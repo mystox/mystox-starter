@@ -24,14 +24,20 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class LoaderBalancerModule implements ModuleInterface
 {
-    Logger LOG = LoggerFactory.getLogger(this.getClass());
+    Logger logger = LoggerFactory.getLogger(this.getClass());
     @Value("${balancer.pluginUrl}")
     private String pluginUrl; //插件目录
     @Value("${balancer.className}")
     private String className; //类名(全路径)
     @Value("${balancer.methodName}")
     private String methodName;  //方法名称
+    @Value("${balancer.periodTime}")
+    private long periodTime;//负载均衡更新周期(秒)
+
+
     private Date bTime; //负载更新时间
+
+
 
     private List<WorkLoader> sequenceLoad ; //负载排名表
 
@@ -41,31 +47,31 @@ public class LoaderBalancerModule implements ModuleInterface
 
     private List<WorkerNodeData> getRegistryWorkCollections()
     {
-        LOG.debug("获取工作节点注册信息集合...");
+        logger.warn("获取工作节点注册信息集合...(todo.todo.2)");
         //todo
         return null;
     }
 
     private void balanceArithmetic(List<WorkerNodeData> workerNodeDatas)
     {
-        LOG.debug("负载算法执行...");
+        logger.debug("负载算法执行...");
         PluginLoader pluginLoader = new PluginLoader(pluginUrl,className,methodName);
         setSequenceLoad((List<WorkLoader>) pluginLoader.executeByJar(workerNodeDatas));
-        //todo
     }
 
     @Override
     public boolean init()
     {
+        logger.info("coordinate-registry-balancer module init[periodTime(s):{}]", periodTime);
         scheduledExecutorService.scheduleWithFixedDelay(() ->
         {
-            LOG.debug("负载均衡定时器...");
+            logger.info("coordinate-registry-loaderBalance update...");
             //获取work 集合
             List<WorkerNodeData> workerNodeDatas = getRegistryWorkCollections();
             //负载均衡生成负载排名表
             balanceArithmetic(workerNodeDatas);
             bTime = new Date(System.currentTimeMillis());
-        }, 1, 3, TimeUnit.SECONDS);
+        }, 1, periodTime, TimeUnit.SECONDS);
         return true;
     }
 

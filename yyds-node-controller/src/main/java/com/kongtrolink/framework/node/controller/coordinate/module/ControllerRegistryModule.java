@@ -59,7 +59,7 @@ public class ControllerRegistryModule extends DefaultServiceRegistry implements 
         //todo 注册策略
         scheduledExecutorService.scheduleWithFixedDelay(() ->
         {
-            LOG.info("coordinate-registry-schedule update... ...");
+            LOG.info("coordinate-registry-schedule update controller node data...");
             //todo 节点信息采集
             //todo 获取works信息
             //更新info信息

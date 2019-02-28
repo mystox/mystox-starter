@@ -8,5 +8,5 @@ package com.kongtrolink.framework.core.service;
  */
 public interface CommandApiInterface
 {
-    String commandExecute(String Order, String parameter);
+    String commandExecute(String order, String parameter);
 }

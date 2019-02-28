@@ -24,7 +24,7 @@ public class CoordinateService implements ServiceInterface, CommandApiInterface
     @Value("${rpc.server.name}")
     private String nodePath;
 
-    @Value("${cluster.id}")
+    @Value("${register.cluster.id}")
     private String clusterId;
 
     @Autowired
@@ -33,11 +33,10 @@ public class CoordinateService implements ServiceInterface, CommandApiInterface
     @Autowired
     LoaderBalancerModule loaderBalancerModule;
 
-
     @Override
     public boolean startService()
     {
-                logger.info("Coordinate service starting... ...");
+        logger.info("Coordinate service starting ... ...");
         //初始化注册
         if (initRegister())
             if (initBalancer())
@@ -50,20 +49,17 @@ public class CoordinateService implements ServiceInterface, CommandApiInterface
 
     private boolean initRegister()
     {
-        RegistryContext registryContext = new RegistryContext("/"+clusterId,null);
-        //服务节点注册
-        //注册更新初始化
-        return controllerRegistryModule.register(registryContext)
-                && controllerRegistryModule.init();
-    }
+        RegistryContext registryContext = new RegistryContext("/" + clusterId, null);
 
+
+        return controllerRegistryModule.register(registryContext) //服务节点注册
+                && controllerRegistryModule.init(); //注册更新初始化
+    }
 
     private boolean initBalancer()
     {
         //负载均衡模块初始化
-        loaderBalancerModule.init();
-
-        return true;
+        return loaderBalancerModule.init();
     }
 
     @Override
@@ -73,7 +69,7 @@ public class CoordinateService implements ServiceInterface, CommandApiInterface
     }
 
     @Override
-    public String commandExecute(String Order, String parameter)
+    public String commandExecute(String order, String parameter)
     {
         return null;
     }

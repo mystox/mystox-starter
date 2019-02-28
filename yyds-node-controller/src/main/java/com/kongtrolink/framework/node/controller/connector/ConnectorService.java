@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class ConnectorService implements ServiceInterface, CommandApiInterface
 {
 
-    Logger LOG = LoggerFactory.getLogger(this.getClass());
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     RpcModule rpcModule;
@@ -32,14 +32,15 @@ public class ConnectorService implements ServiceInterface, CommandApiInterface
     @Override
     public boolean startService()
     {
+        logger.info("Connector service starting ... ...");
 
         if (initRouteModule())//启动路由模块
             if(initRpcModule())//启动rpc模块
                 if (initMessageModule())//消息模块
                     return true;
-                else LOG.error("connector-route module error...");
-            else LOG.error("connector-rpc module error...");
-        else LOG.error("connector-message module error...");
+                else logger.error("connector-route module error...");
+            else logger.error("connector-rpc module error...");
+        else logger.error("connector-message module error...");
 
 
 

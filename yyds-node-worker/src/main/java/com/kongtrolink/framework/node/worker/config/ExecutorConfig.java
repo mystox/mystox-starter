@@ -1,5 +1,6 @@
-package com.kongtrolink.framework.core.config;
+package com.kongtrolink.framework.node.worker.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -13,8 +14,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class ExecutorConfig
 {
-    private static int CORE_POOL_SIZE = 10;
-    private static int MAX_POOL_SIZE = 1000;
+    @Value("${executor.threadPool.corePoolSize}")
+    private int CORE_POOL_SIZE;
+    @Value("${executor.threadPool.maxPoolSize}")
+    private int MAX_POOL_SIZE;
 
     @Bean(name = "workerExecutor")
     public ThreadPoolTaskExecutor taskExecutor()

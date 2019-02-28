@@ -47,7 +47,7 @@ public class WorkerRegistryModule  extends DefaultServiceRegistry implements Mod
         //todo 注册策略
         scheduledExecutorService.scheduleWithFixedDelay(() ->
         {
-            logger.debug("coordinate-registry-schedule update worker node data...");
+            logger.info("coordinate-registry-schedule update worker node data...");
             //todo 节点信息采集
             collectorWorkerData();
             //todo 向worker节点更新信息

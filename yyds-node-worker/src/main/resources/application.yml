@@ -16,3 +16,9 @@ server:
 cluster:
   id: test01
 
+
+executor:
+  threadPool:
+    corePoolSize: 10 #核心执行线程数
+    maxPoolSize: 1000 #最大维护线程数
+

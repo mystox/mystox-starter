@@ -43,7 +43,7 @@ public class MessageModule extends AbstractMqttService implements ModuleInterfac
     @Override
     public boolean init()
     {
-        logger.info("connector-message module init...");
+        logger.info("connector-message module init");
         String[] topic = getTopic();
         super.start(broker, subTopic, topic);
         return true;

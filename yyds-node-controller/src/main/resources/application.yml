@@ -14,13 +14,16 @@ server:
     port: 8888
   tcp:
     port: 9999
-cluster:
-  id: test01
+register:
+  cluster:
+    id: test01
+  periodTime: 5
 
 balancer:
   pluginUrl:
   className:
   methodName:
+  periodTime: 5
 route:
   period:
     time: 10000

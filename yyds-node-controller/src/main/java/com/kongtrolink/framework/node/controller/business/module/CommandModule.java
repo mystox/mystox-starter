@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.node.controller.business;
+package com.kongtrolink.framework.node.controller.business.module;
 
 import com.kongtrolink.framework.node.controller.connector.ConnectorService;
 import com.kongtrolink.framework.node.controller.coordinate.CoordinateService;
@@ -22,7 +22,7 @@ public class CommandModule
     @Autowired
     CoordinateService coordinateService;
 
-    String apiExecute(String[] args)
+    public String apiExecute(String[] args)
     {
         String order = args[0];
         logger.info("获取接口命令:{}",order);

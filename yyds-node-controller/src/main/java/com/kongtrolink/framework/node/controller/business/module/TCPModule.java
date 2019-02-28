@@ -1,7 +1,9 @@
-package com.kongtrolink.framework.node.controller.business;
+package com.kongtrolink.framework.node.controller.business.module;
 
 import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.core.tcp.AbstractTCPService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TCPModule extends AbstractTCPService implements ModuleInterface
 {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     CommandModule commandModule;
 
@@ -39,7 +42,8 @@ public class TCPModule extends AbstractTCPService implements ModuleInterface
     @Override
     public boolean init()
     {
+        logger.info("apiService-tcp module init");
         super.start(bindIp, tcpPort);
-        return false;
+        return true;
     }
 }
