@@ -1,0 +1,18 @@
+zookeeper:
+  url: 172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #zookeeper集群
+  sessionTimeout: 500
+logging:
+  level:
+   root: info
+rpc:
+  server:
+    name: worker01
+server:
+  bindIp: 172.16.6.2
+  port: 17777
+  rpc:
+    port: 18888
+  tcp: 19999
+cluster:
+  id: test01
+

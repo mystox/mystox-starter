@@ -1,0 +1,33 @@
+zookeeper:
+  url: 172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #zookeeper集群
+  sessionTimeout: 500
+logging:
+  level:
+   root: info
+rpc:
+  server:
+    name: controller
+server:
+  port: 7777
+  bindIp: 172.16.6.242
+  rpc:
+    port: 8888
+  tcp:
+    port: 9999
+cluster:
+  id: test01
+
+balancer:
+  pluginUrl:
+  className:
+  methodName:
+route:
+  period:
+    time: 10000
+  expired:
+    time: 10000
+mqtt:
+  broker:
+    host: 172.16.5.26:1883
+  sub:
+    topic: mystox
