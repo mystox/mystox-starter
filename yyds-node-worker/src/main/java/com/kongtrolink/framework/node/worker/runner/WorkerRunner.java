@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkerRunner implements ApplicationRunner
 {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass() + "[12312312313132]");
 
     @Autowired
     CoordinateService coordinateService;

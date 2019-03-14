@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.node.controller.business.module;
 
+import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.node.controller.connector.ConnectorService;
 import com.kongtrolink.framework.node.controller.coordinate.CoordinateService;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
  * update record:
  */
 @Service
-public class CommandModule
+public class CommandModule implements ModuleInterface
 {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
@@ -37,5 +38,11 @@ public class CommandModule
         logger.error("{} command was not found!");
         return order+"command was not founded!";
 
+    }
+
+    @Override
+    public boolean init()
+    {
+        return false;
     }
 }

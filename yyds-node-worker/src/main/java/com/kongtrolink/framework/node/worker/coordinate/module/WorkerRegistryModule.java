@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,7 @@ public class WorkerRegistryModule  extends DefaultServiceRegistry implements Mod
     @Autowired
     WorkerNodeDataCollector workerNodeDataCollector;
 
-    @Value("{cluster.id}")
+    @Value("${register.cluster.id}")
     private String clusterId;
 
     public boolean init()
@@ -51,13 +52,25 @@ public class WorkerRegistryModule  extends DefaultServiceRegistry implements Mod
             //todo 节点信息采集
             collectorWorkerData();
             //todo 向worker节点更新信息
-            updateNodeData();
+            try
+            {
+                updateNodeData();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            } catch (KeeperException e)
+            {
+                e.printStackTrace();
+            }
         }, 1, 3, TimeUnit.SECONDS);
 
         return true;
     }
 
-    private void updateNodeData()
+    private void updateNodeData() throws InterruptedException, UnsupportedEncodingException, KeeperException
     {
         RegistryContext context = new RegistryContext(nodePath,wNodeData);
         super.setData(context);

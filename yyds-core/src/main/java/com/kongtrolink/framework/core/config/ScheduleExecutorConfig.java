@@ -26,4 +26,12 @@ public class ScheduleExecutorConfig
     {
         return Executors.newSingleThreadScheduledExecutor();
     }
+
+    @Bean(autowire = Autowire.BY_NAME, name = "reconnectSchedule")
+    public ScheduledExecutorService getReconnectSchedule()
+    {
+        return Executors.newSingleThreadScheduledExecutor();
+    }
+
+
 }

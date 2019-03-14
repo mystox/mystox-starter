@@ -2,7 +2,7 @@ package com.kongtrolink.framework.node.controller.connector;
 
 import com.kongtrolink.framework.core.service.ServiceInterface;
 import com.kongtrolink.framework.core.service.CommandApiInterface;
-import com.kongtrolink.framework.node.controller.connector.module.MessageModule;
+import com.kongtrolink.framework.node.controller.business.module.MessageModule;
 import com.kongtrolink.framework.node.controller.connector.module.RouteModule;
 import com.kongtrolink.framework.node.controller.connector.module.RpcModule;
 import org.slf4j.Logger;
@@ -36,16 +36,10 @@ public class ConnectorService implements ServiceInterface, CommandApiInterface
 
         if (initRouteModule())//启动路由模块
             if(initRpcModule())//启动rpc模块
-                if (initMessageModule())//消息模块
-                    return true;
-                else logger.error("connector-route module error...");
+                return true;
             else logger.error("connector-rpc module error...");
         else logger.error("connector-message module error...");
-
-
-
-
-        return true;
+        return false;
     }
 
     private boolean initRpcModule()
@@ -58,10 +52,6 @@ public class ConnectorService implements ServiceInterface, CommandApiInterface
         return routeModule.init();
     }
 
-    private boolean initMessageModule()
-    {
-        return messageModule.init();
-    }
 
     @Override
     public boolean restartService()

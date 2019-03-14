@@ -39,6 +39,7 @@ public class LoaderBalancerModule implements ModuleInterface
 
 
 
+
     private List<WorkLoader> sequenceLoad ; //负载排名表
 
     @Autowired
@@ -83,5 +84,15 @@ public class LoaderBalancerModule implements ModuleInterface
     public void setSequenceLoad(List<WorkLoader> sequenceLoad)
     {
         this.sequenceLoad = sequenceLoad;
+    }
+
+    public Date getbTime()
+    {
+        return bTime;
+    }
+
+    public void setbTime(Date bTime)
+    {
+        this.bTime = bTime;
     }
 }

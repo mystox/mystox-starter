@@ -36,7 +36,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     {
         logger.info("message execute" + content);
         //具体业务的执行
-        if (isAsynchronous())
+        if (isAsynchronous()) //同异步判断
             return null;
         return null;
     }

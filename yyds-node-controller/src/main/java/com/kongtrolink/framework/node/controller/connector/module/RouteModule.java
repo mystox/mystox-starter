@@ -73,6 +73,12 @@ public class RouteModule implements ModuleInterface
     public Route[] getRouteByMark(String mark)
     {
         logger.debug("根据mark{}获取路由信息...",mark);
+
+        Route[] routes = routeMap.get(mark);
+        if (routes == null)
+            //TODO
+
+        logger.info("路由信息: {} --> {}",mark, routes);
         return null;
     }
 

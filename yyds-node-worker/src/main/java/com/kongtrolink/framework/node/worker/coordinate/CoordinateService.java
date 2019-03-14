@@ -21,7 +21,7 @@ public class CoordinateService implements ServiceInterface
 
     private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    @Value("${rpc.server.name}")
+    @Value("${server.name}")
     private String nodeName;
     @Autowired
     WorkerRegistryModule workerRegistryModule;

@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>YYDS</artifactId>
         <groupId>com.kongtrolink.framework</groupId>
         <version>1.0.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <build>
         <plugins>
             <plugin>
@@ -51,6 +51,13 @@
             </exclusions>
             <version>3.4.13</version>
         </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/com.101tec/zkclient &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>com.101tec</groupId>-->
+            <!--<artifactId>zkclient</artifactId>-->
+            <!--<version>0.11</version>-->
+        <!--</dependency>-->
+
 
         <!-- MQTT -->
         <dependency>
@@ -71,7 +78,12 @@
             </exclusions>
             <version>3.1.1</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.51</version>
+        </dependency>
         <!-- <dependency>
              <groupId>org.apache.logging.log4j</groupId>
              <artifactId>log4j-1.2-api</artifactId>

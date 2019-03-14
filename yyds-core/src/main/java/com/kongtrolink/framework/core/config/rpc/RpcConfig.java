@@ -33,7 +33,7 @@ public class RpcConfig
         return new RPC.Builder(configuration());
     }
 
-//    @Bean
+    @Bean
     org.apache.hadoop.conf.Configuration configuration()
     {
         return new org.apache.hadoop.conf.Configuration();

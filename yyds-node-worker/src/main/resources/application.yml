@@ -8,13 +8,14 @@ rpc:
   server:
     name: worker01
 server:
-  bindIp: 172.16.6.2
+  bindIp: 172.16.6.39
   port: 17777
   rpc:
     port: 18888
   tcp: 19999
-cluster:
-  id: test01
+register:
+  cluster:
+    id: test01
 
 
 executor:

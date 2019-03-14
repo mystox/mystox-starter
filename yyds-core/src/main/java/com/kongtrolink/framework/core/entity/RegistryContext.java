@@ -17,6 +17,10 @@ public class RegistryContext
         this.path = path;
         this.data = data;
     }
+    public RegistryContext(String path)
+    {
+        this.path = path;
+    }
 
     public String getPath()
     {

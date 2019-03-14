@@ -48,10 +48,11 @@ public abstract class AbstractMqttService
             LOGGER.info("MQTT 服务初始化 mqttHost：{}, clientId:{}, topics:{}",mqttHost ,clientId, Arrays.asList(topics));
             MemoryPersistence persistence = new MemoryPersistence();
             mqttClient = new MqttClient(mqttHost, clientId, persistence);
-            System.out.println("我获取了mqttClient："+mqttClient);
+//            System.out.println("我获取了mqttClient："+mqttClient);
             connect();
             subscribe(this.topics);
         } catch (Exception ex) {
+            ex.printStackTrace();
             LOGGER.error(ex.getMessage());
         }
         startReconnect(this.topics);
@@ -140,7 +141,7 @@ public abstract class AbstractMqttService
      * @param message
      * @throws Exception
      */
-    public abstract void  setMessageArrived(String topic, MqttMessage message)  throws Exception ;
+    public abstract void  setMessageArrived(String topic, MqttMessage message)  throws Exception;
 
 
 

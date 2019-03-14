@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class CoordinateService implements ServiceInterface, CommandApiInterface
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Value("${rpc.server.name}")
+    @Value("${server.name}")
     private String nodePath;
 
     @Value("${register.cluster.id}")
@@ -50,9 +50,7 @@ public class CoordinateService implements ServiceInterface, CommandApiInterface
     private boolean initRegister()
     {
         RegistryContext registryContext = new RegistryContext("/" + clusterId, null);
-
-
-        return controllerRegistryModule.register(registryContext) //服务节点注册
+        return controllerRegistryModule.register(registryContext) //控制节点服務注册
                 && controllerRegistryModule.init(); //注册更新初始化
     }
 

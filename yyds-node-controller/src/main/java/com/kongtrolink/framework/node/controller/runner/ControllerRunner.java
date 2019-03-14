@@ -30,12 +30,18 @@ public class ControllerRunner implements ApplicationRunner
     @Override
     public void run(ApplicationArguments args) throws Exception
     {
+        boolean startMark = false;
         if (coordinateService.startService())
             if (connectorService.startService())
                 if (apiService.startService())
+                {
+                    startMark = true;
                     logger.info("controller service start successfully!!!");
-                else logger.error("apiService start error...");
+
+                } else logger.error("apiService start error...");
             else logger.error("connectorService start error...");
         else logger.error("coordinateService start error...");
+        if (startMark) System.exit(1);
+
     }
 }

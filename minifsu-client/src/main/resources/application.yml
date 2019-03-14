@@ -1,0 +1,4 @@
+server:
+  bindIp: 172.16.6.39
+  rpc:
+    port: 17777

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkerNodeDataCollector extends BaseNodeDataCollector implements NodeDataCollector
 {
+
     public WorkerNodeData getWorkerNodeDate()
     {
         //TODO 采集节点信息逻辑
