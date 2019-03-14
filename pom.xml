@@ -9,9 +9,8 @@
     <version>1.0.0</version>
     <modules>
         <module>yyds-core</module>
-        <module>yyds-common</module>
-        <module>yyds-node-controller</module>
-        <module>yyds-node-worker</module>
+        <module>minifsu-client</module>
+        <module>minifsu-server</module>
     </modules>
     <packaging>pom</packaging>
 
