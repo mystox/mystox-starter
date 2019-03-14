@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.node.controller.connector.module;
 
+import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.node.controller.coordinate.module.LoaderBalancerModule;
 import com.kongtrolink.framework.node.controller.entity.Route;
-import com.kongtrolink.framework.core.service.ModuleInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

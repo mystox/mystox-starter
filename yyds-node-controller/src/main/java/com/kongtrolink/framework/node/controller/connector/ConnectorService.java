@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.node.controller.connector;
 
-import com.kongtrolink.framework.core.service.ServiceInterface;
 import com.kongtrolink.framework.core.service.CommandApiInterface;
+import com.kongtrolink.framework.core.service.ServiceInterface;
 import com.kongtrolink.framework.node.controller.business.module.MessageModule;
 import com.kongtrolink.framework.node.controller.connector.module.RouteModule;
 import com.kongtrolink.framework.node.controller.connector.module.RpcModule;

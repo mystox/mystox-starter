@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.node.controller.coordinate.module;
 
-import com.kongtrolink.framework.node.controller.entity.WorkLoader;
 import com.kongtrolink.framework.core.entity.WorkerNodeData;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.node.controller.entity.WorkLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
