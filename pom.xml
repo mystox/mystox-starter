@@ -9,8 +9,12 @@
     <version>1.0.0</version>
     <modules>
         <module>yyds-core</module>
-        <module>minifsu-client</module>
-        <module>minifsu-server</module>
+        <!--<module>minifsu-client</module>-->
+        <!--<module>minifsu-server</module>-->
+        <!--<module>minifsu-precondition</module>-->
+        <module>minifsu-controller</module>
+        <module>minifsu-net-GW</module>
+
     </modules>
     <packaging>pom</packaging>
 

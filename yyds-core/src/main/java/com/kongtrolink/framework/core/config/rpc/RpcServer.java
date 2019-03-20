@@ -1,8 +1,5 @@
 package com.kongtrolink.framework.core.config.rpc;
 
-import com.cass.protorpc.RpcNotify;
-import com.cass.rpc.protorpc.RpcNotifyProto;
-import com.google.protobuf.BlockingService;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.ipc.ProtobufRpcEngine;
 import org.apache.hadoop.ipc.RPC;
@@ -35,18 +32,18 @@ public class RpcServer
         ;
     }
 
-    public RpcServer setProtocol(Class clazz, final RpcNotifyProto.RpcNotify.BlockingInterface o) throws IOException
+    public RpcServer setProtocol(Class clazz, Object o) throws IOException
     {
 
         RPC.setProtocolEngine(conf, clazz, ProtobufRpcEngine.class);
-        builder.setProtocol(RpcNotify.class)
-                .setInstance((BlockingService) RpcNotifyProto.RpcNotify.newReflectiveBlockingService(o));
+        builder.setProtocol(clazz)
+                .setInstance(o);
         return this;
     }
 
     public void start() throws IOException
     {
-        builder.setNumHandlers(1)
-                .setVerbose(true).build().start();
+        builder.setNumHandlers(1000)//并发数
+                .setVerbose(false).build().start();
     }
 }
