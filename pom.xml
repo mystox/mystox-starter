@@ -12,8 +12,7 @@
         <!--<module>minifsu-client</module>-->
         <!--<module>minifsu-server</module>-->
         <!--<module>minifsu-precondition</module>-->
-        <module>minifsu-controller</module>
-        <module>minifsu-net-GW</module>
+        <module>yyds-minifsu-project</module>
 
     </modules>
     <packaging>pom</packaging>

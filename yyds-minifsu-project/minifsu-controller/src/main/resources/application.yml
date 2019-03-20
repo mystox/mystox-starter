@@ -1,0 +1,15 @@
+logging:
+  level:
+   root: info
+
+server:
+  name: minifsu-controller
+  bindIp: localhost
+  rpc:
+    port: 17777
+
+
+executor:
+  threadPool:
+    corePoolSize: 10 #核心执行线程数
+    maxPoolSize: 1000 #最大维护线程数

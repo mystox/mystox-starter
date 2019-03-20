@@ -18,12 +18,12 @@ public class RpcServer
     private Configuration conf;
     private RPC.Builder builder;
 
-    public RpcServer(Configuration conf, RPC.Builder builder, String addr, int port) throws IOException
+    public RpcServer(Configuration conf, RPC.Builder builder, String hostname, int port) throws IOException
     {
         this.conf = conf;
         this.builder = builder;
 
-        builderAddress(addr, port);
+        builderAddress(hostname, port);
     }
 
     void builderAddress(String addr, int port)
@@ -46,4 +46,10 @@ public class RpcServer
         builder.setNumHandlers(1000)//并发数
                 .setVerbose(false).build().start();
     }
+
+    public RPC.Builder getBuilder()
+    {
+        return builder;
+    }
+
 }

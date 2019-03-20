@@ -43,6 +43,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
             //根据service和method 选择对应的类和方法执行业务逻辑
             result = serviceExecute(msgId, service, method, jsonPayLoad);//不同服务执行不一样的流程
         }
+        logger.info("message result msgId:[{}],msgType:[{}],payload:[{}]", result.getMsgId(),result.getPayload());
         return result;
     }
 

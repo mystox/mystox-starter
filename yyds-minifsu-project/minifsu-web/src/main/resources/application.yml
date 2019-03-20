@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: yyjw-app
+  profiles:
+    active: dev
+#  config:
+#    name: user-table,app-common
+#    location: classpath:/,classpath:/config
+server:
+  port: 8081
+

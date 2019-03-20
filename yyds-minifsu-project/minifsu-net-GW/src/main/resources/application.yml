@@ -1,0 +1,21 @@
+logging:
+  level:
+   root: info
+
+server:
+  name: minifsu-net-GW
+  bindIp: 172.16.6.39
+  rpc:
+    port: 16666
+
+
+executor:
+  threadPool:
+    corePoolSize: 10 #核心执行线程数
+    maxPoolSize: 1000 #最大维护线程数
+
+rpc:
+  controller:
+    hostname:
+    port:
+
