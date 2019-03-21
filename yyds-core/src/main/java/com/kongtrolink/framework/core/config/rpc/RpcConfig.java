@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.core.config.rpc;
 
+import com.google.protobuf.RpcCallback;
+import com.google.protobuf.RpcController;
 import org.apache.hadoop.ipc.RPC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ public class RpcConfig
     private String bindAddress;
     @Value("${server.rpc.port}")
     private Integer rpcPort;
+    @Value("${rpc.client.timeout}")
+    private String rpcClientTimeout;
 
     @Bean
     RpcServer rpcServer(RPC.Builder builder) throws IOException
@@ -36,7 +40,9 @@ public class RpcConfig
     @Bean
     org.apache.hadoop.conf.Configuration configuration()
     {
-        return new org.apache.hadoop.conf.Configuration();
+        org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
+        configuration.set("ipc.client.rpc-timeout.ms", rpcClientTimeout);
+        return configuration;
     }
     @Bean
     RpcClient rpcClient()
@@ -44,5 +50,53 @@ public class RpcConfig
         return new RpcClient(configuration());
     }
 
+
+    RpcController rpcController()
+    {
+       return  new RpcController()
+        {
+            @Override
+            public void reset()
+            {
+
+            }
+
+            @Override
+            public boolean failed()
+            {
+                return false;
+            }
+
+            @Override
+            public String errorText()
+            {
+                return null;
+            }
+
+            @Override
+            public void startCancel()
+            {
+
+            }
+
+            @Override
+            public void setFailed(String reason)
+            {
+
+            }
+
+            @Override
+            public boolean isCanceled()
+            {
+                return false;
+            }
+
+            @Override
+            public void notifyOnCancel(RpcCallback<Object> callback)
+            {
+
+            }
+        };
+    }
 
 }

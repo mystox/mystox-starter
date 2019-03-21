@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
@@ -34,14 +33,15 @@ public class MinifsuControllerApplicationTests {
 	@Test
 	public void sendMsgTest()
 	{
-		InetSocketAddress addr = new InetSocketAddress("172.16.6.39",17777);
+		InetSocketAddress addr = new InetSocketAddress("172.16.6.39",18800);
 		try
 		{
 			String msgId = UUID.randomUUID().toString();
 			RpcNotifyProto.RpcMessage result = rpcModule.postMsg(msgId,addr,"I'm client mystox message...h暗号");
 			System.out.println(result.getPayload());
-		} catch (IOException e)
+		} catch (Exception e)
 		{
+			System.out.println("---------------------"+e.toString());
 			e.printStackTrace();
 		}
 	}

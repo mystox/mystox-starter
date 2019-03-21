@@ -4,9 +4,9 @@ logging:
 
 server:
   name: minifsu-controller
-  bindIp: localhost
+  bindIp: 172.16.6.39
   rpc:
-    port: 17777
+    port: 18800
 
 
 executor:
@@ -16,9 +16,11 @@ executor:
 
 
 rpc:
+  client:
+    timeout: 20000
   net-GW:
     hostname: 172.16.6.39
-    port: 18800
+    port: 17700
   alarm:
     hostname: 172.16.6.39
     port: 18810

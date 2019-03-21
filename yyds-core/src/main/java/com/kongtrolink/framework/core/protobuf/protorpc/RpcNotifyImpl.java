@@ -24,6 +24,11 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
         return result;
     }
 
+    /**
+     * 获取消息执行基本消息判断
+     * @param rpcMessage
+     * @return
+     */
     protected RpcNotifyProto.RpcMessage messageExecute(RpcNotifyProto.RpcMessage rpcMessage)
     {
         logger.info("message execute msgId:[{}],msgType:[{}],payload:[{}]", rpcMessage.getMsgId(),rpcMessage.getPayload());
@@ -47,6 +52,12 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
         return result;
     }
 
+    /**
+     * 单一的proto请求通过实现execute处理(如告警处理,网关上报等 需要重载实现
+     * @param msgId
+     * @param payLoad
+     * @return
+     */
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payLoad)
     {
         return RpcNotifyProto.RpcMessage.newBuilder()
@@ -56,6 +67,14 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
                 .build();
     }
 
+    /**
+     * 包含service&method 的请求通过serviceExecute处理 需要重载实现
+     * @param msgId
+     * @param service
+     * @param method
+     * @param payLoad
+     * @return
+     */
     protected RpcNotifyProto.RpcMessage serviceExecute(String msgId, String service, String method, String payLoad)
     {
         return RpcNotifyProto.RpcMessage.newBuilder()
