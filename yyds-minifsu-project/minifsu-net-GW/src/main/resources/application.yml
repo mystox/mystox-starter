@@ -16,6 +16,6 @@ executor:
 
 rpc:
   controller:
-    hostname:
-    port:
+    hostname: 172.16.6.39
+    port: 18800
 

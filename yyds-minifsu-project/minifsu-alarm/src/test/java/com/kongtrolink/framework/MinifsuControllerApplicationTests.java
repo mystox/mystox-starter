@@ -34,11 +34,12 @@ public class MinifsuControllerApplicationTests {
 	@Test
 	public void sendMsgTest()
 	{
-		InetSocketAddress addr = new InetSocketAddress("localhost",17777);
+		InetSocketAddress addr = new InetSocketAddress("localhost",18880);
 		try
 		{
 			String msgId = UUID.randomUUID().toString();
 			RpcNotifyProto.RpcMessage result = rpcModule.postMsg(msgId,addr,"I'm client mystox message...h暗号");
+			System.out.println("----"+result.getPayload());
 		} catch (IOException e)
 		{
 			e.printStackTrace();

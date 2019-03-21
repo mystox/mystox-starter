@@ -13,3 +13,15 @@ executor:
   threadPool:
     corePoolSize: 10 #核心执行线程数
     maxPoolSize: 1000 #最大维护线程数
+
+
+rpc:
+  net-GW:
+    hostname: 172.16.6.39
+    port: 18800
+  alarm:
+    hostname: 172.16.6.39
+    port: 18810
+  business:
+    hostname: 172.16.6.39
+    port: 18830

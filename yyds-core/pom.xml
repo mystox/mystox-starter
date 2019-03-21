@@ -20,7 +20,7 @@
     <artifactId>yyds-core</artifactId>
     <version>1.0.0</version>
     <name>yyds-core</name>
-    <description>核心包</description>
+    <description>核心包1.0.*提供给minifsu</description>
     <packaging>jar</packaging>
 
     <dependencies>
