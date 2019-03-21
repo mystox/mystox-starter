@@ -25,7 +25,7 @@ public class ControllerExecuteService implements ServiceInterface
     @Override
     public boolean startService()
     {
-        logger.info("ControllerExecute service start... ...");
+        logger.info(this.getClass().getSimpleName()+" service start... ...");
         if(initRpcModule())
             if (initExecuteModule())
                 return true;

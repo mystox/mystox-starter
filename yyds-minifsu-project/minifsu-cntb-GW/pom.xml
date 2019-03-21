@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.kongtrolink.framework</groupId>
-		<artifactId>YYDS</artifactId>
+		<artifactId>yyds-minifsu-project</artifactId>
 		<version>1.0.0</version>
 		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
-	<artifactId>minifsu-alarm</artifactId>
+	<artifactId>minifsu-cntb-GW</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>minifsu-alarm</name>
+	<name>minifsu-cntb-GW</name>
 	<description>告警处理服务</description>
 
 	<properties>
@@ -56,7 +56,16 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

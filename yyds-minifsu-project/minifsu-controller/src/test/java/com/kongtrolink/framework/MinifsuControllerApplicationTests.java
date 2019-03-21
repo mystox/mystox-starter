@@ -2,7 +2,7 @@ package com.kongtrolink.framework;
 
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.runner.WorkerRunner;
+import com.kongtrolink.framework.runner.ControllerRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class MinifsuControllerApplicationTests {
 
 
 	@MockBean
-	WorkerRunner workerRunner; //测试排除注入服务初始化
+    ControllerRunner workerRunner; //测试排除注入服务初始化
 	@Test
 	public void contextLoads() {
 	}
