@@ -3,14 +3,14 @@ package com.kongtrolink.framework.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.ControllerInstance;
+import com.kongtrolink.framework.core.entity.Fsu;
+import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.YwclMessage;
 import com.kongtrolink.framework.dao.FsuDao;
 import com.kongtrolink.framework.dao.FsuDevicesDao;
 import com.kongtrolink.framework.dao.OperatorHistoryDao;
-import com.kongtrolink.framework.model.Fsu;
 import com.kongtrolink.framework.model.OperatHistory;
-import com.kongtrolink.framework.model.PktType;
 import com.kongtrolink.framework.mqtt.base.MqttRequestHelper;
-import com.kongtrolink.framework.mqtt.message.YwclMessage;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.LocationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -136,7 +136,6 @@ public class FsuServiceImpl implements FsuService
         YwclMessage ywclMessage = new YwclMessage(PktType.DEL_DEVICE, System.currentTimeMillis(), "123213132312");
         ywclMessage.setData(JSON.toJSONString(requestBody));
         JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, 300000);
-        //todo 删除设备
         return result;
     }
 
@@ -147,7 +146,6 @@ public class FsuServiceImpl implements FsuService
         YwclMessage ywclMessage = new YwclMessage(PktType.SET_DEVICES, System.currentTimeMillis(), fsuId);
         ywclMessage.setData(JSON.toJSONString(requestBody));
         JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
-        //todo 增加设备配置
         return result;
     }
 

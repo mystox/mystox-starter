@@ -18,9 +18,9 @@ import java.io.IOException;
 @Configuration
 public class RpcConfig
 {
-    @Value("${server.bindIp}")
+    @Value("${server.bindIp:127.0.0.1}")
     private String bindAddress;
-    @Value("${server.rpc.port}")
+    @Value("${server.rpc.port:10000}")
     private Integer rpcPort;
     @Value("${rpc.client.timeout}")
     private String rpcClientTimeout;

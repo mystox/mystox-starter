@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.model;
+package com.kongtrolink.framework.core.entity;
 
 import java.io.Serializable;
 

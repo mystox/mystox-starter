@@ -2,9 +2,9 @@ package com.kongtrolink.framework.mqtt.base;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.MqttStandardMessage;
 import com.kongtrolink.framework.mqtt.MessageArrivedCallback;
 import com.kongtrolink.framework.mqtt.MqttPubTopic;
-import com.kongtrolink.framework.mqtt.message.MqttStandardMessage;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;

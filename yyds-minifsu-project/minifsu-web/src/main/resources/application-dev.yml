@@ -38,3 +38,12 @@ spring:
       host: 172.16.6.142
       port: 27017
       database: db_cntb_minifsu
+server:
+  name: minifsu-web
+  bindIp: 172.16.6.39
+rpc:
+  client:
+    timeout: 20000
+  business:
+    hostname: 172.16.6.39
+    port: 18830

@@ -31,7 +31,7 @@ public class RpcModuleBase
      * @return
      * @throws IOException
      */
-    public RpcNotifyProto.RpcMessage postMsg(String msgId, InetSocketAddress addr, String payload) throws IOException
+    public RpcNotifyProto.RpcMessage postMsg(String msgId, InetSocketAddress addr, String payload,Long timeOut) throws IOException
     {
         RpcNotify proxy = rpcClient.getProxy(RpcNotify.class, addr);
         //发送消息体
@@ -54,5 +54,26 @@ public class RpcModuleBase
     public RpcNotifyProto.RpcMessage postMsg(InetSocketAddress addr, String payload) throws IOException
     {
         return postMsg(null, addr, payload);
+    }
+
+ /**
+     * 消息发送
+     * @param addr
+     * @param payload
+     * @return
+     * @throws IOException
+     */
+    public RpcNotifyProto.RpcMessage postMsg(String msgId,InetSocketAddress addr, String payload) throws IOException
+    {
+        return postMsg(msgId, addr, payload,null);
+    }
+
+    /**
+     * 如果需要服务的情况下需要初始化引擎和实现类等信息
+     * @return
+     */
+    public boolean init()
+    {
+        return true;
     }
 }

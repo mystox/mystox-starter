@@ -1,6 +1,7 @@
 logging:
   level:
    root: info
+   org.apache.hadoop.util : OFF
 
 server:
   name: minifsu-controller

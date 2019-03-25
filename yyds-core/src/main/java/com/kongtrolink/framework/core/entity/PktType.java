@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.model;
+package com.kongtrolink.framework.core.entity;
 
 /**
  * \* @Author: mystox
@@ -6,9 +6,14 @@ package com.kongtrolink.framework.model;
  * \* Description:
  * \
  */
-public class PktType {
+public class PktType
+{
 
     public final static String GET_DATA = "get_data";//获取监控点数据
+    public final static String GET_FSU = "get_fsu";//获取FSU
+    public final static String CHECK_FSU = "check_fsu";//检查绑定
+    public final static String GET_FSU_STATUS = "get_fsu_status";//检查绑定
+    public final static String SET_FSU = "set_fsu";//检查绑定
     public final static String SET_DATA = "set_data"; //设置监控点数据
     public final static String GET_HISTORY_DATA = "get_hist_data"; //获取监控点历史数据
     public final static String UPDATE = "update"; //升级
@@ -25,7 +30,6 @@ public class PktType {
     public final static String GET_DEVICES_POINTS = "get_devices_points";
     public final static String GET_OP_LOG = "get_op_log";
     public final static String LOGOUT = "logout";
-
 
 
 }

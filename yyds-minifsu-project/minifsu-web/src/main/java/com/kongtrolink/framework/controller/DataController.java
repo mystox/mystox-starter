@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.congtroller;
+package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

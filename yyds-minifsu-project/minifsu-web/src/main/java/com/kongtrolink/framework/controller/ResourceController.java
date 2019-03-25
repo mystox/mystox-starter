@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.congtroller;
+package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.service.ResourceService;
 import com.kongtrolink.framework.util.JsonResult;

@@ -36,6 +36,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.kongtrolink.framework</groupId>
 			<artifactId>yyds-core</artifactId>
 			<version>1.0.0</version>

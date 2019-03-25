@@ -1,10 +1,10 @@
-package com.kongtrolink.framework.congtroller;
+package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.ControllerInstance;
-import com.kongtrolink.framework.model.Fsu;
+import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.JsonResult;
 import com.kongtrolink.framework.util.ReflectionUtils;

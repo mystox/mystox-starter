@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.dao;
+package com.kongtrolink.framework.execute.module.dao;
 
 import com.kongtrolink.framework.core.entity.Fsu;
 import org.apache.commons.lang3.StringUtils;

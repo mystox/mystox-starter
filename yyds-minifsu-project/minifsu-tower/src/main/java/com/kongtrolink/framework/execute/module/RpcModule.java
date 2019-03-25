@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.execute.module;
 
-import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.config.rpc.RpcServer;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotify;
@@ -28,8 +27,6 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface
     @Autowired
     private ExecuteModule executeModule;
 
-    @Autowired
-    RpcClient rpcClient; //rpc客户端
 
 
     //如果需要服务的情况下需要初始化引擎和实现类等信息

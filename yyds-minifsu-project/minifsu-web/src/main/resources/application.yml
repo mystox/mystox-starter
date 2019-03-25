@@ -3,6 +3,10 @@ spring:
     name: minifsu-web
   profiles:
     active: dev
+logging:
+  level:
+   root: info
+   org.apache.hadoop.util: OFF
 #  config:
 #    name: user-table,app-common
 #    location: classpath:/,classpath:/config
