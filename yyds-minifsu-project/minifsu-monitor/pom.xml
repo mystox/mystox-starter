@@ -9,10 +9,10 @@
 		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
-	<artifactId>minifsu-alarm</artifactId>
+	<artifactId>minifsu-monitor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>minifsu-alarm</name>
-	<description>告警处理服务</description>
+	<name>minifsu-monitor</name>
+	<description>实时监控处理</description>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -66,7 +66,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

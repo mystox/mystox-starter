@@ -12,7 +12,7 @@
 	<artifactId>minifsu-controller</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>minifsu-controller</name>
-	<description>FSU消息处理(解析|封装|分发)</description>
+	<description>业务网关(解析|封装|分发)</description>
 	<packaging>jar</packaging>
 
 	<properties>

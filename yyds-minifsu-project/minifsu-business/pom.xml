@@ -12,7 +12,7 @@
 	<artifactId>minifsu-business</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>minifsu-business</name>
-	<description>其他业务处理服务</description>
+	<description>门户服务</description>
 	<packaging>jar</packaging>
 
 	<properties>
