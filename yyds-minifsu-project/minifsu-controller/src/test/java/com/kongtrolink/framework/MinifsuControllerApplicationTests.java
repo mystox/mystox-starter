@@ -2,15 +2,19 @@ package com.kongtrolink.framework;
 
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
+import com.kongtrolink.framework.execute.module.model.TerminalPayload;
 import com.kongtrolink.framework.runner.ControllerRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -44,5 +48,19 @@ public class MinifsuControllerApplicationTests {
 			System.out.println("---------------------"+e.toString());
 			e.printStackTrace();
 		}
+	}
+
+
+	@Autowired
+	RedisTemplate redisTemplate;
+	@Test
+	public void redisTest()
+	{
+		List<TerminalPayload> a = new ArrayList<>();
+		a.add(new TerminalPayload());
+		a.add(new TerminalPayload());
+		redisTemplate.opsForValue().set("a",a);
+		List<TerminalPayload> r = (List<TerminalPayload>) redisTemplate.opsForValue().get("a");
+		System.out.println(r);
 	}
 }

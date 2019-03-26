@@ -30,6 +30,7 @@ public class PktType
     public final static String GET_DEVICES_POINTS = "get_devices_points";
     public final static String GET_OP_LOG = "get_op_log";
     public final static String LOGOUT = "logout";
+    public final static String CONNECT = "connect";//终端网关报文通讯
 
 
 }
