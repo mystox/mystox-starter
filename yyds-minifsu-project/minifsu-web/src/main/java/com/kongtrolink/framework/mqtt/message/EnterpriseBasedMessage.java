@@ -10,6 +10,8 @@
  */
 package com.kongtrolink.framework.mqtt.message;
 
+import com.kongtrolink.framework.core.entity.MqttStandardMessage;
+
 /**
  * 基于企业的 MQTT 通信报文
  * 

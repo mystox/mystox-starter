@@ -2,9 +2,9 @@ package com.kongtrolink.framework.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.YwclMessage;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.model.PktType;
 import com.kongtrolink.framework.service.DataMntService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

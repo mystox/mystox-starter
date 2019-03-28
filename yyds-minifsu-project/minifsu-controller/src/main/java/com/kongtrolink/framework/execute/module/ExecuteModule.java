@@ -224,7 +224,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             return (JSONObject) JSONObject.toJSON(responseTP);
         }
         /************fsu信息上报 pktType:2 设备信息上报 pktType:3 **********************/
-        if (TerminalPktType.FSU_REPORT.getKey() == pktType || TerminalPktType.DEV_LIST.getKey() == pktType)
+        if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType || TerminalPktType.DEV_LIST.getKey() == pktType)
         {
             moduleMsg.setPayload(payload);
 

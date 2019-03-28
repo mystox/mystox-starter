@@ -5,7 +5,6 @@ import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.execute.module.model.ModuleMsg;
 import com.kongtrolink.framework.execute.module.model.TerminalMsg;
 import com.kongtrolink.framework.runner.ControllerRunner;
 import org.junit.Test;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.InetSocketAddress;
@@ -84,7 +84,7 @@ public class MinifsuControllerApplicationTests
 
 
     @Autowired
-    RedisTemplate redisTemplate;
+    RedisTemplate<String,Object> redisTemplate;
 
     @Autowired
     RedisUtils redisUtils;
@@ -99,7 +99,8 @@ public class MinifsuControllerApplicationTests
 
         a.add(f);
         a.add(t);
-        redisTemplate.opsForValue().set("a", a);
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        valueOperations.set("a", a);
         String as = "{'a':'b'}";
         redisTemplate.opsForHash().put(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.parse(as));
         JSONObject r = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.class);
@@ -107,8 +108,11 @@ public class MinifsuControllerApplicationTests
 //		List<TerminalMsg> r = JSONArray.
     }
 
-    public static void main(String[] args)
-    {
-        ModuleMsg moduleMsg = new ModuleMsg();
+
+    @Test
+    void testNet() {
+
     }
+
+
 }

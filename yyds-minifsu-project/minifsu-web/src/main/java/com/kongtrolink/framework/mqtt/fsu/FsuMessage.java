@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.mqtt.fsu;
 
 
-import com.kongtrolink.framework.mqtt.message.MqttStandardMessage;
+import com.kongtrolink.framework.core.entity.MqttStandardMessage;
 
 /**
  * Created by John on 2017/10/20.

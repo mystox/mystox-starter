@@ -10,6 +10,8 @@
  */
 package com.kongtrolink.framework.mqtt.message;
 
+import com.kongtrolink.framework.core.entity.MqttStandardMessage;
+
 /**
  * 设置单点遥调信号报文
  * 

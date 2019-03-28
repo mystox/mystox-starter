@@ -110,7 +110,7 @@ public class RegistryServiceImpl implements RegistryService {
         log.setServiceName(name);
         log.setTime(new Date(System.currentTimeMillis()));
         logDao.saveLog(log);
-        result.put("result", 1);
+        result.put("result", 0);
         return result;
     }
 
@@ -122,8 +122,6 @@ public class RegistryServiceImpl implements RegistryService {
         String sn = moduleMsg.getSN();
         Terminal terminal = terminalDao.findTerminalBySn(sn);
         String terminalId = terminal.getId();
-
-
         TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
         if (terminalProperties == null) {
             terminalProperties = new TerminalProperties();
