@@ -20,3 +20,5 @@ executor:
 rpc:
   client:
     timeout: 20000
+register:
+  delay: 100

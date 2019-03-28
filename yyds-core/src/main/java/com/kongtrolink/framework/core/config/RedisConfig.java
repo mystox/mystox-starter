@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.core.config;
 
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -10,6 +11,7 @@ import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -39,9 +41,10 @@ public class RedisConfig
     {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
-//        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(fastJsonRedisSerializer);
+        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(fastJsonRedisSerializer);
+        template.setValueSerializer(fastJsonRedisSerializer);
         template.afterPropertiesSet();
         return template;
     }

@@ -2,23 +2,19 @@ package com.kongtrolink.framework.execute.module.model;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.io.Serializable;
-
 /**
  * Created by mystoxlol on 2019/3/26, 10:21.
  * company: kongtrolink
  * description:
  * update record:
  */
-public class TerminalPayload implements Serializable
+public class TerminalMsg
 {
     private String msgId;
-    private String pktType;
-    private String uuid;
-    private String gip;
     private int pkgSum;
     private long ts;
     private JSONObject payload;
+
 
     public String getMsgId()
     {
@@ -60,44 +56,12 @@ public class TerminalPayload implements Serializable
         this.payload = payload;
     }
 
-    public String getPktType()
-    {
-        return pktType;
-    }
-
-    public void setPktType(String pktType)
-    {
-        this.pktType = pktType;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid(String uuid)
-    {
-        this.uuid = uuid;
-    }
-
-    public String getGip()
-    {
-        return gip;
-    }
-
-    public void setGip(String gip)
-    {
-        this.gip = gip;
-    }
 
     @Override
     public String toString()
     {
-        return "TerminalPayload{" +
+        return "TerminalMsg{" +
                 "msgId='" + msgId + '\'' +
-                ", pktType='" + pktType + '\'' +
-                ", uuid='" + uuid + '\'' +
-                ", gip='" + gip + '\'' +
                 ", pkgSum=" + pkgSum +
                 ", ts=" + ts +
                 ", payload=" + payload +

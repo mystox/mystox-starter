@@ -4,7 +4,7 @@ logging:
 
 server:
   name: minifsu-alarm
-  bindIp: 127.0.0.1
+  bindIp: 172.16.6.39
   rpc:
     port: 18880
 

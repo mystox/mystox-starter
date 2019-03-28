@@ -19,8 +19,8 @@ spring:
 
 logging:
   level:
-   root: info
-   org.apache.hadoop.util : OFF
+   root: debug
+   org.apache.hadoop.util : ON
 
 server:
   name: minifsu-controller
@@ -41,7 +41,7 @@ rpc:
   net-GW:
     hostname: 172.16.6.39
     port: 17700
-  alarm:
+  monitor:
     hostname: 172.16.6.39
     port: 18810
   business:

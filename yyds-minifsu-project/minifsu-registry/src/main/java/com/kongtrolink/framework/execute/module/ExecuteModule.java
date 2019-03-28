@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
  * company: kongtrolink
@@ -44,7 +46,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     {
 
         //todo
-        String result = "execute result ";
+        try
+        {
+            Thread.sleep(new Random().nextInt(10000));
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
+        String result = "execute result "+msgId;
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
@@ -53,5 +63,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 .build();
     }
 
+    public static void main(String[] args)
+    {
+        double d = 5;
+        System.out.println(new Random().nextInt(10000));
+    }
 
 }
