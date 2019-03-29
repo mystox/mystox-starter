@@ -5,6 +5,8 @@
  */
 package com.kongtrolink.framework.mqtt.message;
 
+import com.kongtrolink.framework.core.entity.MqttStandardMessage;
+
 /**
  *
  * @author Mosaico

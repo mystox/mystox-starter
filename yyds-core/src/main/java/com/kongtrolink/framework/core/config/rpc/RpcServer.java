@@ -43,7 +43,7 @@ public class RpcServer
 
     public void start() throws IOException
     {
-        builder.setNumHandlers(1000)//并发数
+        builder.setNumHandlers(100)//并发数
                 .setVerbose(false).build().start();
     }
 

@@ -30,6 +30,12 @@ public class PktType
     public final static String GET_DEVICES_POINTS = "get_devices_points";
     public final static String GET_OP_LOG = "get_op_log";
     public final static String LOGOUT = "logout";
+    public final static String CONNECT = "connect";//终端网关报文通讯
+    public final static String CLEANUP = "cleanUp";//终端网关报文通讯
+    public final static String REGISTRY = "registry";//SN上报注册
+    public final static String FSU_REPORT = "fsu_report"; //FSU信息上报
+    public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
+    public final static String DATA_REPORT = "data_report"; //终端数据变化上报
 
 
 }

@@ -1,12 +1,14 @@
+
 logging:
   level:
    root: info
+   org.apache.hadoop.util.Shell: OFF
 
 server:
   name: minifsu-alarm
-  bindIp: 127.0.0.1
+  bindIp: 172.16.6.39
   rpc:
-    port: 18880
+    port: 18881
 
 
 executor:

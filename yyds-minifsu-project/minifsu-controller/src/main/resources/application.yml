@@ -1,7 +1,28 @@
+
 logging:
   level:
    root: info
-   org.apache.hadoop.util : OFF
+   org.apache.hadoop.util.Shell: OFF
+
+spring:
+  redis:
+    ## Redis数据库索引(默认为0)
+    database: 3
+    ## 连接超时时间（毫秒）
+    timeout: 60000
+    ## 连接池最大连接数（使用负值表示没有限制）
+    pool:
+      max-active: 300
+    ## 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: -1
+    ## 连接池中的最大空闲连接
+      max-idle: 100
+    ## 连接池中的最小空闲连接
+      min-idle: 20
+    host: 172.16.5.26
+    port: 6379
+
+
 
 server:
   name: minifsu-controller
@@ -22,7 +43,7 @@ rpc:
   net-GW:
     hostname: 172.16.6.39
     port: 17700
-  alarm:
+  monitor:
     hostname: 172.16.6.39
     port: 18810
   business:
