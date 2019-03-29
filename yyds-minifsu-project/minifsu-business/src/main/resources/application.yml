@@ -1,7 +1,8 @@
 logging:
   level:
-   root: info
+   root: debug
    org.apache.hadoop.util: OFF
+   org.mongodb.driver.*: OFF
 
 mongodb:
   uri: mongodb://yyds:123456@127.0.0.1:27017/yyds

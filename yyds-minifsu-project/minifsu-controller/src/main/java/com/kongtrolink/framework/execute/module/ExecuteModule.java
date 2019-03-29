@@ -54,7 +54,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     private int monitorPort;
 
 
-    @Value("${redis.communication.expired:120}")
+    @Value("${redis.communication.expired:300}")
     private long communicationExpired;
 
     @Autowired

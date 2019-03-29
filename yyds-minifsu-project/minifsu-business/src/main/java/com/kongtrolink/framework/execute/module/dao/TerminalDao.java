@@ -39,6 +39,6 @@ public class TerminalDao
     }
 
     public void saveTerminal(TerminalProperties terminalProperties) {
-        mongoTemplate.save(terminalProperties);
+        mongoTemplate.save(terminalProperties,MongoTableName.TERMINAL_PROPERTY);
     }
 }

@@ -58,11 +58,11 @@ public class RedisUtils
 
     public void setHash(String hashTable, String key, Object value)
     {
-        redisTemplate.opsForHash().putIfAbsent(hashTable,key,value);
+        redisTemplate.opsForHash().put(hashTable,key,value);
     }
     public void set(String key, Object value)
     {
-        redisTemplate.opsForValue().setIfAbsent(key,value);
+        redisTemplate.opsForValue().set(key,value);
     }
     public void deleteHash(String hashTable, String... keys)
     {

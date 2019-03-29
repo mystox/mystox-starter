@@ -25,16 +25,14 @@ import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MinifsuControllerApplicationTests
-{
+public class MinifsuControllerApplicationTests {
 
 
     @MockBean
     ControllerRunner workerRunner; //测试排除注入服务初始化
 
     @Test
-    public void contextLoads()
-    {
+    public void contextLoads() {
     }
 
     @Autowired
@@ -44,30 +42,26 @@ public class MinifsuControllerApplicationTests
      * rpc spring 测试方法
      */
     @Test
-    public void sendMsgTest() throws InterruptedException
-    {
+    public void sendMsgTest() throws InterruptedException {
         InetSocketAddress addr = new InetSocketAddress("172.16.6.39", 18880);
         InetSocketAddress addr2 = new InetSocketAddress("172.16.6.39", 18881);
         Thread[] threads = new Thread[10];
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             System.out.println(i);
             final int a = i;
             Runnable runnable = () ->
             {
                 String msgId = UUID.randomUUID().toString();
                 RpcNotifyProto.RpcMessage result = null;
-                try
-                {
+                try {
 //                    int r = new Random().nextInt(10000);
-                    System.out.println("创建线程"+a );
+                    System.out.println("创建线程" + a);
 //                    Thread.sleep(r);
                     result = rpcModule.postMsg(msgId, addr, "I'm client mystox message...h暗号" + a, 10000l);
                     RpcNotifyProto.RpcMessage result2 = rpcModule.postMsg(msgId, addr2, "I'm client mystox message...h暗号" + a);
                     System.out.println(result.getPayload());
                     System.out.println(result2.getPayload());
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -77,7 +71,7 @@ public class MinifsuControllerApplicationTests
         }
         while (Thread.activeCount() > 8) {
             Thread.sleep(1000);
-            System.out.println("活跃线程"+Thread.activeCount());
+            System.out.println("活跃线程" + Thread.activeCount());
 //            System.out.println("-----");
             Thread.yield();
         }
@@ -92,8 +86,7 @@ public class MinifsuControllerApplicationTests
     RedisUtils redisUtils;
 
     @Test
-    public void redisTest()
-    {
+    public void redisTest() {
         List<TerminalMsg> a = new ArrayList<>();
         TerminalMsg f = new TerminalMsg();
         TerminalMsg t = new TerminalMsg();
@@ -113,41 +106,74 @@ public class MinifsuControllerApplicationTests
 
     @Test
     public void testNet() {
+        //1包注册
         String registerMsg = "{\"msgId\":\"000021\",\"pkgSum\":1,\"ts\":101325,\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
         JSONObject registerNet = new JSONObject();
-        registerNet.put("uuid", UUID.randomUUID());
-        registerNet.put("GIP", "172.16.6.39:17700");
+        String uuid = UUID.randomUUID().toString();
+        registerNet.put("uuid", uuid);
+        registerNet.put("gip", "172.16.6.39:17700");
         registerNet.put("pktType", PktType.CONNECT);
         registerNet.put("payload", registerMsg);
         JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
-        System.out.println(result);
+        System.out.println("注册结果: " + result);
+
+        //2包 终端信息
+        String terminalMsg = "{\"msgId\":\"000006\",\"pkgSum\":1,\"ts\":1553500102,\"payload\":{\"pktType\":2,\"SN\":\"MINI210121000001\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
+        registerNet.put("payload", terminalMsg);
+        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("终端信息上传结果: " + result);
+
+        //3包 设备包
+        String deviceMsg = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"255-0-0-0-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+        registerNet.put("payload", deviceMsg);
+        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("设备信息上传结果: " + result);
+
+        //4包 设备包
+        String dataMsg = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500161,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dev\":\"5-1\",\"dtm\":1553500102,\"data\":[{\"dev\":\"5-1\",\"info\":{\"114004\":3100,\"114005\":2400}},{\"dev\":\"0-0\",\"info\":{\"114004\":3100,\"114005\":2400}}]}}";
+        registerNet.put("payload", dataMsg);
+        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("设备信息上传结果: " + result);
+
     }
+
+
     /**
-     *
      * @param msgId
      * @param payload
      * @return
      */
-    private JSONObject sendPayLoad(String msgId, String payload, String host, int port)
-    {
+    private JSONObject sendPayLoad(String msgId, String payload, String host, int port) {
         JSONObject result = new JSONObject();
         RpcNotifyProto.RpcMessage response = null;
-        try
-        {
+        try {
             response = rpcModule.postMsg(msgId, new InetSocketAddress(host, port), payload);
             if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
             {
                 result.put("result", 0);
-            } else
-            {
+            } else {
                 return JSONObject.parseObject(response.getPayload());
             }
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             result.put("result", 0);
         }
         return result;
+    }
+
+    public static void main(String[] args)
+    {
+        String s = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"255-0-0-0-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        System.out.println(JSONObject.parseObject(s));
+//        System.out.println(jsonObject.get("data"));
+//        JSONObject object = (JSONObject) jsonObject.get("data");
+//        System.out.println(object.keySet());
+//
+//        System.out.println((Map)jsonObject.get("data"));
+
+
     }
 
 

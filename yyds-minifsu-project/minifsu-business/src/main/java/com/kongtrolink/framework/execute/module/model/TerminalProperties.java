@@ -1,12 +1,17 @@
 package com.kongtrolink.framework.execute.module.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 /**
  * Created by mystoxlol on 2019/3/28, 15:40.
  * company: kongtrolink
  * description:
  * update record:
  */
+@Document
 public class TerminalProperties {
+    @Id
     private String id;
     private String terminalId;
     private Integer business;
@@ -17,7 +22,7 @@ public class TerminalProperties {
     private String wmVendor;
     private String imsi;
     private String imei;
-    private String signalStrength;
+    private Integer signalStrength;
     private String engineVer;
     private String adapterVer;
 
@@ -86,11 +91,11 @@ public class TerminalProperties {
         this.imei = imei;
     }
 
-    public String getSignalStrength() {
+    public Integer getSignalStrength() {
         return signalStrength;
     }
 
-    public void setSignalStrength(String signalStrength) {
+    public void setSignalStrength(Integer signalStrength) {
         this.signalStrength = signalStrength;
     }
 
