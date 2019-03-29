@@ -13,17 +13,25 @@ public class AlarmSignal {
     private String signalId;        //信号点Id
     private String type;            //告警类型
     private String coId;            //数据点id
-    private int coType;             //关联数据点类型
-    private boolean enable;         //告警使能
-    private double threshold;       //阈值
-    private int thresholdFlag;      //门限值标志
-    private int level;              //告警等级
-    private float hystersis;        //告警回差
-    private int delay;              //告警产生延时
-    private int recoverDelay;       //告警恢复延时
-    private int repeatDelay;        //告警重复延时
-    private int alarmDesc;          //告警描述
-    private int normalDesc;         //正常时描述
+    private Integer coType;         //关联数据点类型
+    private Boolean enable;         //告警使能
+    private Double threshold;       //阈值
+    private Integer thresholdFlag;  //门限值标志
+    private Integer level;          //告警等级
+    private Float hystersis;        //告警回差
+    private Integer delay;          //告警产生延时
+    private Integer recoverDelay;   //告警恢复延时
+    private Integer repeatDelay;    //告警重复延时
+    private Integer alarmDesc;      //告警描述
+    private Integer normalDesc;     //正常时描述
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getAlarmId() {
         return alarmId;
@@ -65,112 +73,91 @@ public class AlarmSignal {
         this.coId = coId;
     }
 
-    public int getCoType() {
+    public Integer getCoType() {
         return coType;
     }
 
-    public void setCoType(int coType) {
+    public void setCoType(Integer coType) {
         this.coType = coType;
     }
 
-    public boolean isEnable() {
+    public Boolean getEnable() {
         return enable;
     }
 
-    public void setEnable(boolean enable) {
+    public void setEnable(Boolean enable) {
         this.enable = enable;
     }
 
-    public double getThreshold() {
+    public Double getThreshold() {
         return threshold;
     }
 
-    public void setThreshold(double threshold) {
+    public void setThreshold(Double threshold) {
         this.threshold = threshold;
     }
 
-    public int getThresholdFlag() {
+    public Integer getThresholdFlag() {
         return thresholdFlag;
     }
 
-    public void setThresholdFlag(int thresholdFlag) {
+    public void setThresholdFlag(Integer thresholdFlag) {
         this.thresholdFlag = thresholdFlag;
     }
 
-    public int getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
-    public float getHystersis() {
+    public Float getHystersis() {
         return hystersis;
     }
 
-    public void setHystersis(float hystersis) {
+    public void setHystersis(Float hystersis) {
         this.hystersis = hystersis;
     }
 
-    public int getDelay() {
+    public Integer getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(Integer delay) {
         this.delay = delay;
     }
 
-    public int getRecoverDelay() {
+    public Integer getRecoverDelay() {
         return recoverDelay;
     }
 
-    public void setRecoverDelay(int recoverDelay) {
+    public void setRecoverDelay(Integer recoverDelay) {
         this.recoverDelay = recoverDelay;
     }
 
-    public int getRepeatDelay() {
+    public Integer getRepeatDelay() {
         return repeatDelay;
     }
 
-    public void setRepeatDelay(int repeatDelay) {
+    public void setRepeatDelay(Integer repeatDelay) {
         this.repeatDelay = repeatDelay;
     }
 
-    public int getAlarmDesc() {
+    public Integer getAlarmDesc() {
         return alarmDesc;
     }
 
-    public void setAlarmDesc(int alarmDesc) {
+    public void setAlarmDesc(Integer alarmDesc) {
         this.alarmDesc = alarmDesc;
     }
 
-    public int getNormalDesc() {
+    public Integer getNormalDesc() {
         return normalDesc;
     }
 
-    public void setNormalDesc(int normalDesc) {
+    public void setNormalDesc(Integer normalDesc) {
         this.normalDesc = normalDesc;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/3/27 9:44
-     * 功能描述:根据目标信号点实时值，判定是否应该产生告警
-     */
-    public boolean isAlarm(AlarmSignal tarSignal){
-        if(null == tarSignal){
-            return false;
-        }
-
-        return false;
     }
 }

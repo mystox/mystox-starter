@@ -27,22 +27,12 @@ public class Fsu implements Serializable{
     private Integer upgradeStatus; //升级状态标记
     private String version;
 
-    //JSON转换使用字段
-    private List<Device> deviceList;
     public String getSn() {
         return sn;
     }
 
     public void setSn(String sn) {
         this.sn = sn;
-    }
-
-    public List<Device> getDeviceList() {
-        return deviceList;
-    }
-
-    public void setDeviceList(List<Device> deviceList) {
-        this.deviceList = deviceList;
     }
 
     public String getVersion()
