@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.core.entity;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * \* @Author: mystox
