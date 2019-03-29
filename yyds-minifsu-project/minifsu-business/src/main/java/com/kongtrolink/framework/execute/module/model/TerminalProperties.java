@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.execute.module.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Created by mystoxlol on 2019/3/28, 15:40.
@@ -9,9 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * description:
  * update record:
  */
-@Document
 public class TerminalProperties {
-    @Id
     private String id;
     private String terminalId;
     private Integer business;

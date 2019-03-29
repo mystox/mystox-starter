@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class Fsu implements Serializable{
     private String _id;
+    private String sn;
     private String fsuId;
     private String address;
     private String name;
@@ -24,6 +25,14 @@ public class Fsu implements Serializable{
     private String operators;//运营商
     private Integer upgradeStatus; //升级状态标记
     private String version;
+
+    public String getSn() {
+        return sn;
+    }
+
+    public void setSn(String sn) {
+        this.sn = sn;
+    }
 
     public String getVersion()
     {

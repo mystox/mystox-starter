@@ -22,7 +22,7 @@ public class RpcConfig
     private String bindAddress;
     @Value("${server.rpc.port:10000}")
     private Integer rpcPort;
-    @Value("${rpc.client.timeout}")
+    @Value("${rpc.client.timeout:3000}")
     private String rpcClientTimeout;
 
     @Bean

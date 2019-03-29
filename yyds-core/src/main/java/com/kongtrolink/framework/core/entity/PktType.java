@@ -36,6 +36,5 @@ public class PktType
     public final static String FSU_REPORT = "fsu_report"; //FSU信息上报
     public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
     public final static String DATA_REPORT = "data_report"; //终端数据变化上报
-
-
+    public final static String DATA_REGISTER = "data_register"; //数据注册
 }
