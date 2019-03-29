@@ -1,6 +1,7 @@
 package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
@@ -16,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +86,7 @@ public class MinifsuControllerApplicationTests
 
 
     @Autowired
-    RedisTemplate<String,Object> redisTemplate;
+    RedisTemplate redisTemplate;
 
     @Autowired
     RedisUtils redisUtils;
@@ -110,8 +112,42 @@ public class MinifsuControllerApplicationTests
 
 
     @Test
-    void testNet() {
-
+    public void testNet() {
+        String registerMsg = "{\"msgId\":\"000021\",\"pkgSum\":1,\"ts\":101325,\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
+        JSONObject registerNet = new JSONObject();
+        registerNet.put("uuid", UUID.randomUUID());
+        registerNet.put("GIP", "172.16.6.39:17700");
+        registerNet.put("pktType", PktType.CONNECT);
+        registerNet.put("payload", registerMsg);
+        JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println(result);
+    }
+    /**
+     *
+     * @param msgId
+     * @param payload
+     * @return
+     */
+    private JSONObject sendPayLoad(String msgId, String payload, String host, int port)
+    {
+        JSONObject result = new JSONObject();
+        RpcNotifyProto.RpcMessage response = null;
+        try
+        {
+            response = rpcModule.postMsg(msgId, new InetSocketAddress(host, port), payload);
+            if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
+            {
+                result.put("result", 0);
+            } else
+            {
+                return JSONObject.parseObject(response.getPayload());
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            result.put("result", 0);
+        }
+        return result;
     }
 
 

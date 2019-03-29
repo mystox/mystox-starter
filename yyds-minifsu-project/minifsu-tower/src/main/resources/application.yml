@@ -1,6 +1,8 @@
+
 logging:
   level:
    root: info
+   org.apache.hadoop.util.Shell: OFF
 
 server:
   name: minifsu-alarm

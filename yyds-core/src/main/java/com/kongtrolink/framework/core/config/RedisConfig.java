@@ -61,12 +61,12 @@ public class RedisConfig
         {
             factory.setHostName(this.properties.getHost());
             factory.setPort(this.properties.getPort());
+            factory.setDatabase(this.properties.getDatabase());
             if (this.properties.getPassword() != null)
             {
                 factory.setPassword(this.properties.getPassword());
             }
         }
-        System.out.println(factory.getHostName());
         return factory;
     }
 

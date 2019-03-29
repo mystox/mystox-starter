@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
@@ -53,6 +54,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     private int monitorPort;
 
 
+    @Value("${redis.communication.expired:120}")
+    private long communicationExpired;
+
     @Autowired
     private ThreadPoolTaskExecutor controllerExecutor;
 
@@ -78,7 +82,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         JSONObject payloadObject = JSONObject.parseObject(payload);
         String pktType = (String) payloadObject.get("pktType");//服务间通讯类型
 
-        if (StringUtils.isNotBlank(pktType))//终端处理流程
+        if (StringUtils.isNotBlank(pktType))
         {
             if (PktType.CONNECT.equals(pktType)) //终端>>>>>>>>>服务
             {
@@ -93,7 +97,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 JSONObject result = moduleExecute(msgId, payloadObject);
                 response = result.toJSONString();
             }
-        }
+        } else response = "{'result':0,'msgId':'"+msgId+"'}";
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
@@ -172,7 +176,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         {
             //根据SN从communication_hash获取记录
             //不存在该 SN 记录
-            JSONObject value = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, SN, JSONObject.class);
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + SN;
+            JSONObject value = redisUtils.get(key, JSONObject.class);
             if (value == null) //添加通讯信息
             {
                 value = new JSONObject();
@@ -180,7 +185,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 value.put("UUID", uuid);
                 value.put("STATUS", 0);//设置未注册状态
                 //触发重新注册
-                redisUtils.setHash(RedisHashTable.COMMUNICATION_HASH, SN, value);
+                redisUtils.set(key, value);
                 //将路由信息存入redis 数据格式为:{SN:{uuid:uuid,GWip:gip,STATUS:0}}
             } else
             {
@@ -189,10 +194,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 {
                     value.put("GWip", gip);
                     value.put("UUID", uuid);
-                    redisUtils.setHash(RedisHashTable.COMMUNICATION_HASH, SN, value);
+                    redisUtils.set(key, value);
                 }
             }
-            //TODO 设置过期时间
+            // 设置过期时间
+            redisUtils.expired(key, communicationExpired, TimeUnit.SECONDS);
         }
 
         //终端payload报文解析

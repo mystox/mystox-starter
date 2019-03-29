@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -34,7 +35,6 @@ public class RedisUtils
         return redisTemplate.opsForValue().get(key);
 
     }
-
     public String getString(String key)
     {
         return stringRedisTemplate.opsForValue().get(key);
@@ -60,8 +60,16 @@ public class RedisUtils
     {
         redisTemplate.opsForHash().putIfAbsent(hashTable,key,value);
     }
+    public void set(String key, Object value)
+    {
+        redisTemplate.opsForValue().setIfAbsent(key,value);
+    }
     public void deleteHash(String hashTable, String... keys)
     {
         redisTemplate.opsForHash().delete(hashTable, keys);
+    }
+    public void expired(String key, long time, TimeUnit unit)
+    {
+        redisTemplate.expire(key, time, TimeUnit.SECONDS);
     }
 }
