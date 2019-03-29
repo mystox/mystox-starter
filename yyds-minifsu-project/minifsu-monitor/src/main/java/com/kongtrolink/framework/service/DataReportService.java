@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignal;
 import com.kongtrolink.framework.core.entity.Communication;
+import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
@@ -26,10 +27,10 @@ public class DataReportService {
     @Autowired
     RedisUtils redisUtils;
 
-    private String communication_hash = "";
-    private  String sn_data_hash = "";
-    private String sn_dev_id_alarmsignal_hash = "";
-    private String sn__alarm_hash = "";
+    private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
+    private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
+    private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH;
+    private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
 
     public String report(String msgId, JSONObject payload, Date curDate){
 
@@ -85,7 +86,7 @@ public class DataReportService {
         for(JsonDevice device : fsu.getData()) {
             StringBuilder keyDev = new StringBuilder(fsu.getSN()).append(device.getDev());
             List<JsonSignal> alarmSignalList = new ArrayList<>();
-            HashMap<String, Double> data = device.getData();
+            HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
                 handleSignal(signal, keyDev, alarmHashMap, curDate);
@@ -96,7 +97,7 @@ public class DataReportService {
                 }
             }
             if(!alarmSignalList.isEmpty()) {
-                device.setData(null);
+                device.setInfo(null);
                 device.setSignalList(alarmSignalList);
                 alarmDeviceList.add(device);
             }

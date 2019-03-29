@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.core.utils;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +16,11 @@ import java.util.concurrent.TimeUnit;
  * 针对所有的Set 都是以s开头的方法                    不含通用方法
  * 针对所有的List 都是以l开头的方法
  */
+@Service
 public class RedisUtils {
 
-    private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
