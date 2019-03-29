@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>minifsu-net-GW</module>
-		<module>minifsu-alarm</module>
+		<module>minifsu-monitor</module>
 		<module>minifsu-business</module>
 		<module>minifsu-controller</module>
 		<module>minifsu-net-GW</module>
@@ -23,8 +23,5 @@
 		<module>minifsu-cntb-GW</module>
 		<module>minifsu-tower</module>
 		<module>minifsu-web</module>
-
-
 	</modules>
-
 </project>
