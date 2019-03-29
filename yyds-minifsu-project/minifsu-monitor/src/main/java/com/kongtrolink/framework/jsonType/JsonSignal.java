@@ -21,12 +21,12 @@ public class JsonSignal {
     //信号点id， 告警
     private Map<String, Alarm> alarmMap;
 
-    public Map<String, Alarm> getAlarmMap() {
-        return alarmMap;
+    public JsonSignal() {
     }
 
-    public void setAlarmMap(Map<String, Alarm> alarmMap) {
-        this.alarmMap = alarmMap;
+    public JsonSignal(String id, Double v) {
+        this.id = id;
+        this.v = v;
     }
 
     public Double getV() {
@@ -36,6 +36,16 @@ public class JsonSignal {
     public void setV(Double v) {
         this.v = v;
     }
+
+    public Map<String, Alarm> getAlarmMap() {
+        return alarmMap;
+    }
+
+    public void setAlarmMap(Map<String, Alarm> alarmMap) {
+        this.alarmMap = alarmMap;
+    }
+
+
 
     public String getId() {
         return id;
