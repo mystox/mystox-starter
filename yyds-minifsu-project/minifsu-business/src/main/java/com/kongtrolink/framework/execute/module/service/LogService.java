@@ -4,18 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 
 /**
- * Created by mystoxlol on 2019/3/27, 23:47.
+ * Created by mystoxlol on 2019/3/29, 16:30.
  * company: kongtrolink
  * description:
  * update record:
  */
-public interface RegistryService
-{
-    JSONObject registerSN(ModuleMsg moduleMsg);
-
-    JSONObject registerDevices(ModuleMsg moduleMsg);
-
-    JSONObject registerTerminal(ModuleMsg moduleMsg);
-
+public interface LogService {
     JSONObject saveCleanupLog(ModuleMsg moduleMsg);
 }

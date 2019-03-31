@@ -2,6 +2,7 @@ package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.TerminalPktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
@@ -34,7 +35,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     @Autowired
     RegistryService registryService;
 
-
     @Override
     public boolean init() {
         logger.info("workerExecute-execute module init");
@@ -55,17 +55,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String result = "";
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
-        if (TerminalPktType.REGISTRY.getValue().equals(pktType)) { // 注册fsu
-            //注册服务
+        if (TerminalPktType.REGISTRY.getValue().equals(pktType)) { // 注册终端
             JSONObject jsonObject = registryService.registerSN(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (TerminalPktType.TERMINAL_REPORT.getValue().equals(pktType)) { // 设备上报// 终端信息上报设备上报
-            //注册服务
+        } else if (TerminalPktType.TERMINAL_REPORT.getValue().equals(pktType)) { //  终端信息上报设备上报
             JSONObject jsonObject = registryService.registerTerminal(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (TerminalPktType.DEV_LIST.getValue().equals(pktType)) { // 设备上报// 终端信息上报设备上报
-            //注册服务
+        } else if (TerminalPktType.DEV_LIST.getValue().equals(pktType)) { // 设备上报
             JSONObject jsonObject = registryService.registerDevices(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.CLEANUP.equals(pktType)) { // 设备上报// 终端信息上报设备上报
+            JSONObject jsonObject = registryService.saveCleanupLog(moduleMsg);
             result = jsonObject.toJSONString();
         }
 

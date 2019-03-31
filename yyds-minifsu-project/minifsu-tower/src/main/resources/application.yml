@@ -5,7 +5,7 @@ logging:
    org.apache.hadoop.util.Shell: OFF
 
 server:
-  name: minifsu-alarm
+  name: minifsu-tower
   bindIp: 172.16.6.39
   rpc:
     port: 18881

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -32,11 +34,6 @@ public class RedisUtils
         return JSONObject.toJavaObject((JSON) get(key), clazz);
     }
 
-    public Object get(String key)
-    {
-        return redisTemplate.opsForValue().get(key);
-
-    }
     public String getString(String key)
     {
         return stringRedisTemplate.opsForValue().get(key);
@@ -45,6 +42,11 @@ public class RedisUtils
     public <T> List<T> getArray(String key, Class<T> clazz)
     {
         return JSON.parseArray(stringRedisTemplate.opsForValue().get(key), clazz);
+    }
+
+    Set<String> keys(String keyPattern) {
+       return redisTemplate.keys(keyPattern);
+
     }
 
     public <T> T getHash(String hashTable, String key, Class<T> clazz)
