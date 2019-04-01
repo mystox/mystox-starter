@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
@@ -46,7 +47,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     {
 
         //todo
-        String result = "execute result " +msgId ;
+        JSONObject result = new JSONObject();
+        result.put("result", 1);
         try
         {
             Thread.sleep(new Random().nextInt(10000));
@@ -57,7 +59,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
-                .setPayload(result)
+                .setPayload(result.toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();
     }

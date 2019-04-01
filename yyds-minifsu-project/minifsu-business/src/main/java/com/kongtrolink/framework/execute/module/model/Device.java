@@ -1,4 +1,8 @@
-package com.kongtrolink.framework.core.entity;
+package com.kongtrolink.framework.execute.module.model;
+
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.Date;
 
 /**
  * @Auther: liudd
@@ -11,7 +15,10 @@ public class Device {
     private Integer type;    //设备类型
     private Integer resNo;   //资源编号
     private Integer port; //设备端口
+    @Field("SN")
     private String SN;
+
+    private Date invalidTime; //0为有效
 
     public String getSN() {
         return SN;
@@ -21,7 +28,13 @@ public class Device {
         this.SN = SN;
     }
 
-    private Integer delFlag; //无效标记 1 有效 0 无效
+    public Date getInvalidTime() {
+        return invalidTime;
+    }
+
+    public void setInvalidTime(Date invalidTime) {
+        this.invalidTime = invalidTime;
+    }
 
     public String getId() {
         return id;
@@ -54,5 +67,4 @@ public class Device {
     public void setPort(Integer port) {
         this.port = port;
     }
-
 }

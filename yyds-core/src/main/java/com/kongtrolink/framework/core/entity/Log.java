@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.core.entity;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  * Created by mystoxlol on 2019/3/28, 14:14.

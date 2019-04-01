@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -29,8 +28,7 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 @Service
-public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
-{
+public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -52,6 +50,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     private String monitorHost;
     @Value("${rpc.monitor.port}")
     private int monitorPort;
+    @Value("${rpc.tower.hostname}")
+    private String towerHost;
+    @Value("${rpc.tower.port}")
+    private int towerPort;
 
 
     @Value("${redis.communication.expired:120}")
@@ -61,8 +63,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     private ThreadPoolTaskExecutor controllerExecutor;
 
     @Override
-    public boolean init()
-    {
+    public boolean init() {
         logger.info("workerExecute-execute module init");
         //初始化线程池之类的基础任务服务
         return true;
@@ -76,28 +77,26 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      */
 
     @Override
-    protected RpcNotifyProto.RpcMessage execute(String msgId, String payload)
-    {
+    protected RpcNotifyProto.RpcMessage execute(String msgId, String payload) {
         String response = "";
         JSONObject payloadObject = JSONObject.parseObject(payload);
         String pktType = (String) payloadObject.get("pktType");//服务间通讯类型
 
-        if (StringUtils.isNotBlank(pktType))
-        {
+        if (StringUtils.isNotBlank(pktType)) {
             if (PktType.CONNECT.equals(pktType)) //终端>>>>>>>>>服务
             {
                 JSONObject result = receiveTerminalExecute(msgId, payloadObject);
                 response = result.toJSONString();
-            } else if (true) //服务>>>>>>>>终端 //todo
+            } else if (PktType.SET_ALARM_PARAM.equals(pktType)) //服务>>>>>>>>终端 //
             {
                 JSONObject result = sendTerminalExecute(msgId, payloadObject);
                 response = result.toJSONString();
-            } else if (PktType.CLEANUP.equals(pktType)) //服务>>>>>>>>>>>>服务
+            } else //服务>>>>>>>>>>>>服务
             {
                 JSONObject result = moduleExecute(msgId, payloadObject);
                 response = result.toJSONString();
             }
-        } else response = "{'result':0,'msgId':'"+msgId+"'}";
+        } else response = "{'result':0,'msgId':'" + msgId + "'}";
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
@@ -111,8 +110,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      *
      * @return
      */
-    private JSONObject sendTerminalExecute(String msgId, JSONObject payloadObject)
-    {
+    private JSONObject sendTerminalExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         JSONObject msgPayload = moduleMsg.getPayload();
         msgId = StringUtils.isBlank(msgId) ? moduleMsg.getMsgId() : msgId;
@@ -142,13 +140,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      *
      * @return
      */
-    private JSONObject moduleExecute(String msgId, JSONObject payloadObject)
-    {
+    private JSONObject moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
-        if (PktType.CLEANUP.equals(pktType))
+        if (PktType.CLEANUP.equals(pktType)) {//注销
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
-
+        }
+        if (PktType.REGISTRY_CNTB.equals(pktType)) {
+            return sendPayLoad(msgId, payloadObject.toJSONString(), towerHost, towerPort);
+        }
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("result", 1);
         return responsePayload;
@@ -161,19 +161,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      * @param payloadObject
      * @return
      */
-    private JSONObject receiveTerminalExecute(String msgId, JSONObject payloadObject)
-    {
+    private JSONObject receiveTerminalExecute(String msgId, JSONObject payloadObject) {
         //解析消息报文
         String terminalString = (String) payloadObject.get("payload");
         TerminalMsg terminalMsg = JSONObject.parseObject(terminalString, TerminalMsg.class);
         msgId = StringUtils.isBlank(msgId) ? terminalMsg.getMsgId() : msgId;
         String uuid = (String) payloadObject.get("uuid");
         String gip = (String) payloadObject.get("gip");
-            JSONObject msgPayload = terminalMsg.getPayload();
-            String SN = (String) msgPayload.get("SN");
+        JSONObject msgPayload = terminalMsg.getPayload();
+        String SN = (String) msgPayload.get("SN");
         /******************************通讯信息刷新*****************************/
-        if (StringUtils.isNotBlank(msgId))
-        {
+        if (StringUtils.isNotBlank(msgId)) {
             //根据SN从communication_hash获取记录
             //不存在该 SN 记录
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + SN;
@@ -187,13 +185,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 //触发重新注册
                 redisUtils.set(key, value);
                 //将路由信息存入redis 数据格式为:{SN:{uuid:uuid,GWip:gip,STATUS:0}}
-            } else
-            {
+            } else {
                 String uuid2 = (String) value.get("UUID");//uuid发生变化 则更新通讯路由信息
-                if (!uuid.equals(uuid2))
-                {
+                if (!uuid.equals(uuid2)) {
                     value.put("GWip", gip);
-                    value.put("UUID", uuid);
+                    value.put("UUID", uuid2);
                     redisUtils.set(key, value);
                 }
             }
@@ -207,20 +203,18 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         TerminalMsg responseTP = new TerminalMsg(); //响应终端实体
         responseTP.setPkgSum(terminalMsg.getPkgSum());
         responseTP.setMsgId(msgId);
-            ModuleMsg moduleMsg = new ModuleMsg();
-            moduleMsg.setSN(SN);
+        ModuleMsg moduleMsg = new ModuleMsg();
+        moduleMsg.setMsgId(msgId);
+        moduleMsg.setSN(SN);
+        moduleMsg.setPayload(payload);
         /***************************注册流程*********************************/
-        if (TerminalPktType.REGISTRY.getKey() == pktType)
-        {
-            moduleMsg.setPayload(payload);
+        if (TerminalPktType.REGISTRY.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             int result = (int) responsePayload.get("result");
-            if (result == 0)
-            {
+            if (result == 0) {
                 //注册异常返回延迟时间
-                if(responsePayload.get("delay")!=null)
-                {
+                if (responsePayload.get("delay") != null) {
                     responsePayload.put("delay", 30);
                 }
             }
@@ -230,20 +224,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             return (JSONObject) JSONObject.toJSON(responseTP);
         }
         /************fsu信息上报 pktType:2 设备信息上报 pktType:3 **********************/
-        if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType || TerminalPktType.DEV_LIST.getKey() == pktType)
-        {
-            moduleMsg.setPayload(payload);
-
+        if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType || TerminalPktType.DEV_LIST.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
-            responsePayload.put("pktType", pktType);
             responseTP.setPayload(responsePayload);
+            responsePayload.put("pktType", pktType);
             return (JSONObject) JSONObject.toJSON(responseTP);
         }
         /****************************数据变化上报*******************************/
-        if (TerminalPktType.DATA_REPORT.getKey() == pktType)
-        {
-            JSONObject responsePayload = sendPayLoad(msgId, payload.toJSONString(), monitorHost, monitorPort); //实时监控处理
+        if (TerminalPktType.DATA_REPORT.getKey() == pktType) {
+            moduleMsg.setPktType(TerminalPktType.toValue(pktType));
+            JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);
             responseTP.setPayload(responsePayload);
             return (JSONObject) JSONObject.toJSON(responseTP);
@@ -263,22 +254,18 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      * @param payload
      * @return
      */
-    private JSONObject sendPayLoad(String msgId, String payload, String host, int port)
-    {
+    private JSONObject sendPayLoad(String msgId, String payload, String host, int port) {
         JSONObject result = new JSONObject();
         RpcNotifyProto.RpcMessage response = null;
-        try
-        {
+        try {
             response = rpcModule.postMsg(msgId, new InetSocketAddress(host, port), payload);
             if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
             {
                 result.put("result", 0);
-            } else
-            {
+            } else {
                 return JSONObject.parseObject(response.getPayload());
             }
-        } catch (IOException e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             result.put("result", 0);
         }

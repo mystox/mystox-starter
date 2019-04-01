@@ -44,6 +44,11 @@ public class RedisUtils
         return JSON.parseArray(stringRedisTemplate.opsForValue().get(key), clazz);
     }
 
+    Set<String> keys(String keyPattern) {
+       return redisTemplate.keys(keyPattern);
+
+    }
+
     public <T> T getHash(String hashTable, String key, Class<T> clazz)
     {
         return JSONObject.toJavaObject((JSON) getHash(hashTable,key), clazz);

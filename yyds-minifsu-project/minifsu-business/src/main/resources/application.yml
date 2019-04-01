@@ -1,6 +1,6 @@
 logging:
   level:
-   root: debug
+   root: info
    org.apache.hadoop.util: OFF
    org.mongodb.driver.*: OFF
 
@@ -38,6 +38,9 @@ executor:
 
 rpc:
   client:
-    timeout: 20000
+    timeout: 200000
+  controller:
+    hostname: 172.16.6.39
+    port: 18800
 register:
   delay: 100
