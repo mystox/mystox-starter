@@ -6,7 +6,7 @@ package com.kongtrolink.framework.execute.module.model;
  * description: 告警点配置表
  * update record:
  */
-public class AlarmSignalConfig {
+public class AlarmSignalConfigModel {
     private String id;
     private String monitorId; //告警点id
     private Integer type; //告警点类型

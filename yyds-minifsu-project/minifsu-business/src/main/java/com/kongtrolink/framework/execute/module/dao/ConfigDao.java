@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.execute.module.model.AlarmSignalConfig;
+import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
+import com.kongtrolink.framework.core.entity.MongoTableName;
+import com.kongtrolink.framework.execute.module.model.AlarmSignalConfigModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,6 +24,14 @@ public class ConfigDao {
 
     public List<AlarmSignalConfig> findAlarmSignalConfigByDevId(String devId) {
 
-        return mongoTemplate.find(Query.query(Criteria.where("devId").in(devId)), AlarmSignalConfig.class);
+        return mongoTemplate.find(Query.query(Criteria.where("deviceId").is(devId)), AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
+
+    public List<AlarmSignalConfigModel> findAlarmSignalModelByDevType(Integer devType) {
+        return mongoTemplate.find(Query.query(Criteria.where("devType").is(devType)), AlarmSignalConfigModel.class,MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
+    }
+
+    public void saveAlarmSignalConfig(List<AlarmSignalConfig> alarmSignals) {
+        mongoTemplate.insert(alarmSignals,MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 }

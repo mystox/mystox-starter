@@ -126,16 +126,16 @@ public class MinifsuControllerApplicationTests {
             if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
 
                 //3包 设备包
-                String deviceMsg = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"255-0-0-0-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+                String deviceMsg = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"3-0-0-1-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
                 registerNet.put("payload", deviceMsg);
                 result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
                 System.out.println("设备信息上传结果: " + result);
                 if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
                     //4包 数据包
-                    String dataMsg = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500161,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dev\":\"5-1\",\"dtm\":1553500102,\"data\":[{\"dev\":\"5-1\",\"info\":{\"114004\":3100,\"114005\":2400}},{\"dev\":\"0-0\",\"info\":{\"114004\":3100,\"114005\":2400}}]}}";
+                    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
                     registerNet.put("payload", dataMsg);
-//        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
-//        System.out.println("数据包信息上传结果: " + result);
+        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("数据包信息上传结果: " + result);
 
                 }
             }
@@ -198,5 +198,8 @@ public class MinifsuControllerApplicationTests {
 
     }
 
+    public void testMongo() {
+
+    }
 
 }

@@ -12,5 +12,8 @@ public class MongoTableName
     public final static String TERMINAL_PROPERTY = "t_terminal_property";
     public final static String ORDER = "t_order";
     public final static String LOG = "t_log";
+    public final static String DEVICE = "t_device";
+    public final static String ALARM_SIGNAL_CONFIG = "t_alarm_signal_config";
+    public final static String ALARM_SIGNAL_CONFIG_MODEL = "t_alarm_signal_config_model";
 
 }
