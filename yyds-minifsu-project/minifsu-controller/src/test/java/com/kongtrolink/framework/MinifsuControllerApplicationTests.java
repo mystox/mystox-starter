@@ -14,15 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringRunner;
+import redis.clients.jedis.ScanParams;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -96,10 +95,21 @@ public class MinifsuControllerApplicationTests {
         a.add(f);
         a.add(t);
         ValueOperations valueOperations = redisTemplate.opsForValue();
-        valueOperations.set("a", a);
+//        valueOperations.set("a", a);
         String as = "{'a':'b'}";
-        redisTemplate.opsForHash().put(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.parse(as));
-        JSONObject r = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.class);
+//        redisTemplate.opsForHash().put(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.parse(as));
+        String key = "communication_hash:MINI210121000001";
+        JSONObject r = redisUtils.get(key, JSONObject.class);
+        ScanParams scanParams = new ScanParams();
+        scanParams.match("MINI210121000001*");
+        ScanOptions scanOptions = ScanOptions.scanOptions().match("MINI210121000001_3-1_1*").build();
+
+        String pattern = "MINI210121000001*";
+        final Set<String> hkeys = redisUtils.getHkeys(pattern);
+
+
+//        System.out.println(keys.size());
+        redisTemplate.opsForHash().delete(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001*");
         System.out.println(r);
 //		List<TerminalMsg> r = JSONArray.
     }

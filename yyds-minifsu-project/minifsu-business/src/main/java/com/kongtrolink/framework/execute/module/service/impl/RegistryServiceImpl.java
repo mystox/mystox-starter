@@ -22,11 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -84,8 +80,10 @@ public class RegistryServiceImpl implements RegistryService {
             if (value != null) {
                 redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
                 redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
+                Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
 //                redisUtils
-//                redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn);
+                if (keys!=null && keys.size()>0)
+                redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, (String[]) keys.toArray());
 
                 value.put("BIP", bip);
                 value.put("STATUS", 1);
