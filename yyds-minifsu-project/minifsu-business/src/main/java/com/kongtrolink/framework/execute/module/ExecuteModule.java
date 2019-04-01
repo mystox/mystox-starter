@@ -7,6 +7,7 @@ import com.kongtrolink.framework.core.entity.TerminalPktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.execute.module.service.AlarmService;
 import com.kongtrolink.framework.execute.module.service.FsuService;
 import com.kongtrolink.framework.execute.module.service.RegistryService;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Autowired
     RegistryService registryService;
+
+    @Autowired
+    AlarmService alarmService;
 
     @Override
     public boolean init() {
@@ -67,6 +71,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.CLEANUP.equals(pktType)) { // 设备上报// 终端信息上报设备上报
             JSONObject jsonObject = registryService.saveCleanupLog(moduleMsg);
             result = jsonObject.toJSONString();
+        } else if (PktType.ALARM_SAVE.equals(pktType)) {
+            alarmService.saveAlarm(moduleMsg);
         }
 
 

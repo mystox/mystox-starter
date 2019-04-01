@@ -143,7 +143,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private JSONObject moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
-        if (PktType.CLEANUP.equals(pktType)) {//注销
+        if (PktType.CLEANUP.equals(pktType) || PktType.ALARM_SAVE.equals(pktType)) {//注销
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
         if (PktType.REGISTRY_CNTB.equals(pktType)) {

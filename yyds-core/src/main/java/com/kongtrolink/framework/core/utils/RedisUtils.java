@@ -3,11 +3,14 @@ package com.kongtrolink.framework.core.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -612,5 +615,17 @@ public class RedisUtils
             return false;
         }
         return  false;
+    }
+
+    public Set<String> getHkeys(String hashTable, String pattern) {
+        ScanOptions scanOptions = ScanOptions.scanOptions().match(pattern).build();
+        Cursor<Map.Entry<Object,Object>> cursor = redisTemplate.opsForHash().scan(hashTable, scanOptions);
+        Set<String> result = new HashSet();
+        while (cursor.hasNext())
+        {
+            Map.Entry<Object,Object> entry = cursor.next();
+            result.add(entry.getKey().toString());
+        }
+        return result;
     }
 }
