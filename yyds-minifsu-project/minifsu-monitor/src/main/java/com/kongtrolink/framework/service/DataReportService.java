@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.*;
@@ -37,8 +38,7 @@ public class DataReportService {
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
 
     public String report(String msgId, JSONObject payload, Date curDate){
-
-
+        List<Alarm> alarmList = new ArrayList<>();
         String result = "{'pktType':4,'result':1}";
         JsonFsu fsu = JSON.parseObject(payload.toJSONString(), JsonFsu.class);
         //判定redis中是否有该FSU的通讯信息
@@ -54,7 +54,7 @@ public class DataReportService {
         //存储实时数据
         redisUtils.hset(sn_data_hash, fsu.getSN(), payload);
         //解析告警
-        handlerAlarm(fsu, curDate);
+        handlerAlarm(fsu, curDate, alarmList);
         if(!fsu.getData().isEmpty()){
             redisUtils.hset(sn__alarm_hash, fsu.getSN(), JSON.toJSONString(fsu));
             //上报告警
@@ -66,6 +66,7 @@ public class DataReportService {
                 e.printStackTrace();
             }
         }
+//        if()
         return result;
     }
 
@@ -89,7 +90,7 @@ public class DataReportService {
      * @date: 2019/3/27 14:02
      * 功能描述:以device为单位处理告警
      */
-    private void handlerAlarm(JsonFsu fsu, Date curDate){
+    private void handlerAlarm(JsonFsu fsu, Date curDate, List<Alarm> alarmList){
         //获取FSU下所有告警
         String alarmFsuStr = (String)redisUtils.hget(sn__alarm_hash, fsu.getSN());
         HashMap<String, Alarm> alarmHashMap = new HashMap<>();
@@ -99,15 +100,15 @@ public class DataReportService {
         }
         List<JsonDevice> alarmDeviceList = new ArrayList<>();
         for(JsonDevice device : fsu.getData()) {
-            StringBuilder keyDev = new StringBuilder(fsu.getSN()).append(device.getDev());
+            StringBuilder keyDev = new StringBuilder(fsu.getSN()).append("_").append(device.getDev());
             List<JsonSignal> alarmSignalList = new ArrayList<>();
             HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
-                handleSignal(signal, keyDev, alarmHashMap, curDate);
+                handleSignal(signal, keyDev, alarmHashMap, curDate, alarmList);
                 if(signal.getAlarmMap() != null && !signal.getAlarmMap().isEmpty()){
                     signal.setId(null);
-                    signal.setV(0.0);
+                    signal.setV(null);
                     alarmSignalList.add(signal);
                 }
             }
@@ -117,9 +118,7 @@ public class DataReportService {
                 alarmDeviceList.add(device);
             }
         }
-        if(!alarmDeviceList.isEmpty()) {
-            fsu.setData(alarmDeviceList);
-        }
+        fsu.setData(alarmDeviceList);
     }
 
 
@@ -129,15 +128,16 @@ public class DataReportService {
      * 功能描述:处理信号点下的告警信息
      */
     private void handleSignal(JsonSignal signal, StringBuilder keyDev,
-                              HashMap<String, Alarm> alarmHashMap, Date curDate){
-        StringBuilder keySignal = new StringBuilder(keyDev.toString()).append(signal.getId());
+                              HashMap<String, Alarm> alarmHashMap, Date curDate, List<Alarm> alarmList){
+        StringBuilder keySignal = new StringBuilder(keyDev.toString())
+                .append("_").append(signal.getId());
         //获取redis中该信号点下所有告警点
-        String redisSignalStr = (String) redisUtils.hget(sn_dev_id_alarmsignal_hash, keySignal.toString());
-        if (StringUtils.isBlank(redisSignalStr)) {
+        Object redisSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, keySignal.toString());
+        if (null == redisSignalObj) {
             return ;//redis获取不到信号点，返回异常
         }
-        JsonSignal redisSignal = JSON.parseObject(redisSignalStr, JsonSignal.class);
-        for (AlarmSignal alarmSignal : redisSignal.getAlarmSignals()) {        //比较各个告警点
+        List<AlarmSignal> alarmSignals = JSONArray.parseArray(redisSignalObj.toString(), AlarmSignal.class);
+        for (AlarmSignal alarmSignal : alarmSignals) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
@@ -153,6 +153,7 @@ public class DataReportService {
                 if(null == alarmMap){alarmMap = new HashMap<>();}
                 alarmMap.put(keyAlarmId, beforAlarm);
                 signal.setAlarmMap(alarmMap);
+                alarmList.add(beforAlarm);
             }
         }
     }
@@ -163,8 +164,8 @@ public class DataReportService {
      * 功能描述:开始告警
      */
     private Alarm beginAlarm(JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
-        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()>alarmSignal.getThreshold() )
-                || (alarmSignal.getThresholdFlag()<0 && signal.getV()<alarmSignal.getThreshold()) ){
+        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()>=alarmSignal.getThreshold() )
+                || (alarmSignal.getThresholdFlag()<0 && signal.getV()<=alarmSignal.getThreshold()) ){
             //产生告警
             Alarm alarm = new Alarm();
             alarm.setLink((byte)1);
@@ -182,12 +183,16 @@ public class DataReportService {
      * 如果结束告警上报铁塔未成功，此时继续来结束告警标志
      */
     private Alarm endAlarm(Alarm beforAlarm, JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
-        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()<alarmSignal.getThreshold() )
-                || ( alarmSignal.getThresholdFlag()<0 && signal.getV()>alarmSignal.getThreshold()) ){
-            int link = beforAlarm.getLink() << 1;
-            beforAlarm.setLink((byte)link);
+        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()<=alarmSignal.getThreshold() )
+                || ( alarmSignal.getThresholdFlag()<0 && signal.getV()>=alarmSignal.getThreshold()) ){
+            if(1== beforAlarm.getLink()) {
+                int link = beforAlarm.getLink() + 4;
+                beforAlarm.setLink((byte) link);
+            }
+            beforAlarm.setValue(signal.getV());
             beforAlarm.setUpdateTime(curDate);
+            return beforAlarm;
         }
-        return beforAlarm;
+        return null;
     }
 }

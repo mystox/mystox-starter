@@ -11,7 +11,6 @@ import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +43,7 @@ public class DataRegisterService {
                         Alarm alarm = next.getValue();
                         byte link = (byte)(alarm.getLink() << 1);
                         alarm.setLink(link);
+                        //如果结束报文先上报，怎么处理
                         if(link == 8){
                             iterator.remove();
                         }
