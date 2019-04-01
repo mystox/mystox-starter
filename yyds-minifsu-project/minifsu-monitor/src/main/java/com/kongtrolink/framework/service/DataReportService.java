@@ -42,12 +42,12 @@ public class DataReportService {
         String result = "{'pktType':4,'result':1}";
         JsonFsu fsu = JSON.parseObject(payload.toJSONString(), JsonFsu.class);
         //判定redis中是否有该FSU的通讯信息
-        String communicationStr= (String)redisUtils.hget(communication_hash, fsu.getSN());
-        if(StringUtils.isBlank(communicationStr)){
+        Object communicationObj = redisUtils.get(communication_hash + ":" + fsu.getSN());
+        if(null == communicationObj){
             //写入日志，返回错误信息
             return  "{'pktType':4,'result':0}";
         }
-        Communication communication = JSON.parseObject(communicationStr, Communication.class);
+        Communication communication = JSON.parseObject(communicationObj.toString(), Communication.class);
         if(communication.getStatus() == 0){     //终端未注册成功，返回注册失败消息
             return  "{'pktType':4,'result':0}";
         }
