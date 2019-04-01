@@ -2,11 +2,11 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.core.entity.AlarmSignal;
-import com.kongtrolink.framework.core.entity.Communication;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
+import com.kongtrolink.framework.core.config.rpc.RpcClient;
+import com.kongtrolink.framework.core.entity.*;
+import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -26,6 +28,8 @@ public class DataReportService {
 
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    RpcModule rpcModule;
 
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
     private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
@@ -51,6 +55,17 @@ public class DataReportService {
         redisUtils.hset(sn_data_hash, fsu.getSN(), payload);
         //解析告警
         handlerAlarm(fsu, curDate);
+        if(!fsu.getData().isEmpty()){
+            redisUtils.hset(sn__alarm_hash, fsu.getSN(), JSON.toJSONString(fsu));
+            //上报告警
+            InetSocketAddress addr = new InetSocketAddress("localhost",17777);
+            try{
+                String id = UUID.randomUUID().toString();
+                rpcModule.postMsg(id,addr,"I'm client mystox message...h暗号");
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
         return result;
     }
 
@@ -102,7 +117,9 @@ public class DataReportService {
                 alarmDeviceList.add(device);
             }
         }
-        fsu.setData(alarmDeviceList);
+        if(!alarmDeviceList.isEmpty()) {
+            fsu.setData(alarmDeviceList);
+        }
     }
 
 
@@ -113,13 +130,12 @@ public class DataReportService {
      */
     private void handleSignal(JsonSignal signal, StringBuilder keyDev,
                               HashMap<String, Alarm> alarmHashMap, Date curDate){
-        StringBuilder keySignal = new StringBuilder(keyDev.toString()).append(signal);
+        StringBuilder keySignal = new StringBuilder(keyDev.toString()).append(signal.getId());
         //获取redis中该信号点下所有告警点
         String redisSignalStr = (String) redisUtils.hget(sn_dev_id_alarmsignal_hash, keySignal.toString());
         if (StringUtils.isBlank(redisSignalStr)) {
             return ;//redis获取不到信号点，返回异常
         }
-        JsonSignal jsonSignal = new JsonSignal();
         JsonSignal redisSignal = JSON.parseObject(redisSignalStr, JsonSignal.class);
         for (AlarmSignal alarmSignal : redisSignal.getAlarmSignals()) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
@@ -151,10 +167,7 @@ public class DataReportService {
                 || (alarmSignal.getThresholdFlag()<0 && signal.getV()<alarmSignal.getThreshold()) ){
             //产生告警
             Alarm alarm = new Alarm();
-            alarm.setHasBegin(true);
-            alarm.setBeginReport(false);
-            alarm.setHasEnd(false);
-            alarm.setEndReort(false);
+            alarm.setLink((byte)1);
             alarm.setValue(signal.getV());
             alarm.setUpdateTime(curDate);
             return alarm;
@@ -171,8 +184,8 @@ public class DataReportService {
     private Alarm endAlarm(Alarm beforAlarm, JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
         if( (alarmSignal.getThresholdFlag()>0 && signal.getV()<alarmSignal.getThreshold() )
                 || ( alarmSignal.getThresholdFlag()<0 && signal.getV()>alarmSignal.getThreshold()) ){
-            beforAlarm.setHasEnd(true);
-            beforAlarm.setEndReort(false);
+            int link = beforAlarm.getLink() << 1;
+            beforAlarm.setLink((byte)link);
             beforAlarm.setUpdateTime(curDate);
         }
         return beforAlarm;
