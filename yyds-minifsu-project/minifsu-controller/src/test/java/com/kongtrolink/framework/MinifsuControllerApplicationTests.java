@@ -105,7 +105,7 @@ public class MinifsuControllerApplicationTests {
         ScanOptions scanOptions = ScanOptions.scanOptions().match("MINI210121000001_3-1_1*").build();
 
         String pattern = "MINI210121000001*";
-        final Set<String> hkeys = redisUtils.getHkeys(pattern);
+//        final Set<String> hkeys = redisUtils.getHkeys(pattern);
 
 
 //        System.out.println(keys.size());

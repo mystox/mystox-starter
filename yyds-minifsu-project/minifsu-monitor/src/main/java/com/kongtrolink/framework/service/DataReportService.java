@@ -13,6 +13,7 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,6 +32,10 @@ public class DataReportService {
     RedisUtils redisUtils;
     @Autowired
     RpcModule rpcModule;
+    @Value("${rpc.controller.hostname}")
+    private String controllerName;
+    @Value("${rpc.controller.port}")
+    private int controllerPort;
 
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
     private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
@@ -66,7 +71,48 @@ public class DataReportService {
                 e.printStackTrace();
             }
         }
-//        if()
+
+        if(!alarmList.isEmpty()){
+            String alarmMsg = createAlarmMsg(alarmList);
+            sendPayLoad("", alarmMsg, controllerName, controllerPort);
+        }
+        return result;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/1 19:56
+     * 功能描述:构造保存告警报文
+     */
+    private String createAlarmMsg(List<Alarm> alarmList){
+        ModuleMsg moduleMsg = new ModuleMsg();
+        moduleMsg.setPktType(PktType.ALARM_SAVE);
+        moduleMsg.setPayload(JSONObject.parseObject(JSON.toJSONString(alarmList)));
+        return JSON.toJSONString(moduleMsg);
+    }
+
+    /**
+     * 发送至事务处理的消息
+     *
+     * @param msgId
+     * @param payload
+     * @return
+     */
+    private JSONObject sendPayLoad(String msgId, String payload, String host, int port) {
+        JSONObject result = new JSONObject();
+        RpcNotifyProto.RpcMessage response = null;
+        try {
+            response = rpcModule.postMsg(msgId, new InetSocketAddress(host, port), payload);
+            if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
+            {
+                result.put("result", 0);
+            } else {
+                return JSONObject.parseObject(response.getPayload());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", 0);
+        }
         return result;
     }
 
