@@ -1,14 +1,17 @@
 package com.kongtrolink.framework.core.utils;
 
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+
 /**
  *
  * 基于spring和redis的redisTemplate工具类
@@ -16,14 +19,55 @@ import java.util.concurrent.TimeUnit;
  * 针对所有的Set 都是以s开头的方法                    不含通用方法
  * 针对所有的List 都是以l开头的方法
  */
-@Service
-public class RedisUtils {
-
+@Component
+public class RedisUtils
+{
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
-    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public <T> T get(String key, Class<T> clazz)
+    {
+        return JSONObject.toJavaObject((JSON) get(key), clazz);
+    }
+
+    public Object get(String key)
+    {
+        return redisTemplate.opsForValue().get(key);
+
+    }
+    public String getString(String key)
+    {
+        return stringRedisTemplate.opsForValue().get(key);
+    }
+
+    public <T> List<T> getArray(String key, Class<T> clazz)
+    {
+        return JSON.parseArray(stringRedisTemplate.opsForValue().get(key), clazz);
+    }
+
+    public <T> T getHash(String hashTable, String key, Class<T> clazz)
+    {
+        return JSONObject.toJavaObject((JSON) getHash(hashTable,key), clazz);
+    }
+
+    public Object getHash(String hashTable, String key)
+    {
+        return redisTemplate.opsForHash().get(hashTable,key);
+
+    }
+    public void deleteHash(String hashTable, String... keys)
+    {
+        redisTemplate.opsForHash().delete(hashTable, keys);
+    }
+    public void expired(String key, long time, TimeUnit unit)
+    {
+        redisTemplate.expire(key, time, TimeUnit.SECONDS);
+    }
+    public void setHash(String hashTable, String key, Object value)
+    {
+        redisTemplate.opsForHash().put(hashTable,key,value);
     }
     //=============================common============================
     /**
@@ -91,7 +135,6 @@ public class RedisUtils {
     public Object get(String key){
         return key==null?null:redisTemplate.opsForValue().get(key);
     }
-
     /**
      * 普通缓存放入
      * @param key 键
@@ -129,6 +172,8 @@ public class RedisUtils {
             return false;
         }
     }
+
+
 
     /**
      * 递增

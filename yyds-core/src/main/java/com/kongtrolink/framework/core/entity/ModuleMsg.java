@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 public class ModuleMsg
 {
     private String msgId;
-    private String pktType;
+    private String pktType; //消息通讯类型 类型参考PktType.class
     private String uuid;
     private String SN;
     private JSONObject payload;

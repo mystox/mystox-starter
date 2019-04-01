@@ -31,7 +31,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
      */
     protected RpcNotifyProto.RpcMessage messageExecute(RpcNotifyProto.RpcMessage rpcMessage)
     {
-        logger.info("message execute msgId:[{}],msgType:[{}],payload:[{}]", rpcMessage.getMsgId(),rpcMessage.getPayload());
+        logger.info("message execute msgId:[{}],payload:[{}]", rpcMessage.getMsgId(),rpcMessage.getPayload());
         String msgId = rpcMessage.getMsgId();
         String service = rpcMessage.getService();
         String method = rpcMessage.getMethod();

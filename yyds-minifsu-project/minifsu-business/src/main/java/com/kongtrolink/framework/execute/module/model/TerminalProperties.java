@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.model;
 
+
 /**
  * Created by mystoxlol on 2019/3/28, 15:40.
  * company: kongtrolink
@@ -17,7 +18,7 @@ public class TerminalProperties {
     private String wmVendor;
     private String imsi;
     private String imei;
-    private String signalStrength;
+    private Integer signalStrength;
     private String engineVer;
     private String adapterVer;
 
@@ -86,11 +87,11 @@ public class TerminalProperties {
         this.imei = imei;
     }
 
-    public String getSignalStrength() {
+    public Integer getSignalStrength() {
         return signalStrength;
     }
 
-    public void setSignalStrength(String signalStrength) {
+    public void setSignalStrength(Integer signalStrength) {
         this.signalStrength = signalStrength;
     }
 

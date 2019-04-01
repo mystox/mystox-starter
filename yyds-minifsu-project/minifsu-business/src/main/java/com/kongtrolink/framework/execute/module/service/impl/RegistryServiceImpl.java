@@ -11,6 +11,8 @@ import com.kongtrolink.framework.execute.module.model.Order;
 import com.kongtrolink.framework.execute.module.model.Terminal;
 import com.kongtrolink.framework.execute.module.model.TerminalProperties;
 import com.kongtrolink.framework.execute.module.service.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ import java.sql.Date;
 @Service
 public class RegistryServiceImpl implements RegistryService {
 
-
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Value("${register.delay:300}")
     private int delay;
     @Value("${server.bindIp}")
@@ -52,7 +54,8 @@ public class RegistryServiceImpl implements RegistryService {
             Order order = terminalDao.findOrderByBid(bid);
             String bip = order.getBIP();
             //获取redis 信息
-            JSONObject value = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, sn, JSONObject.class);
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+            JSONObject value = redisUtils.get(key, JSONObject.class);
             //删除所有其他信息
             if (value != null) {
                 redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
@@ -60,11 +63,13 @@ public class RegistryServiceImpl implements RegistryService {
 
                 value.put("BIP", bip);
                 value.put("STATUS", 1);
-                redisUtils.setHash(RedisHashTable.COMMUNICATION_HASH, sn, value);
+                redisUtils.set(key, value);
 
                 result.put("result", 1);
                 result.put("time", System.currentTimeMillis() / 1000);
                 return result;
+            } else {
+                logger.error("不存在通讯key[{}]的值",key);
             }
         } else if (!otherLogic()) {
             result.put("result", 0);
@@ -94,7 +99,8 @@ public class RegistryServiceImpl implements RegistryService {
         JSONObject deviceList = moduleMsg.getPayload();
         JSONObject result = new JSONObject();
         //获取redis 信息
-        JSONObject value = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, sn, JSONObject.class);
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
         if (value != null && (int) value.get("STATUS") == 1) {
             redisUtils.setHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, deviceList.get("devList"));
             result.put("result", 1);
@@ -135,7 +141,7 @@ public class RegistryServiceImpl implements RegistryService {
         terminalProperties.setImei((String) payload.get("imsi"));
         terminalProperties.setImei((String) payload.get("imei"));
         terminalProperties.setEngineVer((String) payload.get("engineVer"));
-        terminalProperties.setSignalStrength((String) payload.get("signalStrength"));
+        terminalProperties.setSignalStrength((Integer) payload.get("signalStrength"));
         terminalProperties.setAdapterVer((String) payload.get("adapterVer"));
         terminalDao.saveTerminal(terminalProperties);
         JSONObject result = new JSONObject();

@@ -1,7 +1,7 @@
 
 logging:
   level:
-   root: info
+   root: debug
    org.apache.hadoop.util.Shell: OFF
 
 spring:
@@ -44,7 +44,7 @@ rpc:
     hostname: 172.16.6.39
     port: 17700
   monitor:
-    hostname: 172.16.6.39
+    hostname: 172.16.6.199
     port: 18810
   business:
     hostname: 172.16.6.39
