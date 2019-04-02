@@ -1,6 +1,8 @@
 package com.kongtrolink.framework;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
@@ -140,14 +142,14 @@ public class MinifsuControllerApplicationTests {
                 registerNet.put("payload", deviceMsg);
                 result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
                 System.out.println("设备信息上传结果: " + result);
-               /* if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
+                if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
                     //4包 数据包
                     String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
                     registerNet.put("payload", dataMsg);
         result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
         System.out.println("数据包信息上传结果: " + result);
 
-                }*/
+                }
             }
         }
 
@@ -156,7 +158,7 @@ public class MinifsuControllerApplicationTests {
 @Test
     public void dataSend() {
     JSONObject registerNet = new JSONObject();
-    String uuid = "b57a90b9-4559-44d8-8a6b-ee16ccad6393";
+    String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
     registerNet.put("uuid", uuid);
     registerNet.put("gip", "172.16.6.39:17700");
     registerNet.put("pktType", PktType.CONNECT);
@@ -211,6 +213,14 @@ public class MinifsuControllerApplicationTests {
     public static void main(String[] args) {
         String s = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"255-0-0-0-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
 
+        List<String> a = new ArrayList<>();
+        a.add("123");
+        a.add("abc");
+
+        ModuleMsg msg = new ModuleMsg();
+        String arr = JSONObject.toJSONString(a);
+        JSON.parseObject(arr);
+        System.out.println(JSON.parseObject(arr));
         JSONObject jsonObject = JSONObject.parseObject(s);
         System.out.println(JSONObject.parseObject(s));
 //        System.out.println(jsonObject.get("data"));

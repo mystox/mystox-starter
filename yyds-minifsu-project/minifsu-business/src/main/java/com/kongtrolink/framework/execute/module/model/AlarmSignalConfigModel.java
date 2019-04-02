@@ -8,7 +8,7 @@ package com.kongtrolink.framework.execute.module.model;
  */
 public class AlarmSignalConfigModel {
     private String id;
-    private String monitorId; //告警点id
+    private String alarmId; //告警点id
     private Integer type; //告警点类型
     private String coId;//关联数据点ID
     private Integer coType; //关联数据点类型
@@ -31,12 +31,12 @@ public class AlarmSignalConfigModel {
         this.id = id;
     }
 
-    public String getMonitorId() {
-        return monitorId;
+    public String getAlarmId() {
+        return alarmId;
     }
 
-    public void setMonitorId(String monitorId) {
-        this.monitorId = monitorId;
+    public void setAlarmId(String alarmId) {
+        this.alarmId = alarmId;
     }
 
     public Integer getType() {

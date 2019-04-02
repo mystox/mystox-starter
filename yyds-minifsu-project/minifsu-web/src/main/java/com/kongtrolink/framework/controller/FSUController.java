@@ -145,7 +145,7 @@ public class FSUController
 
     }
 
-    @RequestMapping("/getTierName")
+  /*  @RequestMapping("/getTierName")
     public JsonResult getTierName(String fsuCode)
     {
 
@@ -185,7 +185,7 @@ public class FSUController
         }
             return new JsonResult("fsuCode错误",false);
 
-    }
+    }*/
 
 
     @RequestMapping("/getFsu")

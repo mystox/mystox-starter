@@ -2,7 +2,6 @@ package com.kongtrolink.framework.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.ControllerInstance;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.YwclMessage;
@@ -54,7 +53,7 @@ public class FsuServiceImpl implements FsuService
 //        Fsu fsu = fsuDao.findByFsuId(fsuId);
         String fsuCode = (String) requestBody.get("fsu_id");
 
-        if (fsuCode != null)
+        /*if (fsuCode != null)
         {
             String code = fsuCode;
             String tierCode = StringUtils.substring(code, 0, 6);
@@ -86,7 +85,7 @@ public class FsuServiceImpl implements FsuService
                 }
                 requestBody.put("tierName", sb.toString());
             }
-        }
+        }*/
 //        BeanUtils.copyProperties(requestBody, fsu);
 //        fsuDao.saveFsu(fsu);
 

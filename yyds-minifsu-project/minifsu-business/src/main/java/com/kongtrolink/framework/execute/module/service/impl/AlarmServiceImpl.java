@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.execute.module.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.core.entity.AlarmSignal;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.execute.module.dao.AlarmDao;
 import com.kongtrolink.framework.execute.module.service.AlarmService;
@@ -31,11 +31,15 @@ public class AlarmServiceImpl implements AlarmService {
      * 功能描述:根据告警点id添加或修改告警
      */
     @Override
-    public void AddOrUpdateByAlarmId(ModuleMsg moduleMsg) {
+    public JSONObject AddOrUpdateByAlarmId(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
-        List<Alarm> alarms = JSONArray.parseArray(payload.toJSONString(), Alarm.class);
+
+        List<Alarm> alarms = JSONArray.parseArray(JSON.toJSONString(payload.get("list")), Alarm.class);
         for(Alarm alarm : alarms){
             alarmDao.AddOrUpdateByAlarmId(alarm);
         }
+        JSONObject object = new JSONObject();
+        object.put("result", 1);
+        return object;
     }
 }

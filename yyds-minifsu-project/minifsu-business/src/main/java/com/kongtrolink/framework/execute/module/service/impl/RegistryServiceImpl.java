@@ -82,8 +82,10 @@ public class RegistryServiceImpl implements RegistryService {
                 redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
                 Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
 //                redisUtils
-                if (keys!=null && keys.size()>0)
-                redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, (String[]) keys.toArray());
+                if (keys!=null && keys.size()>0) {
+                    String[] s = new String[keys.size()];
+                    redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+                }
 
                 value.put("BIP", bip);
                 value.put("STATUS", 1);
@@ -281,7 +283,7 @@ public class RegistryServiceImpl implements RegistryService {
         terminalProperties.setNwType((String) payload.get("nwType"));
         terminalProperties.setWmType((String) payload.get("wmType"));
         terminalProperties.setWmVendor((String) payload.get("wmVendor"));
-        terminalProperties.setImei((String) payload.get("imsi"));
+        terminalProperties.setImsi((String) payload.get("imsi"));
         terminalProperties.setImei((String) payload.get("imei"));
         terminalProperties.setEngineVer((String) payload.get("engineVer"));
         terminalProperties.setSignalStrength((Integer) payload.get("signalStrength"));

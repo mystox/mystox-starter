@@ -72,7 +72,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             JSONObject jsonObject = registryService.saveCleanupLog(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.ALARM_SAVE.equals(pktType)) {
-            alarmService.AddOrUpdateByAlarmId(moduleMsg);
+            JSONObject jsonObject = alarmService.AddOrUpdateByAlarmId(moduleMsg);
         }
 
 
