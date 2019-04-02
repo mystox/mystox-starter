@@ -21,6 +21,16 @@ public class JsonSignal {
     //信号点id， 告警
     private Map<String, Alarm> alarmMap;
 
+    private List<Alarm> alarmList;
+
+    public List<Alarm> getAlarmList() {
+        return alarmList;
+    }
+
+    public void setAlarmList(List<Alarm> alarmList) {
+        this.alarmList = alarmList;
+    }
+
     public JsonSignal() {
     }
 
