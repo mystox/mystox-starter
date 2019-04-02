@@ -303,11 +303,16 @@ public class RegistryServiceImpl implements RegistryService {
         JSONObject msgPayload = moduleMsg.getPayload();
         String uuid = moduleMsg.getUuid();
         String sn = (String) msgPayload.get("SN");
-        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+       /* String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         redisUtils.del(key);
         redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
         redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
-
+        Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
+//                redisUtils
+        if (keys!=null && keys.size()>0) {
+            String[] s = new String[keys.size()];
+            redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+        }*/
         //日志记录
         Log log = new Log();
         log.setMsgType(moduleMsg.getPktType());
