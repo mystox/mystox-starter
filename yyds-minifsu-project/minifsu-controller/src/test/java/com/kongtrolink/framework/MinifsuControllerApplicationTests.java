@@ -106,13 +106,22 @@ public class MinifsuControllerApplicationTests {
         scanParams.match("MINI210121000001*");
         ScanOptions scanOptions = ScanOptions.scanOptions().match("MINI210121000001_3-1_1*").build();
 
-        String pattern = "MINI210121000001*";
+        String pattern = "communication_hash*";
 //        final Set<String> hkeys = redisUtils.getHkeys(pattern);
+//        Set<String> keys = redisTemplate.keys(pattern);
+//        System.out.println(keys);
 
+
+        Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001" + "*");
+        System.out.println(keys);
+        if (keys != null && keys.size() > 0) {
+            String[] s = new String[keys.size()];
+            redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+        }
 
 //        System.out.println(keys.size());
-        redisTemplate.opsForHash().delete(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001*");
-        System.out.println(r);
+//        redisTemplate.opsForHash().delete(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001*");
+//        System.out.println(r);
 //		List<TerminalMsg> r = JSONArray.
     }
 
@@ -178,6 +187,7 @@ public class MinifsuControllerApplicationTests {
         String registerMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000,\"SN\":\"MINI210121000001\"}";
         JSONObject registerNet = new JSONObject();
         String uuid = UUID.randomUUID().toString();
+        uuid = "98485229-8b8d-40f5-a3a5-50ee876ba450";
         registerNet.put("uuid", uuid);
         registerNet.put("gip", "172.16.6.39:17700");
         registerNet.put("pktType", PktType.CLEANUP);
