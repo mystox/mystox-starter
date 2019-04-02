@@ -62,14 +62,14 @@ public class DataReportService {
         handlerAlarm(fsu, curDate, alarmList);
         if(!fsu.getData().isEmpty()){
             redisUtils.hset(sn__alarm_hash, fsu.getSN(), JSON.toJSONString(fsu));
-            //上报告警
-            InetSocketAddress addr = new InetSocketAddress("localhost",17777);
-            try{
-                String id = UUID.randomUUID().toString();
-                rpcModule.postMsg(id,addr,"I'm client mystox message...h暗号");
-            } catch (IOException e){
-                e.printStackTrace();
-            }
+//            //上报告警
+//            InetSocketAddress addr = new InetSocketAddress("localhost",17777);
+//            try{
+//                String id = UUID.randomUUID().toString();
+//                rpcModule.postMsg(id,addr,"I'm client mystox message...h暗号");
+//            } catch (IOException e){
+//                e.printStackTrace();
+//            }
         }
 
         if(!alarmList.isEmpty()){
@@ -86,8 +86,11 @@ public class DataReportService {
      */
     private String createAlarmMsg(List<Alarm> alarmList){
         ModuleMsg moduleMsg = new ModuleMsg();
+        JSONObject o = new JSONObject();
+        o.put("list", alarmList);
         moduleMsg.setPktType(PktType.ALARM_SAVE);
-        moduleMsg.setPayload(JSONObject.parseObject(JSON.toJSONString(alarmList)));
+        //强转
+        moduleMsg.setPayload(o);
         return JSON.toJSONString(moduleMsg);
     }
 

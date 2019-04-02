@@ -34,18 +34,6 @@ executor:
 rpc:
   client:
     timeout: 200000
-  net-GW:
-    hostname: 172.16.6.39
-    port: 17700
-  monitor:
-    hostname: 172.16.6.199
-    port: 18810
-  business:
-    hostname: 172.16.6.39
-    port: 18830
-  tower:
-    hostname: 172.16.6.39
-    port: 18881
   controller:
-    hostname: 172.16.2.36
-    port: 18882
+    hostname: 172.16.6.39
+    port: 18800
