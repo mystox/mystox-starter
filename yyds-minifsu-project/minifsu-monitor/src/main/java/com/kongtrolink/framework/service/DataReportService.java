@@ -219,6 +219,7 @@ public class DataReportService {
             Alarm alarm = new Alarm();
             alarm.setLink((byte)1);
             alarm.setValue(signal.getV());
+            alarm.setAlarmId(alarmSignal.getAlarmId());
             alarm.setUpdateTime(curDate);
             return alarm;
         }
