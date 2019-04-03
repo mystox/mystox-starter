@@ -24,7 +24,7 @@ public enum MqttRecvTopic {
     REPORT_BATTERY_EVENT("PubEventSaved"),          // 蓄电池充放电事件推送【仅蓄电池模块】
     REPORT_BATTERY_FAULT("FaultReportToScloud"),    // BBDS 故障诊断推送【仅蓄电池模块】
 //    REPORT_FSU_LOGIN("UpdateFSULoginSCloud"),       // FSU 注册更新推送【仅C接口模块】
-    REPORT_FSU_LOGOUT_ALARM("FSULogoutAlarm"),       // FSU 离线告警推送【TODO 后续更改至Monitor程序】
+    REPORT_FSU_LOGOUT_ALARM("FSULogoutAlarm"),       // FSU 离线告警推送
     ;
     
     private MqttRecvTopic(String topic) {

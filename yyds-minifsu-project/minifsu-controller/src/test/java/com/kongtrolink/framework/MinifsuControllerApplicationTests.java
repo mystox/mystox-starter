@@ -164,19 +164,20 @@ public class MinifsuControllerApplicationTests {
 
 
     }
-@Test
+
+    @Test
     public void dataSend() {
-    JSONObject registerNet = new JSONObject();
-    String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
-    registerNet.put("uuid", uuid);
-    registerNet.put("gip", "172.16.6.39:17700");
-    registerNet.put("pktType", PktType.CONNECT);
-    //4包 数据包
+        JSONObject registerNet = new JSONObject();
+        String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
+        registerNet.put("uuid", uuid);
+        registerNet.put("gip", "172.16.6.39:17700");
+        registerNet.put("pktType", PktType.CONNECT);
+        //4包 数据包
 //    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}}]}}\n";
-    registerNet.put("payload", dataMsg);
-    JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
-    System.out.println("数据包信息上传结果: " + result);
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}}]}}\n";
+        registerNet.put("payload", dataMsg);
+        JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("数据包信息上传结果: " + result);
     }
 
 

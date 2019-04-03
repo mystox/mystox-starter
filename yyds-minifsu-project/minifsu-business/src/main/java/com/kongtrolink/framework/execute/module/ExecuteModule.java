@@ -9,6 +9,7 @@ import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.execute.module.service.AlarmService;
 import com.kongtrolink.framework.execute.module.service.FsuService;
+import com.kongtrolink.framework.execute.module.service.LogService;
 import com.kongtrolink.framework.execute.module.service.RegistryService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Autowired
     AlarmService alarmService;
+    @Autowired
+    LogService logService;
 
     @Override
     public boolean init() {
@@ -55,7 +58,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload) {
-        //todo
         String result = "";
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
@@ -68,11 +70,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (TerminalPktType.DEV_LIST.getValue().equals(pktType)) { // 设备上报
             JSONObject jsonObject = registryService.registerDevices(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.CLEANUP.equals(pktType)) { // 设备上报// 终端信息上报设备上报
+        } else if (PktType.CLEANUP.equals(pktType)) { // 注销
             JSONObject jsonObject = registryService.saveCleanupLog(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.ALARM_SAVE.equals(pktType)) {
+        } else if (PktType.ALARM_SAVE.equals(pktType)) { //告警保存
             JSONObject jsonObject = alarmService.AddOrUpdateByAlarmId(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.LOG_SAVE.equals(pktType)) { //日志保存
+            JSONObject jsonObject = logService.saveLog(moduleMsg);
             result = jsonObject.toJSONString();
         }
 
@@ -92,7 +97,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                         result = JSONObject.toJSONString(fsu);
                     break;
                 case PktType.CHECK_FSU:
-                    //todo
                     break;
 
             }
