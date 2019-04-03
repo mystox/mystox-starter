@@ -128,13 +128,13 @@ public final class RpcNotifyProto {
   }
 
   /**
-   * Protobuf enum {@code cass.utils.ResponseType}
+   * Protobuf enum {@code cass.utils.PayloadType}
    *
    * <pre>
-   *消息类型
+   *消息流
    * </pre>
    */
-  public enum ResponseType
+  public enum PayloadType
       implements com.google.protobuf.ProtocolMessageEnum {
     /**
      * <code>JSON = 0;</code>
@@ -190,7 +190,7 @@ public final class RpcNotifyProto {
 
     public final int getNumber() { return value; }
 
-    public static ResponseType valueOf(int value) {
+    public static PayloadType valueOf(int value) {
       switch (value) {
         case 0: return JSON;
         case 1: return STRING;
@@ -199,15 +199,15 @@ public final class RpcNotifyProto {
       }
     }
 
-    public static com.google.protobuf.Internal.EnumLiteMap<ResponseType>
+    public static com.google.protobuf.Internal.EnumLiteMap<PayloadType>
         internalGetValueMap() {
       return internalValueMap;
     }
-    private static com.google.protobuf.Internal.EnumLiteMap<ResponseType>
+    private static com.google.protobuf.Internal.EnumLiteMap<PayloadType>
         internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<ResponseType>() {
-            public ResponseType findValueByNumber(int number) {
-              return ResponseType.valueOf(number);
+          new com.google.protobuf.Internal.EnumLiteMap<PayloadType>() {
+            public PayloadType findValueByNumber(int number) {
+              return PayloadType.valueOf(number);
             }
           };
 
@@ -224,9 +224,9 @@ public final class RpcNotifyProto {
       return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.getDescriptor().getEnumTypes().get(1);
     }
 
-    private static final ResponseType[] VALUES = values();
+    private static final PayloadType[] VALUES = values();
 
-    public static ResponseType valueOf(
+    public static PayloadType valueOf(
         com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
         throw new java.lang.IllegalArgumentException(
@@ -238,12 +238,12 @@ public final class RpcNotifyProto {
     private final int index;
     private final int value;
 
-    private ResponseType(int index, int value) {
+    private PayloadType(int index, int value) {
       this.index = index;
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:cass.utils.ResponseType)
+    // @@protoc_insertion_point(enum_scope:cass.utils.PayloadType)
   }
 
   /**
@@ -531,6 +531,24 @@ public final class RpcNotifyProto {
     com.google.protobuf.ByteString
         getMethodBytes();
 
+    // required .cass.utils.PayloadType payloadType = 7;
+    /**
+     * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+     *
+     * <pre>
+     *消息流类型
+     * </pre>
+     */
+    boolean hasPayloadType();
+    /**
+     * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+     *
+     * <pre>
+     *消息流类型
+     * </pre>
+     */
+    com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType();
+
     // optional string payload = 5;
     /**
      * <code>optional string payload = 5;</code>
@@ -558,6 +576,24 @@ public final class RpcNotifyProto {
     com.google.protobuf.ByteString
         getPayloadBytes();
 
+    // optional bytes bytesPayload = 8;
+    /**
+     * <code>optional bytes bytesPayload = 8;</code>
+     *
+     * <pre>
+     *流报文
+     * </pre>
+     */
+    boolean hasBytesPayload();
+    /**
+     * <code>optional bytes bytesPayload = 8;</code>
+     *
+     * <pre>
+     *流报文
+     * </pre>
+     */
+    com.google.protobuf.ByteString getBytesPayload();
+
     // optional .cass.utils.ErrorCode error = 6;
     /**
      * <code>optional .cass.utils.ErrorCode error = 6;</code>
@@ -575,42 +611,6 @@ public final class RpcNotifyProto {
      * </pre>
      */
     com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode getError();
-
-    // optional .cass.utils.ResponseType respType = 7;
-    /**
-     * <code>optional .cass.utils.ResponseType respType = 7;</code>
-     *
-     * <pre>
-     *响应类型
-     * </pre>
-     */
-    boolean hasRespType();
-    /**
-     * <code>optional .cass.utils.ResponseType respType = 7;</code>
-     *
-     * <pre>
-     *响应类型
-     * </pre>
-     */
-    com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType getRespType();
-
-    // optional bytes bytesResponse = 8;
-    /**
-     * <code>optional bytes bytesResponse = 8;</code>
-     *
-     * <pre>
-     *流报文
-     * </pre>
-     */
-    boolean hasBytesResponse();
-    /**
-     * <code>optional bytes bytesResponse = 8;</code>
-     *
-     * <pre>
-     *流报文
-     * </pre>
-     */
-    com.google.protobuf.ByteString getBytesResponse();
   }
   /**
    * Protobuf type {@code cass.utils.RpcMessage}
@@ -690,7 +690,7 @@ public final class RpcNotifyProto {
               break;
             }
             case 42: {
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000020;
               payload_ = input.readBytes();
               break;
             }
@@ -700,25 +700,25 @@ public final class RpcNotifyProto {
               if (value == null) {
                 unknownFields.mergeVarintField(6, rawValue);
               } else {
-                bitField0_ |= 0x00000020;
+                bitField0_ |= 0x00000080;
                 error_ = value;
               }
               break;
             }
             case 56: {
               int rawValue = input.readEnum();
-              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType value = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType.valueOf(rawValue);
+              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType value = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(7, rawValue);
               } else {
-                bitField0_ |= 0x00000040;
-                respType_ = value;
+                bitField0_ |= 0x00000010;
+                payloadType_ = value;
               }
               break;
             }
             case 66: {
-              bitField0_ |= 0x00000080;
-              bytesResponse_ = input.readBytes();
+              bitField0_ |= 0x00000040;
+              bytesPayload_ = input.readBytes();
               break;
             }
           }
@@ -950,6 +950,30 @@ public final class RpcNotifyProto {
       }
     }
 
+    // required .cass.utils.PayloadType payloadType = 7;
+    public static final int PAYLOADTYPE_FIELD_NUMBER = 7;
+    private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType payloadType_;
+    /**
+     * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+     *
+     * <pre>
+     *消息流类型
+     * </pre>
+     */
+    public boolean hasPayloadType() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+     *
+     * <pre>
+     *消息流类型
+     * </pre>
+     */
+    public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType() {
+      return payloadType_;
+    }
+
     // optional string payload = 5;
     public static final int PAYLOAD_FIELD_NUMBER = 5;
     private java.lang.Object payload_;
@@ -961,7 +985,7 @@ public final class RpcNotifyProto {
      * </pre>
      */
     public boolean hasPayload() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
      * <code>optional string payload = 5;</code>
@@ -1005,6 +1029,30 @@ public final class RpcNotifyProto {
       }
     }
 
+    // optional bytes bytesPayload = 8;
+    public static final int BYTESPAYLOAD_FIELD_NUMBER = 8;
+    private com.google.protobuf.ByteString bytesPayload_;
+    /**
+     * <code>optional bytes bytesPayload = 8;</code>
+     *
+     * <pre>
+     *流报文
+     * </pre>
+     */
+    public boolean hasBytesPayload() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bytes bytesPayload = 8;</code>
+     *
+     * <pre>
+     *流报文
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getBytesPayload() {
+      return bytesPayload_;
+    }
+
     // optional .cass.utils.ErrorCode error = 6;
     public static final int ERROR_FIELD_NUMBER = 6;
     private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode error_;
@@ -1016,7 +1064,7 @@ public final class RpcNotifyProto {
      * </pre>
      */
     public boolean hasError() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
+      return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
      * <code>optional .cass.utils.ErrorCode error = 6;</code>
@@ -1029,63 +1077,15 @@ public final class RpcNotifyProto {
       return error_;
     }
 
-    // optional .cass.utils.ResponseType respType = 7;
-    public static final int RESPTYPE_FIELD_NUMBER = 7;
-    private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType respType_;
-    /**
-     * <code>optional .cass.utils.ResponseType respType = 7;</code>
-     *
-     * <pre>
-     *响应类型
-     * </pre>
-     */
-    public boolean hasRespType() {
-      return ((bitField0_ & 0x00000040) == 0x00000040);
-    }
-    /**
-     * <code>optional .cass.utils.ResponseType respType = 7;</code>
-     *
-     * <pre>
-     *响应类型
-     * </pre>
-     */
-    public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType getRespType() {
-      return respType_;
-    }
-
-    // optional bytes bytesResponse = 8;
-    public static final int BYTESRESPONSE_FIELD_NUMBER = 8;
-    private com.google.protobuf.ByteString bytesResponse_;
-    /**
-     * <code>optional bytes bytesResponse = 8;</code>
-     *
-     * <pre>
-     *流报文
-     * </pre>
-     */
-    public boolean hasBytesResponse() {
-      return ((bitField0_ & 0x00000080) == 0x00000080);
-    }
-    /**
-     * <code>optional bytes bytesResponse = 8;</code>
-     *
-     * <pre>
-     *流报文
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getBytesResponse() {
-      return bytesResponse_;
-    }
-
     private void initFields() {
       type_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.REQUEST;
       msgId_ = "";
       service_ = "";
       method_ = "";
+      payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
       payload_ = "";
+      bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
       error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
-      respType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType.JSON;
-      bytesResponse_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1093,6 +1093,10 @@ public final class RpcNotifyProto {
       if (isInitialized != -1) return isInitialized == 1;
 
       if (!hasType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasPayloadType()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -1115,17 +1119,17 @@ public final class RpcNotifyProto {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getMethodBytes());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeBytes(5, getPayloadBytes());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeEnum(6, error_.getNumber());
       }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeEnum(7, respType_.getNumber());
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeEnum(7, payloadType_.getNumber());
       }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        output.writeBytes(8, bytesResponse_);
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBytes(8, bytesPayload_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1152,21 +1156,21 @@ public final class RpcNotifyProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getMethodBytes());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(5, getPayloadBytes());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, error_.getNumber());
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(7, payloadType_.getNumber());
+      }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(7, respType_.getNumber());
-      }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(8, bytesResponse_);
+          .computeBytesSize(8, bytesPayload_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1211,25 +1215,25 @@ public final class RpcNotifyProto {
         result = result && getMethod()
             .equals(other.getMethod());
       }
+      result = result && (hasPayloadType() == other.hasPayloadType());
+      if (hasPayloadType()) {
+        result = result &&
+            (getPayloadType() == other.getPayloadType());
+      }
       result = result && (hasPayload() == other.hasPayload());
       if (hasPayload()) {
         result = result && getPayload()
             .equals(other.getPayload());
       }
+      result = result && (hasBytesPayload() == other.hasBytesPayload());
+      if (hasBytesPayload()) {
+        result = result && getBytesPayload()
+            .equals(other.getBytesPayload());
+      }
       result = result && (hasError() == other.hasError());
       if (hasError()) {
         result = result &&
             (getError() == other.getError());
-      }
-      result = result && (hasRespType() == other.hasRespType());
-      if (hasRespType()) {
-        result = result &&
-            (getRespType() == other.getRespType());
-      }
-      result = result && (hasBytesResponse() == other.hasBytesResponse());
-      if (hasBytesResponse()) {
-        result = result && getBytesResponse()
-            .equals(other.getBytesResponse());
       }
       result = result &&
           getUnknownFields().equals(other.getUnknownFields());
@@ -1260,21 +1264,21 @@ public final class RpcNotifyProto {
         hash = (37 * hash) + METHOD_FIELD_NUMBER;
         hash = (53 * hash) + getMethod().hashCode();
       }
+      if (hasPayloadType()) {
+        hash = (37 * hash) + PAYLOADTYPE_FIELD_NUMBER;
+        hash = (53 * hash) + hashEnum(getPayloadType());
+      }
       if (hasPayload()) {
         hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
         hash = (53 * hash) + getPayload().hashCode();
       }
+      if (hasBytesPayload()) {
+        hash = (37 * hash) + BYTESPAYLOAD_FIELD_NUMBER;
+        hash = (53 * hash) + getBytesPayload().hashCode();
+      }
       if (hasError()) {
         hash = (37 * hash) + ERROR_FIELD_NUMBER;
         hash = (53 * hash) + hashEnum(getError());
-      }
-      if (hasRespType()) {
-        hash = (37 * hash) + RESPTYPE_FIELD_NUMBER;
-        hash = (53 * hash) + hashEnum(getRespType());
-      }
-      if (hasBytesResponse()) {
-        hash = (37 * hash) + BYTESRESPONSE_FIELD_NUMBER;
-        hash = (53 * hash) + getBytesResponse().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -1393,13 +1397,13 @@ public final class RpcNotifyProto {
         bitField0_ = (bitField0_ & ~0x00000004);
         method_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
-        payload_ = "";
+        payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
         bitField0_ = (bitField0_ & ~0x00000010);
-        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
+        payload_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
-        respType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType.JSON;
+        bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000040);
-        bytesResponse_ = com.google.protobuf.ByteString.EMPTY;
+        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
         bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
@@ -1448,19 +1452,19 @@ public final class RpcNotifyProto {
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.payload_ = payload_;
+        result.payloadType_ = payloadType_;
         if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
           to_bitField0_ |= 0x00000020;
         }
-        result.error_ = error_;
+        result.payload_ = payload_;
         if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
           to_bitField0_ |= 0x00000040;
         }
-        result.respType_ = respType_;
+        result.bytesPayload_ = bytesPayload_;
         if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
           to_bitField0_ |= 0x00000080;
         }
-        result.bytesResponse_ = bytesResponse_;
+        result.error_ = error_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1495,19 +1499,19 @@ public final class RpcNotifyProto {
           method_ = other.method_;
           onChanged();
         }
+        if (other.hasPayloadType()) {
+          setPayloadType(other.getPayloadType());
+        }
         if (other.hasPayload()) {
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
           payload_ = other.payload_;
           onChanged();
         }
+        if (other.hasBytesPayload()) {
+          setBytesPayload(other.getBytesPayload());
+        }
         if (other.hasError()) {
           setError(other.getError());
-        }
-        if (other.hasRespType()) {
-          setRespType(other.getRespType());
-        }
-        if (other.hasBytesResponse()) {
-          setBytesResponse(other.getBytesResponse());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1515,6 +1519,10 @@ public final class RpcNotifyProto {
 
       public final boolean isInitialized() {
         if (!hasType()) {
+          
+          return false;
+        }
+        if (!hasPayloadType()) {
           
           return false;
         }
@@ -1886,6 +1894,58 @@ public final class RpcNotifyProto {
         return this;
       }
 
+      // required .cass.utils.PayloadType payloadType = 7;
+      private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+      /**
+       * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+       *
+       * <pre>
+       *消息流类型
+       * </pre>
+       */
+      public boolean hasPayloadType() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+       *
+       * <pre>
+       *消息流类型
+       * </pre>
+       */
+      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType() {
+        return payloadType_;
+      }
+      /**
+       * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+       *
+       * <pre>
+       *消息流类型
+       * </pre>
+       */
+      public Builder setPayloadType(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000010;
+        payloadType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .cass.utils.PayloadType payloadType = 7;</code>
+       *
+       * <pre>
+       *消息流类型
+       * </pre>
+       */
+      public Builder clearPayloadType() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+        onChanged();
+        return this;
+      }
+
       // optional string payload = 5;
       private java.lang.Object payload_ = "";
       /**
@@ -1896,7 +1956,7 @@ public final class RpcNotifyProto {
        * </pre>
        */
       public boolean hasPayload() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
        * <code>optional string payload = 5;</code>
@@ -1948,7 +2008,7 @@ public final class RpcNotifyProto {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000010;
+  bitField0_ |= 0x00000020;
         payload_ = value;
         onChanged();
         return this;
@@ -1961,7 +2021,7 @@ public final class RpcNotifyProto {
        * </pre>
        */
       public Builder clearPayload() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000020);
         payload_ = getDefaultInstance().getPayload();
         onChanged();
         return this;
@@ -1978,8 +2038,60 @@ public final class RpcNotifyProto {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000010;
+  bitField0_ |= 0x00000020;
         payload_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes bytesPayload = 8;
+      private com.google.protobuf.ByteString bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes bytesPayload = 8;</code>
+       *
+       * <pre>
+       *流报文
+       * </pre>
+       */
+      public boolean hasBytesPayload() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bytes bytesPayload = 8;</code>
+       *
+       * <pre>
+       *流报文
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getBytesPayload() {
+        return bytesPayload_;
+      }
+      /**
+       * <code>optional bytes bytesPayload = 8;</code>
+       *
+       * <pre>
+       *流报文
+       * </pre>
+       */
+      public Builder setBytesPayload(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        bytesPayload_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes bytesPayload = 8;</code>
+       *
+       * <pre>
+       *流报文
+       * </pre>
+       */
+      public Builder clearBytesPayload() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        bytesPayload_ = getDefaultInstance().getBytesPayload();
         onChanged();
         return this;
       }
@@ -1994,7 +2106,7 @@ public final class RpcNotifyProto {
        * </pre>
        */
       public boolean hasError() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
        * <code>optional .cass.utils.ErrorCode error = 6;</code>
@@ -2017,7 +2129,7 @@ public final class RpcNotifyProto {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000080;
         error_ = value;
         onChanged();
         return this;
@@ -2030,112 +2142,8 @@ public final class RpcNotifyProto {
        * </pre>
        */
       public Builder clearError() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
-        onChanged();
-        return this;
-      }
-
-      // optional .cass.utils.ResponseType respType = 7;
-      private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType respType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType.JSON;
-      /**
-       * <code>optional .cass.utils.ResponseType respType = 7;</code>
-       *
-       * <pre>
-       *响应类型
-       * </pre>
-       */
-      public boolean hasRespType() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
-      }
-      /**
-       * <code>optional .cass.utils.ResponseType respType = 7;</code>
-       *
-       * <pre>
-       *响应类型
-       * </pre>
-       */
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType getRespType() {
-        return respType_;
-      }
-      /**
-       * <code>optional .cass.utils.ResponseType respType = 7;</code>
-       *
-       * <pre>
-       *响应类型
-       * </pre>
-       */
-      public Builder setRespType(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000040;
-        respType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional .cass.utils.ResponseType respType = 7;</code>
-       *
-       * <pre>
-       *响应类型
-       * </pre>
-       */
-      public Builder clearRespType() {
-        bitField0_ = (bitField0_ & ~0x00000040);
-        respType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ResponseType.JSON;
-        onChanged();
-        return this;
-      }
-
-      // optional bytes bytesResponse = 8;
-      private com.google.protobuf.ByteString bytesResponse_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes bytesResponse = 8;</code>
-       *
-       * <pre>
-       *流报文
-       * </pre>
-       */
-      public boolean hasBytesResponse() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
-      }
-      /**
-       * <code>optional bytes bytesResponse = 8;</code>
-       *
-       * <pre>
-       *流报文
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getBytesResponse() {
-        return bytesResponse_;
-      }
-      /**
-       * <code>optional bytes bytesResponse = 8;</code>
-       *
-       * <pre>
-       *流报文
-       * </pre>
-       */
-      public Builder setBytesResponse(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
-        bytesResponse_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes bytesResponse = 8;</code>
-       *
-       * <pre>
-       *流报文
-       * </pre>
-       */
-      public Builder clearBytesResponse() {
         bitField0_ = (bitField0_ & ~0x00000080);
-        bytesResponse_ = getDefaultInstance().getBytesResponse();
+        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
         onChanged();
         return this;
       }
@@ -2402,14 +2410,14 @@ public final class RpcNotifyProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\034minifsu_notify_service.proto\022\ncass.uti" +
-      "ls\"\335\001\n\nRpcMessage\022%\n\004type\030\001 \002(\0162\027.cass.u" +
+      "ls\"\336\001\n\nRpcMessage\022%\n\004type\030\001 \002(\0162\027.cass.u" +
       "tils.MessageType\022\r\n\005msgId\030\002 \001(\t\022\017\n\007servi" +
-      "ce\030\003 \001(\t\022\016\n\006method\030\004 \001(\t\022\017\n\007payload\030\005 \001(" +
-      "\t\022$\n\005error\030\006 \001(\0162\025.cass.utils.ErrorCode\022" +
-      "*\n\010respType\030\007 \001(\0162\030.cass.utils.ResponseT" +
-      "ype\022\025\n\rbytesResponse\030\010 \001(\014*3\n\013MessageTyp" +
-      "e\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002*" +
-      ".\n\014ResponseType\022\010\n\004JSON\020\000\022\n\n\006STRING\020\001\022\010\n" +
+      "ce\030\003 \001(\t\022\016\n\006method\030\004 \001(\t\022,\n\013payloadType\030" +
+      "\007 \002(\0162\027.cass.utils.PayloadType\022\017\n\007payloa" +
+      "d\030\005 \001(\t\022\024\n\014bytesPayload\030\010 \001(\014\022$\n\005error\030\006" +
+      " \001(\0162\025.cass.utils.ErrorCode*3\n\013MessageTy" +
+      "pe\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002" +
+      "*-\n\013PayloadType\022\010\n\004JSON\020\000\022\n\n\006STRING\020\001\022\010\n" +
       "\004BYTE\020\002*\201\001\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017\n\013W",
       "RONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_METHO" +
       "D\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_RESP" +
@@ -2429,7 +2437,7 @@ public final class RpcNotifyProto {
           internal_static_cass_utils_RpcMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cass_utils_RpcMessage_descriptor,
-              new java.lang.String[] { "Type", "MsgId", "Service", "Method", "Payload", "Error", "RespType", "BytesResponse", });
+              new java.lang.String[] { "Type", "MsgId", "Service", "Method", "PayloadType", "Payload", "BytesPayload", "Error", });
           return null;
         }
       };
