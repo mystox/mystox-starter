@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
-
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
  * company: kongtrolink
@@ -49,16 +47,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         //todo
         JSONObject result = new JSONObject();
         result.put("result", 1);
-        try
-        {
-            Thread.sleep(new Random().nextInt(10000));
-        } catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            Thread.sleep(new Random().nextInt(10000));
+//        } catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setPayload(result.toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();

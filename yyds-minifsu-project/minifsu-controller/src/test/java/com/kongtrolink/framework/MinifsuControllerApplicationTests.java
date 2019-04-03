@@ -106,13 +106,22 @@ public class MinifsuControllerApplicationTests {
         scanParams.match("MINI210121000001*");
         ScanOptions scanOptions = ScanOptions.scanOptions().match("MINI210121000001_3-1_1*").build();
 
-        String pattern = "MINI210121000001*";
+        String pattern = "communication_hash*";
 //        final Set<String> hkeys = redisUtils.getHkeys(pattern);
+//        Set<String> keys = redisTemplate.keys(pattern);
+//        System.out.println(keys);
 
+
+        Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001" + "*");
+        System.out.println(keys);
+        if (keys != null && keys.size() > 0) {
+            String[] s = new String[keys.size()];
+            redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+        }
 
 //        System.out.println(keys.size());
-        redisTemplate.opsForHash().delete(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001*");
-        System.out.println(r);
+//        redisTemplate.opsForHash().delete(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, "MINI210121000001*");
+//        System.out.println(r);
 //		List<TerminalMsg> r = JSONArray.
     }
 
@@ -122,7 +131,7 @@ public class MinifsuControllerApplicationTests {
         //1包注册
         String registerMsg = "{\"msgId\":\"000021\",\"pkgSum\":1,\"ts\":101325,\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
         JSONObject registerNet = new JSONObject();
-        String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
+        String uuid = UUID.randomUUID().toString();
         registerNet.put("uuid", uuid);
         registerNet.put("gip", "172.16.6.39:17700");
         registerNet.put("pktType", PktType.CONNECT);
@@ -142,32 +151,33 @@ public class MinifsuControllerApplicationTests {
                 registerNet.put("payload", deviceMsg);
                 result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
                 System.out.println("设备信息上传结果: " + result);
-                if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
-                    //4包 数据包
-                    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-                    registerNet.put("payload", dataMsg);
-        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
-        System.out.println("数据包信息上传结果: " + result);
-
-                }
+//                if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
+//                    //4包 数据包
+//                    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
+//                    registerNet.put("payload", dataMsg);
+//        result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+//        System.out.println("数据包信息上传结果: " + result);
+//
+//                }
             }
         }
 
 
     }
-@Test
+
+    @Test
     public void dataSend() {
-    JSONObject registerNet = new JSONObject();
-    String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
-    registerNet.put("uuid", uuid);
-    registerNet.put("gip", "172.16.6.39:17700");
-    registerNet.put("pktType", PktType.CONNECT);
-    //4包 数据包
+        JSONObject registerNet = new JSONObject();
+        String uuid = "a72f071e-b2a4-4ca7-bf47-5b769a448204";
+        registerNet.put("uuid", uuid);
+        registerNet.put("gip", "172.16.6.39:17700");
+        registerNet.put("pktType", PktType.CONNECT);
+        //4包 数据包
 //    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":26}}]}}\n";
-    registerNet.put("payload", dataMsg);
-    JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
-    System.out.println("数据包信息上传结果: " + result);
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}}]}}\n";
+        registerNet.put("payload", dataMsg);
+        JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.39", 18800);
+        System.out.println("数据包信息上传结果: " + result);
     }
 
 
@@ -178,6 +188,7 @@ public class MinifsuControllerApplicationTests {
         String registerMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000,\"SN\":\"MINI210121000001\"}";
         JSONObject registerNet = new JSONObject();
         String uuid = UUID.randomUUID().toString();
+        uuid = "98485229-8b8d-40f5-a3a5-50ee876ba450";
         registerNet.put("uuid", uuid);
         registerNet.put("gip", "172.16.6.39:17700");
         registerNet.put("pktType", PktType.CLEANUP);

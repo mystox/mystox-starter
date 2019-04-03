@@ -47,7 +47,7 @@ public class RedisUtils
         return JSON.parseArray(stringRedisTemplate.opsForValue().get(key), clazz);
     }
 
-    Set<String> keys(String keyPattern) {
+    public Set<String> keys(String keyPattern) {
        return redisTemplate.keys(keyPattern);
 
     }

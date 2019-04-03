@@ -18,7 +18,6 @@
 		<module>minifsu-monitor</module>
 		<module>minifsu-business</module>
 		<module>minifsu-controller</module>
-		<module>minifsu-net-GW</module>
 		<module>minifsu-registry</module>
 		<module>minifsu-cntb-GW</module>
 		<module>minifsu-tower</module>

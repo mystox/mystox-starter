@@ -1,10 +1,7 @@
 package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.ModuleMsg;
-import com.kongtrolink.framework.core.entity.PktType;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
-import com.kongtrolink.framework.core.entity.TerminalPktType;
+import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
@@ -19,6 +16,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,6 +37,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     @Autowired
     RpcModule rpcModule;
 
+    @Value("${server.name}")
+    private String serverName;
+    @Value("${server.bindIp}")
+    private String hostname;
 
     @Value("${rpc.business.hostname}")
     private String businessHost;
@@ -100,6 +102,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setPayload(response)
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();
@@ -143,14 +146,27 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private JSONObject moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
-        if (PktType.CLEANUP.equals(pktType) || PktType.ALARM_SAVE.equals(pktType)) {//注销
+        if (PktType.CLEANUP.equals(pktType) || PktType.ALARM_SAVE.equals(pktType) || PktType.LOG_SAVE.equals(pktType)) {//注销
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
-        if (PktType.REGISTRY_CNTB.equals(pktType)) {
-            return sendPayLoad(msgId, payloadObject.toJSONString(), towerHost, towerPort);
+        if (PktType.REGISTRY_CNTB.equals(pktType)) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
+            ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
+            JSONObject value = redisUtils.get(key, JSONObject.class);
+            if (value != null && (Integer) value.get("STATUS") == 1) {
+                String addr = (String) value.get("BIP");
+                if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
+                    String[] addrArr = addr.split(":");
+                    return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
+                } else
+                {
+                    logger.error("bip[{}] illegal...");
+                }
+            }
+
         }
         JSONObject responsePayload = new JSONObject();
-        responsePayload.put("result", 1);
+        responsePayload.put("result", StateCode.FAILED);
         return responsePayload;
 
     }
@@ -170,56 +186,79 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String gip = (String) payloadObject.get("gip");
         JSONObject msgPayload = terminalMsg.getPayload();
         String SN = (String) msgPayload.get("SN");
-        /******************************通讯信息刷新*****************************/
-        if (StringUtils.isNotBlank(msgId)) {
-            //根据SN从communication_hash获取记录
-            //不存在该 SN 记录
-            String key = RedisHashTable.COMMUNICATION_HASH + ":" + SN;
-            JSONObject value = redisUtils.get(key, JSONObject.class);
-            if (value == null) //添加通讯信息
-            {
-                value = new JSONObject();
-                value.put("GWip", gip);
-                value.put("UUID", uuid);
-                value.put("STATUS", 0);//设置未注册状态
-                //触发重新注册
-                redisUtils.set(key, value);
-                //将路由信息存入redis 数据格式为:{SN:{uuid:uuid,GWip:gip,STATUS:0}}
-            } else {
-                String uuid2 = (String) value.get("UUID");//uuid发生变化 则更新通讯路由信息
-                if (!uuid.equals(uuid2)) {
-                    value.put("GWip", gip);
-                    value.put("UUID", uuid2);
-                    redisUtils.set(key, value);
-                }
-            }
-            // 设置过期时间
-            redisUtils.expired(key, communicationExpired, TimeUnit.SECONDS);
-        }
-
-        //终端payload报文解析
-        JSONObject payload = terminalMsg.getPayload();
-        int pktType = (int) payload.get("pktType");//终端报文类型 整型
         TerminalMsg responseTP = new TerminalMsg(); //响应终端实体
         responseTP.setPkgSum(terminalMsg.getPkgSum());
         responseTP.setMsgId(msgId);
         ModuleMsg moduleMsg = new ModuleMsg();
         moduleMsg.setMsgId(msgId);
         moduleMsg.setSN(SN);
+        /******************************通讯信息刷新*****************************/
+        try {
+            if (StringUtils.isNotBlank(msgId)) {
+                //根据SN从communication_hash获取记录
+                //不存在该 SN 记录
+                String key = RedisHashTable.COMMUNICATION_HASH + ":" + SN;
+                JSONObject value = redisUtils.get(key, JSONObject.class);
+                if (value == null) {//添加通讯信息
+                    value = new JSONObject();
+                    value.put("GWip", gip);
+                    value.put("UUID", uuid);
+                    value.put("STATUS", 0);//设置未注册状态
+                    //触发重新注册
+                    redisUtils.set(key, value);
+                    //将路由信息存入redis 数据格式为:{SN:{uuid:uuid,GWip:gip,STATUS:0}}
+                } else {
+                    String uuid2 = (String) value.get("UUID");//uuid发生变化 表示终端重连 则更新通讯路由信息
+                    if (!uuid.equals(uuid2)) {
+                        value.put("GWip", gip);
+                        value.put("UUID", uuid2);
+                        redisUtils.set(key, value);
+                    }
+                }
+                // 设置过期时间
+                redisUtils.expired(key, communicationExpired, TimeUnit.SECONDS);
+            }
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            JSONObject responsePayload = new JSONObject();
+            responsePayload.put("result", StateCode.FAILED);
+            responsePayload.put("msgId", msgId);
+            // 错误信息记录日志
+            Log log = new Log();
+            log.setMsgType((String) payloadObject.get("pktType"));
+            log.setSN(SN);
+            log.setTime(new Date());
+            log.setServiceName(serverName);
+            log.setHostName(hostname);
+            log.setMsgId(msgId);
+            log.setErrorCode(StateCode.REDIS_ERROR);
+            moduleMsg.setPktType(PktType.LOG_SAVE);
+            moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
+            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+            responseTP.setPayload(responsePayload);
+            return (JSONObject) JSONObject.toJSON(responseTP);
+        }
+
+        //终端payload报文解析
+        JSONObject payload = terminalMsg.getPayload();
+        int pktType = (int) payload.get("pktType");//终端报文类型 整型
+
+
         moduleMsg.setPayload(payload);
         /***************************注册流程*********************************/
         if (TerminalPktType.REGISTRY.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             int result = (int) responsePayload.get("result");
-            if (result == 0) {
+            if (result == StateCode.FAILED) {
                 //注册异常返回延迟时间
                 if (responsePayload.get("delay") != null) {
-                    responsePayload.put("delay", 30);
+                    responsePayload.put("delay", 120+(long)(Math.random()*120));
                 }
             }
             responsePayload.put("pktType", pktType);
-
             responseTP.setPayload(responsePayload);
             return (JSONObject) JSONObject.toJSON(responseTP);
         }
@@ -241,8 +280,21 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         }
 
         JSONObject responsePayload = new JSONObject();
-        responsePayload.put("result", 0);
+        responsePayload.put("msgId", msgId);
+        responsePayload.put("result", StateCode.FAILED);
+        // 错误信息记录日志
+        Log log = new Log();
+        log.setMsgType((String) payloadObject.get("pktType"));
+        log.setSN(SN);
+        log.setTime(new Date());
+        log.setServiceName(serverName);
+        log.setHostName(hostname);
+        log.setMsgId(msgId);
+        log.setErrorCode(StateCode.FAILED);
         responseTP.setPayload(responsePayload);
+        moduleMsg.setPktType(PktType.LOG_SAVE);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
+        sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
         return (JSONObject) JSONObject.toJSON(responseTP);
 
     }

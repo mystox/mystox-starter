@@ -115,7 +115,6 @@ public class FsuServiceImpl implements FsuService
         ywclMessage.setData(url);
         JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
         return result;
-        //TODO 编译
     }
 
     @Override

@@ -118,6 +118,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private RpcNotifyProto.RpcMessage createResp(RpcNotifyProto.MessageType responseType, String result, String msgId){
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(responseType).setPayload(result)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId).build();
     }
 }

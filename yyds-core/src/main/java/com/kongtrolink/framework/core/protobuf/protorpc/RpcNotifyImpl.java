@@ -36,6 +36,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
         String service = rpcMessage.getService();
         String method = rpcMessage.getMethod();
         String jsonPayLoad = rpcMessage.getPayload();
+        RpcNotifyProto.PayloadType payloadType = rpcMessage.getPayloadType();
         //根据service & method 具体执行业务逻辑 如果没有指定service与方法, 则直接执行默认方法 service | method 指定但未找到配置,则放回错误
         RpcNotifyProto.RpcMessage result = null;
         if (StringUtils.isBlank(service))
@@ -62,6 +63,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
     {
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setPayload("execute never implement...")
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();
@@ -79,6 +81,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
     {
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setPayload("serviceExecute never implement...")
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();
@@ -87,5 +90,16 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
 
 //    protected abstract String messageExecute(String msgId, String service, String method, String payload);
 
+    public static void main(String[] args)
+    {
+        RpcNotifyProto.RpcMessage rpcMessage = RpcNotifyProto.RpcMessage.newBuilder()
+                .setType(RpcNotifyProto.MessageType.RESPONSE)
+                .setPayloadType(RpcNotifyProto.PayloadType.BYTE)
+                .setPayload("serviceExecute never implement...")
+                .setMsgId("")
+                .build();
+        RpcNotifyProto.PayloadType payloadType = rpcMessage.getPayloadType();
+//        System.out.println(payloadType == RpcNotifyProto.PayloadType.BYTE.getNumber());
+    }
 
 }

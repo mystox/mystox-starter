@@ -21,8 +21,8 @@ spring:
       min-idle: 20
     host: 172.16.5.26
     port: 6379
-
-
+    communication:
+      expired: 1200
 
 server:
   name: minifsu-controller

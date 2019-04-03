@@ -72,7 +72,7 @@ public class RegistryServiceImpl implements RegistryService {
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
             Order order = terminalDao.findOrderByBid(bid);
-            String bip = order.getBIP();
+            String bip = order.getBIP(); //业务网关的消息路由
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             JSONObject value = redisUtils.get(key, JSONObject.class);
@@ -82,7 +82,7 @@ public class RegistryServiceImpl implements RegistryService {
                 redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
                 Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
 //                redisUtils
-                if (keys!=null && keys.size()>0) {
+                if (keys != null && keys.size() > 0) {
                     String[] s = new String[keys.size()];
                     redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
                 }
@@ -99,12 +99,12 @@ public class RegistryServiceImpl implements RegistryService {
             }
         } else if (!otherLogic()) {
             result.put("result", 0);
-            result.put("delay", delay);
+            result.put("delay", delay + (long)(Math.random()*delay));// delay 随机值
         }
         //注册非法默认
 
         result.put("result", 0);
-        result.put("delay", delay);
+        result.put("delay", (long)(Math.random()*delay));
 
         //日志记录
         Log log = new Log();
@@ -133,7 +133,7 @@ public class RegistryServiceImpl implements RegistryService {
                 result.put("result", 0);
             }
             List<String> devList = JSONArray.parseArray(devsJson.toJSONString(), String.class);
-            result.put("result", 1);
+
             // 同步告警点信息表至redis
 
             List<Device> devices = deviceDao.findDevicesBySnAndValid(sn); //获取有效
@@ -180,8 +180,8 @@ public class RegistryServiceImpl implements RegistryService {
 
 
             List<Device> deviceList = deviceDao.findDevicesBySnAndValid(sn); //获取最新设备信息
-
-            for (Device device : deviceList) { //根据设备生产最新配置信息表
+            redisUtils.setHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, devList); //设备信息写入redis
+            for (Device device : deviceList) { //根据设备产生最新配置信息表
 
                 String deviceId = device.getId();
                 Integer type = device.getType();
@@ -190,13 +190,12 @@ public class RegistryServiceImpl implements RegistryService {
 
                 List<AlarmSignalConfig> alarmSignals = configDao.findAlarmSignalConfigByDevId(deviceId);
 
-                if (alarmSignals == null ||alarmSignals.size() < 1) { //根据模版表赋值
+                if (alarmSignals == null || alarmSignals.size() < 1) { //根据模版表赋值
                     alarmSignals = new ArrayList<>();
                     List<AlarmSignalConfigModel> alarmSignalModels = configDao.findAlarmSignalModelByDevType(type);
-                    for (AlarmSignalConfigModel alarmSignalConfigModel : alarmSignalModels)
-                    {
+                    for (AlarmSignalConfigModel alarmSignalConfigModel : alarmSignalModels) {
                         AlarmSignalConfig alarmSignalConfig = new AlarmSignalConfig();
-                        BeanUtils.copyProperties(alarmSignalConfigModel,alarmSignalConfig);
+                        BeanUtils.copyProperties(alarmSignalConfigModel, alarmSignalConfig);
                         alarmSignalConfig.setId(null);
                         alarmSignalConfig.setDeviceId(deviceId);
                         alarmSignals.add(alarmSignalConfig);
@@ -205,16 +204,15 @@ public class RegistryServiceImpl implements RegistryService {
                     alarmSignals = configDao.findAlarmSignalConfigByDevId(deviceId);
                 }
 
-                Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap  = new HashMap<>();
+                Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap = new HashMap<>();
                 if (alarmSignals != null && alarmSignals.size() > 0) { //根据模版表格式化数据
                     for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
                         String coId = alarmSignalConfig.getCoId();
                         String alarmConfigKey = sn + "_" + devDataId + "_" + coId;
                         List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
-                        if (alarmSignalConfigs !=null) {
+                        if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
-                        }
-                        else {
+                        } else {
                             alarmSignalConfigs = new ArrayList<>();
                             alarmSignalConfigs.add(alarmSignalConfig);
 
@@ -225,10 +223,10 @@ public class RegistryServiceImpl implements RegistryService {
 
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
-                        redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
+                    redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
                 }
             }
-            redisUtils.setHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, devList); //设备信息写入redis
+
 
             try {
                 // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
@@ -247,6 +245,7 @@ public class RegistryServiceImpl implements RegistryService {
                 log.setTime(new Date(System.currentTimeMillis()));
                 logDao.saveLog(log);
             }
+            result.put("result", 1);
             return result;
         }
 
@@ -302,12 +301,27 @@ public class RegistryServiceImpl implements RegistryService {
     public JSONObject saveCleanupLog(ModuleMsg moduleMsg) {
         JSONObject msgPayload = moduleMsg.getPayload();
         String uuid = moduleMsg.getUuid();
-        String sn = (String) msgPayload.get("SN");
-        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
-        redisUtils.del(key);
-        redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
-        redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
 
+        //redis 通过uuid反查sn
+        if (StringUtils.isNotBlank(uuid)) {
+
+            String pattern = RedisHashTable.COMMUNICATION_HASH + "*";
+            Set<String> keySet = redisUtils.keys(pattern);
+            for (String key : keySet) {
+                JSONObject value = redisUtils.get(key, JSONObject.class);
+                if (uuid.equals(value.get("UUID"))){
+                    String sn = key.replace(RedisHashTable.COMMUNICATION_HASH+":", "");
+                    redisUtils.del(key);
+                    redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
+                    redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
+                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
+                    if (keys != null && keys.size() > 0) {
+                        String[] s = new String[keys.size()];
+                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+                    }
+                }
+            }
+        }
         //日志记录
         Log log = new Log();
         log.setMsgType(moduleMsg.getPktType());

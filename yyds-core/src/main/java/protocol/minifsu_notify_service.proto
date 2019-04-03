@@ -13,6 +13,11 @@ enum MessageType { //消息类型
   RESPONSE = 1; //响应
   ERROR = 2; // 错误
 }
+enum PayloadType { //消息流
+  JSON = 0; //JSON响应报文
+  STRING = 1; //文本响应报文
+  BYTE = 2; // 字节流响应报文
+}
 
 enum ErrorCode {
   NO_ERROR = 0; //无错误
@@ -31,9 +36,12 @@ message RpcMessage {
   optional string service = 3; //请求执行服务
   optional string method = 4; //请求执行执行方法
 
+  required PayloadType payloadType = 7; //消息流类型
   optional string payload = 5; //请求报文
+  optional bytes bytesPayload = 8; //流报文
 
   optional ErrorCode error = 6; //错误信息
+
 }
 
 // the meta service

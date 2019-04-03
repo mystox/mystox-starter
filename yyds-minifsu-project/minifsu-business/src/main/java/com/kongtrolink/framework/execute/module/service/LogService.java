@@ -10,5 +10,5 @@ import com.kongtrolink.framework.core.entity.ModuleMsg;
  * update record:
  */
 public interface LogService {
-    JSONObject saveCleanupLog(ModuleMsg moduleMsg);
+    JSONObject saveLog(ModuleMsg moduleMsg);
 }

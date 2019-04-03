@@ -3,11 +3,11 @@ package com.kongtrolink.framework.execute.module.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Log;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.StateCode;
 import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.sql.Date;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by mystoxlol on 2019/3/29, 16:31.
@@ -15,26 +15,24 @@ import java.sql.Date;
  * description:
  * update record:
  */
+@Service
 public class LogServiceImpl implements LogService {
     @Autowired
     LogDao logDao;
 
 
+
+
+
     @Override
-    public JSONObject saveCleanupLog(ModuleMsg moduleMsg) {
+    public JSONObject saveLog(ModuleMsg moduleMsg) {
 
         JSONObject msgPayload = moduleMsg.getPayload();
-
+        Log log = JSONObject.toJavaObject(msgPayload, Log.class);
         //日志记录
-        Log log = new Log();
-        log.setMsgType(moduleMsg.getPktType());
-        log.setErrorCode(1);
-        log.setMsgId(moduleMsg.getMsgId());
-        log.setHostName((String) msgPayload.get("serverHost"));
-        log.setServiceName((String) msgPayload.get("serverName"));
-        log.setTime(new Date((Long) msgPayload.get("time")));
         logDao.saveLog(log);
-
-        return null;
+        JSONObject result = new JSONObject();
+        result.put("result", StateCode.SUCCESS);
+        return result;
     }
 }

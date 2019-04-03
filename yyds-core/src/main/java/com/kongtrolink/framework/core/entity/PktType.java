@@ -39,5 +39,6 @@ public class PktType
     public final static String DATA_REPORT = "data_report"; //终端数据变化上报
     public final static String DATA_REGISTER = "data_register"; //数据注册
     public final static String ALARM_SAVE = "alarm_save"; //保存告警
+    public final static String LOG_SAVE = "log_save"; //保存告警
 
 }
