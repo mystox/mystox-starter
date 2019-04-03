@@ -5,11 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
+import com.kongtrolink.framework.task.SaveAalarmTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -22,46 +28,35 @@ import java.util.Map;
 public class DataRegisterService {
     @Autowired
     RedisUtils redisUtils;
-    private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
+    @Autowired
+    RpcModule rpcModule;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
-    public String register(String msgId, JSONObject payload){
-        String sn = payload.get("SN").toString();
-        //根据SN删除redis中相应实时告警
-        Object hget = redisUtils.hget(sn__alarm_hash, sn);
-        if(null != hget){
-            JsonFsu fsu = JSON.parseObject(hget.toString(), JsonFsu.class);
-            Iterator<JsonDevice> deviceIterator = fsu.getData().iterator();
-            while (deviceIterator.hasNext()){
-                JsonDevice device = deviceIterator.next();
-                Iterator<JsonSignal> signalIterator = device.getSignalList().iterator();
-                while(signalIterator.hasNext()){
-                    JsonSignal jsonSignal = signalIterator.next();
-                    Map<String, Alarm> alarmMap = jsonSignal.getAlarmMap();
-                    Iterator<Map.Entry<String, Alarm>> iterator = alarmMap.entrySet().iterator();
-                    while (iterator.hasNext()){
-                        Map.Entry<String, Alarm> next = iterator.next();
-                        Alarm alarm = next.getValue();
-                        byte link = (byte)(alarm.getLink() << 1);
-                        alarm.setLink(link);
-                        //如果结束报文先上报，怎么处理
-                        if(link == 8){
-                            iterator.remove();
-                        }
-                    }
-                    if(jsonSignal.getAlarmMap().isEmpty()){
-                        signalIterator.remove();
-                    }
-                }
-                if(device.getSignalList().isEmpty()){
-                    deviceIterator.remove();
-                }
-            }
-            if(fsu.getData().isEmpty()){
-                redisUtils.hdel(sn__alarm_hash, sn);
-            }else{
-                redisUtils.hset(sn__alarm_hash, sn, JSON.toJSONString(fsu));
-            }
+    @Value("${rpc.controller.hostname}")
+    private String controllerName;
+    @Value("${rpc.controller.port}")
+    private int controllerPort;
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/3 14:22
+     * 功能描述:告警注册与消除告警功能。本过程与实时数据上报过程无关，所以在另一个线程中处理
+     * 1，想铁塔发送告警信息
+     *      1，发送成功，修改各个告警状态，如果已消除上报成功，则移除该告警，并发送给事物处理中心，保存该告警为历史告警
+     *      2，发送失败，不做处理
+     * 2，将实时告警保存到数据库
+     */
+    public String register(String msgId, JsonFsu fsu, Date curDate){
+        if(null == fsu || fsu.getData().isEmpty()){
+            return "";
         }
-        return "{}";
+        if(!fsu.getData().isEmpty()){
+            fsu.setPktType(null);
+            fsu.setDtm(null);
+//            redisUtils.hset(sn__alarm_hash, sn, JSON.toJSONString(fsu));
+            taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, redisUtils));
+        }
+        return "";
     }
 }

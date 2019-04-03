@@ -1,19 +1,23 @@
 package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Communication;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
-import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.DataReportService;
+import com.kongtrolink.framework.task.SaveAalarmTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -28,77 +32,89 @@ import java.util.*;
 public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
-    @Autowired
     DataReportService reportService;
     @Autowired
     DataRegisterService registerService;
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    RedisUtils redisUtils;
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
+    private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
+//    private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/3 10:32
+     * 功能描述:
+     * 1,初始化线程池之类的基础任务服务
+     * 2,加载告警组合，关联，过滤，延迟等配置信息放到redis中
+     */
     @Override
     public boolean init(){
         logger.info("workerExecute-execute module init");
-        //初始化线程池之类的基础任务服务
-        //加载告警组合，关联，过滤，延迟等配置信息放到redis中
-        //可能还需要加载redis宕机后，数据库中的实时告警信息，如果需要判定信号点AI,DI类型，则需要再告警点中存储
         return true;
     }
 
     /**
      * @auther: liudd
      * @date: 2019/3/26 13:09
-     * 功能描述:实时数据处理模块，暂时不使用线程池
-     *      1，直接将实时数据json串更新到redis中作为实时数据，供门户端获取站点
-     *      2，解析实时数据，翻译告警数据并更新到redis中
+     * 功能描述:实时数据处理模块
+     * 1，保存实时数据
+     * 2，解析告警
+     * 3，上报告警
+     * 4，消除告警
      */
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload){
         Date curDate = new Date();
-        //1,将实时数据更新到reids中
-        //2，解析
-        //发送心跳
-//        sendHeartBeat(communication);
         RpcNotifyProto.MessageType response = RpcNotifyProto.MessageType.RESPONSE;
-        String result = "";
         ModuleMsg moduleMsg = JSON.parseObject(payload, ModuleMsg.class);
-        String pktType = moduleMsg.getPktType();
-        if(pktType.equals(PktType.DATA_REPORT)){
-            //变化数据上报
-            result = reportService.report(msgId, moduleMsg.getPayload(), curDate);
-        }else if(pktType.equals(PktType.DATA_REGISTER)){
-            result = registerService.register(msgId, moduleMsg.getPayload());
+        JSONObject infoPayload = moduleMsg.getPayload();
+        if(!checkCommunication(infoPayload)){
+            return createResp(response, "{'pktType':4,'result':0}", StringUtils.isBlank(msgId)? "" : msgId);
         }
-
-        //发送告警信息给外部
-//        sendAlarmInfo(fsu);
+        JsonFsu fsu = JSONObject.parseObject(infoPayload.toJSONString(), JsonFsu.class);
+        String sn = fsu.getSN();
+        //保存实时数据
+        redisUtils.hset(sn_data_hash, sn, infoPayload);
+        //变化数据上报
+        String result = reportService.report(msgId, fsu, curDate);
+        //告警注册与消除
+        registerService.register(msgId, fsu, curDate);
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
     }
 
-
-
-
-
-
     /**
      * @auther: liudd
-     * @date: 2019/3/28 16:38-
-     * 功能描述:发送心跳
+     * @date: 2019/4/3 10:42
+     * 功能描述:判断通讯信息状态
      */
-    private void sendHeartBeat(Communication communication){
-
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/3/28 20:02
-     * 功能描述:发送告警信息
-     */
-    private void sendAlarmInfo(JsonFsu fsu){
-        if(!fsu.getData().isEmpty()){
-
+    private boolean checkCommunication(JSONObject infoPayload){
+        if(null == infoPayload){
+            return false;
         }
+        String sn = (String)infoPayload.get("SN");
+        if(StringUtils.isBlank(sn)){
+            return false;
+        }
+        //判定redis中是否有该FSU的通讯信息
+        Object communicationObj = redisUtils.get(communication_hash + ":" + sn);
+        if(null == communicationObj){
+            return  false;
+        }
+        Communication communication = JSON.parseObject(communicationObj.toString(), Communication.class);
+        if(communication.getStatus() == 0){     //终端未注册成功，返回注册失败消息
+            return  false;
+        }
+        return true;
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/4/3 10:32
+     * 功能描述:创建消息体
+     */
     private RpcNotifyProto.RpcMessage createResp(RpcNotifyProto.MessageType responseType, String result, String msgId){
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(responseType).setPayload(result)
