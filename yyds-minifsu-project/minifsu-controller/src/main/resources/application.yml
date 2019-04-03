@@ -21,7 +21,7 @@ spring:
       min-idle: 20
     host: 172.16.5.26
     port: 6379
-    commutication:
+    communication:
       expired: 1200
 
 server:
