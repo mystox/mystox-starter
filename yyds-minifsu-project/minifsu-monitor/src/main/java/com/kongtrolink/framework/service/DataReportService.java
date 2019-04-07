@@ -2,20 +2,14 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.*;
-import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
-import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -28,92 +22,14 @@ public class DataReportService {
 
     @Autowired
     RedisUtils redisUtils;
-    @Autowired
-    RpcModule rpcModule;
-    @Value("${rpc.controller.hostname}")
-    private String controllerName;
-    @Value("${rpc.controller.port}")
-    private int controllerPort;
 
-    private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
-    private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
 
-    public String report(String msgId, JSONObject payload, Date curDate){
-        List<Alarm> alarmList = new ArrayList<>();
+    public String report(String msgId, JsonFsu fsu, Date curDate){
         String result = "{'pktType':4,'result':1}";
-        JsonFsu fsu = JSON.parseObject(payload.toJSONString(), JsonFsu.class);
-        //判定redis中是否有该FSU的通讯信息
-        Object communicationObj = redisUtils.get(communication_hash + ":" + fsu.getSN());
-        if(null == communicationObj){
-            //写入日志，返回错误信息
-            return  "{'pktType':4,'result':0}";
-        }
-        Communication communication = JSON.parseObject(communicationObj.toString(), Communication.class);
-        if(communication.getStatus() == 0){     //终端未注册成功，返回注册失败消息
-            return  "{'pktType':4,'result':0}";
-        }
-        //存储实时数据
-        redisUtils.hset(sn_data_hash, fsu.getSN(), payload);
-        //解析告警
-        handlerAlarm(fsu, curDate, alarmList);
-        if(!fsu.getData().isEmpty()){
-            redisUtils.hset(sn__alarm_hash, fsu.getSN(), JSON.toJSONString(fsu));
-//            //上报告警
-//            InetSocketAddress addr = new InetSocketAddress("localhost",17777);
-//            try{
-//                String id = UUID.randomUUID().toString();
-//                rpcModule.postMsg(id,addr,"I'm client mystox message...h暗号");
-//            } catch (IOException e){
-//                e.printStackTrace();
-//            }
-        }
-
-        if(!alarmList.isEmpty()){
-            String alarmMsg = createAlarmMsg(alarmList);
-            sendPayLoad("", alarmMsg, controllerName, controllerPort);
-        }
-        return result;
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/4/1 19:56
-     * 功能描述:构造保存告警报文
-     */
-    private String createAlarmMsg(List<Alarm> alarmList){
-        ModuleMsg moduleMsg = new ModuleMsg();
-        JSONObject o = new JSONObject();
-        o.put("list", alarmList);
-        moduleMsg.setPktType(PktType.ALARM_SAVE);
-        //强转
-        moduleMsg.setPayload(o);
-        return JSON.toJSONString(moduleMsg);
-    }
-
-    /**
-     * 发送至事务处理的消息
-     *
-     * @param msgId
-     * @param payload
-     * @return
-     */
-    private JSONObject sendPayLoad(String msgId, String payload, String host, int port) {
-        JSONObject result = new JSONObject();
-        RpcNotifyProto.RpcMessage response = null;
-        try {
-            response = rpcModule.postMsg(msgId, new InetSocketAddress(host, port), payload);
-            if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
-            {
-                result.put("result", 0);
-            } else {
-                return JSONObject.parseObject(response.getPayload());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", 0);
-        }
+        //解析告警，这里可能需要定义异常，比如信号点不存在
+        handlerAlarm(fsu, curDate);
         return result;
     }
 
@@ -137,7 +53,7 @@ public class DataReportService {
      * @date: 2019/3/27 14:02
      * 功能描述:以device为单位处理告警
      */
-    private void handlerAlarm(JsonFsu fsu, Date curDate, List<Alarm> alarmList){
+    private void handlerAlarm(JsonFsu fsu, Date curDate){
         //获取FSU下所有告警
         String alarmFsuStr = (String)redisUtils.hget(sn__alarm_hash, fsu.getSN());
         HashMap<String, Alarm> alarmHashMap = new HashMap<>();
@@ -147,14 +63,13 @@ public class DataReportService {
         }
         List<JsonDevice> alarmDeviceList = new ArrayList<>();
         for(JsonDevice device : fsu.getData()) {
-            StringBuilder keyDev = new StringBuilder(fsu.getSN()).append("_").append(device.getDev());
+            StringBuilder keyDev = new StringBuilder(device.getDev());
             List<JsonSignal> alarmSignalList = new ArrayList<>();
             HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
-                handleSignal(signal, keyDev, alarmHashMap, curDate, alarmList);
+                handleSignal(signal, keyDev, alarmHashMap, curDate);
                 if(signal.getAlarmMap() != null && !signal.getAlarmMap().isEmpty()){
-                    signal.setId(null);
                     signal.setV(null);
                     alarmSignalList.add(signal);
                 }
@@ -168,14 +83,13 @@ public class DataReportService {
         fsu.setData(alarmDeviceList);
     }
 
-
     /**
      * @auther: liudd
      * @date: 2019/3/28 19:57
      * 功能描述:处理信号点下的告警信息
      */
     private void handleSignal(JsonSignal signal, StringBuilder keyDev,
-                              HashMap<String, Alarm> alarmHashMap, Date curDate, List<Alarm> alarmList){
+                              HashMap<String, Alarm> alarmHashMap, Date curDate){
         StringBuilder keySignal = new StringBuilder(keyDev.toString())
                 .append("_").append(signal.getId());
         //获取redis中该信号点下所有告警点
@@ -188,7 +102,7 @@ public class DataReportService {
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
-            String keyAlarmId = keySignal.append(alarmSignal.getAlarmId()).toString();
+            String keyAlarmId = keySignal.append("_").append(alarmSignal.getAlarmId()).toString();
             Alarm beforAlarm = alarmHashMap.get(keyAlarmId);//获取原先的告警
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(signal, alarmSignal, curDate);
@@ -200,7 +114,6 @@ public class DataReportService {
                 if(null == alarmMap){alarmMap = new HashMap<>();}
                 alarmMap.put(keyAlarmId, beforAlarm);
                 signal.setAlarmMap(alarmMap);
-                alarmList.add(beforAlarm);
             }
         }
     }
@@ -233,10 +146,9 @@ public class DataReportService {
     private Alarm endAlarm(Alarm beforAlarm, JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
         if( (alarmSignal.getThresholdFlag()>0 && signal.getV()<=alarmSignal.getThreshold() )
                 || ( alarmSignal.getThresholdFlag()<0 && signal.getV()>=alarmSignal.getThreshold()) ){
-            if(1== beforAlarm.getLink()) {
-                int link = beforAlarm.getLink() + 4;
-                beforAlarm.setLink((byte) link);
-            }
+            byte link = beforAlarm.getLink();
+            link = (byte)(link | EnumAlarmStatus.END.getValue());
+            beforAlarm.setLink(link);
             beforAlarm.setValue(signal.getV());
             beforAlarm.setUpdateTime(curDate);
             return beforAlarm;
