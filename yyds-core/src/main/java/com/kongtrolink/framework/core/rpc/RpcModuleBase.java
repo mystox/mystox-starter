@@ -22,6 +22,14 @@ public class RpcModuleBase
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     RpcClient rpcClient; //rpc客户端服务
+
+    public RpcModuleBase() {
+    }
+
+    public RpcModuleBase(RpcClient rpcClient) {
+        this.rpcClient = rpcClient;
+    }
+
     /**
      * 消息发送
      *
@@ -37,6 +45,7 @@ public class RpcModuleBase
         //发送消息体
         RpcNotifyProto.RpcMessage rpcMessage = RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.REQUEST)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setPayload(payload)
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();

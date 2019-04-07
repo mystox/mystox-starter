@@ -14,6 +14,8 @@ public class StateCode {
     public final static int CONNECT_INTERRUPT = 4; //
     public final static int REDIS_ERROR = 5; //redis异常
     public final static int MONGO_ERROR = 6; //MONGO数据库异常
+    public final static int ILLEGAL_LOG = 7; //非法登录
+    public final static int JSON_ILLEGAL = 8; //json报文不合规
 
 
 }

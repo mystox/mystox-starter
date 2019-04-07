@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -89,27 +90,52 @@ public class RegistryServiceImpl implements RegistryService {
 
                 value.put("BIP", bip);
                 value.put("STATUS", 1);
-                redisUtils.set(key, value);
+                //心跳节拍值设置
+                Integer heartCycle = terminal.getHeartCycle();
+                if (heartCycle == null || heartCycle == 0)
+                    heartCycle = 10;//默认10s
+                value.put("heartCycle", heartCycle);
+                Integer businessRhythm = terminal.getBusinessRhythm();
+                if (businessRhythm == null || businessRhythm == 0)
+                    businessRhythm = 30;//默认10s
+                value.put("businessRhythm", businessRhythm);
+                Integer alarmRhythm = terminal.getAlarmRhythm();
+                if (alarmRhythm == null || alarmRhythm == 0)
+                    alarmRhythm = 1;//默认10s
+                value.put("alarmRhythm", alarmRhythm);
+                Integer runStatusRhythm = terminal.getRunStatusRhythm();
+                if (runStatusRhythm == null || runStatusRhythm == 0)
+                    runStatusRhythm = 100;//默认10s
+                value.put("runStatusRhythm", runStatusRhythm);
 
+                int miniCount = Math.min(Math.min(businessRhythm, alarmRhythm), runStatusRhythm);
+                int expiredTime = miniCount * heartCycle * 3;
+                value.put("expired", expiredTime); //三倍最低心跳时间
+                redisUtils.set(key, value);
+                redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
                 result.put("result", 1);
                 result.put("time", System.currentTimeMillis() / 1000);
+                result.put("heartCycle", heartCycle);
+                result.put("businessRhythm", businessRhythm);
+                result.put("alarmRhythm", alarmRhythm);
+                result.put("runStatusRhythm", runStatusRhythm);
                 return result;
             } else {
                 logger.error("不存在通讯key[{}]的值", key);
             }
         } else if (!otherLogic()) {
-            result.put("result", 0);
-            result.put("delay", delay + (long)(Math.random()*delay));// delay 随机值
+            result.put("result", StateCode.UNREGISTY);
+            result.put("delay", delay + (long) (Math.random() * delay));// delay 随机值
         }
         //注册非法默认
 
-        result.put("result", 0);
-        result.put("delay", (long)(Math.random()*delay));
+        result.put("result", StateCode.UNREGISTY);
+        result.put("delay", (long) (Math.random() * delay));
 
         //日志记录
         Log log = new Log();
         log.setMsgType(moduleMsg.getPktType());
-        log.setErrorCode(1);
+        log.setErrorCode(StateCode.ILLEGAL_LOG);
         log.setSN(sn);
         log.setMsgId(moduleMsg.getMsgId());
         log.setHostName(host);
@@ -127,11 +153,14 @@ public class RegistryServiceImpl implements RegistryService {
         //获取redis 信息
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
-        if (value != null && (int) value.get("STATUS") == 1) {
-            JSONArray devsJson = (JSONArray) devPayload.get("devList");
-            if (devsJson == null) {
-                result.put("result", 0);
+        if (value != null && (int) value.get("STATUS") != 0) {
+            Object devsObject = devPayload.get("devList");
+            if (devsObject == null) {
+                result.put("result", StateCode.UNREGISTY);
+                logger.error("devList is null");
+                return result;
             }
+            JSONArray devsJson = (JSONArray) devsObject;
             List<String> devList = JSONArray.parseArray(devsJson.toJSONString(), String.class);
 
             // 同步告警点信息表至redis
@@ -162,14 +191,14 @@ public class RegistryServiceImpl implements RegistryService {
                 for (Device newDevice : newDeviceList) {
                     if (deviceType == newDevice.getType()
                             && devicePort == newDevice.getPort()
-                            && deviceResNo == newDevice.getResNo()) {
+                            && deviceResNo == newDevice.getResNo()) { //存在对应类型设置有效
                         device.setInvalidTime(new Date(0L));
                         newDevice.setInvalidTime(new Date(0L));
                         break;
                     }
                 }
             }
-            for (Device device : newDeviceList) {
+            for (Device device : newDeviceList) { //未设置的新增设备初始化存入数据库表
                 if (device.getInvalidTime() == null) {
                     device.setSN(sn);
                     device.setInvalidTime(new Date(0L));
@@ -224,6 +253,8 @@ public class RegistryServiceImpl implements RegistryService {
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                     redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
+                    value.put("STATUS", 2);
+                    redisUtils.set(key,value);
                 }
             }
 
@@ -245,14 +276,16 @@ public class RegistryServiceImpl implements RegistryService {
                 log.setTime(new Date(System.currentTimeMillis()));
                 logDao.saveLog(log);
             }
-            result.put("result", 1);
+            //设备上报流程执行完毕
+            result.put("result", StateCode.SUCCESS);
             return result;
         }
 
 
         //日志记录
         Log log = new Log();
-        log.setErrorCode(3);
+        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
+        else log.setErrorCode(StateCode.CONNECT_ERROR);
         log.setSN(sn);
         log.setMsgType(moduleMsg.getPktType());
         log.setMsgId(moduleMsg.getMsgId());
@@ -260,7 +293,7 @@ public class RegistryServiceImpl implements RegistryService {
         log.setServiceName(name);
         log.setTime(new Date(System.currentTimeMillis()));
         logDao.saveLog(log);
-        result.put("result", 0);
+        result.put("result", StateCode.UNREGISTY);
         return result;
     }
 
@@ -270,26 +303,54 @@ public class RegistryServiceImpl implements RegistryService {
 
         JSONObject payload = moduleMsg.getPayload();
         String sn = moduleMsg.getSN();
-        Terminal terminal = terminalDao.findTerminalBySn(sn);
-        String terminalId = terminal.getId();
-        TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
-        if (terminalProperties == null) {
-            terminalProperties = new TerminalProperties();
-            terminalProperties.setTerminalId(terminalId);
-        }
-        terminalProperties.setAccessMode((Integer) payload.get("accessMode"));
-        terminalProperties.setCarrier((String) payload.get("carrier"));
-        terminalProperties.setNwType((String) payload.get("nwType"));
-        terminalProperties.setWmType((String) payload.get("wmType"));
-        terminalProperties.setWmVendor((String) payload.get("wmVendor"));
-        terminalProperties.setImsi((String) payload.get("imsi"));
-        terminalProperties.setImei((String) payload.get("imei"));
-        terminalProperties.setEngineVer((String) payload.get("engineVer"));
-        terminalProperties.setSignalStrength((Integer) payload.get("signalStrength"));
-        terminalProperties.setAdapterVer((String) payload.get("adapterVer"));
-        terminalDao.saveTerminal(terminalProperties);
         JSONObject result = new JSONObject();
-        result.put("result", 1);
+        //获取redis 信息
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
+        if (value != null && (int) value.get("STATUS") != 0) {
+            Terminal terminal = terminalDao.findTerminalBySn(sn);
+            if (terminal == null) {
+                result.put("result", StateCode.UNREGISTY);
+                return result;
+            }
+            String terminalId = terminal.getId();
+            TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
+            if (terminalProperties == null) {
+                terminalProperties = new TerminalProperties();
+                terminalProperties.setTerminalId(terminalId);
+            }
+            terminalProperties.setAccessMode((Integer) payload.get("accessMode"));
+            terminalProperties.setCarrier((String) payload.get("carrier"));
+            terminalProperties.setNwType((String) payload.get("nwType"));
+            terminalProperties.setWmType((String) payload.get("wmType"));
+            terminalProperties.setWmVendor((String) payload.get("wmVendor"));
+            terminalProperties.setImsi((String) payload.get("imsi"));
+            terminalProperties.setImei((String) payload.get("imei"));
+            terminalProperties.setEngineVer((String) payload.get("engineVer"));
+            terminalProperties.setSignalStrength((Integer) payload.get("signalStrength"));
+            terminalProperties.setAdapterVer((String) payload.get("adapterVer"));
+
+            try {
+                terminalDao.saveTerminal(terminalProperties);
+                result.put("result", StateCode.SUCCESS);
+                return result;
+            } catch (Exception e) {
+                result.put("result", StateCode.UNREGISTY);
+                e.printStackTrace();
+            }
+        }
+        //日志记录
+        Log log = new Log();
+        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
+        else log.setErrorCode(StateCode.CONNECT_ERROR);
+        log.setSN(sn);
+        log.setMsgType(moduleMsg.getPktType());
+        log.setMsgId(moduleMsg.getMsgId());
+        log.setHostName(host);
+        log.setServiceName(name);
+        log.setTime(new Date(System.currentTimeMillis()));
+        logDao.saveLog(log);
+        result.put("result", StateCode.UNREGISTY);
         return result;
     }
 
@@ -309,8 +370,8 @@ public class RegistryServiceImpl implements RegistryService {
             Set<String> keySet = redisUtils.keys(pattern);
             for (String key : keySet) {
                 JSONObject value = redisUtils.get(key, JSONObject.class);
-                if (uuid.equals(value.get("UUID"))){
-                    String sn = key.replace(RedisHashTable.COMMUNICATION_HASH+":", "");
+                if (uuid.equals(value.get("UUID"))) {
+                    String sn = key.replace(RedisHashTable.COMMUNICATION_HASH + ":", "");
                     redisUtils.del(key);
                     redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
                     redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
@@ -333,7 +394,7 @@ public class RegistryServiceImpl implements RegistryService {
         logDao.saveLog(log);
 
         JSONObject result = new JSONObject();
-        result.put("result", 1);
+        result.put("result", StateCode.SUCCESS);
         return result;
     }
 

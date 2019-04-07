@@ -38,6 +38,7 @@ public class AlarmServiceImpl implements AlarmService {
         for(Alarm alarm : alarms){
             alarmDao.AddOrUpdateByAlarmId(alarm);
         }
+
         JSONObject object = new JSONObject();
         object.put("result", 1);
         return object;

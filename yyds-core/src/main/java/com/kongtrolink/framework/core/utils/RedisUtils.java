@@ -68,7 +68,7 @@ public class RedisUtils
     }
     public void expired(String key, long time, TimeUnit unit)
     {
-        redisTemplate.expire(key, time, TimeUnit.SECONDS);
+        redisTemplate.expire(key, time, unit);
     }
     public void setHash(String hashTable, String key, Object value)
     {

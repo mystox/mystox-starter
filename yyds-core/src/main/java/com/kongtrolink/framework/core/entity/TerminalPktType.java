@@ -12,7 +12,9 @@ public enum TerminalPktType
     REGISTRY(1, "registry"), //SN上报注册
     TERMINAL_REPORT(2, "terminal_report"), //终端信息上报
     DEV_LIST(3, "dev_list"), //上报终端接入设备信息
-    DATA_REPORT(4,"data_report");//终端数据变化上报
+    DATA_CHANGE(4,"data_change"),//终端数据变化上报(类似告警)
+    DATA_REPORT(5,"data_report"),//终端数据变化上报
+    FILE_GET(10,"file_get");//文件流传输
 
     private final int key;
     private final String value;

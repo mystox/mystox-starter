@@ -38,7 +38,7 @@ message RpcMessage {
 
   required PayloadType payloadType = 7; //消息流类型
   optional string payload = 5; //请求报文
-  optional bytes bytesPayload = 8; //流报文
+  optional bytes bytePayload = 8; //流报文
 
   optional ErrorCode error = 6; //错误信息
 

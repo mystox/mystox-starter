@@ -576,23 +576,23 @@ public final class RpcNotifyProto {
     com.google.protobuf.ByteString
         getPayloadBytes();
 
-    // optional bytes bytesPayload = 8;
+    // optional bytes bytePayload = 8;
     /**
-     * <code>optional bytes bytesPayload = 8;</code>
+     * <code>optional bytes bytePayload = 8;</code>
      *
      * <pre>
      *流报文
      * </pre>
      */
-    boolean hasBytesPayload();
+    boolean hasBytePayload();
     /**
-     * <code>optional bytes bytesPayload = 8;</code>
+     * <code>optional bytes bytePayload = 8;</code>
      *
      * <pre>
      *流报文
      * </pre>
      */
-    com.google.protobuf.ByteString getBytesPayload();
+    com.google.protobuf.ByteString getBytePayload();
 
     // optional .cass.utils.ErrorCode error = 6;
     /**
@@ -718,7 +718,7 @@ public final class RpcNotifyProto {
             }
             case 66: {
               bitField0_ |= 0x00000040;
-              bytesPayload_ = input.readBytes();
+              bytePayload_ = input.readBytes();
               break;
             }
           }
@@ -1029,28 +1029,28 @@ public final class RpcNotifyProto {
       }
     }
 
-    // optional bytes bytesPayload = 8;
-    public static final int BYTESPAYLOAD_FIELD_NUMBER = 8;
-    private com.google.protobuf.ByteString bytesPayload_;
+    // optional bytes bytePayload = 8;
+    public static final int BYTEPAYLOAD_FIELD_NUMBER = 8;
+    private com.google.protobuf.ByteString bytePayload_;
     /**
-     * <code>optional bytes bytesPayload = 8;</code>
+     * <code>optional bytes bytePayload = 8;</code>
      *
      * <pre>
      *流报文
      * </pre>
      */
-    public boolean hasBytesPayload() {
+    public boolean hasBytePayload() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
     /**
-     * <code>optional bytes bytesPayload = 8;</code>
+     * <code>optional bytes bytePayload = 8;</code>
      *
      * <pre>
      *流报文
      * </pre>
      */
-    public com.google.protobuf.ByteString getBytesPayload() {
-      return bytesPayload_;
+    public com.google.protobuf.ByteString getBytePayload() {
+      return bytePayload_;
     }
 
     // optional .cass.utils.ErrorCode error = 6;
@@ -1084,7 +1084,7 @@ public final class RpcNotifyProto {
       method_ = "";
       payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
       payload_ = "";
-      bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
+      bytePayload_ = com.google.protobuf.ByteString.EMPTY;
       error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
     }
     private byte memoizedIsInitialized = -1;
@@ -1129,7 +1129,7 @@ public final class RpcNotifyProto {
         output.writeEnum(7, payloadType_.getNumber());
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeBytes(8, bytesPayload_);
+        output.writeBytes(8, bytePayload_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1170,7 +1170,7 @@ public final class RpcNotifyProto {
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(8, bytesPayload_);
+          .computeBytesSize(8, bytePayload_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1225,10 +1225,10 @@ public final class RpcNotifyProto {
         result = result && getPayload()
             .equals(other.getPayload());
       }
-      result = result && (hasBytesPayload() == other.hasBytesPayload());
-      if (hasBytesPayload()) {
-        result = result && getBytesPayload()
-            .equals(other.getBytesPayload());
+      result = result && (hasBytePayload() == other.hasBytePayload());
+      if (hasBytePayload()) {
+        result = result && getBytePayload()
+            .equals(other.getBytePayload());
       }
       result = result && (hasError() == other.hasError());
       if (hasError()) {
@@ -1272,9 +1272,9 @@ public final class RpcNotifyProto {
         hash = (37 * hash) + PAYLOAD_FIELD_NUMBER;
         hash = (53 * hash) + getPayload().hashCode();
       }
-      if (hasBytesPayload()) {
-        hash = (37 * hash) + BYTESPAYLOAD_FIELD_NUMBER;
-        hash = (53 * hash) + getBytesPayload().hashCode();
+      if (hasBytePayload()) {
+        hash = (37 * hash) + BYTEPAYLOAD_FIELD_NUMBER;
+        hash = (53 * hash) + getBytePayload().hashCode();
       }
       if (hasError()) {
         hash = (37 * hash) + ERROR_FIELD_NUMBER;
@@ -1401,7 +1401,7 @@ public final class RpcNotifyProto {
         bitField0_ = (bitField0_ & ~0x00000010);
         payload_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
-        bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
+        bytePayload_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000040);
         error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
         bitField0_ = (bitField0_ & ~0x00000080);
@@ -1460,7 +1460,7 @@ public final class RpcNotifyProto {
         if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
           to_bitField0_ |= 0x00000040;
         }
-        result.bytesPayload_ = bytesPayload_;
+        result.bytePayload_ = bytePayload_;
         if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
           to_bitField0_ |= 0x00000080;
         }
@@ -1507,8 +1507,8 @@ public final class RpcNotifyProto {
           payload_ = other.payload_;
           onChanged();
         }
-        if (other.hasBytesPayload()) {
-          setBytesPayload(other.getBytesPayload());
+        if (other.hasBytePayload()) {
+          setBytePayload(other.getBytePayload());
         }
         if (other.hasError()) {
           setError(other.getError());
@@ -2044,54 +2044,54 @@ public final class RpcNotifyProto {
         return this;
       }
 
-      // optional bytes bytesPayload = 8;
-      private com.google.protobuf.ByteString bytesPayload_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes bytePayload = 8;
+      private com.google.protobuf.ByteString bytePayload_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes bytesPayload = 8;</code>
+       * <code>optional bytes bytePayload = 8;</code>
        *
        * <pre>
        *流报文
        * </pre>
        */
-      public boolean hasBytesPayload() {
+      public boolean hasBytePayload() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional bytes bytesPayload = 8;</code>
+       * <code>optional bytes bytePayload = 8;</code>
        *
        * <pre>
        *流报文
        * </pre>
        */
-      public com.google.protobuf.ByteString getBytesPayload() {
-        return bytesPayload_;
+      public com.google.protobuf.ByteString getBytePayload() {
+        return bytePayload_;
       }
       /**
-       * <code>optional bytes bytesPayload = 8;</code>
+       * <code>optional bytes bytePayload = 8;</code>
        *
        * <pre>
        *流报文
        * </pre>
        */
-      public Builder setBytesPayload(com.google.protobuf.ByteString value) {
+      public Builder setBytePayload(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000040;
-        bytesPayload_ = value;
+        bytePayload_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes bytesPayload = 8;</code>
+       * <code>optional bytes bytePayload = 8;</code>
        *
        * <pre>
        *流报文
        * </pre>
        */
-      public Builder clearBytesPayload() {
+      public Builder clearBytePayload() {
         bitField0_ = (bitField0_ & ~0x00000040);
-        bytesPayload_ = getDefaultInstance().getBytesPayload();
+        bytePayload_ = getDefaultInstance().getBytePayload();
         onChanged();
         return this;
       }
@@ -2410,22 +2410,21 @@ public final class RpcNotifyProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\034minifsu_notify_service.proto\022\ncass.uti" +
-      "ls\"\336\001\n\nRpcMessage\022%\n\004type\030\001 \002(\0162\027.cass.u" +
+      "ls\"\335\001\n\nRpcMessage\022%\n\004type\030\001 \002(\0162\027.cass.u" +
       "tils.MessageType\022\r\n\005msgId\030\002 \001(\t\022\017\n\007servi" +
       "ce\030\003 \001(\t\022\016\n\006method\030\004 \001(\t\022,\n\013payloadType\030" +
       "\007 \002(\0162\027.cass.utils.PayloadType\022\017\n\007payloa" +
-      "d\030\005 \001(\t\022\024\n\014bytesPayload\030\010 \001(\014\022$\n\005error\030\006" +
-      " \001(\0162\025.cass.utils.ErrorCode*3\n\013MessageTy" +
-      "pe\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002" +
-      "*-\n\013PayloadType\022\010\n\004JSON\020\000\022\n\n\006STRING\020\001\022\010\n" +
-      "\004BYTE\020\002*\201\001\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017\n\013W",
-      "RONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_METHO" +
-      "D\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_RESP" +
-      "ONSE\020\005\022\013\n\007TIMEOUT\020\0062E\n\tRpcNotify\0228\n\006noti" +
-      "fy\022\026.cass.utils.RpcMessage\032\026.cass.utils." +
-      "RpcMessageBE\n\'com.kongtrolink.framework." +
-      "core.protobufB\016RpcNotifyProto\200\001\001\210\001\001\220\001\001\240\001" +
-      "\001"
+      "d\030\005 \001(\t\022\023\n\013bytePayload\030\010 \001(\014\022$\n\005error\030\006 " +
+      "\001(\0162\025.cass.utils.ErrorCode*3\n\013MessageTyp" +
+      "e\022\013\n\007REQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002*" +
+      "-\n\013PayloadType\022\010\n\004JSON\020\000\022\n\n\006STRING\020\001\022\010\n\004" +
+      "BYTE\020\002*\201\001\n\tErrorCode\022\014\n\010NO_ERROR\020\000\022\017\n\013WR",
+      "ONG_PROTO\020\001\022\016\n\nNO_SERVICE\020\002\022\r\n\tNO_METHOD" +
+      "\020\003\022\023\n\017INVALID_REQUEST\020\004\022\024\n\020INVALID_RESPO" +
+      "NSE\020\005\022\013\n\007TIMEOUT\020\0062E\n\tRpcNotify\0228\n\006notif" +
+      "y\022\026.cass.utils.RpcMessage\032\026.cass.utils.R" +
+      "pcMessageBE\n\'com.kongtrolink.framework.c" +
+      "ore.protobufB\016RpcNotifyProto\200\001\001\210\001\001\220\001\001\240\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2437,7 +2436,7 @@ public final class RpcNotifyProto {
           internal_static_cass_utils_RpcMessage_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_cass_utils_RpcMessage_descriptor,
-              new java.lang.String[] { "Type", "MsgId", "Service", "Method", "PayloadType", "Payload", "BytesPayload", "Error", });
+              new java.lang.String[] { "Type", "MsgId", "Service", "Method", "PayloadType", "Payload", "BytePayload", "Error", });
           return null;
         }
       };

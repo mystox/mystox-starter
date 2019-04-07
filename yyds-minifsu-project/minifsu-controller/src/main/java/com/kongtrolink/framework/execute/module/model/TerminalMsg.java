@@ -11,8 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 public class TerminalMsg
 {
     private String msgId;
-    private int pkgSum;
-    private long ts;
+    private Integer pkgSum;
+    private Integer pkgNo;
+
     private JSONObject payload;
 
 
@@ -26,24 +27,20 @@ public class TerminalMsg
         this.msgId = msgId;
     }
 
-    public int getPkgSum()
-    {
+    public Integer getPkgSum() {
         return pkgSum;
     }
 
-    public void setPkgSum(int pkgSum)
-    {
+    public void setPkgSum(Integer pkgSum) {
         this.pkgSum = pkgSum;
     }
 
-    public long getTs()
-    {
-        return ts;
+    public Integer getPkgNo() {
+        return pkgNo;
     }
 
-    public void setTs(long ts)
-    {
-        this.ts = ts;
+    public void setPkgNo(Integer pkgNo) {
+        this.pkgNo = pkgNo;
     }
 
     public JSONObject getPayload()
@@ -57,14 +54,10 @@ public class TerminalMsg
     }
 
 
-    @Override
-    public String toString()
+    public static void main(String[] args)
     {
-        return "TerminalMsg{" +
-                "msgId='" + msgId + '\'' +
-                ", pkgSum=" + pkgSum +
-                ", ts=" + ts +
-                ", payload=" + payload +
-                '}';
+        String json = JSONObject.toJSONString(new TerminalMsg());
+        System.out.println(json);
     }
+
 }

@@ -1,15 +1,16 @@
 package com.kongtrolink.framework;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
+import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.model.TerminalMsg;
 import com.kongtrolink.framework.runner.ControllerRunner;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -222,29 +223,62 @@ public class MinifsuControllerApplicationTests {
     }
 
     public static void main(String[] args) {
-        String s = "{\"msgId\":\"000009\",\"pkgSum\":1,\"ts\":1553500113,\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"255-0-0-0-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
 
-        List<String> a = new ArrayList<>();
-        a.add("123");
-        a.add("abc");
+        //初始化客户端
+        Configuration conf = new Configuration();
+        RpcClient rpcClient = new RpcClient(conf);
+        RpcModuleBase rpcModuleBase = new RpcModuleBase(rpcClient);
+        RpcNotifyProto.RpcMessage response = null;
 
-        ModuleMsg msg = new ModuleMsg();
-        String arr = JSONObject.toJSONString(a);
-        JSON.parseObject(arr);
-        System.out.println(JSON.parseObject(arr));
-        JSONObject jsonObject = JSONObject.parseObject(s);
-        System.out.println(JSONObject.parseObject(s));
-//        System.out.println(jsonObject.get("data"));
-//        JSONObject object = (JSONObject) jsonObject.get("data");
-//        System.out.println(object.keySet());
-//
-//        System.out.println((Map)jsonObject.get("data"));
+        //1包注册
+        JSONObject requestHead = new JSONObject();
+        String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
+        requestHead.put("uuid", uuid);
+        requestHead.put("gip", "172.16.6.39:17700");
+        requestHead.put("pktType", PktType.CONNECT);
+
+        String registerMsg = "{\"msgId\":\"000021\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
+        response = sendMSG(requestHead, rpcModuleBase, registerMsg);
+        System.out.println("终端注册结果: "+response.getPayload());
+        if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
+            //2包 终端信息
+            String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI210121000001\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
+            response = sendMSG(requestHead, rpcModuleBase, terminalMsg);
+            System.out.println("终端属性上报结果: "+response.getPayload());
+            if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
+                //3包 设备包
+                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"3-0-0-1-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+                response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
+                System.out.println("设备上报结果"+response.getPayload());
+            }
+
+        }
+
+
+
+
+        String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
+        System.out.println(cleanMsg);
+        requestHead.put("pktType", PktType.CLEANUP);
+        response = sendMSG(requestHead, rpcModuleBase,  JSONObject.parse(cleanMsg));
+        System.out.println("注销"+response.getPayload());
+
 
 
     }
 
-    public void testMongo() {
 
+    static RpcNotifyProto.RpcMessage sendMSG(JSONObject requestHead, RpcModuleBase rpcModuleBase, Object msg) {
+        String ip = "172.16.6.39";
+        int port = 18800;
+        RpcNotifyProto.RpcMessage response = null;
+        requestHead.put("payload", msg);
+        try {
+            response = rpcModuleBase.postMsg("", new InetSocketAddress(ip, port), requestHead.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response;
     }
 
 }

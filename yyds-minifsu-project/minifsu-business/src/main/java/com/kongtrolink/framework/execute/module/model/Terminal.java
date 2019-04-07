@@ -12,6 +12,44 @@ public class Terminal
     private String SN;
     private String type;
     private String BID;
+    private Integer heartCycle;
+    private Integer businessRhythm;
+    private Integer alarmRhythm;
+    private Integer runStatusRhythm;
+
+
+    public Integer getAlarmRhythm() {
+        return alarmRhythm;
+    }
+
+    public void setAlarmRhythm(Integer alarmRhythm) {
+        this.alarmRhythm = alarmRhythm;
+    }
+
+    public Integer getHeartCycle() {
+        return heartCycle;
+    }
+
+    public void setHeartCycle(Integer heartCycle) {
+        this.heartCycle = heartCycle;
+    }
+
+    public Integer getBusinessRhythm() {
+        return businessRhythm;
+    }
+
+    public void setBusinessRhythm(Integer businessRhythm) {
+        this.businessRhythm = businessRhythm;
+    }
+
+
+    public Integer getRunStatusRhythm() {
+        return runStatusRhythm;
+    }
+
+    public void setRunStatusRhythm(Integer runStatusRhythm) {
+        this.runStatusRhythm = runStatusRhythm;
+    }
 
     public String getSN()
     {

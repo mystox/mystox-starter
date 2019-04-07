@@ -121,9 +121,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //payload组装消息成终端消息格式{"msgId":"000009","pkgSum":1,"ts":1552043047,"payload":{"pktType":4,"result":1}}
         TerminalMsg requestMsg = new TerminalMsg();
         requestMsg.setPayload(msgPayload);
-        requestMsg.setPkgSum(1);
         requestMsg.setMsgId(msgId);
-        requestMsg.setTs(System.currentTimeMillis() / 1000);
         //将消息放入payload
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestMsg));
 
@@ -186,10 +184,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String gip = (String) payloadObject.get("gip");
         JSONObject msgPayload = terminalMsg.getPayload();
         String SN = (String) msgPayload.get("SN");
-        TerminalMsg responseTP = new TerminalMsg(); //响应终端实体
-        responseTP.setPkgSum(terminalMsg.getPkgSum());
-        responseTP.setMsgId(msgId);
-        ModuleMsg moduleMsg = new ModuleMsg();
+        TerminalMsg terminalResp = new TerminalMsg(); //响应终端消息实体 payload
+        terminalResp.setMsgId(msgId);
+        ModuleMsg moduleMsg = new ModuleMsg(); //服务间消息实体
         moduleMsg.setMsgId(msgId);
         moduleMsg.setSN(SN);
         /******************************通讯信息刷新*****************************/
@@ -199,6 +196,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 //不存在该 SN 记录
                 String key = RedisHashTable.COMMUNICATION_HASH + ":" + SN;
                 JSONObject value = redisUtils.get(key, JSONObject.class);
+                Long expiredTime = 0L;
                 if (value == null) {//添加通讯信息
                     value = new JSONObject();
                     value.put("GWip", gip);
@@ -211,12 +209,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     String uuid2 = (String) value.get("UUID");//uuid发生变化 表示终端重连 则更新通讯路由信息
                     if (!uuid.equals(uuid2)) {
                         value.put("GWip", gip);
-                        value.put("UUID", uuid2);
+                        value.put("UUID", uuid);
                         redisUtils.set(key, value);
                     }
+                    Object expired = value.get("expired");
+                    if (expired!=null) expiredTime = ((Integer)expired).longValue();
                 }
+
                 // 设置过期时间
-                redisUtils.expired(key, communicationExpired, TimeUnit.SECONDS);
+                if (expiredTime == 0)
+                    expiredTime = communicationExpired;
+                redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
             }
         } catch (Exception e) {
 
@@ -237,8 +240,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             moduleMsg.setPktType(PktType.LOG_SAVE);
             moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
             sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
-            responseTP.setPayload(responsePayload);
-            return (JSONObject) JSONObject.toJSON(responseTP);
+            terminalResp.setPayload(responsePayload);
+            return (JSONObject) JSONObject.toJSON(terminalResp);
         }
 
         //终端payload报文解析
@@ -259,24 +262,26 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 }
             }
             responsePayload.put("pktType", pktType);
-            responseTP.setPayload(responsePayload);
-            return (JSONObject) JSONObject.toJSON(responseTP);
+            terminalResp.setPayload(responsePayload);
+            return (JSONObject) JSONObject.toJSON(terminalResp);
         }
-        /************fsu信息上报 pktType:2 设备信息上报 pktType:3 **********************/
-        if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType || TerminalPktType.DEV_LIST.getKey() == pktType) {
+        /************终端信息上报 pktType:2 设备信息上报 pktType:3 **********************/
+        if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType
+                || TerminalPktType.DEV_LIST.getKey() == pktType
+                || TerminalPktType.FILE_GET.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
-            responseTP.setPayload(responsePayload);
+            terminalResp.setPayload(responsePayload);
             responsePayload.put("pktType", pktType);
-            return (JSONObject) JSONObject.toJSON(responseTP);
+            return (JSONObject) JSONObject.toJSON(terminalResp);
         }
         /****************************数据变化上报*******************************/
-        if (TerminalPktType.DATA_REPORT.getKey() == pktType) {
+        if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);
-            responseTP.setPayload(responsePayload);
-            return (JSONObject) JSONObject.toJSON(responseTP);
+            terminalResp.setPayload(responsePayload);
+            return (JSONObject) JSONObject.toJSON(terminalResp);
         }
 
         JSONObject responsePayload = new JSONObject();
@@ -291,11 +296,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         log.setHostName(hostname);
         log.setMsgId(msgId);
         log.setErrorCode(StateCode.FAILED);
-        responseTP.setPayload(responsePayload);
+        terminalResp.setPayload(responsePayload);
         moduleMsg.setPktType(PktType.LOG_SAVE);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
         sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
-        return (JSONObject) JSONObject.toJSON(responseTP);
+        return (JSONObject) JSONObject.toJSON(terminalResp);
 
     }
 

@@ -22,7 +22,7 @@ spring:
     host: 172.16.5.26
     port: 6379
     communication:
-      expired: 1200
+      expired: 1200 #通讯信息默认过期时间
 
 server:
   name: minifsu-controller
