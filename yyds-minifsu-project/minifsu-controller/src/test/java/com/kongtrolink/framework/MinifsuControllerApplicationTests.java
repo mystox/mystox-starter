@@ -247,7 +247,7 @@ public class MinifsuControllerApplicationTests {
             System.out.println("终端属性上报结果: "+response.getPayload());
             if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
                 //3包 设备包
-                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"3-0-0-1-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"6-1-1-1-0990201\"]}}";
                 response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
                 System.out.println("设备上报结果"+response.getPayload());
             }

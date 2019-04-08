@@ -72,7 +72,7 @@ public class RegistryServiceImpl implements RegistryService {
         JSONObject result = new JSONObject();
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
-            Order order = terminalDao.findOrderByBid(bid);
+            Order order = terminalDao.findOrderById(bid);
             String bip = order.getBIP(); //业务网关的消息路由
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
@@ -197,6 +197,7 @@ public class RegistryServiceImpl implements RegistryService {
                         break;
                     }
                 }
+                deviceDao.save(device);
             }
             for (Device device : newDeviceList) { //未设置的新增设备初始化存入数据库表
                 if (device.getInvalidTime() == null) {
@@ -253,11 +254,11 @@ public class RegistryServiceImpl implements RegistryService {
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                     redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
-                    value.put("STATUS", 2);
-                    redisUtils.set(key,value);
                 }
             }
 
+                    value.put("STATUS", 2);
+                    redisUtils.set(key,value);
 
             try {
                 // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息

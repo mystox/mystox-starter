@@ -40,7 +40,8 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
         RpcNotifyProto.RpcMessage result = null;
         if (RpcNotifyProto.PayloadType.BYTE == payloadType) {
             ByteString bytes = rpcMessage.getBytePayload();
-            result = bytesExecute(msgId, bytes);//不同服务执行不一样的流程
+            String uuid = rpcMessage.getUuid();
+            result = bytesExecute(msgId,uuid, bytes);//不同服务执行不一样的流程
         } else if (StringUtils.isBlank(service)) {
 //            JSONObject object = JSONObject.parseObject(jsonPayLoad);
             result = execute(msgId, jsonPayLoad);//不同服务执行不一样的流程
@@ -74,7 +75,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
      * @param payLoad
      * @return
      */
-    protected RpcNotifyProto.RpcMessage bytesExecute(String msgId, ByteString payLoad) {
+    protected RpcNotifyProto.RpcMessage bytesExecute(String msgId, String uuid, ByteString payLoad) {
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
                 .setPayloadType(RpcNotifyProto.PayloadType.JSON)

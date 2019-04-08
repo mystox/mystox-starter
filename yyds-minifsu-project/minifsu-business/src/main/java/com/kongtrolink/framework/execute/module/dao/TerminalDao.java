@@ -34,6 +34,12 @@ public class TerminalDao
         return order;
     }
 
+    public Order findOrderById(String id)
+    {
+        Order order = mongoTemplate.findById(id, Order.class, MongoTableName.ORDER);
+        return order;
+    }
+
     public TerminalProperties findTerminalPropertiesByTerminalId(String terminalId) {
         return mongoTemplate.findOne(Query.query(Criteria.where("terminalId").is(terminalId)), TerminalProperties.class,MongoTableName.TERMINAL_PROPERTY);
     }
