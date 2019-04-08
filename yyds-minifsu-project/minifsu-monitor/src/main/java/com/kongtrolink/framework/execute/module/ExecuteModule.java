@@ -12,13 +12,10 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.DataReportService;
-import com.kongtrolink.framework.task.SaveAalarmTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -41,7 +38,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
     private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
-//    private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
 
     /**
      * @auther: liudd
