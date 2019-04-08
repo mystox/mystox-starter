@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.jsonType.JsonFsu;
@@ -20,6 +21,8 @@ public class DataRegisterService {
     RedisUtils redisUtils;
     @Autowired
     RpcModule rpcModule;
+    @Autowired
+    RpcClient rpcClient;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
 
@@ -43,7 +46,7 @@ public class DataRegisterService {
         }
         fsu.setPktType(null);
         fsu.setDtm(null);
-        taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, redisUtils));
+        taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, redisUtils, rpcClient));
         return "";
     }
 }

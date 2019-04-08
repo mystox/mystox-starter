@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -147,6 +148,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (PktType.CLEANUP.equals(pktType) || PktType.ALARM_SAVE.equals(pktType) || PktType.LOG_SAVE.equals(pktType)) {//注销
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
+
+        //告警上报，模拟随机返回成功和失败
+        if(PktType.ALARM_REGISTER.equals(pktType)){
+            JSONObject responsePayload = new JSONObject();
+            int result = new Random().nextBoolean() ? 1 : 0;
+            responsePayload.put("result", result);
+            return responsePayload;
+        }
+
         if (PktType.REGISTRY_CNTB.equals(pktType)) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
