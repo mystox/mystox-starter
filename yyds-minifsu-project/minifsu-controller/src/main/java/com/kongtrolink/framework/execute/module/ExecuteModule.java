@@ -151,7 +151,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
             JSONObject value = redisUtils.get(key, JSONObject.class);
-            if (value != null && (Integer) value.get("STATUS") == 1) {
+            if (value != null && (Integer) value.get("STATUS") == 2) {
                 String addr = (String) value.get("BIP");
                 if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
                     String[] addrArr = addr.split(":");
