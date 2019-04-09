@@ -73,7 +73,7 @@ public class RegistryServiceImpl implements RegistryService {
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
             Order order = terminalDao.findOrderById(bid);
-            String bip = order.getBIP(); //业务网关的消息路由
+
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             JSONObject value = redisUtils.get(key, JSONObject.class);
@@ -87,8 +87,10 @@ public class RegistryServiceImpl implements RegistryService {
                     String[] s = new String[keys.size()];
                     redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
                 }
-
+                if (order != null) {
+                    String bip = order.getBIP(); //业务网关的消息路由
                 value.put("BIP", bip);
+                }
                 value.put("STATUS", 1);
                 //心跳节拍值设置
                 Integer heartCycle = terminal.getHeartCycle();
@@ -391,7 +393,7 @@ public class RegistryServiceImpl implements RegistryService {
         log.setErrorCode((Integer) msgPayload.get("code"));
         log.setHostName((String) msgPayload.get("serverHost"));
         log.setServiceName((String) msgPayload.get("serverName"));
-        log.setTime(new Date((Long) msgPayload.get("time")));
+        log.setTime(new Date((Integer) msgPayload.get("time")));
         logDao.saveLog(log);
 
         JSONObject result = new JSONObject();
