@@ -9,6 +9,8 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -22,12 +24,16 @@ public class DataReportService {
 
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
+    @Value("server.bindIp")
+    private String serverIp;
 
     public String report(String msgId, JsonFsu fsu, Date curDate){
-        String result = "{'pktType':4,'result':1}";
+        String result = "{'pktType':4,'result':2}";
         //解析告警，这里可能需要定义异常，比如信号点不存在
         handlerAlarm(fsu, curDate);
         return result;
@@ -63,7 +69,7 @@ public class DataReportService {
         }
         List<JsonDevice> alarmDeviceList = new ArrayList<>();
         for(JsonDevice device : fsu.getData()) {
-            StringBuilder keyDev = new StringBuilder(device.getDev());
+            StringBuilder keyDev = new StringBuilder(fsu.getSN()).append("_").append(device.getDev());
             List<JsonSignal> alarmSignalList = new ArrayList<>();
             HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {

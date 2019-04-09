@@ -2,6 +2,7 @@ package com.kongtrolink.framework.task;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
@@ -28,7 +29,8 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
     private RedisUtils redisUtils;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
 
-    public SaveAalarmTask(String hostname, int port,RpcModule rpcModule, JsonFsu jsonFsu, RedisUtils redisUtils) {
+    public SaveAalarmTask(String hostname, int port,RpcModule rpcModule, JsonFsu jsonFsu, RedisUtils redisUtils, RpcClient rpcClient) {
+        super(rpcClient);
         this.hostname = hostname;
         this.port = port;
         this.rpcModule = rpcModule;
@@ -40,23 +42,31 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
     public void run() {
         InetSocketAddress registAddr = new InetSocketAddress(hostname, port);
         try {
-            RpcNotifyProto.RpcMessage rpcMessage = postMsg(registAddr, JSON.toJSONString(jsonFsu));
+            ModuleMsg msg = new ModuleMsg();
+            msg.setPayload(JSONObject.parseObject(JSON.toJSONString(jsonFsu)));
+            msg.setPktType(PktType.ALARM_REGISTER);
+            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg("", registAddr, JSON.toJSONString(msg));
             String payload = rpcMessage.getPayload();
-            ModuleMsg moduleMsg = JSON.parseObject(payload, ModuleMsg.class);
-            JSONObject resultPayload = moduleMsg.getPayload();
-            Object res = resultPayload.get("result");
+            JSONObject resultJson = JSONObject.parseObject(payload);
             //如果成功，重新遍历告警
-            boolean result = "1".equals(res) ? true : false;
+            boolean result = "1".equals(resultJson.get("result")) ? true : false;
             if(result){
                 List<Alarm> alarmList = new ArrayList<>();
                 parseAlarm(jsonFsu, alarmList);
-                String alarmMsg = createAlarmMsg(alarmList);
-                //发送命令给服务中心保存告警
-                postMsg(registAddr, alarmMsg);
+                if(!alarmList.isEmpty()) {
+                    String alarmMsg = createAlarmMsg(alarmList);
+                    //发送命令给服务中心保存告警
+                    rpcModule.postMsg("", registAddr, alarmMsg);
+                }
             }
         }catch (IOException e){
+            e.printStackTrace();
         }
         //保存实时告警到redis中
+        if(jsonFsu.getData().isEmpty()){
+            redisUtils.hdel(sn__alarm_hash, jsonFsu.getSN());
+            return ;
+        }
         redisUtils.hset(sn__alarm_hash, jsonFsu.getSN(), JSON.toJSONString(jsonFsu));
     }
 
@@ -81,7 +91,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
                     if( (link & EnumAlarmStatus.BEGINREPORT.getValue()) == 0 ){
                         link = (byte)(link | EnumAlarmStatus.BEGINREPORT.getValue());
                         alarm.setLink(link);
-                    }else{
+                    }else if( (link & EnumAlarmStatus.END.getValue()) != 0){
                         link = (byte)(link | EnumAlarmStatus.ENDREPORT.getValue());
                         alarm.setLink(link);
                         alarmList.add(alarm);

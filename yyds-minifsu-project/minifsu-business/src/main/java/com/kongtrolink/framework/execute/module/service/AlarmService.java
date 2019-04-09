@@ -16,5 +16,5 @@ public interface AlarmService {
      * @date: 2019/4/1 20:35
      * 功能描述:根据告警点id添加或修改告警
      */
-    JSONObject AddOrUpdateByAlarmId(ModuleMsg moduleMsg);
+    JSONObject save(ModuleMsg moduleMsg);
 }

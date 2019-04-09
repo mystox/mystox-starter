@@ -31,14 +31,11 @@ public class AlarmServiceImpl implements AlarmService {
      * 功能描述:根据告警点id添加或修改告警
      */
     @Override
-    public JSONObject AddOrUpdateByAlarmId(ModuleMsg moduleMsg) {
+    public JSONObject save(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
 
         List<Alarm> alarms = JSONArray.parseArray(JSON.toJSONString(payload.get("list")), Alarm.class);
-        for(Alarm alarm : alarms){
-            alarmDao.AddOrUpdateByAlarmId(alarm);
-        }
-
+        alarmDao.save(alarms);
         JSONObject object = new JSONObject();
         object.put("result", 1);
         return object;

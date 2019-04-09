@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @Auther: liudd
  * @Date: 2019/4/1 20:28
@@ -25,17 +27,11 @@ public class AlarmDao {
     /**
      * @auther: liudd
      * @date: 2019/4/1 20:33
-     * 功能描述:根据告警点id修改或者添加告警
+     * 功能描述:保存历史告警
      */
-    public boolean AddOrUpdateByAlarmId(Alarm alarm){
-        Criteria criteria = Criteria.where("alarmId").is(alarm.getAlarmId());
-        Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("link", alarm.getLink());
-        update.set("updateTime", alarm.getUpdateTime());
-        update.set("value", alarm.getValue());
-        WriteResult upsert = mongoTemplate.upsert(query, update, tableName);
-        return upsert.getN()>0 ? true : false;
+    public boolean save(List<Alarm> alarmList){
+        mongoTemplate.insert(alarmList, tableName);
+        return true;
     }
 
 }

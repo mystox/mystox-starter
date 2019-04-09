@@ -2,9 +2,7 @@ package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.Communication;
-import com.kongtrolink.framework.core.entity.ModuleMsg;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
+import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
@@ -12,7 +10,7 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.DataReportService;
-import com.kongtrolink.framework.task.SaveAalarmTask;
+import com.kongtrolink.framework.task.SaveLogTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -37,12 +36,23 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     DataRegisterService registerService;
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    RpcModule rpcModule;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
     private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
-//    private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
-
+    @Value("${server.name}")
+    private String serviceName;
+    @Value("${server.bindIp}")
+    private String hostIp;
+    @Value("${rpc.controller.hostname}")
+    private String controllerName;
+    @Value("${rpc.controller.port}")
+    private int controllerPort;
+    @Value("")
     /**
      * @auther: liudd
      * @date: 2019/4/3 10:32
@@ -71,10 +81,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         RpcNotifyProto.MessageType response = RpcNotifyProto.MessageType.RESPONSE;
         ModuleMsg moduleMsg = JSON.parseObject(payload, ModuleMsg.class);
         JSONObject infoPayload = moduleMsg.getPayload();
-        if(!checkCommunication(infoPayload)){
-            return createResp(response, "{'pktType':4,'result':0}", StringUtils.isBlank(msgId)? "" : msgId);
-        }
         JsonFsu fsu = JSONObject.parseObject(infoPayload.toJSONString(), JsonFsu.class);
+        if(!checkCommunication(infoPayload)){
+            saveLog(msgId, fsu, curDate, moduleMsg.getPktType());
+            return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
+        }
+
         String sn = fsu.getSN();
         //保存实时数据
         redisUtils.hset(sn_data_hash, sn, infoPayload);
@@ -83,6 +95,24 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //告警注册与消除
         registerService.register(msgId, fsu, curDate);
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
+    }
+
+    private void saveLog(String msgId, JsonFsu fsu, Date curDate, String pktType){
+        //发送日志
+        Log log = new Log();
+        log.setErrorCode(StateCode.UNREGISTY);
+        log.setServiceName(serviceName);
+        log.setHostName(hostIp);
+        log.setMsgId(msgId);
+        log.setSN(fsu.getSN());
+        log.setTime(curDate);
+        log.setMsgType(pktType);
+        ModuleMsg msg = new ModuleMsg();
+        msg.setPayload(JSONObject.parseObject(JSON.toJSONString(log)));
+        msg.setPktType(PktType.LOG_SAVE);
+        SaveLogTask task = new SaveLogTask(msgId, new InetSocketAddress(controllerName, controllerPort),
+                JSON.toJSONString(msg), rpcModule);
+        taskExecutor.execute(task);
     }
 
     /**
@@ -104,7 +134,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return  false;
         }
         Communication communication = JSON.parseObject(communicationObj.toString(), Communication.class);
-        if(communication.getStatus() == 0){     //终端未注册成功，返回注册失败消息
+        if(communication.getStatus() != RegisterCodeState.ONLINE){     //终端未注册成功，返回注册失败消息
             return  false;
         }
         return true;
