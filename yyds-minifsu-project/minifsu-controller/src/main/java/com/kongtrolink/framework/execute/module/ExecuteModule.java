@@ -162,13 +162,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
             JSONObject value = redisUtils.get(key, JSONObject.class);
             if (value != null && (Integer) value.get("STATUS") == 2) {
-                String addr = (String) value.get("BIP");
-                if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
-                    String[] addrArr = addr.split(":");
-                    return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
-                } else
-                {
-                    logger.error("bip[{}] illegal...");
+                String addrStr = (String) value.get("BIP");
+                String[] addrs = addrStr.split(";");
+                for (String addr : addrs) {
+                    if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
+                        String[] addrArr = addr.split(":");
+                        return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
+                    } else {
+                        logger.error("bip[{}] illegal...");
+                    }
                 }
             }
 
