@@ -393,7 +393,7 @@ public class RegistryServiceImpl implements RegistryService {
         log.setErrorCode((Integer) msgPayload.get("code"));
         log.setHostName((String) msgPayload.get("serverHost"));
         log.setServiceName((String) msgPayload.get("serverName"));
-        log.setTime(new Date((Integer) msgPayload.get("time")));
+        log.setTime(new Date((Long.valueOf(msgPayload.get("time") +""))));
         logDao.saveLog(log);
 
         JSONObject result = new JSONObject();
