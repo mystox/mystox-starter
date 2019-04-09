@@ -33,7 +33,7 @@ public class DataReportService {
     private String serverIp;
 
     public String report(String msgId, JsonFsu fsu, Date curDate){
-        String result = "{'pktType':4,'result':2}";
+        String result = "{'pktType':4,'result':1}";
         //解析告警，这里可能需要定义异常，比如信号点不存在
         handlerAlarm(fsu, curDate);
         return result;
