@@ -45,8 +45,11 @@ public class FileServiceImpl implements FileService {
             long fileLen = file.length();
             if (fileLen > Integer.MAX_VALUE)
                 logger.error("FILE" + file.getAbsoluteFile() + "is to large then MAX_INTEGER!!!");
+            if (fileLen < startIndex + 1) // 起始index 大于文件长度返回错误
+                return new byte[]{0};
             if (fileLen < endIndex + 1)
                 endIndex = Math.toIntExact(fileLen - 1);
+
             int requestLen = endIndex - startIndex + 1;
             int responseLen = requestLen + 6;
             byte[] bytes = new byte[responseLen]; //增加文件报文的头尾信息
@@ -76,7 +79,7 @@ public class FileServiceImpl implements FileService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new byte[0];
+        return new byte[]{0};
     }
 
 }
