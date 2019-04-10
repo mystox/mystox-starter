@@ -9,6 +9,7 @@ package com.kongtrolink.framework.core.entity;
 public enum TerminalPktType
 {
 
+    HEART(0, "heart"), //SN上报注册
     REGISTRY(1, "registry"), //SN上报注册
     TERMINAL_REPORT(2, "terminal_report"), //终端信息上报
     DEV_LIST(3, "dev_list"), //上报终端接入设备信息

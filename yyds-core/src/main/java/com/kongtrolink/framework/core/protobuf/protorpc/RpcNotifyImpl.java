@@ -102,10 +102,6 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
                 .build();
     }
 
-    public static void main(String[] args)
-    {
-        System.out.println();
-    }
 
 
 }

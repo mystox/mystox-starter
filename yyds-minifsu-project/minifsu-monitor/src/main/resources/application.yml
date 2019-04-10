@@ -1,3 +1,10 @@
+
+logging:
+  level:
+   root: info
+   org.apache.hadoop.util.Shell: OFF
+
+
 spring:
   redis:
     ## Redis数据库索引(默认为0)
@@ -20,7 +27,7 @@ spring:
 
 server:
   name: minifsu-monitor
-  bindIp: 172.16.6.199
+  bindIp: 172.16.6.39
   rpc:
     port: 18810
   port: 18081

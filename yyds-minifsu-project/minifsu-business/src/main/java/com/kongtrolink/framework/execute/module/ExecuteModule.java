@@ -1,16 +1,14 @@
 package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.protobuf.ByteString;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.TerminalPktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
-import com.kongtrolink.framework.execute.module.service.AlarmService;
-import com.kongtrolink.framework.execute.module.service.FsuService;
-import com.kongtrolink.framework.execute.module.service.LogService;
-import com.kongtrolink.framework.execute.module.service.RegistryService;
+import com.kongtrolink.framework.execute.module.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +39,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     AlarmService alarmService;
     @Autowired
     LogService logService;
+
+    @Autowired
+    FileService fileService;
+
 
     @Override
     public boolean init() {
@@ -79,6 +81,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.LOG_SAVE.equals(pktType)) { //日志保存
             JSONObject jsonObject = logService.saveLog(moduleMsg);
             result = jsonObject.toJSONString();
+        } else if (PktType.FILE_GET.equals(pktType)) {
+            byte[] bytes = fileService.fileGet(moduleMsg);
+            return RpcNotifyProto.RpcMessage.newBuilder()
+                    .setType(RpcNotifyProto.MessageType.RESPONSE)
+                    .setPayloadType(RpcNotifyProto.PayloadType.BYTE)
+                    .setBytePayload(ByteString.copyFrom(bytes))
+                    .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
+                    .build();
         }
 
 

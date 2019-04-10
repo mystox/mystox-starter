@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -619,12 +620,23 @@ public class RedisUtils
 
     public Set<String> getHkeys(String hashTable, String pattern) {
         ScanOptions scanOptions = ScanOptions.scanOptions().match(pattern).build();
-        Cursor<Map.Entry<Object,Object>> cursor = redisTemplate.opsForHash().scan(hashTable, scanOptions);
-        Set<String> result = new HashSet();
-        while (cursor.hasNext())
-        {
-            Map.Entry<Object,Object> entry = cursor.next();
-            result.add(entry.getKey().toString());
+        Set<String> result;
+        Cursor<Map.Entry<Object,Object>> cursor = null;
+        try {
+            cursor = redisTemplate.opsForHash().scan(hashTable, scanOptions);
+            result = new HashSet();
+            while (cursor.hasNext())
+            {
+                Map.Entry<Object,Object> entry = cursor.next();
+                result.add(entry.getKey().toString());
+            }
+        } finally {
+            if (cursor!=null & cursor.isClosed()!=true)
+                try {
+                    cursor.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
         return result;
     }

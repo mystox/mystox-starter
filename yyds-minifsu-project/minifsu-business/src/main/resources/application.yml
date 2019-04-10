@@ -22,7 +22,7 @@ spring:
     pool:
       max-active: 300
     ## 连接池最大阻塞等待时间（使用负值表示没有限制）
-      max-wait: -1
+      max-wait: 10000
     ## 连接池中的最大空闲连接
       max-idle: 100
     ## 连接池中的最小空闲连接
@@ -30,6 +30,9 @@ spring:
     host: 172.16.5.26
     port: 6379
 
+resource:
+  path:
+    sn: e:\IdeaProjects\YYDS\AppResources\sn
 
 executor:
   threadPool:
@@ -38,7 +41,7 @@ executor:
 
 rpc:
   client:
-    timeout: 200000
+    timeout: 20000
   controller:
     hostname: 172.16.6.39
     port: 18800
