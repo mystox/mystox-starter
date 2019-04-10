@@ -38,6 +38,7 @@ public class PktType
     public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
     public final static String DATA_REPORT = "data_report"; //终端数据变化上报
     public final static String DATA_REGISTER = "data_register"; //数据注册
+    public final static String FILE_GET = "file_get"; //告警注册
     public final static String ALARM_SAVE = "alarm_save"; //保存告警
     public final static String LOG_SAVE = "log_save"; //保存日志
     public final static String ALARM_REGISTER = "alarm_register"; //告警注册

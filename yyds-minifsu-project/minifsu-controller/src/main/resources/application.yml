@@ -12,7 +12,7 @@ spring:
     timeout: 60000
     ## 连接池最大连接数（使用负值表示没有限制）
     pool:
-      max-active: 300
+      max-active: 3
     ## 连接池最大阻塞等待时间（使用负值表示没有限制）
       max-wait: -1
     ## 连接池中的最大空闲连接
@@ -39,12 +39,12 @@ executor:
 
 rpc:
   client:
-    timeout: 200000
+    timeout: 20000
   net-GW:
     hostname: 172.16.6.39
     port: 17700
   monitor:
-    hostname: 172.16.6.199
+    hostname: 172.16.6.39
     port: 18810
   business:
     hostname: 172.16.6.39

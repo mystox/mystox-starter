@@ -102,7 +102,12 @@ public class MinifsuControllerApplicationTests {
         String as = "{'a':'b'}";
 //        redisTemplate.opsForHash().put(RedisHashTable.COMMUNICATION_HASH, "b", JSONObject.parse(as));
         String key = "communication_hash:MINI210121000001";
-        JSONObject r = redisUtils.get(key, JSONObject.class);
+        for (int i = 0; i<100;i++) {
+            System.out.println(i);
+            JSONObject r = redisUtils.get(key, JSONObject.class);
+            redisUtils.set(key, r);
+            System.out.println(r);
+        }
         ScanParams scanParams = new ScanParams();
         scanParams.match("MINI210121000001*");
         ScanOptions scanOptions = ScanOptions.scanOptions().match("MINI210121000001_3-1_1*").build();
@@ -263,10 +268,16 @@ public class MinifsuControllerApplicationTests {
         requestHead.put("gip", "172.16.6.39:17700");
         requestHead.put("pktType", PktType.CONNECT);
 
-        String registerMsg = "{\"msgId\":\"000021\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
+        /************************* 注册********************************/
+       /* for (int i=0; i<1000; i++)
+        {
+            String msgId = "00000"+ i + "";
+        String registerMsg = "{\"msgId\":\""+msgId+"\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
         response = sendMSG(requestHead, rpcModuleBase, registerMsg);
         System.out.println("终端注册结果: "+response.getPayload());
-        if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
+
+
+        *//*if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
             //2包 终端信息
             String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI210121000001\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
             response = sendMSG(requestHead, rpcModuleBase, terminalMsg);
@@ -279,21 +290,38 @@ public class MinifsuControllerApplicationTests {
             }
 
         }
-
+*//*
         //3包 数据包 数据变化包
         String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}}]}}\n";
         requestHead.put("payload", dataMsg);
         response = sendMSG(requestHead, rpcModuleBase, dataMsg);
         System.out.println("设备上报结果"+response.getPayload());
 
-
+        }*/
         /*String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
         System.out.println(cleanMsg);
         requestHead.put("pktType", PktType.CLEANUP);
         response = sendMSG(requestHead, rpcModuleBase,  JSONObject.parse(cleanMsg));
-        System.out.println("注销"+response.getPayload());
-*/
+        System.out.println("注销"+response.getPayload());*/
 
+
+
+        /****************** 文件包***************************/
+        String msgId = "00000"+ 1 + "";
+        String fileMsg = "{\"msgId\":\""+msgId+"\",\"payload\":{\n" +
+                "  \"pktType\": 10,\n" +
+                "  \"SN\": \"MINI210121000001\",\n" +
+                "  \"file\": {\n" +
+                "    \"filename\": \"engine.bin\",\n" +
+                "    \"type\" : 1,\n" +
+                "    \"fileNum\" : 2,\n" +
+                "    \"startIndex\": 2,\n" +
+                "    \"endIndex\": 6\n" +
+                "  }\n" +
+                "}}";
+        requestHead.put("payload", fileMsg);
+        response = sendMSG(requestHead, rpcModuleBase, fileMsg);
+        System.out.println("文件流结果: "+response.getBytePayload().toString());
 
     }
 
