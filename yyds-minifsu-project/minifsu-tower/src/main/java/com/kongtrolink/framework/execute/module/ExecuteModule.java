@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
@@ -43,6 +44,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload)
     {
+
+
+        ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
+
+
+
 
         //todo
         JSONObject result = new JSONObject();

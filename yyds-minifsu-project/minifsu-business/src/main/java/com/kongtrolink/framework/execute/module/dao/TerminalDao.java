@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.Order;
 import com.kongtrolink.framework.execute.module.model.Terminal;
@@ -9,6 +10,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by mystoxlol on 2019/3/28, 9:06.
@@ -46,5 +49,12 @@ public class TerminalDao
 
     public void saveTerminal(TerminalProperties terminalProperties) {
         mongoTemplate.save(terminalProperties,MongoTableName.TERMINAL_PROPERTY);
+    }
+
+    public List<Terminal> findTerminal(JSONObject jsonObject) {
+
+        Criteria criteria = new Criteria();
+
+        return mongoTemplate.find(Query.query(criteria),Terminal.class, MongoTableName.TERMINAL);
     }
 }

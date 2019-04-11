@@ -175,7 +175,7 @@ public class RegistryServiceImpl implements RegistryService {
                 if (StringUtils.isNotBlank(dev) && dev.contains("-")) {
                     String[] devArr = dev.split("-");
                     Integer devType = Integer.parseInt(devArr[0]);
-                    Integer devPort = Integer.parseInt(devArr[1]);
+                    String devPort = devArr[1];
                     Integer devResNo = Integer.parseInt(devArr[3]);
                     Device device = new Device();
                     device.setPort(devPort);
@@ -187,12 +187,12 @@ public class RegistryServiceImpl implements RegistryService {
             }
             for (Device device : devices) {//数据库设备表
                 Integer deviceType = device.getType();
-                Integer devicePort = device.getPort();
+                String devicePort = device.getPort();
                 Integer deviceResNo = device.getResNo();
                 device.setInvalidTime(new Date(System.currentTimeMillis())); //设置失效
                 for (Device newDevice : newDeviceList) {
                     if (deviceType == newDevice.getType()
-                            && devicePort == newDevice.getPort()
+                            && devicePort.equals(newDevice.getPort())
                             && deviceResNo == newDevice.getResNo()) { //存在对应类型设置有效
                         device.setInvalidTime(new Date(0L));
                         newDevice.setInvalidTime(new Date(0L));

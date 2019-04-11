@@ -5,7 +5,6 @@ import com.kongtrolink.framework.mqtt.base.MqttRequestHelper;
 import com.kongtrolink.framework.service.MqttTestInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by mystoxlol on 2019/2/27, 17:32.
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
  * description:
  * update record:
  */
-@Service
+//@Service
 public class MqttTestImpl implements MqttTestInterface
 {
     @Value("${mqtt.sub.ywcl.topicId}")

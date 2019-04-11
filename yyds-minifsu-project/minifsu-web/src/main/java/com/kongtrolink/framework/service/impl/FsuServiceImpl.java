@@ -1,20 +1,20 @@
 package com.kongtrolink.framework.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Fsu;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
-import com.kongtrolink.framework.core.entity.YwclMessage;
 import com.kongtrolink.framework.dao.FsuDao;
 import com.kongtrolink.framework.dao.FsuDevicesDao;
 import com.kongtrolink.framework.dao.OperatorHistoryDao;
+import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.model.OperatHistory;
-import com.kongtrolink.framework.mqtt.base.MqttRequestHelper;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.LocationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,16 +30,13 @@ import java.util.Map;
 @Service
 public class FsuServiceImpl implements FsuService
 {
-    @Value("${mqtt.sub.ywcl.topicId}")
-    private String omcTopic;
-    @Value("${mqtt.timeout}")
-    private int mqttTimeout;
+
+    @Autowired
+    RpcModule rpcModule;
     @Autowired
     FsuDao fsuDao;
     @Autowired
     FsuDevicesDao fsuDevicesDao;
-    @Autowired
-    MqttRequestHelper mqttRequestHelper;
 
     @Autowired
     OperatorHistoryDao operatorHistoryDao;
@@ -47,11 +44,8 @@ public class FsuServiceImpl implements FsuService
     @Override
     public JSONObject setFsu(Map<String, Object> requestBody)
     {
-//        if (fsu == null) fsu = new Fsu();
         if (requestBody == null) return null;
-        String fsuId = (String) requestBody.get("fsuId");
-//        Fsu fsu = fsuDao.findByFsuId(fsuId);
-        String fsuCode = (String) requestBody.get("fsu_id");
+        String sn = (String) requestBody.get("sn");
 
         /*if (fsuCode != null)
         {
@@ -89,70 +83,52 @@ public class FsuServiceImpl implements FsuService
 //        BeanUtils.copyProperties(requestBody, fsu);
 //        fsuDao.saveFsu(fsu);
 
-        YwclMessage ywclMessage = new YwclMessage(PktType.SET_STATION, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_STATION,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
 
     @Override
-    public JSONObject upgrade(Map<String, Object> requestBody, String fsuId)
+    public JSONObject upgrade(Map<String, Object> requestBody, String sn)
     {
         if (requestBody == null) return null;
-        YwclMessage ywclMessage = new YwclMessage(PktType.UPDATE, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, 300000);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.UPDATE,sn);
+        moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class, 300000L);
         return result;
     }
 
     @Override
-    public JSONObject compiler(Map<String, Object> requestBody)
+    public JSONObject compiler(Map<String, Object> requestBody,String sn)
     {
         if (requestBody == null) return null;
-        String url = (String) requestBody.get("url");
-        YwclMessage ywclMessage = new YwclMessage(PktType.COMPILER, System.currentTimeMillis(), "mqttTimeout");
-        ywclMessage.setData(url);
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.COMPILER,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
     @Override
-    public JSONObject getDeviceList(Map<String, Object> requestBody, String fsuId)
+    public JSONArray getDeviceList(Map<String, Object> requestBody, String sn)
     {
         if (requestBody == null) return null;
-        YwclMessage ywclMessage = new YwclMessage(PktType.GET_DEVICES, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICES,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONArray result = rpcModule.syncRequestData(moduleMsg,  JSONArray.class);
         return result;
     }
 
+
+
     @Override
-    public JSONObject deleteDevice(Map<String, Object> requestBody)
+    public JSONObject getFsuStatus(Map<String, Object> requestBody, String sn)
     {
         if (requestBody == null) return null;
-        YwclMessage ywclMessage = new YwclMessage(PktType.DEL_DEVICE, System.currentTimeMillis(), "123213132312");
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, 300000);
-        return result;
-    }
-
-    @Override
-    public JSONObject addDevice(Map<String, Object> requestBody, String fsuId)
-    {
-        if (requestBody == null) return null;
-        YwclMessage ywclMessage = new YwclMessage(PktType.SET_DEVICES, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
-        return result;
-    }
-
-    @Override
-    public JSONObject getFsuStatus(Map<String, Object> requestBody, String fsuId)
-    {
-        YwclMessage ywclMessage = new YwclMessage(PktType.GET_DEVICE_STATUS, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICE_STATUS,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
         return result;
     }
 
@@ -170,20 +146,22 @@ public class FsuServiceImpl implements FsuService
     }
 
     @Override
-    public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String fsuId)
+    public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String sn)
     {
-        YwclMessage ywclMessage = new YwclMessage(PktType.GET_OP_LOG, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        if (requestBody == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_OP_LOG,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
         return result;
     }
 
     @Override
-    public JSONObject logoutFsu(Map<String, Object> requestBody, String fsuId)
+    public JSONObject logoutFsu(Map<String, Object> requestBody, String sn)
     {
-        YwclMessage ywclMessage = new YwclMessage(PktType.LOGOUT, System.currentTimeMillis(), fsuId);
-        ywclMessage.setData(JSON.toJSONString(requestBody));
-        JSONObject result = mqttRequestHelper.syncRequestData(ywclMessage, omcTopic, JSONObject.class, mqttTimeout);
+        if (requestBody == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.LOGOUT,sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
         return result;
     }
 
@@ -195,7 +173,8 @@ public class FsuServiceImpl implements FsuService
             return null;
         String[] coordinateLocation = coordinate.split(",");
 
-        List<Fsu> fsuList = listFsu(null);
+//        List<Fsu> fsuList = listFsu(null);
+        List<Fsu> fsuList = new ArrayList<>();
 
         List<Fsu> result = new ArrayList<>();
         for (Fsu fsu : fsuList)
@@ -216,11 +195,13 @@ public class FsuServiceImpl implements FsuService
     }
 
     @Override
-    public List<Fsu> listFsu(Map<String, Object> requestBody)
+    public JSONArray listFsu(Map<String, Object> requestBody)
     {
-        if (requestBody == null) return fsuDao.getAllFsu();
-        List<Fsu> fsuList = fsuDao.findByCondition(requestBody);
-        return fsuList;
+        if (requestBody == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_FSU);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONArray result = rpcModule.syncRequestData(moduleMsg,  JSONArray.class);
+        return result;
 
     }
 

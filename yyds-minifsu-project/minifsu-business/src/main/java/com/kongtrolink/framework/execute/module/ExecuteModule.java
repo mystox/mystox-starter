@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.ByteString;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
@@ -30,7 +31,13 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     @Autowired
     private ThreadPoolTaskExecutor controllerExecutor;
     @Autowired
-    FsuService fsuService;
+    TerminalService terminalService;
+
+     @Autowired
+    DataMntService dataMntService;
+
+
+
 
     @Autowired
     RegistryService registryService;
@@ -60,7 +67,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload) {
-        String result = "";
+        JSONObject r = new JSONObject();
+        r.put("result", 0);
+        String result = r.toJSONString();
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
         if (TerminalPktType.REGISTRY.getValue().equals(pktType)) { // 注册终端
@@ -89,6 +98,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     .setBytePayload(ByteString.copyFrom(bytes))
                     .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                     .build();
+        } else if (PktType.GET_DEVICES.equals(pktType)) { //获取设备列表
+            JSONArray jsonObject = terminalService.getDeviceList(moduleMsg);
+            result = jsonObject.toJSONString();
+        }else if (PktType.GET_FSU.equals(pktType)) { //获取设备列表
+            JSONArray jsonObject = terminalService.listFsu(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.GET_DATA.equals(pktType)) { //获取设备列表
+            JSONObject jsonObject = dataMntService.getSignalList(moduleMsg);
+            result = jsonObject.toJSONString();
         }
 
 

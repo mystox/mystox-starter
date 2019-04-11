@@ -43,7 +43,7 @@ server:
   bindIp: 172.16.6.39
 rpc:
   client:
-    timeout: 20000
-  business:
+    timeout: 30000
+  controller:
     hostname: 172.16.6.39
-    port: 18830
+    port: 18800

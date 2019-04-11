@@ -2,7 +2,7 @@ package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.MqttStandardMessage;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.service.ModuleInterface;
@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.UUID;
 
 /**
  * Created by mystoxlol on 2019/3/22, 9:04.
@@ -26,29 +24,40 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Value("${rpc.business.hostname}")
+    @Value("${rpc.controller.hostname}")
     private String host;
-    @Value("${rpc.business.port}")
+    @Value("${rpc.controller.port}")
     private int port;
 
-    public <T> T syncRequestData(MqttStandardMessage message, Class<T> clazz){
+    public <T> T syncRequestData(ModuleMsg message, Class<T> clazz){
         return syncRequestData(message, clazz,null);
     }
 
- public <T> T syncRequestData(MqttStandardMessage message,  Class<T> clazz, Long timeOut){
+ public <T> T syncRequestData(ModuleMsg message,  Class<T> clazz, Long timeOut){
+     String payload = "";
         try
         {
-            RpcNotifyProto.RpcMessage result = super.postMsg(UUID.randomUUID().toString(), new InetSocketAddress(host, port), JSONObject.toJSONString(message),timeOut);
-            String payload = result.getPayload();
+            RpcNotifyProto.RpcMessage result = super.postMsg(message.getMsgId(), new InetSocketAddress(host, port), JSONObject.toJSONString(message),timeOut);
+            payload = result.getPayload();
+            Object o = JSON.parse(payload);
+            if(clazz.isInstance(o)){ //判断返回类型是否匹配
             T data = JSON.parseObject(payload, clazz);
-            return data;
-        } catch (IOException e)
+                return data;
+            } else {
+                logger.error("error class type...");
+                return null;
+            }
+        } catch (Exception e)
         {
-            logger.error("message 解析报错 {}");
+            logger.error("请求错误 {} [{}]",payload,e.toString());
             e.printStackTrace();
             return null;
         }
     }
 
-
+public static void main(String[] args) throws ClassNotFoundException {
+    Class clazz = Class.forName(JSONObject.class.getName());
+    Object o = JSON.parse("[{'result':0}]");
+    System.out.println(clazz.isInstance(o));
+}
 }

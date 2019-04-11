@@ -14,7 +14,7 @@ public class Device {
     private String id;
     private Integer type;    //设备类型
     private Integer resNo;   //资源编号
-    private Integer port; //设备端口
+    private String port; //设备端口
     @Field("SN")
     private String SN;
 
@@ -60,11 +60,11 @@ public class Device {
         this.resNo = resNo;
     }
 
-    public Integer getPort() {
+    public String getPort() {
         return port;
     }
 
-    public void setPort(Integer port) {
+    public void setPort(String port) {
         this.port = port;
     }
 }

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.model.OperatHistory;
@@ -21,17 +22,13 @@ public interface FsuService {
 
     JSONObject upgrade(Map<String, Object> requestBody, String fsuId);
 
-    JSONObject compiler(Map<String, Object> requestBody);
+    JSONObject compiler(Map<String, Object> requestBody, String sn);
 
-    JSONObject getDeviceList(Map<String, Object> requestBody, String fsuId);
-
-    JSONObject deleteDevice(Map<String, Object> requestBody);
-
-    JSONObject addDevice(Map<String, Object> requestBody, String fsuId);
+    JSONArray getDeviceList(Map<String, Object> requestBody, String fsuId);
 
     List<Fsu>  getFsuListByCoordinate(Map fsuMap);
 
-    List<Fsu> listFsu(Map<String, Object> requestBody);
+    JSONArray listFsu(Map<String, Object> requestBody);
 
     List<Fsu> searchFsu(Map<String, Object> requestBody);
 

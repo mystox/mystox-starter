@@ -44,4 +44,12 @@ public enum TerminalPktType
         }
         return null;
     }
+    public static int toKey(String value) {
+        for (TerminalPktType item : TerminalPktType.values()) {
+            if (item.value .equals(value)) {
+                return item.key;
+            }
+        }
+        return -1;
+    }
 }
