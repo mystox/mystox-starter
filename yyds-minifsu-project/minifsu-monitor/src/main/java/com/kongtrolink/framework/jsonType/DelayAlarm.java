@@ -8,6 +8,15 @@ package com.kongtrolink.framework.jsonType;
 public class DelayAlarm {
     private int delay;          //产生延时或消除延迟间隔
     private long delayFT;       //产生延迟或消除延迟第一次时间
+    private float value;        //告警值
+
+    public float getValue() {
+        return value;
+    }
+
+    public void setValue(float value) {
+        this.value = value;
+    }
 
     public DelayAlarm() {
     }

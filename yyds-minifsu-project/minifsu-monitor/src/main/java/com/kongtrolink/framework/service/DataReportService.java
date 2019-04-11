@@ -93,12 +93,12 @@ public class DataReportService {
         for(JsonDevice device : fsu.getData()) {
             StringBuilder keyDev = new StringBuilder(fsu.getSN()).append("_").append(device.getDev());
             List<JsonSignal> alarmSignalList = new ArrayList<>();
-            HashMap<String, Double> data = device.getInfo();
+            HashMap<String, Float> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
                 handleSignal(signal, keyDev, alarmHashMap, curDate, bdBeforMap, bdNewMap, edBeforMap, edNewMap);
                 if(signal.getAlarmMap() != null && !signal.getAlarmMap().isEmpty()){
-                    signal.setV(null);
+                    signal.setV(0);
                     alarmSignalList.add(signal);
                 }
             }
@@ -158,7 +158,7 @@ public class DataReportService {
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(signal, alarmSignal, curDate);
                 beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
-                beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, signal, bdMap, bdNewMap);
+                beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, bdMap, bdNewMap);
                 //处理告警延迟记录
             } else {              //进入恢复告警逻辑
                 endAlarm(beforAlarm, signal, alarmSignal, curDate);

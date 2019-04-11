@@ -12,7 +12,7 @@ public class JsonDevice {
 
     //JSON转换使用字段
     private String dev;     //变化上报时dev字段
-    private HashMap<String, Double> info; //上报的实时数据
+    private HashMap<String, Float> info; //上报的实时数据
     private List<JsonSignal> signalList;
 
     public String getDev() {
@@ -23,11 +23,11 @@ public class JsonDevice {
         this.dev = dev;
     }
 
-    public HashMap<String, Double> getInfo() {
+    public HashMap<String, Float> getInfo() {
         return info;
     }
 
-    public void setInfo(HashMap<String, Double> info) {
+    public void setInfo(HashMap<String, Float> info) {
         this.info = info;
     }
 
