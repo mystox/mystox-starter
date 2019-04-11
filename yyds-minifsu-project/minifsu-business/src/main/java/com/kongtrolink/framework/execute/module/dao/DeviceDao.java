@@ -23,7 +23,7 @@ public class DeviceDao {
     MongoTemplate mongoTemplate;
 
 
-    public Device findDeviceByTypeResNoPort(String sn, Integer type, Integer resNo, Integer port) {
+    public Device findDeviceByTypeResNoPort(String sn, Integer type, Integer resNo, String port) {
         return mongoTemplate.findOne(Query.query(
                 Criteria.where(sn).is(sn)
                         .and("type").is(type)

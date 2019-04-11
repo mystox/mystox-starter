@@ -32,24 +32,18 @@ public class DataController
     /**
      * 信号点实时数据
      * @param requestBody
-     * @param fsuId
+     * @param sn
      * @return
      */
     @RequestMapping("/getSignalList")
-    public JsonResult getSignalList(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)
+    public JsonResult getSignalList(@RequestBody(required = false) Map<String, Object> requestBody, String sn)
     {
 
 
-        JSONObject result = dataMntService.getSignalList(requestBody, fsuId);
+        JSONObject result = dataMntService.getSignalList(requestBody, sn);
         if (result != null)
         {
-            if ( "0".equals(result.get("result"))) return new JsonResult("执行任务失败", false);
-            JSONObject data = (JSONObject) result.get("data");
-            if (data!=null)
-            {
-                transSignalCode(data);
-            return new JsonResult(data);
-            }
+            return new JsonResult(result);
         }
         return new JsonResult("请求错误或者超时", false);
     }
@@ -85,22 +79,6 @@ public class DataController
         }
     }
 
-    @RequestMapping("/getSignalHistory")
-    public JsonResult getSignalHistory(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)
-    {
-        JSONObject result = dataMntService.getSignalListHistory(requestBody, fsuId);
-            if (result != null)
-            {
-                if ( "0".equals(result.get("result"))) return new JsonResult("执行任务失败", false);
-                JSONObject data = (JSONObject) result.get("data");
-                if (data!=null)
-                {
-                    transSignalCode(data);
-                    return new JsonResult(data);
-                }
-            }
-        return new JsonResult("请求错误或者超时", false);
-    }
 
     @RequestMapping("/getAlarmList")
     public JsonResult getAlarmList(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)
@@ -136,11 +114,11 @@ public class DataController
                 "0".equals(result.get("result")) ? new JsonResult("执行任务失败", false) :new JsonResult(result.get("data"));
     }
  @RequestMapping("/setSignal")
-    public JsonResult setSignal(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)
+    public JsonResult setSignal(@RequestBody(required = false) Map<String, Object> requestBody, String sn)
     {
-        JSONObject result = dataMntService.setSignal(requestBody, fsuId);
+        JSONObject result = dataMntService.setSignal(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
-                "0".equals(result.get("result")) ? new JsonResult("执行任务失败", false) :new JsonResult(result.get("data"));
+                0==(Integer)result.get("result") ? new JsonResult("执行任务失败", false) :new JsonResult(result);
     }
 
 }

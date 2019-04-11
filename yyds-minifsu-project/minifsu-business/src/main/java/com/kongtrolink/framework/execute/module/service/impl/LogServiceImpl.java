@@ -20,10 +20,6 @@ public class LogServiceImpl implements LogService {
     @Autowired
     LogDao logDao;
 
-
-
-
-
     @Override
     public JSONObject saveLog(ModuleMsg moduleMsg) {
 

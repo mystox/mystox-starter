@@ -1,13 +1,11 @@
 package com.kongtrolink.framework.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.ControllerInstance;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.JsonResult;
-import com.kongtrolink.framework.util.ReflectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * \* @Author: mystox
@@ -60,60 +55,8 @@ public class FSUController
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody)
     {
-        List<Fsu> result = fsuService.listFsu(requestBody);//查询结果
-        int fsuSize = result.size();
-        Map<String, Integer> stateMap = new ConcurrentHashMap<>();//任务状态标记
-        List<JSONObject> jsonObjectList = new ArrayList<>();
-        long startTime = System.currentTimeMillis();
-        for (Fsu fsu : result)
-        {
-            taskExecutor.execute(() ->
-            {
-                Map<String, Object> requestBody1 = new HashMap<>();
-                String fsuId = fsu.getFsuId();
-                JSONObject result1 = fsuService.getFsuStatus(requestBody1, fsuId);
-                if (result1 != null)
-                {
-                    Map<String, Integer> data = (Map<String, Integer>) result1.get("data");
-                    if (data != null)
-                    {
-                        Integer state = data.get("online");
-                        stateMap.put(fsuId, state);
-                    }
-                }
-            });
-        }
-        while (true)
-        {
-            if (stateMap.size() == fsuSize || System.currentTimeMillis() - startTime > 11000)
-            {
-                logger.info("任务执行结束...");
-                List<String> fsuIds = new ArrayList<>();
-                fsuIds = ReflectionUtils.convertElementPropertyToList(result,"fsuId");
-                Map<String, Integer> fsuDeviceCountMap = fsuService.getFsuDeviceCountMap(fsuIds);
-                for (Fsu fsu : result)
-                {
-                    String fsuId = fsu.getFsuId();
-                    Integer state = stateMap.get(fsuId);
-                    JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(fsu));
-                    jsonObject.put("online", state == null ? 0 : state);
-                    jsonObject.put("deviceCount", fsuDeviceCountMap.get(fsuId));
-                    jsonObjectList.add(jsonObject);
-                }
-                break;
-            }
-            try
-            {
-                Thread.sleep(100l);
-            } catch (InterruptedException e)
-            {
-                logger.error("线程异常");
-                e.printStackTrace();
-                break;
-            }
-        }
-
-        return new JsonResult(jsonObjectList);
+        JSONArray result = fsuService.listFsu(requestBody);//查询结果
+        return new JsonResult(result);
     }
 
     @RequestMapping("/getFsuListByCoordinate")
@@ -212,9 +155,9 @@ public class FSUController
     }
 
     @RequestMapping("/compiler")
-    public JsonResult compiler(@RequestBody Map<String, Object> requestBody)
+    public JsonResult compiler(@RequestBody Map<String, Object> requestBody, String sn)
     {
-        JSONObject result = fsuService.compiler(requestBody);
+        JSONObject result = fsuService.compiler(requestBody,sn);
         return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
     }
 
@@ -222,16 +165,16 @@ public class FSUController
 
 
     @RequestMapping("/getDeviceList")
-    public JsonResult getDeviceList(@RequestBody Map<String, Object> requestBody, String fsuId)
+    public JsonResult getDeviceList(@RequestBody Map<String, Object> requestBody, String sn)
     {
 
-        JSONObject result = fsuService.getDeviceList(requestBody, fsuId);
+        JSONArray result = fsuService.getDeviceList(requestBody, sn);
         if (result != null)
         {
-            Map<String, String> dStationMap = ControllerInstance.getInstance().getdStationMap();
-            Map<String, String> roomStationMap = ControllerInstance.getInstance().getRoomStationMap();
-            JSONObject data = (JSONObject) result.get("data");
-            JSONArray devices = (JSONArray) data.get("devices");
+            /*Map<String, String> dStationMap = ControllerInstance.getInstance().getdStationMap();
+            Map<String, String> roomStationMap = ControllerInstance.getInstance().getRoomStationMap();*/
+//            JSONArray data = (JSONArray) result.get("data");
+          /*  JSONArray devices = (JSONArray) data.get("devices");
             for (Object object : devices)
             {
                 JSONObject device = (JSONObject) object;
@@ -246,25 +189,11 @@ public class FSUController
                     String name = dStationMap.get(sCode);
                     device.put("name", StringUtils.isBlank(name) ? "未知设备" : name);
                 }
-            }
-            return new JsonResult(data);
+            }*/
+            return new JsonResult(result);
         } else return new JsonResult("请求错误或者超时", false);
     }
 
-    @RequestMapping("/deleteDevice")
-    public JsonResult deleteDevice(@RequestBody Map<String, Object> requestBody)
-    {
-        JSONObject result = fsuService.deleteDevice(requestBody);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
-    }
-
-    @RequestMapping("/addDevice")
-    public JsonResult addDevice(@RequestBody Map<String, Object> requestBody, String fsuId)
-    {
-
-        JSONObject result = fsuService.addDevice(requestBody, fsuId);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
-    }
 
     @RequestMapping("/getFsuStatus")
     public JsonResult getFsuStatus(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)

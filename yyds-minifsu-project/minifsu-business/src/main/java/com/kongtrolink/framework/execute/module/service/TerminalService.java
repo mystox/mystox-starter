@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.execute.module.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Fsu;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.OperatHistory;
 
 import java.util.List;
@@ -13,18 +15,18 @@ import java.util.Map;
  * description:
  * update record:
  */
-public interface FsuService
+public interface TerminalService
 {
     JSONObject setFsu(Map<String, Object> requestBody);
 
-    Fsu getFsu(Map<String, Object> requestBody);
+    Fsu getFsu(ModuleMsg requestBody);
 
 
     JSONObject upgrade(Map<String, Object> requestBody, String fsuId);
 
     JSONObject compiler(Map<String, Object> requestBody);
 
-    JSONObject getDeviceList(Map<String, Object> requestBody, String fsuId);
+    JSONArray getDeviceList(ModuleMsg moduleMsg);
 
     JSONObject deleteDevice(Map<String, Object> requestBody);
 
@@ -32,7 +34,7 @@ public interface FsuService
 
     List<Fsu> getFsuListByCoordinate(Map fsuMap);
 
-    List<Fsu> listFsu(Map<String, Object> requestBody);
+    JSONArray listFsu(ModuleMsg requestBody);
 
     List<Fsu> searchFsu(Map<String, Object> requestBody);
 

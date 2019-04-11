@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.ByteString;
 import com.kongtrolink.framework.core.entity.*;
@@ -107,13 +108,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 }
 
             } else if (PktType.SET_ALARM_PARAM.equals(pktType)
-                    || PktType.UPDATE.equals(pktType)) //服务>>>>>>>>终端 //
+                    || PktType.UPDATE.equals(pktType)
+                    || PktType.SET_DATA.equals(pktType)
+                    ) //服务>>>>>>>>终端 //
             {
-                JSONObject result = sendTerminalExecute(msgId, payloadObject);
+                JSON result = sendTerminalExecute(msgId, payloadObject);
                 response = result.toJSONString();
             } else //服务>>>>>>>>>>>>服务
             {
-                JSONObject result = moduleExecute(msgId, payloadObject);
+                JSON result = moduleExecute(msgId, payloadObject);
                 response = result.toJSONString();
             }
         } else response = "{'result':0,'msgId':'" + msgId + "'}";
@@ -131,11 +134,18 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      *
      * @return
      */
-    private JSONObject sendTerminalExecute(String msgId, JSONObject payloadObject) {
+    private JSON sendTerminalExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         JSONObject msgPayload = moduleMsg.getPayload();
         msgId = StringUtils.isBlank(msgId) ? moduleMsg.getMsgId() : msgId;
-        String sn = (String) payloadObject.get("SN");
+        String sn = moduleMsg.getSN();
+        String pktType = moduleMsg.getPktType();
+        //获取终端pktType
+        int pktTypeInt = TerminalPktType.toKey(pktType);
+        JSONObject result = new JSONObject();
+        result.put("result", 0);
+        if (pktTypeInt != -1) return result;
+        msgPayload.put("pktType", pktTypeInt);
         //payload组装消息成终端消息格式{"msgId":"000009","pkgSum":1,"ts":1552043047,"payload":{"pktType":4,"result":1}}
         TerminalMsg requestMsg = new TerminalMsg();
         requestMsg.setPayload(msgPayload);
@@ -143,10 +153,44 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //将消息放入payload
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestMsg));
 
-        //根据SN获取uuid和gip
-        JSONObject snCommunication = redisUtils.getHash(RedisHashTable.COMMUNICATION_HASH, sn, JSONObject.class);
-        String uuid = (String) snCommunication.get("UUID");
-        moduleMsg.setUuid(uuid);
+        JSONObject snCommunication = null;
+        try {
+            //根据SN获取uuid和gip
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+            snCommunication = redisUtils.get(key, JSONObject.class);
+            if (snCommunication == null) {
+                // 错误信息记录日志
+                Log log = new Log();
+                log.setMsgType(moduleMsg.getPktType());
+                log.setSN(sn);
+                log.setTime(new Date());
+                log.setServiceName(serverName);
+                log.setHostName(hostname);
+                log.setMsgId(msgId);
+                log.setErrorCode(StateCode.CONNECT_ERROR);
+                moduleMsg.setPktType(PktType.LOG_SAVE);
+                moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
+                sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+                return result;
+            }
+            String uuid = (String) snCommunication.get("UUID");
+            moduleMsg.setUuid(uuid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 错误信息记录日志
+            Log log = new Log();
+            log.setMsgType(moduleMsg.getPktType());
+            log.setSN(sn);
+            log.setTime(new Date());
+            log.setServiceName(serverName);
+            log.setHostName(hostname);
+            log.setMsgId(msgId);
+            log.setErrorCode(StateCode.REDIS_ERROR);
+            moduleMsg.setPktType(PktType.LOG_SAVE);
+            moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
+            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+            return result;
+        }
 
         //发送至网关
         String netAddr = (String) snCommunication.get("GWip");
@@ -159,10 +203,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      *
      * @return
      */
-    private JSONObject moduleExecute(String msgId, JSONObject payloadObject) {
+    private JSON moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
-        if (PktType.CLEANUP.equals(pktType) || PktType.ALARM_SAVE.equals(pktType) || PktType.LOG_SAVE.equals(pktType)) {//注销
+        if (PktType.CLEANUP.equals(pktType)//注销
+                || PktType.ALARM_SAVE.equals(pktType) //
+                || PktType.LOG_SAVE.equals(pktType)
+                || PktType.GET_DEVICES.equals(pktType)
+                || PktType.GET_DATA.equals(pktType)
+                || PktType.GET_FSU.equals(pktType)) {
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
 
@@ -259,7 +308,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         /***************************注册流程*********************************/
         if (TerminalPktType.REGISTRY.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
-            JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
+            JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             int result = (int) responsePayload.get("result");
             if (result == StateCode.FAILED) {
                 //注册异常返回延迟时间
@@ -275,7 +324,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (TerminalPktType.TERMINAL_REPORT.getKey() == pktType
                 || TerminalPktType.DEV_LIST.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
-            JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
+            JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             terminalResp.setPayload(responsePayload);
             responsePayload.put("pktType", pktType);
             return JSONObject.toJSON(terminalResp);
@@ -283,7 +332,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         /****************************数据变化上报*******************************/
         if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
-            JSONObject responsePayload = sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
+            JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);
             terminalResp.setPayload(responsePayload);
             return JSONObject.toJSON(terminalResp);
@@ -384,7 +433,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @param payload
      * @return
      */
-    private JSONObject sendPayLoad(String msgId, String payload, String host, int port) {
+    private JSON sendPayLoad(String msgId, String payload, String host, int port) {
         JSONObject result = new JSONObject();
         RpcNotifyProto.RpcMessage response = null;
         try {
@@ -393,7 +442,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             {
                 result.put("result", 0);
             } else {
-                return JSONObject.parseObject(response.getPayload());
+                return (JSON) JSON.parse(response.getPayload());
             }
         } catch (Exception e) {
             e.printStackTrace();

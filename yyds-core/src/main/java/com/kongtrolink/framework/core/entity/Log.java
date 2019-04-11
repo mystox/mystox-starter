@@ -8,8 +8,7 @@ import java.util.Date;
  * description:
  * update record:
  */
-public class Log
-{
+public class Log {
     private String id;
     private Date time;
     private Integer errorCode;
@@ -19,83 +18,81 @@ public class Log
     private String serviceName;
     private String hostName;
 
-    public String getId()
-    {
+
+    public Log() {
+    }
+
+    public Log(Date time, Integer errorCode, String SN, String msgType, String msgId, String serviceName, String hostName) {
+        this.time = time;
+        this.errorCode = errorCode;
+        this.SN = SN;
+        this.msgType = msgType;
+        this.msgId = msgId;
+        this.serviceName = serviceName;
+        this.hostName = hostName;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Date getTime()
-    {
+    public Date getTime() {
         return time;
     }
 
-    public void setTime(Date time)
-    {
+    public void setTime(Date time) {
         this.time = time;
     }
 
-    public Integer getErrorCode()
-    {
+    public Integer getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(Integer errorCode)
-    {
+    public void setErrorCode(Integer errorCode) {
         this.errorCode = errorCode;
     }
 
-    public String getSN()
-    {
+    public String getSN() {
         return SN;
     }
 
-    public void setSN(String SN)
-    {
+    public void setSN(String SN) {
         this.SN = SN;
     }
 
-    public String getMsgType()
-    {
+    public String getMsgType() {
         return msgType;
     }
 
-    public void setMsgType(String msgType)
-    {
+    public void setMsgType(String msgType) {
         this.msgType = msgType;
     }
 
-    public String getMsgId()
-    {
+    public String getMsgId() {
         return msgId;
     }
 
-    public void setMsgId(String msgId)
-    {
+    public void setMsgId(String msgId) {
         this.msgId = msgId;
     }
 
-    public String getServiceName()
-    {
+    public String getServiceName() {
         return serviceName;
     }
 
-    public void setServiceName(String serviceName)
-    {
+    public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
 
-    public String getHostName()
-    {
+    public String getHostName() {
         return hostName;
     }
 
-    public void setHostName(String hostName)
-    {
+    public void setHostName(String hostName) {
         this.hostName = hostName;
     }
 }
