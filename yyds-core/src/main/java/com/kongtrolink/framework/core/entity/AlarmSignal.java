@@ -20,7 +20,7 @@ public class AlarmSignal {
     private Integer level;          //告警等级
     private Float hystersis;        //告警回差
     private Integer delay;          //告警产生延时(单位为秒)
-    private Long delayFT;           //告警上报延迟第一次异常产生时间
+    private long delayFT;           //告警上报延迟第一次异常产生时间
     private Integer recoverDelay;   //告警恢复延时
     private Integer repeatDelay;    //告警重复延时
     private Integer alarmDesc;      //告警描述
@@ -30,6 +30,10 @@ public class AlarmSignal {
     private Integer highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
     private Long highRateFT;        //高频过滤第一次告警时间
     private Integer highRateC;      //高频过滤告警次数
+
+    public void setDelayFT(long delayFT) {
+        this.delayFT = delayFT;
+    }
 
     public Long getDelayFT() {
         return delayFT;

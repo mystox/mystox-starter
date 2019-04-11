@@ -11,7 +11,6 @@ import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -26,8 +25,6 @@ public class DataReportService {
     @Autowired
     RedisUtils redisUtils;
     @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
-    @Autowired
     AlarmHighRateFilterService  highRateFilterService;
     @Autowired
     AlarmDelayService delayService;
@@ -35,6 +32,7 @@ public class DataReportService {
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
     private String  alarm_begin_delay_hash = RedisHashTable.SN_DEV_ID_ALARM_BEGIN_DELAY_HASH;
+    private String  alarm_end_delay_hash = RedisHashTable.SN_DEV_ID_ALARM_END_DELAY_HASH;
 
     @Value("server.bindIp")
     private String serverIp;
@@ -68,13 +66,22 @@ public class DataReportService {
      */
     private void handlerAlarm(JsonFsu fsu, Date curDate){
         //获取当前fsu下所有延迟开始告警第一次异常上报时间
-        Object dbObj = redisUtils.hget(alarm_begin_delay_hash, fsu.getSN());
         Map<String, Object> bdBeforMap = new HashMap<>();
         Map<String, Object> bdNewMap = new HashMap<>();
+        Object dbObj = redisUtils.hget(alarm_begin_delay_hash, fsu.getSN());
         if(null != dbObj){
             JSONObject dbJsonObj = JSONObject.parseObject(dbObj.toString());
             bdBeforMap = dbJsonObj.getInnerMap();
         }
+        //获取当前FSU下所有延迟结束告警
+        Map<String, Object> edBeforMap = new HashMap<>();
+        Map<String, Object> edNewMap = new HashMap<>();
+        Object edObj = redisUtils.hget(alarm_end_delay_hash, fsu.getSN());
+        if(null != edObj){
+            JSONObject edJsonObj = JSONObject.parseObject(edObj.toString());
+            edBeforMap = edJsonObj.getInnerMap();
+        }
+
         //获取FSU下所有告警
         String alarmFsuStr = (String)redisUtils.hget(sn__alarm_hash, fsu.getSN());
         HashMap<String, Alarm> alarmHashMap = new HashMap<>();
@@ -89,7 +96,7 @@ public class DataReportService {
             HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
-                handleSignal(signal, keyDev, alarmHashMap, curDate, bdBeforMap, bdNewMap);
+                handleSignal(signal, keyDev, alarmHashMap, curDate, bdBeforMap, bdNewMap, edBeforMap, edNewMap);
                 if(signal.getAlarmMap() != null && !signal.getAlarmMap().isEmpty()){
                     signal.setV(null);
                     alarmSignalList.add(signal);
@@ -102,7 +109,20 @@ public class DataReportService {
             }
         }
         fsu.setData(alarmDeviceList);
+        //先处理告警消除延迟
+        delayService.endDelay2ResoveAlarm(fsu, edBeforMap, curDate);
         delayService.beginDelay2NewAlarm(fsu, bdBeforMap, curDate);
+
+        //更新redis中告警消除延迟记录
+        edBeforMap.putAll(edNewMap);
+        if(edBeforMap.isEmpty()){
+            redisUtils.hdel(alarm_end_delay_hash, fsu.getSN());
+        }else{
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.putAll(edBeforMap);
+            redisUtils.hset(alarm_end_delay_hash, fsu.getSN(), jsonObject.toJSONString());
+        }
+        //更新redis中告警产生延迟记录
         bdBeforMap.putAll(bdNewMap);
         if(bdBeforMap.isEmpty()){
             redisUtils.hdel(alarm_begin_delay_hash, fsu.getSN());
@@ -119,7 +139,8 @@ public class DataReportService {
      * 功能描述:处理信号点下的告警信息
      */
     private void handleSignal(JsonSignal signal, StringBuilder keyDev, HashMap<String, Alarm> alarmHashMap,
-                              Date curDate, Map<String, Object> bdMap, Map<String, Object> bdNewMap){
+                              Date curDate, Map<String, Object> bdMap, Map<String, Object> bdNewMap,
+                              Map<String, Object> edBeforMap, Map<String, Object> edNewMap){
 
         StringBuilder keySignal = new StringBuilder(keyDev.toString()).append("_").append(signal.getId());
         //获取redis中该信号点下所有告警点
@@ -138,8 +159,10 @@ public class DataReportService {
                 beforAlarm = beginAlarm(signal, alarmSignal, curDate);
                 beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
                 beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, signal, bdMap, bdNewMap);
+                //处理告警延迟记录
             } else {              //进入恢复告警逻辑
                 endAlarm(beforAlarm, signal, alarmSignal, curDate);
+                delayService.endAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, edBeforMap, edNewMap);
             }
             if(null != beforAlarm){
                 Map<String, Alarm> alarmMap = signal.getAlarmMap();

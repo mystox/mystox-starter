@@ -2,6 +2,8 @@ package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignal;
+import com.kongtrolink.framework.core.entity.EnumAlarmStatus;
+import com.kongtrolink.framework.jsonType.DelayAlarm;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
@@ -26,9 +28,6 @@ public class AlarmDelayService {
      */
     public Alarm beginAlarmDelay(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate, String keyAlarmId,
                                  JsonSignal signal, Map<String, Object> bdBeforMap, Map<String, Object> bdNewMap){
-        if(null == beforAlarm){
-            return null;
-        }
         Integer delay = alarmSignal.getDelay();
         Long delayFT = alarmSignal.getDelayFT();
         boolean inTime = (curDate.getTime() - delayFT) < delay*1000;
@@ -37,6 +36,12 @@ public class AlarmDelayService {
             return beforAlarm;
         }
         String bdKey = keyAlarmId.substring(keyAlarmId.indexOf("_")+1);
+        //如果没有新告警产生，需要消除原告警延迟数据
+        if(null == beforAlarm){
+            bdBeforMap.remove(bdKey);
+            alarmSignal.setDelayFT(0L);
+            return null;
+        }
         if(0 == delayFT){   //如果需要产生延时，并且是第一次上报，将该告警点值保存到redis中，不产生告警
             bdNewMap.put(bdKey, beforAlarm);
             return null;
@@ -81,6 +86,7 @@ public class AlarmDelayService {
             if(inTime){
                 continue;
             }
+            //需要删除redis中告警延迟信息
             String keyDev = key.substring(0, key.indexOf("_"));
             JsonDevice device = dev_id_deviceMap.get(keyDev);
             if(null == device){
@@ -140,9 +146,64 @@ public class AlarmDelayService {
     /**
      * @auther: liudd
      * @date: 2019/4/10 14:10
-     * 功能描述:消除告警延迟
+     * 功能描述:消除告警延迟。最终如果告警消除延迟，只需要修改告警状态即可
      */
-    public void endAlarmDelay(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate){
+    public void endAlarmDelay(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate, String keyAlarmId,
+                              Map<String, Object> edBeforMap, Map<String, Object> edNewMap){
+        //如果告警本身没有消除，直接返回
+        byte link = beforAlarm.getLink();
+        if((link & EnumAlarmStatus.END.getValue()) == 0){
+            return ;
+        }
+        Integer recoverDelay = alarmSignal.getRecoverDelay();
+        if(0 == recoverDelay){//该信号点没有告警延迟，直接返回
+            return ;
+        }
+        Object edAlarm = edBeforMap.get(keyAlarmId);
+        long curDateTime = curDate.getTime();
+        byte noEndLink = (byte)(link & 7);
+        if(null == edAlarm){    //需要延迟
+            edNewMap.put(keyAlarmId, new DelayAlarm(recoverDelay, curDate.getTime()));
+            beforAlarm.setLink(noEndLink);
+            return ;
+        }
+        //已经到达告警消除延迟时间，需要删除redis中延迟告警信息，并设置告警点延迟告警第一次时间为0
+        DelayAlarm delayAlarm = (DelayAlarm) edAlarm;
+        boolean inTime = (curDateTime - delayAlarm.getDelayFT()) < (recoverDelay * 1000);
+        if(inTime){
+            beforAlarm.setLink(noEndLink);
+            beforAlarm.setUpdateTime(new Date(delayAlarm.getDelayFT()));
+        }else{
+            edBeforMap.remove(keyAlarmId);
+        }
+        return;
+    }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/4/11 15:12
+     * 功能描述:未变量上报的告警消除延迟处理
+     */
+    public void endDelay2ResoveAlarm(JsonFsu fsu, Map<String, Object> edBeforMap, Date curDate){
+        for(JsonDevice device : fsu.getData()){
+            for(JsonSignal signal : device.getSignalList()){
+                Map<String, Alarm> alarmMap = signal.getAlarmMap();
+                for(String key : alarmMap.keySet()){
+                    Object obj = edBeforMap.get(key);
+                    if(null != obj){
+                        DelayAlarm delayAlarm = (DelayAlarm)obj;
+                        int recoverDelay = delayAlarm.getDelay();
+                        Alarm alarm = alarmMap.get(key);
+                        boolean inTime = (curDate.getTime() - delayAlarm.getDelayFT()) < (recoverDelay * 1000);
+                        if(!inTime){
+                            byte link = alarm.getLink();
+                            link = (byte) (link & EnumAlarmStatus.END.getValue());
+                            alarm.setLink(link);
+                            edBeforMap.remove(key);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
