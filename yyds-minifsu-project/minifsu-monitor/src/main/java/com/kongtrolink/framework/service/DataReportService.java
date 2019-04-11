@@ -2,6 +2,7 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonDevice;
@@ -26,9 +27,15 @@ public class DataReportService {
     RedisUtils redisUtils;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    AlarmHighRateFilterService  highRateFilterService;
+    @Autowired
+    AlarmDelayService delayService;
 
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
+    private String  alarm_begin_delay_hash = RedisHashTable.SN_DEV_ID_ALARM_BEGIN_DELAY_HASH;
+
     @Value("server.bindIp")
     private String serverIp;
 
@@ -60,6 +67,14 @@ public class DataReportService {
      * 功能描述:以device为单位处理告警
      */
     private void handlerAlarm(JsonFsu fsu, Date curDate){
+        //获取当前fsu下所有延迟开始告警第一次异常上报时间
+        Object dbObj = redisUtils.hget(alarm_begin_delay_hash, fsu.getSN());
+        Map<String, Object> bdBeforMap = new HashMap<>();
+        Map<String, Object> bdNewMap = new HashMap<>();
+        if(null != dbObj){
+            JSONObject dbJsonObj = JSONObject.parseObject(dbObj.toString());
+            bdBeforMap = dbJsonObj.getInnerMap();
+        }
         //获取FSU下所有告警
         String alarmFsuStr = (String)redisUtils.hget(sn__alarm_hash, fsu.getSN());
         HashMap<String, Alarm> alarmHashMap = new HashMap<>();
@@ -74,7 +89,7 @@ public class DataReportService {
             HashMap<String, Double> data = device.getInfo();
             for (String id : data.keySet()) {
                 JsonSignal signal = new JsonSignal(id, data.get(id));
-                handleSignal(signal, keyDev, alarmHashMap, curDate);
+                handleSignal(signal, keyDev, alarmHashMap, curDate, bdBeforMap, bdNewMap);
                 if(signal.getAlarmMap() != null && !signal.getAlarmMap().isEmpty()){
                     signal.setV(null);
                     alarmSignalList.add(signal);
@@ -87,6 +102,15 @@ public class DataReportService {
             }
         }
         fsu.setData(alarmDeviceList);
+        delayService.beginDelay2NewAlarm(fsu, bdBeforMap, curDate);
+        bdBeforMap.putAll(bdNewMap);
+        if(bdBeforMap.isEmpty()){
+            redisUtils.hdel(alarm_begin_delay_hash, fsu.getSN());
+        }else{
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.putAll(bdBeforMap);
+            redisUtils.hset(alarm_begin_delay_hash, fsu.getSN(), jsonObject.toJSONString());
+        }
     }
 
     /**
@@ -94,10 +118,10 @@ public class DataReportService {
      * @date: 2019/3/28 19:57
      * 功能描述:处理信号点下的告警信息
      */
-    private void handleSignal(JsonSignal signal, StringBuilder keyDev,
-                              HashMap<String, Alarm> alarmHashMap, Date curDate){
-        StringBuilder keySignal = new StringBuilder(keyDev.toString())
-                .append("_").append(signal.getId());
+    private void handleSignal(JsonSignal signal, StringBuilder keyDev, HashMap<String, Alarm> alarmHashMap,
+                              Date curDate, Map<String, Object> bdMap, Map<String, Object> bdNewMap){
+
+        StringBuilder keySignal = new StringBuilder(keyDev.toString()).append("_").append(signal.getId());
         //获取redis中该信号点下所有告警点
         Object redisSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, keySignal.toString());
         if (null == redisSignalObj) {
@@ -112,6 +136,8 @@ public class DataReportService {
             Alarm beforAlarm = alarmHashMap.get(keyAlarmId);//获取原先的告警
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(signal, alarmSignal, curDate);
+                beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
+                beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, signal, bdMap, bdNewMap);
             } else {              //进入恢复告警逻辑
                 endAlarm(beforAlarm, signal, alarmSignal, curDate);
             }
@@ -122,6 +148,9 @@ public class DataReportService {
                 signal.setAlarmMap(alarmMap);
             }
         }
+
+        //跟新信号点
+        redisUtils.hset(sn_dev_id_alarmsignal_hash, keySignal.toString(), JSONArray.toJSONString(alarmSignals));
     }
 
     /**
@@ -130,8 +159,8 @@ public class DataReportService {
      * 功能描述:开始告警
      */
     private Alarm beginAlarm(JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
-        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()>=alarmSignal.getThreshold() )
-                || (alarmSignal.getThresholdFlag()<0 && signal.getV()<=alarmSignal.getThreshold()) ){
+        if( (alarmSignal.getThresholdFlag()==1 && signal.getV()>=alarmSignal.getThreshold() )
+                || (alarmSignal.getThresholdFlag() ==0 && signal.getV()<=alarmSignal.getThreshold()) ){
             //产生告警
             Alarm alarm = new Alarm();
             alarm.setLink((byte)1);
@@ -150,8 +179,8 @@ public class DataReportService {
      * 如果结束告警上报铁塔未成功，此时继续来结束告警标志
      */
     private Alarm endAlarm(Alarm beforAlarm, JsonSignal signal, AlarmSignal alarmSignal, Date curDate){
-        if( (alarmSignal.getThresholdFlag()>0 && signal.getV()<=alarmSignal.getThreshold() )
-                || ( alarmSignal.getThresholdFlag()<0 && signal.getV()>=alarmSignal.getThreshold()) ){
+        if( (alarmSignal.getThresholdFlag()==1 && signal.getV()<=alarmSignal.getThreshold() )
+                || ( alarmSignal.getThresholdFlag() ==0 && signal.getV()>=alarmSignal.getThreshold()) ){
             byte link = beforAlarm.getLink();
             link = (byte)(link | EnumAlarmStatus.END.getValue());
             beforAlarm.setLink(link);

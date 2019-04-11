@@ -19,11 +19,57 @@ public class AlarmSignal {
     private Integer thresholdFlag;  //门限值标志
     private Integer level;          //告警等级
     private Float hystersis;        //告警回差
-    private Integer delay;          //告警产生延时
+    private Integer delay;          //告警产生延时(单位为秒)
+    private Long delayFT;           //告警上报延迟第一次异常产生时间
     private Integer recoverDelay;   //告警恢复延时
     private Integer repeatDelay;    //告警重复延时
     private Integer alarmDesc;      //告警描述
     private Integer normalDesc;     //正常时描述
+    //高频过滤，暂时所有告警点都有
+    private Integer highRateI = 30*60;      //高频过滤间隔highrateinteval（单位为秒）
+    private Integer highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
+    private Long highRateFT;        //高频过滤第一次告警时间
+    private Integer highRateC;      //高频过滤告警次数
+
+    public Long getDelayFT() {
+        return delayFT;
+    }
+
+    public void setDelayFT(Long delayFT) {
+        this.delayFT = delayFT;
+    }
+
+    public Integer getHighRateI() {
+        return highRateI;
+    }
+
+    public void setHighRateI(Integer highRateI) {
+        this.highRateI = highRateI;
+    }
+
+    public Integer getHighRateT() {
+        return highRateT;
+    }
+
+    public void setHighRateT(Integer highRateT) {
+        this.highRateT = highRateT;
+    }
+
+    public Long getHighRateFT() {
+        return highRateFT;
+    }
+
+    public void setHighRateFT(Long highRateFT) {
+        this.highRateFT = highRateFT;
+    }
+
+    public Integer getHighRateC() {
+        return highRateC;
+    }
+
+    public void setHighRateC(Integer highRateC) {
+        this.highRateC = highRateC;
+    }
 
     public String getId() {
         return id;
