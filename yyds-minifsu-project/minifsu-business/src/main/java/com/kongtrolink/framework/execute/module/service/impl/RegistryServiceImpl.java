@@ -383,18 +383,20 @@ public class RegistryServiceImpl implements RegistryService {
                         String[] s = new String[keys.size()];
                         redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
                     }
+                    //日志记录
+                    Log log = new Log();
+                    log.setSN(sn);
+                    log.setMsgType(moduleMsg.getPktType());
+                    log.setMsgId(moduleMsg.getMsgId());
+                    log.setErrorCode((Integer) msgPayload.get("code"));
+                    log.setHostName((String) msgPayload.get("serverHost"));
+                    log.setServiceName((String) msgPayload.get("serverName"));
+                    log.setTime(new Date((Long.valueOf(msgPayload.get("time") +""))));
+                    logDao.saveLog(log);
                 }
             }
         }
-        //日志记录
-        Log log = new Log();
-        log.setMsgType(moduleMsg.getPktType());
-        log.setMsgId(moduleMsg.getMsgId());
-        log.setErrorCode((Integer) msgPayload.get("code"));
-        log.setHostName((String) msgPayload.get("serverHost"));
-        log.setServiceName((String) msgPayload.get("serverName"));
-        log.setTime(new Date((Long.valueOf(msgPayload.get("time") +""))));
-        logDao.saveLog(log);
+
 
         JSONObject result = new JSONObject();
         result.put("result", StateCode.SUCCESS);
