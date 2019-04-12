@@ -37,16 +37,21 @@ public class AlarmHighRateFilterService {
         int highRateT = alarmSignal.getHighRateT();
         long diff = curDate.getTime() - highRateFT;
         boolean inTime = diff < highRateI*1000;
-        if((highRateC >= highRateT) && inTime){    //在时间间隔内，超过规定频率的告警不予产生
-            return null;
-        }
-        if(highRateFT == 0 || !inTime){
+        if(highRateFT == 0){
             alarmSignal.setHighRateFT(curDate.getTime());
             alarmSignal.setHighRateC(1);
             return beforAlarm;
         }
-
-        alarmSignal.setHighRateC(alarmSignal.getHighRateC() + 1);
-        return beforAlarm;
+        if(inTime){
+            if(highRateC >= highRateT){
+                return null;
+            }
+            alarmSignal.setHighRateC(highRateC+1);
+            return beforAlarm;
+        }else{
+            alarmSignal.setHighRateFT(curDate.getTime());
+            alarmSignal.setHighRateC(1);
+            return beforAlarm;
+        }
     }
 }

@@ -28,21 +28,21 @@ public class AlarmDelayService {
      * 功能描述:产生告警延迟
      */
     public Alarm beginAlarmDelay(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate, String keyAlarmId,
-                                 Map<String, Object> bdBeforMap, Map<String, Object> bdNewMap){
+                                 Map<String, Object> beginDelayAlarmMap){
         //如果没有新告警产生，不管原来是否有告警产生延迟，直接消除redis中相应告警产生延迟信息
         if(null == beforAlarm){
-            bdBeforMap.remove(keyAlarmId);
+            beginDelayAlarmMap.remove(keyAlarmId);
             return null;
         }
         Integer delay = alarmSignal.getDelay();
         if(delay == 0){        //如果该告警点没有告警产生延迟，直接返回
-            bdBeforMap.remove(keyAlarmId);
+            beginDelayAlarmMap.remove(keyAlarmId);
             return beforAlarm;
         }
-        Object bdAlarm = bdBeforMap.get(keyAlarmId);
+        Object bdAlarm = beginDelayAlarmMap.get(keyAlarmId);
         if(null == bdAlarm){//如果需要产生延时，并且是第一次上报，将该告警点值保存到redis中，不产生告警
             beforAlarm.setDelay(delay);
-            bdNewMap.put(keyAlarmId, beforAlarm);
+            beginDelayAlarmMap.put(keyAlarmId, beforAlarm);
             return null;
         }
         Alarm delayAlarm = (Alarm) bdAlarm;
@@ -50,7 +50,7 @@ public class AlarmDelayService {
         if(!inTime) { //如果超出产生延迟时间，则产生告警，设置告警初次产生时间,删除redis中告警产生延迟信息
             beforAlarm.setUpdateTime(delayAlarm.getUpdateTime());
             beforAlarm.setValue(delayAlarm.getValue());
-            bdBeforMap.remove(keyAlarmId);
+            beginDelayAlarmMap.remove(keyAlarmId);
             return beforAlarm;
         }
         return null;

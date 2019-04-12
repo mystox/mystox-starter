@@ -8,8 +8,10 @@ import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
+import com.kongtrolink.framework.service.AlarmAnalysisService;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.DataReportService;
+import com.kongtrolink.framework.service.TimeDataAnalysisService;
 import com.kongtrolink.framework.task.SaveLogTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,10 +42,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     RpcModule rpcModule;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    TimeDataAnalysisService timeDateService;
+    @Autowired
+    AlarmAnalysisService analysisService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
-    private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
+
+
     @Value("${server.name}")
     private String serviceName;
     @Value("${server.bindIp}")
@@ -52,7 +59,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String controllerName;
     @Value("${rpc.controller.port}")
     private int controllerPort;
-    @Value("")
+
     /**
      * @auther: liudd
      * @date: 2019/4/3 10:32
@@ -87,9 +94,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
         }
 
-        String sn = fsu.getSN();
-        //保存实时数据
-        redisUtils.hset(sn_data_hash, sn, infoPayload);
+        //解析保存实时数据和告警
+        Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
+        //解析告警
+        analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate);
+
         //变化数据上报
         String result = reportService.report(msgId, fsu, curDate);
         //告警注册与消除

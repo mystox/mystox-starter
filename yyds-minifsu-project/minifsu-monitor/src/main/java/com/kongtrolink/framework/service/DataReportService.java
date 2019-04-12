@@ -110,27 +110,27 @@ public class DataReportService {
         }
         fsu.setData(alarmDeviceList);
         //先处理告警消除延迟
-        delayService.endDelay2ResoveAlarm(fsu, edBeforMap, curDate);
-        delayService.beginDelay2NewAlarm(fsu, bdBeforMap, curDate);
-
-        //更新redis中告警消除延迟记录
-        edBeforMap.putAll(edNewMap);
-        if(edBeforMap.isEmpty()){
-            redisUtils.hdel(alarm_end_delay_hash, fsu.getSN());
-        }else{
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(edBeforMap);
-            redisUtils.hset(alarm_end_delay_hash, fsu.getSN(), jsonObject.toJSONString());
-        }
-        //更新redis中告警产生延迟记录
-        bdBeforMap.putAll(bdNewMap);
-        if(bdBeforMap.isEmpty()){
-            redisUtils.hdel(alarm_begin_delay_hash, fsu.getSN());
-        }else{
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(bdBeforMap);
-            redisUtils.hset(alarm_begin_delay_hash, fsu.getSN(), jsonObject.toJSONString());
-        }
+//        delayService.endDelay2ResoveAlarm(fsu, edBeforMap, curDate);
+//        delayService.beginDelay2NewAlarm(fsu, bdBeforMap, curDate);
+//
+//        //更新redis中告警消除延迟记录
+//        edBeforMap.putAll(edNewMap);
+//        if(edBeforMap.isEmpty()){
+//            redisUtils.hdel(alarm_end_delay_hash, fsu.getSN());
+//        }else{
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.putAll(edBeforMap);
+//            redisUtils.hset(alarm_end_delay_hash, fsu.getSN(), jsonObject.toJSONString());
+//        }
+//        //更新redis中告警产生延迟记录
+//        bdBeforMap.putAll(bdNewMap);
+//        if(bdBeforMap.isEmpty()){
+//            redisUtils.hdel(alarm_begin_delay_hash, fsu.getSN());
+//        }else{
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.putAll(bdBeforMap);
+//            redisUtils.hset(alarm_begin_delay_hash, fsu.getSN(), jsonObject.toJSONString());
+//        }
     }
 
     /**
@@ -158,11 +158,11 @@ public class DataReportService {
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(signal, alarmSignal, curDate);
                 beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
-                beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, bdMap, bdNewMap);
+//                beforAlarm = delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, bdMap, bdNewMap);
                 //处理告警延迟记录
             } else {              //进入恢复告警逻辑
                 endAlarm(beforAlarm, signal, alarmSignal, curDate);
-                delayService.endAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, edBeforMap, edNewMap);
+//                delayService.endAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, edBeforMap, edNewMap);
             }
             if(null != beforAlarm){
                 Map<String, Alarm> alarmMap = signal.getAlarmMap();
