@@ -14,7 +14,7 @@ import java.util.Map;
 public class JsonSignal {
 
     private String id;
-    private Double v;
+    private float v;
 
     //JSON转换使用字段
     private List<AlarmSignal> alarmSignals;
@@ -34,16 +34,16 @@ public class JsonSignal {
     public JsonSignal() {
     }
 
-    public JsonSignal(String id, Double v) {
+    public JsonSignal(String id, float v) {
         this.id = id;
         this.v = v;
     }
 
-    public Double getV() {
+    public float getV() {
         return v;
     }
 
-    public void setV(Double v) {
+    public void setV(float v) {
         this.v = v;
     }
 

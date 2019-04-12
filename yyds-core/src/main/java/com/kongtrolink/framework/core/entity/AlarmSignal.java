@@ -20,54 +20,45 @@ public class AlarmSignal {
     private Integer level;          //告警等级
     private Float hystersis;        //告警回差
     private Integer delay;          //告警产生延时(单位为秒)
-    private Long delayFT;           //告警上报延迟第一次异常产生时间
     private Integer recoverDelay;   //告警恢复延时
     private Integer repeatDelay;    //告警重复延时
     private Integer alarmDesc;      //告警描述
     private Integer normalDesc;     //正常时描述
     //高频过滤，暂时所有告警点都有
-    private Integer highRateI = 30*60;      //高频过滤间隔highrateinteval（单位为秒）
-    private Integer highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
-    private Long highRateFT;        //高频过滤第一次告警时间
-    private Integer highRateC;      //高频过滤告警次数
+    private int highRateI = 30*60;      //高频过滤间隔highrateinteval（单位为秒）
+    private int highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
+    private long highRateFT;        //高频过滤第一次告警时间
+    private int highRateC;      //高频过滤告警次数
 
-    public Long getDelayFT() {
-        return delayFT;
-    }
-
-    public void setDelayFT(Long delayFT) {
-        this.delayFT = delayFT;
-    }
-
-    public Integer getHighRateI() {
+    public int getHighRateI() {
         return highRateI;
     }
 
-    public void setHighRateI(Integer highRateI) {
+    public void setHighRateI(int highRateI) {
         this.highRateI = highRateI;
     }
 
-    public Integer getHighRateT() {
+    public int getHighRateT() {
         return highRateT;
     }
 
-    public void setHighRateT(Integer highRateT) {
+    public void setHighRateT(int highRateT) {
         this.highRateT = highRateT;
     }
 
-    public Long getHighRateFT() {
+    public long getHighRateFT() {
         return highRateFT;
     }
 
-    public void setHighRateFT(Long highRateFT) {
+    public void setHighRateFT(long highRateFT) {
         this.highRateFT = highRateFT;
     }
 
-    public Integer getHighRateC() {
+    public int getHighRateC() {
         return highRateC;
     }
 
-    public void setHighRateC(Integer highRateC) {
+    public void setHighRateC(int highRateC) {
         this.highRateC = highRateC;
     }
 

@@ -31,10 +31,10 @@ public class AlarmHighRateFilterService {
         if(null == beforAlarm){
             return null;
         }
-        Long highRateFT = alarmSignal.getHighRateFT();
-        Integer highRateC = alarmSignal.getHighRateC();
-        Integer highRateI = alarmSignal.getHighRateI();
-        Integer highRateT = alarmSignal.getHighRateT();
+        long highRateFT = alarmSignal.getHighRateFT();
+        int highRateC = alarmSignal.getHighRateC();
+        int highRateI = alarmSignal.getHighRateI();
+        int highRateT = alarmSignal.getHighRateT();
         long diff = curDate.getTime() - highRateFT;
         boolean inTime = diff < highRateI*1000;
         if((highRateC >= highRateT) && inTime){    //在时间间隔内，超过规定频率的告警不予产生

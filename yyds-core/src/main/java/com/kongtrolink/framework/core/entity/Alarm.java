@@ -12,7 +12,7 @@ public class Alarm {
 
     private String id;
     private String alarmId;         //告警点id
-    private Double value;           //告警值
+    private float value;           //告警值
     private byte link;              //告警所处环节(1-开始；2-开始报文上报成功；4-结束报文；8结束报文上报成功)
     private Date updateTime;        //跟新时间
     private int delay;              ////告警产生延时(单位为秒)
@@ -49,11 +49,11 @@ public class Alarm {
         this.alarmId = alarmId;
     }
 
-    public Double getValue() {
+    public float getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(float value) {
         this.value = value;
     }
 
