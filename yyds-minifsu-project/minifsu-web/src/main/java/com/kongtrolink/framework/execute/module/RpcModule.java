@@ -55,9 +55,4 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface
         }
     }
 
-public static void main(String[] args) throws ClassNotFoundException {
-    Class clazz = Class.forName(JSONObject.class.getName());
-    Object o = JSON.parse("[{'result':0}]");
-    System.out.println(clazz.isInstance(o));
-}
 }

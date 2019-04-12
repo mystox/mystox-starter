@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -90,8 +89,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String pktType = (String) payloadObject.get("pktType");//服务间通讯类型
 
         if (StringUtils.isNotBlank(pktType)) {
-            if (PktType.CONNECT.equals(pktType)) //终端>>>>>>>>>服务
-            {
+
+
+            if (PktType.CONNECT.equals(pktType)) {                              //终端>>>>>>>>>服务
                 Object result = receiveTerminalExecute(msgId, payloadObject);
                 if (result instanceof JSONObject) //json结果放回json
                 {
@@ -107,14 +107,13 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                             .build();
                 }
 
-            } else if (PktType.SET_ALARM_PARAM.equals(pktType)
-                    || PktType.UPDATE.equals(pktType)
+            } else if (PktType.UPGRADE.equals(pktType)
                     || PktType.SET_DATA.equals(pktType)
-                    ) //服务>>>>>>>>终端 //
+                    )                                                           //服务>>>>>>>>终端
             {
                 JSON result = sendTerminalExecute(msgId, payloadObject);
                 response = result.toJSONString();
-            } else //服务>>>>>>>>>>>>服务
+            } else                                                              //服务>>>>>>>>>>>>服务
             {
                 JSON result = moduleExecute(msgId, payloadObject);
                 response = result.toJSONString();
@@ -206,24 +205,21 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private JSON moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         String pktType = moduleMsg.getPktType();
+        //>>>>>>>>>>>>>>>>>>>>>>>>>通往事务处理 >>>>>>>>>>>>>>>>>>>
         if (PktType.CLEANUP.equals(pktType)//注销
-                || PktType.ALARM_SAVE.equals(pktType) //
-                || PktType.LOG_SAVE.equals(pktType)
-                || PktType.GET_DEVICES.equals(pktType)
+                || PktType.ALARM_SAVE.equals(pktType) //告警保存
+                || PktType.LOG_SAVE.equals(pktType) //日志保存
+                || PktType.GET_DEVICES.equals(pktType) //
                 || PktType.GET_DATA.equals(pktType)
+                || PktType.SET_ALARM_PARAM.equals(pktType)
+                || PktType.COMPILER.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
-            return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
+        return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
-
-        //告警上报，模拟随机返回成功和失败
-        if (PktType.ALARM_REGISTER.equals(pktType)) {
-            JSONObject responsePayload = new JSONObject();
-            int result = new Random().nextBoolean() ? 1 : 0;
-            responsePayload.put("result", result);
-            return responsePayload;
-        }
-
-        if (PktType.REGISTRY_CNTB.equals(pktType)) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        if (PktType.REGISTRY_CNTB.equals(pktType)
+                || PktType.ALARM_REGISTER.equals(pktType)
+                ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
             JSONObject value = redisUtils.get(key, JSONObject.class);
@@ -239,7 +235,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     }
                 }
             }
-
         }
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("result", StateCode.FAILED);
@@ -389,7 +384,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     }
 
     /**
-     * 通讯刷新
+     * 通讯信息刷新
      *
      * @param sn
      * @param gip

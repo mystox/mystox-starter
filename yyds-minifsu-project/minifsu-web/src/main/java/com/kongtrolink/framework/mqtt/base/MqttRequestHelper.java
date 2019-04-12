@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ import static com.alibaba.fastjson.JSON.parseObject;
  * 同步等待 MQTT返回消息 处理类
  * @author Mag
  */
-@Component
+//@Component
 public class MqttRequestHelper {
 
     private   int timeOut = 10 * 1000; //默认时长 单位 毫秒

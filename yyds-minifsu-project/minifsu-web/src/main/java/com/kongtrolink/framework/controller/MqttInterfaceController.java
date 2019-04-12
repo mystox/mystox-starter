@@ -6,7 +6,6 @@ import com.kongtrolink.framework.util.JsonResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by mystoxlol on 2019/2/27, 17:21.
@@ -14,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
  * description:
  * update record:
  */
-@RestController
-@RequestMapping("/mqtt")
+//@RestController
+//@RequestMapping("/mqtt")
 public class MqttInterfaceController
 {
     @Autowired

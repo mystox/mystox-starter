@@ -94,7 +94,7 @@ public class FsuServiceImpl implements FsuService
     public JSONObject upgrade(Map<String, Object> requestBody, String sn)
     {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.UPDATE,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.UPGRADE,sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class, 300000L);
         return result;

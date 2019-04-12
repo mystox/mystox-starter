@@ -11,4 +11,6 @@ import com.kongtrolink.framework.core.entity.ModuleMsg;
  */
 public interface DataMntService {
     JSONObject getSignalList(ModuleMsg moduleMsg);
+
+    JSONObject setThreshold(ModuleMsg moduleMsg);
 }

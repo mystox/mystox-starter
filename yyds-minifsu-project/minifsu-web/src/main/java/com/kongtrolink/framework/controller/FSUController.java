@@ -151,14 +151,14 @@ public class FSUController
     {
 
         JSONObject result = fsuService.upgrade(requestBody,fsuId);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
 
     @RequestMapping("/compiler")
     public JsonResult compiler(@RequestBody Map<String, Object> requestBody, String sn)
     {
         JSONObject result = fsuService.compiler(requestBody,sn);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
 
 

@@ -46,4 +46,8 @@ public class DeviceDao {
     public List<Device> findDevicesBySnAndValid(String sn) {
         return mongoTemplate.find(Query.query(Criteria.where("SN").is(sn).and("invalidTime").is(new Date(0L))), Device.class, MongoTableName.DEVICE);
     }
+
+    public Device findDeviceById(String deviceId) {
+        return mongoTemplate.findById(deviceId,Device.class, MongoTableName.DEVICE);
+    }
 }

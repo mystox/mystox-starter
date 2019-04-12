@@ -83,10 +83,10 @@ public class RegistryServiceImpl implements RegistryService {
                 if (value != null) {
                     redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
                     redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
-                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
+                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
                     if (keys != null && keys.size() > 0) {
                         String[] s = new String[keys.size()];
-                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
                     }
                     if (order != null) {
                         String bip = order.getBIP(); //业务网关的消息路由
@@ -255,7 +255,7 @@ public class RegistryServiceImpl implements RegistryService {
 
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
-                    redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
+                    redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
                 }
             }
 
@@ -378,10 +378,10 @@ public class RegistryServiceImpl implements RegistryService {
                     redisUtils.del(key);
                     redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
                     redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
-                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, sn + "*");
+                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
                     if (keys != null && keys.size() > 0) {
                         String[] s = new String[keys.size()];
-                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARMSIGNAL_HASH, keys.toArray(s));
+                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
                     }
                 }
             }

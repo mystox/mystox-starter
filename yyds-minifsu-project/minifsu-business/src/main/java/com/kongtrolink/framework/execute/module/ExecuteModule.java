@@ -33,10 +33,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     @Autowired
     TerminalService terminalService;
 
-     @Autowired
+    @Autowired
     DataMntService dataMntService;
-
-
 
 
     @Autowired
@@ -101,11 +99,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.GET_DEVICES.equals(pktType)) { //获取设备列表
             JSONArray jsonObject = terminalService.getDeviceList(moduleMsg);
             result = jsonObject.toJSONString();
-        }else if (PktType.GET_FSU.equals(pktType)) { //获取设备列表
+        } else if (PktType.GET_FSU.equals(pktType)) { //获取sn列表
             JSONArray jsonObject = terminalService.listFsu(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.GET_DATA.equals(pktType)) { //获取设备列表
+        } else if (PktType.GET_DATA.equals(pktType)) { //获取实时数据
             JSONObject jsonObject = dataMntService.getSignalList(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.COMPILER.equals(pktType)) { //下载编译文件
+            JSONObject jsonObject = fileService.getCompilerFile(moduleMsg);
+            result = jsonObject.toJSONString();
+        }else if (PktType.SET_ALARM_PARAM.equals(pktType)) { //下载编译文件
+            JSONObject jsonObject = dataMntService.setThreshold(moduleMsg);
             result = jsonObject.toJSONString();
         }
 

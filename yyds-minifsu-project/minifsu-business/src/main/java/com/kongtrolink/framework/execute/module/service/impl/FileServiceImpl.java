@@ -14,6 +14,9 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by mystoxlol on 2019/4/9, 19:16.
@@ -80,6 +83,52 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
         }
         return new byte[]{0};
+    }
+
+    @Override
+    public JSONObject getCompilerFile(ModuleMsg moduleMsg) {
+
+        String sn = moduleMsg.getSN();
+
+        JSONObject param = moduleMsg.getPayload();
+
+        String urlStr = (String) param.get("url");
+        String name = (String) param.get("name");
+        InputStream is = null;
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            URL url = new URL(urlStr);
+            URLConnection urlc = url.openConnection();
+            is = urlc.getInputStream();
+            urlc.setConnectTimeout(100000);
+            urlc.setReadTimeout(100000);
+            File dir = ResourceUtils.getFile(snPath + File.separator + sn + File.separator);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File file = ResourceUtils.getFile(snPath + File.separator + sn + File.separator + name);
+            if (file.exists()) {
+                file.deleteOnExit();
+            }
+            file.createNewFile();
+            FileUtils.copyInputStreamToFile(is, file);
+            jsonObject.put("totalLen", file.length());
+            jsonObject.put("result", 1);
+        } catch (IOException e) {
+            jsonObject.put("result", 0);
+            e.toString();
+
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return jsonObject;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 
 /**
@@ -10,4 +11,6 @@ import com.kongtrolink.framework.core.entity.ModuleMsg;
  */
 public interface FileService {
     byte[] fileGet(ModuleMsg moduleMsg);
+
+    JSONObject getCompilerFile(ModuleMsg moduleMsg);
 }

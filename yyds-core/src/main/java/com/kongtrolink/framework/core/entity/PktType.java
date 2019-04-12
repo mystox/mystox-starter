@@ -16,8 +16,8 @@ public class PktType
     public final static String SET_FSU = "set_fsu";//检查绑定
     public final static String SET_DATA = "set_data"; //设置监控点数据
     public final static String GET_HISTORY_DATA = "get_hist_data"; //获取监控点历史数据
-    public final static String UPDATE = "update"; //升级
-    public final static String COMPILER = "compiler";
+    public final static String UPGRADE = "upgrade"; //升级
+    public final static String COMPILER = "compiler"; //下载编译文件
     public final static String GET_DEVICES = "get_devices";
     public final static String SET_DEVICES = "set_devices";
     public final static String DEL_DEVICE = "del_device";
