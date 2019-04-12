@@ -28,10 +28,18 @@ public class ConfigDao {
     }
 
     public List<AlarmSignalConfigModel> findAlarmSignalModelByDevType(Integer devType) {
-        return mongoTemplate.find(Query.query(Criteria.where("devType").is(devType)), AlarmSignalConfigModel.class,MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
+        return mongoTemplate.find(Query.query(Criteria.where("devType").is(devType)), AlarmSignalConfigModel.class, MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
     }
 
     public void saveAlarmSignalConfig(List<AlarmSignalConfig> alarmSignals) {
-        mongoTemplate.insert(alarmSignals,MongoTableName.ALARM_SIGNAL_CONFIG);
+        mongoTemplate.insert(alarmSignals, MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
+
+    public void saveAlarmSignalConfig(AlarmSignalConfig alarmSignal) {
+        mongoTemplate.save(alarmSignal, MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
+
+    public AlarmSignalConfig findAlarmSignalConfigById(String id) {
+        return mongoTemplate.findById(id, AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 }

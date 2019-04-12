@@ -90,9 +90,9 @@ public class DataController
 
 
     @RequestMapping("/getThreshold")
-    public JsonResult getThreshold(@RequestBody Map<String, Object> requestBody, String fsuId)
+    public JsonResult getThreshold(@RequestBody Map<String, Object> requestBody, String sn)
     {
-        JSONObject result = dataMntService.getThreshold(requestBody, fsuId);
+        JSONObject result = dataMntService.getThreshold(requestBody, sn);
         if (result != null)
         {
             JSONObject data = (JSONObject) result.get("data");
@@ -107,9 +107,9 @@ public class DataController
     }
 
     @RequestMapping("/setThreshold")
-    public JsonResult setThreshold(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId)
+    public JsonResult setThreshold(@RequestBody(required = false) Map<String, Object> requestBody, String sn)
     {
-        JSONObject result = dataMntService.setThreshold(requestBody, fsuId);
+        JSONObject result = dataMntService.setThreshold(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 "0".equals(result.get("result")) ? new JsonResult("执行任务失败", false) :new JsonResult(result.get("data"));
     }
