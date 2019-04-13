@@ -28,7 +28,6 @@ public class AlarmAnalysisService {
 
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
-    private String  alarm_begin_delay_hash = RedisHashTable.SN_DEV_ID_ALARM_BEGIN_DELAY_HASH;
 
     /**
      * @auther: liudd
@@ -36,24 +35,27 @@ public class AlarmAnalysisService {
      * 功能描述:处理告警
      */
     public Map<String, Object> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate){
-        Map<String, Object> alarmMap = new HashMap<>();
+        Map<String, Object> beforAlarmMap = new HashMap<>();
         //获取FSU下所有以前告警
         Object beforAlarmMapObj = redisUtils.hget(sn__alarm_hash, fsu.getSN());
         if(null != beforAlarmMapObj){
             JSONObject beforAlarmMapJson = JSONObject.parseObject(beforAlarmMapObj.toString());
-            alarmMap = beforAlarmMapJson.getInnerMap();
-        }
-        //获取当前fsu下所有延迟开始告警第一次异常上报时间
-        Map<String, Object> beginDelayAlarmMap = new HashMap<>();
-        Object dbObj = redisUtils.hget(alarm_begin_delay_hash, fsu.getSN());
-        if(null != dbObj){
-            JSONObject dbJsonObj = JSONObject.parseObject(dbObj.toString());
-            beginDelayAlarmMap = dbJsonObj.getInnerMap();
+            beforAlarmMap = beforAlarmMapJson.getInnerMap();
         }
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
-            handleSignal(entry.getKey(), entry.getValue(), alarmMap, curDate, beginDelayAlarmMap);
+            beforAlarmMap = handleSignal(entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
         }
-        return alarmMap;
+        if(!beforAlarmMap.isEmpty()){
+            /*
+                处理历史遗留问题：1，产生延迟，但是此次该信号点没有变化上报；2：消除延迟，此次信号点没有变化上报.
+                主要是为了筛选需要注册的告警，注册完后，将真实告警和延迟（产生，消除）一起存入redis
+             */
+            Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
+            beforAlarmMap = delayService.handleHistory(beforAlarmMap, curDate, delayAlarmMap);
+            //告警管理过滤和告警组合
+
+        }
+        return beforAlarmMap;
     }
 
     /**
@@ -61,44 +63,35 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理信号点下的所有告警点
      */
-    public void handleSignal(String sn_dev_colId, Float value, Map<String, Object> beforAlarmMap, Date curDate
-                , Map<String, Object> beginDelayAlarmMap){
+    public Map<String, Object> handleSignal(String sn_dev_colId, Float value, Map<String, Object> beforAlarmMap, Date curDate){
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, sn_dev_colId);
         if(null == alarmSignalObj){
-            return ;
+            return null;
         }
+        Map<String, Object> alarmMap = new HashMap<>();
         List<AlarmSignal> alarmSignals = JSONArray.parseArray(alarmSignalObj.toString(), AlarmSignal.class);
         for (AlarmSignal alarmSignal : alarmSignals) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
             String keyAlarmId = sn_dev_colId + alarmSignal.getId();//sn_dev_colId_alarmId
-            Object beforAlarmObj = beforAlarmMap.get(keyAlarmId);//获取原先的告警
-            Alarm beforAlarm = (Alarm)beforAlarmObj;
-            if (null == beforAlarmObj) {//进入开始告警逻辑
+            Alarm beforAlarm = (Alarm)beforAlarmMap.get(keyAlarmId);//获取原先的告警
+            if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(value, alarmSignal, curDate);
                 //处理高频过滤
                 beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
-                delayService.beginAlarmDelay(beforAlarm, alarmSignal, curDate, keyAlarmId, beginDelayAlarmMap);
+                delayService.beginDelayAlarm(beforAlarm, alarmSignal, curDate);
             } else {              //进入恢复告警逻辑
-                endAlarm(beforAlarm, value, alarmSignal, curDate);
+                beforAlarm = endAlarm(beforAlarm, value, alarmSignal, curDate);
+                beforAlarm = delayService.endDelayAlarm(beforAlarm, alarmSignal, curDate);
             }
             if(null != beforAlarm){
-                beforAlarmMap.put(keyAlarmId, beforAlarm);
+                alarmMap.put(keyAlarmId, beforAlarm);
             }
         }
         //更新信号点数据
         redisUtils.hset(sn_dev_id_alarmsignal_hash, sn_dev_colId, JSONArray.toJSONString(alarmSignals));
-    }
-
-    public static void main(String[] a){
-        System.out.println("-----------");
-        Map<String, Object> alarmMap = new HashMap<>();
-        Object alarmObj = alarmMap.get("111");
-        Alarm beforAlarm = (Alarm) alarmObj;
-        System.out.println("alarmObj:" + alarmObj + "; beforAlarm: " + beforAlarm);
-        Alarm newAlarm =(Alarm)alarmMap.get("0000000");
-        System.out.println("newAlarm:" + newAlarm);
+        return alarmMap;
     }
 
     /**
@@ -115,8 +108,6 @@ public class AlarmAnalysisService {
             alarm.setValue(vallue);
             alarm.setAlarmId(alarmSignal.getAlarmId());
             alarm.setUpdateTime(curDate);
-            //填充信号点告警产生延迟以及结束延迟，避免告警延迟时再次获取信号点
-            alarm.setDelay(alarmSignal.getDelay());
             return alarm;
         }
         return null;
@@ -138,8 +129,7 @@ public class AlarmAnalysisService {
             beforAlarm.setUpdateTime(curDate);
             //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
             beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
-            return beforAlarm;
         }
-        return null;
+        return beforAlarm;
     }
 }
