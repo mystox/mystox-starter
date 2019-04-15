@@ -68,8 +68,8 @@ public class AlarmAnalysisService {
             return null;
         }
         Map<String, Object> alarmMap = new HashMap<>();
-        List<AlarmSignal> alarmSignals = JSONArray.parseArray(alarmSignalObj.toString(), AlarmSignal.class);
-        for (AlarmSignal alarmSignal : alarmSignals) {        //比较各个告警点
+        List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(alarmSignalObj.toString(), AlarmSignalConfig.class);
+        for (AlarmSignalConfig alarmSignal : alarmSignals) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
@@ -102,7 +102,7 @@ public class AlarmAnalysisService {
      * @date: 2019/3/27 16:17
      * 功能描述:开始告警
      */
-    private Alarm beginAlarm(float vallue, AlarmSignal alarmSignal, Date curDate){
+    private Alarm beginAlarm(float vallue, AlarmSignalConfig alarmSignal, Date curDate){
         if( (alarmSignal.getThresholdFlag() == 1 && vallue >= alarmSignal.getThreshold() )
                 || (alarmSignal.getThresholdFlag() == 0 && vallue <= alarmSignal.getThreshold()) ){
             //产生告警
@@ -122,7 +122,7 @@ public class AlarmAnalysisService {
      * 功能描述:结束告警逻辑
      * 如果结束告警上报铁塔未成功，此时继续来结束告警标志
      */
-    private Alarm endAlarm(Alarm beforAlarm, float value, AlarmSignal alarmSignal, Date curDate){
+    private Alarm endAlarm(Alarm beforAlarm, float value, AlarmSignalConfig alarmSignal, Date curDate){
         if( (alarmSignal.getThresholdFlag() ==  1 && value <= alarmSignal.getThreshold() )
                 || (alarmSignal.getThresholdFlag() ==0 && value >= alarmSignal.getThreshold()) ){
             byte link = beforAlarm.getLink();

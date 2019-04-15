@@ -36,7 +36,7 @@ public class TimeDataAnalysisService {
             StringBuilder devKey = new StringBuilder(fsu.getSN()).append(CoreConstant.LINE_CUT_OFF).append(device.getDev()).append(CoreConstant.LINE_CUT_OFF);
             HashMap<String, Float> info = device.getInfo();
             for(String key  : info.keySet()){
-                String sn_dev_colId = devKey.append(key).toString();
+                String sn_dev_colId = devKey + key;
                 dev_colId_valMap.put(sn_dev_colId, info.get(key));
                 //更新实时数据
                 redisUtils.hset(sn_data_hash, sn_dev_colId, info.get(key));

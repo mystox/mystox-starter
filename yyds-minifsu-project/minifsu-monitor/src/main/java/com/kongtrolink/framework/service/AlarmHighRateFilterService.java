@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.core.entity.AlarmSignal;
+import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 
@@ -27,7 +27,7 @@ public class AlarmHighRateFilterService {
      * @date: 2019/4/10 11:26
      * 功能描述:告警产生判定高频过滤
      */
-    public Alarm checkAlarm(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate){
+    public Alarm checkAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate){
         if(null == beforAlarm){
             return null;
         }
