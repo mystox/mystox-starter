@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 
@@ -13,4 +14,6 @@ public interface DataMntService {
     JSONObject getSignalList(ModuleMsg moduleMsg);
 
     JSONObject setThreshold(ModuleMsg moduleMsg);
+
+    JSONArray getThreshold(ModuleMsg moduleMsg);
 }

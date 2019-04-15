@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -43,5 +45,18 @@ public class MinifsuControllerApplicationTests {
 		{
 			e.printStackTrace();
 		}
+	}
+
+	@Autowired
+	MongoTemplate mongoTemplate;
+	/**
+	 * rpc spring 测试方法
+	 */
+	@Test
+	public void testMongo()
+	{
+		Criteria criteria =Criteria.where("a").is(1);
+		criteria.and("b").is(2);
+		System.out.println(criteria);
 	}
 }

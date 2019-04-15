@@ -25,7 +25,7 @@ public class PktType
     public final static String SET_ALARM_PARAM = "set_alarm_param"; //设置门限值
     public final static String GET_ALARMS = "get_alarms";
     public final static String GET_STATION = "get_station";
-    public final static String SET_STATION = "set_station";
+    public final static String SET_STATION = "set_station"; //设置绑定
     public final static String GET_DEVICE_STATUS = "get_device_status";
     public final static String GET_DEVICES_POINTS = "get_devices_points";
     public final static String GET_OP_LOG = "get_op_log";
@@ -34,6 +34,7 @@ public class PktType
     public final static String CLEANUP = "cleanUp";//终端网关报文通讯
     public final static String REGISTRY = "registry";//SN上报注册
     public final static String REGISTRY_CNTB = "registry_cntb";//SN上报注册至外部业务平台
+    public final static String FSU_BIND = "fsu_bind";//終端綁定SN
     public final static String FSU_REPORT = "fsu_report"; //FSU信息上报
     public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
     public final static String DATA_REPORT = "data_report"; //终端数据变化上报
@@ -42,5 +43,9 @@ public class PktType
     public final static String ALARM_SAVE = "alarm_save"; //保存告警
     public final static String LOG_SAVE = "log_save"; //保存日志
     public final static String ALARM_REGISTER = "alarm_register"; //告警注册
+    public final static String TERMINAL_SAVE = "terminal_save"; //保存终端
+    public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
+
+
 
 }

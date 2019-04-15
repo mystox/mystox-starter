@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
@@ -87,11 +88,11 @@ public class DataMntServiceImpl implements DataMntService {
     }
 
     @Override
-    public JSONObject getThreshold(Map<String, Object> requestBody, String sn) {
+    public JSONArray getThreshold(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_ALARM_PARAM, sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
-        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
         return result;
     }
 

@@ -47,7 +47,7 @@ public class TerminalDao
         return mongoTemplate.findOne(Query.query(Criteria.where("terminalId").is(terminalId)), TerminalProperties.class,MongoTableName.TERMINAL_PROPERTY);
     }
 
-    public void saveTerminal(TerminalProperties terminalProperties) {
+    public void saveTerminalProperties(TerminalProperties terminalProperties) {
         mongoTemplate.save(terminalProperties,MongoTableName.TERMINAL_PROPERTY);
     }
 
@@ -56,5 +56,17 @@ public class TerminalDao
         Criteria criteria = new Criteria();
 
         return mongoTemplate.find(Query.query(criteria),Terminal.class, MongoTableName.TERMINAL);
+    }
+
+    public boolean existsBySn(String sn) {
+        return mongoTemplate.exists(Query.query(Criteria.where("SN").is(sn)),MongoTableName.TERMINAL);
+    }
+
+    public void saveTerminal(Terminal terminal) {
+        mongoTemplate.save(terminal,MongoTableName.TERMINAL);
+    }
+
+    public void saveTerminalBatch(List<Terminal> terminals) {
+        mongoTemplate.insert(terminals,MongoTableName.TERMINAL);
     }
 }

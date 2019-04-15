@@ -277,7 +277,7 @@ public class MinifsuControllerApplicationTests {
         JSONObject requestHead = new JSONObject();
         String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
         requestHead.put("uuid", uuid);
-        requestHead.put("gip", "172.16.6.39:17700");
+        requestHead.put("gip", "172.16.6.39:17701");
         requestHead.put("pktType", PktType.CONNECT);
 
         /************************* 注册********************************/

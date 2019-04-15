@@ -109,6 +109,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
             } else if (PktType.UPGRADE.equals(pktType)
                     || PktType.SET_DATA.equals(pktType)
+                    || PktType.TERMINAL_REBOOT.equals(pktType)
                     )                                                           //服务>>>>>>>>终端
             {
                 JSON result = sendTerminalExecute(msgId, payloadObject);
@@ -143,7 +144,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         int pktTypeInt = TerminalPktType.toKey(pktType);
         JSONObject result = new JSONObject();
         result.put("result", 0);
-        if (pktTypeInt != -1) return result;
+        if (pktTypeInt == -1) return result;
         msgPayload.put("pktType", pktTypeInt);
         //payload组装消息成终端消息格式{"msgId":"000009","pkgSum":1,"ts":1552043047,"payload":{"pktType":4,"result":1}}
         TerminalMsg requestMsg = new TerminalMsg();
@@ -155,8 +156,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         JSONObject snCommunication = null;
         try {
             //根据SN获取uuid和gip
+
+
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             snCommunication = redisUtils.get(key, JSONObject.class);
+
+
             if (snCommunication == null) {
                 // 错误信息记录日志
                 Log log = new Log();
@@ -172,8 +177,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
                 return result;
             }
+
+
             String uuid = (String) snCommunication.get("UUID");
             moduleMsg.setUuid(uuid);
+            //发送至网关
+            String netAddr = (String) snCommunication.get("GWip");
+            String[] netAddrArr = netAddr.split(":");
+            return sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), netAddrArr[0], Integer.parseInt(netAddrArr[1]));
         } catch (Exception e) {
             e.printStackTrace();
             // 错误信息记录日志
@@ -191,10 +202,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return result;
         }
 
-        //发送至网关
-        String netAddr = (String) snCommunication.get("GWip");
-        String[] netAddrArr = netAddr.split(":");
-        return sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), netAddrArr[0], Integer.parseInt(netAddrArr[1]));
     }
 
     /**
@@ -211,14 +218,19 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.LOG_SAVE.equals(pktType) //日志保存
                 || PktType.GET_DEVICES.equals(pktType) //
                 || PktType.GET_DATA.equals(pktType)
+                || PktType.SET_STATION.equals(pktType)
                 || PktType.SET_ALARM_PARAM.equals(pktType)
+                || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.COMPILER.equals(pktType)
+                || PktType.TERMINAL_SAVE.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
-        return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
+            return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType)
                 || PktType.ALARM_REGISTER.equals(pktType)
+                || PktType.GET_ALARMS.equals(pktType)
+                || PktType.FSU_BIND.equals(pktType)
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
@@ -325,7 +337,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return JSONObject.toJSON(terminalResp);
         }
         /****************************数据变化上报*******************************/
-        if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
+        if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType || TerminalPktType.RUN_STATE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);

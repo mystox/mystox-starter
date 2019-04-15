@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.core.entity;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -14,6 +15,7 @@ public class ModuleMsg {
     private String uuid;
     private String SN;
     private JSONObject payload;
+    private JSONArray arrayPayload;
 
     public ModuleMsg() {
     }
@@ -85,6 +87,13 @@ public class ModuleMsg {
         this.payload = payload;
     }
 
+    public JSONArray getArrayPayload() {
+        return arrayPayload;
+    }
+
+    public void setArrayPayload(JSONArray arrayPayload) {
+        this.arrayPayload = arrayPayload;
+    }
 
     @Override
     public String toString() {
@@ -94,14 +103,8 @@ public class ModuleMsg {
                 ", uuid='" + uuid + '\'' +
                 ", SN='" + SN + '\'' +
                 ", payload=" + payload +
+                ", arrayPayload=" + arrayPayload +
                 '}';
     }
 
-    public static void main(String[] args) {
-        ModuleMsg moduleMsg = new ModuleMsg();
-        moduleMsg.setSN("sfadfsf");
-        System.out.println(JSONObject.toJSONString(moduleMsg));
-        ModuleMsg moduleMsg1 = JSONObject.parseObject("{\"sN\":\"sfadfsf\"}", ModuleMsg.class);
-        System.out.println(moduleMsg1);
-    }
 }
