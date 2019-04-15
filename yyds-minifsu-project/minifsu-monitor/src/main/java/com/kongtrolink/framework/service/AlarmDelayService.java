@@ -120,7 +120,13 @@ public class AlarmDelayService {
     public Map<String, Object> handleHistory(Map<String, Object> alarmMap, Date curDate, Map<String, Object> delayAlarmMap ){
         Map<String, Object> realAlarmMap = new HashMap<>();
         for(String key : alarmMap.keySet()){
-            Alarm alarm = (Alarm)alarmMap.get(key);
+            Alarm alarm = null;
+            Object alarmObj = alarmMap.get(key);
+            if(alarmObj instanceof Alarm){
+                alarm = (Alarm) alarmObj;
+            }else {
+                alarm  = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
+            }
             byte link = alarm.getLink();
             if( (link & EnumAlarmStatus.END.getValue()) != 0 ){     //收到告警消除数据，判定是否真实消除
                 if( (link & EnumAlarmStatus.REALEND.getValue()) != 0 ){
