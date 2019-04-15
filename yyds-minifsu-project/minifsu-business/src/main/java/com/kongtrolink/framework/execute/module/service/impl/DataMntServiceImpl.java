@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by mystoxlol on 2019/4/10, 18:57.
@@ -44,8 +45,20 @@ public class DataMntServiceImpl implements DataMntService {
         Integer type = (Integer) searchCondition.get("type");
 
         String dev = type + "-" + resNo;
-        JSONObject mntData = redisUtils.getHash(RedisHashTable.SN_DATA_HASH, sn, JSONObject.class);
-        JSONArray jsonArray = (JSONArray) mntData.get("data");
+        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH+sn,dev + "_*");
+
+        for (String key : mntData) {
+            JSONObject coData = new JSONObject();
+            Float value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH+sn,key,Float.class);
+            String coId = key.replaceFirst(key, dev + "_");
+            coData.put("coId", coId);
+            coData.put("value", value);
+            //TODO 翻译数据点
+
+            coData.put("name", "");
+        }
+//        JSONArray jsonArray = (JSONArray) mntData.add("data");
+        JSONArray jsonArray = new JSONArray();
         for (Object devObject : jsonArray) {
             JSONObject devJson = (JSONObject) devObject;
             if (dev.equals(devJson.get("dev"))) {
