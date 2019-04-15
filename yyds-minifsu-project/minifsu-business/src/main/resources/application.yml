@@ -9,7 +9,7 @@ mongodb:
 
 server:
   name: minifsu-business
-  bindIp: 172.16.6.39
+  bindIp: 172.16.6.199
   rpc:
     port: 18830
 spring:
@@ -43,7 +43,7 @@ rpc:
   client:
     timeout: 30000
   controller:
-    hostname: 172.16.6.39
+    hostname: 172.16.6.199
     port: 18800
 register:
   delay: 100

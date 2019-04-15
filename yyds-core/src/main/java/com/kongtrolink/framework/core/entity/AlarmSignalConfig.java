@@ -18,19 +18,16 @@ public class AlarmSignalConfig {
     private Integer thresholdFlag; //门限值标志
     private Integer level;//告警等级
     private Float hystersis; //告警回差;
-    private Integer delay; //告警产生延迟
-    private Integer recoverDelay; //告警恢复延时
+    private int delay; //告警产生延迟
+    private int recoverDelay; //告警恢复延时
     private Integer repeatDelay; //告警重复延时
     private String alarmDesc; //告警描述
 
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
+    //高频过滤，暂时所有告警点都有
+    private int highRateI = 30*60;      //高频过滤间隔highrateinteval（单位为秒）
+    private int highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
+    private long highRateFT;        //高频过滤第一次告警时间
+    private int highRateC;      //高频过滤告警次数
 
     public String getId() {
         return id;
@@ -38,6 +35,14 @@ public class AlarmSignalConfig {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getAlarmId() {
@@ -112,19 +117,19 @@ public class AlarmSignalConfig {
         this.hystersis = hystersis;
     }
 
-    public Integer getDelay() {
+    public int getDelay() {
         return delay;
     }
 
-    public void setDelay(Integer delay) {
+    public void setDelay(int delay) {
         this.delay = delay;
     }
 
-    public Integer getRecoverDelay() {
+    public int getRecoverDelay() {
         return recoverDelay;
     }
 
-    public void setRecoverDelay(Integer recoverDelay) {
+    public void setRecoverDelay(int recoverDelay) {
         this.recoverDelay = recoverDelay;
     }
 
@@ -142,5 +147,37 @@ public class AlarmSignalConfig {
 
     public void setAlarmDesc(String alarmDesc) {
         this.alarmDesc = alarmDesc;
+    }
+
+    public int getHighRateI() {
+        return highRateI;
+    }
+
+    public void setHighRateI(int highRateI) {
+        this.highRateI = highRateI;
+    }
+
+    public int getHighRateT() {
+        return highRateT;
+    }
+
+    public void setHighRateT(int highRateT) {
+        this.highRateT = highRateT;
+    }
+
+    public long getHighRateFT() {
+        return highRateFT;
+    }
+
+    public void setHighRateFT(long highRateFT) {
+        this.highRateFT = highRateFT;
+    }
+
+    public int getHighRateC() {
+        return highRateC;
+    }
+
+    public void setHighRateC(int highRateC) {
+        this.highRateC = highRateC;
     }
 }

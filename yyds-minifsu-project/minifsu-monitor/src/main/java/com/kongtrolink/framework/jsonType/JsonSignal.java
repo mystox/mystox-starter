@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.jsonType;
 
 import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.core.entity.AlarmSignal;
+import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class JsonSignal {
     private float v;
 
     //JSON转换使用字段
-    private List<AlarmSignal> alarmSignals;
+    private List<AlarmSignalConfig> alarmSignals;
     //信号点id， 告警
     private Map<String, Alarm> alarmMap;
 
@@ -63,13 +63,5 @@ public class JsonSignal {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public List<AlarmSignal> getAlarmSignals() {
-        return alarmSignals;
-    }
-
-    public void setAlarmSignals(List<AlarmSignal> alarmSignals) {
-        this.alarmSignals = alarmSignals;
     }
 }

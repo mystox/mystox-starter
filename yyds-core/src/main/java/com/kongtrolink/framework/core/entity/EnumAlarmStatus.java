@@ -7,10 +7,12 @@ package com.kongtrolink.framework.core.entity;
  */
 public enum  EnumAlarmStatus {
 
-    BEGIN(1, "开始"),
-    BEGINREPORT(2, "开始上报"),
+    BEGIN(1, "产生"),
+    BEGINREPORT(2, "产生上报"),
     END(4, "结束"),
-    ENDREPORT(8, "结束上报");
+    ENDREPORT(8, "结束上报"),
+    REALBEGIN(16, "真实产生"),
+    REALEND(32, "真实消除");
 
     private int value;
     private String name;

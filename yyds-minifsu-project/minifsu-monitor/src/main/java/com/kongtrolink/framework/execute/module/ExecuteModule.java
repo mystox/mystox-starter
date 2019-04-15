@@ -8,8 +8,9 @@ import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
+import com.kongtrolink.framework.service.AlarmAnalysisService;
 import com.kongtrolink.framework.service.DataRegisterService;
-import com.kongtrolink.framework.service.DataReportService;
+import com.kongtrolink.framework.service.TimeDataAnalysisService;
 import com.kongtrolink.framework.task.SaveLogTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,9 +30,6 @@ import java.util.*;
  */
 @Service
 public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
-
-    @Autowired
-    DataReportService reportService;
     @Autowired
     DataRegisterService registerService;
     @Autowired
@@ -40,10 +38,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     RpcModule rpcModule;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    TimeDataAnalysisService timeDateService;
+    @Autowired
+    AlarmAnalysisService analysisService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String communication_hash = RedisHashTable.COMMUNICATION_HASH;
-    private  String sn_data_hash = RedisHashTable.SN_DATA_HASH;
+
+
     @Value("${server.name}")
     private String serviceName;
     @Value("${server.bindIp}")
@@ -52,7 +55,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String controllerName;
     @Value("${rpc.controller.port}")
     private int controllerPort;
-    @Value("")
+
     /**
      * @auther: liudd
      * @date: 2019/4/3 10:32
@@ -77,6 +80,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      */
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload){
+        String result = "{'pktType':4,'result':1}";
         Date curDate = new Date();
         RpcNotifyProto.MessageType response = RpcNotifyProto.MessageType.RESPONSE;
         ModuleMsg moduleMsg = JSON.parseObject(payload, ModuleMsg.class);
@@ -87,13 +91,24 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
         }
 
-        String sn = fsu.getSN();
-        //保存实时数据
-        redisUtils.hset(sn_data_hash, sn, infoPayload);
-        //变化数据上报
-        String result = reportService.report(msgId, fsu, curDate);
+        //解析保存实时数据和告警
+        Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
+        //解析告警
+        Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
+        Map<String, Object> alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate, delayAlarmMap);
+        alarmMap.putAll(delayAlarmMap);
+        //将告警保存到redis中
+        for(String key : alarmMap.keySet()) {
+            //暂时不做上报和保存告警处理
+            Alarm alarm = (Alarm)alarmMap.get(key);
+            if((alarm.getLink() & EnumAlarmStatus.REALEND.getValue()) != 0){
+                redisUtils.hdel(RedisHashTable.SN_ALARM_HASH + fsu.getSN(), key);
+            }else {
+                redisUtils.hset(RedisHashTable.SN_ALARM_HASH + fsu.getSN(), key, alarm);
+            }
+        }
         //告警注册与消除
-        registerService.register(msgId, fsu, curDate);
+//        registerService.register(msgId, fsu, curDate);
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
     }
 

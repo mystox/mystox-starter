@@ -52,7 +52,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
             boolean result = "1".equals(resultJson.get("result")) ? true : false;
             if(true){
                 List<Alarm> alarmList = new ArrayList<>();
-                parseAlarm(jsonFsu, alarmList);
+//                parseAlarm(jsonFsu, alarmList);
                 if(!alarmList.isEmpty()) {
                     String alarmMsg = createAlarmMsg(alarmList);
                     //发送命令给服务中心保存告警
@@ -75,38 +75,38 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
      * @date: 2019/4/3 16:44
      * 功能描述:修改告警状态
      */
-    private void parseAlarm(JsonFsu fsu, List<Alarm> alarmList){
-        Iterator<JsonDevice> deviceIterator = fsu.getData().iterator();
-        while (deviceIterator.hasNext()){
-            JsonDevice device = deviceIterator.next();
-            Iterator<JsonSignal> signalIterator = device.getSignalList().iterator();
-            while(signalIterator.hasNext()){
-                JsonSignal jsonSignal = signalIterator.next();
-                Map<String, Alarm> alarmMap = jsonSignal.getAlarmMap();
-                Iterator<Map.Entry<String, Alarm>> iterator = alarmMap.entrySet().iterator();
-                while (iterator.hasNext()){
-                    Map.Entry<String, Alarm> next = iterator.next();
-                    Alarm alarm = next.getValue();
-                    byte link = alarm.getLink();
-                    if( (link & EnumAlarmStatus.BEGINREPORT.getValue()) == 0 ){
-                        link = (byte)(link | EnumAlarmStatus.BEGINREPORT.getValue());
-                        alarm.setLink(link);
-                    }else if( (link & EnumAlarmStatus.END.getValue()) != 0){
-                        link = (byte)(link | EnumAlarmStatus.ENDREPORT.getValue());
-                        alarm.setLink(link);
-                        alarmList.add(alarm);
-                        iterator.remove();
-                    }
-                }
-                if(jsonSignal.getAlarmMap().isEmpty()){
-                    signalIterator.remove();
-                }
-            }
-            if(device.getSignalList().isEmpty()){
-                deviceIterator.remove();
-            }
-        }
-    }
+//    private void parseAlarm(JsonFsu fsu, List<Alarm> alarmList){
+//        Iterator<JsonDevice> deviceIterator = fsu.getData().iterator();
+//        while (deviceIterator.hasNext()){
+//            JsonDevice device = deviceIterator.next();
+//            Iterator<JsonSignal> signalIterator = device.getSignalList().iterator();
+//            while(signalIterator.hasNext()){
+//                JsonSignal jsonSignal = signalIterator.next();
+//                Map<String, Alarm> alarmMap = jsonSignal.getAlarmMap();
+//                Iterator<Map.Entry<String, Alarm>> iterator = alarmMap.entrySet().iterator();
+//                while (iterator.hasNext()){
+//                    Map.Entry<String, Alarm> next = iterator.next();
+//                    Alarm alarm = next.getValue();
+//                    byte link = alarm.getLink();
+//                    if( (link & EnumAlarmStatus.BEGINREPORT.getValue()) == 0 ){
+//                        link = (byte)(link | EnumAlarmStatus.BEGINREPORT.getValue());
+//                        alarm.setLink(link);
+//                    }else if( (link & EnumAlarmStatus.END.getValue()) != 0){
+//                        link = (byte)(link | EnumAlarmStatus.ENDREPORT.getValue());
+//                        alarm.setLink(link);
+//                        alarmList.add(alarm);
+//                        iterator.remove();
+//                    }
+//                }
+//                if(jsonSignal.getAlarmMap().isEmpty()){
+//                    signalIterator.remove();
+//                }
+//            }
+//            if(device.getSignalList().isEmpty()){
+//                deviceIterator.remove();
+//            }
+//        }
+//    }
 
     /**
      * 发送至事务处理的消息
