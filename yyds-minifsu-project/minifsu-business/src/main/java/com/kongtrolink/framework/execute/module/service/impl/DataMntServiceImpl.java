@@ -54,6 +54,7 @@ public class DataMntServiceImpl implements DataMntService {
             coData.put("coId", coId);
             coData.put("value", value);
             //TODO 翻译数据点
+            String name = tranceDataId(coId);
 
             coData.put("name", "");
         }
@@ -73,6 +74,16 @@ public class DataMntServiceImpl implements DataMntService {
         }
 
         return new JSONObject();
+    }
+
+    /**
+     * 转换数据点id类型名称
+     * @param coId
+     * @return
+     */
+    private String tranceDataId(String coId) {
+
+        return "1";
     }
 
     @Override
