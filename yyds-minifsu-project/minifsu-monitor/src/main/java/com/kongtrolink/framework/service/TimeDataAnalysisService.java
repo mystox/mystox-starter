@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.CoreConstant;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
@@ -9,7 +8,6 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +34,12 @@ public class TimeDataAnalysisService {
         Map<String, Float> dev_colId_valMap = new HashMap<>();
         for(JsonDevice device : fsu.getData()){
             StringBuilder devKey = new StringBuilder(fsu.getSN()).append(CoreConstant.LINE_CUT_OFF).append(device.getDev()).append(CoreConstant.LINE_CUT_OFF);
-            for(JsonSignal signal : device.getSignalList()){
-                String sn_dev_colId = devKey.append(signal.getId()).toString();
-                dev_colId_valMap.put(sn_dev_colId, signal.getV());
+            HashMap<String, Float> info = device.getInfo();
+            for(String key  : info.keySet()){
+                String sn_dev_colId = devKey.append(key).toString();
+                dev_colId_valMap.put(sn_dev_colId, info.get(key));
                 //更新实时数据
-                redisUtils.hset(sn_data_hash, sn_dev_colId, dev_colId_valMap.get(sn_dev_colId));
+                redisUtils.hset(sn_data_hash, sn_dev_colId, info.get(key));
             }
         }
         return dev_colId_valMap;

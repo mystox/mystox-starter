@@ -293,7 +293,9 @@ public class AlarmDelayService {
             return null;
         }
         Integer delay = alarmSignal.getDelay();
-        if(delay == 0){        //如果该告警点没有告警产生延迟，直接返回
+        if(delay == 0){        //如果该告警点没有告警产生延迟，修改状态为真实产生
+            byte link = beforAlarm.getLink();
+            beforAlarm.setLink((byte)(link | EnumAlarmStatus.REALBEGIN.getValue()));
             return beforAlarm;
         }
         //填充信号点告警产生延迟以及结束延迟，避免告警延迟时再次获取信号点
@@ -311,7 +313,6 @@ public class AlarmDelayService {
     public Alarm endDelayAlarm(Alarm beforAlarm, AlarmSignal alarmSignal, Date curDate) {
         byte link = beforAlarm.getLink();
         Integer recoverDelay = alarmSignal.getRecoverDelay();
-        byte endDelayLink = (byte) (link | EnumAlarmStatus.ENDDELAY.getValue());
         byte realEndLink = (byte) (link | EnumAlarmStatus.REALEND.getValue());
         if ((link & EnumAlarmStatus.END.getValue()) != 0) {      //告警消除
             //判断该告警是否有产生延迟
@@ -323,17 +324,14 @@ public class AlarmDelayService {
                         beforAlarm.setLink(realEndLink);
                         return beforAlarm;
                     }
-                    if((link & EnumAlarmStatus.ENDDELAY.getValue()) == 0){      //消除延迟状态为0，说明是第一次告警消除，填充消除时间和修改状态
-                        beforAlarm.setLink(endDelayLink);
-                        beforAlarm.setRecoverDelay(recoverDelay);
-                        beforAlarm.setRecoverDelayFT(curDate.getTime());
-                        return beforAlarm;
-                    }else{      //消除延迟状态不为0，说明此前已经有过告警消除，但是被延迟了。判断消除延迟是否过期
-                        if(!endInTime(beforAlarm, curDate)){    //消除延时已经过期，直接修改状态为真实消除。否则不做任何修改
-                            beforAlarm.setLink(realEndLink);
-                        }
-                        return beforAlarm;
+                    if(!endInTime(beforAlarm, curDate)){    //消除延时已经过期，直接修改状态为真实消除。否则不做任何修改
+                        beforAlarm.setLink(realEndLink);
+                    }else{
+                        //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
+                        beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
+                        beforAlarm.setBeginDelayFT(curDate.getTime());
                     }
+                    return beforAlarm;
                 }else{//以前告警延迟已经真实消除，直接返回告警即可。当告警真实消除后，推送给铁塔失败，倒追redis中一直存在该告警
                     return beforAlarm;
                 }

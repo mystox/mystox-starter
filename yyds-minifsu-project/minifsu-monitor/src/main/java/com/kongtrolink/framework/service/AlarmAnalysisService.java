@@ -2,10 +2,7 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.core.entity.AlarmSignal;
-import com.kongtrolink.framework.core.entity.EnumAlarmStatus;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
+import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,23 +31,25 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理告警
      */
-    public Map<String, Object> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate){
+    public Map<String, Object> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate,
+                                             Map<String, Object> delayAlarmMap){
         Map<String, Object> beforAlarmMap = new HashMap<>();
         //获取FSU下所有以前告警
-        Object beforAlarmMapObj = redisUtils.hget(sn__alarm_hash, fsu.getSN());
-        if(null != beforAlarmMapObj){
-            JSONObject beforAlarmMapJson = JSONObject.parseObject(beforAlarmMapObj.toString());
-            beforAlarmMap = beforAlarmMapJson.getInnerMap();
+//        Object beforAlarmMapObj = redisUtils.hget(sn__alarm_hash, fsu.getSN());
+        Map<Object, Object> hmget = redisUtils.hmget(sn__alarm_hash + fsu.getSN());
+        if(null != hmget){
+            for(Map.Entry<Object, Object> curAlarm : hmget.entrySet()){
+                beforAlarmMap.put(curAlarm.getKey().toString(), curAlarm.getValue());
+            }
         }
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
             beforAlarmMap = handleSignal(entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
         }
-        if(!beforAlarmMap.isEmpty()){
+        if(null != beforAlarmMap && !beforAlarmMap.isEmpty()){
             /*
                 处理历史遗留问题：1，产生延迟，但是此次该信号点没有变化上报；2：消除延迟，此次信号点没有变化上报.
                 主要是为了筛选需要注册的告警，注册完后，将真实告警和延迟（产生，消除）一起存入redis
              */
-            Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
             beforAlarmMap = delayService.handleHistory(beforAlarmMap, curDate, delayAlarmMap);
             //告警管理过滤和告警组合
 
@@ -74,8 +73,12 @@ public class AlarmAnalysisService {
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
-            String keyAlarmId = sn_dev_colId + alarmSignal.getId();//sn_dev_colId_alarmId
-            Alarm beforAlarm = (Alarm)beforAlarmMap.get(keyAlarmId);//获取原先的告警
+            String keyAlarmId = sn_dev_colId + CoreConstant.LINE_CUT_OFF + alarmSignal.getAlarmId();//sn_dev_colId_alarmId
+            Alarm beforAlarm = null;//获取原先的告警
+            Object beforAlarmObj = beforAlarmMap.get(keyAlarmId);
+            if(null != beforAlarmObj) {
+                beforAlarm = JSONObject.parseObject(beforAlarmObj.toString(), Alarm.class);
+            }
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(value, alarmSignal, curDate);
                 //处理高频过滤
@@ -127,8 +130,8 @@ public class AlarmAnalysisService {
             beforAlarm.setLink(link);
             beforAlarm.setValue(value);
             beforAlarm.setUpdateTime(curDate);
-            //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
-            beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
+//            //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
+//            beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
         }
         return beforAlarm;
     }

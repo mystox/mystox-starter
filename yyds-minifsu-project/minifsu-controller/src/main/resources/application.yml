@@ -41,7 +41,7 @@ rpc:
   client:
     timeout: 30000
   net-GW:
-    hostname: 172.16.6.39
+    hostname: 172.16.6.199
     port: 17700
   monitor:
     hostname: 172.16.6.199

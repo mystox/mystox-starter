@@ -11,10 +11,8 @@ public enum  EnumAlarmStatus {
     BEGINREPORT(2, "产生上报"),
     END(4, "结束"),
     ENDREPORT(8, "结束上报"),
-    DEBINDELAY(16, "产生延迟"),
-    REALBEGIN(32, "真实产生"),
-    ENDDELAY(64, "消除延迟"),
-    REALEND(128, "真实消除");
+    REALBEGIN(16, "真实产生"),
+    REALEND(32, "真实消除");
 
     private int value;
     private String name;

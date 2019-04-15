@@ -15,12 +15,12 @@ public class AlarmSignal {
     private String coId;            //数据点id
     private Integer coType;         //关联数据点类型
     private Boolean enable;         //告警使能
-    private Double threshold;       //阈值
-    private Integer thresholdFlag;  //门限值标志
+    private double threshold;       //阈值
+    private int thresholdFlag;  //门限值标志
     private Integer level;          //告警等级
     private Float hystersis;        //告警回差
-    private Integer delay;          //告警产生延时(单位为秒)
-    private Integer recoverDelay;   //告警恢复延时
+    private int delay;          //告警产生延时(单位为秒)
+    private int recoverDelay;   //告警恢复延时
     private Integer repeatDelay;    //告警重复延时
     private Integer alarmDesc;      //告警描述
     private Integer normalDesc;     //正常时描述
@@ -29,38 +29,6 @@ public class AlarmSignal {
     private int highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
     private long highRateFT;        //高频过滤第一次告警时间
     private int highRateC;      //高频过滤告警次数
-
-    public int getHighRateI() {
-        return highRateI;
-    }
-
-    public void setHighRateI(int highRateI) {
-        this.highRateI = highRateI;
-    }
-
-    public int getHighRateT() {
-        return highRateT;
-    }
-
-    public void setHighRateT(int highRateT) {
-        this.highRateT = highRateT;
-    }
-
-    public long getHighRateFT() {
-        return highRateFT;
-    }
-
-    public void setHighRateFT(long highRateFT) {
-        this.highRateFT = highRateFT;
-    }
-
-    public int getHighRateC() {
-        return highRateC;
-    }
-
-    public void setHighRateC(int highRateC) {
-        this.highRateC = highRateC;
-    }
 
     public String getId() {
         return id;
@@ -126,19 +94,19 @@ public class AlarmSignal {
         this.enable = enable;
     }
 
-    public Double getThreshold() {
+    public double getThreshold() {
         return threshold;
     }
 
-    public void setThreshold(Double threshold) {
+    public void setThreshold(double threshold) {
         this.threshold = threshold;
     }
 
-    public Integer getThresholdFlag() {
+    public int getThresholdFlag() {
         return thresholdFlag;
     }
 
-    public void setThresholdFlag(Integer thresholdFlag) {
+    public void setThresholdFlag(int thresholdFlag) {
         this.thresholdFlag = thresholdFlag;
     }
 
@@ -158,19 +126,19 @@ public class AlarmSignal {
         this.hystersis = hystersis;
     }
 
-    public Integer getDelay() {
+    public int getDelay() {
         return delay;
     }
 
-    public void setDelay(Integer delay) {
+    public void setDelay(int delay) {
         this.delay = delay;
     }
 
-    public Integer getRecoverDelay() {
+    public int getRecoverDelay() {
         return recoverDelay;
     }
 
-    public void setRecoverDelay(Integer recoverDelay) {
+    public void setRecoverDelay(int recoverDelay) {
         this.recoverDelay = recoverDelay;
     }
 
@@ -196,5 +164,37 @@ public class AlarmSignal {
 
     public void setNormalDesc(Integer normalDesc) {
         this.normalDesc = normalDesc;
+    }
+
+    public int getHighRateI() {
+        return highRateI;
+    }
+
+    public void setHighRateI(int highRateI) {
+        this.highRateI = highRateI;
+    }
+
+    public int getHighRateT() {
+        return highRateT;
+    }
+
+    public void setHighRateT(int highRateT) {
+        this.highRateT = highRateT;
+    }
+
+    public long getHighRateFT() {
+        return highRateFT;
+    }
+
+    public void setHighRateFT(long highRateFT) {
+        this.highRateFT = highRateFT;
+    }
+
+    public int getHighRateC() {
+        return highRateC;
+    }
+
+    public void setHighRateC(int highRateC) {
+        this.highRateC = highRateC;
     }
 }
