@@ -70,8 +70,6 @@ public class RegistryServiceImpl implements RegistryService {
         //查表t_terminal
         Terminal terminal = terminalDao.findTerminalBySn(sn);
         JSONObject result = new JSONObject();
-
-
             if (terminal != null && otherLogic()) {
                 String bid = terminal.getBID();
                 Order order = terminalDao.findOrderById(bid);
@@ -82,7 +80,7 @@ public class RegistryServiceImpl implements RegistryService {
                 //删除所有其他信息
                 if (value != null) {
                     redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
-                    redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
+                    redisUtils.del(RedisHashTable.SN_DATA_HASH + sn);
                     Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
                     if (keys != null && keys.size() > 0) {
                         String[] s = new String[keys.size()];
@@ -191,9 +189,9 @@ public class RegistryServiceImpl implements RegistryService {
                 Integer deviceResNo = device.getResNo();
                 device.setInvalidTime(new Date(System.currentTimeMillis())); //设置失效
                 for (Device newDevice : newDeviceList) {
-                    if (deviceType == newDevice.getType()
+                    if (deviceType.equals(newDevice.getType())
                             && devicePort.equals(newDevice.getPort())
-                            && deviceResNo == newDevice.getResNo()) { //存在对应类型设置有效
+                            && deviceResNo.equals(newDevice.getResNo())) { //存在对应类型设置有效
                         device.setInvalidTime(new Date(0L));
                         newDevice.setInvalidTime(new Date(0L));
                         break;
@@ -209,7 +207,6 @@ public class RegistryServiceImpl implements RegistryService {
                 }
             }
             deviceDao.saveBatch(saveDeviceList); //保存最新设备信息
-
 
             List<Device> deviceList = deviceDao.findDevicesBySnAndValid(sn); //获取最新设备信息
             redisUtils.setHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, devList); //设备信息写入redis
@@ -377,7 +374,7 @@ public class RegistryServiceImpl implements RegistryService {
                     String sn = key.replace(RedisHashTable.COMMUNICATION_HASH + ":", "");
                     redisUtils.del(key);
                     redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
-                    redisUtils.deleteHash(RedisHashTable.SN_DATA_HASH, sn);
+                    redisUtils.del(RedisHashTable.SN_DATA_HASH + sn);
                     Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
                     if (keys != null && keys.size() > 0) {
                         String[] s = new String[keys.size()];
