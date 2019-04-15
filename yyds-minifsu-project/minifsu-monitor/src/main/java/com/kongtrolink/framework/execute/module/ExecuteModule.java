@@ -96,7 +96,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //解析告警
         Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
         Map<String, Object> alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate, delayAlarmMap);
-
+        alarmMap.putAll(delayAlarmMap);
         //将告警保存到redis中
         for(String key : alarmMap.keySet()) {
             //暂时不做上报和保存告警处理
