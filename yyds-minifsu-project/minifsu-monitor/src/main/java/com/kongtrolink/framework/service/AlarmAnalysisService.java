@@ -82,7 +82,7 @@ public class AlarmAnalysisService {
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(value, alarmSignal, curDate);
                 //处理高频过滤
-                beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
+//                beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
                 delayService.beginDelayAlarm(beforAlarm, alarmSignal, curDate);
             } else {              //进入恢复告警逻辑
                 beforAlarm = endAlarm(beforAlarm, value, alarmSignal, curDate);
