@@ -84,23 +84,27 @@ public class AlarmDelayService {
     public Alarm endDelayAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate) {
         byte link = beforAlarm.getLink();
         Integer recoverDelay = alarmSignal.getRecoverDelay();
+        link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
         byte realEndLink = (byte) (link | EnumAlarmStatus.REALEND.getValue());
         if ((link & EnumAlarmStatus.END.getValue()) != 0) {      //告警消除
             //判断该告警是否有产生延迟
             if (inTime(beforAlarm, curDate)) {    //在告警产生延迟期间，告警需要消除，则直接将告警删除，不需要保存和注册
                 return null;
             } else {
+
                 if((link & EnumAlarmStatus.REALEND.getValue()) == 0){   //告警不是真是消除
                     if(recoverDelay == 0){      //告警点不需要消除延迟，直接修改状态为真实消除
                         beforAlarm.setLink(realEndLink);
                         return beforAlarm;
                     }
-                    if(!endInTime(beforAlarm, curDate)){    //消除延时已经过期，直接修改状态为真实消除。否则不做任何修改
-                        beforAlarm.setLink(realEndLink);
-                    }else{
+                    if(0 == beforAlarm.getRecoverDelayFT()){
                         //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
                         beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
-                        beforAlarm.setBeginDelayFT(curDate.getTime());
+                        beforAlarm.setRecoverDelayFT(curDate.getTime());
+                        return beforAlarm;
+                    }
+                    if(!endInTime(beforAlarm, curDate)){    //消除延时已经过期，直接修改状态为真实消除。否则不做任何修改
+                        beforAlarm.setLink(realEndLink);
                     }
                     return beforAlarm;
                 }else{//以前告警延迟已经真实消除，直接返回告警即可。当告警真实消除后，推送给铁塔失败，倒追redis中一直存在该告警
@@ -120,7 +124,7 @@ public class AlarmDelayService {
     public Map<String, Object> handleHistory(Map<String, Object> alarmMap, Date curDate, Map<String, Object> delayAlarmMap ){
         Map<String, Object> realAlarmMap = new HashMap<>();
         for(String key : alarmMap.keySet()){
-            Alarm alarm = null;
+            Alarm alarm ;
             Object alarmObj = alarmMap.get(key);
             if(alarmObj instanceof Alarm){
                 alarm = (Alarm) alarmObj;

@@ -81,7 +81,7 @@ public class AlarmAnalysisService {
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(value, alarmSignal, curDate);
                 //处理高频过滤
-                beforAlarm = highRateFilterService.checkAlarm(fsu, beforAlarm, alarmSignal, curDate);
+                beforAlarm = highRateFilterService.checkAlarm(fsu, beforAlarm, alarmSignal, curDate, keyAlarmId);
                 delayService.beginDelayAlarm(beforAlarm, alarmSignal, curDate);
                 //更新信号点数据
                 redisUtils.hset(sn_dev_id_alarmsignal_hash, sn_dev_colId, JSONArray.toJSONString(alarmSignals));

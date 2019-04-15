@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
@@ -35,33 +36,44 @@ public class AlarmHighRateFilterService {
      * @date: 2019/4/10 11:26
      * 功能描述:告警产生判定高频过滤
      */
-    public Alarm checkAlarm(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate){
+    public Alarm checkAlarm(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate, String keyAlarmId){
         if(null == beforAlarm){
             return null;
         }
-        Object highRateObj = redisUtils.hget(highrate_hash + fsu, beforAlarm.getAlarmId());
-
-        long highRateFT = alarmSignal.getHighRateFT();
-        int highRateC = alarmSignal.getHighRateC();
         int highRateI = alarmSignal.getHighRateI();
         int highRateT = alarmSignal.getHighRateT();
-        long diff = curDate.getTime() - highRateFT;
-        boolean inTime = diff < highRateI*1000;
-        if(highRateFT == 0){
-            alarmSignal.setHighRateFT(curDate.getTime());
-            alarmSignal.setHighRateC(1);
-            return beforAlarm;
-        }
-        if(inTime){
-            if(highRateC >= highRateT){
-                return null;
+        long highRateFT ;
+        int highRateC ;
+        Object highRateObj = redisUtils.hget(highrate_hash + fsu.getSN(), keyAlarmId);
+        JSONObject jsonObject ;
+        if(highRateObj == null){
+            if(highRateT == 0){
+                return beforAlarm;
             }
-            alarmSignal.setHighRateC(highRateC+1);
-            return beforAlarm;
+            jsonObject = new JSONObject();
+            jsonObject.put("highRateC", 1);
+            jsonObject.put("highRateFT", curDate.getTime());
+            redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+            return  beforAlarm;
         }else{
-            alarmSignal.setHighRateFT(curDate.getTime());
-            alarmSignal.setHighRateC(1);
-            return beforAlarm;
+            jsonObject = JSONObject.parseObject(highRateObj.toString());
+            highRateFT = jsonObject.getLong("highRateFT");
+            highRateC = jsonObject.getInteger("highRateC");
+            long diff = curDate.getTime() - highRateFT;
+            boolean inTime = diff < highRateI*1000;
+            if(inTime){
+                if(highRateC >= highRateT){
+                    return null;
+                }
+                jsonObject.put("highRateC", highRateC+1);
+                redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+                return beforAlarm;
+            }else{
+                jsonObject.put("highRateC", 1);
+                jsonObject.put("highRateFT", curDate.getTime());
+                redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+                return beforAlarm;
+            }
         }
     }
 }
