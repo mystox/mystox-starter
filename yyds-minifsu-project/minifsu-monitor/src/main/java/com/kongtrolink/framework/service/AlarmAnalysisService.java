@@ -32,8 +32,7 @@ public class AlarmAnalysisService {
      * 功能描述:处理告警
      */
     public Map<String, Object> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate,
-                                             Map<String, Object> delayAlarmMap){
-        Map<String, Object> beforAlarmMap = new HashMap<>();
+                                             Map<String, Object> beforAlarmMap, Map<String, Object> delayAlarmMap ){
         //获取FSU下所有以前告警
 //        Object beforAlarmMapObj = redisUtils.hget(sn__alarm_hash, fsu.getSN());
         Map<Object, Object> hmget = redisUtils.hmget(sn__alarm_hash + fsu.getSN());
@@ -43,7 +42,7 @@ public class AlarmAnalysisService {
             }
         }
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
-            beforAlarmMap = handleSignal(entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
+            handleSignal(entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
         }
         if(null != beforAlarmMap && !beforAlarmMap.isEmpty()){
             /*
@@ -67,7 +66,7 @@ public class AlarmAnalysisService {
         if(null == alarmSignalObj){
             return null;
         }
-        Map<String, Object> alarmMap = new HashMap<>();
+//        Map<String, Object> alarmMap = new HashMap<>();
         List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(alarmSignalObj.toString(), AlarmSignalConfig.class);
         for (AlarmSignalConfig alarmSignal : alarmSignals) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
@@ -91,10 +90,10 @@ public class AlarmAnalysisService {
                 beforAlarm = delayService.endDelayAlarm(beforAlarm, alarmSignal, curDate);
             }
             if(null != beforAlarm){
-                alarmMap.put(keyAlarmId, beforAlarm);
+                beforAlarmMap.put(keyAlarmId, beforAlarm);
             }
         }
-        return alarmMap;
+        return beforAlarmMap;
     }
 
     /**

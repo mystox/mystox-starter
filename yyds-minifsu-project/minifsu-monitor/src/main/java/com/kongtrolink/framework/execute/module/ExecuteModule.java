@@ -12,6 +12,7 @@ import com.kongtrolink.framework.service.AlarmAnalysisService;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.TimeDataAnalysisService;
 import com.kongtrolink.framework.task.SaveLogTask;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,8 +95,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //解析保存实时数据和告警
         Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
         //解析告警
+        Map<String, Object> alarmMap = new HashMap<>();
         Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
-        Map<String, Object> alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate, delayAlarmMap);
+        alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate, alarmMap, delayAlarmMap);
         alarmMap.putAll(delayAlarmMap);
         //将告警保存到redis中
         for(String key : alarmMap.keySet()) {
