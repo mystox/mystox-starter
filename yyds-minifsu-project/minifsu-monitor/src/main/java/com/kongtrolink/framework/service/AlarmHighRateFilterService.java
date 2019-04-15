@@ -2,6 +2,10 @@ package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
+import com.kongtrolink.framework.core.entity.RedisHashTable;
+import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.jsonType.JsonFsu;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 
@@ -22,15 +26,21 @@ import java.util.Date;
 @Service
 public class AlarmHighRateFilterService {
 
+    @Autowired
+    RedisUtils redisUtils;
+
+    private String highrate_hash = RedisHashTable.HIGHRATE_SN_HASH;
     /**
      * @auther: liudd
      * @date: 2019/4/10 11:26
      * 功能描述:告警产生判定高频过滤
      */
-    public Alarm checkAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate){
+    public Alarm checkAlarm(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate){
         if(null == beforAlarm){
             return null;
         }
+        Object highRateObj = redisUtils.hget(highrate_hash + fsu, beforAlarm.getAlarmId());
+
         long highRateFT = alarmSignal.getHighRateFT();
         int highRateC = alarmSignal.getHighRateC();
         int highRateI = alarmSignal.getHighRateI();

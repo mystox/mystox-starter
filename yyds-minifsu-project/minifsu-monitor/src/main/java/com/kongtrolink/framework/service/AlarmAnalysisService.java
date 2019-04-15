@@ -42,7 +42,7 @@ public class AlarmAnalysisService {
             }
         }
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
-            handleSignal(entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
+            handleSignal(fsu, entry.getKey(), entry.getValue(), beforAlarmMap, curDate);
         }
         if(null != beforAlarmMap && !beforAlarmMap.isEmpty()){
             /*
@@ -61,7 +61,7 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理信号点下的所有告警点
      */
-    public Map<String, Object> handleSignal(String sn_dev_colId, Float value, Map<String, Object> beforAlarmMap, Date curDate){
+    public Map<String, Object> handleSignal(JsonFsu fsu, String sn_dev_colId, Float value, Map<String, Object> beforAlarmMap, Date curDate){
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, sn_dev_colId);
         if(null == alarmSignalObj){
             return null;
@@ -81,7 +81,7 @@ public class AlarmAnalysisService {
             if (null == beforAlarm) {//进入开始告警逻辑
                 beforAlarm = beginAlarm(value, alarmSignal, curDate);
                 //处理高频过滤
-                beforAlarm = highRateFilterService.checkAlarm(beforAlarm, alarmSignal, curDate);
+                beforAlarm = highRateFilterService.checkAlarm(fsu, beforAlarm, alarmSignal, curDate);
                 delayService.beginDelayAlarm(beforAlarm, alarmSignal, curDate);
                 //更新信号点数据
                 redisUtils.hset(sn_dev_id_alarmsignal_hash, sn_dev_colId, JSONArray.toJSONString(alarmSignals));
