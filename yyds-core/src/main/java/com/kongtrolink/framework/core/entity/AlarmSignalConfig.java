@@ -24,8 +24,8 @@ public class AlarmSignalConfig {
     private String alarmDesc; //告警描述
 
     //高频过滤，暂时所有告警点都有
-    private int highRateI = 30*60;      //高频过滤间隔highrateinteval（单位为秒）
-    private int highRateT = 6;      //高频过滤规定间隔内，允许的告警次数
+    private int highRateI;      //高频过滤间隔highrateinteval（单位为秒）
+    private int highRateT;      //高频过滤规定间隔内，允许的告警次数
     private long highRateFT;        //高频过滤第一次告警时间
     private int highRateC;      //高频过滤告警次数
 
