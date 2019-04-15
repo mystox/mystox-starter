@@ -41,4 +41,10 @@ public interface FsuService {
     JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String fsuId);
 
     JSONObject logoutFsu(Map<String, Object> requestBody, String fsuId);
+
+    JSONObject saveTerminal(JSONArray snList);
+
+    JSONObject terminalReboot(Map<String, Object> requestBody, String sn);
+
+    JSONObject setGprs(Map<String, Object> requestBody, String sn);
 }

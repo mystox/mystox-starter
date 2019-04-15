@@ -4,17 +4,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.ControllerInstance;
 import com.kongtrolink.framework.core.entity.Fsu;
+import com.kongtrolink.framework.exception.ExcelParseException;
 import com.kongtrolink.framework.service.FsuService;
+import com.kongtrolink.framework.util.ExcelUtil;
 import com.kongtrolink.framework.util.JsonResult;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -147,10 +152,10 @@ public class FSUController
     }
 
     @RequestMapping("/upgrade")
-    public JsonResult upgrade(@RequestBody Map<String, Object> requestBody,String fsuId)
+    public JsonResult upgrade(@RequestBody Map<String, Object> requestBody,String sn)
     {
 
-        JSONObject result = fsuService.upgrade(requestBody,fsuId);
+        JSONObject result = fsuService.upgrade(requestBody,sn);
         return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
 
@@ -218,6 +223,51 @@ public class FSUController
         JSONObject result = fsuService.getOperationHistoryByMqtt(requestBody,fsuId);
 //        System.out.println(operatHistories.size());
         return new JsonResult(result);
+    }
+
+ @RequestMapping("/reboot")
+    public JsonResult terminalReboot(@RequestBody(required = false) Map<String, Object> requestBody,String sn)
+    {
+//        List<OperatHistory> operatHistories = fsuService.getOperationHistory(requestBody,fsuId);
+        JSONObject result = fsuService.terminalReboot(requestBody,sn);
+//        System.out.println(operatHistories.size());
+        return new JsonResult(result);
+    }
+
+@RequestMapping("/setGPRS")
+    public JsonResult setGPRS(@RequestBody(required = false) Map<String, Object> requestBody,String sn)
+    {
+//        List<OperatHistory> operatHistories = fsuService.getOperationHistory(requestBody,fsuId);
+        JSONObject result = fsuService.setGprs(requestBody,sn);
+//        System.out.println(operatHistories.size());
+        return new JsonResult(result);
+    }
+
+
+    @RequestMapping(value = "/terminal/import",method = RequestMethod.POST)
+    public JsonResult terminalImport(@RequestParam MultipartFile file, HttpServletRequest request) {
+
+// 解析 Excel 文件
+        JSONArray snList = new JSONArray();
+        CommonsMultipartFile cmf = (CommonsMultipartFile) file;
+        DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
+        File f = dfi.getStoreLocation();
+        try {
+            String[][] cell = ExcelUtil.getInstance().getCellsFromFile(f);
+            for (int r =0 ; r<cell.length; r ++)
+            {
+
+                JSONObject snObj = new JSONObject();
+                snObj.put("SN", cell[r][0]);
+                snObj.put("vendor", cell[r][1]);
+                snList.add(snObj);
+            }
+            JSONObject result = fsuService.saveTerminal(snList);
+            if (result != null) return new JsonResult(result);
+        } catch (ExcelParseException e) {
+            return new JsonResult(e.getMessage(), false);
+        }
+        return new JsonResult("请求失败",false);
     }
 
 }

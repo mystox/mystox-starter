@@ -2,6 +2,7 @@ package com.kongtrolink.framework.execute.module.dao;
 
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.Device;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -24,11 +25,15 @@ public class DeviceDao {
 
 
     public Device findDeviceByTypeResNoPort(String sn, Integer type, Integer resNo, String port) {
+        Criteria criteria = Criteria
+                .where("type").is(type)
+                .and("resNo").is(resNo)
+                .and("invalidTime").is(new Date(0));
+        if (StringUtils.isNotBlank(port)) {
+            criteria = criteria.and("port").is(port);
+        }
         return mongoTemplate.findOne(Query.query(
-                Criteria.where(sn).is(sn)
-                        .and("type").is(type)
-                        .and("resNo").is(resNo)
-                        .and("port").is(port)), Device.class, MongoTableName.DEVICE);
+                criteria), Device.class, MongoTableName.DEVICE);
     }
 
     public void save(Device device) {
@@ -48,6 +53,6 @@ public class DeviceDao {
     }
 
     public Device findDeviceById(String deviceId) {
-        return mongoTemplate.findById(deviceId,Device.class, MongoTableName.DEVICE);
+        return mongoTemplate.findById(deviceId, Device.class, MongoTableName.DEVICE);
     }
 }

@@ -2,11 +2,14 @@ package com.kongtrolink.framework.execute.module.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.ByteUtil;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.service.FileService;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -31,12 +34,27 @@ public class FileServiceImpl implements FileService {
     @Value("${resource.path.sn}")
     private String snPath;
 
+
+    @Autowired
+    RedisUtils redisUtils;
+
+
     @Override
     public byte[] fileGet(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
+
+        //获取redis 信息
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
+        value.put("STATE", 3); //新增升级状态
+        Long expiredTime = (Long) value.get("expired");
+        redisUtils.set(key, value,expiredTime);
+//        redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
+
+
         JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
         JSONObject fileMsg = (JSONObject) payload.get("file");
-        String filename = (String) fileMsg.get("filename");
+        String filename = (String) fileMsg.get("fileName");
         Integer fileType = (Integer) fileMsg.get("type");
         Integer fileNum = (Integer) fileMsg.get("fileNum");
         Integer startIndex = (Integer) fileMsg.get("startIndex");
@@ -44,7 +62,6 @@ public class FileServiceImpl implements FileService {
 
         try {
             File file = ResourceUtils.getFile(snPath + File.separator + sn + File.separator + filename);
-            System.out.println(file.length());
             long fileLen = file.length();
             if (fileLen > Integer.MAX_VALUE)
                 logger.error("FILE" + file.getAbsoluteFile() + "is to large then MAX_INTEGER!!!");
@@ -114,6 +131,7 @@ public class FileServiceImpl implements FileService {
             file.createNewFile();
             FileUtils.copyInputStreamToFile(is, file);
             jsonObject.put("totalLen", file.length());
+            jsonObject.put("fileName", file.getName());
             jsonObject.put("result", 1);
         } catch (IOException e) {
             jsonObject.put("result", 0);

@@ -15,7 +15,12 @@ public enum TerminalPktType
     DEV_LIST(3, "dev_list"), //上报终端接入设备信息
     DATA_CHANGE(4,"data_change"),//终端数据变化上报(类似告警)
     DATA_REPORT(5,"data_report"),//终端数据变化上报
-    FILE_GET(10,"file_get");//文件流传输
+    TERMINAL_REBOOT(6,"terminal_reboot"),//终端数据变化上报
+    SET_GPRS(7,"set_gprs"),//设置GPRS服务器
+    SET_DATA(8,"set_data"),//设置信号点值
+    UPGRADE(9,"upgrade"),//升级请求
+    FILE_GET(10,"file_get"),//文件流传输
+    RUN_STATE(11,"run_state");//文件流传输
 
     private final int key;
     private final String value;

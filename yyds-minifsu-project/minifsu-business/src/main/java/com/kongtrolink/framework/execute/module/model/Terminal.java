@@ -16,7 +16,24 @@ public class Terminal
     private Integer businessRhythm;
     private Integer alarmRhythm;
     private Integer runStatusRhythm;
+    private String vendor;
+    private String coordinate;
 
+    public String getCoordinate() {
+        return coordinate;
+    }
+
+    public void setCoordinate(String coordinate) {
+        this.coordinate = coordinate;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor;
+    }
 
     public Integer getAlarmRhythm() {
         return alarmRhythm;

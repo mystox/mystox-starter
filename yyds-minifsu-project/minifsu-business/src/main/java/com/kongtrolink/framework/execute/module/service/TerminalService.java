@@ -47,4 +47,8 @@ public interface TerminalService
     JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String fsuId);
 
     JSONObject logoutFsu(Map<String, Object> requestBody, String fsuId);
+
+    JSONObject saveTerminal(ModuleMsg moduleMsg);
+
+    JSONObject setTerminal(ModuleMsg moduleMsg);
 }

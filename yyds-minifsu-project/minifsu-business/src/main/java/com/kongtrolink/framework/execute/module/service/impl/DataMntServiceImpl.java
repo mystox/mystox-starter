@@ -49,6 +49,12 @@ public class DataMntServiceImpl implements DataMntService {
         for (Object devObject : jsonArray) {
             JSONObject devJson = (JSONObject) devObject;
             if (dev.equals(devJson.get("dev"))) {
+                //todo 信号点属性翻译
+                JSONObject info = (JSONObject) devJson.get("info");
+                info.keySet();
+
+
+
                 return devJson;
             }
         }
@@ -59,12 +65,12 @@ public class DataMntServiceImpl implements DataMntService {
     @Override
     public JSONObject setThreshold(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
-        JSONObject alarmSignal = new JSONObject();
+        JSONObject alarmSignal = moduleMsg.getPayload();
         String deviceId = (String) alarmSignal.get("deviceId");
         String coId = (String) alarmSignal.get("coId");
         String configId = (String) alarmSignal.get("configId");
-        Double threshold = alarmSignal.get("threshold") == null ? null : (Double) alarmSignal.get("threshold");
-        Float hystersis = alarmSignal.get("hystersis") == null ? null : (Float) alarmSignal.get("hystersis");
+        Double threshold = alarmSignal.get("threshold") == null ? null : Double.parseDouble( alarmSignal.get("threshold")+"");
+        Float hystersis = alarmSignal.get("hystersis") == null ? null :  Float.parseFloat(alarmSignal.get("hystersis")+"");
         Integer relativeval = alarmSignal.get("relativeval") == null ? null : (Integer) alarmSignal.get("relativeval");
         Integer level = alarmSignal.get("level") == null ? null : (Integer) alarmSignal.get("level");
         Integer delay = alarmSignal.get("delay") == null ? null : (Integer) alarmSignal.get("delay");
@@ -107,6 +113,20 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject result = new JSONObject();
         result.put("result", 1);
         return result;
+    }
+
+    @Override
+    public JSONArray getThreshold(ModuleMsg moduleMsg) {
+        String sn = moduleMsg.getSN();
+        JSONObject payload = moduleMsg.getPayload();
+        String dev = (String) payload.get("dev");
+        String[] devArr = dev.split("-");
+        Integer devType = Integer.parseInt(devArr[0]);
+        Integer resNo = Integer.parseInt(devArr[1]);
+        Device device = deviceDao.findDeviceByTypeResNoPort(sn,devType, resNo, null); //根据信号点的devType获取deviceId
+        String coId = (String) payload.get("coId");
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(),coId); //根据deviceId和数据点id获取信号点配置列表
+        return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
 }

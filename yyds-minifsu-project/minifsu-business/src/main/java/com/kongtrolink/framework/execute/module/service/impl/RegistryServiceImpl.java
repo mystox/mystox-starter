@@ -334,7 +334,7 @@ public class RegistryServiceImpl implements RegistryService {
             terminalProperties.setAdapterVer((String) payload.get("adapterVer"));
 
             try {
-                terminalDao.saveTerminal(terminalProperties);
+                terminalDao.saveTerminalProperties(terminalProperties);
                 result.put("result", StateCode.SUCCESS);
                 return result;
             } catch (Exception e) {

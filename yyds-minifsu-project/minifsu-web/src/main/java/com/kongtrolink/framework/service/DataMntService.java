@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.Map;
@@ -21,7 +22,7 @@ public interface DataMntService {
 
     JSONObject getDeviceList(Map<String, Object> requestBody);
 
-    JSONObject getThreshold(Map<String, Object> requestBody, String fsuId);
+    JSONArray getThreshold(Map<String, Object> requestBody, String fsuId);
 
     JSONObject getSignalListHistory(Map<String, Object> requestBody, String fsuId);
 

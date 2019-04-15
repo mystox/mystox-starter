@@ -47,7 +47,7 @@ public class ConfigurationInit implements ApplicationRunner
         try
         {
             logger.info("初始化区域层级配置信息... ...");
-            String areaData = IOUtils.toString(areaRes.getInputStream(), Charset.forName("UTF-8"));
+            String areaData = IOUtils.toString(areaRes.getInputStream(), Charset.forName("UTF-8").toString());
             List<TierNode> tierNodeList = JSONObject.parseArray(areaData, TierNode.class);
             Map<String, String> map = TierTreeUtil.getTireName(tierNodeList, "", "", null);
             ControllerInstance.getInstance().setTierMap(map);
@@ -62,9 +62,9 @@ public class ConfigurationInit implements ApplicationRunner
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception
     {
-        initTier();
-        initStationType();
-        initSignalCode();
+//        initTier();
+//        initStationType();
+//        initSignalCode();
     }
 
     private void initSignalCode()
@@ -79,7 +79,7 @@ public class ConfigurationInit implements ApplicationRunner
             logger.info("signal files size is " + files.length);
             for (File file : files)
             {
-                List<String> result = FileUtils.readLines(file, Charset.forName("UTF-8"));
+                List<String> result = FileUtils.readLines(file, Charset.forName("UTF-8").toString());
                 for (String signalString : result)
                 {
                     if (signalString == null || !signalString.contains(","))
@@ -108,12 +108,12 @@ public class ConfigurationInit implements ApplicationRunner
         logger.info("初始化局站code... ...");
         try
         {
-            String dStationJson = IOUtils.toString(dStation.getInputStream(), Charset.forName("UTF-8"));
+            String dStationJson = IOUtils.toString(dStation.getInputStream(), Charset.forName("UTF-8").toString());
             List<StationCode> stationCodes = JSONObject.parseArray(dStationJson, StationCode.class);
             Map<String, String> d_map = StationCodeUtil.toCodeMap(stationCodes);
             ControllerInstance.getInstance().setdStationMap(d_map);
             logger.info("d_station code size is " + d_map.size());
-            String roomStationJson = IOUtils.toString(roomStation.getInputStream(), Charset.forName("UTF-8"));
+            String roomStationJson = IOUtils.toString(roomStation.getInputStream(), Charset.forName("UTF-8").toString());
             List<StationCode> roomStationCodes = JSONObject.parseArray(roomStationJson, StationCode.class);
             Map<String, String> room_map = StationCodeUtil.toCodeMap(roomStationCodes);
             ControllerInstance.getInstance().setRoomStationMap(room_map);

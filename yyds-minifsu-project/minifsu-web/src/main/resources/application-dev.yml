@@ -38,6 +38,9 @@ spring:
       host: 172.16.6.142
       port: 27017
       database: db_cntb_minifsu
+  http:
+    multipart:
+      enabled: true
 server:
   name: minifsu-web
   bindIp: 172.16.6.39

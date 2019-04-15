@@ -42,4 +42,8 @@ public class ConfigDao {
     public AlarmSignalConfig findAlarmSignalConfigById(String id) {
         return mongoTemplate.findById(id, AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
+
+    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId) {
+        return mongoTemplate.find(Query.query(Criteria.where("deviceId").is(deviceId).and("coId").is(coId)),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
 }

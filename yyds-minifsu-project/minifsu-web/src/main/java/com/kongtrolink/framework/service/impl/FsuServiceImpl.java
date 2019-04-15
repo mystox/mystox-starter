@@ -28,8 +28,7 @@ import java.util.Map;
  * \
  */
 @Service
-public class FsuServiceImpl implements FsuService
-{
+public class FsuServiceImpl implements FsuService {
 
     @Autowired
     RpcModule rpcModule;
@@ -42,8 +41,7 @@ public class FsuServiceImpl implements FsuService
     OperatorHistoryDao operatorHistoryDao;
 
     @Override
-    public JSONObject setFsu(Map<String, Object> requestBody)
-    {
+    public JSONObject setFsu(Map<String, Object> requestBody) {
         if (requestBody == null) return null;
         String sn = (String) requestBody.get("sn");
 
@@ -83,7 +81,7 @@ public class FsuServiceImpl implements FsuService
 //        BeanUtils.copyProperties(requestBody, fsu);
 //        fsuDao.saveFsu(fsu);
 
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_STATION,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_STATION, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
@@ -91,83 +89,101 @@ public class FsuServiceImpl implements FsuService
 
 
     @Override
-    public JSONObject upgrade(Map<String, Object> requestBody, String sn)
-    {
+    public JSONObject upgrade(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.UPGRADE,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.UPGRADE, sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class, 300000L);
         return result;
     }
 
     @Override
-    public JSONObject compiler(Map<String, Object> requestBody,String sn)
-    {
+    public JSONObject compiler(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.COMPILER,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.COMPILER, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
     @Override
-    public JSONArray getDeviceList(Map<String, Object> requestBody, String sn)
-    {
+    public JSONArray getDeviceList(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICES,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICES, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONArray result = rpcModule.syncRequestData(moduleMsg,  JSONArray.class);
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
         return result;
     }
 
 
-
     @Override
-    public JSONObject getFsuStatus(Map<String, Object> requestBody, String sn)
-    {
+    public JSONObject getFsuStatus(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICE_STATUS,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICE_STATUS, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
     @Override
-    public List<OperatHistory> getOperationHistory(Map<String, Object> requestBody, String fsuId)
-    {
+    public List<OperatHistory> getOperationHistory(Map<String, Object> requestBody, String fsuId) {
         return operatorHistoryDao.findByCondition(requestBody, fsuId);
 
     }
 
     @Override
-    public Map<String, Integer> getFsuDeviceCountMap(List<String> fsuIds)
-    {
+    public Map<String, Integer> getFsuDeviceCountMap(List<String> fsuIds) {
         return fsuDevicesDao.getFsuDeviceCount(fsuIds);
     }
 
     @Override
-    public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String sn)
-    {
+    public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_OP_LOG,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_OP_LOG, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
     @Override
-    public JSONObject logoutFsu(Map<String, Object> requestBody, String sn)
-    {
+    public JSONObject logoutFsu(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.LOGOUT,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.LOGOUT, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONObject result = rpcModule.syncRequestData(moduleMsg,  JSONObject.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
     @Override
-    public List<Fsu> getFsuListByCoordinate(Map fsuMap)
-    {
+    public JSONObject saveTerminal(JSONArray snList) {
+        if (snList == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_SAVE);
+        moduleMsg.setArrayPayload(snList);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
+    public JSONObject terminalReboot(Map<String, Object> requestBody, String sn) {
+        if (requestBody == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_REBOOT, sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
+    public JSONObject setGprs(Map<String, Object> requestBody, String sn) {
+        if (requestBody == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_REBOOT, sn);
+        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+
+    }
+
+    @Override
+    public List<Fsu> getFsuListByCoordinate(Map fsuMap) {
         String coordinate = (String) fsuMap.get("coordinate");
         if (StringUtils.isBlank(coordinate))
             return null;
@@ -177,16 +193,13 @@ public class FsuServiceImpl implements FsuService
         List<Fsu> fsuList = new ArrayList<>();
 
         List<Fsu> result = new ArrayList<>();
-        for (Fsu fsu : fsuList)
-        {
+        for (Fsu fsu : fsuList) {
             String fsuCoordinate = fsu.getCoordinate();
-            if (StringUtils.isNotBlank(fsuCoordinate))
-            {
+            if (StringUtils.isNotBlank(fsuCoordinate)) {
                 String[] fsuCoordinateArr = fsuCoordinate.split(",");
 
                 double distance = LocationUtils.getDistance(fsuCoordinateArr[0], fsuCoordinateArr[1], coordinateLocation[0], coordinateLocation[1]);
-                if (distance < 2000)
-                {
+                if (distance < 2000) {
                     result.add(fsu);
                 }
             }
@@ -195,27 +208,24 @@ public class FsuServiceImpl implements FsuService
     }
 
     @Override
-    public JSONArray listFsu(Map<String, Object> requestBody)
-    {
+    public JSONArray listFsu(Map<String, Object> requestBody) {
         if (requestBody == null) return null;
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_FSU);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONArray result = rpcModule.syncRequestData(moduleMsg,  JSONArray.class);
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
         return result;
 
     }
 
     @Override
-    public List<Fsu> searchFsu(Map<String, Object> requestBody)
-    {
+    public List<Fsu> searchFsu(Map<String, Object> requestBody) {
         if (requestBody == null) return null;
 
         return fsuDao.findByCondition(requestBody);
     }
 
     @Override
-    public Fsu getFsu(Map<String, Object> requestBody)
-    {
+    public Fsu getFsu(Map<String, Object> requestBody) {
         if (requestBody == null) return null;
         String fsuId = (String) requestBody.get("fsuId");
         return fsuDao.findByFsuId(fsuId);
