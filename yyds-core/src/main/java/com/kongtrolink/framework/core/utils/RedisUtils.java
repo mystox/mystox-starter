@@ -222,7 +222,7 @@ public class RedisUtils
      * @param key 键
      * @return 对应的多个键值
      */
-    public Map<Object,Object> hmget(String key){
+    public Map hmget(String key){
         return redisTemplate.opsForHash().entries(key);
     }
 
@@ -232,7 +232,7 @@ public class RedisUtils
      * @param map 对应多个键值
      * @return true 成功 false 失败
      */
-    public boolean hmset(String key, Map<String,Object> map){
+    public boolean hmset(String key, Map<String,JSONObject> map){
         try {
             redisTemplate.opsForHash().putAll(key, map);
             return true;
