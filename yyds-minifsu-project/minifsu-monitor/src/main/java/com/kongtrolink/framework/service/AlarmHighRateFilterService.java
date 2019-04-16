@@ -3,6 +3,7 @@ package com.kongtrolink.framework.service;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
+import com.kongtrolink.framework.core.entity.CoreConstant;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
@@ -31,49 +32,116 @@ public class AlarmHighRateFilterService {
     RedisUtils redisUtils;
 
     private String highrate_hash = RedisHashTable.HIGHRATE_SN_HASH;
+
     /**
      * @auther: liudd
-     * @date: 2019/4/10 11:26
-     * 功能描述:告警产生判定高频过滤
+     * @date: 2019/4/16 20:22
+     * 功能描述:高频过滤判断告警是否可以产生
      */
-    public Alarm checkAlarm(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate, String keyAlarmId){
+    public Alarm highRateAlarmCreate(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate, String keyAlarmId){
         if(null == beforAlarm){
             return null;
         }
+        String sn = fsu.getSN();
         int highRateI = alarmSignal.getHighRateI();
         int highRateT = alarmSignal.getHighRateT();
         long highRateFT ;
         int highRateC ;
-        Object highRateObj = redisUtils.hget(highrate_hash + fsu.getSN(), keyAlarmId);
-        JSONObject jsonObject ;
+        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
         if(highRateObj == null){
             if(highRateT == 0){
                 return beforAlarm;
             }
-            jsonObject = new JSONObject();
-            jsonObject.put("highRateC", 1);
-            jsonObject.put("highRateFT", curDate.getTime());
-            redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+            highRateObj = new JSONObject();
+            highRateObj.put("highRateC", 1);
+            highRateObj.put("highRateFT", curDate.getTime());
+            redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
             return  beforAlarm;
         }else{
-            jsonObject = JSONObject.parseObject(highRateObj.toString());
-            highRateFT = jsonObject.getLong("highRateFT");
-            highRateC = jsonObject.getInteger("highRateC");
+            highRateFT = highRateObj.getLong("highRateFT");
+            highRateC = highRateObj.getInteger("highRateC");
             long diff = curDate.getTime() - highRateFT;
             boolean inTime = diff < highRateI*1000;
             if(inTime){
                 if(highRateC >= highRateT){
                     return null;
                 }
-                jsonObject.put("highRateC", highRateC+1);
-                redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+                highRateObj.put("highRateC", ++highRateC);
+                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+                if(highRateC == highRateT){
+                    //设置高频
+                    beforAlarm.setDesc(CoreConstant.HITH_RATE_ALARM);
+                }
                 return beforAlarm;
             }else{
-                jsonObject.put("highRateC", 1);
-                jsonObject.put("highRateFT", curDate.getTime());
-                redisUtils.hset(highrate_hash + fsu.getSN(), keyAlarmId, jsonObject);
+                highRateObj.put("highRateC", 1);
+                highRateObj.put("highRateFT", curDate.getTime());
+                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
                 return beforAlarm;
             }
         }
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/16 21:21
+     * 功能描述:减少高频过滤属性
+     */
+    public void updateHighRateInfo(String sn, String keyAlarmId){
+        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
+        if(null != highRateObj){
+            int highRateC = highRateObj.getInteger("highRateC");
+            if(1== highRateC){
+                redisUtils.hdel(highrate_hash + sn, keyAlarmId);
+            }else{
+                highRateObj.put("highRateC", -- highRateC);
+                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+            }
+        }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/16 20:23
+     * 功能描述:增加高频过滤属性值
+     */
+//    public Alarm updateHighRateInfo(String sn, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate, String keyAlarmId){
+//        int highRateI = alarmSignal.getHighRateI();
+//        int highRateT = alarmSignal.getHighRateT();
+//        long highRateFT ;
+//        int highRateC ;
+//        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
+//        if(highRateObj == null){
+//            if(highRateT == 0){
+//                return beforAlarm;
+//            }
+//            highRateObj = new JSONObject();
+//            highRateObj.put("highRateC", 1);
+//            highRateObj.put("highRateFT", curDate.getTime());
+//            redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//            return  beforAlarm;
+//        }else{
+//            highRateFT = highRateObj.getLong("highRateFT");
+//            highRateC = highRateObj.getInteger("highRateC");
+//            long diff = curDate.getTime() - highRateFT;
+//            boolean inTime = diff < highRateI*1000;
+//            if(inTime){
+//                if(highRateC >= highRateT){
+//                    return null;
+//                }
+//                highRateObj.put("highRateC", ++highRateC);
+//                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//                if(highRateC == highRateT){
+//                    //设置高频
+//                    beforAlarm.setDesc(CoreConstant.HITH_RATE_ALARM);
+//                }
+//                return beforAlarm;
+//            }else{
+//                highRateObj.put("highRateC", 1);
+//                highRateObj.put("highRateFT", curDate.getTime());
+//                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//                return beforAlarm;
+//            }
+//        }
+//    }
 }

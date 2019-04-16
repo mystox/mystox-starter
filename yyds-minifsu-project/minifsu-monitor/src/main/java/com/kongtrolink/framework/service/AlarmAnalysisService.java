@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.*;
@@ -70,9 +69,16 @@ public class AlarmAnalysisService {
             if(null == beforAlarmObj && null == beginDelayAlarmObj){
                 //原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
                 Alarm alarm = beginAlarm(value, alarmSignal, curDate);
-                delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
+                //高频过滤是否产生告警
+                alarm = highRateFilterService.highRateAlarmCreate(fsu, alarm, alarmSignal, curDate, keyAlarmId);
+                if(null== alarm){
+                    continue ;
+                }
+                alarm = delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
+                if(null == alarm){
+                    highRateFilterService.updateHighRateInfo(fsu.getSN(),  keyAlarmId);
+                }
             }else if(null != beforAlarmObj){
-                System.out.println("class name;" + beforAlarmObj.getClass().getName());
                 //原来告警中有，则进入告警消除
                 Alarm beforAlarm = JSONObject.parseObject(beforAlarmObj.toString(), Alarm.class);
                 endAlarm(beforAlarm, value, alarmSignal, curDate);
@@ -82,7 +88,11 @@ public class AlarmAnalysisService {
                 if( (alarmSignal.getThresholdFlag() ==  1 && value <= alarmSignal.getThreshold() )
                         || (alarmSignal.getThresholdFlag() ==0 && value >= alarmSignal.getThreshold()) ){
                     //延迟产生过期后告警消除和延迟产生内消除
-                    delayService.resolveBeginDelayAlarm(beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
+                    Alarm alarm = delayService.resolveBeginDelayAlarm(beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
+                    delayService.endDelayAlarm(alarm, alarmSignal, curDate);//判定是否延迟消除
+                    if(null == alarm){
+                        highRateFilterService.updateHighRateInfo(fsu.getSN(),  keyAlarmId);
+                    }
                 }
             }
         }

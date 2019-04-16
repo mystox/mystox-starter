@@ -8,4 +8,5 @@ package com.kongtrolink.framework.core.entity;
 public class CoreConstant {
 
     public static final String LINE_CUT_OFF = "_";
+    public static final String HITH_RATE_ALARM = "高频";
 }

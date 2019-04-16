@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
@@ -30,6 +31,8 @@ public class AlarmDelayService {
 
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    AlarmHighRateFilterService highRateFilterService;
 
     /**
      * @auther: liudd
@@ -68,12 +71,13 @@ public class AlarmDelayService {
             byte link = alarm.getLink();
             alarm.setLink((byte)(link | EnumAlarmStatus.REALBEGIN.getValue()));
             beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
+            return alarm;
         }else{
             alarm.setDelay(delay);
             alarm.setBeginDelayFT(curDate.getTime());
             beginDelayAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
+            return null;
         }
-        return alarm;
     }
 
     /**
@@ -110,33 +114,29 @@ public class AlarmDelayService {
      * @date: 2019/4/16 18:33
      * 功能描述:产生延迟期间告警消除处理
      */
-    public void resolveBeginDelayAlarm(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, String keyAlarmId, Date curDate){
+    public Alarm resolveBeginDelayAlarm(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, String keyAlarmId, Date curDate){
         Object alarmObj = beginDelayAlarm.get(keyAlarmId);
         if(null == alarmObj){
-            return ;
+            return null;
         }
         Alarm beforAlarm = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
         beginDelayAlarm.remove(keyAlarmId);
-
+        if(inTime(beforAlarm, curDate)){    //还在产生延迟期间，告警自动消除，则直接删除，当做没有产生过告警
+            return null;
+        }
         beforAlarm.settReport(curDate);
         beforAlarm.settRecover(curDate);
         byte link = beforAlarm.getLink();
         link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
         beforAlarm.setLink(link);
         alarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(beforAlarm));
-
+        return beforAlarm;
     }
 
     public Map<String, JSONObject> handleBeginDelayHistory(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, Date curDate){
         Map<String, Object> realBeginDelayAlarm = new HashMap<>();
         for(String key : beginDelayAlarm.keySet()){
-            Alarm alarm ;
-            Object alarmObj = alarmMap.get(key);
-            if(alarmObj instanceof Alarm){
-                alarm = (Alarm) alarmObj;
-            }else {
-                alarm  = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
-            }
+            Alarm alarm =  JSON.toJavaObject(alarmMap.get(key), Alarm.class);
             if(inTime(alarm, curDate)){
                realBeginDelayAlarm.put(key, alarm);
             }else{
