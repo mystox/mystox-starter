@@ -45,18 +45,18 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
     public void run() {
         InetSocketAddress registAddr = new InetSocketAddress(hostname, port);
         try {
-            ModuleMsg msg = new ModuleMsg();
-            msg.setSN(jsonFsu.getSN());
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("alarmMap", alarmMap);
-            msg.setPayload(jsonObject);
-            msg.setPktType(PktType.ALARM_REGISTER);
-            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg("", registAddr, JSON.toJSONString(msg));
-            String payload = rpcMessage.getPayload();
-            JSONObject resultJson = JSONObject.parseObject(payload);
-            String result1 = resultJson.getString("result");
+//            ModuleMsg msg = new ModuleMsg();
+//            msg.setSN(jsonFsu.getSN());
+//            JSONObject jsonObject = new JSONObject();
+//            jsonObject.put("alarmMap", alarmMap);
+//            msg.setPayload(jsonObject);
+//            msg.setPktType(PktType.ALARM_REGISTER);
+//            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg("", registAddr, JSON.toJSONString(msg));
+//            String payload = rpcMessage.getPayload();
+//            JSONObject resultJson = JSONObject.parseObject(payload);
+//            String result1 = resultJson.getString("result");
             //如果成功，重新遍历告警
-            if("1".equals(result1)){
+            if(true){
 //                Map<String, Object> resolveAlarmMap = new HashMap<>();
                 List<Alarm> resolveAlarmList = new ArrayList<>();
                 List<String> resolveKey = new ArrayList<>();

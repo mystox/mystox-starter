@@ -9,7 +9,7 @@ mongodb:
 
 server:
   name: minifsu-tower
-  bindIp: 172.16.6.20
+  bindIp: 172.16.6.199
   rpc:
     port: 18881
 
@@ -28,7 +28,7 @@ spring:
       max-idle: 100
       ## 连接池中的最小空闲连接
       min-idle: 20
-    host: 172.16.6.20
+    host: 172.16.5.26
     port: 6379
 
 executor:
