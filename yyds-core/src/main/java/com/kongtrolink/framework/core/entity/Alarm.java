@@ -21,14 +21,14 @@ public class Alarm {
     private int recoverDelay;       //告警恢复延时
     private long recoverDelayFT;     //告警消除下一次时间
     private int num;                //告警序列号，终端内唯一
-    private String desc ;            //告警描述
+    private byte h;                  //是否高频
 
-    public String getDesc() {
-        return desc;
+    public byte getH() {
+        return h;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setH(byte h) {
+        this.h = h;
     }
 
     public long getRecoverDelayFT() {
