@@ -149,6 +149,8 @@ public class AlarmDelayService {
                 byte link = alarm.getLink();
                 link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
                 alarm.setLink(link);
+                //修改产生时间为当前时间
+                alarm.settReport(curDate);
                 alarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
             }
         }
@@ -171,6 +173,8 @@ public class AlarmDelayService {
                     //判断告警消除延期是否过期
                     if(!endInTime(alarm, curDate)){
                         alarm.setLink((byte) (link | EnumAlarmStatus.REALEND.getValue()));
+                        //修改消除时间为当前时间
+                        alarm.settRecover(curDate);
                     }
                 }
             }

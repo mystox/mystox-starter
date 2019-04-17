@@ -136,8 +136,14 @@ public class AlarmAnalysisService {
             byte link = beforAlarm.getLink();
             link = (byte)(link | EnumAlarmStatus.END.getValue());
             beforAlarm.setLink(link);
-            beforAlarm.setValue(value);
             beforAlarm.settRecover(curDate);
+        }else{//告警延时消除期间，告警数据再次异常，则将告警开始状态
+            beforAlarm.settRecover(null);
+            beforAlarm.setRecoverDelay(0);
+            beforAlarm.setRecoverDelayFT(0);
+            byte link = beforAlarm.getLink();
+            link = (byte) (link & 251);
+            beforAlarm.setLink(link);
         }
         return beforAlarm;
     }
