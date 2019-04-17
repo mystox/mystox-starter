@@ -120,7 +120,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
 
     public static void main(String[] a){
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date(1555481438886l);
+        Date date = new Date(1555483410836l);
         System.out.println("time:" + format.format(date));
     }
 }

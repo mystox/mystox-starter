@@ -88,14 +88,17 @@ public class AlarmAnalysisService {
             }else if(null != beginDelayAlarmObj){
                 if( (alarmSignal.getThresholdFlag() ==  1 && value <= alarmSignal.getThreshold() )
                         || (alarmSignal.getThresholdFlag() ==0 && value >= alarmSignal.getThreshold()) ){
-                    //延迟产生过期后告警消除和延迟产生内消除
-                    Alarm alarm = delayService.resolveBeginDelayAlarm(fsu.getSN(), beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
-                    delayService.endDelayAlarm(alarm, alarmSignal, curDate);//判定是否延迟消除
-                    if(null == alarm){
-                        highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
-                    }else{
-                        beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
-                    }
+                    //延迟产生过期后第一次数据如果是异常，则告警产生，否则同延迟产生时间内告警消除处理
+                    redisUtils.hdel(begin_delay_alarm_hash+fsu.getSN(), keyAlarmId); //删除redis中延迟产生数据
+                    highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
+                    beginDelayAlarmMap.remove(keyAlarmId);
+//                    Alarm alarm = delayService.resolveBeginDelayAlarm(fsu.getSN(), beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
+//                    delayService.endDelayAlarm(alarm, alarmSignal, curDate);//判定是否延迟消除
+//                    if(null == alarm){
+//                        highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
+//                    }else{
+//                        beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
+//                    }
                 }
             }
         }
