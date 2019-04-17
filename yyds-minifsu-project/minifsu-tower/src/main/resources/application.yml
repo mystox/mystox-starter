@@ -4,12 +4,32 @@ logging:
    root: info
    org.apache.hadoop.util.Shell: OFF
 
+mongodb:
+  uri: mongodb://172.16.6.9:27017/minifsu2_tower
+
 server:
   name: minifsu-tower
-  bindIp: 172.16.6.199
+  bindIp: 172.16.6.20
   rpc:
     port: 18881
 
+spring:
+  redis:
+    ## Redis数据库索引(默认为0)
+    database: 5
+    ## 连接超时时间（毫秒）
+    timeout: 60000
+    ## 连接池最大连接数（使用负值表示没有限制）
+    pool:
+      max-active: 300
+      ## 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: 10000
+      ## 连接池中的最大空闲连接
+      max-idle: 100
+      ## 连接池中的最小空闲连接
+      min-idle: 20
+    host: 172.16.6.20
+    port: 6379
 
 executor:
   threadPool:
@@ -18,3 +38,18 @@ executor:
 rpc:
   client:
     timeout: 20000
+
+tower:
+  binding:
+    dictMode: 1 #信号量字典版本(枚举值，1：标准版，适用3/4G信号的基站；2：精减版，适用2G信号的基站，默认1)
+    disabled: false #是否解除绑定
+    disabledTime: 0 #解除绑定时间
+  loginParam:
+    heartbeatInterval: 60 #铁塔平台心跳周期(秒)
+    heartbeatTimeoutLimit: 5 #心跳超时次数上限
+    loginLimit: -1 #注册次数上限(未使用)
+    loginInterval: 120 #注册间隔(秒)
+    alarmReportLimit: 5 #单条告警上报次数上限
+    alarmReportInterval: 60 #告警上报间隔(秒)
+  login:
+    regMode: 2  #注册模式(枚举值，1：原有注册模块，2：新的注册械)，可为空，为空表示采用原有的注册模式 固定为2
