@@ -13,6 +13,7 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -91,11 +92,13 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
                 link = (byte)(link | EnumAlarmStatus.BEGINREPORT.getValue());
                 alarm.setLink(link);
                 saveRedisAlarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
-            }else if((link & EnumAlarmStatus.REALEND.getValue()) != 0){
+            }else if((link & EnumAlarmStatus.REALEND.getValue()) != 0){//这是消除的告警，注册成功后直接删除，并保存到mongdb中
                 link = (byte)(link | EnumAlarmStatus.ENDREPORT.getValue());
                 alarm.setLink(link);
                 resolveAlarmList.add(alarm);
                 resolveKey.add(key);
+            }else{
+                saveRedisAlarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
             }
         }
     }
@@ -112,5 +115,12 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
         moduleMsg.setPktType(PktType.ALARM_SAVE);
         moduleMsg.setPayload(o);
         return JSON.toJSONString(moduleMsg);
+    }
+
+
+    public static void main(String[] a){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(1555481438886l);
+        System.out.println("time:" + format.format(date));
     }
 }

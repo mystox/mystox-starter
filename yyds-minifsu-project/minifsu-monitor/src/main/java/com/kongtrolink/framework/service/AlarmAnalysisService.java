@@ -33,17 +33,21 @@ public class AlarmAnalysisService {
      * 功能描述:处理告警
      */
     public Map<String, JSONObject> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate){
+        String beginDelayTable = begin_delay_alarm_hash + fsu.getSN();
         //获取FSU下所有以前告警
         Map<String, JSONObject> beforAlarmMap = redisUtils.hmget(sn__alarm_hash + fsu.getSN());
         //获取所有的告警开始延迟
-        Map<String, JSONObject> beginDelayAlarmMap = redisUtils.hmget(begin_delay_alarm_hash + fsu.getSN());//延迟产生或延迟消除的告警
+        Map<String, JSONObject> beginDelayAlarmMap = redisUtils.hmget(beginDelayTable);//延迟产生或延迟消除的告警
         //处理上报的各个信号点告警数据
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
             handleSignal(fsu, entry.getKey(), entry.getValue(), beforAlarmMap, beginDelayAlarmMap, curDate);
         }
         beforAlarmMap = delayService.handleEndDelayHistory(beforAlarmMap, curDate);
         Map<String, JSONObject> realBeginDelayAlarm = delayService.handleBeginDelayHistory(beforAlarmMap, beginDelayAlarmMap, curDate);
-        redisUtils.hmset(begin_delay_alarm_hash + fsu.getSN(), realBeginDelayAlarm);
+        for(String key : beginDelayAlarmMap.keySet()){//一个个删除，这里应该有办法
+            redisUtils.hdel(beginDelayTable, key);
+        }
+        redisUtils.hmset(beginDelayTable, realBeginDelayAlarm);
         return beforAlarmMap;
     }
 
@@ -74,10 +78,7 @@ public class AlarmAnalysisService {
                 if(null== alarm){
                     continue ;
                 }
-                alarm = delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
-                if(null == alarm){
-                    highRateFilterService.updateHighRateInfo(fsu.getSN(),  keyAlarmId);
-                }
+                delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
             }else if(null != beforAlarmObj){
                 //原来告警中有，则进入告警消除
                 Alarm beforAlarm = JSONObject.parseObject(beforAlarmObj.toString(), Alarm.class);
@@ -88,10 +89,12 @@ public class AlarmAnalysisService {
                 if( (alarmSignal.getThresholdFlag() ==  1 && value <= alarmSignal.getThreshold() )
                         || (alarmSignal.getThresholdFlag() ==0 && value >= alarmSignal.getThreshold()) ){
                     //延迟产生过期后告警消除和延迟产生内消除
-                    Alarm alarm = delayService.resolveBeginDelayAlarm(beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
+                    Alarm alarm = delayService.resolveBeginDelayAlarm(fsu.getSN(), beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
                     delayService.endDelayAlarm(alarm, alarmSignal, curDate);//判定是否延迟消除
                     if(null == alarm){
-                        highRateFilterService.updateHighRateInfo(fsu.getSN(),  keyAlarmId);
+                        highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
+                    }else{
+                        beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
                     }
                 }
             }

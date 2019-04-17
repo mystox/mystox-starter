@@ -96,7 +96,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //解析告警
         Map<String, JSONObject>  alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate);
         //告警注册与消除
-        registerService.register(msgId, fsu, alarmMap, curDate);
+        if(!alarmMap.isEmpty()) {
+            registerService.register(msgId, fsu, alarmMap, curDate);
+        }
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
     }
 

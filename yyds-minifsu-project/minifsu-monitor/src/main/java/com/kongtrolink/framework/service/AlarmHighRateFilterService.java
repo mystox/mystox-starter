@@ -37,6 +37,8 @@ public class AlarmHighRateFilterService {
      * @auther: liudd
      * @date: 2019/4/16 20:22
      * 功能描述:高频过滤判断告警是否可以产生
+     * 为了避免延迟告警生效时，第一次高频信息需要从alarmSignal中获取（拼接键字符串等过程），在这里处理高频信息。
+     * 当延迟产生时间内，告警消除时，再降低高频信息
      */
     public Alarm highRateAlarmCreate(JsonFsu fsu, Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate, String keyAlarmId){
         if(null == beforAlarm){
@@ -87,17 +89,32 @@ public class AlarmHighRateFilterService {
      * @date: 2019/4/16 21:21
      * 功能描述:减少高频过滤属性
      */
-    public void updateHighRateInfo(String sn, String keyAlarmId){
+    public void reduceHighRateInfo(String sn, String keyAlarmId){
         JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
         if(null != highRateObj){
             int highRateC = highRateObj.getInteger("highRateC");
-            if(1== highRateC){
+            if(1 == highRateC){
                 redisUtils.hdel(highrate_hash + sn, keyAlarmId);
             }else{
-                highRateObj.put("highRateC", -- highRateC);
+                highRateObj.put("highRateC", --highRateC);
                 redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
             }
         }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/16 21:21
+     * 功能描述:增加高频过滤属性
+     */
+    public void increaseHighRateInfo(String sn, String keyAlarmId){
+        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
+        if(null == highRateObj){
+            highRateObj = new JSONObject();
+        }
+        int highRateC = highRateObj.getInteger("highRateC");
+        highRateObj.put("highRateC", ++highRateC);
+        redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
     }
 
     /**

@@ -33,6 +33,7 @@ public class AlarmDelayService {
     RedisUtils redisUtils;
     @Autowired
     AlarmHighRateFilterService highRateFilterService;
+    private String begin_delay_alarm_hash = RedisHashTable.SN_BEGIN_DELAY_ALARM_HASH;
 
     /**
      * @auther: liudd
@@ -87,6 +88,9 @@ public class AlarmDelayService {
      * 如果在告警消除延迟期间，告警又产生了，咋办？
      */
     public Alarm endDelayAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate) {
+        if(null == beforAlarm){
+            return null;
+        }
         byte link = beforAlarm.getLink();
         Integer recoverDelay = alarmSignal.getRecoverDelay();
         byte realEndLink = (byte) (link | EnumAlarmStatus.REALEND.getValue());
@@ -114,13 +118,14 @@ public class AlarmDelayService {
      * @date: 2019/4/16 18:33
      * 功能描述:产生延迟期间告警消除处理
      */
-    public Alarm resolveBeginDelayAlarm(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, String keyAlarmId, Date curDate){
+    public Alarm resolveBeginDelayAlarm(String sn, Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, String keyAlarmId, Date curDate){
         Object alarmObj = beginDelayAlarm.get(keyAlarmId);
         if(null == alarmObj){
             return null;
         }
         Alarm beforAlarm = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
         beginDelayAlarm.remove(keyAlarmId);
+        redisUtils.hdel(begin_delay_alarm_hash+sn, keyAlarmId); //删除redis中延迟产生数据
         if(inTime(beforAlarm, curDate)){    //还在产生延迟期间，告警自动消除，则直接删除，当做没有产生过告警
             return null;
         }
@@ -128,17 +133,18 @@ public class AlarmDelayService {
         beforAlarm.settRecover(curDate);
         byte link = beforAlarm.getLink();
         link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
+        link = (byte)(link | EnumAlarmStatus.END.getValue());
         beforAlarm.setLink(link);
         alarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(beforAlarm));
         return beforAlarm;
     }
 
     public Map<String, JSONObject> handleBeginDelayHistory(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, Date curDate){
-        Map<String, Object> realBeginDelayAlarm = new HashMap<>();
+        Map<String, JSONObject> realBeginDelayAlarm = new HashMap<>();
         for(String key : beginDelayAlarm.keySet()){
-            Alarm alarm =  JSON.toJavaObject(alarmMap.get(key), Alarm.class);
+            Alarm alarm =  JSON.toJavaObject(beginDelayAlarm.get(key), Alarm.class);
             if(inTime(alarm, curDate)){
-               realBeginDelayAlarm.put(key, alarm);
+               realBeginDelayAlarm.put(key, (JSONObject)JSONObject.toJSON(alarm));
             }else{
                 byte link = alarm.getLink();
                 link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
@@ -146,7 +152,7 @@ public class AlarmDelayService {
                 alarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
             }
         }
-        return beginDelayAlarm;
+        return realBeginDelayAlarm;
     }
 
     /**
