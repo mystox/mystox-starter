@@ -15,10 +15,19 @@ public class Device {
     private Integer type;    //设备类型
     private Integer resNo;   //资源编号
     private String port; //设备端口
+    private String name; //设备名称
     @Field("SN")
     private String SN;
 
     private Date invalidTime; //0为有效
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getSN() {
         return SN;

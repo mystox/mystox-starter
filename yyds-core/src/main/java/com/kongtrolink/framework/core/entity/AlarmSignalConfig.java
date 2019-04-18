@@ -180,4 +180,30 @@ public class AlarmSignalConfig {
     public void setHighRateC(int highRateC) {
         this.highRateC = highRateC;
     }
+
+
+    @Override
+    public String toString() {
+        return "AlarmSignalConfig{" +
+                "id='" + id + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", alarmId='" + alarmId + '\'' +
+                ", type=" + type +
+                ", coId='" + coId + '\'' +
+                ", coType=" + coType +
+                ", enable=" + enable +
+                ", threshold=" + threshold +
+                ", thresholdFlag=" + thresholdFlag +
+                ", level=" + level +
+                ", hystersis=" + hystersis +
+                ", delay=" + delay +
+                ", recoverDelay=" + recoverDelay +
+                ", repeatDelay=" + repeatDelay +
+                ", alarmDesc='" + alarmDesc + '\'' +
+                ", highRateI=" + highRateI +
+                ", highRateT=" + highRateT +
+                ", highRateFT=" + highRateFT +
+                ", highRateC=" + highRateC +
+                '}';
+    }
 }

@@ -20,8 +20,7 @@ import java.net.InetSocketAddress;
  * update record:
  */
 @Service
-public class RpcModule extends RpcModuleBase implements ModuleInterface
-{
+public class RpcModule extends RpcModuleBase implements ModuleInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private RpcServer rpcServer;
@@ -31,16 +30,13 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface
 
     //如果需要服务的情况下需要初始化引擎和实现类等信息
     @Override
-    public boolean init()
-    {
+    public boolean init() {
         logger.info("controller execute-RpcModule init : protocol class[{}], impl class[{}]", RpcNotify.class, executeModule.getClass());
-        try
-        {
+        try {
             // 初始化RpcServer.protocol方法实例,远程调用的方法体由此处初始化,初始化多个服务,多次setProtocol()即可
             rpcServer.setProtocol(RpcNotify.class, RpcNotifyProto.RpcNotify.newReflectiveBlockingService(executeModule))
                     .start();
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -48,16 +44,15 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface
     }
 
 
-
     /**
      * 消息发送
+     *
      * @param addr
      * @param payload
      * @return
      * @throws IOException
      */
-    public RpcNotifyProto.RpcMessage postMsg(InetSocketAddress addr, String payload) throws IOException
-    {
+    public RpcNotifyProto.RpcMessage postMsg(InetSocketAddress addr, String payload) throws IOException {
         return postMsg(null, addr, payload);
     }
 }

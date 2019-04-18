@@ -2,6 +2,7 @@ package com.kongtrolink.framework.execute.module.dao;
 
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.DeviceType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -54,5 +55,10 @@ public class DeviceDao {
 
     public Device findDeviceById(String deviceId) {
         return mongoTemplate.findById(deviceId, Device.class, MongoTableName.DEVICE);
+    }
+
+
+    public DeviceType getDeviceType(int type) {
+        return mongoTemplate.findOne(Query.query(Criteria.where("type").is(type)), DeviceType.class, MongoTableName.DEVICE_TYPE);
     }
 }

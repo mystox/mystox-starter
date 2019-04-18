@@ -26,6 +26,7 @@ public class AlarmAnalysisService {
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
     private String begin_delay_alarm_hash = RedisHashTable.SN_BEGIN_DELAY_ALARM_HASH;
+    private String alarm_num_hash = RedisHashTable.SN_ALARM_NUM_HASH;
 
     /**
      * @auther: liudd
@@ -78,6 +79,8 @@ public class AlarmAnalysisService {
                 if(null== alarm){
                     continue ;
                 }
+                //填充告警序列号，虽然延迟告警也填充序列号，可能浪费序列号并且增加redis操作，但是代码可读性更高
+                alarm.setNum((int)redisUtils.hincr(alarm_num_hash, fsu.getSN(), 1d));
                 delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
             }else if(null != beforAlarmObj){
                 //原来告警中有，则进入告警消除
@@ -92,13 +95,6 @@ public class AlarmAnalysisService {
                     redisUtils.hdel(begin_delay_alarm_hash+fsu.getSN(), keyAlarmId); //删除redis中延迟产生数据
                     highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
                     beginDelayAlarmMap.remove(keyAlarmId);
-//                    Alarm alarm = delayService.resolveBeginDelayAlarm(fsu.getSN(), beforAlarmMap, beginDelayAlarmMap, keyAlarmId, curDate);
-//                    delayService.endDelayAlarm(alarm, alarmSignal, curDate);//判定是否延迟消除
-//                    if(null == alarm){
-//                        highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
-//                    }else{
-//                        beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
-//                    }
                 }
             }
         }
@@ -136,8 +132,14 @@ public class AlarmAnalysisService {
             byte link = beforAlarm.getLink();
             link = (byte)(link | EnumAlarmStatus.END.getValue());
             beforAlarm.setLink(link);
-            beforAlarm.setValue(value);
             beforAlarm.settRecover(curDate);
+        }else{//告警延时消除期间，告警数据再次异常，则将告警开始状态
+            beforAlarm.settRecover(null);
+            beforAlarm.setRecoverDelay(0);
+            beforAlarm.setRecoverDelayFT(0);
+            byte link = beforAlarm.getLink();
+            link = (byte) (link & 251);
+            beforAlarm.setLink(link);
         }
         return beforAlarm;
     }
