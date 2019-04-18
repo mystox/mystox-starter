@@ -45,6 +45,8 @@ public class PktType
     public final static String ALARM_REGISTER = "alarm_register"; //告警注册
     public final static String TERMINAL_SAVE = "terminal_save"; //保存终端
     public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
+    public final static String DATA_CHANGE = "data_change"; //实时数据上报
+    public final static String DATA_STATUS = "data_status"; //状态数据上报
 
 
 

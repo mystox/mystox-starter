@@ -47,11 +47,8 @@ public class FileServiceImpl implements FileService {
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
         value.put("STATE", 3); //新增升级状态
-        Long expiredTime = (Long) value.get("expired");
+        int expiredTime = (int) value.get("expired");
         redisUtils.set(key, value,expiredTime);
-//        redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
-
-
         JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
         JSONObject fileMsg = (JSONObject) payload.get("file");
         String filename = (String) fileMsg.get("fileName");
@@ -59,7 +56,6 @@ public class FileServiceImpl implements FileService {
         Integer fileNum = (Integer) fileMsg.get("fileNum");
         Integer startIndex = (Integer) fileMsg.get("startIndex");
         Integer endIndex = (Integer) fileMsg.get("endIndex");
-
         try {
             File file = ResourceUtils.getFile(snPath + File.separator + sn + File.separator + filename);
             long fileLen = file.length();
@@ -85,7 +81,6 @@ public class FileServiceImpl implements FileService {
                 bytes[1] = (byte) (fileNum >> 8 * 2 & 0xFF);
             }
 
-
             byte[] fileBytes = FileUtils.readFileToByteArray(file);
             byte[] filePayload = new byte[requestLen];
             System.arraycopy(fileBytes, startIndex, filePayload, 0, requestLen);
@@ -106,13 +101,10 @@ public class FileServiceImpl implements FileService {
     public JSONObject getCompilerFile(ModuleMsg moduleMsg) {
 
         String sn = moduleMsg.getSN();
-
         JSONObject param = moduleMsg.getPayload();
-
         String urlStr = (String) param.get("url");
         String name = (String) param.get("name");
         InputStream is = null;
-
         JSONObject jsonObject = new JSONObject();
         try {
             URL url = new URL(urlStr);

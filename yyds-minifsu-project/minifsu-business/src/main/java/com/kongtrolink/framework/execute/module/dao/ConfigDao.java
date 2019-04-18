@@ -3,6 +3,8 @@ package com.kongtrolink.framework.execute.module.dao;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.AlarmSignalConfigModel;
+import com.kongtrolink.framework.execute.module.model.SignalModel;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -44,6 +46,14 @@ public class ConfigDao {
     }
 
     public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId) {
-        return mongoTemplate.find(Query.query(Criteria.where("deviceId").is(deviceId).and("coId").is(coId)),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
+        Criteria criteria = Criteria.where("deviceId").is(deviceId);
+        if (StringUtils.isEmpty(coId)) {
+            criteria.and("dataId").is(coId);
+        }
+        return mongoTemplate.find(Query.query(criteria),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
+
+    public SignalModel findSignalModelByDeviceTypeAndCoId(int deviceType, String coId) {
+       return mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(deviceType).and("dataId").is(coId)),SignalModel.class, MongoTableName.SIGNAL_MODEL);
     }
 }

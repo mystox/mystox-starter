@@ -6,7 +6,7 @@ logging:
 
 server:
   name: minifsu-tower
-  bindIp: 172.16.6.199
+  bindIp: 172.16.6.39
   rpc:
     port: 18881
 

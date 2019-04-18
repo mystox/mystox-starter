@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.*;
@@ -40,6 +41,8 @@ public class RegistryServiceImpl implements RegistryService {
     private int delay;
     @Value("${server.bindIp}")
     private String host;
+    @Value("${server.rpc.port}")
+    private String port;
     @Value("${server.name}")
     private String name;
     @Autowired
@@ -70,68 +73,68 @@ public class RegistryServiceImpl implements RegistryService {
         //查表t_terminal
         Terminal terminal = terminalDao.findTerminalBySn(sn);
         JSONObject result = new JSONObject();
-            if (terminal != null && otherLogic()) {
-                String bid = terminal.getBID();
-                Order order = terminalDao.findOrderById(bid);
+        if (terminal != null && otherLogic()) {
+            String bid = terminal.getBID();
+            Order order = terminalDao.findOrderById(bid);
 
-                //获取redis 信息
-                String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
-                JSONObject value = redisUtils.get(key, JSONObject.class);
-                //删除所有其他信息
-                if (value != null) {
-                    redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
-                    redisUtils.del(RedisHashTable.SN_DATA_HASH + sn);
-                    Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
-                    if (keys != null && keys.size() > 0) {
-                        String[] s = new String[keys.size()];
-                        redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
-                    }
-                    if (order != null) {
-                        String bip = order.getBIP(); //业务网关的消息路由
-                        value.put("BIP", bip);
-                    }
-                    value.put("STATUS", 1);
-                    //心跳节拍值设置
-                    Integer heartCycle = terminal.getHeartCycle();
-                    if (heartCycle == null || heartCycle == 0)
-                        heartCycle = 10;//默认10s
-                    value.put("heartCycle", heartCycle);
-                    Integer businessRhythm = terminal.getBusinessRhythm();
-                    if (businessRhythm == null || businessRhythm == 0)
-                        businessRhythm = 30;//默认10s
-                    value.put("businessRhythm", businessRhythm);
-                    Integer alarmRhythm = terminal.getAlarmRhythm();
-                    if (alarmRhythm == null || alarmRhythm == 0)
-                        alarmRhythm = 1;//默认10s
-                    value.put("alarmRhythm", alarmRhythm);
-                    Integer runStatusRhythm = terminal.getRunStatusRhythm();
-                    if (runStatusRhythm == null || runStatusRhythm == 0)
-                        runStatusRhythm = 100;//默认10s
-                    value.put("runStatusRhythm", runStatusRhythm);
-
-                    int miniCount = Math.min(Math.min(businessRhythm, alarmRhythm), runStatusRhythm);
-                    int expiredTime = miniCount * heartCycle * 3;
-                    value.put("expired", expiredTime); //三倍最低心跳时间
-                    redisUtils.set(key, value);
-                    redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
-                    result.put("result", 1);
-                    result.put("time", System.currentTimeMillis() / 1000);
-                    result.put("heartCycle", heartCycle);
-                    result.put("businessRhythm", businessRhythm);
-                    result.put("alarmRhythm", alarmRhythm);
-                    result.put("runStatusRhythm", runStatusRhythm);
-                    return result;
-                } else {
-                    logger.error("不存在通讯key[{}]的值", key);
+            //获取redis 信息
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+            JSONObject value = redisUtils.get(key, JSONObject.class);
+            //删除所有其他信息
+            if (value != null) {
+                redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
+                redisUtils.del(RedisHashTable.SN_DATA_HASH + sn);
+                Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
+                if (keys != null && keys.size() > 0) {
+                    String[] s = new String[keys.size()];
+                    redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
                 }
-            } else if (!otherLogic()) {
-                result.put("result", StateCode.UNREGISTY);
-                result.put("delay", delay + (long) (Math.random() * delay));// delay 随机值
-            }
-            //注册非法默认
+                if (order != null) {
+                    String bip = order.getBIP(); //业务网关的消息路由
+                    value.put("BIP", bip);
+                }
+                value.put("STATUS", 1);
+                //心跳节拍值设置
+                Integer heartCycle = terminal.getHeartCycle();
+                if (heartCycle == null || heartCycle == 0)
+                    heartCycle = 10;//默认10s
+                value.put("heartCycle", heartCycle);
+                Integer businessRhythm = terminal.getBusinessRhythm();
+                if (businessRhythm == null || businessRhythm == 0)
+                    businessRhythm = 30;//默认10s
+                value.put("businessRhythm", businessRhythm);
+                Integer alarmRhythm = terminal.getAlarmRhythm();
+                if (alarmRhythm == null || alarmRhythm == 0)
+                    alarmRhythm = 1;//默认10s
+                value.put("alarmRhythm", alarmRhythm);
+                Integer runStatusRhythm = terminal.getRunStatusRhythm();
+                if (runStatusRhythm == null || runStatusRhythm == 0)
+                    runStatusRhythm = 100;//默认10s
+                value.put("runStatusRhythm", runStatusRhythm);
 
+                int miniCount = Math.min(Math.min(businessRhythm, alarmRhythm), runStatusRhythm);
+                int expiredTime = miniCount * heartCycle * 3;
+                value.put("expired", expiredTime); //三倍最低心跳时间
+                redisUtils.set(key, value);
+                redisUtils.expired(key, expiredTime, TimeUnit.SECONDS);
+                result.put("result", 1);
+                result.put("time", System.currentTimeMillis() / 1000);
+                result.put("heartCycle", heartCycle);
+                result.put("businessRhythm", businessRhythm);
+                result.put("alarmRhythm", alarmRhythm);
+                result.put("runStatusRhythm", runStatusRhythm);
+                return result;
+            } else {
+                logger.error("不存在通讯key[{}]的值", key);
+            }
+        } else if (!otherLogic()) {
             result.put("result", StateCode.UNREGISTY);
-            result.put("delay", (long) (Math.random() * delay));
+            result.put("delay", delay + (long) (Math.random() * delay));// delay 随机值
+        }
+        //注册非法默认
+
+        result.put("result", StateCode.UNREGISTY);
+        result.put("delay", (long) (Math.random() * delay));
         //日志记录
         Log log = new Log();
         log.setMsgType(moduleMsg.getPktType());
@@ -252,16 +255,19 @@ public class RegistryServiceImpl implements RegistryService {
 
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
-                    redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmConfigKeyMap.get(alarmConfigKey));
+                    redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
                 }
             }
 
-                    value.put("STATUS", 2);
-                    redisUtils.set(key,value);
+            value.put("STATUS", 2);
+            redisUtils.set(key, value);
 
             try {
                 // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
                 moduleMsg.setPktType(PktType.REGISTRY_CNTB);
+                JSONObject registerJson = (JSONObject) JSONObject.toJSON(moduleMsg);
+                registerJson.put("innerIp", host);
+                registerJson.put("innerPort", port);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             } catch (IOException e) {
                 logger.error("发送至外部业务注册异常" + e.toString());
@@ -388,7 +394,7 @@ public class RegistryServiceImpl implements RegistryService {
                     log.setErrorCode((Integer) msgPayload.get("code"));
                     log.setHostName((String) msgPayload.get("serverHost"));
                     log.setServiceName((String) msgPayload.get("serverName"));
-                    log.setTime(new Date((Long.valueOf(msgPayload.get("time") +""))));
+                    log.setTime(new Date((Long.valueOf(msgPayload.get("time") + ""))));
                     logDao.saveLog(log);
                 }
             }

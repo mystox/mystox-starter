@@ -296,18 +296,17 @@ public class MinifsuControllerApplicationTests {
             System.out.println("终端属性上报结果: "+response.getPayload());
             if ((Integer) ((Map) JSONObject.parseObject(response.getPayload()).get("payload")).get("result") == 1) { //判断结果是不是1 成功的请求
                 //3包 设备包
-                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"6-1-1-1-0990201\"]}}";
+                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"MINI210121000001\",\"devList\": [\"3-1-1-1-0990201\"]}}";
                 response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
                 System.out.println("设备上报结果"+response.getPayload());
             }
 
         }
         //3包 数据包 数据变化包
-        /*String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}}]}}\n";
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}},{\"dev\":\"3-1\",\"info\":{\"201001\":12}},{\"dev\":\"3-1\",\"info\":{\"101001\":12}},{\"dev\":\"3-1\",\"info\":{\"301001\":12}}]}}\n";
         requestHead.put("payload", dataMsg);
         response = sendMSG(requestHead, rpcModuleBase, dataMsg);
         System.out.println("设备上报结果"+response.getPayload());
-*/
         }
         /*String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
         System.out.println(cleanMsg);

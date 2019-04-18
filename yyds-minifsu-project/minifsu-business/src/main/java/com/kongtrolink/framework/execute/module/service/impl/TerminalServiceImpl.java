@@ -11,6 +11,7 @@ import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.FsuDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.DeviceType;
 import com.kongtrolink.framework.execute.module.model.Terminal;
 import com.kongtrolink.framework.execute.module.model.TerminalProperties;
 import com.kongtrolink.framework.execute.module.service.TerminalService;
@@ -72,6 +73,10 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONArray getDeviceList(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         List<Device> devicesBySn = deviceDao.findDevicesBySnAndValid(sn);
+        for (Device device : devicesBySn) {
+            DeviceType deviceType = deviceDao.getDeviceType(device.getType());
+            device.setName(deviceType == null ? "":deviceType.getName());
+        }
         return (JSONArray) JSONObject.toJSON(devicesBySn);
     }
 

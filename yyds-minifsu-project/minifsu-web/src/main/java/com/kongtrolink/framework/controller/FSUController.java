@@ -263,7 +263,15 @@ public class FSUController
                 snList.add(snObj);
             }
             JSONObject result = fsuService.saveTerminal(snList);
-            if (result != null) return new JsonResult(result);
+            if (result != null)
+            {
+                if ((int)result.get("result") == 0){
+                    JsonResult jsonResult = new JsonResult(false);
+                    jsonResult.setData(result);
+                    return jsonResult;
+                }
+                return new JsonResult(result);
+            }
         } catch (ExcelParseException e) {
             return new JsonResult(e.getMessage(), false);
         }

@@ -9,6 +9,8 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.SignalModel;
+import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,45 +47,48 @@ public class DataMntServiceImpl implements DataMntService {
         Integer type = (Integer) searchCondition.get("type");
 
         String dev = type + "-" + resNo;
-        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH+sn,dev + "_*");
-
-        for (String key : mntData) {
+        //获取实时数据的key
+        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH + sn, sn + "_" + dev + "_*");
+        JSONArray jsonArray = new JSONArray();
+        for (String key : mntData) { //通过key获取实时数据
             JSONObject coData = new JSONObject();
-            Float value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH+sn,key,Float.class);
-            String coId = key.replaceFirst(key, dev + "_");
+            Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
+            String coId = key.replaceFirst(sn + "_" + dev + "_", "");
             coData.put("coId", coId);
             coData.put("value", value);
-            //TODO 翻译数据点
-            String name = tranceDataId(coId);
-
-            coData.put("name", "");
+            JSONObject data = tranceDataId(type, coId); //数据点翻译
+            coData.putAll(data);
+            jsonArray.add(coData);
         }
-//        JSONArray jsonArray = (JSONArray) mntData.add("data");
-        JSONArray jsonArray = new JSONArray();
-        for (Object devObject : jsonArray) {
-            JSONObject devJson = (JSONObject) devObject;
-            if (dev.equals(devJson.get("dev"))) {
-                //todo 信号点属性翻译
-                JSONObject info = (JSONObject) devJson.get("info");
-                info.keySet();
-
-
-
-                return devJson;
-            }
-        }
-
-        return new JSONObject();
+        JSONObject result = new JSONObject();
+        result.put("dev", dev);
+        result.put("info", jsonArray);
+        return result;
     }
 
     /**
      * 转换数据点id类型名称
+     *
      * @param coId
      * @return
      */
-    private String tranceDataId(String coId) {
+    private JSONObject tranceDataId(Integer devType, String coId) {
+        int coIdLen = coId.length();
+        if (coIdLen < 6) {
+            coId = String.format("%6s", coId).replaceAll("\\s", "0");
+        }
+        if (coIdLen > 6) {
+            coId = coId.substring(coIdLen - 6);
+        }
+        JSONObject data = new JSONObject();
+        String coIdType = coId.substring(0, 1);
+        data.put("dataType", SignalType.toName(coIdType));
+        SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
+        data.put("name", signalModel != null ? signalModel.getName() : null);
+        data.put("unit", signalModel != null ? signalModel.getUnit() : null);
+        data.put("type", signalModel != null ? signalModel.getType() : null);
+        return data;
 
-        return "1";
     }
 
     @Override
@@ -93,8 +98,8 @@ public class DataMntServiceImpl implements DataMntService {
         String deviceId = (String) alarmSignal.get("deviceId");
         String coId = (String) alarmSignal.get("coId");
         String configId = (String) alarmSignal.get("configId");
-        Double threshold = alarmSignal.get("threshold") == null ? null : Double.parseDouble( alarmSignal.get("threshold")+"");
-        Float hystersis = alarmSignal.get("hystersis") == null ? null :  Float.parseFloat(alarmSignal.get("hystersis")+"");
+        Double threshold = alarmSignal.get("threshold") == null ? null : Double.parseDouble(alarmSignal.get("threshold") + "");
+        Float hystersis = alarmSignal.get("hystersis") == null ? null : Float.parseFloat(alarmSignal.get("hystersis") + "");
         Integer relativeval = alarmSignal.get("relativeval") == null ? null : (Integer) alarmSignal.get("relativeval");
         Integer level = alarmSignal.get("level") == null ? null : (Integer) alarmSignal.get("level");
         Integer delay = alarmSignal.get("delay") == null ? null : (Integer) alarmSignal.get("delay");
@@ -102,9 +107,8 @@ public class DataMntServiceImpl implements DataMntService {
         Device device = deviceDao.findDeviceById(deviceId);
         int devType = device.getType();
         int resNo = device.getResNo();
-        String dev = devType + "-" + resNo;
-
-        String alarmConfigKey = sn + "_" + dev + "_" + coId;
+        String dev = devType + "-" + resNo; //设备
+        String alarmConfigKey = sn + "_" + dev + "_" + coId;//redis 告警配置键值
 
         //设置内存值
         JSONArray redisSignalObj = redisUtils.getHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSONArray.class);
@@ -115,7 +119,6 @@ public class DataMntServiceImpl implements DataMntService {
             if (coId1.equals(coId)) {
                 alarmSignalConfig.setThreshold(threshold);
             }
-
         }
 
         redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmSignals);
@@ -123,13 +126,13 @@ public class DataMntServiceImpl implements DataMntService {
         AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigById(configId);
         if (threshold != null)
             alarmSignalConfig.setThreshold(threshold);
-         if (relativeval != null)
+        if (relativeval != null)
             alarmSignalConfig.setRecoverDelay(relativeval);
-         if (hystersis != null)
+        if (hystersis != null)
             alarmSignalConfig.setHystersis(hystersis);
-         if (level != null)
+        if (level != null)
             alarmSignalConfig.setLevel(level);
-         if (delay != null)
+        if (delay != null)
             alarmSignalConfig.setDelay(delay);
 
         configDao.saveAlarmSignalConfig(alarmSignalConfig);
@@ -143,13 +146,12 @@ public class DataMntServiceImpl implements DataMntService {
     public JSONArray getThreshold(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         JSONObject payload = moduleMsg.getPayload();
-        String dev = (String) payload.get("dev");
-        String[] devArr = dev.split("-");
-        Integer devType = Integer.parseInt(devArr[0]);
-        Integer resNo = Integer.parseInt(devArr[1]);
-        Device device = deviceDao.findDeviceByTypeResNoPort(sn,devType, resNo, null); //根据信号点的devType获取deviceId
+        Integer devType = (Integer) payload.get("type");
+        Integer resNo = (Integer) payload.get("resNo");
+        String port = (String) payload.get("port");
+        Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         String coId = (String) payload.get("coId");
-        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(),coId); //根据deviceId和数据点id获取信号点配置列表
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId); //根据deviceId和数据点id获取信号点配置列表
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
