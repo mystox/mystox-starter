@@ -2,9 +2,11 @@ package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.service.TowerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     @Autowired
     private ThreadPoolTaskExecutor controllerExecutor;
 
+    @Autowired
+    private TowerService towerService;
+
     @Override
     public boolean init()
     {
@@ -44,16 +49,20 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload)
     {
-
+        JSONObject response = new JSONObject();
+        boolean result = false;
 
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
 
-
-
+        JSONObject infoPayload = moduleMsg.getPayload();
+        switch (moduleMsg.getPktType()) {
+            case PktType.FSU_BIND:
+                result = towerService.FsuBind(infoPayload);
+                break;
+        }
 
         //todo
-        JSONObject result = new JSONObject();
-        result.put("result", 1);
+        response.put("result", result ? 1 : 0);
 //        try
 //        {
 //            Thread.sleep(new Random().nextInt(10000));
@@ -65,7 +74,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
                 .setPayloadType(RpcNotifyProto.PayloadType.JSON)
-                .setPayload(result.toJSONString())
+                .setPayload(response.toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();
     }

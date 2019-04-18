@@ -13,7 +13,8 @@ public class RedisHashTable
     public final static String SN_DATA_HASH = "data_hash_";       //实时数据{sn1:data}
     public final static String SN_DEV_ID_ALARM_SIGNAL_HASH ="sn_dev_id_alarm_signal_hash";    //信号点下对应的所有告警点信息
     public final static String SN_ALARM_HASH = "sn_alarm_hash_";  //实时告警{sn1:alarmObjectList}
-    public final static String SN_DEV_ID_ALARM_BEGIN_DELAY_HASH = "sn_dev_id_alarm_begin_delay_hash";  //告警开始延迟记录表
-    public final static String SN_DEV_ID_ALARM_END_DELAY_HASH = "sn_dev_id_alarm_end_delay_hash";  //告警结束延迟记录表
+    public final static String SN_BEGIN_DELAY_ALARM_HASH = "sn_begin_delay_hash";  //告警开始延迟记录表
+    public final static String HIGHRATE_SN_HASH  = "sn_highrage_hash_";  //告警高频过滤表
+    public final static String SN_ALARM_NUM_HASH = "sn_alarm_num_hash";     //告警序列号（SN内唯一，不需要用自增）
 
 }

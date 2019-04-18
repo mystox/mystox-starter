@@ -12,7 +12,6 @@ import com.kongtrolink.framework.service.AlarmAnalysisService;
 import com.kongtrolink.framework.service.DataRegisterService;
 import com.kongtrolink.framework.service.TimeDataAnalysisService;
 import com.kongtrolink.framework.task.SaveLogTask;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,22 +94,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //解析保存实时数据和告警
         Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
         //解析告警
-        Map<String, Object> alarmMap = new HashMap<>();
-        Map<String, Object> delayAlarmMap = new HashMap<>();//延迟产生或延迟消除的告警
-        alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate, alarmMap, delayAlarmMap);
-        alarmMap.putAll(delayAlarmMap);
-        //将告警保存到redis中
-        for(String key : alarmMap.keySet()) {
-            //暂时不做上报和保存告警处理
-            Alarm alarm = (Alarm)alarmMap.get(key);
-            if((alarm.getLink() & EnumAlarmStatus.REALEND.getValue()) != 0){
-                redisUtils.hdel(RedisHashTable.SN_ALARM_HASH + fsu.getSN(), key);
-            }else {
-                redisUtils.hset(RedisHashTable.SN_ALARM_HASH + fsu.getSN(), key, alarm);
-            }
-        }
+        Map<String, JSONObject>  alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate);
         //告警注册与消除
-//        registerService.register(msgId, fsu, curDate);
+        if(!alarmMap.isEmpty()) {
+            registerService.register(msgId, fsu, alarmMap, curDate);
+        }
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
     }
 

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import java.util.Date;
+import java.util.Map;
+
 /**
  * @Auther: liudd
  * @Date: 2019/3/29 11:30
@@ -40,13 +43,13 @@ public class DataRegisterService {
      *      2，发送失败，不做处理
      * 2，将实时告警保存到数据库
      */
-    public String register(String msgId, JsonFsu fsu, Date curDate){
+    public String register(String msgId, JsonFsu fsu, Map<String, JSONObject> alarmMap, Date curDate){
         if(null == fsu || fsu.getData().isEmpty()){
             return "";
         }
         fsu.setPktType(null);
         fsu.setDtm(null);
-        taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, redisUtils, rpcClient));
+        taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, alarmMap, redisUtils, rpcClient));
         return "";
     }
 }

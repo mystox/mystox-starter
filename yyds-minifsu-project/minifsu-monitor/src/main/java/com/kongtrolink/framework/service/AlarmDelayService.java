@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
@@ -10,6 +11,7 @@ import com.kongtrolink.framework.jsonType.DelayAlarm;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
+import jdk.nashorn.internal.scripts.JO;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +31,9 @@ public class AlarmDelayService {
 
     @Autowired
     RedisUtils redisUtils;
-
-    private String  alarm_begin_delay_hash = RedisHashTable.SN_DEV_ID_ALARM_BEGIN_DELAY_HASH;
+    @Autowired
+    AlarmHighRateFilterService highRateFilterService;
+    private String begin_delay_alarm_hash = RedisHashTable.SN_BEGIN_DELAY_ALARM_HASH;
 
     /**
      * @auther: liudd
@@ -59,20 +62,23 @@ public class AlarmDelayService {
      * @date: 2019/4/13 11:01
      * 功能描述:告警产生时判定延迟告警
      */
-    public Alarm beginDelayAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate){
-        if(null == beforAlarm){
+    public Alarm beginDelayAlarm(Alarm alarm, AlarmSignalConfig alarmSignal, Date curDate,
+                 Map<String, JSONObject> beforAlarmMap, Map<String, JSONObject> beginDelayAlarmMap, String keyAlarmId){
+        if(null == alarm){
             return null;
         }
-        Integer delay = alarmSignal.getDelay();
-        if(delay == 0){        //如果该告警点没有告警产生延迟，修改状态为真实产生
-            byte link = beforAlarm.getLink();
-            beforAlarm.setLink((byte)(link | EnumAlarmStatus.REALBEGIN.getValue()));
-            return beforAlarm;
+        int delay = alarmSignal.getDelay();
+        if(0 == delay){
+            byte link = alarm.getLink();
+            alarm.setLink((byte)(link | EnumAlarmStatus.REALBEGIN.getValue()));
+            beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
+            return alarm;
+        }else{
+            alarm.setDelay(delay);
+            alarm.setBeginDelayFT(curDate.getTime());
+            beginDelayAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(alarm));
+            return null;
         }
-        //填充信号点告警产生延迟以及结束延迟，避免告警延迟时再次获取信号点
-        beforAlarm.setDelay(alarmSignal.getDelay());
-        beforAlarm.setBeginDelayFT(curDate.getTime());
-        return beforAlarm;
     }
 
     /**
@@ -82,73 +88,98 @@ public class AlarmDelayService {
      * 如果在告警消除延迟期间，告警又产生了，咋办？
      */
     public Alarm endDelayAlarm(Alarm beforAlarm, AlarmSignalConfig alarmSignal, Date curDate) {
+        if(null == beforAlarm){
+            return null;
+        }
         byte link = beforAlarm.getLink();
         Integer recoverDelay = alarmSignal.getRecoverDelay();
         byte realEndLink = (byte) (link | EnumAlarmStatus.REALEND.getValue());
         if ((link & EnumAlarmStatus.END.getValue()) != 0) {      //告警消除
-            //判断该告警是否有产生延迟
-            if (inTime(beforAlarm, curDate)) {    //在告警产生延迟期间，告警需要消除，则直接将告警删除，不需要保存和注册
-                return null;
-            } else {
-                if((link & EnumAlarmStatus.REALEND.getValue()) == 0){   //告警不是真是消除
-                    if(recoverDelay == 0){      //告警点不需要消除延迟，直接修改状态为真实消除
-                        beforAlarm.setLink(realEndLink);
-                        return beforAlarm;
-                    }
-                    if(!endInTime(beforAlarm, curDate)){    //消除延时已经过期，直接修改状态为真实消除。否则不做任何修改
-                        beforAlarm.setLink(realEndLink);
-                    }else{
-                        //填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点
-                        beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
-                        beforAlarm.setBeginDelayFT(curDate.getTime());
-                    }
-                    return beforAlarm;
-                }else{//以前告警延迟已经真实消除，直接返回告警即可。当告警真实消除后，推送给铁塔失败，倒追redis中一直存在该告警
+            if((link & EnumAlarmStatus.REALEND.getValue()) == 0){   //告警不是真是消除
+                if(recoverDelay == 0){      //告警点不需要消除延迟，直接修改状态为真实消除
+                    beforAlarm.setLink(realEndLink);
                     return beforAlarm;
                 }
+                if(0 == beforAlarm.getRecoverDelayFT()){ /*填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点*/
+                    beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
+                    beforAlarm.setRecoverDelayFT(curDate.getTime());
+                    return beforAlarm;
+                }
+                return beforAlarm;
+            }else{
+                return beforAlarm;
             }
         }
-        //告警数据没有消除，本来此时需要判定告警延迟产生问题，移动到后面处理
         return beforAlarm;
     }
 
     /**
      * @auther: liudd
-     * @date: 2019/4/13 14:26
-     * 功能描述:处理历史遗留问题.只有真实产生和真实消除的告警需要注册
+     * @date: 2019/4/16 18:33
+     * 功能描述:产生延迟期间告警消除处理
      */
-    public Map<String, Object> handleHistory(Map<String, Object> alarmMap, Date curDate, Map<String, Object> delayAlarmMap ){
-        Map<String, Object> realAlarmMap = new HashMap<>();
+    public Alarm resolveBeginDelayAlarm(String sn, Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, String keyAlarmId, Date curDate){
+        Object alarmObj = beginDelayAlarm.get(keyAlarmId);
+        if(null == alarmObj){
+            return null;
+        }
+        Alarm beforAlarm = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
+        beginDelayAlarm.remove(keyAlarmId);
+        redisUtils.hdel(begin_delay_alarm_hash+sn, keyAlarmId); //删除redis中延迟产生数据
+        if(inTime(beforAlarm, curDate)){    //还在产生延迟期间，告警自动消除，则直接删除，当做没有产生过告警
+            return null;
+        }
+        beforAlarm.settReport(curDate);
+        beforAlarm.settRecover(curDate);
+        byte link = beforAlarm.getLink();
+        link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
+        link = (byte)(link | EnumAlarmStatus.END.getValue());
+        beforAlarm.setLink(link);
+        alarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(beforAlarm));
+        return beforAlarm;
+    }
+
+    public Map<String, JSONObject> handleBeginDelayHistory(Map<String, JSONObject> alarmMap, Map<String, JSONObject> beginDelayAlarm, Date curDate){
+        Map<String, JSONObject> realBeginDelayAlarm = new HashMap<>();
+        for(String key : beginDelayAlarm.keySet()){
+            Alarm alarm =  JSON.toJavaObject(beginDelayAlarm.get(key), Alarm.class);
+            if(inTime(alarm, curDate)){
+               realBeginDelayAlarm.put(key, (JSONObject)JSONObject.toJSON(alarm));
+            }else{
+                byte link = alarm.getLink();
+                link = (byte)(link | EnumAlarmStatus.REALBEGIN.getValue());
+                alarm.setLink(link);
+                //修改产生时间为当前时间
+                alarm.settReport(curDate);
+                alarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
+            }
+        }
+        return realBeginDelayAlarm;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/16 14:33
+     * 功能描述:处理告警中消除延迟到期的告警
+     */
+    public Map<String, JSONObject>  handleEndDelayHistory(Map<String, JSONObject> alarmMap, Date curDate){
+        Map<String, JSONObject> realAlarmMap = new HashMap<>();
         for(String key : alarmMap.keySet()){
-            Alarm alarm = (Alarm)alarmMap.get(key);
+            JSONObject alarmObj = alarmMap.get(key);
+            Alarm alarm  = JSONObject.parseObject(alarmObj.toString(), Alarm.class);
             byte link = alarm.getLink();
             if( (link & EnumAlarmStatus.END.getValue()) != 0 ){     //收到告警消除数据，判定是否真实消除
-                if( (link & EnumAlarmStatus.REALEND.getValue()) != 0 ){
-                    realAlarmMap.put(key, alarm);
-                }else{  //判断告警消除延期是否过期
-                    if(endInTime(alarm, curDate)){
-                        delayAlarmMap.put(key, alarm);
-                    }else{
-                        //修改状态
+                if( (link & EnumAlarmStatus.REALEND.getValue()) == 0 ){
+                    //判断告警消除延期是否过期
+                    if(!endInTime(alarm, curDate)){
                         alarm.setLink((byte) (link | EnumAlarmStatus.REALEND.getValue()));
-                        realAlarmMap.put(key, alarm);
-                    }
-                }
-            }else{          //告警产生
-                if((link & EnumAlarmStatus.REALBEGIN.getValue()) != 0){
-                    realAlarmMap.put(key, alarm);
-                }else{//需要判定产生延时是否过期
-                    if(inTime(alarm, curDate)){
-                        delayAlarmMap.put(key, alarm);
-                    }else{
-                        //修改状态
-                        alarm.setLink((byte) (link | EnumAlarmStatus.REALBEGIN.getValue()));
-                        realAlarmMap.put(key, alarm);
+                        //修改消除时间为当前时间
+                        alarm.settRecover(curDate);
                     }
                 }
             }
+            realAlarmMap.put(key, (JSONObject) JSONObject.toJSON(alarm));
         }
         return realAlarmMap;
     }
-
 }
