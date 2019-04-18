@@ -1,19 +1,21 @@
 package com.kongtrolink.framework.execute.module.model;
 
 /**
- * 设备类型对照表
+ * @author fengw
+ * 运营商对照信息
+ * 新建文件 2019-4-17 18:32:23
  */
-public class DevType {
-    //内部设备类型
-    private int type;
-    //铁塔设备类型
+public class Carrier {
+    //内部服务运营商类型
+    private String type;
+    //铁塔运营商类型
     private String cntbType;
 
-    public int getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(String type) {
         this.type = type;
     }
 

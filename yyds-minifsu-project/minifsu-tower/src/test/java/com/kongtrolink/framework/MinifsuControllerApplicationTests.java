@@ -3,8 +3,10 @@ package com.kongtrolink.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.TowerRunner;
 import org.apache.hadoop.conf.Configuration;
@@ -52,6 +54,14 @@ public class MinifsuControllerApplicationTests {
 		}
 	}
 
+	@Autowired
+	RedisUtils redisUtils;
+	@Test
+	public void redisTest()
+	{
+		redisUtils.keys("*");
+	}
+
 	public static void main(String[] args) {
 
 		//初始化客户端
@@ -60,27 +70,58 @@ public class MinifsuControllerApplicationTests {
 		RpcModuleBase rpcModuleBase = new RpcModuleBase(rpcClient);
 		RpcNotifyProto.RpcMessage response = null;
 
-		ModuleMsg msg = new ModuleMsg("fsu_bind", "PMU20000001");
+//		ModuleMsg msg = createBindRequest();
+
+		ModuleMsg msg = createRegistryCntbRequest();
+
+		response = sendMSG(rpcModuleBase, msg);
+		System.out.println("终端属性上报结果: "+response.getPayload());
+	}
+
+	private static ModuleMsg createBindRequest() {
+		ModuleMsg msg = new ModuleMsg(PktType.FSU_BIND, "PMU20000003");
+
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("fsuId", "00000043800001");
-		jsonObject.put("sn", "PMU20000001");
+		jsonObject.put("fsuId", "00000043800002");
+		jsonObject.put("sn", "PMU20000003");
 		jsonObject.put("name", "新基站");
 		jsonObject.put("address", "浙江杭州");
-		jsonObject.put("desc", "测试站点1");
-		jsonObject.put("vpnName", "全国1");
+		jsonObject.put("desc", "测试站点3");
+		jsonObject.put("vpnName", "全国3");
+		jsonObject.put("fsuClass", "INTSTAN");
 
 		List<String> list = new ArrayList();
-		list.add("00000040600001");
-		list.add("00000041900001");
+		list.add("00000040600002");
+		list.add("00000041900002");
+		list.add("00000040700004");
+		list.add("00000043800002");
+		list.add("00000041810001");
 		list.add("00000040700002");
-		list.add("00000043800001");
-		list.add("00000040700001");
+		list.add("00000041810002");
 		jsonObject.put("deviceList", list);
 
 		msg.setPayload(jsonObject);
 
-		response = sendMSG(rpcModuleBase, msg);
-		System.out.println("终端属性上报结果: "+response.getPayload());
+		return msg;
+	}
+
+	private static ModuleMsg createRegistryCntbRequest() {
+		ModuleMsg msg = new ModuleMsg(PktType.REGISTRY_CNTB, "PMU20000003");
+
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("SN", "PMU20000003");
+		jsonObject.put("innerIp", "172.16.6.20");
+		jsonObject.put("innerPort", 18883);
+
+		List<String> list = new ArrayList();
+		list.add("255-0-0-0-0110103");
+		list.add("1-0-1-1-0990101");
+		list.add("6-1-1-1-0990201");
+		jsonObject.put("devList", list);
+
+		msg.setPayload(jsonObject);
+
+		return msg;
 	}
 
 	static RpcNotifyProto.RpcMessage sendMSG(RpcModuleBase rpcModuleBase, ModuleMsg msg) {
@@ -94,4 +135,6 @@ public class MinifsuControllerApplicationTests {
 		}
 		return response;
 	}
+
+
 }

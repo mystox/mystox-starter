@@ -19,7 +19,7 @@ public class ExecutorConfig
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "controllerExecutor")
+    @Bean(name = "towerExecute")
     public ThreadPoolTaskExecutor taskExecutor()
     {
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();

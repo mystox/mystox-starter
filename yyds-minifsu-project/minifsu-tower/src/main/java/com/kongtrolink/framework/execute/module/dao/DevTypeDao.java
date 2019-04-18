@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.config.MongoConfig;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.execute.module.model.DevType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,24 +28,24 @@ public class DevTypeDao {
      * @param type 指定内部设备类型
      * @return 对照信息
      */
-    public DevType getInfoByType(String type) {
+    public DevType getInfoByType(int type) {
         Criteria criteria = Criteria.where("type").is(type);
         return mongoTemplate.findOne(Query.query(criteria),
-                DevType.class, MongoConfig.T_DEVICE_LIST);
+                DevType.class, MongoDBTable.T_DEV_TYPE_MAP);
     }
 
     /**
      * 查询所有对照信息
-     * @return 返回Map，铁塔设备类型为key，内部设备类型为value
+     * @return 返回Map，内部设备类型为key，铁塔设备类型为value
      */
-    public Map<String, String> getAll() {
-        Map<String, String> result = new HashMap();
+    public Map<Integer, String> getAll() {
+        Map<Integer, String> result = new HashMap();
 
         List<DevType> list = mongoTemplate.findAll(DevType.class,
-                MongoConfig.T_DEV_TYPE_MAP);
+                MongoDBTable.T_DEV_TYPE_MAP);
 
         for (int i = 0; i < list.size(); ++i) {
-            result.put(list.get(i).getCntbType(), list.get(i).getType());
+            result.put(list.get(i).getType(), list.get(i).getCntbType());
         }
 
         return result;

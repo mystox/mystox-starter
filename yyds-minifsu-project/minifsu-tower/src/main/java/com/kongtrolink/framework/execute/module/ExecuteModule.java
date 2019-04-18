@@ -59,6 +59,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             case PktType.FSU_BIND:
                 result = towerService.FsuBind(infoPayload);
                 break;
+            case PktType.REGISTRY_CNTB:
+                result = towerService.login(infoPayload);
+                break;
         }
 
         //todo

@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.config.MongoConfig;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.execute.module.model.Vpn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,6 +28,6 @@ public class VpnDao {
         Criteria criteria = Criteria
                 .where("vpnName").is(vpnName);
         return mongoTemplate.findOne(Query.query(criteria),
-                Vpn.class, MongoConfig.T_VPN);
+                Vpn.class, MongoDBTable.T_VPN);
     }
 }

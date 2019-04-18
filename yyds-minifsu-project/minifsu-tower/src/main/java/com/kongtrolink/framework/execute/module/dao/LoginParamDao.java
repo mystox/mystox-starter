@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.config.MongoConfig;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class LoginParamDao {
     public JsonLoginParam getInfoByFsuId(String fsuId) {
         Criteria criteria = Criteria.where("fsuId").is(fsuId);
         return mongoTemplate.findOne(Query.query(criteria),
-                JsonLoginParam.class, MongoConfig.T_LOGIN_PARAM);
+                JsonLoginParam.class, MongoDBTable.T_LOGIN_PARAM);
     }
 
     /**
@@ -46,7 +46,7 @@ public class LoginParamDao {
         update.set("alarmReportInterval", info.getAlarmReportInterval());
 
         WriteResult writeResult = mongoTemplate.upsert(Query.query(criteria),
-                update, MongoConfig.T_LOGIN_PARAM);
+                update, MongoDBTable.T_LOGIN_PARAM);
 
         result = writeResult.getN() > 0;
 

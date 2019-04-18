@@ -15,16 +15,35 @@ public class JsonDevice {
     //端口
     private String port;
     //设备版本号
-    private String type;
+    private int type;
     //资源编号
-    private String resNo;
+    private int resNo;
 
+    /**
+     * 默认构造函数
+     */
     public JsonDevice() {
     }
 
+    /**
+     * 构造函数
+     * @param fsuId fsuId
+     * @param deviceId 铁塔设备id
+     */
     public JsonDevice(String fsuId, String deviceId) {
         this.fsuId = fsuId;
         this.deviceId = deviceId;
+    }
+
+    /**
+     * 构造函数
+     * @param deviceInfo 内部上报设备信息
+     */
+    public JsonDevice(String deviceInfo) {
+        String[] infos = deviceInfo.split("-");
+        this.type = Integer.parseInt(infos[0]);
+        this.port = infos[1];
+        this.resNo = Integer.parseInt(infos[3]);
     }
 
     public String getFsuId() {
@@ -51,19 +70,19 @@ public class JsonDevice {
         this.port = port;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(int type) {
         this.type = type;
     }
 
-    public String getResNo() {
+    public int getResNo() {
         return resNo;
     }
 
-    public void setResNo(String resNo) {
+    public void setResNo(int resNo) {
         this.resNo = resNo;
     }
 }
