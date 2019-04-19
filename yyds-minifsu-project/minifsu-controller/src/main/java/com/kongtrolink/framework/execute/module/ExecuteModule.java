@@ -98,7 +98,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     || PktType.TERMINAL_REBOOT.equals(pktType)
                     ) {                                                     //服务>>>>>>>>终端
                 JSON result = sendTerminalExecute(msgId, payloadObject);
-                responseMsg(result, msgId);
+                return responseMsg(result, msgId);
+
             } else {                                                         //服务>>>>>>>>>>>>服务
                 JSON result = moduleExecute(msgId, payloadObject);
                 return responseMsg(result, msgId);
