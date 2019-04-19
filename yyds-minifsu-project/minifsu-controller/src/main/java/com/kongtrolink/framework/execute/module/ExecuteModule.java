@@ -110,8 +110,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     /**
      * 构造返回实体
+     *
      * @param result 响应实体
-     * @param msgId 消息id
+     * @param msgId  消息id
      * @return 返回payload实例
      */
     public RpcNotifyProto.RpcMessage responseMsg(Object result, String msgId) {
@@ -237,14 +238,18 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             JSONObject value = redisUtils.get(key, JSONObject.class);
             if (value != null && (Integer) value.get("STATUS") == 2) {
                 String addrStr = (String) value.get("BIP");
-                String[] addrs = addrStr.split(";");
-                for (String addr : addrs) {
-                    if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
-                        String[] addrArr = addr.split(":");
-                        return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
-                    } else {
-                        logger.error("bip[{}] illegal...");
+                if (StringUtils.isNotBlank(addrStr)) {
+                    String[] addrs = addrStr.split(";");
+                    for (String addr : addrs) {
+                        if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
+                            String[] addrArr = addr.split(":");
+                            return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
+                        } else {
+                            logger.error("bip[{}] illegal...",addr);
+                        }
                     }
+                } else {
+                    logger.error("bip[{}] is NULL...",addrStr);
                 }
             }
         }
