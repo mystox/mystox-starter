@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.execute.module.dao;
 
 import com.kongtrolink.framework.config.MongoConfig;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.jsonType.JsonStation;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,20 @@ public class StationDao {
                 .where("disabled").is(false)
                 .and("fsuId").is(fsuId);
         return mongoTemplate.findOne(Query.query(criteria),
-                JsonStation.class, MongoConfig.T_STATION);
+                JsonStation.class, MongoDBTable.T_STATION);
+    }
+
+    /**
+     * 通过sn查找绑定信息
+     * @param sn sn
+     * @return 绑定信息，不为null则说明存在已绑定信息
+     */
+    public JsonStation getInfoBySn(String sn) {
+        Criteria criteria = Criteria
+                .where("disabled").is(false)
+                .and("sn").is(sn);
+        return mongoTemplate.findOne(Query.query(criteria),
+                JsonStation.class, MongoDBTable.T_STATION);
     }
 
     /**
@@ -39,7 +53,7 @@ public class StationDao {
      * @param info 待插入的绑定记录
      */
     public void insertInfo(JsonStation info) {
-        mongoTemplate.insert(info, MongoConfig.T_STATION);
+        mongoTemplate.insert(info, MongoDBTable.T_STATION);
     }
 
     /**
@@ -63,7 +77,7 @@ public class StationDao {
         update.set("vpnName", info.getVpnName());
 
         WriteResult writeResult = mongoTemplate.updateMulti(Query.query(criteria),
-                update, MongoConfig.T_STATION);
+                update, MongoDBTable.T_STATION);
 
         result = writeResult.getN() > 0;
 
@@ -88,7 +102,7 @@ public class StationDao {
         update.set("disabledTime", System.currentTimeMillis() / 1000);
 
         WriteResult writeResult = mongoTemplate.updateMulti(Query.query(criteria),
-                update, MongoConfig.T_STATION);
+                update, MongoDBTable.T_STATION);
 
         result = writeResult.getN() > 0;
 

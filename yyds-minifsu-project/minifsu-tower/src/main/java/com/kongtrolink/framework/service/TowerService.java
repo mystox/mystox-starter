@@ -2,18 +2,21 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.config.RedisConfig;
+import com.kongtrolink.framework.entity.RedisTable;
+import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.utils.RedisUtils;
-import com.kongtrolink.framework.execute.module.dao.LoginParamDao;
-import com.kongtrolink.framework.execute.module.dao.StationDao;
-import com.kongtrolink.framework.execute.module.dao.DeviceDao;
-import com.kongtrolink.framework.execute.module.dao.VpnDao;
+import com.kongtrolink.framework.execute.module.RpcModule;
+import com.kongtrolink.framework.execute.module.dao.*;
+import com.kongtrolink.framework.execute.module.model.RedisFsuBind;
+import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
 import com.kongtrolink.framework.execute.module.model.Vpn;
+import com.kongtrolink.framework.jsonType.JsonRegistry;
 import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,21 +32,29 @@ public class TowerService {
 
     @Autowired
     RedisUtils redisUtils;
-
     @Autowired
     StationDao stationDao;
-
     @Autowired
     VpnDao vpnDao;
-
     @Autowired
     LoginParamDao loginParamDao;
-
     @Autowired
     DeviceDao deviceDao;
-
+    @Autowired
+    CarrierDao carrierDao;
     @Autowired
     DeviceMatchService deviceMatchService;
+    @Autowired
+    private RpcModule rpcModule;
+    @Autowired
+    RpcClient rpcClient;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    @Value("${tower.gateway.hostname}")
+    private String towerGatewayHostname;
+    @Value("${tower.gateway.port}")
+    private int towerGatewayPort;
 
     //信号字典表模式
     @Value("${tower.binding.dictMode}")
@@ -74,6 +85,10 @@ public class TowerService {
     @Value("${tower.loginParam.alarmReportInterval}")
     private int alarmReportInterval;
 
+    //终端在线超时时间(秒)
+    @Value("${tower.registry.timeout}")
+    private int registryTimeout;
+
     /**
      * 绑定业务
      * @param request 绑定信息
@@ -82,16 +97,19 @@ public class TowerService {
     public boolean FsuBind(JSONObject request) {
         boolean result = false;
 
-        JsonStation info = getStationInfo(request);
+        JsonStation jsonStation = getStationInfo(request);
 
         //更新数据库中的注册参数
-        updateLoginParam(info.getSn(), request);
+        JsonLoginParam jsonLoginParam = getLoginParam(request);
 
         //更新数据库中的设备列表
         JSONArray array = request.getJSONArray("deviceList");
-        updateDeviceList(array, info.getFsuId());
+        List<JsonDevice> jsonDeviceList = getDeviceList(array, jsonStation.getFsuId());
 
-        result = updateStation(info);
+        updateBindRedis(jsonStation, jsonLoginParam, jsonDeviceList);
+
+        //更新基站信息
+        result = updateStationBindDB(jsonStation, jsonLoginParam, jsonDeviceList);
 
         return result;
     }
@@ -116,11 +134,10 @@ public class TowerService {
     }
 
     /**
-     * 更新指定FSU的注册参数信息
-     * @param sn sn
+     * 获取FSU的注册参数信息
      * @param request 请求信息
      */
-    private void updateLoginParam(String sn, JSONObject request) {
+    private JsonLoginParam getLoginParam(JSONObject request) {
         JsonLoginParam loginParam = JSONObject.parseObject(request.toJSONString(), JsonLoginParam.class);
         if (!request.containsKey("heartbeatInterval")) {
             loginParam.setHeartbeatInterval(this.heartbeatInterval);
@@ -140,17 +157,7 @@ public class TowerService {
         if (!request.containsKey("alarmReportInterval")) {
             loginParam.setAlarmReportInterval(this.alarmReportInterval);
         }
-        loginParamDao.upsertInfoByFsuId(loginParam);
-        String key = RedisConfig.TERMINAL_HASH + sn;
-        if (redisUtils.hasKey(key)) {
-            long time = redisUtils.getExpire(key);
-            redisUtils.hset(key, "heartbeatInterval", loginParam.getHeartbeatInterval(), time);
-            redisUtils.hset(key, "heartbeatTimeoutLimit", loginParam.getHeartbeatTimeoutLimit(), time);
-            redisUtils.hset(key, "loginLimit", loginParam.getLoginLimit(), time);
-            redisUtils.hset(key, "loginInterval", loginParam.getLoginInterval(), time);
-            redisUtils.hset(key, "alarmReportLimit", loginParam.getAlarmReportLimit(), time);
-            redisUtils.hset(key, "alarmReportInterval", loginParam.getAlarmReportInterval(), time);
-        }
+        return loginParam;
     }
 
     /**
@@ -158,58 +165,194 @@ public class TowerService {
      * @param array 接收到的设备列表
      * @param fsuId fsuId
      */
-    private void updateDeviceList(JSONArray array, String fsuId) {
-        List<JsonDevice> list = new ArrayList<>();
+    private List<JsonDevice> getDeviceList(JSONArray array, String fsuId) {
+        List<JsonDevice> result = new ArrayList<>();
         for (int i = 0; i < array.size(); ++i) {
-            list.add(new JsonDevice(fsuId, array.getString(i)));
+            result.add(new JsonDevice(fsuId, array.getString(i)));
         }
         //取出对应设备ID列表，重新进行设备匹配，删除原有设备信息后将新设备信息写入数据库
         List<JsonDevice> curDeviceList = deviceDao.getListByFsuId(fsuId);
-        deviceMatchService.matchingDevice(list, curDeviceList);
-        deviceDao.deleteListByFsuId(fsuId);
-        deviceDao.insertListByFsuId(list);
+        deviceMatchService.matchingDevice(result, curDeviceList);
+        return result;
     }
 
     /**
-     * 更新绑定信息
-     * @param info 绑定信息
+     * 更新数据库中的绑定信息
+     * @param jsonStation 基站信息
+     * @param jsonLoginParam 注册参数信息
+     * @param jsonDeviceList 设备列表
      * @return 更新结果
      */
-    private boolean updateStation(JsonStation info) {
-        JsonStation curStation = stationDao.getInfoByFsuId(info.getFsuId());
+    private boolean updateStationBindDB(JsonStation jsonStation,
+                                        JsonLoginParam jsonLoginParam,
+                                        List<JsonDevice> jsonDeviceList) {
+
+        loginParamDao.upsertInfoByFsuId(jsonLoginParam);
+
+        deviceDao.deleteListByFsuId(jsonStation.getFsuId());
+        deviceDao.insertListByFsuId(jsonDeviceList);
+
+        JsonStation curStation = stationDao.getInfoByFsuId(jsonStation.getFsuId());
         if (curStation != null) {
             //该FSU在数据库中存在绑定关系
-            if (curStation.getSn().equals(info.getSn())) {
+            if (curStation.getSn().equals(jsonStation.getSn())) {
                 //若数据库存在记录且SN相同，则更新数据库中该条记录对应的信息
-                boolean result = stationDao.updateInfoByFsuIdAndSn(info);
-                String key = RedisConfig.TERMINAL_HASH + info.getSn();
-                if (redisUtils.hasKey(key)) {
-                    Vpn vpn = vpnDao.getInfoByName(info.getVpnName());
-                    if (vpn != null) {
-                        long time = redisUtils.getExpire(key);
-                        redisUtils.hset(key, "localName", vpn.getLocalName(), time);
-                        redisUtils.hset(key, "loginIp", vpn.getLoginIp(), time);
-                        redisUtils.hset(key, "loginPort", vpn.getLoginPort(), time);
-                    }
-                }
-                return result;
+                return stationDao.updateInfoByFsuIdAndSn(jsonStation);
             } else {
                 //若数据库存在记录且SN不同，则将该条绑定状态置为解绑，并记录解绑时间
                 boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation);
                 if (!unbindResult) {
-                    //若解绑失败？
+                    //todo 若解绑失败？
 
                 }
             }
         }
 
-        stationDao.insertInfo(info);
+        stationDao.insertInfo(jsonStation);
         return true;
     }
 
-    public boolean Login() {
+    /**
+     * 更新redis中的绑定信息
+     * @param jsonStation 基站信息
+     * @param jsonLoginParam 注册参数信息
+     * @param jsonDeviceList 设备列表
+     */
+    private void updateBindRedis(JsonStation jsonStation,
+                                 JsonLoginParam jsonLoginParam,
+                                 List<JsonDevice> jsonDeviceList) {
+        String key = RedisTable.TERMINAL_HASH + jsonStation.getSn();
+        if (redisUtils.hasKey(key)) {
+            RedisOnlineInfo onlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            onlineInfo.setStation(jsonStation);
+            onlineInfo.setLoginParam(jsonLoginParam);
+
+            Vpn vpn = vpnDao.getInfoByName(jsonStation.getVpnName());
+            if (vpn != null) {
+                onlineInfo.setVpn(vpn);
+            } else {
+                onlineInfo.setLocalName("");
+                onlineInfo.setLoginIp("");
+                onlineInfo.setLoginPort(0);
+            }
+
+            long time = redisUtils.getExpire(key);
+            redisUtils.set(key, onlineInfo, time);
+        }
+
+        RedisFsuBind redisFsuBind = new RedisFsuBind();
+        redisFsuBind.setSn(jsonStation.getSn());
+        redisFsuBind.setFsuId(jsonStation.getFsuId());
+        for (int i = 0; i < jsonDeviceList.size(); ++i) {
+            redisFsuBind.getDeviceIdList().add(jsonDeviceList.get(i).getDeviceId());
+        }
+        //更新redis中fsuId和sn的映射关系
+        redisUtils.hset(RedisTable.FSU_BIND_HASH, jsonStation.getFsuId(), redisFsuBind);
+    }
+
+    /**
+     * 平台注册终端信息
+     * @return
+     */
+    public boolean login(JSONObject request) {
         boolean result = false;
 
+        JsonRegistry jsonRegistry = getRegistryInfo(request);
+        String key = RedisTable.TERMINAL_HASH + jsonRegistry.getSn();
+
+        if (!redisUtils.hasKey(key)) {
+            //若redis中不存在sn记录，则在数据库中查找
+            JsonStation jsonStation = stationDao.getInfoBySn(jsonRegistry.getSn());
+            if (jsonStation == null) {
+                //若数据库中不存在sn记录，则说明该sn未绑定fsuId，直接向内部服务返回0
+                return false;
+            }
+            //若数据库中存在记录，读取相关信息，写入redis中
+            JsonLoginParam jsonLoginParam = loginParamDao.getInfoByFsuId(jsonStation.getFsuId());
+            Vpn vpn = vpnDao.getInfoByName(jsonStation.getVpnName());
+
+            RedisOnlineInfo redisOnlineInfo = new RedisOnlineInfo();
+            redisOnlineInfo.setStation(jsonStation);
+            redisOnlineInfo.setJsonRegistry(jsonRegistry);
+            redisOnlineInfo.setLoginParam(jsonLoginParam);
+            redisOnlineInfo.setVpn(vpn);
+
+            result = redisUtils.set(key, redisOnlineInfo, registryTimeout);
+
+            if (!result) {
+                //todo log 写redis失败
+            }
+        }
+
+        if (redisUtils.hasKey(key)) {
+            redisUtils.expire(key, registryTimeout);
+            RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            List<JsonDevice> curList = new ArrayList<>();
+            List<JsonDevice> deviceList = deviceDao.getListByFsuId(redisOnlineInfo.getFsuId());
+            JSONArray array = request.getJSONArray("devList");
+            for (int i = 0; i < array.size(); ++i) {
+                curList.add(new JsonDevice(array.getString(i)));
+            }
+            deviceMatchService.matchingDevice(deviceList, curList);
+
+            deviceDao.deleteListByFsuId(redisOnlineInfo.getFsuId());
+            deviceDao.insertListByFsuId(deviceList);
+        }
+
+        checkOnline(key);
+
         return result;
+    }
+
+    /**
+     * 解析内部服务上报的注册信息
+     * @param request 上报信息
+     * @return 注册信息
+     */
+    private JsonRegistry getRegistryInfo(JSONObject request) {
+        JsonRegistry jsonRegistry = JSONObject.parseObject(request.toJSONString(), JsonRegistry.class);
+        JSONArray array = request.getJSONArray("devList");
+        for (int i = 0; i < array.size(); ++i) {
+            String[] dev = array.get(i).toString().split("-");
+
+            JsonDevice jsonDevice = new JsonDevice();
+            jsonDevice.setType(Integer.parseInt(dev[0]));
+            jsonDevice.setPort(dev[1]);
+            jsonDevice.setResNo(Integer.parseInt(dev[3]));
+
+            jsonRegistry.getDeviceList().add(jsonDevice);
+        }
+        return jsonRegistry;
+    }
+
+    /**
+     * 检查终端是否铁塔在线，若离线，启动线程执行注册流程
+     * @param key 终端在redis中的key
+     * @return 终端在redis中的状态是否正常
+     */
+    private void checkOnline(String key) {
+        if (redisUtils.hasKey(key)) {
+            RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            if (System.currentTimeMillis()/1000 - redisOnlineInfo.getLastTimeRecvTowerMsg() >
+                    redisOnlineInfo.getHeartbeatInterval() * redisOnlineInfo.getHeartbeatTimeoutLimit()) {
+                //若当前时间 - 上次收到铁塔报文时间 > 心跳间隔 * 心跳超时次数，说明铁塔平台离线
+                redisOnlineInfo.setOnline(false);
+                long time = redisUtils.getExpire(key);
+                redisUtils.set(key, redisOnlineInfo, time);
+            }
+        }
+
+        if (redisUtils.hasKey(key)) {
+            RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            if (!redisOnlineInfo.isOnline() &&
+                redisUtils.hasKey(RedisTable.VPN_HASH) &&
+                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName())) {
+                //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
+                taskExecutor.execute(new CntbLoginService(redisOnlineInfo.getSn(),
+                        towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
+                        carrierDao));
+                System.out.println(taskExecutor.getActiveCount());
+            }
+        }
     }
 }

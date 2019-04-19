@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.config.MongoConfig;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class DeviceDao {
     public List<JsonDevice> getListByFsuId(String fsuId) {
         Criteria criteria = Criteria.where("fsuId").is(fsuId);
         return mongoTemplate.find(Query.query(criteria),
-                JsonDevice.class, MongoConfig.T_DEVICE_LIST);
+                JsonDevice.class, MongoDBTable.T_DEVICE_LIST);
     }
 
     /**
@@ -38,7 +38,7 @@ public class DeviceDao {
      * @param list 待添加的设备信息列表
      */
     public void insertListByFsuId(List<JsonDevice> list) {
-        mongoTemplate.insert(list, MongoConfig.T_DEVICE_LIST);
+        mongoTemplate.insert(list, MongoDBTable.T_DEVICE_LIST);
     }
 
     /**
@@ -49,7 +49,7 @@ public class DeviceDao {
     public boolean deleteListByFsuId(String fsuId) {
         Criteria criteria = Criteria.where("fsuId").is(fsuId);
         WriteResult writeResult = mongoTemplate.remove(Query.query(criteria),
-                MongoConfig.T_DEVICE_LIST);
+                MongoDBTable.T_DEVICE_LIST);
         //由于存在FSU下无设备的情况导致writeResult.getN()为0
         //所以无法准确判断是否删除成功
         return true;

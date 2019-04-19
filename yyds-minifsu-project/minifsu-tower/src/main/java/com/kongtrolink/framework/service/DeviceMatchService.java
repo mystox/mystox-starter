@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.service;
 
-import com.kongtrolink.framework.config.RedisConfig;
+import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.dao.DevTypeDao;
 import com.kongtrolink.framework.execute.module.model.DevType;
@@ -24,8 +24,8 @@ public class DeviceMatchService {
     @Autowired
     RedisUtils redisUtils;
 
-    private final static int CNTB_TYPE_START_INDEX = 6;
-    private final static int CNTB_TYPE_END_INDEX = 10;
+    private final static int CNTB_TYPE_START_INDEX = 7;
+    private final static int CNTB_TYPE_END_INDEX = 9;
     private final static int CNTB_DEVICE_ID_LENGTH = 14;
 
     /**
@@ -52,11 +52,11 @@ public class DeviceMatchService {
             for (int j = 0; j < cntbList.size(); ++j) {
                 JsonDevice jsonDevice = cntbList.get(j);
                 if (jsonDevice.getDeviceId().indexOf(cntbType) == CNTB_TYPE_START_INDEX &&
-                        jsonDevice.getType().equals(null)) {
+                        jsonDevice.getPort() == null) {
                     jsonDevice.setPort(curList.get(i).getPort());
                     jsonDevice.setType(curList.get(i).getType());
                     jsonDevice.setResNo(curList.get(i).getResNo());
-                    continue;
+                    break;
                 }
             }
         }
@@ -67,30 +67,28 @@ public class DeviceMatchService {
      * @param type 内部设备类型
      * @return 铁塔设备类型，若未找到，返回null
      */
-    private String getCntbType(String type) {
-        if (type == null) {
-            return null;
-        }
-        if (redisUtils.hasKey(RedisConfig.CNTBTYPE_TYPE_HASH)) {
-            Map<String, String> map = devTypeDao.getAll();
+    private String getCntbType(int type) {
+        if (!redisUtils.hasKey(RedisTable.CNTBTYPE_TYPE_HASH)) {
+            Map<Integer, String > map = devTypeDao.getAll();
             Map<String, Object> tmp = new HashMap<>();
             //遍历map中的键
-            for (String key : map.keySet()) {
-                tmp.put(key, map.get(key));
+            for (Integer key : map.keySet()) {
+                tmp.put(key.toString(), map.get(key));
             }
-            if (!redisUtils.hmset(RedisConfig.CNTBTYPE_TYPE_HASH, tmp, 0)) {
+            if (!redisUtils.hmset(RedisTable.CNTBTYPE_TYPE_HASH, tmp, 0)) {
                 //redis中添加失败，返回null
                 return null;
             }
         }
-        if (!redisUtils.hHasKey(RedisConfig.CNTBTYPE_TYPE_HASH, type)) {
+        if (!redisUtils.hHasKey(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type))) {
             DevType devType = devTypeDao.getInfoByType(type);
-            if (!redisUtils.hset(RedisConfig.CNTBTYPE_TYPE_HASH, type, devType.getCntbType())) {
-                //redis中添加失败，返回null
+            if (devType == null ||
+                !redisUtils.hset(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type), devType.getCntbType())) {
+                //找不到对应设备类型或redis中添加失败，返回null
                 return null;
             }
         }
-        return redisUtils.hget(RedisConfig.CNTBTYPE_TYPE_HASH, type).toString();
+        return redisUtils.hget(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type)).toString();
     }
 
     /**
@@ -99,11 +97,12 @@ public class DeviceMatchService {
      */
     private void sortCntbDevList(List<JsonDevice> devList) {
         Collections.sort(devList, (arg0, arg1) -> {
-            String type0 = arg0.getDeviceId().substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
+            String type0 = getCntbType(arg0.getDeviceId());
             String no0 = arg0.getDeviceId().substring(CNTB_TYPE_END_INDEX, CNTB_DEVICE_ID_LENGTH);
 
-            String type1 = arg1.getDeviceId().substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
+            String type1 = getCntbType(arg1.getDeviceId());
             String no1 = arg1.getDeviceId().substring(CNTB_TYPE_END_INDEX, CNTB_DEVICE_ID_LENGTH);
+
             if (type0.equals(type1)) {
                 return no0.compareTo(no1);
             } else {
@@ -113,14 +112,28 @@ public class DeviceMatchService {
     }
 
     /**
+     * 从铁塔设备Id中获取设备类型
+     * @param deviceId 铁塔设备Id
+     * @return 设备类型
+     */
+    private String getCntbType(String deviceId) {
+        String result = deviceId.substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
+        if (result.equals("18")) {
+            //若为18，则是环境变量，需再取一位作为设备类型
+            result = deviceId.substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX + 1);
+        }
+        return result;
+    }
+
+    /**
      * 清除列表中的匹配关系
      * @param devList 待清除列表
      */
     private void clearMatch(List<JsonDevice> devList) {
         for (int i = 0; i < devList.size(); ++i) {
             devList.get(i).setPort(null);
-            devList.get(i).setResNo(null);
-            devList.get(i).setType(null);
+            devList.get(i).setType(-1);
+            devList.get(i).setResNo(-1);
         }
     }
 
@@ -130,18 +143,10 @@ public class DeviceMatchService {
      */
     private void sortDevList(List<JsonDevice> devList) {
         Collections.sort(devList, (arg0, arg1) -> {
-            if ((arg0.getType() == null && arg1.getType() == null) || (arg0.getType().equals(arg1.getType()))) {
-                if (arg0.getResNo() == null && arg1.getResNo() == null) {
-                    return 0;
-                } else if (arg0.getResNo() == null) {
-                    return -1;
-                } else if (arg1.getResNo() == null) {
-                    return 1;
-                } else {
-                    return Integer.valueOf(arg0.getResNo()).compareTo((Integer.valueOf(arg1.getResNo())));
-                }
+            if (arg0.getType() == arg1.getType()) {
+                return Integer.valueOf(arg0.getResNo()).compareTo((Integer.valueOf(arg1.getResNo())));
             } else {
-                return arg0.getType().compareTo(arg1.getType());
+                return Integer.valueOf(arg0.getType()).compareTo(Integer.valueOf(arg1.getType()));
             }
         });
     }

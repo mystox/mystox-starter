@@ -13,7 +13,7 @@ public class Vpn {
     //注册机IP
     private String loginIp;
     //注册机端口
-    private String loginPort;
+    private int loginPort;
 
     public String getVpnName() {
         return vpnName;
@@ -39,11 +39,11 @@ public class Vpn {
         this.loginIp = loginIp;
     }
 
-    public String getLoginPort() {
+    public int getLoginPort() {
         return loginPort;
     }
 
-    public void setLoginPort(String loginPort) {
+    public void setLoginPort(int loginPort) {
         this.loginPort = loginPort;
     }
 }

@@ -20,6 +20,8 @@ public class JsonStation {
     private int dictMode;
     //FSU所使用的VPN名称
     private String vpnName;
+    //FSU的应用类型
+    private String fsuClass;
     //是否解除绑定
     private boolean disabled;
     //解除绑定时间
@@ -81,7 +83,15 @@ public class JsonStation {
         this.vpnName = vpnName;
     }
 
-    public boolean getDisabled() {
+    public String getFsuClass() {
+        return fsuClass;
+    }
+
+    public void setFsuClass(String fsuClass) {
+        this.fsuClass = fsuClass;
+    }
+
+    public boolean isDisabled() {
         return disabled;
     }
 
