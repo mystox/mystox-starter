@@ -8,7 +8,6 @@ package com.kongtrolink.framework.core.entity;
  */
 public class PktType
 {
-
     public final static String GET_DATA = "get_data";//获取监控点数据
     public final static String GET_FSU = "get_fsu";//获取FSU
     public final static String CHECK_FSU = "check_fsu";//检查绑定
@@ -47,7 +46,4 @@ public class PktType
     public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
     public final static String DATA_CHANGE = "data_change"; //实时数据上报
     public final static String DATA_STATUS = "data_status"; //状态数据上报
-
-
-
 }

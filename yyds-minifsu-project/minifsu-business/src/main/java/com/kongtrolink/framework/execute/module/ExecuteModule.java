@@ -76,6 +76,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (TerminalPktType.TERMINAL_REPORT.getValue().equals(pktType)) { //  终端信息上报设备上报
             JSONObject jsonObject = registryService.registerTerminal(moduleMsg);
             result = jsonObject.toJSONString();
+        } else if (TerminalPktType.HEART.getValue().equals(pktType)) { //  终端信息上报设备上报
+            JSONObject jsonObject = registryService.terminalHeart(moduleMsg); //心跳处理
+            result = jsonObject.toJSONString();
         } else if (TerminalPktType.DEV_LIST.getValue().equals(pktType)) { // 设备上报
             JSONObject jsonObject = registryService.registerDevices(moduleMsg);
             result = jsonObject.toJSONString();

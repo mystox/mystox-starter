@@ -406,5 +406,32 @@ public class RegistryServiceImpl implements RegistryService {
         return result;
     }
 
+    @Override
+    public JSONObject terminalHeart(ModuleMsg moduleMsg) {
+        JSONObject payload = moduleMsg.getPayload();
+        String sn = moduleMsg.getSN();
+        JSONObject result = new JSONObject();
+        //获取redis 信息
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
+        if (value != null && (int) value.get("STATUS") == 2) {
+            result.put("result", StateCode.SUCCESS);
+            return result;
+        }
+        //日志记录
+        Log log = new Log();
+        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
+        else log.setErrorCode(StateCode.CONNECT_ERROR);
+        log.setSN(sn);
+        log.setMsgType(moduleMsg.getPktType());
+        log.setMsgId(moduleMsg.getMsgId());
+        log.setHostName(host);
+        log.setServiceName(name);
+        log.setTime(new Date(System.currentTimeMillis()));
+        logDao.saveLog(log);
+        result.put("result", StateCode.UNREGISTY);
+        return result;
+    }
+
 }
 
