@@ -34,6 +34,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    ThreadPoolTaskExecutor getControllerExecutor;
+
     @Autowired
     RedisUtils redisUtils;
 
@@ -431,7 +433,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private void terminalPayloadSave(String msgId, Object payload) {
         if (payload != null && payload instanceof JSONObject) {//非空json结果保存
             ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, (JSONObject) payload);
-
+            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
         }
     }
 

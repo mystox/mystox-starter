@@ -260,7 +260,8 @@ public class RegistryServiceImpl implements RegistryService {
             }
 
             value.put("STATUS", 2);
-            redisUtils.set(key, value);
+            int expiredTime = (int) value.get("expired");
+            redisUtils.set(key, value,expiredTime);
 
             try {
                 // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
