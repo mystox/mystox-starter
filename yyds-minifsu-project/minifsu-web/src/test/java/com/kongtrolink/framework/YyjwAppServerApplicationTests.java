@@ -80,4 +80,12 @@ public class YyjwAppServerApplicationTests {
         }
     }
 
+
+
+    public static void main(String[] args)
+    {
+        File file = FileUtils.getFile("E:\\IdeaProjects\\YYDS\\AppResources\\sn\\MINI201904180001\\123");
+        System.out.println(file.length());
+    }
+
 }

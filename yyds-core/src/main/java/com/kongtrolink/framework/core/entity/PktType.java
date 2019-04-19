@@ -46,4 +46,5 @@ public class PktType
     public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
     public final static String DATA_CHANGE = "data_change"; //实时数据上报
     public final static String DATA_STATUS = "data_status"; //状态数据上报
+    public final static String TERMINAL_LOG_SAVE = "terminal_log_save"; //终端报文保存
 }
