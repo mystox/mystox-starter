@@ -117,6 +117,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      */
     public RpcNotifyProto.RpcMessage responseMsg(Object result, String msgId) {
 
+        if (result == null) {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("result", 0);
+            jsonResult.put("msgId", msgId);
+            return RpcNotifyProto.RpcMessage.newBuilder()
+                    .setType(RpcNotifyProto.MessageType.ERROR)
+                    .setPayloadType(RpcNotifyProto.PayloadType.JSON)
+                    .setPayload(jsonResult.toJSONString())
+                    .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
+                    .build();
+        }
         if (result instanceof ByteString) { //终端响应文件流...
             return RpcNotifyProto.RpcMessage.newBuilder()
                     .setType(RpcNotifyProto.MessageType.RESPONSE)
