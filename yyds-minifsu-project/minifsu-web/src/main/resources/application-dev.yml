@@ -21,23 +21,12 @@ login:
 #      host: 172.16.6.9
 #      port: 27017
 #      database: 3dConfiguration
-mqtt:
-  broker:
-    host: tcp://172.16.6.142:1883
-  client:
-    appServer:
-      topic: cntb/app/1/ywcl
-      id: app1 #订阅的topic id
-  sub:
-    ywcl:
-      topicId: cntb/ywcl/1/omc #消费的topic id
-  timeout: 10000
 spring:
   data:
     mongodb:
-      host: 172.16.6.142
+      host: 172.16.6.9
       port: 27017
-      database: db_cntb_minifsu
+      database: minifsu2
   http:
     multipart:
       enabled: true

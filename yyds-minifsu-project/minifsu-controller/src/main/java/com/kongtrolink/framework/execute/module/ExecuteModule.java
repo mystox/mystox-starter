@@ -126,8 +126,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         }
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
-                .setPayloadType(RpcNotifyProto.PayloadType.BYTE)
-                .setBytePayload((ByteString) result)
+                .setPayloadType(RpcNotifyProto.PayloadType.JSON)
+                .setPayload(((JSON) result).toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();
 
