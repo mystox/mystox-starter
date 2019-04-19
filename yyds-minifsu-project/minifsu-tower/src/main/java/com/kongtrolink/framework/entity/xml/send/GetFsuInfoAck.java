@@ -24,7 +24,7 @@ public class GetFsuInfoAck extends Info {
 
     @Override
     public PKType pkType() {
-        return new PKType("GET_FSUINFO_ACK","1702");
+        return new PKType("GET_FSUINFO_ACK",1702);
     }
 
     public String getFsuId() {
