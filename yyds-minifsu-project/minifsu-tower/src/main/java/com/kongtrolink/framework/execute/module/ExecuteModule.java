@@ -68,7 +68,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
         switch (moduleMsg.getPktType()) {
             case PktType.FSU_BIND:
-                result = towerService.FsuBind(infoPayload);
+                result = towerService.fsuBind(infoPayload);
                 break;
             case PktType.REGISTRY_CNTB:
                 result = towerService.login(infoPayload);

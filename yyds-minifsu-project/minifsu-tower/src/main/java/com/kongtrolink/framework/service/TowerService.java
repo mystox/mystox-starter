@@ -33,10 +33,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author fengw
@@ -116,7 +113,7 @@ public class TowerService {
      * @param request 绑定信息
      * @return 绑定结果
      */
-    public boolean FsuBind(JSONObject request) {
+    public boolean fsuBind(JSONObject request) {
         boolean result = false;
 
         JsonStation jsonStation = getStationInfo(request);
@@ -222,7 +219,7 @@ public class TowerService {
                 return stationDao.updateInfoByFsuIdAndSn(jsonStation);
             } else {
                 //若数据库存在记录且SN不同，则将该条绑定状态置为解绑，并记录解绑时间
-                boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation);
+                boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation.getSn(), curStation.getFsuId());
                 if (!unbindResult) {
                     //todo 若解绑失败？
 
@@ -346,6 +343,172 @@ public class TowerService {
             jsonRegistry.getDeviceList().add(jsonDevice);
         }
         return jsonRegistry;
+    }
+
+    /**
+     * 接收内部服务上报数据信息
+     * @param request 上报数据信息
+     * @return 处理结果
+     */
+    public boolean rcvData(JSONObject request) {
+        boolean result = false;
+
+        String sn = request.getString("SN");
+        String key = RedisTable.TERMINAL_HASH + sn;
+        if (!redisUtils.hasKey(key)) {
+            //终端在redis中不存在，说明离线，返回false
+            return result;
+        }
+
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
+        String fsuId = redisOnlineInfo.getFsuId();
+        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
+        if (jsonDeviceList.size() == 0) {
+            //若该fsuId下没有设备id，则不需处理，直接返回true
+            return true;
+        }
+
+        JSONArray array = request.getJSONArray("data");
+        if (array.size() == 0) {
+            //若没有设备信息，返回true
+            return true;
+        }
+
+        for (int i = 0; i < array.size(); ++i) {
+            JSONObject data = array.getJSONObject(i);
+            String[] dev = data.getString("dev").split("-");
+            int type = Integer.parseInt(dev[0]);
+            int resNo = Integer.parseInt(dev[1]);
+
+            String deviceId = null;
+            for (int j = 0; j < jsonDeviceList.size(); ++j) {
+                JsonDevice device = jsonDeviceList.get(j);
+                if (device.getType() == type && device.getResNo() == resNo) {
+                    deviceId = device.getDeviceId();
+                    break;
+                }
+            }
+
+            if (deviceId == null){
+                //该设备未找到对应铁塔设备Id，跳过
+                continue;
+            }
+
+            String dataKey = RedisTable.DATA_HASH + fsuId + ":" + deviceId;
+            RedisData redisData = new RedisData();
+            if (redisUtils.hasKey(dataKey)) {
+                redisData = redisUtils.get(dataKey, RedisData.class);
+            }
+            redisData.setDeviceId(deviceId);
+
+            JSONObject info = data.getJSONObject("info");
+            for (String signalId : info.keySet()) {
+                Signal signal = getSignal(type, signalId);
+                if (signal != null) {
+                    redisData.getValues().put(signal.getCntbId(), info.getString(signalId));
+                }
+            }
+            result = redisUtils.set(dataKey, redisData);
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取信号点信息
+     * @param type 内部设备类型
+     * @param signalId 内部信号点id
+     * @return 信号点信息
+     */
+    private Signal getSignal(int type, String signalId) {
+        Signal result;
+        String key = RedisTable.CNTBTYPE_SIGNAL_HASH+ type + ":" + signalId;
+        if (!redisUtils.hasKey(key)) {
+            result = signalDao.getInfoByTypeAndSignalId(type, signalId);
+            redisUtils.set(key, result);
+        } else {
+            result = redisUtils.get(key, Signal.class);
+        }
+
+        return result;
+    }
+
+    /**
+     * 接收内部服务上报FSU信息
+     * @param request 上报信息
+     * @return 处理结果
+     */
+    public boolean rcvFsuInfo(JSONObject request) {
+        boolean result = false;
+
+        String sn = request.getString("SN");
+        String key = RedisTable.TERMINAL_HASH + sn;
+        if (!redisUtils.hasKey(key)) {
+            //终端在redis中不存在，说明离线，返回false
+            return result;
+        }
+
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
+        String fsuId = redisOnlineInfo.getFsuId();
+
+        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
+        if (jsonDeviceList.size() == 0) {
+            //若该fsuId下没有设备id，则不需处理，直接返回true
+            return true;
+        }
+
+        String dataKey = RedisTable.DATA_HASH + fsuId + ":" + fsuId;
+        RedisData redisData = new RedisData();
+        if (redisUtils.hasKey(dataKey)) {
+            redisData = redisUtils.get(dataKey, RedisData.class);
+        }
+        redisData.setDeviceId(fsuId);
+
+        if (request.containsKey("cpuUse")) {
+            redisData.getValues().put("0438101001", request.getString("cpuUse"));
+        }
+        if (request.containsKey("memUse")) {
+            redisData.getValues().put("0438102001", request.getString("memUse"));
+        }
+        if (request.containsKey("sysTime")) {
+            redisData.getValues().put("0438103001", request.getString("sysTime"));
+        }
+        if (request.containsKey("signalStrength")) {
+            redisData.getValues().put("0438104001", request.getString("signalStrength"));
+        }
+        result = redisUtils.set(dataKey, redisData);
+
+        return result;
+    }
+
+    /**
+     * 接收内部服务上报的解绑信息
+     * @param request 上报信息
+     * @return 处理结果
+     */
+    public boolean fsuUnbind(JSONObject request) {
+        boolean result;
+
+        String sn = request.getString("sn");
+        String fsuId = request.getString("fsuId");
+
+        String key = RedisTable.TERMINAL_HASH + sn;
+        if (redisUtils.hasKey(key)) {
+            redisUtils.del(key);
+        }
+        if (redisUtils.hHasKey(RedisTable.FSU_BIND_HASH, fsuId)) {
+            redisUtils.hdel(RedisTable.FSU_BIND_HASH, fsuId);
+        }
+        Set<String> list = redisUtils.keys(RedisTable.DATA_HASH + fsuId +":*");
+        for (String dataKey : list) {
+            redisUtils.del(dataKey);
+        }
+
+        result = stationDao.unbindByFsuIdAndSn(sn, fsuId);
+
+        return result;
     }
 
     /**
@@ -551,144 +714,6 @@ public class TowerService {
         redisUtils.set(key, redisOnlineInfo, time);
 
         return true;
-    }
-
-    /**
-     * 接收内部服务上报数据信息
-     * @param request 上报数据信息
-     * @return 处理结果
-     */
-    public boolean rcvData(JSONObject request) {
-        boolean result = false;
-
-        String sn = request.getString("SN");
-        String key = RedisTable.TERMINAL_HASH + sn;
-        if (!redisUtils.hasKey(key)) {
-            //终端在redis中不存在，说明离线，返回false
-            return result;
-        }
-
-        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
-        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
-        String fsuId = redisOnlineInfo.getFsuId();
-        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
-        if (jsonDeviceList.size() == 0) {
-            //若该fsuId下没有设备id，则不需处理，直接返回true
-            return true;
-        }
-
-        JSONArray array = request.getJSONArray("data");
-        if (array.size() == 0) {
-            //若没有设备信息，返回true
-            return true;
-        }
-
-        for (int i = 0; i < array.size(); ++i) {
-            JSONObject data = array.getJSONObject(i);
-            String[] dev = data.getString("dev").split("-");
-            int type = Integer.parseInt(dev[0]);
-            int resNo = Integer.parseInt(dev[1]);
-
-            String deviceId = null;
-            for (int j = 0; j < jsonDeviceList.size(); ++j) {
-                JsonDevice device = jsonDeviceList.get(j);
-                if (device.getType() == type && device.getResNo() == resNo) {
-                    deviceId = device.getDeviceId();
-                    break;
-                }
-            }
-
-            if (deviceId == null){
-                //该设备未找到对应铁塔设备Id，跳过
-                continue;
-            }
-
-            String dataKey = RedisTable.DATA_HASH + fsuId + ":" + deviceId;
-            RedisData redisData = new RedisData();
-            if (redisUtils.hasKey(dataKey)) {
-                redisData = redisUtils.get(dataKey, RedisData.class);
-            }
-            redisData.setDeviceId(deviceId);
-
-            JSONObject info = data.getJSONObject("info");
-            for (String signalId : info.keySet()) {
-                Signal signal = getSignal(type, signalId);
-                if (signal != null) {
-                    redisData.getValues().put(signal.getCntbId(), info.getString(signalId));
-                }
-            }
-            result = redisUtils.set(dataKey, redisData);
-        }
-
-        return result;
-    }
-
-    /**
-     * 获取信号点信息
-     * @param type 内部设备类型
-     * @param signalId 内部信号点id
-     * @return 信号点信息
-     */
-    private Signal getSignal(int type, String signalId) {
-        Signal result;
-        String key = RedisTable.CNTBTYPE_SIGNAL_HASH+ type + ":" + signalId;
-        if (!redisUtils.hasKey(key)) {
-            result = signalDao.getInfoByTypeAndSignalId(type, signalId);
-            redisUtils.set(key, result);
-        } else {
-            result = redisUtils.get(key, Signal.class);
-        }
-
-        return result;
-    }
-
-    /**
-     * 接收内部服务上报FSU信息
-     * @param request 上报信息
-     * @return 处理结果
-     */
-    public boolean rcvFsuInfo(JSONObject request) {
-        boolean result = false;
-
-        String sn = request.getString("SN");
-        String key = RedisTable.TERMINAL_HASH + sn;
-        if (!redisUtils.hasKey(key)) {
-            //终端在redis中不存在，说明离线，返回false
-            return result;
-        }
-
-        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
-        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
-        String fsuId = redisOnlineInfo.getFsuId();
-
-        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
-        if (jsonDeviceList.size() == 0) {
-            //若该fsuId下没有设备id，则不需处理，直接返回true
-            return true;
-        }
-
-        String dataKey = RedisTable.DATA_HASH + fsuId + ":" + fsuId;
-        RedisData redisData = new RedisData();
-        if (redisUtils.hasKey(dataKey)) {
-            redisData = redisUtils.get(dataKey, RedisData.class);
-        }
-        redisData.setDeviceId(fsuId);
-
-        if (request.containsKey("cpuUse")) {
-            redisData.getValues().put("0438101001", request.getString("cpuUse"));
-        }
-        if (request.containsKey("memUse")) {
-            redisData.getValues().put("0438102001", request.getString("memUse"));
-        }
-        if (request.containsKey("sysTime")) {
-            redisData.getValues().put("0438103001", request.getString("sysTime"));
-        }
-        if (request.containsKey("signalStrength")) {
-            redisData.getValues().put("0438104001", request.getString("signalStrength"));
-        }
-        result = redisUtils.set(dataKey, redisData);
-
-        return result;
     }
 
     /**

@@ -125,11 +125,14 @@ public class MinifsuControllerApplicationTests {
 
 	@Test
 	public void testRedis() {
-		RedisData redisData = redisUtils.get(RedisTable.DATA_HASH + "1:1", RedisData.class);
+//		RedisData redisData = redisUtils.get(RedisTable.DATA_HASH + "1:1", RedisData.class);
 
-		System.out.println(redisUtils.hHasKey("12", "23"));
-		redisUtils.hset("12", "24", "re");
-		System.out.println(redisUtils.hHasKey("12", "23"));
+//		System.out.println(redisUtils.hHasKey("12", "23"));
+//		redisUtils.hset("12", "24", "re");
+//		System.out.println(redisUtils.hHasKey("12", "23"));
+
+		Set<String> list = redisUtils.keys(RedisTable.DATA_HASH + "43048243800189:" + "*");
+		System.out.println(list);
 	}
 
 	@Test
