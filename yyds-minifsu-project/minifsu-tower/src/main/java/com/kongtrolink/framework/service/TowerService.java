@@ -1,15 +1,23 @@
 package com.kongtrolink.framework.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.entity.xml.base.Message;
+import com.kongtrolink.framework.entity.xml.base.MessageResp;
+import com.kongtrolink.framework.entity.xml.rcv.GetData;
+import com.kongtrolink.framework.entity.xml.rcv.GetFsuInfo;
+import com.kongtrolink.framework.entity.xml.rcv.LoginAck;
+import com.kongtrolink.framework.entity.xml.send.*;
+import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.*;
-import com.kongtrolink.framework.execute.module.model.RedisFsuBind;
-import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
-import com.kongtrolink.framework.execute.module.model.Vpn;
+import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.jsonType.JsonRegistry;
 import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.jsonType.JsonDevice;
@@ -18,9 +26,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author fengw
@@ -41,7 +57,13 @@ public class TowerService {
     @Autowired
     DeviceDao deviceDao;
     @Autowired
+    DevTypeDao devTypeDao;
+    @Autowired
     CarrierDao carrierDao;
+    @Autowired
+    SignalDao signalDao;
+    @Autowired
+    AlarmDao alarmDao;
     @Autowired
     DeviceMatchService deviceMatchService;
     @Autowired
@@ -252,6 +274,7 @@ public class TowerService {
 
     /**
      * 平台注册终端信息
+     * @param request 请求信息
      * @return
      */
     public boolean login(JSONObject request) {
@@ -326,6 +349,366 @@ public class TowerService {
     }
 
     /**
+     * 铁塔平台获取Fsu信息
+     * @param request 请求信息
+     * @return 回复报文字符串
+     */
+    public String cntbGetFsuInfo(String request) {
+        String result = null;
+
+        try {
+            GetFsuInfo getFsuInfo = (GetFsuInfo)MessageUtil.stringToMessage(request, GetFsuInfo.class);
+
+            if (!checkTowerOnline(getFsuInfo.getFsuId())) {
+                return result;
+            }
+
+            RedisData redisData = redisUtils.get(RedisTable.DATA_HASH + getFsuInfo.getFsuId() + ":" + getFsuInfo.getFsuId(), RedisData.class);
+
+            GetFsuInfoAck ack = new GetFsuInfoAck();
+            ack.setFsuId(getFsuInfo.getFsuId());
+            ack.setFsuCode(getFsuInfo.getFsuId());
+            ack.setCpu("0");
+            ack.setMemu("0");
+            if (redisData != null && redisData.getValues().containsKey("0438101001")) {
+                ack.setCpu(redisData.getValues().get("0438101001").toString());
+            }
+            if (redisData != null && redisData.getValues().containsKey("0438102001")) {
+                ack.setMemu(redisData.getValues().get("0438102001").toString());
+            }
+            ack.setResult(1);
+            result = getXmlMsg(new MessageResp(ack));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    /**
+     * 铁塔平台时间同步
+     * @param request 请求信息
+     * @return 回复报文字符串
+     */
+    public String cntbTimeCheck(String request) {
+        String result = null;
+
+        TimeCheckAck ack = new TimeCheckAck();
+        ack.setResult(1);
+        result = getXmlMsg(new MessageResp(ack));
+
+        return result;
+    }
+
+    /**
+     * 铁塔平台获取数据
+     * @param request 请求信息
+     * @return 回复报文字符串
+     */
+    public String cntbGetData(String request) {
+        String result = null;
+
+        try {
+            GetData getData = (GetData)MessageUtil.stringToMessage(request, GetData.class);
+
+            if (!checkTowerOnline(getData.getFsuId())) {
+                return result;
+            }
+
+            JSONObject jsonRedisFsuBind = (JSONObject)redisUtils.hget(RedisTable.FSU_BIND_HASH, getData.getFsuId());
+            RedisFsuBind redisFsuBind = JSONObject.parseObject(jsonRedisFsuBind.toJSONString(), RedisFsuBind.class);
+
+            Map<String, List<Signal>> deviceSignalMap = getDeviceSignalMap(getData, redisFsuBind);
+
+            GetDataAck ack = new GetDataAck();
+            ack.setFsuId(getData.getFsuId());
+            ack.setFsuCode(getData.getFsuId());
+            ack.getValue().getDeviceListList().add(new DeviceList());
+            ack.setResult(1);
+            for (String deviceId : deviceSignalMap.keySet()) {
+                RedisData redisData = redisUtils.get(RedisTable.DATA_HASH + getData.getFsuId() + ":" + deviceId, RedisData.class);
+
+                Device device = new Device();
+                device.setId(deviceId);
+                device.setCode(deviceId);
+                device.settSemaphoreList(new ArrayList<>());
+                for (Signal signal : deviceSignalMap.get(deviceId)) {
+                    TSemaphore tSemaphore = new TSemaphore();
+                    tSemaphore.setId(signal.getCntbId());
+                    tSemaphore.setType(signal.getIdType());
+                    tSemaphore.setMeasuredVal("0");
+                    tSemaphore.setSetupVal("0");
+                    tSemaphore.setStatus(0);
+                    if (redisData != null && redisData.getValues().containsKey(signal.getCntbId())) {
+                        tSemaphore.setMeasuredVal(redisData.getValues().get(signal.getCntbId()).toString());
+                        tSemaphore.setSetupVal(redisData.getValues().get(signal.getCntbId()).toString());
+                    }
+                    device.gettSemaphoreList().add(tSemaphore);
+                }
+                ack.getValue().getDeviceListList().get(0).getDeviceList().add(device);
+            }
+
+            result = getXmlMsg(new MessageResp(ack));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取指定信息中的设备ID与信号点
+     * @param getData 指定信息
+     * @param redisFsuBind redis中设备绑定信息
+     * @return 设备ID与信号点
+     */
+    private Map<String, List<Signal>> getDeviceSignalMap(GetData getData, RedisFsuBind redisFsuBind) {
+        Map<String, List<Signal>> result = new HashMap<>();
+
+        List<String> curDeviceIdList = redisFsuBind.getDeviceIdList();
+        for (int i = 0; i < getData.getDeviceList().getDeviceList().size(); ++i) {
+            //遍历请求设备ID
+            String deviceId = getData.getDeviceList().getDeviceList().get(i).getId();
+            if (deviceId.equals("99999999999999")) {
+                //若当前请求设备ID为“99999999999999”，则将该FSU下所有设备ID与信号点ID全加入到Map中，并直接跳出循环
+                for (int j = 0; j < curDeviceIdList.size(); ++j){
+                    List<Signal> signalList = getSignalListByDeviceId(curDeviceIdList.get(j));
+                    result.put(curDeviceIdList.get(j), signalList);
+                }
+                break;
+            }
+            if (curDeviceIdList.contains(deviceId) && !result.containsKey(deviceId)) {
+                //若当前设备ID列表存在待获取设备ID，且当前Map中不存在该设备ID
+                result.put(deviceId, new ArrayList<>());
+                List<Signal> signalList = getSignalListByDeviceId(deviceId);
+                for (int j = 0; j < getData.getDeviceList().getDeviceList().get(i).getIdList().size(); ++j) {
+                    //遍历请求信号点ID
+                    String signalId = getData.getDeviceList().getDeviceList().get(i).getIdList().get(j);
+
+                    if (signalId.equals("9999999999")) {
+                        //若当前请求信号点ID为“9999999999”，则将该设备下的所有信号点加入Map中
+                        result.put(deviceId, signalList);
+                        continue;
+                    }
+
+                    for (Signal signal : signalList) {
+                        if (signal.getCntbId().equals(signalId)) {
+                            result.get(deviceId).add(signal);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取指定铁塔设备ID下的所有信号点
+     * @param deviceId 铁塔设备ID
+     * @return 信号点列表
+     */
+    private List<Signal> getSignalListByDeviceId(String deviceId) {
+        List<Signal> result = new ArrayList<>();
+        String cntbType = deviceMatchService.getCntbType(deviceId);
+        DevType devType = devTypeDao.getInfoByCntbType(cntbType);
+        if (devType != null) {
+            result = signalDao.getListByType(devType.getType());
+        }
+
+        return result;
+    }
+
+    /**
+     * 检查指定fsu是否铁塔平台在线
+     * @param fsuId fsuId
+     * @return 在线状态
+     */
+    private boolean checkTowerOnline(String fsuId) {
+        if (!redisUtils.hHasKey(RedisTable.FSU_BIND_HASH, fsuId)) {
+            //未查询到该fsuId有绑定sn记录，返回null
+            return false;
+        }
+
+        JSONObject jsonRedisFsuBind = (JSONObject)redisUtils.hget(RedisTable.FSU_BIND_HASH, fsuId);
+        RedisFsuBind redisFsuBind = JSONObject.parseObject(jsonRedisFsuBind.toJSONString(), RedisFsuBind.class);
+
+        String key = RedisTable.TERMINAL_HASH + redisFsuBind.getSn();
+        if (!redisUtils.hasKey(key)) {
+            //未查询到该fsuId对应的终端在线，返回null
+            return false;
+        }
+
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        if (!redisOnlineInfo.isOnline()) {
+            //该fsuId对应的终端在线，但铁塔平台离线，返回null
+            return false;
+        }
+
+        long time = redisUtils.getExpire(key);
+        redisOnlineInfo.setLastTimeRecvTowerMsg(System.currentTimeMillis()/1000);
+        redisUtils.set(key, redisOnlineInfo, time);
+
+        return true;
+    }
+
+    /**
+     * 接收内部服务上报数据信息
+     * @param request 上报数据信息
+     * @return 处理结果
+     */
+    public boolean rcvData(JSONObject request) {
+        boolean result = false;
+
+        String sn = request.getString("SN");
+        String key = RedisTable.TERMINAL_HASH + sn;
+        if (!redisUtils.hasKey(key)) {
+            //终端在redis中不存在，说明离线，返回false
+            return result;
+        }
+
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
+        String fsuId = redisOnlineInfo.getFsuId();
+        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
+        if (jsonDeviceList.size() == 0) {
+            //若该fsuId下没有设备id，则不需处理，直接返回true
+            return true;
+        }
+
+        JSONArray array = request.getJSONArray("data");
+        if (array.size() == 0) {
+            //若没有设备信息，返回true
+            return true;
+        }
+
+        for (int i = 0; i < array.size(); ++i) {
+            JSONObject data = array.getJSONObject(i);
+            String[] dev = data.getString("dev").split("-");
+            int type = Integer.parseInt(dev[0]);
+            int resNo = Integer.parseInt(dev[1]);
+
+            String deviceId = null;
+            for (int j = 0; j < jsonDeviceList.size(); ++j) {
+                JsonDevice device = jsonDeviceList.get(j);
+                if (device.getType() == type && device.getResNo() == resNo) {
+                    deviceId = device.getDeviceId();
+                    break;
+                }
+            }
+
+            if (deviceId == null){
+                //该设备未找到对应铁塔设备Id，跳过
+                continue;
+            }
+
+            String dataKey = RedisTable.DATA_HASH + fsuId + ":" + deviceId;
+            RedisData redisData = new RedisData();
+            if (redisUtils.hasKey(dataKey)) {
+                redisData = redisUtils.get(dataKey, RedisData.class);
+            }
+            redisData.setDeviceId(deviceId);
+
+            JSONObject info = data.getJSONObject("info");
+            for (String signalId : info.keySet()) {
+                Signal signal = getSignal(type, signalId);
+                if (signal != null) {
+                    redisData.getValues().put(signal.getCntbId(), info.getString(signalId));
+                }
+            }
+            result = redisUtils.set(dataKey, redisData);
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取信号点信息
+     * @param type 内部设备类型
+     * @param signalId 内部信号点id
+     * @return 信号点信息
+     */
+    private Signal getSignal(int type, String signalId) {
+        Signal result;
+        String key = RedisTable.CNTBTYPE_SIGNAL_HASH+ type + ":" + signalId;
+        if (!redisUtils.hasKey(key)) {
+            result = signalDao.getInfoByTypeAndSignalId(type, signalId);
+            redisUtils.set(key, result);
+        } else {
+            result = redisUtils.get(key, Signal.class);
+        }
+
+        return result;
+    }
+
+    /**
+     * 接收内部服务上报FSU信息
+     * @param request 上报信息
+     * @return 处理结果
+     */
+    public boolean rcvFsuInfo(JSONObject request) {
+        boolean result = false;
+
+        String sn = request.getString("SN");
+        String key = RedisTable.TERMINAL_HASH + sn;
+        if (!redisUtils.hasKey(key)) {
+            //终端在redis中不存在，说明离线，返回false
+            return result;
+        }
+
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        redisUtils.set(key, redisOnlineInfo, registryTimeout); //刷新redis中的超时时间
+        String fsuId = redisOnlineInfo.getFsuId();
+
+        List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
+        if (jsonDeviceList.size() == 0) {
+            //若该fsuId下没有设备id，则不需处理，直接返回true
+            return true;
+        }
+
+        String dataKey = RedisTable.DATA_HASH + fsuId + ":" + fsuId;
+        RedisData redisData = new RedisData();
+        if (redisUtils.hasKey(dataKey)) {
+            redisData = redisUtils.get(dataKey, RedisData.class);
+        }
+        redisData.setDeviceId(fsuId);
+
+        if (request.containsKey("cpuUse")) {
+            redisData.getValues().put("0438101001", request.getString("cpuUse"));
+        }
+        if (request.containsKey("memUse")) {
+            redisData.getValues().put("0438102001", request.getString("memUse"));
+        }
+        if (request.containsKey("sysTime")) {
+            redisData.getValues().put("0438103001", request.getString("sysTime"));
+        }
+        if (request.containsKey("signalStrength")) {
+            redisData.getValues().put("0438104001", request.getString("signalStrength"));
+        }
+        result = redisUtils.set(dataKey, redisData);
+
+        return result;
+    }
+
+    /**
+     * 获取Xml报文
+     * @param message 注册信息
+     * @return Xml报文字符串
+     */
+    private String getXmlMsg(MessageResp message) {
+        String result = null;
+
+        try {
+            result = MessageUtil.messageToString(message);
+        } catch (Exception ex) {
+
+        }
+
+        return result;
+    }
+
+    /**
      * 检查终端是否铁塔在线，若离线，启动线程执行注册流程
      * @param key 终端在redis中的key
      * @return 终端在redis中的状态是否正常
@@ -348,7 +731,7 @@ public class TowerService {
                 redisUtils.hasKey(RedisTable.VPN_HASH) &&
                 redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName())) {
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
-                taskExecutor.execute(new CntbLoginService(redisOnlineInfo.getSn(),
+                taskExecutor.execute(new CntbLoginService(redisOnlineInfo,
                         towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
                         carrierDao));
                 System.out.println(taskExecutor.getActiveCount());

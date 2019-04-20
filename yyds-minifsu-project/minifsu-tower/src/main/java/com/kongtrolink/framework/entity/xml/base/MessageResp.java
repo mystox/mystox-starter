@@ -1,7 +1,10 @@
 package com.kongtrolink.framework.entity.xml.base;
 
+import com.kongtrolink.framework.entity.xml.rcv.GetData;
+import com.kongtrolink.framework.entity.xml.send.GetDataAck;
 import com.kongtrolink.framework.entity.xml.send.GetFsuInfoAck;
 import com.kongtrolink.framework.entity.xml.send.Login;
+import com.kongtrolink.framework.entity.xml.send.TimeCheckAck;
 
 import javax.xml.bind.annotation.*;
 
@@ -13,8 +16,9 @@ public class MessageResp {
     @XmlElement(name = "PK_Type")
     protected PKType pkType;
     @XmlElements({
-            @XmlElement(name = "Info", type = Login.class),          // LOGIN
             @XmlElement(name = "Info", type = GetFsuInfoAck.class),
+            @XmlElement(name = "Info", type = TimeCheckAck.class),
+            @XmlElement(name = "Info", type = GetDataAck.class)
     })
     protected Info info;
 

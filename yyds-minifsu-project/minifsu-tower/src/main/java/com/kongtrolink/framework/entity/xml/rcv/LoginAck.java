@@ -6,7 +6,6 @@ import com.kongtrolink.framework.entity.xml.base.PKType;
 import javax.xml.bind.annotation.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = { "scIp" , "rightLevel" })
 @XmlRootElement(name = "Info")
 public class LoginAck extends Info {
 

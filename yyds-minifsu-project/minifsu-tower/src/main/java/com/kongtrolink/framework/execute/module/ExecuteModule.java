@@ -6,6 +6,8 @@ import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
+import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.service.TowerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,6 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
@@ -55,6 +63,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
 
         JSONObject infoPayload = moduleMsg.getPayload();
+
+        //处理请求
+        //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
         switch (moduleMsg.getPktType()) {
             case PktType.FSU_BIND:
                 result = towerService.FsuBind(infoPayload);
@@ -62,17 +73,22 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             case PktType.REGISTRY_CNTB:
                 result = towerService.login(infoPayload);
                 break;
+            case PktType.DATA_CHANGE:
+            case PktType.DATA_REPORT:
+                result = towerService.rcvData(infoPayload);
+                break;
+            case PktType.FSU_REPORT:
+                result = towerService.rcvFsuInfo(infoPayload);
+                break;
+            case CntbPktTypeTable.GW_SERVICE:
+                String responseMsg = scMessage(infoPayload);
+                response.put("msg", responseMsg);
+                result = responseMsg != null;
+                break;
         }
 
         //todo
         response.put("result", result ? 1 : 0);
-//        try
-//        {
-//            Thread.sleep(new Random().nextInt(10000));
-//        } catch (InterruptedException e)
-//        {
-//            e.printStackTrace();
-//        }
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
@@ -82,5 +98,40 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 .build();
     }
 
+    /**
+     * 检查铁塔网关发送来的信息，并根据类型进行处理
+     * @param infoPayload 请求信息
+     * @return 回复报文，若为null，则不回复
+     */
+    private String scMessage(JSONObject infoPayload) {
+        String result = null;
+        try {
+            Document doc = MessageUtil.stringToDocument(infoPayload.getString("msg"));
+            String type = doc.getElementsByTagName("Name").item(0).getTextContent();
+            int code = Integer.parseInt(doc.getElementsByTagName("Code").item(0).getTextContent());
+            Node reqInfoNode = doc.getElementsByTagName("Info").item(0);
+            String request = MessageUtil.infoNodeToString(reqInfoNode);
 
+            if (type.equals(CntbPktTypeTable.GET_FSUINFO) && code == CntbPktTypeTable.GET_FSUINFO_CODE) {
+                result = towerService.cntbGetFsuInfo(request);
+            } else if (type.equals(CntbPktTypeTable.TIME_CHECK) && code == CntbPktTypeTable.TIME_CHECK_CODE) {
+                result = towerService.cntbTimeCheck(request);
+            } else if (type.equals(CntbPktTypeTable.GET_DATA) && code == CntbPktTypeTable.GET_DATA_CODE) {
+                result = towerService.cntbGetData(request);
+            } else if (type.equals(CntbPktTypeTable.SET_POINT) && code == CntbPktTypeTable.SET_POINT_CODE) {
+
+            } else if (type.equals(CntbPktTypeTable.GET_THRESHOLD) && code == CntbPktTypeTable.GET_THRESHOLD_CODE) {
+
+            } else if (type.equals(CntbPktTypeTable.SET_THRESHOLD) && code == CntbPktTypeTable.SET_THRESHOLD_CODE) {
+
+            }
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

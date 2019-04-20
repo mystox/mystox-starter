@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * update record:
  */
 @Service
-public class AlarmExecuteService implements ServiceInterface
+public class CntbGWExecuteService implements ServiceInterface
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
