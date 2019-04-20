@@ -43,12 +43,13 @@ public class FileServiceImpl implements FileService {
     public byte[] fileGet(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
 
-        //获取redis 信息
+        //获取redis 信息增加升级状态
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
         value.put("STATE", 3); //新增升级状态
         int expiredTime = (int) value.get("expired");
         redisUtils.set(key, value,expiredTime);
+
         JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
         JSONObject fileMsg = (JSONObject) payload.get("file");
         String filename = (String) fileMsg.get("fileName");
@@ -127,7 +128,7 @@ public class FileServiceImpl implements FileService {
             jsonObject.put("result", 1);
         } catch (IOException e) {
             jsonObject.put("result", 0);
-            e.toString();
+            e.printStackTrace();
 
         } finally {
             if (is != null) {

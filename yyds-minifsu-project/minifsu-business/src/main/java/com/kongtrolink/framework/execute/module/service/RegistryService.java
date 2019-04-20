@@ -18,4 +18,6 @@ public interface RegistryService
     JSONObject registerTerminal(ModuleMsg moduleMsg);
 
     JSONObject saveCleanupLog(ModuleMsg moduleMsg);
+
+    JSONObject terminalHeart(ModuleMsg moduleMsg);
 }

@@ -260,7 +260,8 @@ public class RegistryServiceImpl implements RegistryService {
             }
 
             value.put("STATUS", 2);
-            redisUtils.set(key, value);
+            int expiredTime = (int) value.get("expired");
+            redisUtils.set(key, value,expiredTime);
 
             try {
                 // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
@@ -403,6 +404,33 @@ public class RegistryServiceImpl implements RegistryService {
 
         JSONObject result = new JSONObject();
         result.put("result", StateCode.SUCCESS);
+        return result;
+    }
+
+    @Override
+    public JSONObject terminalHeart(ModuleMsg moduleMsg) {
+        JSONObject payload = moduleMsg.getPayload();
+        String sn = moduleMsg.getSN();
+        JSONObject result = new JSONObject();
+        //获取redis 信息
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
+        if (value != null && (int) value.get("STATUS") == 2) {
+            result.put("result", StateCode.SUCCESS);
+            return result;
+        }
+        //日志记录
+        Log log = new Log();
+        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
+        else log.setErrorCode(StateCode.CONNECT_ERROR);
+        log.setSN(sn);
+        log.setMsgType(moduleMsg.getPktType());
+        log.setMsgId(moduleMsg.getMsgId());
+        log.setHostName(host);
+        log.setServiceName(name);
+        log.setTime(new Date(System.currentTimeMillis()));
+        logDao.saveLog(log);
+        result.put("result", StateCode.UNREGISTY);
         return result;
     }
 
