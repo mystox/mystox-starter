@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.execute.module.model;
 
-import java.util.Map;
-
 /**
  * Created by mystoxlol on 2019/4/22, 10:24.
  * company: kongtrolink
@@ -11,7 +9,42 @@ import java.util.Map;
 public class RunState {
     private String id;
     private String sn;
-    private Map<String, String> status;
+    private String cpuUse;
+    private String memUse;
+    private Long sysTime; //终端系统时间
+    private Integer csq; //信号强度
+
+    public String getCpuUse() {
+        return cpuUse;
+    }
+
+    public void setCpuUse(String cpuUse) {
+        this.cpuUse = cpuUse;
+    }
+
+    public String getMemUse() {
+        return memUse;
+    }
+
+    public void setMemUse(String memUse) {
+        this.memUse = memUse;
+    }
+
+    public Long getSysTime() {
+        return sysTime;
+    }
+
+    public void setSysTime(Long sysTime) {
+        this.sysTime = sysTime;
+    }
+
+    public Integer getCsq() {
+        return csq;
+    }
+
+    public void setCsq(Integer csq) {
+        this.csq = csq;
+    }
 
     public String getId() {
         return id;
@@ -29,11 +62,4 @@ public class RunState {
         this.sn = sn;
     }
 
-    public Map<String, String> getStatus() {
-        return status;
-    }
-
-    public void setStatus(Map<String, String> status) {
-        this.status = status;
-    }
 }
