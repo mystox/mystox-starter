@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.Order;
 import com.kongtrolink.framework.execute.module.model.Terminal;
+import com.kongtrolink.framework.execute.module.model.TerminalLog;
 import com.kongtrolink.framework.execute.module.model.TerminalProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -68,5 +69,9 @@ public class TerminalDao
 
     public void saveTerminalBatch(List<Terminal> terminals) {
         mongoTemplate.insert(terminals,MongoTableName.TERMINAL);
+    }
+
+    public void saveTerminalLog(TerminalLog terminalLog) {
+        mongoTemplate.save(terminalLog,MongoTableName.TERMINAL_LOG);
     }
 }

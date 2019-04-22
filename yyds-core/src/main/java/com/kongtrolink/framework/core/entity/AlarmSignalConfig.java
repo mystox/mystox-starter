@@ -29,6 +29,17 @@ public class AlarmSignalConfig {
     private long highRateFT;        //高频过滤第一次告警时间
     private int highRateC;      //高频过滤告警次数
 
+
+    private int thresholdBase; //门限值基数
+
+    public int getThresholdBase() {
+        return thresholdBase;
+    }
+
+    public void setThresholdBase(int thresholdBase) {
+        this.thresholdBase = thresholdBase;
+    }
+
     public String getId() {
         return id;
     }

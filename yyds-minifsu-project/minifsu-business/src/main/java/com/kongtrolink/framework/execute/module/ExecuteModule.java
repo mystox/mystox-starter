@@ -29,7 +29,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private ThreadPoolTaskExecutor controllerExecutor;
+    private ThreadPoolTaskExecutor businessExecutor;
     @Autowired
     TerminalService terminalService;
 
@@ -111,18 +111,23 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.COMPILER.equals(pktType)) { //下载编译文件
             JSONObject jsonObject = fileService.getCompilerFile(moduleMsg);
             result = jsonObject.toJSONString();
-        }else if (PktType.SET_ALARM_PARAM.equals(pktType)) { //设置告警点配置
+        } else if (PktType.SET_ALARM_PARAM.equals(pktType)) { //设置告警点配置
             JSONObject jsonObject = dataMntService.setThreshold(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.GET_ALARM_PARAM.equals(pktType)) { //获取告警点配置
             JSONArray jsonObject = dataMntService.getThreshold(moduleMsg);
             result = jsonObject.toJSONString();
-        }
- else if (PktType.TERMINAL_SAVE.equals(pktType)) { //获取告警点配置
+        } else if (PktType.TERMINAL_SAVE.equals(pktType)) { //获取告警点配置
             JSONObject jsonObject = terminalService.saveTerminal(moduleMsg);
             result = jsonObject.toJSONString();
-        }else if (PktType.SET_STATION.equals(pktType)) { //获取告警点配置
+        } else if (PktType.SET_STATION.equals(pktType)) { //
             JSONObject jsonObject = terminalService.setTerminal(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.TERMINAL_LOG_SAVE.equals(pktType)) { // 终端流
+            JSONObject jsonObject = terminalService.terminalLogSave(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.DATA_STATUS.equals(pktType)) { // 终端流
+            JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
             result = jsonObject.toJSONString();
         }
 
