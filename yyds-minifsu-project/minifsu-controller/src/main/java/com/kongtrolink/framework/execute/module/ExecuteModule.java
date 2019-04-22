@@ -31,14 +31,10 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
-
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    ThreadPoolTaskExecutor getControllerExecutor;
 
     @Autowired
     RedisUtils redisUtils;
-
 
     @Autowired
     RpcModule rpcModule;
@@ -91,7 +87,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (StringUtils.isNotBlank(pktType)) {
             if (PktType.CONNECT.equals(pktType)) {                          //终端>>>>>>>>>服务
                 Object result = receiveTerminalExecute(msgId, payloadObject);
-                terminalPayloadSave(msgId, result); //记录响应日志
+                terminalPayloadSave(msgId, result); //记录终端响应日志
                 return responseMsg(result, msgId);
             } else if (PktType.UPGRADE.equals(pktType)
                     || PktType.SET_DATA.equals(pktType)
@@ -110,7 +106,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         result.put("msgId", msgId);
         return responseMsg(result, msgId);
     }
-
 
 
     /**
@@ -238,6 +233,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.COMPILER.equals(pktType)
                 || PktType.TERMINAL_SAVE.equals(pktType)
+                || PktType.ALARM_MODEL_IMPORT.equals(pktType)
+                || PktType.SIGNAL_MODEL_IMPORT.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
@@ -259,6 +256,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     for (String addr : addrs) {
                         if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
                             String[] addrArr = addr.split(":");
+                            System.out.println("payloadObject：" + payloadObject.toJSONString());
                             return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
                         } else {
                             logger.error("bip[{}] illegal...", addr);
@@ -287,6 +285,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (StringUtils.isBlank(terminalString)) return null;
         TerminalMsg terminalMsg = JSONObject.parseObject(terminalString, TerminalMsg.class);
         if (terminalMsg == null) return null;
+        terminalPayloadSave(msgId, terminalString); //终端接收的报文保存
         msgId = StringUtils.isBlank(msgId) ? terminalMsg.getMsgId() : msgId;
         String uuid = (String) payloadObject.get("uuid");
         String gip = (String) payloadObject.get("gip");
@@ -303,6 +302,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String SN = (String) msgPayload.get("SN");
         ModuleMsg moduleMsg = new ModuleMsg(); //服务间消息实体
         moduleMsg.setMsgId(msgId);
+        moduleMsg.setUuid(uuid);
         moduleMsg.setSN(SN);
         /******************************通讯信息刷新*****************************/
         try {
@@ -332,7 +332,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         JSONObject payload = terminalMsg.getPayload();
         int pktType = (int) payload.get("pktType");//终端报文类型 整型
         moduleMsg.setPayload(payload);
-        terminalPayloadSave(msgId, payload);
        /* if (TerminalPktType.HEART.getKey() == pktType) {
             JSONObject responsePayload = new JSONObject();
             responsePayload.put("result", StateCode.SUCCESS);
@@ -427,15 +426,28 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     }
 
     /**
-     * 保存终端双向报文日志
+     * 保存终端双向报文日志 异步保存
+     *
      * @param msgId
      * @param payload
      */
     private void terminalPayloadSave(String msgId, Object payload) {
-        if (payload != null && payload instanceof JSONObject) {//非空json结果保存
-            ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, (JSONObject) payload);
-            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
-        }
+        controllerExecutor.execute(() -> {
+            ModuleMsg moduleMsg = null;
+            if (payload != null && payload instanceof JSONObject) {//非空json结果保存
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, (JSONObject) payload);
+
+            } else if (payload != null && payload instanceof String) {
+                JSONObject jsonPayload = JSONObject.parseObject((String) payload);
+                if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
+                if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, jsonPayload);
+            }
+            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //异步保存
+        });
+
+
+
     }
 
     /**

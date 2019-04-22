@@ -51,4 +51,6 @@ public interface TerminalService
     JSONObject saveTerminal(ModuleMsg moduleMsg);
 
     JSONObject setTerminal(ModuleMsg moduleMsg);
+
+    JSONObject terminalLogSave(ModuleMsg moduleMsg);
 }

@@ -8,6 +8,7 @@ package com.kongtrolink.framework.core.entity;
  */
 public class AlarmSignalConfig {
     private String id;
+
     private String deviceId;
     private String alarmId; //告警点id
     private Integer type; //告警点类型
@@ -28,6 +29,26 @@ public class AlarmSignalConfig {
     private int highRateT;      //高频过滤规定间隔内，允许的告警次数
     private long highRateFT;        //高频过滤第一次告警时间
     private int highRateC;      //高频过滤告警次数
+
+
+    private Integer thresholdBase; //门限值基数
+    private String uuid; //内存版本
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public Integer getThresholdBase() {
+        return thresholdBase;
+    }
+
+    public void setThresholdBase(Integer thresholdBase) {
+        this.thresholdBase = thresholdBase;
+    }
 
     public String getId() {
         return id;

@@ -11,6 +11,7 @@ import java.util.Date;
 public class Alarm {
 
     private String id;
+    private String dev_colId;         //信号点告警点id,注册和保存告警需要使用
     private String alarmId;         //告警点id
     private float value;            //告警值
     private byte link;              //告警所处环节(1-开始；2-开始报文上报成功；4-结束报文；8结束报文上报成功,16延迟产生，32延迟消除)
@@ -22,6 +23,14 @@ public class Alarm {
     private long recoverDelayFT;     //告警消除下一次时间
     private int num;                //告警序列号，终端内唯一
     private byte h;                  //是否高频
+
+    public String getDev_colId() {
+        return dev_colId;
+    }
+
+    public void setDev_colId(String dev_colId) {
+        this.dev_colId = dev_colId;
+    }
 
     public byte getH() {
         return h;

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -45,25 +46,32 @@ public class RegistryServiceImpl implements RegistryService {
     private String port;
     @Value("${server.name}")
     private String name;
+    private final TerminalDao terminalDao;
+    private final LogDao logDao;
+    private final ConfigDao configDao;
+    private final DeviceDao deviceDao;
+    private final RedisUtils redisUtils;
+    private RpcModule rpcModule;
     @Autowired
-    TerminalDao terminalDao;
-    @Autowired
-    LogDao logDao;
-    @Autowired
-    ConfigDao configDao;
-    @Autowired
-    DeviceDao deviceDao;
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
 
-    @Autowired
-    RedisUtils redisUtils;
-
-    @Autowired
-    RpcModule rpcModule;
-
+    private final ThreadPoolTaskExecutor businessExecutor;
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
     @Value("${rpc.controller.port}")
     private int controllerPort;
+
+    @Autowired
+    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils,  ThreadPoolTaskExecutor businessExecutor) {
+        this.terminalDao = terminalDao;
+        this.logDao = logDao;
+        this.configDao = configDao;
+        this.deviceDao = deviceDao;
+        this.redisUtils = redisUtils;
+        this.businessExecutor = businessExecutor;
+    }
 
 
     @Override
@@ -240,8 +248,15 @@ public class RegistryServiceImpl implements RegistryService {
                 if (alarmSignals != null && alarmSignals.size() > 0) { //根据模版表格式化数据
                     for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
                         String coId = alarmSignalConfig.getCoId();
+
                         String alarmConfigKey = sn + "_" + devDataId + "_" + coId;
                         List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
+                        //根据告警点属性的valueBase处理数据点值的倍数问题!!
+                        SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
+                        alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
+                                signalModel.getValueBase());
+                        alarmSignalConfig.setUuid(moduleMsg.getUuid());
+
                         if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
                         } else {
@@ -253,7 +268,6 @@ public class RegistryServiceImpl implements RegistryService {
                     }
                 }
 
-
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                     redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
                 }
@@ -261,33 +275,35 @@ public class RegistryServiceImpl implements RegistryService {
 
             value.put("STATUS", 2);
             int expiredTime = (int) value.get("expired");
-            redisUtils.set(key, value,expiredTime);
+            redisUtils.set(key, value, expiredTime);
+            businessExecutor.execute(() -> {
+                try {
+                    // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
+                    moduleMsg.setPktType(PktType.REGISTRY_CNTB);
+                    JSONObject registerJson = (JSONObject) JSONObject.toJSON(moduleMsg);
+                    registerJson.put("innerIp", host);
+                    registerJson.put("innerPort", port);
+                    rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                } catch (IOException e) {
+                    logger.error("发送至外部业务注册异常" + e.toString());
+                    //日志记录
+                    Log log = new Log();
+                    log.setErrorCode(3);
+                    log.setSN(sn);
+                    log.setMsgType(moduleMsg.getPktType());
+                    log.setMsgId(moduleMsg.getMsgId());
+                    log.setHostName(host);
+                    log.setServiceName(name);
+                    log.setTime(new Date(System.currentTimeMillis()));
+                    logDao.saveLog(log);
+                }
+            });
 
-            try {
-                // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
-                moduleMsg.setPktType(PktType.REGISTRY_CNTB);
-                JSONObject registerJson = (JSONObject) JSONObject.toJSON(moduleMsg);
-                registerJson.put("innerIp", host);
-                registerJson.put("innerPort", port);
-                rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
-            } catch (IOException e) {
-                logger.error("发送至外部业务注册异常" + e.toString());
-                //日志记录
-                Log log = new Log();
-                log.setErrorCode(3);
-                log.setSN(sn);
-                log.setMsgType(moduleMsg.getPktType());
-                log.setMsgId(moduleMsg.getMsgId());
-                log.setHostName(host);
-                log.setServiceName(name);
-                log.setTime(new Date(System.currentTimeMillis()));
-                logDao.saveLog(log);
-            }
+
             //设备上报流程执行完毕
             result.put("result", StateCode.SUCCESS);
             return result;
         }
-
 
         //日志记录
         Log log = new Log();

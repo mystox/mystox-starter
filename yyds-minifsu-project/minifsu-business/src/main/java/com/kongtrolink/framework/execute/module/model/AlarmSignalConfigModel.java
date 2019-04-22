@@ -9,6 +9,7 @@ package com.kongtrolink.framework.execute.module.model;
 public class AlarmSignalConfigModel {
     private String id;
     private String alarmId; //告警点id
+    private Integer devType; //设备类型
     private Integer type; //告警点类型
     private String coId;//关联数据点ID
     private Integer coType; //关联数据点类型
@@ -21,11 +22,26 @@ public class AlarmSignalConfigModel {
     private int recoverDelay; //告警恢复延时
     private int repeatDelay; //告警重复延时
     private String alarmDesc; //告警描述
+    private String normalDesc; //正常时描述
     //高频过滤，暂时所有告警点都有
     private int highRateI;      //高频过滤间隔highrateinteval（单位为秒）
     private int highRateT;      //高频过滤规定间隔内，允许的告警次数
-    private long highRateFT;        //高频过滤第一次告警时间
-    private int highRateC;      //高频过滤告警次数
+
+    public void setDevType(Integer devType) {
+        this.devType = devType;
+    }
+
+    public Integer getDevType() {
+        return devType;
+    }
+
+    public String getNormalDesc() {
+        return normalDesc;
+    }
+
+    public void setNormalDesc(String normalDesc) {
+        this.normalDesc = normalDesc;
+    }
 
     public void setRepeatDelay(int repeatDelay) {
         this.repeatDelay = repeatDelay;
@@ -47,21 +63,6 @@ public class AlarmSignalConfigModel {
         this.highRateT = highRateT;
     }
 
-    public long getHighRateFT() {
-        return highRateFT;
-    }
-
-    public void setHighRateFT(long highRateFT) {
-        this.highRateFT = highRateFT;
-    }
-
-    public int getHighRateC() {
-        return highRateC;
-    }
-
-    public void setHighRateC(int highRateC) {
-        this.highRateC = highRateC;
-    }
 
     public String getId() {
         return id;
