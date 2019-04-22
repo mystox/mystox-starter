@@ -51,8 +51,8 @@ public class RegistryServiceImpl implements RegistryService {
     private final ConfigDao configDao;
     private final DeviceDao deviceDao;
     private final RedisUtils redisUtils;
-    @Autowired
     private RpcModule rpcModule;
+    @Autowired
     public void setRpcModule(RpcModule rpcModule) {
         this.rpcModule = rpcModule;
     }
