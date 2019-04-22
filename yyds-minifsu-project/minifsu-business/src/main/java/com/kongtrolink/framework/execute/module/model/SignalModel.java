@@ -14,7 +14,7 @@ public class SignalModel {
     private String deviceType;
     private String unit;
 
-    private Integer valueBase; //信号点基数
+    private Integer valueBase = 1; //信号点基数
 
     public Integer getValueBase() {
         return valueBase;

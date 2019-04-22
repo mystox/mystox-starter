@@ -10,6 +10,7 @@ public class MongoTableName
 {
     public final static String TERMINAL = "t_terminal";
     public final static String TERMINAL_PROPERTY = "t_terminal_property";
+    public final static String TERMINAL_RUN_STATE = "t_terminal_run_state";
     public final static String ORDER = "t_order";
     public final static String LOG = "t_log";
     public final static String DEVICE = "t_device";

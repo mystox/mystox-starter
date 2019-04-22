@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
+import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.RunState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,7 +23,7 @@ public class RunStateDao {
 
 
     public void saveRunState(RunState runState) {
-        mongoTemplate.insert(runState);
+        mongoTemplate.insert(runState, MongoTableName.TERMINAL_RUN_STATE);
 
     }
 

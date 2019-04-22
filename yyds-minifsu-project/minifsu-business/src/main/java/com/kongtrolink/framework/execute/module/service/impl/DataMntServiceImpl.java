@@ -169,7 +169,7 @@ public class DataMntServiceImpl implements DataMntService {
         runState.setCpuUse((String) payload.get("cpuUse"));
         runState.setCpuUse((String) payload.get("cpuUse"));
         runState.setCpuUse((String) payload.get("memUse"));
-        runState.setSysTime((Long) payload.get("sysTime"));
+        runState.setSysTime((Long.parseLong(payload.get("sysTime")+"")));
         runState.setCsq((Integer) payload.get("csq"));
         runStateDao.saveRunState(runState);
         JSONObject result = new JSONObject();

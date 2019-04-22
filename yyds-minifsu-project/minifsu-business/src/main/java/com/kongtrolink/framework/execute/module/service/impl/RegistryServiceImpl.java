@@ -249,7 +249,8 @@ public class RegistryServiceImpl implements RegistryService {
                         List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
                         //根据告警点属性的valueBase处理数据点值的倍数问题!!
                         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
-                        alarmSignalConfig.setThresholdBase(signalModel.getValueBase());
+                        alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
+                                signalModel.getValueBase());
 
                         if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
