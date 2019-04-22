@@ -76,10 +76,9 @@ public class AlarmAnalysisService {
             Integer thresholdBase = alarmSignal.getThresholdBase();
             if(null != thresholdBase){
                 value = value / thresholdBase;
-                entry.setValue(value);
             }
             if(null == beforAlarmObj && null == beginDelayAlarmObj){
-                //原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
+                //liuddTODO：原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
                 Alarm alarm = beginAlarm(value, alarmSignal, curDate);
                 //高频过滤是否产生告警
                 alarm = highRateFilterService.highRateAlarmCreate(fsu, alarm, alarmSignal, curDate, keyAlarmId);
