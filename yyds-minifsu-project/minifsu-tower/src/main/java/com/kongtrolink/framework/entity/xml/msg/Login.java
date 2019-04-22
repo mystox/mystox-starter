@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.entity.xml.send;
+package com.kongtrolink.framework.entity.xml.msg;
 
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.base.Info;
@@ -47,10 +47,10 @@ public class Login extends Info {
     @XmlElement(name = "DictVersion")
     private int dictVersion;
     @XmlElement(name = "DeviceList")
-    private DeviceList deviceList;
+    private XmlList deviceList;
 
     public Login() {
-        deviceList = new DeviceList();
+        deviceList = new XmlList();
     }
 
     @Override
@@ -202,11 +202,11 @@ public class Login extends Info {
         this.dictVersion = dictVersion;
     }
 
-    public DeviceList getDeviceList() {
+    public XmlList getDeviceList() {
         return deviceList;
     }
 
-    public void setDeviceList(DeviceList deviceList) {
+    public void setDeviceList(XmlList deviceList) {
         this.deviceList = deviceList;
     }
 }

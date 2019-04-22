@@ -8,14 +8,13 @@ import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.execute.module.dao.AlarmDao;
 import com.kongtrolink.framework.execute.module.dao.SignalDao;
 import com.kongtrolink.framework.execute.module.model.Alarm;
-import com.kongtrolink.framework.execute.module.model.RedisData;
 import com.kongtrolink.framework.execute.module.model.Signal;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
-import com.kongtrolink.framework.entity.xml.rcv.SetPoint;
-import com.kongtrolink.framework.entity.xml.rcv.GetData;
+import com.kongtrolink.framework.entity.xml.msg.SetPoint;
+import com.kongtrolink.framework.entity.xml.msg.GetData;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.TowerRunner;
@@ -249,7 +248,9 @@ public class MinifsuControllerApplicationTests {
 
 //		ModuleMsg msg = createTimeCheckRequest();
 
-		ModuleMsg msg = createDataChangeRequest();
+//		ModuleMsg msg = createDataChangeRequest();
+
+		ModuleMsg msg = createAlarmRequest();
 
 		response = sendMSG(rpcModuleBase, msg);
 		System.out.println("终端属性上报结果: "+response.getPayload());
@@ -358,6 +359,52 @@ public class MinifsuControllerApplicationTests {
 		list.add(data2);
 		jsonObject.put("data", list);
 
+		msg.setPayload(jsonObject);
+
+		return msg;
+	}
+
+	private static ModuleMsg createAlarmRequest() {
+		ModuleMsg msg = new ModuleMsg(PktType.ALARM_REGISTER, "MINI210121000001");
+
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("sN", "MINI210121000001");
+
+		List<JSONObject> list = new ArrayList<>();
+
+		JSONObject alarm1 = new JSONObject();
+		alarm1.put("recoverDelay", 0);
+		alarm1.put("delay", 0);
+		alarm1.put("beginDelayFT", 0);
+		alarm1.put("dev_colId", "3-1_3001");
+		alarm1.put("num", 7);
+		alarm1.put("h", 0);
+		alarm1.put("link", 17);
+		alarm1.put("alarmId", "001001");
+		alarm1.put("tReport", 1555898299);
+		alarm1.put("tRecover", 1555898299);
+		alarm1.put("value", 333.0);
+		alarm1.put("recoverDelayFT", 0);
+
+		list.add(alarm1);
+
+		JSONObject alarm2 = new JSONObject();
+		alarm2.put("recoverDelay", 0);
+		alarm2.put("delay", 0);
+		alarm2.put("beginDelayFT", 0);
+		alarm2.put("dev_colId", "3-1_3001");
+		alarm2.put("num", 8);
+		alarm2.put("h", 0);
+		alarm2.put("link", 17);
+		alarm2.put("alarmId", "003001");
+		alarm2.put("tReport", 1555898299);
+		alarm2.put("tRecover", 1555898299);
+		alarm2.put("value", 333.0);
+		alarm2.put("recoverDelayFT", 0);
+
+		list.add(alarm2);
+
+		jsonObject.put("alarmList", list);
 		msg.setPayload(jsonObject);
 
 		return msg;

@@ -11,10 +11,10 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.entity.xml.base.Message;
-import com.kongtrolink.framework.entity.xml.rcv.LoginAck;
-import com.kongtrolink.framework.entity.xml.send.DeviceList;
-import com.kongtrolink.framework.entity.xml.send.Login;
-import com.kongtrolink.framework.entity.xml.send.Device;
+import com.kongtrolink.framework.entity.xml.msg.LoginAck;
+import com.kongtrolink.framework.entity.xml.msg.Login;
+import com.kongtrolink.framework.entity.xml.msg.Device;
+import com.kongtrolink.framework.entity.xml.msg.XmlList;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.CarrierDao;
@@ -38,48 +38,46 @@ import java.util.Map;
  */
 public class CntbLoginService extends RpcModuleBase implements Runnable {
 
+    private String key;
     private String hostname;
     private int port;
     private RpcModule rpcModule;
     private RedisUtils redisUtils;
-    private String sn;
     private CarrierDao carrierDao;
-    private String loginIp;
-    private int loginPort;
+
+    private RedisOnlineInfo redisOnlineInfo;
 
     /**
      * 构造函数
-     * @param redisOnlineInfo redis中的信息
+     * @param sn sn
      * @param hostname 铁塔网关服务地址
      * @param port 铁塔网关服务端口
      * @param rpcModule rpcModule
      * @param redisUtils redisUtils
      * @param rpcClient rpcClient
      */
-    public CntbLoginService(RedisOnlineInfo redisOnlineInfo, String hostname, int port,
+    public CntbLoginService(String sn, String hostname, int port,
                             RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
                             CarrierDao carrierDao) {
         super(rpcClient);
-        this.sn = redisOnlineInfo.getSn();
+        this.key = RedisTable.getRegistryKey(sn);
         this.hostname = hostname;
         this.port = port;
         this.rpcModule = rpcModule;
         this.redisUtils = redisUtils;
+        this.redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
         this.carrierDao = carrierDao;
-        this.loginIp = redisOnlineInfo.getLoginIp();
-        this.loginPort = redisOnlineInfo.getLoginPort();
     }
 
     @Override
     public void run() {
-        RedisOnlineInfo onlineInfo = getRedisOnlineInfo();
-        if (!(onlineInfo != null && !onlineInfo.isOnline() &&
+        if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
                 redisUtils.hasKey(RedisTable.VPN_HASH) &&
-                redisUtils.hHasKey(RedisTable.VPN_HASH, onlineInfo.getLocalName()))) {
+                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
             return;
         }
 
-        Login info = getLoginInfo(onlineInfo);
+        Login info = getLoginInfo(redisOnlineInfo);
 
         if (info != null) {
             login(info);
@@ -91,7 +89,6 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @return redis中在线信息
      */
     private RedisOnlineInfo getRedisOnlineInfo() {
-        String key = RedisTable.TERMINAL_HASH + sn;
         if (!redisUtils.hasKey(key)) {
             return null;
         }
@@ -160,7 +157,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
         JSONObject jsonRedisFsuBind = (JSONObject)redisUtils.hget(RedisTable.FSU_BIND_HASH, onlineInfo.getFsuId());
         RedisFsuBind redisFsuBind = JSONObject.parseObject(jsonRedisFsuBind.toJSONString(), RedisFsuBind.class);
-        DeviceList list = new DeviceList();
+        XmlList list = new XmlList();
         for (int i = 0; i < redisFsuBind.getDeviceIdList().size(); ++i) {
             Device device = new Device();
             device.setId(redisFsuBind.getDeviceIdList().get(i));
@@ -209,13 +206,12 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         InetSocketAddress addr = new InetSocketAddress(hostname, port);
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("ip", loginIp);
-        jsonObject.put("port", loginPort);
+        jsonObject.put("ip", redisOnlineInfo.getLoginIp());
+        jsonObject.put("port", redisOnlineInfo.getLoginPort());
         jsonObject.put("msg", reqXmlMsg);
 
         String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, jsonObject);
 
-        //todo 没有和内部服务进行通信
         JSONObject jsonResponse = postMsg(request, addr);
 
 //        JSONObject jsonResponse = new JSONObject();
@@ -226,7 +222,6 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             String resXmlMsg = jsonResponse.getString("msg");
             LoginAck loginAck = analyzeMsg(resXmlMsg);
 
-            String key = RedisTable.TERMINAL_HASH + sn;
             RedisOnlineInfo onlineInfo = getRedisOnlineInfo();
             if (onlineInfo != null) {
                 if (loginAck != null && Integer.parseInt(loginAck.getRightLevel()) == 2) {
@@ -253,7 +248,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             Message message = new Message(login);
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
-
+            //todo 实体类转xml失败
         }
 
         return result;

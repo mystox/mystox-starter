@@ -80,6 +80,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             case PktType.FSU_REPORT:
                 result = towerService.rcvFsuInfo(infoPayload);
                 break;
+            case PktType.ALARM_REGISTER:
+                result = towerService.rcvAlarm(infoPayload);
+                break;
             case CntbPktTypeTable.GW_SERVICE:
                 String responseMsg = scMessage(infoPayload);
                 response.put("msg", responseMsg);

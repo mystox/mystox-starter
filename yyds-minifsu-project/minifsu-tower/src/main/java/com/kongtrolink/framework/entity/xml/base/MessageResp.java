@@ -1,10 +1,8 @@
 package com.kongtrolink.framework.entity.xml.base;
 
-import com.kongtrolink.framework.entity.xml.rcv.GetData;
-import com.kongtrolink.framework.entity.xml.send.GetDataAck;
-import com.kongtrolink.framework.entity.xml.send.GetFsuInfoAck;
-import com.kongtrolink.framework.entity.xml.send.Login;
-import com.kongtrolink.framework.entity.xml.send.TimeCheckAck;
+import com.kongtrolink.framework.entity.xml.msg.GetDataAck;
+import com.kongtrolink.framework.entity.xml.msg.GetFsuInfoAck;
+import com.kongtrolink.framework.entity.xml.msg.TimeCheckAck;
 
 import javax.xml.bind.annotation.*;
 

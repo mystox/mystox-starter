@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.entity.xml.send;
+package com.kongtrolink.framework.entity.xml.msg;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;

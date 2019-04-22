@@ -16,6 +16,11 @@ public class CntbPktTypeTable {
     public final static String GET_DATA_ACK = "GET_DATA_ACK";
     public final static int GET_DATA_ACK_CODE = 402;
 
+    public final static String SEND_ALARM = "SEND_ALARM";
+    public final static int SEND_ALARM_CODE = 501;
+    public final static String SEND_ALARM_ACK = "SEND_ALARM_ACK";
+    public final static int SEND_ALARM_ACK_CODE = 502;
+
     public final static String SET_POINT = "SET_POINT";
     public final static int SET_POINT_CODE = 1001;
     public final static String SET_POINT_ACK = "SET_POINT_ACK";
