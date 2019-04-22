@@ -254,6 +254,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     for (String addr : addrs) {
                         if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
                             String[] addrArr = addr.split(":");
+                            System.out.println("payloadObject：" + payloadObject.toJSONString());
                             return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
                         } else {
                             logger.error("bip[{}] illegal...", addr);
