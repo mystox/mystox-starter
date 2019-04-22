@@ -8,7 +8,9 @@ import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
+import com.kongtrolink.framework.execute.module.dao.RunStateDao;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.RunState;
 import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
@@ -34,6 +36,9 @@ public class DataMntServiceImpl implements DataMntService {
     @Autowired
     DeviceDao deviceDao;
 
+
+    @Autowired
+    private RunStateDao runStateDao;
 
     @Autowired
     ConfigDao configDao;
@@ -155,12 +160,21 @@ public class DataMntServiceImpl implements DataMntService {
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
-    @Override
+       @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
-
-
-
-        return null;
+        String sn =  moduleMsg.getSN();
+        JSONObject payload = moduleMsg.getPayload();
+        RunState runState = new RunState();
+        runState.setSn(sn);
+        runState.setCpuUse((String) payload.get("cpuUse"));
+        runState.setCpuUse((String) payload.get("cpuUse"));
+        runState.setCpuUse((String) payload.get("memUse"));
+        runState.setSysTime((Long) payload.get("sysTime"));
+        runState.setCsq((Integer) payload.get("csq"));
+        runStateDao.saveRunState(runState);
+        JSONObject result = new JSONObject();
+        result.put("result", 1);
+        return result;
     }
 
 }

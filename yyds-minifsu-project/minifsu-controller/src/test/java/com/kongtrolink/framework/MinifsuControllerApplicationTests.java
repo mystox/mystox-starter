@@ -308,6 +308,19 @@ public class MinifsuControllerApplicationTests {
         requestHead.put("payload", dataMsg);
         response = sendMSG(requestHead, rpcModuleBase, dataMsg);
         System.out.println("设备上报结果"+response.getPayload());*/
+        //11包 运状包
+            String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\n" +
+                    "  \"pktType\": 11,\n" +
+                    "  \"SN\": \"MINI210121000001\",\n" +
+                    "  \"cpuUse\":\"37.2%\",\n" +
+                    "  \"memUse\":\"41.5%\",\n" +
+                    "  \"sysTime\":15234875,\n" +
+                    "  \"csq\":22\n" +
+                    "}}\n";
+            requestHead.put("payload", dataMsg);
+            response = sendMSG(requestHead, rpcModuleBase, dataMsg);
+            System.out.println("设备上报结果"+response.getPayload());
+
         }
         /*String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
         System.out.println(cleanMsg);
