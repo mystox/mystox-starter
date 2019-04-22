@@ -155,4 +155,12 @@ public class DataMntServiceImpl implements DataMntService {
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
+    @Override
+    public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
+
+
+
+        return null;
+    }
+
 }

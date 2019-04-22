@@ -18,5 +18,6 @@ public class MongoTableName
     public final static String ALARM_SIGNAL_CONFIG = "t_alarm_signal_config";
     public final static String ALARM_SIGNAL_CONFIG_MODEL = "t_alarm_signal_config_model";
     public final static String ALARM = "t_alarm";
+    public final static String TERMINAL_LOG = "t_terminal_log";
 
 }
