@@ -64,7 +64,7 @@ public class RegistryServiceImpl implements RegistryService {
     private int controllerPort;
 
     @Autowired
-    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils, RpcModule rpcModule, ThreadPoolTaskExecutor businessExecutor) {
+    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils,  ThreadPoolTaskExecutor businessExecutor) {
         this.terminalDao = terminalDao;
         this.logDao = logDao;
         this.configDao = configDao;
@@ -257,7 +257,6 @@ public class RegistryServiceImpl implements RegistryService {
                                 signalModel.getValueBase());
                         alarmSignalConfig.setUuid(moduleMsg.getUuid());
 
-
                         if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
                         } else {
@@ -305,7 +304,6 @@ public class RegistryServiceImpl implements RegistryService {
             result.put("result", StateCode.SUCCESS);
             return result;
         }
-
 
         //日志记录
         Log log = new Log();

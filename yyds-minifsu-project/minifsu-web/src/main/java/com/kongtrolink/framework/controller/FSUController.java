@@ -301,12 +301,11 @@ public class FSUController {
             for (int r = 0; r < cell.length; r++) {
 
                 JSONObject snObj = new JSONObject();
-                snObj.put("dataId", cell[r][0]);
-                snObj.put("name", cell[r][1]);
-                snObj.put("type", cell[r][1]);
                 snObj.put("deviceType", cell[r][1]);
-                snObj.put("unit", cell[r][1]);
-                snObj.put("", cell[r][1]);
+                snObj.put("dataId", cell[r][1]);
+                snObj.put("type", cell[r][2]);
+                snObj.put("name", cell[r][3]);
+                snObj.put("unit", cell[r][9]);
                 snList.add(snObj);
             }
             JSONObject result = fsuService.saveTerminal(snList);
