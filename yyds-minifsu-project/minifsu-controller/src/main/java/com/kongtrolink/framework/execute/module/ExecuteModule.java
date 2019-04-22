@@ -233,6 +233,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.COMPILER.equals(pktType)
                 || PktType.TERMINAL_SAVE.equals(pktType)
+                || PktType.ALARM_MODEL_IMPORT.equals(pktType)
+                || PktType.SIGNAL_MODEL_IMPORT.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }

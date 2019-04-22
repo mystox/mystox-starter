@@ -253,7 +253,7 @@ public class FSUController {
  @RequestMapping(value = "/alarmModel/import", method = RequestMethod.POST)
     public JsonResult alarmModelImport(@RequestParam MultipartFile file, HttpServletRequest request) {
 // 解析 Excel 文件
-        JSONArray snList = new JSONArray();
+        JSONArray alarmSignalList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
         DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
         File f = dfi.getStoreLocation();
@@ -262,6 +262,7 @@ public class FSUController {
             for (int r = 0; r < cell.length; r++) {
                 JSONObject alarmModel = new JSONObject();
                 alarmModel.put("devType", cell[r][1]); //设备类型
+                alarmModel.put("alarmId", cell[r][2]);
                 alarmModel.put("coId", cell[r][10]); //信号点id
                 alarmModel.put("coType", cell[r][11]); //信号点类型
                 alarmModel.put("enable", "1".equals(cell[r][5])); //告警使能
@@ -273,9 +274,9 @@ public class FSUController {
                 alarmModel.put("repeatDelay", cell[r][13]);
                 alarmModel.put("highRateI", cell[r][14]);
                 alarmModel.put("highRateT", cell[r][15]);
-                snList.add(alarmModel);
+                alarmSignalList.add(alarmModel);
             }
-            JSONObject result = fsuService.saveTerminal(snList);
+            JSONObject result = fsuService.saveAlarmModelList(alarmSignalList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     JsonResult jsonResult = new JsonResult(false);
@@ -292,23 +293,22 @@ public class FSUController {
  @RequestMapping(value = "/signalModel/import", method = RequestMethod.POST)
     public JsonResult signalModelImport(@RequestParam MultipartFile file, HttpServletRequest request) {
 // 解析 Excel 文件
-        JSONArray snList = new JSONArray();
+        JSONArray signalModelList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
         DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
         File f = dfi.getStoreLocation();
         try {
             String[][] cell = ExcelUtil.getInstance().getCellsFromFile(f);
             for (int r = 0; r < cell.length; r++) {
-
-                JSONObject snObj = new JSONObject();
-                snObj.put("deviceType", cell[r][1]);
-                snObj.put("dataId", cell[r][1]);
-                snObj.put("type", cell[r][2]);
-                snObj.put("name", cell[r][3]);
-                snObj.put("unit", cell[r][9]);
-                snList.add(snObj);
+                JSONObject signalModel = new JSONObject();
+                signalModel.put("deviceType", cell[r][1]);
+                signalModel.put("dataId", cell[r][2]);
+                signalModel.put("type", cell[r][3]);
+                signalModel.put("name", cell[r][4]);
+                signalModel.put("unit", cell[r][9]);
+                signalModelList.add(signalModel);
             }
-            JSONObject result = fsuService.saveTerminal(snList);
+            JSONObject result = fsuService.saveSignalModelList(signalModelList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     JsonResult jsonResult = new JsonResult(false);

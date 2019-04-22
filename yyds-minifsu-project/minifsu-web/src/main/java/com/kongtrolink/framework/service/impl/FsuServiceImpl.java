@@ -183,6 +183,25 @@ public class FsuServiceImpl implements FsuService {
     }
 
     @Override
+    public JSONObject saveSignalModelList(JSONArray signalModelList) {
+
+        if (signalModelList == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.SIGNAL_MODEL_IMPORT);
+        moduleMsg.setArrayPayload(signalModelList);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
+    public JSONObject saveAlarmModelList(JSONArray alarmSignalList) {
+        if (alarmSignalList == null) return null;
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.ALARM_MODEL_IMPORT);
+        moduleMsg.setArrayPayload(alarmSignalList);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
     public List<Fsu> getFsuListByCoordinate(Map fsuMap) {
         String coordinate = (String) fsuMap.get("coordinate");
         if (StringUtils.isBlank(coordinate))

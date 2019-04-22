@@ -9,6 +9,7 @@ package com.kongtrolink.framework.execute.module.model;
 public class AlarmSignalConfigModel {
     private String id;
     private String alarmId; //告警点id
+    private Integer devType; //设备类型
     private Integer type; //告警点类型
     private String coId;//关联数据点ID
     private Integer coType; //关联数据点类型
@@ -25,6 +26,14 @@ public class AlarmSignalConfigModel {
     //高频过滤，暂时所有告警点都有
     private int highRateI;      //高频过滤间隔highrateinteval（单位为秒）
     private int highRateT;      //高频过滤规定间隔内，允许的告警次数
+
+    public void setDevType(Integer devType) {
+        this.devType = devType;
+    }
+
+    public Integer getDevType() {
+        return devType;
+    }
 
     public String getNormalDesc() {
         return normalDesc;

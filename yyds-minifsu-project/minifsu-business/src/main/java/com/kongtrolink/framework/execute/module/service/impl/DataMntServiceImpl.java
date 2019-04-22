@@ -9,11 +9,9 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.RunStateDao;
-import com.kongtrolink.framework.execute.module.model.Device;
-import com.kongtrolink.framework.execute.module.model.RunState;
-import com.kongtrolink.framework.execute.module.model.SignalModel;
-import com.kongtrolink.framework.execute.module.model.SignalType;
+import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +37,12 @@ public class DataMntServiceImpl implements DataMntService {
     @Autowired
     private RunStateDao runStateDao;
 
+    private ConfigDao configDao;
+
     @Autowired
-    ConfigDao configDao;
+    public void setConfigDao(ConfigDao configDao) {
+        this.configDao = configDao;
+    }
 
     @Override
     public JSONObject getSignalList(ModuleMsg moduleMsg) {
@@ -171,6 +173,24 @@ public class DataMntServiceImpl implements DataMntService {
         runState.setCsq((Integer) payload.get("csq"));
         runState.setCreateTime(new Date());
         runStateDao.saveRunState(runState);
+        JSONObject result = new JSONObject();
+        result.put("result", 1);
+        return result;
+    }
+
+    @Override
+    public JSONObject saveSignalModel(ModuleMsg moduleMsg) {
+        JSONArray jsonArray = moduleMsg.getArrayPayload();
+
+        List<SignalModel> signalModels = JSONArray.parseArray(jsonArray.toJSONString(), SignalModel.class);
+        for (SignalModel signalModel : signalModels) {
+            SignalModel signalModel1 = configDao.findSignalModelByDeviceTypeAndCoId(signalModel.getDeviceType(), signalModel.getDataId());
+            if (signalModel1 != null) {
+                BeanUtils.copyProperties(signalModel, signalModel1,"id");
+                configDao.saveSignalModel(signalModel1);
+            } else
+                configDao.saveSignalModel(signalModel);
+        }
         JSONObject result = new JSONObject();
         result.put("result", 1);
         return result;

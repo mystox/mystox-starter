@@ -37,8 +37,13 @@ public class ConfigDao {
         mongoTemplate.insert(alarmSignals, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 
+
     public void saveAlarmSignalConfig(AlarmSignalConfig alarmSignal) {
         mongoTemplate.save(alarmSignal, MongoTableName.ALARM_SIGNAL_CONFIG);
+    }
+
+    public void saveAlarmSignalConfigModel(AlarmSignalConfigModel alarmSignalConfigModel) {
+        mongoTemplate.save(alarmSignalConfigModel, MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
     }
 
     public AlarmSignalConfig findAlarmSignalConfigById(String id) {
@@ -55,5 +60,13 @@ public class ConfigDao {
 
     public SignalModel findSignalModelByDeviceTypeAndCoId(int deviceType, String coId) {
        return mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(deviceType).and("dataId").is(coId)),SignalModel.class, MongoTableName.SIGNAL_MODEL);
+    }
+
+    public AlarmSignalConfigModel findAlarmSignalModelByDevTypeAndAlarmId(Integer devType, String alarmId) {
+        return mongoTemplate.findOne(Query.query(Criteria.where("devType").is(devType).and("alarmId").is(alarmId)),AlarmSignalConfigModel.class,MongoTableName.SIGNAL_MODEL);
+    }
+
+    public void saveSignalModel(SignalModel signalModel) {
+        mongoTemplate.save(signalModel,MongoTableName.SIGNAL_MODEL);
     }
 }

@@ -47,4 +47,8 @@ public interface FsuService {
     JSONObject terminalReboot(Map<String, Object> requestBody, String sn);
 
     JSONObject setGprs(Map<String, Object> requestBody, String sn);
+
+    JSONObject saveSignalModelList(JSONArray signalModelList);
+
+    JSONObject saveAlarmModelList(JSONArray alarmSignalList);
 }

@@ -18,4 +18,7 @@ public interface DataMntService {
     JSONArray getThreshold(ModuleMsg moduleMsg);
 
     JSONObject saveRunStatus(ModuleMsg moduleMsg);
+
+
+    JSONObject saveSignalModel(ModuleMsg moduleMsg);
 }

@@ -36,6 +36,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
 
     private RegistryService registryService;
+
     @Autowired
     public void setRegistryService(RegistryService registryService) {
         this.registryService = registryService;
@@ -135,6 +136,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             result = jsonObject.toJSONString();
         } else if (PktType.DATA_STATUS.equals(pktType)) { // 终端流
             JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.ALARM_MODEL_IMPORT.equals(pktType)) { // 终端流
+            JSONObject jsonObject = alarmService.saveAlarmModel(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.SIGNAL_MODEL_IMPORT.equals(pktType)) { // 终端流
+            JSONObject jsonObject = dataMntService.saveSignalModel(moduleMsg);
             result = jsonObject.toJSONString();
         }
 
