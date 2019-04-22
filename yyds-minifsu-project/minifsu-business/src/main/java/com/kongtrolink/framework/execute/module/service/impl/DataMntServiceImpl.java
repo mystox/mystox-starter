@@ -33,10 +33,8 @@ public class DataMntServiceImpl implements DataMntService {
     @Autowired
     RedisUtils redisUtils;
 
-
     @Autowired
     DeviceDao deviceDao;
-
 
     @Autowired
     private RunStateDao runStateDao;

@@ -28,25 +28,28 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final ThreadPoolTaskExecutor businessExecutor;
     @Autowired
-    private ThreadPoolTaskExecutor businessExecutor;
-    @Autowired
-    TerminalService terminalService;
+    private TerminalService terminalService;
+
+    private final DataMntService dataMntService;
 
     @Autowired
-    DataMntService dataMntService;
+    private RegistryService registryService;
 
+    private final AlarmService alarmService;
+    private final LogService logService;
 
-    @Autowired
-    RegistryService registryService;
-
-    @Autowired
-    AlarmService alarmService;
-    @Autowired
-    LogService logService;
+    private final FileService fileService;
 
     @Autowired
-    FileService fileService;
+    public ExecuteModule(ThreadPoolTaskExecutor businessExecutor, DataMntService dataMntService, AlarmService alarmService, LogService logService, FileService fileService) {
+        this.businessExecutor = businessExecutor;
+        this.dataMntService = dataMntService;
+        this.alarmService = alarmService;
+        this.logService = logService;
+        this.fileService = fileService;
+    }
 
 
     @Override
