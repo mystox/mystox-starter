@@ -51,7 +51,12 @@ public class RegistryServiceImpl implements RegistryService {
     private final ConfigDao configDao;
     private final DeviceDao deviceDao;
     private final RedisUtils redisUtils;
-    private final RpcModule rpcModule;
+    private RpcModule rpcModule;
+    @Autowired
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
+
     private final ThreadPoolTaskExecutor businessExecutor;
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
@@ -66,7 +71,6 @@ public class RegistryServiceImpl implements RegistryService {
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
         this.businessExecutor = businessExecutor;
-        this.rpcModule = rpcModule;
     }
 
 

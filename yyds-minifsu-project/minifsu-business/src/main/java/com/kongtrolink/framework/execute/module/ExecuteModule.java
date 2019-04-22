@@ -34,8 +34,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     private final DataMntService dataMntService;
 
-    @Autowired
+
     private RegistryService registryService;
+    @Autowired
+    public void setRegistryService(RegistryService registryService) {
+        this.registryService = registryService;
+    }
 
     private final AlarmService alarmService;
     private final LogService logService;
