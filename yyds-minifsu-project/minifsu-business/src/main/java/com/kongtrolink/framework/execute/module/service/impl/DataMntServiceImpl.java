@@ -17,6 +17,7 @@ import com.kongtrolink.framework.execute.module.service.DataMntService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -160,17 +161,18 @@ public class DataMntServiceImpl implements DataMntService {
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
-       @Override
+    @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
-        String sn =  moduleMsg.getSN();
+        String sn = moduleMsg.getSN();
         JSONObject payload = moduleMsg.getPayload();
         RunState runState = new RunState();
         runState.setSn(sn);
         runState.setCpuUse((String) payload.get("cpuUse"));
         runState.setCpuUse((String) payload.get("cpuUse"));
         runState.setCpuUse((String) payload.get("memUse"));
-        runState.setSysTime((Long.parseLong(payload.get("sysTime")+"")));
+        runState.setSysTime((Long.parseLong(payload.get("sysTime") + "")));
         runState.setCsq((Integer) payload.get("csq"));
+        runState.setCreateTime(new Date());
         runStateDao.saveRunState(runState);
         JSONObject result = new JSONObject();
         result.put("result", 1);
