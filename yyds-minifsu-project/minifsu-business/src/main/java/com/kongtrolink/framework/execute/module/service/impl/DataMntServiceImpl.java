@@ -166,8 +166,7 @@ public class DataMntServiceImpl implements DataMntService {
         RunState runState = new RunState();
         runState.setSn(sn);
         runState.setCpuUse((String) payload.get("cpuUse"));
-        runState.setCpuUse((String) payload.get("cpuUse"));
-        runState.setCpuUse((String) payload.get("memUse"));
+        runState.setMemUse((String) payload.get("memUse"));
         runState.setSysTime((Long.parseLong(payload.get("sysTime") + "")));
         runState.setCsq((Integer) payload.get("csq"));
         runState.setCreateTime(new Date());

@@ -221,7 +221,7 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONObject terminalLogSave(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
         JSONObject terminalPayload = (JSONObject) payload.get("payload");
-        TerminalLog terminalLog = null;
+        TerminalLog terminalLog;
         String sn = moduleMsg.getSN();
         if (terminalPayload != null) {
             Integer pktType = (Integer) terminalPayload.get("pktType");

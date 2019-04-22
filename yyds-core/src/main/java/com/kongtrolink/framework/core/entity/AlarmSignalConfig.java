@@ -8,6 +8,7 @@ package com.kongtrolink.framework.core.entity;
  */
 public class AlarmSignalConfig {
     private String id;
+
     private String deviceId;
     private String alarmId; //告警点id
     private Integer type; //告警点类型
@@ -31,6 +32,15 @@ public class AlarmSignalConfig {
 
 
     private Integer thresholdBase; //门限值基数
+    private String uuid; //内存版本
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Integer getThresholdBase() {
         return thresholdBase;

@@ -13,8 +13,16 @@ public class SignalModel {
     private String type;
     private String deviceType;
     private String unit;
-
+    private String snModel;
     private Integer valueBase = 1; //信号点基数
+
+    public String getSnModel() {
+        return snModel;
+    }
+
+    public void setSnModel(String snModel) {
+        this.snModel = snModel;
+    }
 
     public Integer getValueBase() {
         return valueBase;

@@ -300,6 +300,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String SN = (String) msgPayload.get("SN");
         ModuleMsg moduleMsg = new ModuleMsg(); //服务间消息实体
         moduleMsg.setMsgId(msgId);
+        moduleMsg.setUuid(uuid);
         moduleMsg.setSN(SN);
         /******************************通讯信息刷新*****************************/
         try {

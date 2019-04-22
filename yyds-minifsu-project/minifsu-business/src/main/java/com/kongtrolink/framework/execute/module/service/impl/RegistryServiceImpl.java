@@ -255,6 +255,8 @@ public class RegistryServiceImpl implements RegistryService {
                         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
                         alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
                                 signalModel.getValueBase());
+                        alarmSignalConfig.setUuid(moduleMsg.getUuid());
+
 
                         if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
@@ -266,7 +268,6 @@ public class RegistryServiceImpl implements RegistryService {
                         alarmConfigKeyMap.put(alarmConfigKey, alarmSignalConfigs);
                     }
                 }
-
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                     redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
