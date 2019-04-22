@@ -41,7 +41,7 @@ public class AlarmAnalysisService {
         Map<String, JSONObject> beginDelayAlarmMap = redisUtils.hmget(beginDelayTable);//延迟产生或延迟消除的告警
         //处理上报的各个信号点告警数据
         for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
-            handleSignal(fsu, entry.getKey(), entry.getValue(), beforAlarmMap, beginDelayAlarmMap, curDate);
+            handleSignal(fsu, entry, beforAlarmMap, beginDelayAlarmMap, curDate);
         }
         beforAlarmMap = delayService.handleEndDelayHistory(beforAlarmMap, curDate);
         Map<String, JSONObject> realBeginDelayAlarm = delayService.handleBeginDelayHistory(beforAlarmMap, beginDelayAlarmMap, curDate);
@@ -57,8 +57,10 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理信号点下的所有告警点
      */
-    public Map<String, JSONObject> handleSignal(JsonFsu fsu, String dev_colId, Float value,
+    public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Float> entry,
                          Map<String, JSONObject> beforAlarmMap, Map<String, JSONObject> beginDelayAlarmMap, Date curDate){
+        String dev_colId = entry.getKey();
+        Float value = entry.getValue();
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, fsu.getSN() + "_" + dev_colId);
         if(null == alarmSignalObj){
             return null;
@@ -71,6 +73,11 @@ public class AlarmAnalysisService {
             String keyAlarmId = dev_colId + CoreConstant.LINE_CUT_OFF + alarmSignal.getAlarmId();//dev_colId_alarmId
             Object beforAlarmObj = beforAlarmMap.get(keyAlarmId);
             Object beginDelayAlarmObj = beginDelayAlarmMap.get(keyAlarmId);
+            Integer thresholdBase = alarmSignal.getThresholdBase();
+            if(null != thresholdBase){
+                value = value / thresholdBase;
+                entry.setValue(value);
+            }
             if(null == beforAlarmObj && null == beginDelayAlarmObj){
                 //原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
                 Alarm alarm = beginAlarm(value, alarmSignal, curDate);

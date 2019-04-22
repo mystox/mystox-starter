@@ -30,13 +30,13 @@ public class AlarmSignalConfig {
     private int highRateC;      //高频过滤告警次数
 
 
-    private int thresholdBase; //门限值基数
+    private Integer thresholdBase; //门限值基数
 
-    public int getThresholdBase() {
+    public Integer getThresholdBase() {
         return thresholdBase;
     }
 
-    public void setThresholdBase(int thresholdBase) {
+    public void setThresholdBase(Integer thresholdBase) {
         this.thresholdBase = thresholdBase;
     }
 
