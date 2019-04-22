@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.entity;
 
 public class MongoDBTable {
+    public final static String T_SIGNAL = "t_signal";
+    public final static String T_ALARM = "t_alarm";
     public final static String T_VPN = "t_vpn";
     public final static String T_STATION = "t_station";
     public final static String T_DEVICE_LIST = "t_device_list";

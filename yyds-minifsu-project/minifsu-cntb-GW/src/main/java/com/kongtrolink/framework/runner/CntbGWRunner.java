@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.runner;
 
-import com.kongtrolink.framework.execute.AlarmExecuteService;
+import com.kongtrolink.framework.execute.CntbGWExecuteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
  * update record:
  */
 @Component
-public class AlarmRunner implements ApplicationRunner
+public class CntbGWRunner implements ApplicationRunner
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    AlarmExecuteService workerExecuteService;
+    CntbGWExecuteService workerExecuteService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception

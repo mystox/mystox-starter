@@ -24,6 +24,17 @@ public class DevTypeDao {
     MongoTemplate mongoTemplate;
 
     /**
+     * 查询指定铁塔设备类型对应的信息
+     * @param cntbType 指定铁塔设备类型
+     * @return 对照信息
+     */
+    public DevType getInfoByCntbType(String cntbType) {
+        Criteria criteria = Criteria.where("cntbType").is(cntbType);
+        return mongoTemplate.findOne(Query.query(criteria),
+                DevType.class, MongoDBTable.T_DEV_TYPE_MAP);
+    }
+
+    /**
      * 查询指定内部设备类型对应的信息
      * @param type 指定内部设备类型
      * @return 对照信息

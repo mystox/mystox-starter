@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.entity.xml.base;
 
 import com.kongtrolink.framework.entity.xml.send.Login;
+import com.kongtrolink.framework.entity.xml.send.TimeCheckAck;
 
 import javax.xml.bind.annotation.*;
 

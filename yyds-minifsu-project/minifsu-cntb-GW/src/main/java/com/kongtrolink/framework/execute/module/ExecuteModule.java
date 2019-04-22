@@ -1,8 +1,11 @@
 package com.kongtrolink.framework.execute.module;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.util.FSUServiceClientUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +45,29 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload)
     {
+        JSONObject response = new JSONObject();
+        boolean result = false;
+
+        ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
+
+        JSONObject infoPayload = moduleMsg.getPayload();
+
+        if (moduleMsg.getPktType().equals("service_gw")) {
+            String reqMsg = infoPayload.getString("msg");
+            String ip = infoPayload.getString("ip");
+            int port = infoPayload.getInteger("port");
+            String resMsg = FSUServiceClientUtil.sendReq(reqMsg, ip, port);
+            response.put("msg", resMsg);
+            result = (resMsg != null);
+        }
 
         //todo
-        String result = "execute result ";
+        response.put("result", result ? 1 : 0);
 
         return RpcNotifyProto.RpcMessage.newBuilder()
                 .setType(RpcNotifyProto.MessageType.RESPONSE)
                 .setPayloadType(RpcNotifyProto.PayloadType.JSON)
-                .setPayload(result)
+                .setPayload(response.toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();
     }

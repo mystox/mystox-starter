@@ -86,15 +86,16 @@ public class StationDao {
 
     /**
      * 将指定fsuId和sn的记录设置为解绑状态
-     * @param info 待解绑的信息
+     * @param sn 待解绑的sn
+     * @param fsuId 带解绑的fsuId
      * @return 是否解绑成功
      */
-    public boolean unbindByFsuIdAndSn(JsonStation info) {
+    public boolean unbindByFsuIdAndSn(String sn, String fsuId) {
         boolean result = false;
 
         Criteria criteria = Criteria
-                .where("fsuId").is(info.getFsuId())
-                .and("sn").is(info.getSn())
+                .where("fsuId").is(sn)
+                .and("sn").is(fsuId)
                 .and("disabled").is(false);
 
         Update update = new Update();

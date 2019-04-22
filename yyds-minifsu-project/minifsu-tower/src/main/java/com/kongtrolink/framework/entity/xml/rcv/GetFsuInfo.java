@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.entity.xml.rcv;
 
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.base.Info;
 import com.kongtrolink.framework.entity.xml.base.PKType;
 
@@ -18,7 +19,7 @@ public class GetFsuInfo extends Info {
 
     @Override
     public PKType pkType() {
-        return new PKType("GET_FSUINFO",1701);
+        return new PKType(CntbPktTypeTable.GET_FSUINFO, CntbPktTypeTable.GET_FSUINFO_CODE);
     }
 
     public String getFsuId() {

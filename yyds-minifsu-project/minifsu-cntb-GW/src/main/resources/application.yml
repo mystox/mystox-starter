@@ -3,10 +3,11 @@ logging:
    root: info
 
 server:
-  name: minifsu-alarm
-  bindIp: 127.0.0.1
+  name: minifsu-cntb-gw
+  bindIp: 172.16.6.20
+  port: 8080
   rpc:
-    port: 18880
+    port: 18882
 
 
 executor:
@@ -17,3 +18,8 @@ executor:
 rpc:
   client:
     timeout: 20000
+
+tower:
+  service:
+    hostname: 172.16.6.20
+    port: 18881

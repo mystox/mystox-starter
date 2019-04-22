@@ -44,26 +44,30 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     private RedisUtils redisUtils;
     private String sn;
     private CarrierDao carrierDao;
+    private String loginIp;
+    private int loginPort;
 
     /**
      * 构造函数
-     * @param sn sn
+     * @param redisOnlineInfo redis中的信息
      * @param hostname 铁塔网关服务地址
      * @param port 铁塔网关服务端口
      * @param rpcModule rpcModule
      * @param redisUtils redisUtils
      * @param rpcClient rpcClient
      */
-    public CntbLoginService(String sn, String hostname, int port,
+    public CntbLoginService(RedisOnlineInfo redisOnlineInfo, String hostname, int port,
                             RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
                             CarrierDao carrierDao) {
         super(rpcClient);
-        this.sn = sn;
+        this.sn = redisOnlineInfo.getSn();
         this.hostname = hostname;
         this.port = port;
         this.rpcModule = rpcModule;
         this.redisUtils = redisUtils;
         this.carrierDao = carrierDao;
+        this.loginIp = redisOnlineInfo.getLoginIp();
+        this.loginPort = redisOnlineInfo.getLoginPort();
     }
 
     @Override
@@ -205,18 +209,20 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         InetSocketAddress addr = new InetSocketAddress(hostname, port);
 
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("ip", loginIp);
+        jsonObject.put("port", loginPort);
         jsonObject.put("msg", reqXmlMsg);
 
-        String request = createRequestMsg(CntbPktTypeTable.LOGIN, jsonObject);
+        String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, jsonObject);
 
         //todo 没有和内部服务进行通信
-//        JSONObject jsonResponse = postMsg(request, addr);
+        JSONObject jsonResponse = postMsg(request, addr);
 
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("result", true);
-        jsonResponse.put("msg", "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><PK_Type><Name>LOGIN_ACK</Name><Code>102</Code></PK_Type><Info><SCIP>172.16.6.66</SCIP><RightLevel>2</RightLevel></Info></Response>");
+//        JSONObject jsonResponse = new JSONObject();
+//        jsonResponse.put("result", true);
+//        jsonResponse.put("msg", "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><PK_Type><Name>LOGIN_ACK</Name><Code>102</Code></PK_Type><Info><SCIP>172.16.6.66</SCIP><RightLevel>2</RightLevel></Info></Response>");
 
-        if (jsonResponse.containsKey("result") && jsonResponse.getBoolean("result")) {
+        if (jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
             String resXmlMsg = jsonResponse.getString("msg");
             LoginAck loginAck = analyzeMsg(resXmlMsg);
 
@@ -309,8 +315,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         try {
             rpcMessage = rpcModule.postMsg("", addr, request);
             String response = rpcMessage.getPayload();
-            ModuleMsg moduleMsg = JSONObject.parseObject(response, ModuleMsg.class);
-            result = moduleMsg.getPayload();
+            result = JSONObject.parseObject(response);
         } catch (IOException e) {
             e.printStackTrace();
         }

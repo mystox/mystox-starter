@@ -26,7 +26,7 @@ public class VpnDao {
      */
     public Vpn getInfoByName(String vpnName) {
         Criteria criteria = Criteria
-                .where("vpnName").is(vpnName);
+                .where("localName").is(vpnName);
         return mongoTemplate.findOne(Query.query(criteria),
                 Vpn.class, MongoDBTable.T_VPN);
     }

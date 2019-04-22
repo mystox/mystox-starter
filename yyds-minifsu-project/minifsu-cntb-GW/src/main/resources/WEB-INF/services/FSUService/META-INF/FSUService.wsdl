@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://FSUService.chinatowercom.com" xmlns:impl="http://FSUService.chinatowercom.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:intf="http://FSUService.chinatowercom.com" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+  <wsdl:message name="invokeRequest">
+    <wsdl:part name="xmlData" type="soapenc:string">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="invokeResponse">
+    <wsdl:part name="invokeReturn" type="soapenc:string">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="FSUService">
+    <wsdl:operation name="invoke" parameterOrder="xmlData">
+      <wsdl:input name="invokeRequest" message="impl:invokeRequest">
+    </wsdl:input>
+      <wsdl:output name="invokeResponse" message="impl:invokeResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FSUServiceSoapBinding" type="impl:FSUService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="invoke">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="invokeRequest">
+        <wsdlsoap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://FSUService.chinatowercom.com"/>
+      </wsdl:input>
+      <wsdl:output name="invokeResponse">
+        <wsdlsoap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://FSUService.chinatowercom.com"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FSUServiceService">
+    <wsdl:port name="FSUService" binding="impl:FSUServiceSoapBinding">
+      <wsdlsoap:address location="http://127.0.0.1:8080/services/FSUService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

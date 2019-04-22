@@ -34,13 +34,14 @@ public class DeviceMatchService {
      * @param curList 当前已知内部设备列表
      */
     public void matchingDevice(List<JsonDevice> cntbList, List<JsonDevice> curList) {
-        if (curList == null || curList.size() == 0) {
-            return;
-        }
 
         clearMatch(cntbList);
         sortCntbDevList(cntbList);
         sortDevList(curList);
+
+        if (curList == null || curList.size() == 0) {
+            return;
+        }
 
         //todo 遍历curList，在cntbList中查找对应的铁塔设备ID，并将信息填入cntbList中
         for (int i = 0; i < curList.size(); ++i) {
@@ -116,7 +117,7 @@ public class DeviceMatchService {
      * @param deviceId 铁塔设备Id
      * @return 设备类型
      */
-    private String getCntbType(String deviceId) {
+    public String getCntbType(String deviceId) {
         String result = deviceId.substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
         if (result.equals("18")) {
             //若为18，则是环境变量，需再取一位作为设备类型
