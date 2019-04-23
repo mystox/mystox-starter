@@ -51,4 +51,10 @@ public interface FsuService {
     JSONObject saveSignalModelList(JSONArray signalModelList);
 
     JSONObject saveAlarmModelList(JSONArray alarmSignalList);
+
+    JSONObject unbind(String sn);
+
+    JSONArray getRunState(Map<String, Object> requestBody, String sn);
+
+    JSONArray getTerminalPayload(Map<String, Object> requestBody, String sn);
 }

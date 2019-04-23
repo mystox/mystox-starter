@@ -21,4 +21,7 @@ public interface DataMntService {
 
 
     JSONObject saveSignalModel(ModuleMsg moduleMsg);
+
+    JSONObject setData(ModuleMsg moduleMsg);
+
 }

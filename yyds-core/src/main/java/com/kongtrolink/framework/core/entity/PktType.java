@@ -12,8 +12,9 @@ public class PktType
     public final static String GET_FSU = "get_fsu";//获取FSU
     public final static String CHECK_FSU = "check_fsu";//检查绑定
     public final static String GET_FSU_STATUS = "get_fsu_status";//检查绑定
-    public final static String SET_FSU = "set_fsu";//检查绑定
+    public final static String SET_FSU = "set_fsu";//设置和绑定终端
     public final static String SET_DATA = "set_data"; //设置监控点数据
+    public final static String SET_DATA_TERMINAL = "set_data_terminal"; //设置监控点数据 -- > 终端
     public final static String GET_HISTORY_DATA = "get_hist_data"; //获取监控点历史数据
     public final static String UPGRADE = "upgrade"; //升级
     public final static String COMPILER = "compiler"; //下载编译文件
@@ -46,7 +47,13 @@ public class PktType
     public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
     public final static String DATA_CHANGE = "data_change"; //实时数据上报
     public final static String DATA_STATUS = "data_status"; //状态数据上报
+    public final static String GET_RUNSTATE = "get_runstate"; //获取状态数据
     public final static String TERMINAL_LOG_SAVE = "terminal_log_save"; //终端报文保存
-    public final static String ALARM_MODEL_IMPORT = "alarm_model_import"; //终端报文保存
-    public final static String SIGNAL_MODEL_IMPORT = "signal_model_import"; //终端报文保存
+    public final static String GET_TERMINAL_LOG = "get_terminal_log"; //终端报文保存
+    public final static String ALARM_MODEL_IMPORT = "alarm_model_import"; //导入告警模板
+    public final static String SIGNAL_MODEL_IMPORT = "signal_model_import"; //导入信号点模板
+    public final static String TERMINAL_STATUS = "terminal_status"; //终端状态获取
+    public final static String TERMINAL_UNBIND = "terminal_unbind"; //终端解绑
+    public final static String SET_TERMINAL = "set_terminal"; //终端配置
+    public final static String TERMINAL_BIND = "terminal_bind"; //终端配置
 }

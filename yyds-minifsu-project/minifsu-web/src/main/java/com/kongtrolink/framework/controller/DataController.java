@@ -73,9 +73,11 @@ public class DataController {
 
     @RequestMapping("/getAlarmList")
     public JsonResult getAlarmList(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
-        JSONObject result = dataMntService.getAlarmList(requestBody, sn);
-        return result == null ? new JsonResult("请求错误或者超时", false) :
-                "0".equals(result.get("result")) ? new JsonResult("执行任务失败", false) : new JsonResult(result.get("data"));
+        JSONArray result = dataMntService.getAlarmList(requestBody, sn);
+        if (result != null) {
+            return new JsonResult(result);
+        }
+        return new JsonResult("请求错误或者超时", false);
     }
 
 
@@ -101,5 +103,8 @@ public class DataController {
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == (Integer) result.get("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
+
+
+
 
 }

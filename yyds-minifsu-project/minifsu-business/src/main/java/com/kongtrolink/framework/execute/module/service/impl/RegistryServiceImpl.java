@@ -218,7 +218,6 @@ public class RegistryServiceImpl implements RegistryService {
                 }
             }
             deviceDao.saveBatch(saveDeviceList); //保存最新设备信息
-
             List<Device> deviceList = deviceDao.findDevicesBySnAndValid(sn); //获取最新设备信息
             redisUtils.setHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, devList); //设备信息写入redis
             for (Device device : deviceList) { //根据设备产生最新配置信息表

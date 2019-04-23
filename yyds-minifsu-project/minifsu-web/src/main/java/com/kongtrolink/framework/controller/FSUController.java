@@ -2,14 +2,12 @@ package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.ControllerInstance;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.exception.ExcelParseException;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.ExcelUtil;
 import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +49,18 @@ public class FSUController {
             return new JsonResult("fsu未绑定配置,继续配置", true);
     }
 
+ /**
+     * 检查fsu是否已经配置,需要重新绑定
+     *
+     * @param requestBody
+     * @return
+     */
+    @RequestMapping("/unbind")
+    public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody,String sn) {
+        JSONObject result = fsuService.unbind(sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+
+    }
 
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
@@ -64,66 +74,6 @@ public class FSUController {
         return new JsonResult(result);
 
     }
-
-    @RequestMapping("/getDeviceName")
-    public JsonResult getDeviceName(String code) {
-        Map<String, String> dStationMap = ControllerInstance.getInstance().getdStationMap();
-        Map<String, String> roomStationMap = ControllerInstance.getInstance().getRoomStationMap();
-        if (StringUtils.isNotBlank(code)) {
-            String sCode = StringUtils.substring(code, 6, 9);
-            if ("418".equals(sCode)) {
-                String room_code = StringUtils.substring(code, 7, 10);
-                return new JsonResult(roomStationMap.get(room_code));
-            } else {
-                String name = dStationMap.get(sCode);
-                return new JsonResult(StringUtils.isBlank(name) ? "未知设备" : name);
-            }
-        } else return new JsonResult("code为空", false);
-
-    }
-
-  /*  @RequestMapping("/getTierName")
-    public JsonResult getTierName(String fsuCode)
-    {
-
-        if (fsuCode != null)
-        {
-            String code = fsuCode;
-            if (code.length()<6) return new JsonResult("code长度少于6",false);
-            String tierCode = StringUtils.substring(code, 0, 6);
-            if (StringUtils.isNotBlank(tierCode) && StringUtils.length(tierCode) >= 2)
-            {
-                StringBuilder sb = new StringBuilder();
-                Map<String, String> tierMap = ControllerInstance.getInstance().getTierMap();
-                String firstTier = StringUtils.substring(tierCode, 0, 2);
-                sb.append(tierMap.get(firstTier));
-                if (StringUtils.length(tierCode) >= 4)
-                {
-                    String secondTier = StringUtils.substring(tierCode, 0, 4);
-                    String secondTierName = tierMap.get(secondTier);
-                    if (StringUtils.isNotBlank(secondTierName))
-                    {
-                        sb.append("-");
-                        sb.append(tierMap.get(secondTier));
-                        if (StringUtils.length(tierCode) >= 6)
-                        {
-
-                            String tierName = tierMap.get(tierCode);
-                            if (StringUtils.isNotBlank(tierName))
-                            {
-                                sb.append("-");
-                                sb.append(tierName);
-                            }
-                        }
-                    }
-                }
-                    return new JsonResult(sb.toString());
-            }
-        }
-            return new JsonResult("fsuCode错误",false);
-
-    }*/
-
 
     @RequestMapping("/getFsu")
     public JsonResult getFsu(@RequestBody(required = false) Map<String, Object> requestBody) {
@@ -182,10 +132,27 @@ public class FSUController {
 
 
     @RequestMapping("/getFsuStatus")
-    public JsonResult getFsuStatus(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId) {
+    public JsonResult getFsuStatus(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
 
-        JSONObject result = fsuService.getFsuStatus(requestBody, fsuId);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
+        JSONObject result = fsuService.getFsuStatus(requestBody, sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+    }
+  @RequestMapping("/getRunState")
+    public JsonResult getRunState(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
+
+      JSONArray result  = fsuService.getRunState(requestBody, sn);
+      if (result != null) {
+          return new JsonResult(result);
+      }
+      return new JsonResult("请求错误或者超时", false);
+    }
+    @RequestMapping("/getTerminalLog")
+    public JsonResult getTerminalPayload(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
+        JSONArray result = fsuService.getTerminalPayload(requestBody, sn);
+        if (result != null) {
+            return new JsonResult(result);
+        }
+        return new JsonResult("请求错误或者超时", false);
     }
 
     @RequestMapping("/logoutFsu")
@@ -272,8 +239,10 @@ public class FSUController {
                 alarmModel.put("hystersis", cell[r][9]);
                 alarmModel.put("recoverDelay", cell[r][12]);
                 alarmModel.put("repeatDelay", cell[r][13]);
-                alarmModel.put("highRateI", cell[r][14]);
-                alarmModel.put("highRateT", cell[r][15]);
+                alarmModel.put("alarmDesc", cell[r][16]);
+                alarmModel.put("normalDesc", cell[r][17]);
+                alarmModel.put("highRateI", cell[r][18]);
+                alarmModel.put("highRateT", cell[r][19]);
                 alarmSignalList.add(alarmModel);
             }
             JSONObject result = fsuService.saveAlarmModelList(alarmSignalList);

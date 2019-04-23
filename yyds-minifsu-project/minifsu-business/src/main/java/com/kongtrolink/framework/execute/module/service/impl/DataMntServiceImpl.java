@@ -2,19 +2,28 @@ package com.kongtrolink.framework.execute.module.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
-import com.kongtrolink.framework.core.entity.ModuleMsg;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
+import com.kongtrolink.framework.core.entity.*;
+import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
+import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.RunStateDao;
-import com.kongtrolink.framework.execute.module.model.*;
+import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.RunState;
+import com.kongtrolink.framework.execute.module.model.SignalModel;
+import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +36,19 @@ import java.util.Set;
  */
 @Service
 public class DataMntServiceImpl implements DataMntService {
-
+    Logger logger = LoggerFactory.getLogger(DataMntServiceImpl.class);
+    @Value("${rpc.controller.hostname}")
+    private String controllerHost;
+    @Value("${rpc.controller.port}")
+    private int controllerPort;
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.rpc.port}")
+    private String port;
+    @Value("${server.name}")
+    private String name;
+    @Autowired
+    private LogDao logDao;
     @Autowired
     RedisUtils redisUtils;
 
@@ -44,6 +65,13 @@ public class DataMntServiceImpl implements DataMntService {
         this.configDao = configDao;
     }
 
+    private RpcModule rpcModule;
+
+    @Autowired
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
+
     @Override
     public JSONObject getSignalList(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
@@ -54,14 +82,17 @@ public class DataMntServiceImpl implements DataMntService {
 
         String dev = type + "-" + resNo;
         //获取实时数据的key
-        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH + sn, sn + "_" + dev + "_*");
+        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH + sn, dev + "_*");
         JSONArray jsonArray = new JSONArray();
         for (String key : mntData) { //通过key获取实时数据
             JSONObject coData = new JSONObject();
             Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
             String coId = key.replaceFirst(sn + "_" + dev + "_", "");
             coData.put("coId", coId);
-            coData.put("value", value);
+            SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
+            Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
+            double value1 = Double.valueOf(value + "");
+            coData.put("value", value1/valueBase);
             JSONObject data = tranceDataId(type, coId); //数据点翻译
             coData.putAll(data);
             jsonArray.add(coData);
@@ -157,9 +188,55 @@ public class DataMntServiceImpl implements DataMntService {
         String port = (String) payload.get("port");
         Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         String coId = (String) payload.get("coId");
-        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId); //根据deviceId和数据点id获取信号点配置列表
+        String alarmId = (String) payload.get("alarmId");
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId,alarmId); //根据deviceId和数据点id获取信号点配置列表
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
+
+    @Override
+    public JSONObject setData(ModuleMsg moduleMsg) {
+        String sn = moduleMsg.getSN();
+        JSONObject payload = moduleMsg.getPayload();
+        String dev = (String) payload.get("dev");
+        Integer devType = Integer.parseInt(dev.split("-")[0]);
+        String coId = payload.get("stePoint") + "";
+        Integer data = (Integer) payload.get("steData");
+        SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
+        Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
+        JSONObject terminalPayload = payload;
+        terminalPayload.put("data", data * valueBase);
+
+        try {
+            // 向终端设置信号点值报文
+            moduleMsg.setPktType(PktType.SET_DATA_TERMINAL);
+            moduleMsg.setPayload(terminalPayload);
+            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg(moduleMsg.getMsgId(),
+                    new InetSocketAddress(controllerHost, controllerPort),
+                    JSONObject.toJSONString(moduleMsg));
+            if (!RpcNotifyProto.MessageType.ERROR.equals(rpcMessage.getType())) {
+                JSONObject result = new JSONObject();
+                result.put("result", 1);
+                return result;
+            }
+        } catch (IOException e) {
+            logger.error("set_data error .." + e.toString());
+            //日志记录
+            Log log = new Log();
+            log.setErrorCode(StateCode.CONNECT_ERROR);
+            log.setSN(sn);
+            log.setMsgType(moduleMsg.getPktType());
+            log.setMsgId(moduleMsg.getMsgId());
+            log.setHostName(host);
+            log.setServiceName(name);
+            log.setTime(new Date(System.currentTimeMillis()));
+            logDao.saveLog(log);
+        }
+        JSONObject result = new JSONObject();
+        result.put("result", 0);
+        return result;
+    }
+
+
 
     @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
@@ -186,7 +263,7 @@ public class DataMntServiceImpl implements DataMntService {
         for (SignalModel signalModel : signalModels) {
             SignalModel signalModel1 = configDao.findSignalModelByDeviceTypeAndCoId(signalModel.getDeviceType(), signalModel.getDataId());
             if (signalModel1 != null) {
-                BeanUtils.copyProperties(signalModel, signalModel1,"id");
+                BeanUtils.copyProperties(signalModel, signalModel1, "id");
                 configDao.saveSignalModel(signalModel1);
             } else
                 configDao.saveSignalModel(signalModel);

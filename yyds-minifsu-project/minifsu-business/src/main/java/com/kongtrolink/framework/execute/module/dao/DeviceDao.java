@@ -27,7 +27,8 @@ public class DeviceDao {
 
     public Device findDeviceByTypeResNoPort(String sn, Integer type, Integer resNo, String port) {
         Criteria criteria = Criteria
-                .where("type").is(type)
+                .where("SN").is(sn)
+                .and("type").is(type)
                 .and("resNo").is(resNo)
                 .and("invalidTime").is(new Date(0));
         if (StringUtils.isNotBlank(port)) {

@@ -53,4 +53,10 @@ public interface TerminalService
     JSONObject setTerminal(ModuleMsg moduleMsg);
 
     JSONObject terminalLogSave(ModuleMsg moduleMsg);
+
+    JSONObject TerminalStatus(ModuleMsg moduleMsg);
+
+    JSONArray getRunStates(ModuleMsg moduleMsg);
+
+    JSONArray getTerminalPayloadLog(ModuleMsg moduleMsg);
 }

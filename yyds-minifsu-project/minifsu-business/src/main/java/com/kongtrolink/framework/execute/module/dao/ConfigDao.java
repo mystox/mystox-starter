@@ -50,10 +50,12 @@ public class ConfigDao {
         return mongoTemplate.findById(id, AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 
-    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId) {
+    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId,String alarmId) {
         Criteria criteria = Criteria.where("deviceId").is(deviceId);
         if (StringUtils.isEmpty(coId)) {
-            criteria.and("dataId").is(coId);
+            criteria.and("coId").is(coId);
+        }if (StringUtils.isEmpty(coId)) {
+            criteria.and("alarmId").is(alarmId);
         }
         return mongoTemplate.find(Query.query(criteria),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
     }
@@ -63,10 +65,15 @@ public class ConfigDao {
     }
 
     public AlarmSignalConfigModel findAlarmSignalModelByDevTypeAndAlarmId(Integer devType, String alarmId) {
-        return mongoTemplate.findOne(Query.query(Criteria.where("devType").is(devType).and("alarmId").is(alarmId)),AlarmSignalConfigModel.class,MongoTableName.SIGNAL_MODEL);
+        return mongoTemplate.findOne(Query.query(Criteria.where("devType").is(devType).and("alarmId").is(alarmId)),
+                AlarmSignalConfigModel.class,MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
     }
 
     public void saveSignalModel(SignalModel signalModel) {
         mongoTemplate.save(signalModel,MongoTableName.SIGNAL_MODEL);
+    }
+
+    public AlarmSignalConfig findAlarmSignalConfigByDeviceIdAndAlarmId(String deviceId, String alarmId) {
+        return mongoTemplate.findOne(Query.query(Criteria.where("deviceId").is(deviceId).where("alarmId").is(alarmId)),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 }
