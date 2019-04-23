@@ -12,10 +12,10 @@ public class Terminal
     private String SN;
     private String type;
     private String BID;
-    private Integer heartCycle;
-    private Integer businessRhythm;
-    private Integer alarmRhythm;
-    private Integer runStatusRhythm;
+    private Integer heartCycle = 10;
+    private Integer businessRhythm = 30;
+    private Integer alarmRhythm =1;
+    private Integer runStatusRhythm = 100;
     private String vendor;
     private String coordinate;
 
