@@ -41,6 +41,25 @@ public class AlarmDao {
     }
 
     /**
+     * 获取指定类型与铁塔Id的告警点信息
+     * @param type 内部设备类型
+     * @param cntbId 铁塔门限Id
+     * @return 告警点信息
+     */
+    public Alarm getInfoByTypeAndCntbId(int type, String cntbId) {
+        Alarm result;
+
+        Criteria criteria = Criteria
+                .where("type").is(type)
+                .and("cntbId").is(cntbId);
+
+        result = mongoTemplate.findOne(Query.query(criteria),
+                Alarm.class, MongoDBTable.T_ALARM);
+
+        return result;
+    }
+
+    /**
      * 获取指定类型与Id的告警点信息
      * @param type 内部设备类型
      * @param id 告警点Id

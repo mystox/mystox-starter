@@ -21,7 +21,6 @@ import com.kongtrolink.framework.jsonType.JsonRegistry;
 import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
-import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -855,6 +854,75 @@ public class TowerService {
     }
 
     /**
+     * 铁塔平台设置数据点
+     * @param request 请求信息
+     * @return 回复报文字符串
+     */
+    public String cntbSetPoint(String request) {
+        String result= null;
+
+        try {
+            SetPoint setPoint = (SetPoint)MessageUtil.stringToMessage(request, SetPoint.class);
+
+            if (!checkTowerOnline(setPoint.getFsuId())) {
+                return result;
+            }
+
+            refreshLastTimeRecvTowerMsg(setPoint.getFsuId());
+
+            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(setPoint.getFsuId()), RedisFsuBind.class);
+            RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(redisFsuBind.getSn()), RedisOnlineInfo.class);
+
+            SetPointAck ack = new SetPointAck();
+            ack.setFsuId(setPoint.getFsuId());
+            ack.setFsuCode(setPoint.getFsuId());
+            for (Device device : setPoint.getValue().getDeviceListList().get(0).getDeviceList()) {
+                Device resultDevice = new Device();
+                resultDevice.setId(device.getId());
+                resultDevice.setCode(device.getCode());
+                resultDevice.setSuccessList(new SetResultList());
+                resultDevice.setFailList(new SetResultList());
+
+                for (TSemaphore tSemaphore : device.gettSemaphoreList()) {
+                    JsonDevice jsonDevice = deviceDao.getInfoByFsuIdAndDeviceId(setPoint.getFsuId(), device.getId());
+                    if (jsonDevice == null || jsonDevice.getPort() == null) {
+                        resultDevice.getFailList().getIdList().add(tSemaphore.getId());
+                        continue;
+                    }
+                    Signal signal = signalDao.getInfoByTypeAndCntbId(jsonDevice.getType(), tSemaphore.getId());
+                    if (signal == null || signal.getSignalId() == null) {
+                        resultDevice.getFailList().getIdList().add(tSemaphore.getId());
+                        continue;
+                    }
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("dev", jsonDevice.getType() + "-" + jsonDevice.getResNo());
+                    jsonObject.put("setPoint", Integer.valueOf(signal.getSignalId()));
+                    jsonObject.put("setData", Float.valueOf(tSemaphore.getSetupVal()));
+
+                    ModuleMsg msg = new ModuleMsg(PktType.SET_DATA, redisOnlineInfo.getSn());
+                    msg.setPayload(jsonObject);
+
+                    RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
+                    if (responseObject.getBoolean("success")) {
+                        resultDevice.getSuccessList().getIdList().add(tSemaphore.getId());
+                    } else {
+                        resultDevice.getFailList().getIdList().add(tSemaphore.getId());
+                    }
+                }
+                ack.getDeviceList().add(resultDevice);
+                ack.setResult(1);
+                result = getXmlMsg(new MessageResp(ack));
+            }
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    /**
      * 铁塔平台获取门限值
      * @param request 请求信息
      * @return 回复报文字符串
@@ -1049,6 +1117,75 @@ public class TowerService {
         }
         jsonObject.put("alarmId", alarmIdList);
         result.setPayload(jsonObject);
+
+        return result;
+    }
+
+    /**
+     * 铁塔平台设置数据点
+     * @param request 请求信息
+     * @return 回复报文字符串
+     */
+    public String cntbSetThreshold(String request) {
+        String result= null;
+
+        try {
+            SetThreshold setThreshold = (SetThreshold)MessageUtil.stringToMessage(request, SetThreshold.class);
+
+            if (!checkTowerOnline(setThreshold.getFsuId())) {
+                return result;
+            }
+
+            refreshLastTimeRecvTowerMsg(setThreshold.getFsuId());
+
+            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(setThreshold.getFsuId()), RedisFsuBind.class);
+            RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(redisFsuBind.getSn()), RedisOnlineInfo.class);
+
+            SetThresholdAck ack = new SetThresholdAck();
+            ack.setFsuId(setThreshold.getFsuId());
+            ack.setFsuCode(setThreshold.getFsuId());
+            for (Device device : setThreshold.getValue().getDeviceListList().get(0).getDeviceList()) {
+                Device resultDevice = new Device();
+                resultDevice.setId(device.getId());
+                resultDevice.setCode(device.getCode());
+                resultDevice.setSuccessList(new SetResultList());
+                resultDevice.setFailList(new SetResultList());
+
+                for (TThreshold tThreshold : device.gettThresholdList()) {
+                    JsonDevice jsonDevice = deviceDao.getInfoByFsuIdAndDeviceId(setThreshold.getFsuId(), device.getId());
+                    if (jsonDevice == null || jsonDevice.getPort() == null) {
+                        resultDevice.getFailList().getIdList().add(tThreshold.getId());
+                        continue;
+                    }
+                    Alarm alarm = alarmDao.getInfoByTypeAndCntbId(jsonDevice.getType(), tThreshold.getId());
+                    if (alarm == null || alarm.getAlarmId() == null) {
+                        resultDevice.getFailList().getIdList().add(tThreshold.getId());
+                        continue;
+                    }
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("dev", jsonDevice.getType() + "-" + jsonDevice.getResNo());
+                    jsonObject.put("alarmId", alarm.getAlarmId());
+                    jsonObject.put("threshold", Float.valueOf(tThreshold.getThreshold()));
+
+                    ModuleMsg msg = new ModuleMsg(PktType.SET_ALARM_PARAM, redisOnlineInfo.getSn());
+                    msg.setPayload(jsonObject);
+
+                    RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
+                    if (responseObject.getBoolean("success")) {
+                        resultDevice.getSuccessList().getIdList().add(tThreshold.getId());
+                    } else {
+                        resultDevice.getFailList().getIdList().add(tThreshold.getId());
+                    }
+                }
+                ack.getDeviceList().add(resultDevice);
+                ack.setResult(1);
+                result = getXmlMsg(new MessageResp(ack));
+            }
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
 
         return result;
     }

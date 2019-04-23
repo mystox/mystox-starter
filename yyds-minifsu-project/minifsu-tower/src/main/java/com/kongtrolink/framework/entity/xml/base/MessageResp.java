@@ -1,8 +1,6 @@
 package com.kongtrolink.framework.entity.xml.base;
 
-import com.kongtrolink.framework.entity.xml.msg.GetDataAck;
-import com.kongtrolink.framework.entity.xml.msg.GetFsuInfoAck;
-import com.kongtrolink.framework.entity.xml.msg.TimeCheckAck;
+import com.kongtrolink.framework.entity.xml.msg.*;
 
 import javax.xml.bind.annotation.*;
 
@@ -16,7 +14,10 @@ public class MessageResp {
     @XmlElements({
             @XmlElement(name = "Info", type = GetFsuInfoAck.class),
             @XmlElement(name = "Info", type = TimeCheckAck.class),
-            @XmlElement(name = "Info", type = GetDataAck.class)
+            @XmlElement(name = "Info", type = GetDataAck.class),
+            @XmlElement(name = "Info", type = SetPointAck.class),
+            @XmlElement(name = "Info", type = GetThreshold.class),
+            @XmlElement(name = "Info", type = SetThresholdAck.class)
     })
     protected Info info;
 

@@ -27,6 +27,7 @@ public class SignalDao {
     /**
      * 获取指定内部类型下的指定信号点信息
      * @param type 内部设备类型
+     * @param signalId 内部信号点Id
      * @return 信号点信息
      */
     public Signal getInfoByTypeAndSignalId(int type, String signalId) {
@@ -35,6 +36,25 @@ public class SignalDao {
         Criteria criteria = Criteria
                 .where("type").is(type)
                 .and("signalId").is(signalId);
+
+        result = mongoTemplate.findOne(Query.query(criteria),
+                Signal.class, MongoDBTable.T_SIGNAL);
+
+        return result;
+    }
+
+    /**
+     * 获取指定内部类型下的指定铁塔信号点信息
+     * @param type 内部设备类型
+     * @param cntbId 铁塔信号点Id
+     * @return 信号点信息
+     */
+    public Signal getInfoByTypeAndCntbId(int type, String cntbId) {
+        Signal result;
+
+        Criteria criteria = Criteria
+                .where("type").is(type)
+                .and("cntbId").is(cntbId);
 
         result = mongoTemplate.findOne(Query.query(criteria),
                 Signal.class, MongoDBTable.T_SIGNAL);

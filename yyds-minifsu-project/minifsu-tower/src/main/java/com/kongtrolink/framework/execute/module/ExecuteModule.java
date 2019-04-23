@@ -83,6 +83,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             case PktType.ALARM_REGISTER:
                 result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
                 break;
+            case PktType.TERMINAL_UNBIND:
+                result = towerService.fsuUnbind(moduleMsg.getSN(), infoPayload);
+                break;
             case CntbPktTypeTable.GW_SERVICE:
                 String responseMsg = scMessage(infoPayload);
                 response.put("msg", responseMsg);
@@ -122,11 +125,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             } else if (type.equals(CntbPktTypeTable.GET_DATA) && code == CntbPktTypeTable.GET_DATA_CODE) {
                 result = towerService.cntbGetData(request);
             } else if (type.equals(CntbPktTypeTable.SET_POINT) && code == CntbPktTypeTable.SET_POINT_CODE) {
-
+                result = towerService.cntbSetPoint(request);
             } else if (type.equals(CntbPktTypeTable.GET_THRESHOLD) && code == CntbPktTypeTable.GET_THRESHOLD_CODE) {
                 result = towerService.cntbGetThreshold(request);
             } else if (type.equals(CntbPktTypeTable.SET_THRESHOLD) && code == CntbPktTypeTable.SET_THRESHOLD_CODE) {
-
+                result = towerService.cntbSetThreshold(request);
             }
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
