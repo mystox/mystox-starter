@@ -21,6 +21,30 @@ public class AlarmDao {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    /**
+     * 获取指定类型与Id的告警信息
+     * @param type 内部设备类型
+     * @param id 告警点Id
+     * @return 告警点信息
+     */
+    public Alarm getAlarmByTypeAndId(int type, String id) {
+        Alarm result;
+
+        Criteria criteria = Criteria
+                .where("type").is(type)
+                .and("alarmId").is(id);
+
+        result = mongoTemplate.findOne(Query.query(criteria),
+                Alarm.class, MongoDBTable.T_ALARM);
+
+        return result;
+    }
+
+    /**
+     * 更新或添加告警信息
+     * @param alarm 告警信息
+     * @return 更新或添加结果
+     */
     public boolean upsert(Alarm alarm) {
         boolean result;
 

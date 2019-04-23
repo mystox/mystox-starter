@@ -27,9 +27,10 @@ public class MongoConfig
     private String uri;
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoDbFactory factory) throws Exception {
+    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,MappingMongoConverter converter) throws Exception {
+
         //额外连接参数设置
-        return new MongoTemplate(factory);
+        return new MongoTemplate(mongoDbFactory,converter);
     }
 
     @Bean
@@ -51,12 +52,13 @@ public class MongoConfig
     }
 
     @Bean
-    public MappingMongoConverter mappingMongoConverter(MongoDbFactory factory, MongoMappingContext context, BeanFactory beanFactory) {
-        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, context);
+    public MappingMongoConverter mappingMongoConverter(MongoDbFactory mongoDbFactory, MongoMappingContext mappingContext, BeanFactory beanFactory) {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoDbFactory);
+        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, mappingContext);
         try {
             mappingConverter.setCustomConversions(beanFactory.getBean(CustomConversions.class));
         } catch (NoSuchBeanDefinitionException ignore) {
+            ignore.printStackTrace();
         }
 
         // Don't save _class to mongo

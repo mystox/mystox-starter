@@ -51,7 +51,12 @@ public class RegistryServiceImpl implements RegistryService {
     private final ConfigDao configDao;
     private final DeviceDao deviceDao;
     private final RedisUtils redisUtils;
-    private final    RpcModule rpcModule;
+    private RpcModule rpcModule;
+    @Autowired
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
+
     private final ThreadPoolTaskExecutor businessExecutor;
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
@@ -59,13 +64,12 @@ public class RegistryServiceImpl implements RegistryService {
     private int controllerPort;
 
     @Autowired
-    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils, RpcModule rpcModule, ThreadPoolTaskExecutor businessExecutor) {
+    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils,  ThreadPoolTaskExecutor businessExecutor) {
         this.terminalDao = terminalDao;
         this.logDao = logDao;
         this.configDao = configDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
-        this.rpcModule = rpcModule;
         this.businessExecutor = businessExecutor;
     }
 
@@ -251,6 +255,7 @@ public class RegistryServiceImpl implements RegistryService {
                         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
                         alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
                                 signalModel.getValueBase());
+                        alarmSignalConfig.setUuid(moduleMsg.getUuid());
 
                         if (alarmSignalConfigs != null) {
                             alarmSignalConfigs.add(alarmSignalConfig);
@@ -262,7 +267,6 @@ public class RegistryServiceImpl implements RegistryService {
                         alarmConfigKeyMap.put(alarmConfigKey, alarmSignalConfigs);
                     }
                 }
-
 
                 for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                     redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
@@ -300,7 +304,6 @@ public class RegistryServiceImpl implements RegistryService {
             result.put("result", StateCode.SUCCESS);
             return result;
         }
-
 
         //日志记录
         Log log = new Log();

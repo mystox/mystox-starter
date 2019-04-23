@@ -11,10 +11,18 @@ public class SignalModel {
     private String dataId;
     private String name;
     private String type;
-    private String deviceType;
+    private Integer deviceType;
     private String unit;
-
+    private String snModel;
     private Integer valueBase = 1; //信号点基数
+
+    public String getSnModel() {
+        return snModel;
+    }
+
+    public void setSnModel(String snModel) {
+        this.snModel = snModel;
+    }
 
     public Integer getValueBase() {
         return valueBase;
@@ -56,11 +64,11 @@ public class SignalModel {
         this.type = type;
     }
 
-    public String getDeviceType() {
+    public Integer getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(String deviceType) {
+    public void setDeviceType(Integer deviceType) {
         this.deviceType = deviceType;
     }
 

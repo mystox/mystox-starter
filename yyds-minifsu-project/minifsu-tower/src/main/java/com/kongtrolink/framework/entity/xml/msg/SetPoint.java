@@ -1,6 +1,4 @@
-package com.kongtrolink.framework.entity.xml.rcv;
-
-import com.kongtrolink.framework.entity.xml.send.DeviceList;
+package com.kongtrolink.framework.entity.xml.msg;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,17 +7,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Info")
-public class GetData {
+public class SetPoint {
     @XmlElement(name = "FsuId")
     private String fsuId;
     @XmlElement(name = "FsuCode")
     private String fsuCode;
     @XmlElement(name = "DeviceList")
-    private DeviceList deviceList;
-
-    public GetData() {
-        deviceList = new DeviceList();
-    }
+    private XmlList deviceList;
+    @XmlElement(name = "Value")
+    private Value value;
 
     public String getFsuId() {
         return fsuId;
@@ -37,11 +33,19 @@ public class GetData {
         this.fsuCode = fsuCode;
     }
 
-    public DeviceList getDeviceList() {
+    public XmlList getDeviceList() {
         return deviceList;
     }
 
-    public void setDeviceList(DeviceList deviceList) {
+    public void setDeviceList(XmlList deviceList) {
         this.deviceList = deviceList;
+    }
+
+    public Value getValue() {
+        return value;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
     }
 }

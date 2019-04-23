@@ -28,25 +28,33 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final ThreadPoolTaskExecutor businessExecutor;
     @Autowired
-    private ThreadPoolTaskExecutor businessExecutor;
-    @Autowired
-    TerminalService terminalService;
+    private TerminalService terminalService;
 
-    @Autowired
-    DataMntService dataMntService;
+    private final DataMntService dataMntService;
 
 
-    @Autowired
-    RegistryService registryService;
+    private RegistryService registryService;
 
     @Autowired
-    AlarmService alarmService;
-    @Autowired
-    LogService logService;
+    public void setRegistryService(RegistryService registryService) {
+        this.registryService = registryService;
+    }
+
+    private final AlarmService alarmService;
+    private final LogService logService;
+
+    private final FileService fileService;
 
     @Autowired
-    FileService fileService;
+    public ExecuteModule(ThreadPoolTaskExecutor businessExecutor, DataMntService dataMntService, AlarmService alarmService, LogService logService, FileService fileService) {
+        this.businessExecutor = businessExecutor;
+        this.dataMntService = dataMntService;
+        this.alarmService = alarmService;
+        this.logService = logService;
+        this.fileService = fileService;
+    }
 
 
     @Override
@@ -128,6 +136,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             result = jsonObject.toJSONString();
         } else if (PktType.DATA_STATUS.equals(pktType)) { // 终端流
             JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.ALARM_MODEL_IMPORT.equals(pktType)) { // 终端流
+            JSONObject jsonObject = alarmService.saveAlarmModel(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.SIGNAL_MODEL_IMPORT.equals(pktType)) { // 终端流
+            JSONObject jsonObject = dataMntService.saveSignalModel(moduleMsg);
             result = jsonObject.toJSONString();
         }
 

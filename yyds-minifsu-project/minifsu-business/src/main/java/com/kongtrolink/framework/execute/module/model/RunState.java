@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.execute.module.model;
 
+import java.util.Date;
+
 /**
  * Created by mystoxlol on 2019/4/22, 10:24.
  * company: kongtrolink
@@ -13,6 +15,15 @@ public class RunState {
     private String memUse;
     private Long sysTime; //终端系统时间
     private Integer csq; //信号强度
+    private Date createTime;
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
     public String getCpuUse() {
         return cpuUse;

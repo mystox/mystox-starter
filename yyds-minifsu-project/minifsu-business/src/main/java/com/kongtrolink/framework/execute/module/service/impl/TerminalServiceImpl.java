@@ -32,12 +32,13 @@ import java.util.Map;
  */
 @Service
 public class TerminalServiceImpl implements TerminalService {
-    final
-    FsuDao fsuDao;
+    private final FsuDao fsuDao;
 
     private final TerminalDao terminalDao;
     private final DeviceDao deviceDao;
-    private final RpcModule rpcModule;
+
+    @Autowired
+    private RpcModule rpcModule;
 
 
     @Value("${rpc.controller.hostname}")
@@ -46,8 +47,7 @@ public class TerminalServiceImpl implements TerminalService {
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(RpcModule rpcModule, FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao) {
-        this.rpcModule = rpcModule;
+    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao) {
         this.fsuDao = fsuDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
@@ -221,7 +221,7 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONObject terminalLogSave(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
         JSONObject terminalPayload = (JSONObject) payload.get("payload");
-        TerminalLog terminalLog = null;
+        TerminalLog terminalLog;
         String sn = moduleMsg.getSN();
         if (terminalPayload != null) {
             Integer pktType = (Integer) terminalPayload.get("pktType");

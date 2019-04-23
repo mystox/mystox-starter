@@ -22,12 +22,19 @@ import java.io.IOException;
 public class RpcModule extends RpcModuleBase implements ModuleInterface
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
+
     private RpcServer rpcServer;
-    @Autowired
+
     private ExecuteModule executeModule;
 
-
+    @Autowired
+    public void setRpcServer(RpcServer rpcServer) {
+        this.rpcServer = rpcServer;
+    }
+    @Autowired
+    public void setExecuteModule(ExecuteModule executeModule) {
+        this.executeModule = executeModule;
+    }
 
     //如果需要服务的情况下需要初始化引擎和实现类等信息
     @Override

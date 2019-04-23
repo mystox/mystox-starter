@@ -47,4 +47,6 @@ public class PktType
     public final static String DATA_CHANGE = "data_change"; //实时数据上报
     public final static String DATA_STATUS = "data_status"; //状态数据上报
     public final static String TERMINAL_LOG_SAVE = "terminal_log_save"; //终端报文保存
+    public final static String ALARM_MODEL_IMPORT = "alarm_model_import"; //终端报文保存
+    public final static String SIGNAL_MODEL_IMPORT = "signal_model_import"; //终端报文保存
 }
