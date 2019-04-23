@@ -26,10 +26,7 @@ import redis.clients.jedis.ScanParams;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -191,13 +188,12 @@ public class MinifsuControllerApplicationTests {
         registerNet.put("pktType", PktType.CONNECT);
         //4包 数据包
 //    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":2222, \"3001\":3333}}]}}\n";
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":2000000}}]}}\n";
 //        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"3001\":11}}]}}\n";
         registerNet.put("payload", dataMsg);
         JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.211", 18800);
         System.out.println("数据包信息上传结果: " + result);
     }
-
 
     @Test
     public void cleanUp() {
