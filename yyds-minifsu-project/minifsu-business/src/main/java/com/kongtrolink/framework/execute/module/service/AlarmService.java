@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 
@@ -19,4 +20,6 @@ public interface AlarmService {
     JSONObject save(ModuleMsg moduleMsg);
 
     JSONObject saveAlarmModel(ModuleMsg moduleMsg);
+
+    JSONArray getAlarms(ModuleMsg moduleMsg);
 }

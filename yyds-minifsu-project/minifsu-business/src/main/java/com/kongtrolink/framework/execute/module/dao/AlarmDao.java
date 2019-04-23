@@ -2,12 +2,8 @@ package com.kongtrolink.framework.execute.module.dao;
 
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.MongoTableName;
-import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,5 +29,6 @@ public class AlarmDao {
         mongoTemplate.insert(alarmList, tableName);
         return true;
     }
+
 
 }

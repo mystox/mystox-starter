@@ -10,7 +10,7 @@ public class SignalModel {
     private String id;
     private String dataId;
     private String name;
-    private String type;
+    private Integer type;
     private Integer deviceType;
     private String unit;
     private String snModel;
@@ -56,11 +56,11 @@ public class SignalModel {
         this.dataId = dataId;
     }
 
-    public String getType() {
+    public Integer getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 

@@ -81,7 +81,7 @@ public class FsuServiceImpl implements FsuService {
 //        BeanUtils.copyProperties(requestBody, fsu);
 //        fsuDao.saveFsu(fsu);
 
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_STATION, sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_TERMINAL, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
@@ -119,7 +119,7 @@ public class FsuServiceImpl implements FsuService {
     @Override
     public JSONObject getFsuStatus(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) return null;
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_DEVICE_STATUS, sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.TERMINAL_STATUS, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
@@ -198,6 +198,36 @@ public class FsuServiceImpl implements FsuService {
         ModuleMsg moduleMsg = new ModuleMsg(PktType.ALARM_MODEL_IMPORT);
         moduleMsg.setArrayPayload(alarmSignalList);
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
+    public JSONObject unbind(String sn) {
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.ALARM_MODEL_IMPORT,sn);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        return result;
+    }
+
+    @Override
+    public JSONArray getRunState(Map<String, Object> requestBody, String sn) {
+        if (requestBody == null) {
+            return null;
+        }
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_RUNSTATE, sn);
+        moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
+        return result;
+    }
+
+
+    @Override
+    public JSONArray getTerminalPayload(Map<String, Object> requestBody, String sn) {
+        if (requestBody == null) {
+            return null;
+        }
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_TERMINAL_LOG, sn);
+        moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
         return result;
     }
 
