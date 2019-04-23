@@ -33,8 +33,11 @@ public class AlarmServiceImpl implements AlarmService {
     @Override
     public JSONObject save(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
-
+        String sn = moduleMsg.getSN();
         List<Alarm> alarms = JSONArray.parseArray(JSON.toJSONString(payload.get("list")), Alarm.class);
+        for(Alarm alarm : alarms){
+            alarm.setSn(sn);
+        }
         alarmDao.save(alarms);
         JSONObject object = new JSONObject();
         object.put("result", 1);

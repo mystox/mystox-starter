@@ -45,6 +45,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
     public void run() {
         InetSocketAddress registAddr = new InetSocketAddress(hostname, port);
         try {
+            //liuddtodo :在注册和保存到数据库中的告警，修需要将延迟等多余字段去掉。
             ModuleMsg msg = new ModuleMsg();
             msg.setSN(jsonFsu.getSN());
             JSONObject jsonObject = new JSONObject();
@@ -63,7 +64,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
                 Map<String, JSONObject> saveRedisAlarmMap = new HashMap<>();
                 parseAlarm(alarmMap, resolveAlarmList, resolveKey, saveRedisAlarmMap);
                 if(!resolveAlarmList.isEmpty()) {
-                    String alarmMsg = createAlarmMsg(resolveAlarmList);
+                    String alarmMsg = createAlarmMsg(jsonFsu, resolveAlarmList);
                     //发送命令给服务中心保存告警
                     rpcModule.postMsg("", registAddr, alarmMsg);
                 }
@@ -108,11 +109,12 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
      * @date: 2019/4/1 19:56
      * 功能描述:构造保存告警报文
      */
-    private String createAlarmMsg(List<Alarm> resolveAlarmList){
+    private String createAlarmMsg(JsonFsu jsonFsu, List<Alarm> resolveAlarmList){
         ModuleMsg moduleMsg = new ModuleMsg();
         JSONObject o = new JSONObject();
         o.put("list", resolveAlarmList);
         moduleMsg.setPktType(PktType.ALARM_SAVE);
+        moduleMsg.setSN(jsonFsu.getSN());
         moduleMsg.setPayload(o);
         return JSON.toJSONString(moduleMsg);
     }

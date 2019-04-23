@@ -48,7 +48,9 @@ public class AlarmAnalysisService {
         for(String key : beginDelayAlarmMap.keySet()){//一个个删除，这里应该有办法
             redisUtils.hdel(beginDelayTable, key);
         }
+        //保存告警产生延迟到redis中
         redisUtils.hmset(beginDelayTable, realBeginDelayAlarm);
+        //返回当前的真实告警
         return beforAlarmMap;
     }
 
@@ -78,14 +80,14 @@ public class AlarmAnalysisService {
                 value = value / thresholdBase;
             }
             if(null == beforAlarmObj && null == beginDelayAlarmObj){
-                //liuddTODO：原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
+                //原告警列表中和开始延迟告警列表中都没有该信号点，生成新告警，并判定是否需要开始延时
                 Alarm alarm = beginAlarm(value, alarmSignal, curDate);
                 //高频过滤是否产生告警
                 alarm = highRateFilterService.highRateAlarmCreate(fsu, alarm, alarmSignal, curDate, keyAlarmId);
                 if(null== alarm){
                     continue ;
                 }
-                //设置dev_colId，告警注册和保存历史告警时需要。但是保存在redis中的真实告警和延迟告警需要去除，后期优化节约空间
+                //liuddtodo:设置dev_colId，告警注册和保存历史告警时需要。但是保存在redis中的真实告警和延迟告警需要去除，后期优化节约空间
                 alarm.setDev_colId(dev_colId);
                 //填充告警序列号，虽然延迟告警也填充序列号，可能浪费序列号并且增加redis操作，但是代码可读性更高
                 alarm.setNum((int)redisUtils.hincr(alarm_num_hash, fsu.getSN(), 1d));
