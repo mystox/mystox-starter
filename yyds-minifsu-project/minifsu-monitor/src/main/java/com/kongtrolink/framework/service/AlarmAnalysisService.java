@@ -62,7 +62,8 @@ public class AlarmAnalysisService {
     public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Float> entry,
                          Map<String, JSONObject> beforAlarmMap, Map<String, JSONObject> beginDelayAlarmMap, Date curDate){
         String dev_colId = entry.getKey();
-        Float value = entry.getValue();
+        Float signalValue = entry.getValue();
+        float value = signalValue;
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, fsu.getSN() + "_" + dev_colId);
         if(null == alarmSignalObj){
             return null;
