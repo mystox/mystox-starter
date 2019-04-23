@@ -5,7 +5,7 @@ public class RedisTable {
     public final static String CNTBTYPE_SIGNAL_HASH = "cntbType_signal_hash:";
     public final static String CNTBTYPE_ALARM_HASH = "cntbType_alarm_hash:";
     public final static String TERMINAL_HASH = "terminal_hash:";
-    public final static String FSU_BIND_HASH = "fsu_bind_hash";
+    public final static String FSU_BIND_HASH = "fsu_bind_hash:";
     public final static String VPN_HASH = "vpn_hash";
     public final static String CARRIER_HASH = "carrier_hash";
     public final static String DATA_HASH = "data_hash:";
@@ -18,6 +18,15 @@ public class RedisTable {
      */
     public static String getRegistryKey(String sn) {
         return RedisTable.TERMINAL_HASH + sn;
+    }
+
+    /**
+     * 获取redis中fsu绑定信息
+     * @param fsuId fsuId
+     * @return 绑定信息key
+     */
+    public static String getFsuBindKey(String fsuId) {
+        return RedisTable.FSU_BIND_HASH + fsuId;
     }
 
     /**

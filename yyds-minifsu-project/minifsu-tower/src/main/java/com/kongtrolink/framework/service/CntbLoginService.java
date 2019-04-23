@@ -155,8 +155,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         result.setVersion(array.getJSONObject(0).getString("adapterVer"));
         result.setDictVersion(onlineInfo.getDictMode());
 
-        JSONObject jsonRedisFsuBind = (JSONObject)redisUtils.hget(RedisTable.FSU_BIND_HASH, onlineInfo.getFsuId());
-        RedisFsuBind redisFsuBind = JSONObject.parseObject(jsonRedisFsuBind.toJSONString(), RedisFsuBind.class);
+        RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(onlineInfo.getFsuId()), RedisFsuBind.class);
         XmlList list = new XmlList();
         for (int i = 0; i < redisFsuBind.getDeviceIdList().size(); ++i) {
             Device device = new Device();
