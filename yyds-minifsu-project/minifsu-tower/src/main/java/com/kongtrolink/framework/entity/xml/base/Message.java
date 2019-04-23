@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.entity.xml.base;
 
-import com.kongtrolink.framework.entity.xml.send.Login;
-import com.kongtrolink.framework.entity.xml.send.TimeCheckAck;
+import com.kongtrolink.framework.entity.xml.msg.Login;
+import com.kongtrolink.framework.entity.xml.msg.SendAlarm;
 
 import javax.xml.bind.annotation.*;
 
@@ -14,7 +14,8 @@ public class Message {
     protected PKType pkType;
     //这里存在冗余
     @XmlElements({
-            @XmlElement(name = "Info", type = Login.class),          // LOGIN
+        @XmlElement(name = "Info", type = Login.class),          // LOGIN
+        @XmlElement(name = "Info", type = SendAlarm.class)
     })
     protected Info info;
 

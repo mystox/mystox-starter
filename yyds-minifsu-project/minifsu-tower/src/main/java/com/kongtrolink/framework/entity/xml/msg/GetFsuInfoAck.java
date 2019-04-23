@@ -1,5 +1,6 @@
-package com.kongtrolink.framework.entity.xml.send;
+package com.kongtrolink.framework.entity.xml.msg;
 
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.base.Info;
 import com.kongtrolink.framework.entity.xml.base.PKType;
 
@@ -24,7 +25,7 @@ public class GetFsuInfoAck extends Info {
 
     @Override
     public PKType pkType() {
-        return new PKType("GET_FSUINFO_ACK",1702);
+        return new PKType(CntbPktTypeTable.GET_FSUINFO_ACK, CntbPktTypeTable.GET_FSUINFO_ACK_CODE);
     }
 
     public String getFsuId() {
