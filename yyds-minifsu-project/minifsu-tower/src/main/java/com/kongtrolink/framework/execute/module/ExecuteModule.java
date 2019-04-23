@@ -68,20 +68,20 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
         switch (moduleMsg.getPktType()) {
             case PktType.FSU_BIND:
-                result = towerService.fsuBind(infoPayload);
+                result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
                 break;
             case PktType.REGISTRY_CNTB:
-                result = towerService.login(infoPayload);
+                result = towerService.login(moduleMsg.getSN(), infoPayload);
                 break;
             case PktType.DATA_CHANGE:
             case PktType.DATA_REPORT:
-                result = towerService.rcvData(infoPayload);
+                result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
                 break;
             case PktType.FSU_REPORT:
-                result = towerService.rcvFsuInfo(infoPayload);
+                result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
                 break;
             case PktType.ALARM_REGISTER:
-                result = towerService.rcvAlarm(infoPayload);
+                result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
                 break;
             case CntbPktTypeTable.GW_SERVICE:
                 String responseMsg = scMessage(infoPayload);
@@ -124,7 +124,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             } else if (type.equals(CntbPktTypeTable.SET_POINT) && code == CntbPktTypeTable.SET_POINT_CODE) {
 
             } else if (type.equals(CntbPktTypeTable.GET_THRESHOLD) && code == CntbPktTypeTable.GET_THRESHOLD_CODE) {
-
+                result = towerService.cntbGetThreshold(request);
             } else if (type.equals(CntbPktTypeTable.SET_THRESHOLD) && code == CntbPktTypeTable.SET_THRESHOLD_CODE) {
 
             }

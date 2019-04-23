@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author fengw
  * 告警点数据库操作
@@ -22,7 +24,24 @@ public class AlarmDao {
     MongoTemplate mongoTemplate;
 
     /**
-     * 获取指定类型与Id的告警信息
+     * 获取指定类型的告警点信息列表
+     * @param type 内部设备类型
+     * @return 告警点信息列表
+     */
+    public List<Alarm> getListByType(int type) {
+        List<Alarm> result;
+
+        Criteria criteria = Criteria
+                .where("type").is(type);
+
+        result = mongoTemplate.find(Query.query(criteria),
+                Alarm.class, MongoDBTable.T_ALARM);
+
+        return result;
+    }
+
+    /**
+     * 获取指定类型与Id的告警点信息
      * @param type 内部设备类型
      * @param id 告警点Id
      * @return 告警点信息

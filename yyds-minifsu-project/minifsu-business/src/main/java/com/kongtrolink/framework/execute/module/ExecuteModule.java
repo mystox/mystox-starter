@@ -29,11 +29,19 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final ThreadPoolTaskExecutor businessExecutor;
-    @Autowired
     private TerminalService terminalService;
 
-    private final DataMntService dataMntService;
+    private DataMntService dataMntService;
+    @Autowired
+    public void setDataMntService(DataMntService dataMntService) {
+        this.dataMntService = dataMntService;
+    }
 
+
+    @Autowired
+    public void setTerminalService(TerminalService terminalService) {
+        this.terminalService = terminalService;
+    }
 
     private RegistryService registryService;
 
@@ -48,9 +56,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private final FileService fileService;
 
     @Autowired
-    public ExecuteModule(ThreadPoolTaskExecutor businessExecutor, DataMntService dataMntService, AlarmService alarmService, LogService logService, FileService fileService) {
+    public ExecuteModule(ThreadPoolTaskExecutor businessExecutor, AlarmService alarmService, LogService logService, FileService fileService) {
         this.businessExecutor = businessExecutor;
-        this.dataMntService = dataMntService;
         this.alarmService = alarmService;
         this.logService = logService;
         this.fileService = fileService;
@@ -128,7 +135,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.TERMINAL_SAVE.equals(pktType)) { //获取告警点配置
             JSONObject jsonObject = terminalService.saveTerminal(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.SET_STATION.equals(pktType)) { //
+        } else if (PktType.SET_TERMINAL.equals(pktType)) { // 设置和绑定终端
             JSONObject jsonObject = terminalService.setTerminal(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.TERMINAL_LOG_SAVE.equals(pktType)) { // 终端流
@@ -142,6 +149,23 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             result = jsonObject.toJSONString();
         } else if (PktType.SIGNAL_MODEL_IMPORT.equals(pktType)) { // 终端流
             JSONObject jsonObject = dataMntService.saveSignalModel(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.TERMINAL_STATUS.equals(pktType)) { // 终端流
+            JSONObject jsonObject = terminalService.TerminalStatus(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.GET_ALARMS.equals(pktType)) { // 获取告警列表
+            JSONArray jsonObject = alarmService.getAlarms(moduleMsg);
+            result = jsonObject.toJSONString();
+        } else if (PktType.SET_DATA.equals(pktType)) { // 获取告警列表
+            JSONObject jsonObject = dataMntService.setData(moduleMsg);
+            result = jsonObject.toJSONString();
+        }
+else if (PktType.GET_RUNSTATE.equals(pktType)) { // 获取运行状态
+            JSONArray jsonObject = terminalService.getRunStates(moduleMsg);
+            result = jsonObject.toJSONString();
+        }
+else if (PktType.GET_TERMINAL_LOG.equals(pktType)) { // 获取报文日志
+            JSONArray jsonObject = terminalService.getTerminalPayloadLog(moduleMsg);
             result = jsonObject.toJSONString();
         }
 

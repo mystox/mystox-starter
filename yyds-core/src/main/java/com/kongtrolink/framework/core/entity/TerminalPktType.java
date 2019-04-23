@@ -17,7 +17,7 @@ public enum TerminalPktType
     DATA_REPORT(5,"data_report"),//终端数据实时上报
     TERMINAL_REBOOT(6,"terminal_reboot"),//终端数据变化上报
     SET_GPRS(7,"set_gprs"),//设置GPRS服务器
-    SET_DATA(8,"set_data"),//设置信号点值
+    SET_DATA(8,"set_data_terminal"),//设置信号点值
     UPGRADE(9,"upgrade"),//升级请求
     FILE_GET(10,"file_get"),//文件流传输
     RUN_STATE(11,"data_status");//文件流传输

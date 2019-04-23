@@ -60,6 +60,7 @@ public class DataMntServiceImpl implements DataMntService {
         return result;
     }
 
+
     @Override
     public JSONObject setThreshold(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) {
@@ -72,11 +73,10 @@ public class DataMntServiceImpl implements DataMntService {
     }
 
     @Override
-    public JSONObject getAlarmList(Map<String, Object> requestBody, String sn) {
-        if (requestBody == null) return null;
+    public JSONArray getAlarmList(Map<String, Object> requestBody, String sn) {
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_ALARMS, sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
-        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
+        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
         return result;
 
     }

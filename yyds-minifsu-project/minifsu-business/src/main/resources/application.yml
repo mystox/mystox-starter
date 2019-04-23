@@ -5,7 +5,8 @@ logging:
    org.mongodb.driver.*: OFF
 
 mongodb:
-  uri: mongodb://172.16.6.9:27017/minifsu2
+#  uri: mongodb://172.16.6.9:27017/minifsu2
+  uri: mongodb://172.16.5.228:27017/mini-fsu-db
 
 server:
   name: minifsu-business

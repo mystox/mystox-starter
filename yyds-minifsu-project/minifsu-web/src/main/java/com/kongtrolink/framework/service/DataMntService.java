@@ -18,7 +18,7 @@ public interface DataMntService {
 
     JSONObject setThreshold(Map<String, Object> requestBody, String fsuId);
 
-    JSONObject getAlarmList(Map<String, Object> requestBody, String fsuId);
+    JSONArray getAlarmList(Map<String, Object> requestBody, String fsuId);
 
     JSONObject getDeviceList(Map<String, Object> requestBody);
 
@@ -27,4 +27,5 @@ public interface DataMntService {
     JSONObject getSignalListHistory(Map<String, Object> requestBody, String fsuId);
 
     JSONObject setSignal(Map<String, Object> requestBody, String fsuId);
+
 }
