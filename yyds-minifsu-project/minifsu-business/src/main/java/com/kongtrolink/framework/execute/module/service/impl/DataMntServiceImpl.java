@@ -102,6 +102,9 @@ public class DataMntServiceImpl implements DataMntService {
             Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
             double value1 = Double.valueOf(value + "");
             coData.put("value", value1 / valueBase);
+            coData.put("name", signalModel != null ? signalModel.getName() : null);
+            coData.put("unit", signalModel != null ? signalModel.getUnit() : null);
+            coData.put("type", signalModel != null ? signalModel.getType() : null);
             JSONObject data = tranceDataId(type, coId); //数据点翻译
             coData.putAll(data);
             jsonArray.add(coData);
@@ -129,10 +132,6 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject data = new JSONObject();
         String coIdType = coId.substring(0, 1);
         data.put("dataType", SignalType.toName(coIdType));
-        SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
-        data.put("name", signalModel != null ? signalModel.getName() : null);
-        data.put("unit", signalModel != null ? signalModel.getUnit() : null);
-        data.put("type", signalModel != null ? signalModel.getType() : null);
         return data;
 
     }
