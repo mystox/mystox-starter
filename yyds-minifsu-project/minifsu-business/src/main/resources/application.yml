@@ -30,6 +30,7 @@ spring:
     ## 连接池中的最小空闲连接
       min-idle: 20
     host: 172.16.5.228
+#    host: 172.16.5.26
     port: 6379
 
 resource:
