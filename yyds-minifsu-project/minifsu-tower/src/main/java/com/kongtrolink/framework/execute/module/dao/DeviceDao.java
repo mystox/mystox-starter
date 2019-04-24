@@ -23,6 +23,21 @@ public class DeviceDao {
     MongoTemplate mongoTemplate;
 
     /**
+     * 获取指定FSU下的指定设备Id信息
+     * @param fsuId fsuId
+     * @param deviceId deviceId
+     * @return 设备信息
+     */
+    public JsonDevice getInfoByFsuIdAndDeviceId(String fsuId, String deviceId) {
+        Criteria criteria = Criteria
+                .where("fsuId").is(fsuId)
+                .and("deviceId").is(deviceId);
+
+        return mongoTemplate.findOne(Query.query(criteria),
+                JsonDevice.class, MongoDBTable.T_DEVICE_LIST);
+    }
+
+    /**
      * 获取指定FSU下的所有设备信息
      * @param fsuId fsuId
      * @return 设备信息列表

@@ -283,7 +283,7 @@ public class MinifsuControllerApplicationTests {
 		list.add("43048249900010");
 		list.add("43048244500016");
 		list.add("43048241860244");
-		jsonObject.put("deviceList", list);
+		jsonObject.put("devCodeList", list);
 
 		msg.setPayload(jsonObject);
 
@@ -381,7 +381,7 @@ public class MinifsuControllerApplicationTests {
 		alarm1.put("h", 0);
 		alarm1.put("link", 17);
 		alarm1.put("alarmId", "001001");
-		alarm1.put("tReport", 1555898299);
+		alarm1.put("tReport", 1555898299123l);
 		alarm1.put("tRecover", 1555898299);
 		alarm1.put("value", 333.0);
 		alarm1.put("recoverDelayFT", 0);
