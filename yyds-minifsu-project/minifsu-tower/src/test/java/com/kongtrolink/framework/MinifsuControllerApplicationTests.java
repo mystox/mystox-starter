@@ -347,9 +347,9 @@ public class MinifsuControllerApplicationTests {
 		JSONObject data2 = new JSONObject();
 		data2.put("dev", "11-1");
 		JSONObject signal2 = new JSONObject();
-		signal2.put("001001", 0);
-		signal2.put("002001", 0);
-		signal2.put("005001", 0);
+		signal2.put("1001", 0);
+		signal2.put("2001", 0);
+		signal2.put("5001", 0);
 		signal2.put("102001", 53.35);
 		signal2.put("106001", 26.72);
 		signal2.put("107001", 26.63);
@@ -380,7 +380,7 @@ public class MinifsuControllerApplicationTests {
 		alarm1.put("num", 7);
 		alarm1.put("h", 0);
 		alarm1.put("link", 17);
-		alarm1.put("alarmId", "001001");
+		alarm1.put("alarmId", "1001");
 		alarm1.put("tReport", 1555898299123l);
 		alarm1.put("tRecover", 1555898299);
 		alarm1.put("value", 333.0);
@@ -396,7 +396,7 @@ public class MinifsuControllerApplicationTests {
 		alarm2.put("num", 8);
 		alarm2.put("h", 0);
 		alarm2.put("link", 17);
-		alarm2.put("alarmId", "003001");
+		alarm2.put("alarmId", "3001");
 		alarm2.put("tReport", 1555898299);
 		alarm2.put("tRecover", 1555898299);
 		alarm2.put("value", 333.0);
@@ -408,6 +408,25 @@ public class MinifsuControllerApplicationTests {
 		msg.setPayload(jsonObject);
 
 		return msg;
+	}
+
+	@Test
+	public void send() {
+		String msg = "{\"payload\":{\"pktType\":3,\"devList\":[\"1-1-1-1-0990201\"],\"SN\":\"MINI210121000001\"},\"pktType\":\"registry_cntb\",\"msgId\":\"000009\",\"sN\":\"MINI210121000001\",\"uuid\":\"3000f271-53de-4b14-8517-a43bca925a23\"}";
+
+		Configuration conf = new Configuration();
+		RpcClient rpcClient = new RpcClient(conf);
+		RpcModuleBase rpcModuleBase = new RpcModuleBase(rpcClient);
+
+		String ip = "172.16.6.20";
+		int port = 18881;
+
+		RpcNotifyProto.RpcMessage response = null;
+		try {
+			response = rpcModuleBase.postMsg("", new InetSocketAddress(ip, port), msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	static RpcNotifyProto.RpcMessage sendMSG(RpcModuleBase rpcModuleBase, ModuleMsg msg) {

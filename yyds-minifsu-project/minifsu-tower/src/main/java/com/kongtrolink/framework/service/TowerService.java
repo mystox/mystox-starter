@@ -319,6 +319,10 @@ public class TowerService {
 
             deviceDao.deleteListByFsuId(redisOnlineInfo.getFsuId());
             deviceDao.insertListByFsuId(deviceList);
+
+            redisOnlineInfo.setInnerIp(jsonRegistry.getInnerIp());
+            redisOnlineInfo.setInnerPort(jsonRegistry.getInnerPort());
+            result = redisUtils.set(key, redisOnlineInfo, registryTimeout);
         }
 
         checkOnline(jsonRegistry.getSn());
@@ -545,6 +549,7 @@ public class TowerService {
             }
         }
 
+        result = true;
         checkAlarm(sn);
 
         return result;
@@ -903,6 +908,10 @@ public class TowerService {
                     msg.setPayload(jsonObject);
 
                     RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    if (resMsg == null) {
+                        resultDevice.getFailList().getIdList().add(tSemaphore.getId());
+                        continue;
+                    }
                     JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
                     if (responseObject.getBoolean("success")) {
                         resultDevice.getSuccessList().getIdList().add(tSemaphore.getId());
@@ -980,18 +989,20 @@ public class TowerService {
                             //如果端口号不为null，说明该设备存在，向内部服务发送请求获取该设备下的告警点值
                             ModuleMsg msg = getGetThresholdRequest(redisFsuBind.getSn(), jsonDevice, alarmList);
                             RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
-                            JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
-                            if (responseObject.getBoolean("success")) {
-                                //获取成功
-                                JSONArray array = responseObject.getJSONArray("data");
-                                for (int i = 0; i < array.size(); ++i) {
-                                    //遍历报文中的告警点信息
-                                    JSONObject value = array.getJSONObject(i);
-                                    for (TThreshold defaultValue : device.gettThresholdList()) {
-                                        if (defaultValue.getId().equals(value.getString("alarmId"))) {
-                                            //与当前默认门限值匹配，并修改默认门限值
-                                            defaultValue.setThreshold(value.getString("threshold").toString());
-                                            break;
+                            if (resMsg != null) {
+                                JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
+                                if (responseObject.getBoolean("success")) {
+                                    //获取成功
+                                    JSONArray array = responseObject.getJSONArray("data");
+                                    for (int i = 0; i < array.size(); ++i) {
+                                        //遍历报文中的告警点信息
+                                        JSONObject value = array.getJSONObject(i);
+                                        for (TThreshold defaultValue : device.gettThresholdList()) {
+                                            if (defaultValue.getId().equals(value.getString("alarmId"))) {
+                                                //与当前默认门限值匹配，并修改默认门限值
+                                                defaultValue.setThreshold(value.getString("threshold").toString());
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -1171,6 +1182,11 @@ public class TowerService {
                     msg.setPayload(jsonObject);
 
                     RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    if (resMsg == null) {
+                        resultDevice.getFailList().getIdList().add(tThreshold.getId());
+                        continue;
+                    }
+
                     JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
                     if (responseObject.getBoolean("success")) {
                         resultDevice.getSuccessList().getIdList().add(tThreshold.getId());

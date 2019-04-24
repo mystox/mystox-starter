@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
@@ -107,25 +108,25 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sn", onlineInfo.getSn());
-        String request = createRequestMsg(CntbPktTypeTable.LOGIN, jsonObject);
+        String request = createRequestMsg(PktType.GET_FSU, jsonObject);
 
         //todo 没有和内部服务进行通信
-//        JSONObject jsonResponse = postMsg(request, addr);
+        JSONObject jsonResponse = postMsg(request, addr);
 
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("success", true);
-        JSONArray tmp = new JSONArray();
-        JSONObject info = new JSONObject();
-        info.put("imei", "imei");
-        info.put("imsi", "imsi");
-        info.put("nwType", "nwType");
-        info.put("carrier", "CU");
-        info.put("wmVendor", "wmVendor");
-        info.put("wmType", "wmType");
-        info.put("model", "model");
-        info.put("adapterVer", "adapterVer");
-        tmp.add(info);
-        jsonResponse.put("data", tmp);
+//        JSONObject jsonResponse = new JSONObject();
+//        jsonResponse.put("success", true);
+//        JSONArray tmp = new JSONArray();
+//        JSONObject info = new JSONObject();
+//        info.put("imei", "imei");
+//        info.put("imsi", "imsi");
+//        info.put("nwType", "nwType");
+//        info.put("carrier", "CU");
+//        info.put("wmVendor", "wmVendor");
+//        info.put("wmType", "wmType");
+//        info.put("model", "model");
+//        info.put("adapterVer", "adapterVer");
+//        tmp.add(info);
+//        jsonResponse.put("data", tmp);
 
         if (!jsonResponse.getBoolean("success")) {
             return result;
