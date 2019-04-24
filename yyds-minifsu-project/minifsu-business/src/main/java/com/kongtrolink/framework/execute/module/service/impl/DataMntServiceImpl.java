@@ -96,7 +96,7 @@ public class DataMntServiceImpl implements DataMntService {
         for (String key : mntData) { //通过key获取实时数据
             JSONObject coData = new JSONObject();
             Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
-            String coId = key.replaceFirst(sn + "_" + dev + "_", "");
+            String coId = key.replaceFirst(dev + "_", "");
             coData.put("coId", coId);
             SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
             Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();

@@ -274,7 +274,8 @@ public class FSUController {
                 signalModel.put("dataId", cell[r][2]);
                 signalModel.put("type", cell[r][3]);
                 signalModel.put("name", cell[r][4]);
-                signalModel.put("unit", cell[r][9]);
+                signalModel.put("unit", cell[r][10]);
+                signalModel.put("valueBase", cell[r][11]);
                 signalModelList.add(signalModel);
             }
             JSONObject result = fsuService.saveSignalModelList(signalModelList);
