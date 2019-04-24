@@ -77,7 +77,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             case PktType.DATA_REPORT:
                 result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
                 break;
-            case PktType.FSU_REPORT:
+            case PktType.DATA_STATUS:
                 result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
                 break;
             case PktType.ALARM_REGISTER:

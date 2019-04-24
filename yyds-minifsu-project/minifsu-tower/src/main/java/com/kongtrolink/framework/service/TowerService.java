@@ -123,13 +123,14 @@ public class TowerService {
         JsonLoginParam jsonLoginParam = getLoginParam(request);
 
         //更新数据库中的设备列表
-        JSONArray array = request.getJSONArray("devCodeList");
-        List<JsonDevice> jsonDeviceList = getDeviceList(array, jsonStation.getFsuId());
+        List<JsonDevice> jsonDeviceList = getDeviceList(request, jsonStation.getFsuId());
 
         updateBindRedis(jsonStation, jsonLoginParam, jsonDeviceList);
 
         //更新基站信息
         result = updateStationBindDB(jsonStation, jsonLoginParam, jsonDeviceList);
+
+        checkOnline(sn, request.getString("innerIp"), request.getInteger("innerPort"));
 
         return result;
     }
@@ -182,17 +183,26 @@ public class TowerService {
 
     /**
      * 更新数据库中的设备列表
-     * @param array 接收到的设备列表
+     * @param request 请求信息
      * @param fsuId fsuId
      */
-    private List<JsonDevice> getDeviceList(JSONArray array, String fsuId) {
+    private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) {
         List<JsonDevice> result = new ArrayList<>();
+
+        JSONArray array = request.getJSONArray("devCodeList");
         for (int i = 0; i < array.size(); ++i) {
             result.add(new JsonDevice(fsuId, array.getString(i)));
         }
-        //取出对应设备ID列表，重新进行设备匹配，删除原有设备信息后将新设备信息写入数据库
-        List<JsonDevice> curDeviceList = deviceDao.getListByFsuId(fsuId);
-        deviceMatchService.matchingDevice(result, curDeviceList);
+
+        List<JsonDevice> curList = new ArrayList<>();
+        JSONArray curArray = request.getJSONArray("devList");
+        if (curArray != null) {
+            for (int i = 0; i < curArray.size(); ++i) {
+                curList.add(new JsonDevice(curArray.getString(i)));
+            }
+        }
+        deviceMatchService.matchingDevice(result, curList);
+
         return result;
     }
 
@@ -319,9 +329,13 @@ public class TowerService {
 
             deviceDao.deleteListByFsuId(redisOnlineInfo.getFsuId());
             deviceDao.insertListByFsuId(deviceList);
+
+            redisOnlineInfo.setInnerIp(jsonRegistry.getInnerIp());
+            redisOnlineInfo.setInnerPort(jsonRegistry.getInnerPort());
+            result = redisUtils.set(key, redisOnlineInfo, registryTimeout);
         }
 
-        checkOnline(jsonRegistry.getSn());
+        checkOnline(jsonRegistry.getSn(), request.getString("innerIp"), request.getInteger("innerPort"));
 
         return result;
     }
@@ -355,6 +369,8 @@ public class TowerService {
      */
     public boolean rcvData(String sn, JSONObject request) {
         boolean result = false;
+
+        checkOnline(sn, request.getString("innerIp"), request.getInteger("innerPort"));
 
         RedisOnlineInfo redisOnlineInfo = getRedisOnlineInfo(sn);
         if (redisOnlineInfo == null) {
@@ -431,6 +447,8 @@ public class TowerService {
     public boolean rcvFsuInfo(String sn, JSONObject request) {
         boolean result = false;
 
+        checkOnline(sn, request.getString("innerIp"), request.getInteger("innerPort"));
+
         RedisOnlineInfo redisOnlineInfo = getRedisOnlineInfo(sn);
         if (redisOnlineInfo == null) {
             //终端在redis中不存在，说明离线，返回false
@@ -487,6 +505,8 @@ public class TowerService {
      */
     public boolean rcvAlarm(String sn, JSONObject request) {
         boolean result = false;
+
+        checkOnline(sn, request.getString("innerIp"), request.getInteger("innerPort"));
 
         RedisOnlineInfo redisOnlineInfo = getRedisOnlineInfo(sn);
         if (redisOnlineInfo == null) {
@@ -545,6 +565,7 @@ public class TowerService {
             }
         }
 
+        result = true;
         checkAlarm(sn);
 
         return result;
@@ -903,6 +924,10 @@ public class TowerService {
                     msg.setPayload(jsonObject);
 
                     RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    if (resMsg == null) {
+                        resultDevice.getFailList().getIdList().add(tSemaphore.getId());
+                        continue;
+                    }
                     JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
                     if (responseObject.getBoolean("success")) {
                         resultDevice.getSuccessList().getIdList().add(tSemaphore.getId());
@@ -980,18 +1005,20 @@ public class TowerService {
                             //如果端口号不为null，说明该设备存在，向内部服务发送请求获取该设备下的告警点值
                             ModuleMsg msg = getGetThresholdRequest(redisFsuBind.getSn(), jsonDevice, alarmList);
                             RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
-                            JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
-                            if (responseObject.getBoolean("success")) {
-                                //获取成功
-                                JSONArray array = responseObject.getJSONArray("data");
-                                for (int i = 0; i < array.size(); ++i) {
-                                    //遍历报文中的告警点信息
-                                    JSONObject value = array.getJSONObject(i);
-                                    for (TThreshold defaultValue : device.gettThresholdList()) {
-                                        if (defaultValue.getId().equals(value.getString("alarmId"))) {
-                                            //与当前默认门限值匹配，并修改默认门限值
-                                            defaultValue.setThreshold(value.getString("threshold").toString());
-                                            break;
+                            if (resMsg != null) {
+                                JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
+                                if (responseObject.getBoolean("success")) {
+                                    //获取成功
+                                    JSONArray array = responseObject.getJSONArray("data");
+                                    for (int i = 0; i < array.size(); ++i) {
+                                        //遍历报文中的告警点信息
+                                        JSONObject value = array.getJSONObject(i);
+                                        for (TThreshold defaultValue : device.gettThresholdList()) {
+                                            if (defaultValue.getId().equals(value.getString("alarmId"))) {
+                                                //与当前默认门限值匹配，并修改默认门限值
+                                                defaultValue.setThreshold(value.getString("threshold").toString());
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -1171,6 +1198,11 @@ public class TowerService {
                     msg.setPayload(jsonObject);
 
                     RpcNotifyProto.RpcMessage resMsg = sendMsg(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort(), msg);
+                    if (resMsg == null) {
+                        resultDevice.getFailList().getIdList().add(tThreshold.getId());
+                        continue;
+                    }
+
                     JSONObject responseObject = JSONObject.parseObject(resMsg.getPayload());
                     if (responseObject.getBoolean("success")) {
                         resultDevice.getSuccessList().getIdList().add(tThreshold.getId());
@@ -1271,7 +1303,7 @@ public class TowerService {
      * @param sn sn
      * @return 终端在redis中的状态是否正常
      */
-    private void checkOnline(String sn) {
+    private void checkOnline(String sn, String innerIp, int innerPort) {
         String key = RedisTable.getRegistryKey(sn);
         if (redisUtils.hasKey(key)) {
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
@@ -1290,7 +1322,7 @@ public class TowerService {
                 redisUtils.hasKey(RedisTable.VPN_HASH) &&
                 redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName())) {
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
-                taskExecutor.execute(new CntbLoginService(sn,
+                taskExecutor.execute(new CntbLoginService(sn, innerIp, innerPort,
                         towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
                         carrierDao));
                 System.out.println(taskExecutor.getActiveCount());
