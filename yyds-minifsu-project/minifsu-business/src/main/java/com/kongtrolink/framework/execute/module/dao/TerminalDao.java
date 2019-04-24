@@ -56,7 +56,7 @@ public class TerminalDao {
         Criteria criteria = new Criteria();
         if(StringUtils.isNotBlank(sn))
         {
-            criteria = Criteria.where("SN").is(sn);
+            criteria = Criteria.where("SN").regex(sn);
         }
 
 
