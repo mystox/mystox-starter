@@ -40,9 +40,6 @@ executor:
 rpc:
   client:
     timeout: 60000
-  net-GW:
-    hostname: 172.16.6.39
-    port: 17700
   monitor:
     hostname: 172.16.6.39
     port: 18810

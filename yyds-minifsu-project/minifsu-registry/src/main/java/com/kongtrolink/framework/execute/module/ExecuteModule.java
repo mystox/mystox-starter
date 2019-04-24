@@ -64,10 +64,5 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 .build();
     }
 
-    public static void main(String[] args)
-    {
-        double d = 5;
-        System.out.println(new Random().nextInt(10000));
-    }
 
 }
