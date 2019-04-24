@@ -39,8 +39,11 @@ public class TerminalServiceImpl implements TerminalService {
     private final RedisUtils redisUtils;
 
 
-    private final RpcModule rpcModule;
-
+    private RpcModule rpcModule;
+    @Autowired
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
 
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
@@ -48,12 +51,11 @@ public class TerminalServiceImpl implements TerminalService {
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils, RpcModule rpcModule) {
+    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
         this.fsuDao = fsuDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
-        this.rpcModule = rpcModule;
     }
 
     @Override
