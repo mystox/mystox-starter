@@ -1,8 +1,8 @@
-
 logging:
   level:
    root: info
-   org.apache.hadoop.util.Shell: OFF
+   org.apache.hadoop.util: OFF #隐藏hadoop日志
+   org.mongodb.driver.*: OFF
 
 mongodb:
   uri: mongodb://172.16.6.9:27017/minifsu2_tower

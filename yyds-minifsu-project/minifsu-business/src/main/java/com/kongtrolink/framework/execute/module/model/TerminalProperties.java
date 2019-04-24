@@ -21,7 +21,15 @@ public class TerminalProperties {
     private Integer signalStrength;
     private String engineVer;
     private String adapterVer;
+    private String model;
 
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
 
     public Integer getBusiness() {
         return business;

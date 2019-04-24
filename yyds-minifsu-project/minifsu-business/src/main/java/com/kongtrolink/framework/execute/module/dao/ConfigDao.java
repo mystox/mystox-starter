@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
+import com.alibaba.fastjson.JSONArray;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.AlarmSignalConfigModel;
@@ -50,30 +51,36 @@ public class ConfigDao {
         return mongoTemplate.findById(id, AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 
-    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId,String alarmId) {
+    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId, String alarmId) {
         Criteria criteria = Criteria.where("deviceId").is(deviceId);
-        if (StringUtils.isEmpty(coId)) {
+        if (StringUtils.isNotBlank(coId)) {
             criteria.and("coId").is(coId);
-        }if (StringUtils.isEmpty(coId)) {
-            criteria.and("alarmId").is(alarmId);
         }
-        return mongoTemplate.find(Query.query(criteria),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
+        if (StringUtils.isNotBlank(alarmId)) {
+            if (alarmId.contains("[")) {
+                List<String> alarms = JSONArray.parseArray(alarmId, String.class);
+                criteria.and("alarmId").in(alarms);
+            } else {
+                criteria.and("alarmId").is(alarmId);
+            }
+        }
+        return mongoTemplate.find(Query.query(criteria), AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 
     public SignalModel findSignalModelByDeviceTypeAndCoId(int deviceType, String coId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(deviceType).and("dataId").is(coId)),SignalModel.class, MongoTableName.SIGNAL_MODEL);
+        return mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(deviceType).and("dataId").is(coId)), SignalModel.class, MongoTableName.SIGNAL_MODEL);
     }
 
     public AlarmSignalConfigModel findAlarmSignalModelByDevTypeAndAlarmId(Integer devType, String alarmId) {
         return mongoTemplate.findOne(Query.query(Criteria.where("devType").is(devType).and("alarmId").is(alarmId)),
-                AlarmSignalConfigModel.class,MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
+                AlarmSignalConfigModel.class, MongoTableName.ALARM_SIGNAL_CONFIG_MODEL);
     }
 
     public void saveSignalModel(SignalModel signalModel) {
-        mongoTemplate.save(signalModel,MongoTableName.SIGNAL_MODEL);
+        mongoTemplate.save(signalModel, MongoTableName.SIGNAL_MODEL);
     }
 
     public AlarmSignalConfig findAlarmSignalConfigByDeviceIdAndAlarmId(String deviceId, String alarmId) {
-        return mongoTemplate.findOne(Query.query(Criteria.where("deviceId").is(deviceId).where("alarmId").is(alarmId)),AlarmSignalConfig.class,MongoTableName.ALARM_SIGNAL_CONFIG);
+        return mongoTemplate.findOne(Query.query(Criteria.where("deviceId").is(deviceId).and("alarmId").is(alarmId)), AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 }

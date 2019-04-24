@@ -15,11 +15,13 @@ import com.kongtrolink.framework.execute.module.model.RunState;
 import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -47,18 +49,25 @@ public class DataMntServiceImpl implements DataMntService {
     private String port;
     @Value("${server.name}")
     private String name;
-    @Autowired
-    private LogDao logDao;
-    @Autowired
+    private final LogDao logDao;
+    final
     RedisUtils redisUtils;
 
-    @Autowired
+    final
     DeviceDao deviceDao;
 
-    @Autowired
-    private RunStateDao runStateDao;
+    private final RunStateDao runStateDao;
 
     private ConfigDao configDao;
+
+    @Autowired
+    public DataMntServiceImpl(LogDao logDao, RedisUtils redisUtils, DeviceDao deviceDao, RunStateDao runStateDao, ThreadPoolTaskExecutor businessExecutor) {
+        this.logDao = logDao;
+        this.redisUtils = redisUtils;
+        this.deviceDao = deviceDao;
+        this.runStateDao = runStateDao;
+        this.businessExecutor = businessExecutor;
+    }
 
     @Autowired
     public void setConfigDao(ConfigDao configDao) {
@@ -71,7 +80,7 @@ public class DataMntServiceImpl implements DataMntService {
     public void setRpcModule(RpcModule rpcModule) {
         this.rpcModule = rpcModule;
     }
-
+    private final ThreadPoolTaskExecutor businessExecutor;
     @Override
     public JSONObject getSignalList(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
@@ -92,7 +101,7 @@ public class DataMntServiceImpl implements DataMntService {
             SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
             Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
             double value1 = Double.valueOf(value + "");
-            coData.put("value", value1/valueBase);
+            coData.put("value", value1 / valueBase);
             JSONObject data = tranceDataId(type, coId); //数据点翻译
             coData.putAll(data);
             jsonArray.add(coData);
@@ -135,16 +144,30 @@ public class DataMntServiceImpl implements DataMntService {
         String deviceId = (String) alarmSignal.get("deviceId");
         String coId = (String) alarmSignal.get("coId");
         String configId = (String) alarmSignal.get("configId");
+        String alarmId = (String) alarmSignal.get("alarmId");
+        String dev = (String) alarmSignal.get("dev");
         Double threshold = alarmSignal.get("threshold") == null ? null : Double.parseDouble(alarmSignal.get("threshold") + "");
         Float hystersis = alarmSignal.get("hystersis") == null ? null : Float.parseFloat(alarmSignal.get("hystersis") + "");
         Integer relativeval = alarmSignal.get("relativeval") == null ? null : (Integer) alarmSignal.get("relativeval");
         Integer level = alarmSignal.get("level") == null ? null : (Integer) alarmSignal.get("level");
         Integer delay = alarmSignal.get("delay") == null ? null : (Integer) alarmSignal.get("delay");
 
-        Device device = deviceDao.findDeviceById(deviceId);
-        int devType = device.getType();
-        int resNo = device.getResNo();
-        String dev = devType + "-" + resNo; //设备
+
+        if (StringUtils.isBlank(dev)) { //根据deviceId获取dev 门户场景
+            Device device = deviceDao.findDeviceById(deviceId);
+            int devType = device.getType();
+            int resNo = device.getResNo();
+            dev = devType + "-" + resNo; //设备
+        }
+
+        if (StringUtils.isBlank(coId)) { //根据告警id和dev获取coId 外部业务场景
+            Device device = deviceDao.findDeviceByTypeResNoPort(sn,
+                    Integer.parseInt(dev.split("-")[0]), Integer.parseInt(dev.split("-")[1]), null);
+            AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigByDeviceIdAndAlarmId(device.getId(), alarmId);
+            coId = alarmSignalConfig.getCoId();
+            configId = alarmSignalConfig.getId();
+        }
+
         String alarmConfigKey = sn + "_" + dev + "_" + coId;//redis 告警配置键值
 
         //设置内存值
@@ -188,8 +211,8 @@ public class DataMntServiceImpl implements DataMntService {
         String port = (String) payload.get("port");
         Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         String coId = (String) payload.get("coId");
-        String alarmId = (String) payload.get("alarmId");
-        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId,alarmId); //根据deviceId和数据点id获取信号点配置列表
+        String alarmId = payload.getString("alarmId");
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId, alarmId); //根据deviceId和数据点id获取信号点配置列表
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
@@ -237,7 +260,6 @@ public class DataMntServiceImpl implements DataMntService {
     }
 
 
-
     @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
@@ -250,6 +272,28 @@ public class DataMntServiceImpl implements DataMntService {
         runState.setCsq((Integer) payload.get("csq"));
         runState.setCreateTime(new Date());
         runStateDao.saveRunState(runState);
+        businessExecutor.execute(() -> {
+            // 向向外部网关发送运行状态报文
+            try {
+                moduleMsg.setPktType(PktType.DATA_STATUS);
+                rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+            } catch (IOException e) {
+                logger.error("发送至外部业务注册异常" + e.toString());
+                //日志记录
+                Log log = new Log();
+                log.setErrorCode(3);
+                log.setSN(sn);
+                log.setMsgType(moduleMsg.getPktType());
+                log.setMsgId(moduleMsg.getMsgId());
+                log.setHostName(host);
+                log.setServiceName(name);
+                log.setTime(new Date(System.currentTimeMillis()));
+                logDao.saveLog(log);
+                e.printStackTrace();
+            }
+        });
+
+
         JSONObject result = new JSONObject();
         result.put("result", 1);
         return result;

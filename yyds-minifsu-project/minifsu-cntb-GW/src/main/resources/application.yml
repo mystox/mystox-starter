@@ -1,7 +1,8 @@
 logging:
   level:
    root: info
-
+   org.apache.hadoop.util: OFF #隐藏hadoop日志
+   org.mongodb.driver.*: OFF
 server:
   name: minifsu-cntb-gw
   bindIp: 172.16.6.20

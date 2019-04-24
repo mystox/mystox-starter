@@ -13,6 +13,8 @@ import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.model.AlarmSignalConfigModel;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.DeviceType;
+import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.execute.module.service.AlarmService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ public class AlarmServiceImpl implements AlarmService {
     AlarmDao alarmDao;
 
     RedisUtils redisUtils;
+
     @Autowired
     public void setRedisUtils(RedisUtils redisUtils) {
         this.redisUtils = redisUtils;
@@ -41,10 +44,12 @@ public class AlarmServiceImpl implements AlarmService {
 
 
     private DeviceDao deviceDao;
+
     @Autowired
     public void setDeviceDao(DeviceDao deviceDao) {
         this.deviceDao = deviceDao;
     }
+
     private ConfigDao configDao;
 
     @Autowired
@@ -63,7 +68,7 @@ public class AlarmServiceImpl implements AlarmService {
         JSONObject payload = moduleMsg.getPayload();
         String sn = moduleMsg.getSN();
         List<Alarm> alarms = JSONArray.parseArray(JSON.toJSONString(payload.get("list")), Alarm.class);
-        for(Alarm alarm : alarms){
+        for (Alarm alarm : alarms) {
             alarm.setSn(sn);
         }
         alarmDao.save(alarms);
@@ -80,7 +85,7 @@ public class AlarmServiceImpl implements AlarmService {
         for (AlarmSignalConfigModel alarmSignalConfigModel : alarmSignalConfigModels) {
             AlarmSignalConfigModel alarmSignalConfigModel1 = configDao.findAlarmSignalModelByDevTypeAndAlarmId(alarmSignalConfigModel.getDevType(), alarmSignalConfigModel.getAlarmId());
             if (alarmSignalConfigModel1 != null) {
-                BeanUtils.copyProperties(alarmSignalConfigModel, alarmSignalConfigModel1,"id");
+                BeanUtils.copyProperties(alarmSignalConfigModel, alarmSignalConfigModel1, "id");
                 configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel1);
             } else
                 configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel);
@@ -94,15 +99,25 @@ public class AlarmServiceImpl implements AlarmService {
     public JSONArray getAlarms(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         String hashTable = RedisHashTable.SN_ALARM_HASH + sn;
-        Set<String> keys = redisUtils.getHkeys(hashTable,"*");
+        Set<String> keys = redisUtils.getHkeys(hashTable, "*");
         JSONArray alarmList = new JSONArray();
         for (String key : keys) {
             Alarm alarm = redisUtils.getHash(hashTable, key, Alarm.class);
             String dev = key.split("_")[0];
-            Device device = deviceDao.findDeviceByTypeResNoPort(sn,Integer.valueOf(dev.split("-")[0]), Integer.valueOf(dev.split("-")[1]),null);
             JSONObject alarmJson = (JSONObject) JSONObject.toJSON(alarm);
-            AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigByDeviceIdAndAlarmId(device.getId(),alarm.getAlarmId());
-            alarmJson.put("name", alarmSignalConfig == null ? "未知告警" : alarmSignalConfig.getAlarmDesc());
+            int devType = Integer.valueOf(dev.split("-")[0]);
+            int resNo = Integer.valueOf(dev.split("-")[1]);
+            Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, null);
+            AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigByDeviceIdAndAlarmId(device.getId(), alarm.getAlarmId());
+            alarmJson.put("level", alarmSignalConfig.getLevel());
+            alarmJson.put("threshold", alarmSignalConfig.getThreshold());
+            AlarmSignalConfigModel alarmSignalConfigModel = configDao.findAlarmSignalModelByDevTypeAndAlarmId(devType, alarm.getAlarmId());
+            alarmJson.put("name", alarmSignalConfigModel == null ? "未知告警" : alarmSignalConfigModel.getAlarmDesc());
+            DeviceType deviceType = deviceDao.getDeviceType(devType);
+            alarmJson.put("devName", deviceType == null ? "" : deviceType.getName());
+            String coId = alarmSignalConfig.getCoId();
+            SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
+            alarmJson.put("signalName", signalModel.getName());
             alarmList.add(alarmJson);
         }
         return (JSONArray) JSONArray.toJSON(alarmList);

@@ -39,8 +39,11 @@ public class TerminalServiceImpl implements TerminalService {
     private final RedisUtils redisUtils;
 
 
-    private final RpcModule rpcModule;
-
+    private RpcModule rpcModule;
+    @Autowired
+    public void setRpcModule(RpcModule rpcModule) {
+        this.rpcModule = rpcModule;
+    }
 
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
@@ -48,12 +51,11 @@ public class TerminalServiceImpl implements TerminalService {
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils, RpcModule rpcModule) {
+    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
         this.fsuDao = fsuDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
-        this.rpcModule = rpcModule;
     }
 
     @Override
@@ -115,8 +117,15 @@ public class TerminalServiceImpl implements TerminalService {
             String terminalId = terminal.getId();
             TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
             JSONObject terminalJSON = (JSONObject) JSONObject.toJSON(terminal);
-            if (terminalProperties!=null)
-            terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + terminal.getSN();
+            JSONObject value = redisUtils.get(key, JSONObject.class);
+            if (value != null) {
+                terminalJSON.put("status", value.get("STATUS"));
+            }else {
+                terminalJSON.put("status", 0);
+            }
+            if (terminalProperties != null)
+                terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));
             result.add(terminalJSON);
         }
         return result;
@@ -204,7 +213,7 @@ public class TerminalServiceImpl implements TerminalService {
         if (StringUtils.isNotBlank(fsuId)) {
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
             try {
-                moduleMsg.setPktType(PktType.TERMINAL_BIND);
+                moduleMsg.setPktType(PktType.FSU_BIND);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -243,11 +252,10 @@ public class TerminalServiceImpl implements TerminalService {
         JSONObject result = new JSONObject();
         if (value != null) {
             return value;
-        }
-        else {
+        } else {
             Terminal terminal = terminalDao.findTerminalBySn(sn);
-            if (terminal!=null)
-            result = (JSONObject) JSONObject.toJSON(terminal);
+            if (terminal != null)
+                result = (JSONObject) JSONObject.toJSON(terminal);
             result.put("STATUS", 0);
         }
         result.put("result", 0);
@@ -259,7 +267,7 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONArray getRunStates(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         JSONObject search = moduleMsg.getPayload();
-        List<RunState> terminalLogs = terminalDao.findRunStates(sn,search);
+        List<RunState> terminalLogs = terminalDao.findRunStates(sn, search);
         return (JSONArray) JSONArray.toJSON(terminalLogs);
     }
 
@@ -267,7 +275,7 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONArray getTerminalPayloadLog(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         JSONObject search = moduleMsg.getPayload();
-        List<TerminalLog> terminalLogs = terminalDao.findTerminalLog(sn,search);
+        List<TerminalLog> terminalLogs = terminalDao.findTerminalLog(sn, search);
         return (JSONArray) JSONArray.toJSON(terminalLogs);
     }
 }
