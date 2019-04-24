@@ -43,7 +43,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String serverName;
     @Value("${server.bindIp}")
     private String hostname;
-
+    @Value("${server.rpc.port}")
+    private String port;
     @Value("${rpc.business.hostname}")
     private String businessHost;
     @Value("${rpc.business.port}")
@@ -246,7 +247,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
-                || PktType.TERMINAL_BIND.equals(pktType) //business ---> 绑定
+                || PktType.FSU_BIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_STATUS.equals(pktType) //business ---> 运行状态上报
                 || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 运行状态上报
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
@@ -261,8 +262,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     for (String addr : addrs) {
                         if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
                             String[] addrArr = addr.split(":");
-                            System.out.println("payloadObject：" + payloadObject.toJSONString());
-                            return sendPayLoad(msgId, payloadObject.toJSONString(), addrArr[0], Integer.parseInt(addrArr[1]));
+                            JSONObject registerJson = moduleMsg.getPayload();
+                            registerJson.put("innerIp", hostname);
+                            registerJson.put("innerPort", port);
+                            return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
                         } else {
                             logger.error("bip[{}] illegal...", addr);
                         }

@@ -3,7 +3,9 @@ package com.kongtrolink.framework.execute.module.dao;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -48,9 +50,17 @@ public class TerminalDao {
 
     public List<Terminal> findTerminal(JSONObject jsonObject) {
 
+        int count = jsonObject.get("count") == null ? 30 : (int)jsonObject.get("count");
+       int page = jsonObject.get("page") == null ? 0 : (int)jsonObject.get("page");
+        String sn = jsonObject.getString("sn");
         Criteria criteria = new Criteria();
+        if(StringUtils.isNotBlank(sn))
+        {
+            criteria = Criteria.where("SN").is(sn);
+        }
 
-        return mongoTemplate.find(Query.query(criteria), Terminal.class, MongoTableName.TERMINAL);
+
+        return mongoTemplate.find(Query.query(criteria).skip(page*count).limit(count), Terminal.class, MongoTableName.TERMINAL);
     }
 
     public boolean existsBySn(String sn) {
@@ -71,7 +81,7 @@ public class TerminalDao {
 
     public List<TerminalLog> findTerminalLog(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime") + "";
+        Object startTime = search.get("startTime");
         if (startTime != null) {
             Object endTime = search.get("endTime");
             if (endTime != null) {
@@ -80,12 +90,12 @@ public class TerminalDao {
                 criteria.and("recordTime").gte(new Date(Long.valueOf(startTime + "")));
             }
         }
-        return mongoTemplate.find(Query.query(criteria), TerminalLog.class, MongoTableName.TERMINAL_LOG);
+        return mongoTemplate.find(Query.query(criteria).with(new Sort(new Sort.Order(Sort.Direction.DESC,"recordTime"))), TerminalLog.class, MongoTableName.TERMINAL_LOG);
     }
 
     public List<RunState> findRunStates(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Long startTime = Long.valueOf(search.get("startTime") + "");
+        Object startTime = search.get("startTime");
         if (startTime != null) {
             Object endTime = search.get("endTime");
             if (endTime != null) {
@@ -94,6 +104,6 @@ public class TerminalDao {
                 criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
             }
         }
-        return mongoTemplate.find(Query.query(criteria), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
+        return mongoTemplate.find(Query.query(criteria).with(new Sort(new Sort.Order(Sort.Direction.DESC,"createTime"))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
     }
 }

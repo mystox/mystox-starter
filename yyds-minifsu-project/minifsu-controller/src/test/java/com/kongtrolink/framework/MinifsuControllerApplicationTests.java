@@ -266,7 +266,7 @@ public class MinifsuControllerApplicationTests {
         return result;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         //初始化客户端
         Configuration conf = new Configuration();
@@ -309,6 +309,7 @@ public class MinifsuControllerApplicationTests {
         response = sendMSG(requestHead, rpcModuleBase, dataMsg);
         System.out.println("设备上报结果"+response.getPayload());*/
         //11包 运状包
+            Thread.sleep(5000L);
             String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\n" +
                     "  \"pktType\": 11,\n" +
                     "  \"SN\": \"MINI210121000001\",\n" +

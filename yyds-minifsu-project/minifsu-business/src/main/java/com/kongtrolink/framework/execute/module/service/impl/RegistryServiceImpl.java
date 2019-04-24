@@ -279,9 +279,6 @@ public class RegistryServiceImpl implements RegistryService {
                 try {
                     // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
                     moduleMsg.setPktType(PktType.REGISTRY_CNTB);
-                    JSONObject registerJson = (JSONObject) JSONObject.toJSON(moduleMsg);
-                    registerJson.put("innerIp", host);
-                    registerJson.put("innerPort", port);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
                     logger.error("发送至外部业务注册异常" + e.toString());

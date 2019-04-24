@@ -141,9 +141,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.TERMINAL_LOG_SAVE.equals(pktType)) { // 终端流
             JSONObject jsonObject = terminalService.terminalLogSave(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.DATA_STATUS.equals(pktType)) { // 终端流
-            JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
-            result = jsonObject.toJSONString();
         } else if (PktType.ALARM_MODEL_IMPORT.equals(pktType)) { // 终端流
             JSONObject jsonObject = alarmService.saveAlarmModel(moduleMsg);
             result = jsonObject.toJSONString();
@@ -158,6 +155,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             result = jsonObject.toJSONString();
         } else if (PktType.SET_DATA.equals(pktType)) { // 获取告警列表
             JSONObject jsonObject = dataMntService.setData(moduleMsg);
+            result = jsonObject.toJSONString();
+        }else if (PktType.RUN_STATUS.equals(pktType)) { // 终端的状态数据
+            JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
             result = jsonObject.toJSONString();
         }
 else if (PktType.GET_RUNSTATE.equals(pktType)) { // 获取运行状态

@@ -20,7 +20,7 @@ public enum TerminalPktType
     SET_DATA(8,"set_data_terminal"),//设置信号点值
     UPGRADE(9,"upgrade"),//升级请求
     FILE_GET(10,"file_get"),//文件流传输
-    RUN_STATE(11,"data_status");//文件流传输
+    RUN_STATE(11,"run_status");//文件流传输
 
     private final int key;
     private final String value;
