@@ -11,6 +11,7 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.service.AlarmAnalysisService;
 import com.kongtrolink.framework.service.AlarmRegisterService;
 import com.kongtrolink.framework.service.TimeDataAnalysisService;
+import com.kongtrolink.framework.task.RpcTask;
 import com.kongtrolink.framework.task.SaveLogTask;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -80,6 +81,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      */
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload){
+
         String result = "{'pktType':4,'result':1}";
         Date curDate = new Date();
         RpcNotifyProto.MessageType response = RpcNotifyProto.MessageType.RESPONSE;
@@ -90,6 +92,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             saveLog(msgId, fsu, curDate, moduleMsg.getPktType());
             return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
         }
+        //注册数据
+        registerData(msgId, moduleMsg);
 
         //解析保存实时数据和告警
         Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
@@ -119,6 +123,30 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 JSON.toJSONString(msg), rpcModule);
         taskExecutor.execute(task);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/25 10:51
+     * 功能描述:数据注册给铁塔
+     */
+    private void registerData(String msgId, ModuleMsg dataMsg){
+        String sn = dataMsg.getSN();
+        JSONObject payload = dataMsg.getPayload();
+
+        ModuleMsg moduleMsg = new ModuleMsg();
+        moduleMsg.setPayload(payload);
+        moduleMsg.setSN(sn);
+        String pktType = dataMsg.getPktType();
+        if(pktType.equals("4")){
+            moduleMsg.setPktType(PktType.DATA_CHANGE);
+        }else if(pktType.equals("5")) {
+            moduleMsg.setPktType(PktType.DATA_REGISTER);
+        }
+        RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
+                JSON.toJSONString(moduleMsg), rpcModule);
+        taskExecutor.execute(rpcTask);
+    }
+
 
     /**
      * @auther: liudd

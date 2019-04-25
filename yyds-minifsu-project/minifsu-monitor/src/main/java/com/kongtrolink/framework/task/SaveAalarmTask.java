@@ -53,9 +53,9 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
             RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg("", registAddr, JSON.toJSONString(msg));
             String payload = rpcMessage.getPayload();
             JSONObject resultJson = JSONObject.parseObject(payload);
-            String result1 = resultJson.getString("result");
+            boolean result = "1".equals(resultJson.getString("result"));
             //如果成功，重新遍历告警
-            if(true){
+            if(result){
 //                Map<String, Object> resolveAlarmMap = new HashMap<>();
                 List<Alarm> resolveAlarmList = new ArrayList<>();
                 List<String> resolveKey = new ArrayList<>();
