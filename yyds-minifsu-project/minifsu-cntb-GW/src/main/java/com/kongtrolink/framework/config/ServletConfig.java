@@ -1,12 +1,10 @@
 package com.kongtrolink.framework.config;
 
 import org.apache.axis2.transport.http.AxisServlet;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ResourceUtils;
 
 @Configuration
 public class ServletConfig {
