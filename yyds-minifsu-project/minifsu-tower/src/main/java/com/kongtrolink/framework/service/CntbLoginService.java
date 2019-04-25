@@ -77,16 +77,24 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
     @Override
     public void run() {
-        if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
-                redisUtils.hasKey(RedisTable.VPN_HASH) &&
-                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
-            return;
-        }
+        try {
+            if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
+                    redisUtils.hasKey(RedisTable.VPN_HASH) &&
+                    redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
+                return;
+            }
 
-        Login info = getLoginInfo(redisOnlineInfo);
+            Login info = getLoginInfo(redisOnlineInfo);
 
-        if (info != null) {
-            login(info);
+            if (info != null) {
+                login(info);
+            }
+        } finally {
+            if (redisOnlineInfo != null) {
+                redisOnlineInfo.setLogining(false);
+                long time = redisUtils.getExpire(key);
+                redisUtils.set(key, redisOnlineInfo, time);
+            }
         }
     }
 

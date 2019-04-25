@@ -22,6 +22,8 @@ public class RedisOnlineInfo {
     private String innerIp;
     //内部服务端口
     private int innerPort;
+    //是否正在注册
+    private boolean logining = false;
     //铁塔在线状态
     private boolean online = false;
     //心跳间隔
@@ -93,6 +95,14 @@ public class RedisOnlineInfo {
 
     public void setInnerPort(int innerPort) {
         this.innerPort = innerPort;
+    }
+
+    public boolean isLogining() {
+        return logining;
+    }
+
+    public void setLogining(boolean logining) {
+        this.logining = logining;
     }
 
     public boolean isOnline() {

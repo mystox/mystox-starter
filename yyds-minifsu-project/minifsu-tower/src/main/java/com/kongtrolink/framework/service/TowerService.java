@@ -1349,7 +1349,11 @@ public class TowerService {
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
             if (!redisOnlineInfo.isOnline() &&
                 redisUtils.hasKey(RedisTable.VPN_HASH) &&
-                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName())) {
+                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()) &&
+                !redisOnlineInfo.isLogining()) {
+                long time = redisUtils.getExpire(key);
+                redisOnlineInfo.setLogining(true);
+                redisUtils.set(key, redisOnlineInfo, time);
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
                 taskExecutor.execute(new CntbLoginService(sn,
                         towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
