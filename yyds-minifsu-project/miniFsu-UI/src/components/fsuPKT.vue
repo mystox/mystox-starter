@@ -144,52 +144,52 @@
       }
     },
     computed: {
-      // optionBind() {
-      //   return {
-      //     name: '绑定',
-      //     form: {
-      //       'SN ID': [
-      //         {
-      //           type: 'span',
-      //           text: this.modifyCont.sN,
-      //           rule: {}
-      //         }
-      //       ],
-      //       'SN 设备列表': [
-      //         {
-      //           type: 'textarea',
-      //           name: 'snDeviceList',
-      //           defaultValue: '123123123\n123123123\n123123123\n123123123\n123123123\n',
-      //           disabled: true,
-      //           rows: 8,
-      //           rule: {}
-      //         }
-      //       ],
-      //       'FSU ID': [
-      //         {
-      //           type: 'input',
-      //           name: 'fsuId',
-      //           rule: {}
-      //         }
-      //       ],
-      //       'FSU 设备列表': [
-      //         {
-      //           type: 'textarea',
-      //           name: 'devIds',
-      //           rows: 8,
-      //           rule: {}
-      //         }
-      //       ],
-      //     },
-      //     clearText: this.$t('OPERATION.CLEAR'),
-      //     clear: this.clear,
-      //     executeText: this.$t('OPERATION.CONFIRM'),
-      //     execute: this.executeModify,
-      //     style: {
-      //       // width: '50%',
-      //     }
-      //   }
-      // },
+      optionBind() {
+        return {
+          name: '绑定',
+          form: {
+            'SN ID': [
+              {
+                type: 'span',
+                text: this.modifyCont.sN,
+                rule: {}
+              }
+            ],
+            'SN 设备列表': [
+              {
+                type: 'textarea',
+                name: 'snDeviceList',
+                defaultValue: '123123123\n123123123\n123123123\n123123123\n123123123\n',
+                disabled: true,
+                rows: 8,
+                rule: {}
+              }
+            ],
+            'FSU ID': [
+              {
+                type: 'input',
+                name: 'fsuId',
+                rule: {}
+              }
+            ],
+            'FSU 设备列表': [
+              {
+                type: 'textarea',
+                name: 'devIds',
+                rows: 8,
+                rule: {}
+              }
+            ],
+          },
+          clearText: this.$t('OPERATION.CLEAR'),
+          clear: this.clear,
+          executeText: this.$t('OPERATION.CONFIRM'),
+          execute: this.executeModify,
+          style: {
+            // width: '50%',
+          }
+        }
+      },
     },
     methods: {
       addMockData() {
