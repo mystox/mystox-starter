@@ -284,7 +284,7 @@ public class DataMntServiceImpl implements DataMntService {
                 int value = info.getInteger(coId);
                 SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(Integer.parseInt(dev.split("-")[0]), coId);
                 Integer valueBase = signalModel == null?1: signalModel.getValueBase();
-                info.put("coId", (double) value / (valueBase == null ? 1 : valueBase));
+                info.put(coId, (double) value / (valueBase == null ? 1 : valueBase));
             }
 
         }

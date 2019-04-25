@@ -300,7 +300,7 @@ public class MinifsuControllerApplicationTests {
 
         }
         //3包 数据包 数据变化包
-        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}},{\"dev\":\"3-1\",\"info\":{\"201001\":12}},{\"dev\":\"3-1\",\"info\":{\"101001\":12}},{\"dev\":\"3-1\",\"info\":{\"301001\":12}}]}}\n";
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}},{\"dev\":\"3-1\",\"info\":{\"201001\":12}},{\"dev\":\"3-1\",\"info\":{\"101001\":12,\"101002\":12}},{\"dev\":\"3-1\",\"info\":{\"301001\":12}}]}}\n";
         requestHead.put("payload", dataMsg);
         response = sendMSG(requestHead, rpcModuleBase, dataMsg);
         System.out.println("设备上报结果"+response.getPayload());
