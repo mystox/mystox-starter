@@ -1,39 +1,38 @@
 <template>
-  <div class="fsuList flex-column">
+  <div class="alarmList flex-column">
     <sc-breadcrumb
       :urls="[
-        {name: 'SN列表', path: '/fsus'},
-        {name: 'SN 日志记录'},
+        {name: 'SN列表'},
+        {name: '设备列表', path: '/devices', query: {sN: $route.query.sN}},
+        {name: '设备下实时告警'},
       ]"
     ></sc-breadcrumb>
-    <operation-bar-layout style="{}">
-       <div slot="query">
+    <!-- <operation-bar-layout style="{}">
+      <div slot="query">
         <el-form class=""
                  :model="searcher"
                  ref="searcher"
                  label-position="right"
                  :inline="true">
-          <!--使用重置功能需要给item元素传入prop属性-->
-          <!-- <el-form-item label="告警名称" prop="name" label-width="80px">
+          <el-form-item label="告警名称" prop="name" label-width="80px">
             <el-input v-model="searcher.sn" placeholder="请输入告警名称">
             </el-input>
-          </el-form-item> -->
-          <el-form-item label="时间" prop="name" label-width="45px">
+          </el-form-item>
+          <el-form-item label="时间" prop="name" label-width="80px">
             <el-date-picker
               v-model="searcher.timeRange"
               type="datetimerange"
               :picker-options="pickerOptions"
               placeholder="选择时间范围"
-              :clearable = "false"
               align="right">
             </el-date-picker>
           </el-form-item>
         </el-form>
       </div>
       <div slot="operate">
-        <el-button type="primary" @click="getTerminalLog()">查询</el-button>
+        <el-button type="primary" @click="goSearch(false)">查询</el-button>
       </div>
-    </operation-bar-layout>
+    </operation-bar-layout> -->
     <table-box
       class="flex-1"
       row-class-name="cursor-point"
@@ -41,8 +40,7 @@
       :loading = "loading"
       :stripe = "true"
       :border = "true"
-      :pagination = "pagination"
-      :data="fsuList"
+      :data="alarmList"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection">
       </el-table-column>
@@ -56,27 +54,42 @@
         :className = 'item.className'
         :resizable='false'>
       </el-table-column>
-      <el-table-column label="报文">
+      <!-- <el-table-column :label="'SN'" fixed="left">
         <template slot-scope="scope">
-          <span>{{JSON.stringify(scope.row.payload.payload)}}</span>
+          <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
+            <router-link :to="{
+                  path: '/points',
+                  query: {
+                      deviceId: scope.row.deviceId
+                  }
+                }" tag="span">
+              {{scope.row.username}}
+            </router-link>
+          </div>
         </template>
-      </el-table-column>
+      </el-table-column> -->
+      <!-- <el-table-column
+        :label="$t('SECURITY.USER.OPERATION')" fixed="right">
+        <template slot-scope="scope">
+          <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('threshold', scope.row)">门限设置</i>
+        </template>
+      </el-table-column> -->
     </table-box>
-    <modal :option="optionBind" ref="bindDialog"></modal>
+    <modal :option="optionModify" ref="threshold"></modal>
   </div>
 </template>
 
 <script>
   export default {
-    name: 's-sites',
+    name: 's-points',
     props: {},
     data () {
       return {
         searcher: {
           name: '',
           timeRange: [
-            new Date() - 1 * 24 * 60 * 60 * 1000, 
-            new Date().getTime()
+            new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0), 
+            new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1, 0, 0, 0)
           ],
         },
         pickerOptions: {
@@ -107,33 +120,64 @@
           }]
         },
         multipleSelection: [],
-        fsuList: [],
+        alarmList: [],
         userGroups: [],
         columns: [
-          {
-            label: '流量大小',
-            value: 'payloadSize',
+           {
+            label: '告警名称',
+            value: 'name',
             // width: 270,
             filter: 'nullFilter',
             className: '',
           },
           {
-            label: '报文类型',
-            value: 'pktType',
+            label: '告警点 ID',
+            value: 'alarmId',
             // width: 270,
             filter: 'nullFilter',
             className: '',
           },
           {
-            label: '时间',
-            value: 'recordTime',
+            label: '告警点值',
+            value: 'value',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '门限',
+            value: 'value',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '上报时间',
+            value: 'tReport',
             // width: 270,
             filter: 'dataFormatFilter',
             className: '',
           },
+          {
+            label: '等级',
+            value: 'level',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '描述',
+            value: 'desc',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
         ],
         modifyCont: {
-          
+          username: '',
+          password: '',
+          group_name: '',
+          comment: '',
         },
         pagination: {
           total: 0,
@@ -142,43 +186,22 @@
           onChange: this.onPaginationChanged
         },
         loading: false,
-      }
+      };
     },
     computed: {
-      optionBind() {
+      optionModify() {
         return {
-          name: '绑定',
+          name: '门限设置',
           form: {
-            'SN ID': [
-              {
-                type: 'span',
-                text: this.modifyCont.sN,
-                rule: {}
-              }
-            ],
-            'SN 设备列表': [
-              {
-                type: 'textarea',
-                name: 'snDeviceList',
-                defaultValue: '123123123\n123123123\n123123123\n123123123\n123123123\n',
-                disabled: true,
-                rows: 8,
-                rule: {}
-              }
-            ],
-            'FSU ID': [
+            '门限值': [
               {
                 type: 'input',
-                name: 'fsuId',
-                rule: {}
-              }
-            ],
-            'FSU 设备列表': [
-              {
-                type: 'textarea',
-                name: 'devIds',
-                rows: 8,
-                rule: {}
+                name: 'threshold',
+                defaultValue: this.modifyCont.threshold,
+                rule: {
+                  required: true,
+                  requiredError: '输入内容不可为空。'
+                }
               }
             ],
           },
@@ -187,7 +210,7 @@
           executeText: this.$t('OPERATION.CONFIRM'),
           execute: this.executeModify,
           style: {
-            // width: '50%',
+          //  width: '50%',
           }
         }
       },
@@ -195,80 +218,55 @@
     methods: {
       addMockData() {
         for (let i = 0; i < 10; i++) {
-          this.fsuList.push({
-            "recordTime":1556103423840,
-            "payloadSize":132,  // 流量大小
-            "payload":{
-                "payload":{
-                    "memUse":"14%",
-                    "csq":31,
-                    "pktType":11,
-                    "sysTime":1556103420,
-                    "SN":"MINI201904180005",
-                    "cpuUse":"99%"
-                },
-                "msgId":"01556103420"
-            },
-            "pktType": 11,  // 报文类型
-            "id":"5cc040ff2ebfe763b82a3fa6",
-            "sn":"MINI201904180005"
+          this.alarmList.push({
+            alarmId: "1001",
+            beginDelayFT: 0,
+            delay: 0,
+            devName: "开关电源",
+            dev_colId: "1-1_1001",
+            h: 0,
+            link: 19,
+            name: "电池01熔丝故障告警",
+            num: 17,
+            recoverDelay: 0,
+            recoverDelayFT: 0,
+            signalName: " 电池01熔丝故障告警",
+            tReport: 1556094413224,
+            threshold: 1,
+            value: 1,
           });
         }
-        this.pagination.total = this.fsuList.length;
+        this.pagination.total = this.alarmList.length;
       },
 
-      getTerminalLog() {
-        let param = {
-          sn: this.$route.query.sN,
-          startTime: new Date(this.searcher.timeRange[0]).getTime(),
-          endTime: new Date(this.searcher.timeRange[1]).getTime(),
-          page: this.pagination.currentPage ,
-          count: this.pagination.pageSize ,
-        };
-        this.$api.getTerminalLog(param, this.$route.query.sN).then((res) => {
-          this.pagination.total = res.data.totalSize;
-          this.fsuList = res.data.list;
-          this.loading = false;
-        }, (err)=> {
-          if (err) this.loading = false;
-        })
-      },
-
-      onPaginationChanged (pagination) {
-        this.pagination.pageSize = pagination.pageSize;
-        this.pagination.currentPage = pagination.currentPage;
-        this.getTerminalLog()
-      },
-
-      handleSelectionChange(val) {
-        this.multipleSelection = this.comFunc.map(val, "username");
+      handleSelectionChange() {
+        
       },
 
       intoNextPage() {
+
       },
 
-      executeAdd(res) {
-        this.addContent(res)
-      },
-      executeModify(res) {
-        this.modifyCont = Object.assign({}, this.modifyCont, res);
-        this.modifyCont.devIds = res.devIds.split('\n');
-        // this.updateContent(res);
-      },
-      clear(res) {
-      //  console.log(res)
-      },
+      // 获取实时告警列表
+      getAlarmList() {
+        let param = {
+          dev: this.$route.query.dev
+        }
+        this.$api.getAlarmList(param, this.$route.query.sN).then((res)=> {
+          this.alarmList = res.data;
+        })
+      }
 
     },
     mounted() {
       // this.addMockData();
-      this.getTerminalLog();
+      this.getAlarmList();
     }
   }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-  .fsuList
+  .alarmList
     .table-wrapper
       margin-top: 24px;
       .dialog-wrapper

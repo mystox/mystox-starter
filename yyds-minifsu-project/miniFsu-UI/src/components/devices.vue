@@ -30,7 +30,6 @@
       :loading = "loading"
       :stripe = "true"
       :border = "true"
-      :pagination = "pagination"
       :data="deviceList"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection">
@@ -55,19 +54,19 @@
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,
                       type: scope.row.type,
-                      sn: scope.row.sN,
+                      sN: scope.row.sN,
                       dev: scope.row.type + '-' + scope.row.resNo
                   }
                 }" tag="span">
               实时数据
             </router-link>
             <router-link :to="{
-                  path: '/alarms',
+                  path: '/alarmsForDevice',
                   query: {
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,
                       type: scope.row.type,
-                      sn: scope.row.sN,
+                      sN: scope.row.sN,
                       port: scope.row.port,
                       dev: scope.row.type + '-' + scope.row.resNo
                   }
@@ -80,7 +79,7 @@
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,
                       type: scope.row.type,
-                      sn: scope.row.sN,
+                      sN: scope.row.sN,
                       port: scope.row.port,
                   }
                 }" tag="span">
