@@ -130,20 +130,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * 功能描述:数据注册给铁塔
      */
     private void registerData(String msgId, ModuleMsg dataMsg){
-        String sn = dataMsg.getSN();
-        JSONObject payload = dataMsg.getPayload();
-
-        ModuleMsg moduleMsg = new ModuleMsg();
-        moduleMsg.setPayload(payload);
-        moduleMsg.setSN(sn);
-        String pktType = dataMsg.getPktType();
-        if(pktType.equals("4")){
-            moduleMsg.setPktType(PktType.DATA_CHANGE);
-        }else if(pktType.equals("5")) {
-            moduleMsg.setPktType(PktType.DATA_REGISTER);
-        }
         RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
-                JSON.toJSONString(moduleMsg), rpcModule);
+                JSON.toJSONString(dataMsg), rpcModule);
         taskExecutor.execute(rpcTask);
     }
 
