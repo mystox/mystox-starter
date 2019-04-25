@@ -19,7 +19,7 @@ import java.util.Map;
  * @Description:
  */
 @Service
-public class DataRegisterService {
+public class AlarmRegisterService {
     @Autowired
     RedisUtils redisUtils;
     @Autowired
@@ -52,4 +52,6 @@ public class DataRegisterService {
         taskExecutor.execute(new SaveAalarmTask(controllerName, controllerPort, rpcModule, fsu, alarmMap, redisUtils, rpcClient));
         return "";
     }
+
+
 }
