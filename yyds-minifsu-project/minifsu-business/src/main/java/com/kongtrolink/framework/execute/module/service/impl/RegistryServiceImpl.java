@@ -84,6 +84,8 @@ public class RegistryServiceImpl implements RegistryService {
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
             Order order = terminalDao.findOrderById(bid);
+            if (order == null)
+                order = terminalDao.findOrderByBid("default"); //默认外部通讯信息
 
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
