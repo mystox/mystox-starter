@@ -90,6 +90,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
                 login(info);
             }
         } finally {
+            redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
             if (redisOnlineInfo != null) {
                 redisOnlineInfo.setLogining(false);
                 long time = redisUtils.getExpire(key);
