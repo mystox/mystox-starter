@@ -248,7 +248,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
-                || PktType.FSU_BIND.equals(pktType) //business ---> 绑定
+                || PktType.HEART.equals(pktType) // business ---> 心跳
+                || PktType.FSU_BIND.equals(pktType) // business ---> 绑定
                 || PktType.DATA_STATUS.equals(pktType) //business ---> 运行状态上报
                 || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_REPORT.equals(pktType) //monitor ---> 实时数据上报
@@ -274,9 +275,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                         }
                     }
                 } else {
-                    logger.warn("BIP is NULL...send to default BID[default]", addrStr);
+                    logger.warn("BIP{} is NULL...send to default ", addrStr);
                 }
             }
+        }
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务绑定 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        if(PktType.FSU_BIND.equals(pktType)){ //business ---> 绑定
+
+
         }
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("result", StateCode.FAILED);
