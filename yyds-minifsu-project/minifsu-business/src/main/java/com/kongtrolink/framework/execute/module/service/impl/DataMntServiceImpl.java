@@ -96,13 +96,16 @@ public class DataMntServiceImpl implements DataMntService {
         for (String key : mntData) { //通过key获取实时数据
             JSONObject coData = new JSONObject();
             Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
-            String coId = key.replaceFirst(sn + "_" + dev + "_", "");
+            String coId = key.replaceFirst(dev + "_", "");
             coData.put("coId", coId);
             SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
             Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
             double value1 = Double.valueOf(value + "");
             coData.put("value", value1 / valueBase);
-            JSONObject data = tranceDataId(type, coId); //数据点翻译
+            coData.put("name", signalModel != null ? signalModel.getName() : null);
+            coData.put("unit", signalModel != null ? signalModel.getUnit() : null);
+            coData.put("type", signalModel != null ? signalModel.getType() : null);
+            JSONObject data = tranceDataId(coId); //数据点翻译
             coData.putAll(data);
             jsonArray.add(coData);
         }
@@ -118,7 +121,7 @@ public class DataMntServiceImpl implements DataMntService {
      * @param coId
      * @return
      */
-    private JSONObject tranceDataId(Integer devType, String coId) {
+    private JSONObject tranceDataId(String coId) {
         int coIdLen = coId.length();
         if (coIdLen < 6) {
             coId = String.format("%6s", coId).replaceAll("\\s", "0");
@@ -129,10 +132,6 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject data = new JSONObject();
         String coIdType = coId.substring(0, 1);
         data.put("dataType", SignalType.toName(coIdType));
-        SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
-        data.put("name", signalModel != null ? signalModel.getName() : null);
-        data.put("unit", signalModel != null ? signalModel.getUnit() : null);
-        data.put("type", signalModel != null ? signalModel.getType() : null);
         return data;
 
     }
@@ -263,39 +262,58 @@ public class DataMntServiceImpl implements DataMntService {
     @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
-        JSONObject payload = moduleMsg.getPayload();
-        RunState runState = new RunState();
-        runState.setSn(sn);
-        runState.setCpuUse((String) payload.get("cpuUse"));
-        runState.setMemUse((String) payload.get("memUse"));
-        runState.setSysTime((Long.parseLong(payload.get("sysTime") + "")));
-        runState.setCsq((Integer) payload.get("csq"));
-        runState.setCreateTime(new Date());
-        runStateDao.saveRunState(runState);
-        businessExecutor.execute(() -> {
-            // 向向外部网关发送运行状态报文
-            try {
-                moduleMsg.setPktType(PktType.DATA_STATUS);
-                rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
-            } catch (IOException e) {
-                logger.error("发送至外部业务注册异常" + e.toString());
-                //日志记录
-                Log log = new Log();
-                log.setErrorCode(3);
-                log.setSN(sn);
-                log.setMsgType(moduleMsg.getPktType());
-                log.setMsgId(moduleMsg.getMsgId());
-                log.setHostName(host);
-                log.setServiceName(name);
-                log.setTime(new Date(System.currentTimeMillis()));
-                logDao.saveLog(log);
-                e.printStackTrace();
-            }
-        });
-
-
+        //获取redis 信息
+        String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+        JSONObject value = redisUtils.get(key, JSONObject.class);
         JSONObject result = new JSONObject();
-        result.put("result", 1);
+        if (value != null && (int) value.get("STATUS") == 2) {
+            JSONObject payload = moduleMsg.getPayload();
+            RunState runState = new RunState();
+            runState.setSn(sn);
+            runState.setCpuUse((String) payload.get("cpuUse"));
+            runState.setMemUse((String) payload.get("memUse"));
+            runState.setSysTime((Long.parseLong(payload.get("sysTime") + "")));
+            runState.setCsq((Integer) payload.get("csq"));
+            runState.setCreateTime(new Date());
+            runStateDao.saveRunState(runState);
+            businessExecutor.execute(() -> {
+                // 向向外部网关发送运行状态报文
+                try {
+                    moduleMsg.setPktType(PktType.DATA_STATUS);
+                    rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                } catch (IOException e) {
+                    logger.error("发送至外部业务注册异常" + e.toString());
+                    //日志记录
+                    Log log = new Log();
+                    log.setErrorCode(3);
+                    log.setSN(sn);
+                    log.setMsgType(moduleMsg.getPktType());
+                    log.setMsgId(moduleMsg.getMsgId());
+                    log.setHostName(host);
+                    log.setServiceName(name);
+                    log.setTime(new Date(System.currentTimeMillis()));
+                    logDao.saveLog(log);
+                    e.printStackTrace();
+                }
+            });
+
+
+
+            result.put("result", 1);
+            return result;
+        }
+        //日志记录
+        Log log = new Log();
+        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
+        else log.setErrorCode(StateCode.CONNECT_ERROR);
+        log.setSN(sn);
+        log.setMsgType(moduleMsg.getPktType());
+        log.setMsgId(moduleMsg.getMsgId());
+        log.setHostName(host);
+        log.setServiceName(name);
+        log.setTime(new Date(System.currentTimeMillis()));
+        logDao.saveLog(log);
+        result.put("result", StateCode.UNREGISTY);
         return result;
     }
 

@@ -118,14 +118,14 @@ public class AlarmServiceImpl implements AlarmService {
             if (alarmSignalConfig != null) {
                 alarmJson.put("level", alarmSignalConfig.getLevel());
                 alarmJson.put("threshold", alarmSignalConfig.getThreshold());
+                String coId = alarmSignalConfig.getCoId();
+                SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
+                alarmJson.put("signalName", signalModel.getName());
             }
             AlarmSignalConfigModel alarmSignalConfigModel = configDao.findAlarmSignalModelByDevTypeAndAlarmId(devType, alarm.getAlarmId());
             alarmJson.put("name", alarmSignalConfigModel == null ? "未知告警" : alarmSignalConfigModel.getAlarmDesc());
             DeviceType deviceType = deviceDao.getDeviceType(devType);
             alarmJson.put("devName", deviceType == null ? "" : deviceType.getName());
-            String coId = alarmSignalConfig.getCoId();
-            SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
-            alarmJson.put("signalName", signalModel.getName());
             alarmList.add(alarmJson);
         }
         return (JSONArray) JSONArray.toJSON(alarmList);

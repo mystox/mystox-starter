@@ -37,5 +37,5 @@ rpc:
   client:
     timeout: 60000
   controller:
-    hostname: 172.16.5.213
+    hostname: 172.16.6.39
     port: 18800
