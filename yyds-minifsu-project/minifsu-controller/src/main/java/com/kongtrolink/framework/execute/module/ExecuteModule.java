@@ -231,6 +231,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.SET_DATA.equals(pktType) //设置信号点值
                 || PktType.SET_STATION.equals(pktType) //设置终端或绑定
                 || PktType.SET_ALARM_PARAM.equals(pktType)
+                || PktType.DATA_REGISTER.equals(pktType) //外报数据解析
                 || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.GET_ALARMS.equals(pktType) //web <--- 获取告警
                 || PktType.COMPILER.equals(pktType)

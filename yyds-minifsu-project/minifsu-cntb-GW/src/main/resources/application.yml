@@ -5,10 +5,10 @@ logging:
    org.mongodb.driver.*: OFF
 server:
   name: minifsu-cntb-gw
-  bindIp: 172.16.6.20
+  bindIp: 172.16.6.39
   port: 8080
   rpc:
-    port: 18882
+    port: 199999
 
 
 executor:
@@ -22,5 +22,5 @@ rpc:
 
 tower:
   service:
-    hostname: 172.16.6.20
+    hostname: 172.16.6.39
     port: 18881

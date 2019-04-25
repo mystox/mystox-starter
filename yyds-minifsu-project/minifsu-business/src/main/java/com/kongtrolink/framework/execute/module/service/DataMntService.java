@@ -24,4 +24,5 @@ public interface DataMntService {
 
     JSONObject setData(ModuleMsg moduleMsg);
 
+    JSONObject parseData(ModuleMsg moduleMsg);
 }

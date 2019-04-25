@@ -6,8 +6,7 @@ package com.kongtrolink.framework.core.entity;
  * \* Description:
  * \
  */
-public class PktType
-{
+public class PktType {
     public final static String GET_DATA = "get_data";//获取监控点数据
     public final static String GET_FSU = "get_fsu";//获取FSU
     public final static String CHECK_FSU = "check_fsu";//检查绑定

@@ -226,6 +226,7 @@ public class TerminalServiceImpl implements TerminalService {
             }
 
         }
+
         terminalDao.saveTerminal(terminal);
         JSONObject result = new JSONObject();
         result.put("result", 1);
