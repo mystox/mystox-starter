@@ -52,14 +52,14 @@
                 }" tag="span" style="color: #20A0FF; cursor: pointer;">
               / 查看设备
             </router-link>
-            <router-link :to="{
-                  path: '/alarms',
+            <router-link v-if="scope.row.status === 2"
+            :to="{
+                  path: '/alarmsForSN',
                   query: {
                       sN: scope.row.sN,
-                      isSN: true
                   }
                 }" tag="span" style="color: #20A0FF; cursor: pointer;">
-              / SN下实时告警
+              / 实时告警
             </router-link>
             <router-link :to="{
                   path: '/fsuInfoList',
@@ -81,7 +81,6 @@
         </template>
       </el-table-column>
     </table-box>
-    <!-- <modal :option="optionAdd" ref="addUserInfoDialog"></modal> -->
     <modal :option="optionBind" ref="bindDialog"></modal>
   </div>
 </template>
@@ -99,14 +98,14 @@
         fsuList: [],
         userGroups: [],
         columns: [
+          // {
+          //   label: 'SN 名称',
+          //   value: 'name',
+          //   // width: 270,
+          //   filter: 'nullFilter',
+          //   className: '',
+          // },
           {
-            label: 'SN 名称',
-            value: 'name',
-            // width: 270,
-            filter: 'nullFilter',
-            className: '',
-          },
-           {
             label: 'SN 编码',
             value: 'sN',
             // width: 270,

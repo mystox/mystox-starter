@@ -166,6 +166,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.GET_TERMINAL_LOG.equals(pktType)) { // 获取报文日志
             JSONObject jsonObject = terminalService.getTerminalPayloadLog(moduleMsg);
             result = jsonObject.toJSONString();
+        } else if (PktType.DATA_REGISTER.equals(pktType)) { // 外报数据解析
+            JSONObject jsonObject = dataMntService.parseData(moduleMsg);
+            result = jsonObject.toJSONString();
         }
 
 

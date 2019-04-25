@@ -1,17 +1,8 @@
 <template>
   <div class="alarmList flex-column">
     <sc-breadcrumb 
-      v-if="this.$route.query.isSN"
       :urls="[
         {name: 'SN列表', path: '/fsus'},
-        {name: '实时告警'},
-      ]"
-    ></sc-breadcrumb>
-    <sc-breadcrumb
-      v-else
-      :urls="[
-        {name: 'SN列表'},
-        {name: '设备列表', path: '/devices', query: {sN: $route.query.sn}},
         {name: '实时告警'},
       ]"
     ></sc-breadcrumb>
@@ -173,13 +164,13 @@
             filter: 'nullFilter',
             className: '',
           },
-          {
-            label: '描述',
-            value: 'desc',
-            // width: 270,
-            filter: 'nullFilter',
-            className: '',
-          },
+          // {
+          //   label: '描述',
+          //   value: 'desc',
+          //   // width: 270,
+          //   filter: 'nullFilter',
+          //   className: '',
+          // },
         ],
         modifyCont: {
           username: '',
@@ -258,9 +249,9 @@
       // 获取实时告警列表
       getAlarmList() {
         let param = {
-          dev: this.$route.query.dev
+          // sn: this.$route.query.sN
         }
-        this.$api.getAlarmList(param, this.$route.query.sn).then((res)=> {
+        this.$api.getAlarmList(param, this.$route.query.sN).then((res)=> {
           this.alarmList = res.data;
         })
       }

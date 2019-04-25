@@ -40,6 +40,7 @@ public class TerminalServiceImpl implements TerminalService {
 
 
     private RpcModule rpcModule;
+
     @Autowired
     public void setRpcModule(RpcModule rpcModule) {
         this.rpcModule = rpcModule;
@@ -124,14 +125,14 @@ public class TerminalServiceImpl implements TerminalService {
             JSONObject value = redisUtils.get(key, JSONObject.class);
             if (value != null) {
                 terminalJSON.put("status", value.get("STATUS"));
-            }else {
+            } else {
                 terminalJSON.put("status", 0);
             }
             if (terminalProperties != null)
                 terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));
             snList.add(terminalJSON);
         }
-        result.put("list",snList);
+        result.put("list", snList);
         return result;
     }
 
@@ -201,6 +202,15 @@ public class TerminalServiceImpl implements TerminalService {
     public JSONObject setTerminal(ModuleMsg moduleMsg) {
         JSONObject jsonObject = moduleMsg.getPayload();
         String sn = moduleMsg.getSN();
+        if (StringUtils.isBlank(sn)) {
+            sn = jsonObject.getString("sN");
+            if (StringUtils.isBlank(sn)) {
+                JSONObject result = new JSONObject();
+                result.put("result", 0);
+                return result;
+            }
+        }
+
         Terminal terminal = terminalDao.findTerminalBySn(sn);
         Object heartCycle = jsonObject.get("heartCycle");
         if (heartCycle != null) terminal.setHeartCycle((Integer) heartCycle);
@@ -217,7 +227,7 @@ public class TerminalServiceImpl implements TerminalService {
         if (StringUtils.isNotBlank(fsuId)) {
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
             try {
-                JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn,JSONArray.class);
+                JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, JSONArray.class);
                 moduleMsg.setPktType(PktType.FSU_BIND);
                 jsonObject.put("devList", devList);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
@@ -225,8 +235,10 @@ public class TerminalServiceImpl implements TerminalService {
                 e.printStackTrace();
             }
 
+        } else {
+            terminalDao.saveTerminal(terminal);
         }
-        terminalDao.saveTerminal(terminal);
+
         JSONObject result = new JSONObject();
         result.put("result", 1);
         return result;
@@ -274,7 +286,7 @@ public class TerminalServiceImpl implements TerminalService {
         String sn = moduleMsg.getSN();
         JSONObject search = moduleMsg.getPayload();
         List<RunState> terminalLogs = terminalDao.findRunStates(sn, search);
-        Long totalSize  = terminalDao.getRunStateCount(sn, search);
+        Long totalSize = terminalDao.getRunStateCount(sn, search);
         JSONObject result = new JSONObject();
         result.put("totalSize", totalSize);
         result.put("list", terminalLogs);

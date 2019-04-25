@@ -84,6 +84,8 @@ public class RegistryServiceImpl implements RegistryService {
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
             Order order = terminalDao.findOrderById(bid);
+            if (order == null)
+                order = terminalDao.findOrderByBid("default"); //默认外部通讯信息
 
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
@@ -431,6 +433,27 @@ public class RegistryServiceImpl implements RegistryService {
             result.put("result", StateCode.SUCCESS);
             return result;
         }
+        businessExecutor.execute(() -> {
+            try {
+                // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
+                moduleMsg.setPktType(PktType.HEART);
+                rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+            } catch (IOException e) {
+                logger.error("发送至外部业务心跳" + e.toString());
+                //日志记录
+                Log log = new Log();
+                log.setErrorCode(3);
+                log.setSN(sn);
+                log.setMsgType(moduleMsg.getPktType());
+                log.setMsgId(moduleMsg.getMsgId());
+                log.setHostName(host);
+                log.setServiceName(name);
+                log.setTime(new Date(System.currentTimeMillis()));
+                logDao.saveLog(log);
+            }
+        });
+
+
         //日志记录
         Log log = new Log();
         if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常

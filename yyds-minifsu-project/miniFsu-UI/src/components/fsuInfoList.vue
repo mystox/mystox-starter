@@ -20,6 +20,7 @@
               type="datetimerange"
               :picker-options="pickerOptions"
               placeholder="选择时间范围"
+              :clearable="false"
               align="right">
             </el-date-picker>
           </el-form-item>

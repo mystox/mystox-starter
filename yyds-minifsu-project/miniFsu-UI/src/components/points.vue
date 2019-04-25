@@ -3,7 +3,7 @@
     <sc-breadcrumb
       :urls="[
         {name: 'SN列表'},
-        {name: '设备列表', path: '/devices', query: {sN: $route.query.sn}},
+        {name: '设备列表', path: '/devices', query: {sN: $route.query.sN}},
         {name: '实时数据'},
       ]"
     ></sc-breadcrumb>
@@ -40,7 +40,6 @@
       :loading = "loading"
       :stripe = "true"
       :border = "true"
-      :pagination = "pagination"
       :data="pointList"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection">
@@ -247,7 +246,7 @@
           deviceId: this.$route.query.deviceId,
           resNo: this.$route.query.resNo - 0,
           type: this.$route.query.type - 0,
-        }, this.$route.query.sn).then((data) => {
+        }, this.$route.query.sN).then((data) => {
           this.pagination.total = data.data.info.length;
           this.pointList = data.data.info;
           this.dev = data.data.dev;
@@ -305,7 +304,7 @@
           "stePoint":201001,
           "steData":1
         };
-        this.$api.setSignal(params, this.$route.query.sn).then(() => {
+        this.$api.setSignal(params, this.$route.query.sN).then(() => {
           this.getSignalList();
         })
       },
