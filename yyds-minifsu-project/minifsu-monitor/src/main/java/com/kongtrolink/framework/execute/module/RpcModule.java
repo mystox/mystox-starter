@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module;
 
+import com.google.protobuf.BlockingService;
 import com.kongtrolink.framework.core.config.rpc.RpcServer;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotify;
@@ -33,8 +34,9 @@ public class RpcModule extends RpcModuleBase implements ModuleInterface {
     public boolean init() {
         logger.info("controller execute-RpcModule init : protocol class[{}], impl class[{}]", RpcNotify.class, executeModule.getClass());
         try {
+            BlockingService blockingService = RpcNotifyProto.RpcNotify.newReflectiveBlockingService(executeModule);
             // 初始化RpcServer.protocol方法实例,远程调用的方法体由此处初始化,初始化多个服务,多次setProtocol()即可
-            rpcServer.setProtocol(RpcNotify.class, RpcNotifyProto.RpcNotify.newReflectiveBlockingService(executeModule))
+            rpcServer.setProtocol(RpcNotify.class, blockingService)
                     .start();
         } catch (IOException e) {
             e.printStackTrace();

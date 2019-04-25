@@ -16,7 +16,7 @@ public class MessageResp {
             @XmlElement(name = "Info", type = TimeCheckAck.class),
             @XmlElement(name = "Info", type = GetDataAck.class),
             @XmlElement(name = "Info", type = SetPointAck.class),
-            @XmlElement(name = "Info", type = GetThreshold.class),
+            @XmlElement(name = "Info", type = GetThresholdAck.class),
             @XmlElement(name = "Info", type = SetThresholdAck.class)
     })
     protected Info info;

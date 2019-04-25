@@ -6,8 +6,7 @@ package com.kongtrolink.framework.core.entity;
  * \* Description:
  * \
  */
-public class PktType
-{
+public class PktType {
     public final static String GET_DATA = "get_data";//获取监控点数据
     public final static String GET_FSU = "get_fsu";//获取FSU
     public final static String CHECK_FSU = "check_fsu";//检查绑定
@@ -37,7 +36,6 @@ public class PktType
     public final static String FSU_BIND = "fsu_bind";//終端綁定SN
     public final static String FSU_REPORT = "fsu_report"; //FSU信息上报
     public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
-    public final static String DATA_REPORT = "data_report"; //终端数据变化上报
     public final static String DATA_REGISTER = "data_register"; //数据注册
     public final static String FILE_GET = "file_get"; //告警注册
     public final static String ALARM_SAVE = "alarm_save"; //保存告警
@@ -45,7 +43,8 @@ public class PktType
     public final static String ALARM_REGISTER = "alarm_register"; //告警注册
     public final static String TERMINAL_SAVE = "terminal_save"; //保存终端
     public final static String TERMINAL_REBOOT = "terminal_reboot"; //保存终端
-    public final static String DATA_CHANGE = "data_change"; //实时数据上报
+    public final static String DATA_REPORT = "data_report"; //数据变化上报--外部
+    public final static String DATA_CHANGE = "data_change"; //实时数据上报--外部
     public final static String DATA_STATUS = "data_status"; //往外部服务发送状态数据
     public final static String RUN_STATUS = "run_status"; //状态数据上报
     public final static String GET_RUNSTATE = "get_runstate"; //获取状态数据

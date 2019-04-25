@@ -231,6 +231,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.SET_DATA.equals(pktType) //设置信号点值
                 || PktType.SET_STATION.equals(pktType) //设置终端或绑定
                 || PktType.SET_ALARM_PARAM.equals(pktType)
+                || PktType.DATA_REGISTER.equals(pktType) //外报数据解析
                 || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.GET_ALARMS.equals(pktType) //web <--- 获取告警
                 || PktType.COMPILER.equals(pktType)
@@ -249,7 +250,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
                 || PktType.FSU_BIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_STATUS.equals(pktType) //business ---> 运行状态上报
-                || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 运行状态上报
+                || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 绑定
+                || PktType.DATA_REPORT.equals(pktType) //monitor ---> 实时数据上报
+                || PktType.DATA_CHANGE.equals(pktType) //monitor ---> 变化数据上报
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             //获取通讯信息中外部服务ip
@@ -271,7 +274,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                         }
                     }
                 } else {
-                    logger.error("bip[{}] is NULL...", addrStr);
+                    logger.warn("BIP is NULL...send to default BID[default]", addrStr);
                 }
             }
         }
@@ -376,7 +379,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             responsePayload.put("pktType", pktType);
             return terminalResponse(msgId, SN, terminalResp);
         }
-        /****************************数据变化上报*******************************/
+        /****************************数据变化上报DATA_CHANGE 实时数据上报DATA_REPORT*******************************/
         if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
