@@ -6,14 +6,13 @@
         {name: '设备列表'},
       ]"
     ></sc-breadcrumb>
-    <operation-bar-layout style="{}">
+    <!-- <operation-bar-layout style="{}">
      <div slot="query">
         <el-form class=""
                  :model="searcher"
                  ref="searchForm"
                  label-position="right"
                  :inline="true">
-          <!--使用重置功能需要给item元素传入prop属性-->
           <el-form-item label="设备名称" prop="sn" label-width="70px">
             <el-input v-model="searcher.sn" placeholder="请输入设备名称">
             </el-input>
@@ -21,12 +20,9 @@
         </el-form>
       </div>
       <div slot="operate">
-        <!-- <el-button type="primary" @click="showDialog('addUserInfoDialog')">新增</el-button> -->
-        <!--<el-button type="primary">应用</el-button>-->
         <el-button type="primary" @click="goSearch(false)">查询</el-button>
-        <!-- <el-button type="primary" @click="deleteContentsNeedValidated(false)">删除</el-button> -->
       </div>
-    </operation-bar-layout>
+    </operation-bar-layout> -->
     <table-box
       class="flex-1"
       row-class-name="cursor-point"

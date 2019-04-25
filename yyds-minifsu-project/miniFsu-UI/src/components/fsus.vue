@@ -7,18 +7,14 @@
                  ref="searcher"
                  label-position="right"
                  :inline="true">
-          <!--使用重置功能需要给item元素传入prop属性-->
-          <el-form-item label="SN" prop="sn" label-width="50px">
+          <el-form-item label="SN" prop="sn" label-width="35px">
             <el-input v-model="searcher.sn" placeholder="请输入SN">
             </el-input>
           </el-form-item>
         </el-form>
       </div>
       <div slot="operate">
-        <!-- <el-button type="primary" @click="showDialog('addUserInfoDialog')">新增</el-button> -->
-        <!--<el-button type="primary">应用</el-button>-->
         <el-button type="primary" @click="getFsuList">查询</el-button>
-        <!-- <el-button type="primary" @click="deleteContentsNeedValidated(false)">删除</el-button> -->
       </div>
     </operation-bar-layout>
     <table-box
@@ -44,14 +40,9 @@
         :resizable='false'>
       </el-table-column>
       <el-table-column
-        :label="$t('SECURITY.USER.OPERATION')" width="300">
+        :label="$t('SECURITY.USER.OPERATION')" width="400">
         <template slot-scope="scope">
           <div>
-            <!-- <i title='修改'
-                 style="color: #20A0FF; cursor: pointer;"
-                  @click="showDialog('modifyUserInfoDialog', scope.row)"
-                 class="icon iconfont icon-edit icon-lg">
-              </i> -->
             <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">绑定</i>
             <router-link :to="{
                   path: '/devices',
@@ -59,7 +50,16 @@
                       sN: scope.row.sN
                   }
                 }" tag="span" style="color: #20A0FF; cursor: pointer;">
-              / 设备
+              / 查看设备
+            </router-link>
+            <router-link :to="{
+                  path: '/alarms',
+                  query: {
+                      sN: scope.row.sN,
+                      isSN: true
+                  }
+                }" tag="span" style="color: #20A0FF; cursor: pointer;">
+              / SN下实时告警
             </router-link>
             <router-link :to="{
                   path: '/fsuInfoList',
@@ -209,7 +209,7 @@
       // 获取FSU（sn）列表
       getFsuList() {
         let param = {
-          // sn: this.searcher.sn,
+          sn: this.searcher.sn,
           page: this.pagination.currentPage ,
           count: this.pagination.pageSize ,
         };
