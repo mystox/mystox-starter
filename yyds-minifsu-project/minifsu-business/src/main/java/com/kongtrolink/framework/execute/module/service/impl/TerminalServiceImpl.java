@@ -7,11 +7,14 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.FsuDao;
+import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
 import com.kongtrolink.framework.execute.module.model.Device;
 import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.service.TerminalService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,8 +34,16 @@ import java.util.Map;
  */
 @Service
 public class TerminalServiceImpl implements TerminalService {
-    private final FsuDao fsuDao;
+    Logger logger = LoggerFactory.getLogger(TerminalServiceImpl.class);
 
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.rpc.port}")
+    private String port;
+    @Value("${server.name}")
+    private String name;
+    private final FsuDao fsuDao;
+    private final LogDao logDao;
     private final TerminalDao terminalDao;
     private final DeviceDao deviceDao;
 
@@ -52,8 +63,9 @@ public class TerminalServiceImpl implements TerminalService {
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
+    public TerminalServiceImpl(FsuDao fsuDao, LogDao logDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
         this.fsuDao = fsuDao;
+        this.logDao = logDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
@@ -224,7 +236,7 @@ public class TerminalServiceImpl implements TerminalService {
         if (runStatusRhythm != null) terminal.setCoordinate((String) coordinate);
 
         String fsuId = (String) jsonObject.get("fsuId");
-        if (StringUtils.isNotBlank(fsuId)) {
+        if (StringUtils.isNotBlank(fsuId)) { //存在 fsuid 进入绑定流程
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
             try {
                 JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, JSONArray.class);
@@ -232,9 +244,19 @@ public class TerminalServiceImpl implements TerminalService {
                 jsonObject.put("devList", devList);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             } catch (IOException e) {
+                logger.error("发送至外部业务注册异常" + e.toString());
+                //日志记录
+                Log log = new Log();
+                log.setErrorCode(3);
+                log.setSN(sn);
+                log.setMsgType(moduleMsg.getPktType());
+                log.setMsgId(moduleMsg.getMsgId());
+                log.setHostName(host);
+                log.setServiceName(name);
+                log.setTime(new Date(System.currentTimeMillis()));
+                logDao.saveLog(log);
                 e.printStackTrace();
             }
-
         } else {
             terminalDao.saveTerminal(terminal);
         }
