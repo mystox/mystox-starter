@@ -22,10 +22,7 @@
         </el-form>
       </div>
       <div slot="operate">
-        <!-- <el-button type="primary" @click="showDialog('addUserInfoDialog')">新增</el-button> -->
-        <!--<el-button type="primary">应用</el-button>-->
-        <el-button type="primary" @click="goSearch(false)">查询</el-button>
-        <!-- <el-button type="primary" @click="deleteContentsNeedValidated(false)">删除</el-button> -->
+        <el-button type="primary" @click="getThreshold">查询</el-button>
       </div>
     </operation-bar-layout>
     <table-box
@@ -91,6 +88,13 @@
           {
             label: '告警点 ID',
             value: 'alarmId',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '告警描述',
+            value: 'alarmDesc',
             // width: 270,
             filter: 'nullFilter',
             className: '',
@@ -169,8 +173,8 @@
     
       getThreshold() {
         let params = {
-          // cur_page: this.pagination.currentPage ,
-          // page_size: this.pagination.pageSize ,
+          page: this.pagination.currentPage ,
+          count: this.pagination.pageSize ,
         };
         this.$api.getThreshold({
           port: this.$route.query.port,
@@ -188,7 +192,7 @@
       onPaginationChanged (pagination) {
         this.pagination.pageSize = pagination.pageSize;
         this.pagination.currentPage = pagination.currentPage;
-        this.getUsers()
+        this.getThreshold()
       },
 
       handleSelectionChange(val) {
@@ -196,7 +200,7 @@
       },
 
       executeModify(res) {
-        this.updateContent(res)
+        this.setThreshold(res)
       },
       clear(res) {
 //        console.log(res)
@@ -212,7 +216,7 @@
       },
 
       // 设置门限值。
-      updateContent(res) {
+      setThreshold(res) {
         let params = {
           "deviceId": this.modifyCont.deviceId,
           "configId": this.modifyCont.id,
@@ -222,37 +226,6 @@
         this.$api.setThreshold(params, this.$route.query.sn).then(() => {
           this.getThreshold();
         })
-      },
-
-      deleteContents(callback) {
-        let params = {
-          users: this.multipleSelection
-        };
-        this.appHttp.postDeleteUsers(params).then(() => {
-          callback && callback.call(this);
-        })
-      },
-
-      deleteContentsNeedValidated() {
-        if (this.multipleSelection.length === 0) {
-          this.$message({message: "请选择删除项", type: 'warning', showClose: true})
-        } else {
-          this.$confirm('此操作将永久删除所选项, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.deleteContents(function() {
-              this.getUsers();
-            })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除',
-              showClose: true
-            });
-          });
-        }
       },
 
     },

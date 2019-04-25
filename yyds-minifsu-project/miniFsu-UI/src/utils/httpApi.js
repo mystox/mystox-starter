@@ -49,6 +49,7 @@ const get = (url, param, successMsg, failMsg)=> {
             return Promise.reject(httpErr);
         }
     ).catch(err=> {
+        closeFullScreen();
         return Promise.reject(err);
     })
 }
@@ -76,6 +77,7 @@ const post = (url, param, successMsg, failMsg)=> {
                 return Promise.reject(httpErr);
             }
     ).catch(err=> {
+        closeFullScreen();
         return Promise.reject(err);
     })
 }

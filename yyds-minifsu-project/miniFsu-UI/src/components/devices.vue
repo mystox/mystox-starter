@@ -373,7 +373,7 @@
 
     },
     mounted() {
-      this.addMockData();
+      // this.addMockData();
       this.getDeviceList();
     }
   }
