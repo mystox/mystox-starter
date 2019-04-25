@@ -23,6 +23,8 @@ import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -41,6 +43,8 @@ import java.util.*;
  */
 @Service
 public class TowerService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     RedisUtils redisUtils;
@@ -231,8 +235,7 @@ public class TowerService {
                 //若数据库存在记录且SN不同，则将该条绑定状态置为解绑，并记录解绑时间
                 boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation.getSn(), curStation.getFsuId());
                 if (!unbindResult) {
-                    //todo 若解绑失败？
-
+                    logger.error("TERMINAL_UNBIND: 终端解绑失败,sn:" + curStation.getSn() + ",fsuId:" + curStation.getFsuId());
                 }
             }
         }
@@ -490,7 +493,7 @@ public class TowerService {
         if (redisUtils.hasKey(dataKey)) {
             result = redisUtils.get(dataKey, RedisData.class);
         }
-        result.setDeviceId(fsuId);
+        result.setDeviceId(deviceId);
         return result;
     }
 
@@ -526,13 +529,13 @@ public class TowerService {
 
             String deviceId = getDeviceId(type, resNo, jsonDeviceList);
             if (deviceId == null) {
-                //todo 在日志中记录错误代码和原始数据，该告警无对应设备Id
+                logger.info("ALARM_REGISTER: 查找铁塔设备Id失败,type:" + type + ",resNo:" + resNo);
                 continue;
             }
 
             Alarm alarm = getAlarm(type, jsonObject.getString("alarmId"));
             if (alarm == null) {
-                //todo 在日志中记录错误代码和原始数据，未获取到告警点对应信息
+                logger.info("ALARM_REGISTER: 查找铁塔告警点失败,type:" + type + ",alarmId:" + jsonObject.getString("alarmId"));
                 continue;
             }
 
@@ -542,7 +545,7 @@ public class TowerService {
             }
 
             if (!alarmLogDao.upsert(redisAlarm)) {
-                //todo 在日志中记录错误代码和原始数据，数据库中记录出错
+                logger.error("ALARM_REGISTER: 数据库记录失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
                 continue;
             }
 
@@ -555,7 +558,7 @@ public class TowerService {
                 curRedisAlarm = redisAlarm;
             }
             if (!redisUtils.set(alarmKey, curRedisAlarm)) {
-                //todo 在日志中记录错误代码和原始数据，redis中记录出错
+                logger.error("ALARM_REGISTER: redis记录失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
                 continue;
             }
         }
@@ -600,7 +603,7 @@ public class TowerService {
         } else if ((info.getInteger("link") & 16) > 0) {
             result.setAlarmFlag(true);
         } else {
-            //todo 在日志中记录错误代码和原始数据，无法识别告警标识
+            logger.info("ALARM_REGISTER: 无法识别告警标识,link:" + info.getInteger("link"));
             return null;
         }
 
@@ -642,7 +645,6 @@ public class TowerService {
         }
 
         result = redisUtils.get(key, RedisOnlineInfo.class);
-        redisUtils.set(key, result, registryTimeout); //刷新redis中的超时时间
 
         return result;
     }
@@ -728,7 +730,7 @@ public class TowerService {
             ack.setResult(1);
             result = getXmlMsg(new MessageResp(ack));
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("CntbGetFsuInfo: 解析请求报文失败：" + request);
         }
 
         return result;
@@ -800,7 +802,7 @@ public class TowerService {
 
             result = getXmlMsg(new MessageResp(ack));
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("CntbGetData: 解析请求报文失败,request:" + request);
         }
 
         return result;
@@ -937,7 +939,7 @@ public class TowerService {
             }
 
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("CntbSetPoint: 解析请求报文失败,request:" + request);
         }
 
         return result;
@@ -1029,7 +1031,7 @@ public class TowerService {
             result = getXmlMsg(new MessageResp(getThresholdAck));
 
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("CntbGetThreshold: 解析请求报文失败,request:" + request);
         }
 
         return result;
@@ -1110,7 +1112,7 @@ public class TowerService {
         try {
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
-            //todo 实体类转xml失败
+            logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(message));
         }
 
         return result;
@@ -1209,7 +1211,7 @@ public class TowerService {
             }
 
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("CntbSetThreshold: 解析请求报文失败,request:" + request);
         }
 
         return result;
@@ -1231,7 +1233,7 @@ public class TowerService {
         try {
             response = rpcModuleBase.postMsg("", new InetSocketAddress(ip, port), JSONObject.toJSONString(msg));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + ip + ",port:" + port + ",msg:" + msg);
         }
         return response;
     }

@@ -21,6 +21,8 @@ import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.CarrierDao;
 import com.kongtrolink.framework.execute.module.model.RedisFsuBind;
 import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -39,9 +41,9 @@ import java.util.Map;
  */
 public class CntbLoginService extends RpcModuleBase implements Runnable {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private String key;
-    private String innerIp;
-    private int innerPort;
     private String hostname;
     private int port;
     private RpcModule rpcModule;
@@ -113,23 +115,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         jsonObject.put("sn", onlineInfo.getSn());
         String request = createRequestMsg(PktType.GET_FSU, jsonObject);
 
-        //todo 没有和内部服务进行通信
         JSONObject jsonResponse = postMsg(request, addr);
-
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("success", true);
-//        JSONArray tmp = new JSONArray();
-//        JSONObject info = new JSONObject();
-//        info.put("imei", "imei");
-//        info.put("imsi", "imsi");
-//        info.put("nwType", "nwType");
-//        info.put("carrier", "CU");
-//        info.put("wmVendor", "wmVendor");
-//        info.put("wmType", "wmType");
-//        info.put("model", "model");
-//        info.put("adapterVer", "adapterVer");
-//        tmp.add(info);
-//        jsonResponse.put("data", tmp);
 
         if (!jsonResponse.containsKey("list")) {
             return result;
@@ -217,10 +203,6 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
         JSONObject jsonResponse = postMsg(request, addr);
 
-//        JSONObject jsonResponse = new JSONObject();
-//        jsonResponse.put("result", true);
-//        jsonResponse.put("msg", "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><PK_Type><Name>LOGIN_ACK</Name><Code>102</Code></PK_Type><Info><SCIP>172.16.6.66</SCIP><RightLevel>2</RightLevel></Info></Response>");
-
         if (jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
             String resXmlMsg = jsonResponse.getString("msg");
             LoginAck loginAck = analyzeMsg(resXmlMsg);
@@ -251,7 +233,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             Message message = new Message(login);
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
-            //todo 实体类转xml失败
+            logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(login));
         }
 
         return result;
@@ -275,14 +257,10 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
                 String reqInfoStr = MessageUtil.infoNodeToString(reqInfoNode);
                 result = (LoginAck)MessageUtil.stringToMessage(reqInfoStr, LoginAck.class);
             }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            logger.error("AnalyzeXmlMsg: String转Document失败,xml:" + xml);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("GetXmlMsg: String转实体类失败,xml" + xml);
         }
 
         return result;
@@ -315,7 +293,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             String response = rpcMessage.getPayload();
             result = JSONObject.parseObject(response);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + addr.getHostName() + ",port:" + addr.getPort() + ",msg:" + request);
         }
 
         return result;

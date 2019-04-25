@@ -16,6 +16,8 @@ import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.AlarmLogDao;
 import com.kongtrolink.framework.execute.module.model.RedisAlarm;
 import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -35,7 +37,8 @@ import java.util.Set;
  */
 public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
-    private String sn;
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private RedisOnlineInfo redisOnlineInfo;
     private String hostname;
     private int port;
@@ -87,6 +90,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
         for (RedisAlarm redisAlarm : redisAlarmList) {
             if (alarmLogDao.upsert(redisAlarm)) {
                 //todo 日志记录错误信息
+                logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
             }
         }
 
@@ -99,9 +103,11 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
      */
     private boolean checkReport(RedisAlarm redisAlarm) {
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.BEGIN) && redisAlarm.isStartReported()) {
+            //当前告警状态为BEGIN且已成功上报，则不再上报
             return false;
         }
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.END) && redisAlarm.isEndReported()) {
+            //当前告警状态为END且已成功上报，则不再上报
             return false;
         }
 
@@ -212,7 +218,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             Message message = new Message(sendAlarm);
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
-            //todo 实体类转xml失败
+            logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(sendAlarm));
         }
 
         return result;
@@ -245,7 +251,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             String response = rpcMessage.getPayload();
             result = JSONObject.parseObject(response);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + addr.getHostName() + ",port:" + addr.getPort() + ",msg:" + request);
         }
 
         return result;
@@ -269,14 +275,10 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 String reqInfoStr = MessageUtil.infoNodeToString(reqInfoNode);
                 result = (SendAlarmAck)MessageUtil.stringToMessage(reqInfoStr, SendAlarmAck.class);
             }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            logger.error("AnalyzeXmlMsg: String转Document失败,xml:" + xml);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("GetXmlMsg: String转实体类失败,xml" + xml);
         }
 
         return result;
