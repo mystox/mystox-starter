@@ -13,7 +13,8 @@ let points = r=> require.ensure([], ()=> r(require('@/components/points.vue')), 
 let bindSN = r=> require.ensure([], ()=> r(require('@/components/bindSN.vue')), 'bindSN');
 let importDataForTest = r=> require.ensure([], ()=> r(require('@/components/importDataForTest.vue')), 'importDataForTest');
 let setAlarms = r=> require.ensure([], ()=> r(require('@/components/setAlarms.vue')), 'setAlarms');
-let alarms = r=> require.ensure([], ()=> r(require('@/components/alarms.vue')), 'alarms');
+let alarmsForDevice = r=> require.ensure([], ()=> r(require('@/components/alarmsForDevice.vue')), 'alarmsForDevice');
+let alarmsForSN = r=> require.ensure([], ()=> r(require('@/components/alarmsForSN.vue')), 'alarmsForSN');
 
 export default new Router({
   // mode: 'history',
@@ -63,9 +64,14 @@ export default new Router({
           component: setAlarms
         },
         {
-          path: '/alarms',
-          name: 'alarms',
-          component: alarms
+          path: '/alarmsForDevice',
+          name: 'alarmsForDevice',
+          component: alarmsForDevice
+        },
+        {
+          path: '/alarmsForSN',
+          name: 'alarmsForSN',
+          component: alarmsForSN
         },
         {
           path: '/bindSN',

@@ -3,7 +3,7 @@
     <sc-breadcrumb
       :urls="[
         {name: 'SN列表'},
-        {name: '设备列表', path: `/devices`, query: {sN: $route.query.sn}},
+        {name: '设备列表', path: `/devices`, query: {sN: $route.query.sN}},
         {name: '告警门限设置'},
       ]"
     ></sc-breadcrumb>
@@ -180,7 +180,7 @@
           port: this.$route.query.port,
           resNo: this.$route.query.resNo - 0,
           type: this.$route.query.type - 0,
-        }, this.$route.query.sn).then((data) => {
+        }, this.$route.query.sN).then((data) => {
           this.pagination.total = data.data.length;
           this.alarmList = data.data;
           this.loading = false
@@ -223,7 +223,7 @@
           "coId":  this.modifyCont.coId,
           "threshold": res.threshold - 0
         };
-        this.$api.setThreshold(params, this.$route.query.sn).then(() => {
+        this.$api.setThreshold(params, this.$route.query.sN).then(() => {
           this.getThreshold();
         })
       },
