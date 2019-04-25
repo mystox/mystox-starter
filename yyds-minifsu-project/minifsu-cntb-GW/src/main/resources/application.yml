@@ -5,10 +5,10 @@ logging:
    org.mongodb.driver.*: OFF
 server:
   name: minifsu-cntb-gw
-  bindIp: 172.16.6.39
+  bindIp: 172.16.6.20
   port: 8080
   rpc:
-    port: 199999
+    port: 18882
 
 
 executor:
@@ -22,5 +22,7 @@ rpc:
 
 tower:
   service:
-    hostname: 172.16.6.39
+    hostname: 172.16.6.20
     port: 18881
+servlet:
+  resourcePath: E:\Works\MiniFSU\minifsu2_framework\yyds-minifsu-project\minifsu-cntb-GW\src\main\resources\WEB-INF\services\FSUService\META-INF

@@ -79,7 +79,7 @@ public class FSUServiceServiceSkeleton implements FSUServiceServiceSkeletonInter
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
-        LOGGER.info("*********************FSU上报 end******************************");
+        LOGGER.info("*********************FSU回复 end******************************");
         return new InvokeResponse();
     }
 
