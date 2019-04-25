@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TAlarm {
     @XmlElement(name = "SerialNo")
-    private int serialNo;
+    private String serialNo;
     @XmlElement(name = "Id")
     private String id;
     @XmlElement(name = "FsuId")
@@ -32,11 +32,11 @@ public class TAlarm {
     @XmlElement(name = "AlarmDesc")
     private String alarmDesc;
 
-    public int getSerialNo() {
+    public String getSerialNo() {
         return serialNo;
     }
 
-    public void setSerialNo(int serialNo) {
+    public void setSerialNo(String serialNo) {
         this.serialNo = serialNo;
     }
 

@@ -6,7 +6,7 @@ package com.kongtrolink.framework.execute.module.model;
  * 新建文件 2019-4-22 18:49:57
  */
 public class RedisAlarm {
-    private int serialNo;
+    private String serialNo;
     private String id;
     private String fsuId;
     private String deviceId;
@@ -24,14 +24,14 @@ public class RedisAlarm {
     private boolean endReported;
     private int reportCount;
 
-    public static final String START = "START";
+    public static final String BEGIN = "BEGIN";
     public static final String END = "END";
 
-    public int getSerialNo() {
+    public String getSerialNo() {
         return serialNo;
     }
 
-    public void setSerialNo(int serialNo) {
+    public void setSerialNo(String serialNo) {
         this.serialNo = serialNo;
     }
 
@@ -60,7 +60,7 @@ public class RedisAlarm {
     }
 
     public String getAlarmTime() {
-        if (this.alarmFlag == START) {
+        if (this.alarmFlag == BEGIN) {
             return startTime;
         } else if (this.alarmFlag == END) {
             return endTime;
@@ -91,7 +91,7 @@ public class RedisAlarm {
 
     public void setAlarmFlag(boolean alarmFlag) {
         if (alarmFlag) {
-            this.alarmFlag = START;
+            this.alarmFlag = BEGIN;
         } else {
             this.alarmFlag = END;
         }

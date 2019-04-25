@@ -70,14 +70,6 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
         for (String key : list) {
             RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
-            if (!redisAlarm.isStartReported()) {
-                redisAlarm.setAlarmFlag(true);
-            } else if (!redisAlarm.isEndReported()) {
-                redisAlarm.setAlarmFlag(false);
-            } else {
-                redisUtils.del(key);
-                continue;
-            }
 
             if (!checkReport(redisAlarm)) {
                 continue;
@@ -106,10 +98,16 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
      * @return
      */
     private boolean checkReport(RedisAlarm redisAlarm) {
+        if (redisAlarm.getAlarmFlag().equals(RedisAlarm.BEGIN) && redisAlarm.isStartReported()) {
+            return false;
+        }
+        if (redisAlarm.getAlarmFlag().equals(RedisAlarm.END) && redisAlarm.isEndReported()) {
+            return false;
+        }
+
         if (redisAlarm.getLastReportTime() + 24 * 60 * 60 > System.currentTimeMillis() / 1000) {
             //上次上报时间距离当前时间超过24小时，则上报次数清0，返回true
             redisAlarm.setReportCount(0);
-            return true;
         }
 
         //上次上报时间+上报间隔 大于 当前时间 不上报告警
@@ -139,7 +137,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             tAlarm.setAlarmDesc(redisAlarm.getCompleteDesc());
             if (!redisAlarm.isStartReported()) {
                 tAlarm.setAlarmTime(redisAlarm.getStartTime());
-                tAlarm.setAlarmFlag(RedisAlarm.START);
+                tAlarm.setAlarmFlag(RedisAlarm.BEGIN);
             } else if (!redisAlarm.isEndReported()) {
                 tAlarm.setAlarmTime(redisAlarm.getEndTime());
                 tAlarm.setAlarmFlag(RedisAlarm.END);

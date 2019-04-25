@@ -53,8 +53,6 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     /**
      * 构造函数
      * @param sn sn
-     * @param innerIp 内部服务地址
-     * @param innerPort 内部服务端口
      * @param hostname 铁塔网关服务地址
      * @param port 铁塔网关服务端口
      * @param rpcModule rpcModule
@@ -62,13 +60,11 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @param rpcClient rpcClient
      * @param carrierDao 运营商信息数据库操作
      */
-    public CntbLoginService(String sn, String innerIp, int innerPort, String hostname, int port,
+    public CntbLoginService(String sn, String hostname, int port,
                             RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
                             CarrierDao carrierDao) {
         super(rpcClient);
         this.key = RedisTable.getRegistryKey(sn);
-        this.innerIp = innerIp;
-        this.innerPort = innerPort;
         this.hostname = hostname;
         this.port = port;
         this.rpcModule = rpcModule;
@@ -111,7 +107,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     private Login getLoginInfo(RedisOnlineInfo onlineInfo) {
         Login result = null;
 
-        InetSocketAddress addr = new InetSocketAddress(innerIp, innerPort);
+        InetSocketAddress addr = new InetSocketAddress(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort());
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sn", onlineInfo.getSn());
@@ -135,10 +131,10 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 //        tmp.add(info);
 //        jsonResponse.put("data", tmp);
 
-        if (!jsonResponse.getBoolean("success")) {
+        if (!jsonResponse.containsKey("list")) {
             return result;
         }
-        JSONArray array = jsonResponse.getJSONArray("data");
+        JSONArray array = jsonResponse.getJSONArray("list");
         if (array.size() != 1) {
             return result;
         }
