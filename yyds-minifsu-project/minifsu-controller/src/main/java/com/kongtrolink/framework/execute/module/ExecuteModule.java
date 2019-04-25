@@ -256,31 +256,39 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.DATA_CHANGE.equals(pktType) //monitor ---> 变化数据上报
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
-            //获取通讯信息中外部服务ip
-            String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
-            JSONObject value = redisUtils.get(key, JSONObject.class);
-            if (value != null && (Integer) value.get("STATUS") == 2) {
-                String addrStr = (String) value.get("BIP");
-                if (StringUtils.isNotBlank(addrStr)) {
-                    String[] addrs = addrStr.split(";");
-                    for (String addr : addrs) {
-                        if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
-                            String[] addrArr = addr.split(":");
-                            JSONObject registerJson = moduleMsg.getPayload();
-                            registerJson.put("innerIp", hostname);
-                            registerJson.put("innerPort", port);
-                            return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
-                        } else {
-                            logger.error("bip[{}] illegal...", addr);
-                        }
-                    }
-                } else {
-                    logger.warn("BIP{} is NULL...send to default ", addrStr);
+            String addrStr = "";
+            JSONObject payload = msg.getPayload();
+            if (payload != null) {
+                addrStr = payload.getString("BIP");
+            }
+            if (StringUtils.isBlank(addrStr)){
+                //获取通讯信息中外部服务ip
+                String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
+                JSONObject value = redisUtils.get(key, JSONObject.class);
+                if (value != null && (Integer) value.get("STATUS") == 2) {
+                    addrStr = (String) value.get("BIP");
                 }
+            }
+
+            if (StringUtils.isNotBlank(addrStr)) {
+                String[] addrs = addrStr.split(";");
+                for (String addr : addrs) {
+                    if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
+                        String[] addrArr = addr.split(":");
+                        JSONObject registerJson = moduleMsg.getPayload();
+                        registerJson.put("innerIp", hostname);
+                        registerJson.put("innerPort", port);
+                        return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
+                    } else {
+                        logger.error("bip[{}] illegal...", addr);
+                    }
+                }
+            } else {
+                logger.warn("BIP{} is NULL...send to default ", addrStr);
             }
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务绑定 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        if(PktType.FSU_BIND.equals(pktType)){ //business ---> 绑定
+        if (PktType.FSU_BIND.equals(pktType)) { //business ---> 绑定
 
 
         }
@@ -307,7 +315,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String gip = (String) payloadObject.get("gip");
         JSONObject msgPayload = terminalMsg.getPayload();
         String SN = (String) msgPayload.get("SN");
-        terminalPayloadSave(msgId, SN,terminalString); //终端接收的报文保存
+        terminalPayloadSave(msgId, SN, terminalString); //终端接收的报文保存
         TerminalMsg terminalResp = new TerminalMsg(); //响应终端消息实体 payload
         terminalResp.setMsgId(msgId);
         if (msgPayload == null) {
@@ -443,8 +451,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     }
 
-    Object terminalResponse(String msgId, String sn ,TerminalMsg terminalResp) {
-        terminalPayloadSave(msgId, sn,terminalResp); //----------------------->记录终端响应日志
+    Object terminalResponse(String msgId, String sn, TerminalMsg terminalResp) {
+        terminalPayloadSave(msgId, sn, terminalResp); //----------------------->记录终端响应日志
         return JSONObject.toJSON(terminalResp);
     }
 
@@ -458,13 +466,13 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         controllerExecutor.execute(() -> {
             ModuleMsg moduleMsg = null;
             if (payload != null && payload instanceof JSON) {//非空json结果保存
-                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN,(JSONObject) payload);
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, (JSONObject) payload);
 
             } else if (payload != null && payload instanceof String) {
                 JSONObject jsonPayload = JSONObject.parseObject((String) payload);
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
-                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN,jsonPayload);
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
             } else return;
             try {
                 sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //异步保存
@@ -473,7 +481,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 e.printStackTrace();
             }
         });
-
 
 
     }

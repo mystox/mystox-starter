@@ -229,12 +229,12 @@ public class TerminalServiceImpl implements TerminalService {
             try {
                 JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, JSONArray.class);
                 moduleMsg.setPktType(PktType.FSU_BIND);
+
                 jsonObject.put("devList", devList);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         } else {
             terminalDao.saveTerminal(terminal);
         }
