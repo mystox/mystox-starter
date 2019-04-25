@@ -274,7 +274,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                         }
                     }
                 } else {
-                    logger.error("bip[{}] is NULL...", addrStr);
+                    logger.warn("BIP is NULL...send to default BID[default]", addrStr);
                 }
             }
         }
