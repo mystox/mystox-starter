@@ -32,6 +32,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private TerminalService terminalService;
 
     private DataMntService dataMntService;
+
     @Autowired
     public void setDataMntService(DataMntService dataMntService) {
         this.dataMntService = dataMntService;
@@ -118,7 +119,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             JSONArray jsonObject = terminalService.getDeviceList(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.GET_FSU.equals(pktType)) { //获取sn列表
-            JSONArray jsonObject = terminalService.listFsu(moduleMsg);
+            JSONObject jsonObject = terminalService.listFsu(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.GET_DATA.equals(pktType)) { //获取实时数据
             JSONObject jsonObject = dataMntService.getSignalList(moduleMsg);
@@ -156,16 +157,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.SET_DATA.equals(pktType)) { // 获取告警列表
             JSONObject jsonObject = dataMntService.setData(moduleMsg);
             result = jsonObject.toJSONString();
-        }else if (PktType.RUN_STATUS.equals(pktType)) { // 终端的状态数据
+        } else if (PktType.RUN_STATUS.equals(pktType)) { // 终端的状态数据
             JSONObject jsonObject = dataMntService.saveRunStatus(moduleMsg);
             result = jsonObject.toJSONString();
-        }
-else if (PktType.GET_RUNSTATE.equals(pktType)) { // 获取运行状态
-            JSONArray jsonObject = terminalService.getRunStates(moduleMsg);
+        } else if (PktType.GET_RUNSTATE.equals(pktType)) { // 获取运行状态
+            JSONObject jsonObject = terminalService.getRunStates(moduleMsg);
             result = jsonObject.toJSONString();
-        }
-else if (PktType.GET_TERMINAL_LOG.equals(pktType)) { // 获取报文日志
-            JSONArray jsonObject = terminalService.getTerminalPayloadLog(moduleMsg);
+        } else if (PktType.GET_TERMINAL_LOG.equals(pktType)) { // 获取报文日志
+            JSONObject jsonObject = terminalService.getTerminalPayloadLog(moduleMsg);
             result = jsonObject.toJSONString();
         }
 

@@ -9,7 +9,7 @@ import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.service.AlarmAnalysisService;
-import com.kongtrolink.framework.service.DataRegisterService;
+import com.kongtrolink.framework.service.AlarmRegisterService;
 import com.kongtrolink.framework.service.TimeDataAnalysisService;
 import com.kongtrolink.framework.task.SaveLogTask;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +31,7 @@ import java.util.*;
 @Service
 public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     @Autowired
-    DataRegisterService registerService;
+    AlarmRegisterService registerService;
     @Autowired
     RedisUtils redisUtils;
     @Autowired

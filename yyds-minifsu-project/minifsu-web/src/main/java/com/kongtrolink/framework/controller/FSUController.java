@@ -64,7 +64,7 @@ public class FSUController {
 
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
-        JSONArray result = fsuService.listFsu(requestBody);//查询结果
+        JSONObject result = fsuService.listFsu(requestBody);//查询结果
         return new JsonResult(result);
     }
 
@@ -140,26 +140,20 @@ public class FSUController {
   @RequestMapping("/getRunState")
     public JsonResult getRunState(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
 
-      JSONArray result  = fsuService.getRunState(requestBody, sn);
-      if (result != null) {
-          return new JsonResult(result);
-      }
-      return new JsonResult("请求错误或者超时", false);
+      JSONObject result  = fsuService.getRunState(requestBody, sn);
+      return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
     @RequestMapping("/getTerminalLog")
     public JsonResult getTerminalPayload(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
-        JSONArray result = fsuService.getTerminalPayload(requestBody, sn);
-        if (result != null) {
-            return new JsonResult(result);
-        }
-        return new JsonResult("请求错误或者超时", false);
+        JSONObject result = fsuService.getTerminalPayload(requestBody, sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
 
     @RequestMapping("/logoutFsu")
     public JsonResult logoutFsu(@RequestBody(required = false) Map<String, Object> requestBody, String fsuId) {
 
         JSONObject result = fsuService.logoutFsu(requestBody, fsuId);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
 
     @RequestMapping("/getOperationHistory")

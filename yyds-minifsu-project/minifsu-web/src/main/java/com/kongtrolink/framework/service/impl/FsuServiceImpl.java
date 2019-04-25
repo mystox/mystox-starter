@@ -209,25 +209,25 @@ public class FsuServiceImpl implements FsuService {
     }
 
     @Override
-    public JSONArray getRunState(Map<String, Object> requestBody, String sn) {
+    public JSONObject getRunState(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) {
             return null;
         }
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_RUNSTATE, sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
-        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
 
     @Override
-    public JSONArray getTerminalPayload(Map<String, Object> requestBody, String sn) {
+    public JSONObject getTerminalPayload(Map<String, Object> requestBody, String sn) {
         if (requestBody == null) {
             return null;
         }
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_TERMINAL_LOG, sn);
         moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
-        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
 
@@ -257,11 +257,11 @@ public class FsuServiceImpl implements FsuService {
     }
 
     @Override
-    public JSONArray listFsu(Map<String, Object> requestBody) {
+    public JSONObject listFsu(Map<String, Object> requestBody) {
         if (requestBody == null) return null;
         ModuleMsg moduleMsg = new ModuleMsg(PktType.GET_FSU);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
-        JSONArray result = rpcModule.syncRequestData(moduleMsg, JSONArray.class);
+        JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
 
     }
