@@ -25,4 +25,4 @@ tower:
     hostname: 172.16.6.20
     port: 18881
 servlet:
-  resourcePath: E:\Works\MiniFSU\minifsu2_framework\yyds-minifsu-project\minifsu-cntb-GW\src\main\resources\WEB-INF\services\FSUService\META-INF
+  resourcePath: E:\Works\MiniFSU\minifsu2_framework\yyds-minifsu-project\minifsu-cntb-GW\src\main\resources\WEB-INF\
