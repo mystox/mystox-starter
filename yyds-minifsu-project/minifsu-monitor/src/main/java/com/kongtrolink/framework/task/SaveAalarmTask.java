@@ -8,12 +8,9 @@ import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
-import com.kongtrolink.framework.jsonType.JsonSignal;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -51,13 +48,14 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("alarmList", alarmMap.values());
             msg.setPayload(jsonObject);
+            System.out.println("alarm register:" + jsonObject);
             msg.setPktType(PktType.ALARM_REGISTER);
             RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg("", registAddr, JSON.toJSONString(msg));
             String payload = rpcMessage.getPayload();
             JSONObject resultJson = JSONObject.parseObject(payload);
-            String result1 = resultJson.getString("result");
+            boolean result = "1".equals(resultJson.getString("result"));
             //如果成功，重新遍历告警
-            if(true){
+            if(result){
 //                Map<String, Object> resolveAlarmMap = new HashMap<>();
                 List<Alarm> resolveAlarmList = new ArrayList<>();
                 List<String> resolveKey = new ArrayList<>();
@@ -65,6 +63,7 @@ public class SaveAalarmTask extends RpcModuleBase implements Runnable{
                 parseAlarm(alarmMap, resolveAlarmList, resolveKey, saveRedisAlarmMap);
                 if(!resolveAlarmList.isEmpty()) {
                     String alarmMsg = createAlarmMsg(jsonFsu, resolveAlarmList);
+                    System.out.println("alarm save:" + alarmMsg);
                     //发送命令给服务中心保存告警
                     rpcModule.postMsg("", registAddr, alarmMsg);
                 }

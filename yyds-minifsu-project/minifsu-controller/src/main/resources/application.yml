@@ -20,6 +20,7 @@ spring:
     ## 连接池中的最小空闲连接
       min-idle: 20
     host: 172.16.5.26
+#    host: 172.16.5.228
     port: 6379
     communication:
       expired: 1200 #通讯信息默认过期时间
@@ -40,9 +41,6 @@ executor:
 rpc:
   client:
     timeout: 60000
-  net-GW:
-    hostname: 172.16.6.39
-    port: 17700
   monitor:
     hostname: 172.16.6.39
     port: 18810

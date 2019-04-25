@@ -8,8 +8,8 @@ import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.FsuDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
-import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.service.TerminalService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,12 +107,15 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
-    public JSONArray listFsu(ModuleMsg requestBody) {
+    public JSONObject listFsu(ModuleMsg requestBody) {
 
         JSONObject jsonObject = requestBody.getPayload();
         List<Terminal> terminals = terminalDao.findTerminal(jsonObject);
+        Long terminalCount = terminalDao.findTerminalCount(jsonObject);
 
-        JSONArray result = new JSONArray();
+        JSONObject result = new JSONObject();
+        result.put("totalSize", terminalCount);
+        JSONArray snList = new JSONArray();
         for (Terminal terminal : terminals) {
             String terminalId = terminal.getId();
             TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
@@ -126,8 +129,9 @@ public class TerminalServiceImpl implements TerminalService {
             }
             if (terminalProperties != null)
                 terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));
-            result.add(terminalJSON);
+            snList.add(terminalJSON);
         }
+        result.put("list",snList);
         return result;
     }
 
@@ -213,7 +217,9 @@ public class TerminalServiceImpl implements TerminalService {
         if (StringUtils.isNotBlank(fsuId)) {
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
             try {
+                JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn,JSONArray.class);
                 moduleMsg.setPktType(PktType.FSU_BIND);
+                jsonObject.put("devList", devList);
                 rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -264,18 +270,26 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
-    public JSONArray getRunStates(ModuleMsg moduleMsg) {
+    public JSONObject getRunStates(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         JSONObject search = moduleMsg.getPayload();
         List<RunState> terminalLogs = terminalDao.findRunStates(sn, search);
-        return (JSONArray) JSONArray.toJSON(terminalLogs);
+        Long totalSize  = terminalDao.getRunStateCount(sn, search);
+        JSONObject result = new JSONObject();
+        result.put("totalSize", totalSize);
+        result.put("list", terminalLogs);
+        return result;
     }
 
     @Override
-    public JSONArray getTerminalPayloadLog(ModuleMsg moduleMsg) {
+    public JSONObject getTerminalPayloadLog(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         JSONObject search = moduleMsg.getPayload();
         List<TerminalLog> terminalLogs = terminalDao.findTerminalLog(sn, search);
-        return (JSONArray) JSONArray.toJSON(terminalLogs);
+        Long totalSize = terminalDao.getTerminalLogCount(sn, search);
+        JSONObject result = new JSONObject();
+        result.put("totalSize", totalSize);
+        result.put("list", terminalLogs);
+        return result;
     }
 }
