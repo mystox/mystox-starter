@@ -2,6 +2,21 @@ import axios from 'axios';
 import {Message, Notification, Loading} from 'element-ui';
 const base = process.env.API_HOST;
 
+let loading;
+const openFullScreen = ()=> {
+  loading = Loading.service({
+    lock: true,
+    text: 'loading...',
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.7)'
+  });
+};
+const closeFullScreen = ()=> {
+  setTimeout(()=> {
+    loading.close();
+  }, 500);
+};
+
 // use custom message component
 const message = (msg, type, showClose)=> {
     let msgs = {
@@ -17,8 +32,10 @@ const message = (msg, type, showClose)=> {
 
 // get
 const get = (url, param, successMsg, failMsg)=> {
+    openFullScreen();
     return axios.get(url, {params: param}).then(
         (response)=> {
+            closeFullScreen();
             let res = response.data;
             if (res.success) {
                 successMsg && message(successMsg || res.info, 'success', true);
@@ -32,18 +49,21 @@ const get = (url, param, successMsg, failMsg)=> {
             return Promise.reject(httpErr);
         }
     ).catch(err=> {
+        closeFullScreen();
         return Promise.reject(err);
     })
 }
 
 // post
 const post = (url, param, successMsg, failMsg)=> {
+    openFullScreen();
     return axios({
             method: 'post',
             url:url,
             data: param
         }).then(
             (response)=> {
+                closeFullScreen();
                 let res = response.data;
                 if (res.success) {
                     successMsg && message(successMsg || res.info, 'success', true);
@@ -57,6 +77,7 @@ const post = (url, param, successMsg, failMsg)=> {
                 return Promise.reject(httpErr);
             }
     ).catch(err=> {
+        closeFullScreen();
         return Promise.reject(err);
     })
 }

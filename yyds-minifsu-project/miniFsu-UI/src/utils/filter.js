@@ -154,7 +154,13 @@ export default {
             return '离线';
           case 1:
           case '1':
+            return '注册';
+          case 2:
+          case '2':
             return '在线';
+          case 3:
+          case '3':
+            return '升级中';
         }
       },
       // 是否

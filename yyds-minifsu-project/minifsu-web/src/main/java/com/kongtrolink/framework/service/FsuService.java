@@ -28,7 +28,7 @@ public interface FsuService {
 
     List<Fsu>  getFsuListByCoordinate(Map fsuMap);
 
-    JSONArray listFsu(Map<String, Object> requestBody);
+    JSONObject listFsu(Map<String, Object> requestBody);
 
     List<Fsu> searchFsu(Map<String, Object> requestBody);
 
@@ -54,7 +54,7 @@ public interface FsuService {
 
     JSONObject unbind(String sn);
 
-    JSONArray getRunState(Map<String, Object> requestBody, String sn);
+    JSONObject getRunState(Map<String, Object> requestBody, String sn);
 
-    JSONArray getTerminalPayload(Map<String, Object> requestBody, String sn);
+    JSONObject getTerminalPayload(Map<String, Object> requestBody, String sn);
 }

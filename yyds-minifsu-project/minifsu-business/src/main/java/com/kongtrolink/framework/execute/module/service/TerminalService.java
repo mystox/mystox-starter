@@ -34,7 +34,7 @@ public interface TerminalService
 
     List<Fsu> getFsuListByCoordinate(Map fsuMap);
 
-    JSONArray listFsu(ModuleMsg requestBody);
+    JSONObject listFsu(ModuleMsg requestBody);
 
     List<Fsu> searchFsu(Map<String, Object> requestBody);
 
@@ -56,7 +56,7 @@ public interface TerminalService
 
     JSONObject TerminalStatus(ModuleMsg moduleMsg);
 
-    JSONArray getRunStates(ModuleMsg moduleMsg);
+    JSONObject getRunStates(ModuleMsg moduleMsg);
 
-    JSONArray getTerminalPayloadLog(ModuleMsg moduleMsg);
+    JSONObject getTerminalPayloadLog(ModuleMsg moduleMsg);
 }

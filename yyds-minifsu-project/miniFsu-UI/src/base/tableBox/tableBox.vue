@@ -43,7 +43,7 @@
       <slot></slot>
       <div slot="empty" class="empty">
         <div class="no-data" v-if = '!loading'>
-          <div class="img img-2x"></div>
+          <div class="img img-2x">暂无数据</div>
         </div>
       </div>
     </el-table>

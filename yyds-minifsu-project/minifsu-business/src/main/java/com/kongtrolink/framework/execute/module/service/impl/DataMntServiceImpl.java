@@ -171,6 +171,11 @@ public class DataMntServiceImpl implements DataMntService {
 
         //设置内存值
         JSONArray redisSignalObj = redisUtils.getHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSONArray.class);
+        if (redisSignalObj == null) {
+            JSONObject result = new JSONObject();
+            result.put("result", 0);
+            return result;
+        }
         List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(redisSignalObj.toString(), AlarmSignalConfig.class);
 
         for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
