@@ -54,6 +54,7 @@ public class PktType {
     public final static String SIGNAL_MODEL_IMPORT = "signal_model_import"; //导入信号点模板
     public final static String TERMINAL_STATUS = "terminal_status"; //终端状态获取
     public final static String TERMINAL_UNBIND = "terminal_unbind"; //终端解绑
+    public final static String FSU_UNBIND = "fsu_unbind"; //终端解绑
     public final static String SET_TERMINAL = "set_terminal"; //终端配置
     public final static String TERMINAL_BIND = "terminal_bind"; //终端配置
     public final static String HEART = "heart"; //心跳

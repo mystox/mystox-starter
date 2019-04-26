@@ -17,6 +17,8 @@ import com.kongtrolink.framework.execute.module.model.DeviceType;
 import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.execute.module.service.AlarmService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ import java.util.Set;
 @Service
 public class AlarmServiceImpl implements AlarmService {
 
+    Logger logger = LoggerFactory.getLogger(AlarmServiceImpl.class);
     @Autowired
     AlarmDao alarmDao;
 
@@ -80,16 +83,21 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Override
     public JSONObject saveAlarmModel(ModuleMsg moduleMsg) {
+        String msgId = moduleMsg.getMsgId();
         JSONArray jsonArray = moduleMsg.getArrayPayload();
-
-        List<AlarmSignalConfigModel> alarmSignalConfigModels = JSONArray.parseArray(jsonArray.toJSONString(), AlarmSignalConfigModel.class);
-        for (AlarmSignalConfigModel alarmSignalConfigModel : alarmSignalConfigModels) {
-            AlarmSignalConfigModel alarmSignalConfigModel1 = configDao.findAlarmSignalModelByDevTypeAndAlarmId(alarmSignalConfigModel.getDevType(), alarmSignalConfigModel.getAlarmId());
-            if (alarmSignalConfigModel1 != null) {
-                BeanUtils.copyProperties(alarmSignalConfigModel, alarmSignalConfigModel1, "id");
-                configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel1);
-            } else
-                configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel);
+        try {
+            List<AlarmSignalConfigModel> alarmSignalConfigModels = JSONArray.parseArray(jsonArray.toJSONString(), AlarmSignalConfigModel.class);
+            for (AlarmSignalConfigModel alarmSignalConfigModel : alarmSignalConfigModels) {
+                AlarmSignalConfigModel alarmSignalConfigModel1 = configDao.findAlarmSignalModelByDevTypeAndAlarmId(alarmSignalConfigModel.getDevType(), alarmSignalConfigModel.getAlarmId());
+                if (alarmSignalConfigModel1 != null) {
+                    BeanUtils.copyProperties(alarmSignalConfigModel, alarmSignalConfigModel1, "id");
+                    configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel1);
+                } else
+                    configDao.saveAlarmSignalConfigModel(alarmSignalConfigModel);
+            }
+        } catch (Exception e) {
+            logger.error("[{}] save alarm model error", msgId);
+            e.printStackTrace();
         }
         JSONObject result = new JSONObject();
         result.put("result", 1);

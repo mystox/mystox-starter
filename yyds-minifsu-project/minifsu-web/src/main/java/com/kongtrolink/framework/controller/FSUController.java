@@ -15,8 +15,10 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * \* @Author: mystox
@@ -59,7 +61,6 @@ public class FSUController {
     public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody,String sn) {
         JSONObject result = fsuService.unbind(sn);
         return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
-
     }
 
     @RequestMapping("/list")
@@ -85,7 +86,8 @@ public class FSUController {
     @RequestMapping("/setFsu")
     public JsonResult setFsu(@RequestBody(required = false) Map<String, Object> requestBody) {
         JSONObject result = fsuService.setFsu(requestBody);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result.get("data"));
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
 
     @RequestMapping("/upgrade")
@@ -188,12 +190,18 @@ public class FSUController {
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
         DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
         File f = dfi.getStoreLocation();
+        Set<String> snSet = new HashSet<>();
         try {
             String[][] cell = ExcelUtil.getInstance().getCellsFromFile(f);
             for (int r = 0; r < cell.length; r++) {
 
                 JSONObject snObj = new JSONObject();
-                snObj.put("SN", cell[r][0]);
+                String sn = cell[r][0];
+                if (snSet.contains(sn)) {
+                    JsonResult jsonResult = new JsonResult("excel存在重复SN",false);
+                    return jsonResult;
+                }
+                snObj.put("SN",sn);
                 snObj.put("vendor", cell[r][1]);
                 snList.add(snObj);
             }
@@ -243,7 +251,7 @@ public class FSUController {
             JSONObject result = fsuService.saveAlarmModelList(alarmSignalList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult(false);
+                    JsonResult jsonResult = new JsonResult("导入失败",false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -276,7 +284,7 @@ public class FSUController {
             JSONObject result = fsuService.saveSignalModelList(signalModelList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult(false);
+                    JsonResult jsonResult = new JsonResult("导入失败",false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
