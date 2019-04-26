@@ -293,6 +293,11 @@ public class TerminalServiceImpl implements TerminalService {
         return result;
     }
 
+    /**
+     * 获取终端状态
+     * @param moduleMsg
+     * @return
+     */
     @Override
     public JSONObject TerminalStatus(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
@@ -307,7 +312,7 @@ public class TerminalServiceImpl implements TerminalService {
                 result = (JSONObject) JSONObject.toJSON(terminal);
             result.put("STATUS", 0);
         }
-        result.put("result", 1);
+        result.put("result", 0);
         return result;
 
     }
