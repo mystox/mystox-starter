@@ -15,8 +15,8 @@
                  label-position="right"
                  :inline="true">
           <!--使用重置功能需要给item元素传入prop属性-->
-          <el-form-item label="告警名称" prop="name" label-width="70px">
-            <el-input v-model="searcher.sn" placeholder="请输入告警名称">
+          <el-form-item label="告警描述" prop="alarmDesc" label-width="70px">
+            <el-input v-model.trim="searcher.alarmDesc" placeholder="请输入告警名称">
             </el-input>
           </el-form-item>
         </el-form>
@@ -32,7 +32,6 @@
       :loading = "loading"
       :stripe = "true"
       :border = "true"
-      :pagination = "pagination"
       :data="alarmList"
       @selection-change="handleSelectionChange">
       <el-table-column type="selection">
@@ -79,7 +78,7 @@
     data () {
       return {
         searcher: {
-          name: '',
+          alarmDesc: '',
         },
         multipleSelection: [],
         alarmList: [],
@@ -170,17 +169,17 @@
         this.pagination.total = this.alarmList.length;
       },
 
-    
+      /**
+       * 获取告警列表
+       */
       getThreshold() {
-        let params = {
-          page: this.pagination.currentPage ,
-          count: this.pagination.pageSize ,
-        };
-        this.$api.getThreshold({
+        let param = {
+          alarmDesc: this.searcher.alarmDesc,
           port: this.$route.query.port,
           resNo: this.$route.query.resNo - 0,
           type: this.$route.query.type - 0,
-        }, this.$route.query.sN).then((data) => {
+        }
+        this.$api.getThreshold(param, this.$route.query.sN).then((data) => {
           this.pagination.total = data.data.length;
           this.alarmList = data.data;
           this.loading = false

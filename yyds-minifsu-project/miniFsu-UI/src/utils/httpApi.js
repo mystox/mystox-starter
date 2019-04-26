@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {Message, Notification, Loading} from 'element-ui';
+import { fail } from 'assert';
 const base = process.env.API_HOST;
 
 let loading;
@@ -81,18 +82,25 @@ const post = (url, param, successMsg, failMsg)=> {
         return Promise.reject(err);
     })
 }
+const successMsg = "操作成功"
+const failMsg = "操作失败"
 
 export default {
     install(Vue, opt) {
         Vue.prototype.$api = {
             // 导入终端列表
             importTerminalList(param) {
-                return post(`${base}fsu/terminal/import`, param);
+                return post(`${base}fsu/terminal/import`, param, successMsg, failMsg);
             },
 
             // 绑定终端列表
             setFsu(param) {
-                return post(`${base}fsu/setFsu`, param);
+                return post(`${base}fsu/setFsu`, param, successMsg, failMsg);
+            },
+
+            // 解绑
+            unbind(param) {
+                return post(`${base}fsu/unbind`, param, successMsg, failMsg);
             },
 
             // 获取终端列表
@@ -112,7 +120,7 @@ export default {
 
             // 设置信号点值
             setSignal(param, sn) {
-                return post(`${base}dataMnt/setSignal?sn=${sn}`, param)
+                return post(`${base}dataMnt/setSignal?sn=${sn}`, param, successMsg, failMsg)
             },
 
             // 获取告警门限列表
@@ -122,7 +130,7 @@ export default {
 
             // 设置告警门限值
             setThreshold(param, sn) {
-                return post(`${base}dataMnt/setThreshold?sn=${sn}`, param)
+                return post(`${base}dataMnt/setThreshold?sn=${sn}`, param, successMsg, failMsg)
             },
 
             // 获取实时告警列表
@@ -132,12 +140,12 @@ export default {
 
             // 告警列表导入
             alarmModelImport(param, sn) {
-                return post(`${base}fsu/alarmModel/import?sn=${sn}`, param)
+                return post(`${base}fsu/alarmModel/import?sn=${sn}`, param, successMsg, failMsg)
             },
 
             // 信号点列表导入
             signalModelImport(param, sn) {
-                return post(`${base}fsu/signalModel/import?sn=${sn}`, param)
+                return post(`${base}fsu/signalModel/import?sn=${sn}`, param, successMsg, failMsg)
             },
 
             // 获取终端日志报文信息
