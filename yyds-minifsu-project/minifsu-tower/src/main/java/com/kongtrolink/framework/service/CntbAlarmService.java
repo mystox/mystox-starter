@@ -60,54 +60,57 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
     @Override
     public void run() {
-        if (redisOnlineInfo == null || !redisOnlineInfo.isOnline()) {
-            //未获取到redis中在线信息或铁塔平台离线，不上报告警
-            return;
-        }
-        Set<String> list = redisUtils.keys(RedisTable.getAlarmKey(redisOnlineInfo.getFsuId(), "*"));
-        if (list.size() == 0) {
-            return;
-        }
-
-        List<RedisAlarm> redisAlarmList = new ArrayList<>();
-
         try {
-            for (String key : list) {
-                RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
-
-                if (!checkReport(redisAlarm)) {
-                    continue;
-                }
-                logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
-
-                redisAlarm.setReporting(true);
-                redisUtils.set(key, redisAlarm);
-
-                redisAlarmList.add(redisAlarm);
+            if (redisOnlineInfo == null || !redisOnlineInfo.isOnline()) {
+                //未获取到redis中在线信息或铁塔平台离线，不上报告警
+                return;
             }
-
-            if (redisAlarmList.size() == 0) {
+            Set<String> list = redisUtils.keys(RedisTable.getAlarmKey(redisOnlineInfo.getFsuId(), "*"));
+            if (list.size() == 0) {
                 return;
             }
 
-            sendAlarm(redisAlarmList);
-        } finally {
+            List<RedisAlarm> redisAlarmList = new ArrayList<>();
+
+            try {
+                for (String key : list) {
+                    RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
+
+                    if (!checkReport(redisAlarm)) {
+                        continue;
+                    }
+                    logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
+
+                    redisAlarm.setReporting(true);
+                    redisUtils.set(key, redisAlarm);
+
+                    redisAlarmList.add(redisAlarm);
+                }
+
+                if (redisAlarmList.size() == 0) {
+                    return;
+                }
+
+                sendAlarm(redisAlarmList);
+            } finally {
+                for (RedisAlarm redisAlarm : redisAlarmList) {
+                    String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
+                    redisAlarm.setReporting(false);
+                    redisUtils.set(key, redisAlarm);
+                    logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+                }
+            }
+
+
             for (RedisAlarm redisAlarm : redisAlarmList) {
-                String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
-                redisAlarm.setReporting(false);
-                redisUtils.set(key, redisAlarm);
-                logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+                if (!alarmLogDao.upsert(redisAlarm)) {
+                    //todo 日志记录错误信息
+                    logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
+                }
             }
+        } catch (Exception e) {
+            logger.error("上报告警过程中出现异常:" + JSONObject.toJSONString(e));
         }
-
-
-        for (RedisAlarm redisAlarm : redisAlarmList) {
-            if (!alarmLogDao.upsert(redisAlarm)) {
-                //todo 日志记录错误信息
-                logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
-            }
-        }
-
     }
 
     /**

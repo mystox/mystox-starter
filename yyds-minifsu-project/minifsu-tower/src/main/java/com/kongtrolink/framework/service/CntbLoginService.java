@@ -89,6 +89,8 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             if (info != null) {
                 login(info);
             }
+        } catch (Exception e) {
+            logger.error("注册过程中出现异常:" + JSONObject.toJSONString(e));
         } finally {
             redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
             if (redisOnlineInfo != null) {

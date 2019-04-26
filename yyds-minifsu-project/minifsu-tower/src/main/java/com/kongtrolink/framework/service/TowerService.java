@@ -119,7 +119,7 @@ public class TowerService {
      * @param request 绑定信息
      * @return 绑定结果
      */
-    public boolean fsuBind(String sn, JSONObject request) {
+    public boolean fsuBind(String sn, JSONObject request) throws Exception {
         boolean result = false;
 
         JsonStation jsonStation = getStationInfo(request);
@@ -197,12 +197,19 @@ public class TowerService {
      * @param request 请求信息
      * @param fsuId fsuId
      */
-    private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) {
+    private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) throws Exception {
         List<JsonDevice> result = new ArrayList<>();
 
         JSONArray array = request.getJSONArray("devCodeList");
         for (int i = 0; i < array.size(); ++i) {
-            result.add(new JsonDevice(fsuId, array.getString(i)));
+            String deviceId = array.getString(i);
+            if (deviceId.equals("")) {
+                continue;
+            }
+            if (deviceId.length() != 14) {
+                throw new Exception("铁塔设备ID有误,fsuId:" + fsuId + ",deviceId:" + deviceId);
+            }
+            result.add(new JsonDevice(fsuId, deviceId));
         }
 
         List<JsonDevice> curList = new ArrayList<>();
