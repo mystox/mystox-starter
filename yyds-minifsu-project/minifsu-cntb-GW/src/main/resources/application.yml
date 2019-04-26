@@ -8,7 +8,7 @@ server:
   bindIp: 172.16.6.20
   port: 8080
   rpc:
-    port: 18882
+    port: 18883
 
 
 executor:
