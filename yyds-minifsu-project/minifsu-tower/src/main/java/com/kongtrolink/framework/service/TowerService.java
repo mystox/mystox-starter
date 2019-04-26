@@ -1348,9 +1348,10 @@ public class TowerService {
         if (redisUtils.hasKey(key)) {
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
             if (!redisOnlineInfo.isOnline() &&
-                redisUtils.hasKey(RedisTable.VPN_HASH) &&
-                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()) &&
-                !redisOnlineInfo.isLogining()) {
+                    (redisOnlineInfo.getLastTimeLogin() + redisOnlineInfo.getLoginInterval() < System.currentTimeMillis() / 1000) &&
+                    redisUtils.hasKey(RedisTable.VPN_HASH) &&
+                    redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()) &&
+                    (!redisOnlineInfo.isLogining())) {
                 long time = redisUtils.getExpire(key);
                 redisOnlineInfo.setLogining(true);
                 redisUtils.set(key, redisOnlineInfo, time);
