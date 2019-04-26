@@ -119,7 +119,7 @@ public class TowerService {
      * @param request 绑定信息
      * @return 绑定结果
      */
-    public boolean fsuBind(String sn, JSONObject request) {
+    public boolean fsuBind(String sn, JSONObject request) throws Exception {
         boolean result = false;
 
         JsonStation jsonStation = getStationInfo(request);
@@ -129,6 +129,14 @@ public class TowerService {
 
         //更新数据库中的设备列表
         List<JsonDevice> jsonDeviceList = getDeviceList(request, jsonStation.getFsuId());
+
+        JsonStation curStation = stationDao.getInfoByFsuId(jsonStation.getFsuId());
+        if (curStation != null) {
+            if (!fsuUnbind(curStation.getSn(), null)) {
+                logger.error("TERMINAL_UNBIND: 原终端解绑失败,sn:" + curStation.getSn() + ",fsuId:" + curStation.getFsuId());
+                return result;
+            }
+        }
 
         updateBindRedis(jsonStation, jsonLoginParam, jsonDeviceList);
 
@@ -189,12 +197,19 @@ public class TowerService {
      * @param request 请求信息
      * @param fsuId fsuId
      */
-    private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) {
+    private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) throws Exception {
         List<JsonDevice> result = new ArrayList<>();
 
         JSONArray array = request.getJSONArray("devCodeList");
         for (int i = 0; i < array.size(); ++i) {
-            result.add(new JsonDevice(fsuId, array.getString(i)));
+            String deviceId = array.getString(i);
+            if (deviceId.equals("")) {
+                continue;
+            }
+            if (deviceId.length() != 14) {
+                throw new Exception("铁塔设备ID有误,fsuId:" + fsuId + ",deviceId:" + deviceId);
+            }
+            result.add(new JsonDevice(fsuId, deviceId));
         }
 
         List<JsonDevice> curList = new ArrayList<>();
@@ -234,6 +249,7 @@ public class TowerService {
             } else {
                 //若数据库存在记录且SN不同，则将该条绑定状态置为解绑，并记录解绑时间
                 boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation.getSn(), curStation.getFsuId());
+                redisUtils.del(RedisTable.getRegistryKey(curStation.getSn()));
                 if (!unbindResult) {
                     logger.error("TERMINAL_UNBIND: 终端解绑失败,sn:" + curStation.getSn() + ",fsuId:" + curStation.getFsuId());
                 }
@@ -678,7 +694,9 @@ public class TowerService {
     public boolean fsuUnbind(String sn, JSONObject request) {
         boolean result;
 
-        String fsuId = request.getString("fsuId");
+        JsonStation jsonStation = stationDao.getInfoBySn(sn);
+
+        String fsuId = jsonStation.getFsuId();
 
         String key = RedisTable.getRegistryKey(sn);
         if (redisUtils.hasKey(key)) {

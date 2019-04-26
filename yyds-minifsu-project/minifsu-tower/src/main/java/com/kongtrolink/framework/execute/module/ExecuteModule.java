@@ -64,42 +64,47 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
 
         JSONObject infoPayload = moduleMsg.getPayload();
 
-        //处理请求
-        //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
-        switch (moduleMsg.getPktType()) {
-            case CntbPktTypeTable.GW_SERVICE:
-                String responseMsg = scMessage(infoPayload);
-                response.put("msg", responseMsg);
-                result = responseMsg != null;
-                break;
-            case PktType.FSU_BIND:
-                result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
-                towerService.checkOnline(moduleMsg.getSN(), infoPayload);
-                break;
-            case PktType.TERMINAL_UNBIND:
-                result = towerService.fsuUnbind(moduleMsg.getSN(), infoPayload);
-                break;
-            case PktType.DATA_CHANGE:
-            case PktType.DATA_REPORT:
-                towerService.checkOnline(moduleMsg.getSN(), infoPayload);
-                towerService.checkAlarm(moduleMsg.getSN());
-                result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
-                break;
-            case PktType.DATA_STATUS:
-                towerService.checkOnline(moduleMsg.getSN(), infoPayload);
-                towerService.checkAlarm(moduleMsg.getSN());
-                result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
-                break;
-            case PktType.ALARM_REGISTER:
-                towerService.checkOnline(moduleMsg.getSN(), infoPayload);
-                result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
-                towerService.checkAlarm(moduleMsg.getSN());
-                break;
-            default:
-                towerService.checkOnline(moduleMsg.getSN(), infoPayload);
-                towerService.checkAlarm(moduleMsg.getSN());
-                result = true;
-                break;
+        try {
+            //处理请求
+            //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
+            switch (moduleMsg.getPktType()) {
+                case CntbPktTypeTable.GW_SERVICE:
+                    String responseMsg = scMessage(infoPayload);
+                    response.put("msg", responseMsg);
+                    result = responseMsg != null;
+                    break;
+                case PktType.FSU_BIND:
+                    result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
+                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    break;
+                case PktType.TERMINAL_UNBIND:
+                    result = towerService.fsuUnbind(moduleMsg.getSN(), infoPayload);
+                    break;
+                case PktType.DATA_CHANGE:
+                case PktType.DATA_REPORT:
+                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.checkAlarm(moduleMsg.getSN());
+                    result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
+                    break;
+                case PktType.DATA_STATUS:
+                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.checkAlarm(moduleMsg.getSN());
+                    result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
+                    break;
+                case PktType.ALARM_REGISTER:
+                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
+                    towerService.checkAlarm(moduleMsg.getSN());
+                    break;
+                default:
+                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.checkAlarm(moduleMsg.getSN());
+                    result = true;
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("处理请求异常：PktType:" + moduleMsg.getPktType() + ",payload:" +
+                    moduleMsg.getPayload() + ",Exception:" + JSONObject.toJSONString(e));
         }
 
         //todo
