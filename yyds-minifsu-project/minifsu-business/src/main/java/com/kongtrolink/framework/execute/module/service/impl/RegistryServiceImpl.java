@@ -52,6 +52,7 @@ public class RegistryServiceImpl implements RegistryService {
     private final DeviceDao deviceDao;
     private final RedisUtils redisUtils;
     private RpcModule rpcModule;
+
     @Autowired
     public void setRpcModule(RpcModule rpcModule) {
         this.rpcModule = rpcModule;
@@ -64,7 +65,7 @@ public class RegistryServiceImpl implements RegistryService {
     private int controllerPort;
 
     @Autowired
-    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils,  ThreadPoolTaskExecutor businessExecutor) {
+    public RegistryServiceImpl(TerminalDao terminalDao, LogDao logDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils, ThreadPoolTaskExecutor businessExecutor) {
         this.terminalDao = terminalDao;
         this.logDao = logDao;
         this.configDao = configDao;
@@ -76,22 +77,25 @@ public class RegistryServiceImpl implements RegistryService {
 
     @Override
     public JSONObject registerSN(ModuleMsg moduleMsg) {
-
+        String msgId = moduleMsg.getMsgId();
         String sn = moduleMsg.getSN();
+        logger.info("[{}] sn [{}] register...", msgId, sn);
         //查表t_terminal
         Terminal terminal = terminalDao.findTerminalBySn(sn);
         JSONObject result = new JSONObject();
         if (terminal != null && otherLogic()) {
             String bid = terminal.getBID();
             Order order = terminalDao.findOrderById(bid);
-            if (order == null)
+            if (order == null) {
+                logger.warn("[{}] sn [{}] order message is null, use BID[default]....", msgId, sn);
                 order = terminalDao.findOrderByBid("default"); //默认外部通讯信息
-
+            }
             //获取redis 信息
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             JSONObject value = redisUtils.get(key, JSONObject.class);
             //删除所有其他信息
             if (value != null) {
+                logger.info("[{}] sn [{}] clear message in redis....", msgId, sn);
                 redisUtils.deleteHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn);
                 redisUtils.del(RedisHashTable.SN_DATA_HASH + sn);
                 Set<String> keys = redisUtils.getHkeys(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, sn + "*");
@@ -135,14 +139,14 @@ public class RegistryServiceImpl implements RegistryService {
                 result.put("runStatusRhythm", runStatusRhythm);
                 return result;
             } else {
-                logger.error("不存在通讯key[{}]的值", key);
+                logger.error("[{}] sn [{}] communication key not exists....", msgId, sn,key);
             }
         } else if (!otherLogic()) {
             result.put("result", StateCode.UNREGISTY);
             result.put("delay", delay + (long) (Math.random() * delay));// delay 随机值
         }
+        logger.error("register error ---terminal {} data not exists in DB---", sn);
         //注册非法默认
-
         result.put("result", StateCode.UNREGISTY);
         result.put("delay", (long) (Math.random() * delay));
         //日志记录
@@ -160,7 +164,9 @@ public class RegistryServiceImpl implements RegistryService {
 
     @Override
     public JSONObject registerDevices(ModuleMsg moduleMsg) {
+        String msgId = moduleMsg.getMsgId();
         String sn = moduleMsg.getSN();
+        logger.error("[{}] sn [{}] register devices....", msgId, sn);
         JSONObject devPayload = moduleMsg.getPayload();//设备信息包的报文
         JSONObject result = new JSONObject();
         //获取redis 信息
@@ -169,15 +175,14 @@ public class RegistryServiceImpl implements RegistryService {
         if (value != null && (int) value.get("STATUS") != 0) {
             Object devsObject = devPayload.get("devList");
             if (devsObject == null) {
+                logger.error("[{}] sn [{}] devList is null....", msgId, sn);
                 result.put("result", StateCode.UNREGISTY);
-                logger.error("devList is null");
                 return result;
             }
             JSONArray devsJson = (JSONArray) devsObject;
             List<String> devList = JSONArray.parseArray(devsJson.toJSONString(), String.class);
 
             // 同步告警点信息表至redis
-
             List<Device> devices = deviceDao.findDevicesBySnAndValid(sn); //获取有效
             List<Device> newDeviceList = new ArrayList<>(); //新增设备
             List<Device> saveDeviceList = new ArrayList<>();
@@ -279,11 +284,12 @@ public class RegistryServiceImpl implements RegistryService {
             redisUtils.set(key, value, expiredTime);
             businessExecutor.execute(() -> {
                 try {
+                    logger.info("[{}] sn [{}] send devList msg to [{}]", msgId, sn,PktType.REGISTRY_CNTB);
                     // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
                     moduleMsg.setPktType(PktType.REGISTRY_CNTB);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.error("发送至外部业务注册异常" + e.toString());
+                    logger.error("[{}] sn [{}] send devList msg to [{}] error [{}]", msgId, sn,PktType.REGISTRY_CNTB,e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);
@@ -296,8 +302,6 @@ public class RegistryServiceImpl implements RegistryService {
                     logDao.saveLog(log);
                 }
             });
-
-
             //设备上报流程执行完毕
             result.put("result", StateCode.SUCCESS);
             return result;
@@ -423,7 +427,7 @@ public class RegistryServiceImpl implements RegistryService {
 
     @Override
     public JSONObject terminalHeart(ModuleMsg moduleMsg) {
-        JSONObject payload = moduleMsg.getPayload();
+        String msgId = moduleMsg.getMsgId();
         String sn = moduleMsg.getSN();
         JSONObject result = new JSONObject();
         //获取redis 信息
@@ -436,7 +440,7 @@ public class RegistryServiceImpl implements RegistryService {
                     moduleMsg.setPktType(PktType.HEART);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.error("发送至外部业务心跳" + e.toString());
+                    logger.error("[{}] sn [{}] send heart msg to [{}] error [{}]", msgId, sn,PktType.REGISTRY_CNTB,e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);
@@ -452,7 +456,6 @@ public class RegistryServiceImpl implements RegistryService {
             result.put("result", StateCode.SUCCESS);
             return result;
         }
-
 
 
         //日志记录

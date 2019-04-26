@@ -139,6 +139,8 @@ public class DataMntServiceImpl implements DataMntService {
     @Override
     public JSONObject setThreshold(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
+        String msgId = moduleMsg.getMsgId();
+        JSONObject result = new JSONObject();
         JSONObject alarmSignal = moduleMsg.getPayload();
         String deviceId = (String) alarmSignal.get("deviceId");
         String coId = (String) alarmSignal.get("coId");
@@ -152,6 +154,7 @@ public class DataMntServiceImpl implements DataMntService {
         Integer delay = alarmSignal.get("delay") == null ? null : (Integer) alarmSignal.get("delay");
 
         if (StringUtils.isBlank(dev)) { //根据deviceId获取dev 门户场景
+            logger.info("[{}] sn [{}] set threshold by web/app ", msgId, sn);
             Device device = deviceDao.findDeviceById(deviceId);
             int devType = device.getType();
             int resNo = device.getResNo();
@@ -159,6 +162,7 @@ public class DataMntServiceImpl implements DataMntService {
         }
 
         if (StringUtils.isBlank(coId)) { //根据告警id和dev获取coId 外部业务场景
+            logger.info("[{}] sn [{}]  set threshold by thirdParty ", msgId, sn);
             Device device = deviceDao.findDeviceByTypeResNoPort(sn,
                     Integer.parseInt(dev.split("-")[0]), Integer.parseInt(dev.split("-")[1]), null);
             AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigByDeviceIdAndAlarmId(device.getId(), alarmId);
@@ -167,40 +171,39 @@ public class DataMntServiceImpl implements DataMntService {
         }
 
         String alarmConfigKey = sn + "_" + dev + "_" + coId;//redis 告警配置键值
-
         AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigById(configId);
-        if (threshold != null)
-            alarmSignalConfig.setThreshold(threshold);
-        if (relativeval != null)
-            alarmSignalConfig.setRecoverDelay(relativeval);
-        if (hystersis != null)
-            alarmSignalConfig.setHystersis(hystersis);
-        if (level != null)
-            alarmSignalConfig.setLevel(level);
-        if (delay != null)
-            alarmSignalConfig.setDelay(delay);
-
-        alarmId = alarmSignalConfig.getAlarmId();
+        if (alarmSignalConfig != null) {
+            if (threshold != null)
+                alarmSignalConfig.setThreshold(threshold);
+            if (relativeval != null)
+                alarmSignalConfig.setRecoverDelay(relativeval);
+            if (hystersis != null)
+                alarmSignalConfig.setHystersis(hystersis);
+            if (level != null)
+                alarmSignalConfig.setLevel(level);
+            if (delay != null)
+                alarmSignalConfig.setDelay(delay);
+            alarmId = alarmSignalConfig.getAlarmId();
+            //设置数据库值
+            configDao.saveAlarmSignalConfig(alarmSignalConfig);
+        }
         //设置内存值
         JSONArray redisSignalObj = redisUtils.getHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSONArray.class);
-        if (redisSignalObj == null) {
-            JSONObject result = new JSONObject();
-            result.put("result", 0);
-            return result;
-        }
-        List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(redisSignalObj.toString(), AlarmSignalConfig.class);
+        if (redisSignalObj != null) {
+            List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(redisSignalObj.toString(), AlarmSignalConfig.class);
 
-        for (AlarmSignalConfig signalConfig : alarmSignals) {
-            String alarmId1 = signalConfig.getAlarmId();
-            if (alarmId1.equals(alarmId)) {
-                alarmSignalConfig.setThreshold(threshold);
-                break;
+            for (AlarmSignalConfig signalConfig : alarmSignals) {
+                String alarmId1 = signalConfig.getAlarmId();
+                if (alarmId1.equals(alarmId)) {
+                    alarmSignalConfig.setThreshold(threshold);
+                    break;
+                }
             }
+            redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmSignals);
+        } else {
+            logger.warn("[{}] sn [{}]  set threshold in redis is null ", msgId, sn);
         }
-        redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmSignals);
-        //设置数据库值
-        configDao.saveAlarmSignalConfig(alarmSignalConfig);
-        JSONObject result = new JSONObject();
+
         result.put("result", 1);
         return result;
     }
@@ -222,6 +225,7 @@ public class DataMntServiceImpl implements DataMntService {
 
     @Override
     public JSONObject setData(ModuleMsg moduleMsg) {
+        String msgId = moduleMsg.getMsgId();
         String sn = moduleMsg.getSN();
         JSONObject payload = moduleMsg.getPayload();
         String dev = (String) payload.get("dev");
@@ -234,10 +238,11 @@ public class DataMntServiceImpl implements DataMntService {
         terminalPayload.put("data", data * valueBase);
 
         try {
+            logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, data * valueBase);
             // 向终端设置信号点值报文
             moduleMsg.setPktType(PktType.SET_DATA_TERMINAL);
             moduleMsg.setPayload(terminalPayload);
-            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg(moduleMsg.getMsgId(),
+            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg(msgId,
                     new InetSocketAddress(controllerHost, controllerPort),
                     JSONObject.toJSONString(moduleMsg));
             if (!RpcNotifyProto.MessageType.ERROR.equals(rpcMessage.getType())) {
@@ -246,7 +251,7 @@ public class DataMntServiceImpl implements DataMntService {
                 return result;
             }
         } catch (IOException e) {
-            logger.error("set_data error .." + e.toString());
+            logger.error("[{}] sn [{}]  set data [{}]to terminal error [{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, e.toString());
             //日志记录
             Log log = new Log();
             log.setErrorCode(StateCode.CONNECT_ERROR);
@@ -265,8 +270,9 @@ public class DataMntServiceImpl implements DataMntService {
 
     @Override
     public JSONObject parseData(ModuleMsg moduleMsg) {
-        logger.info("实时/变化数据上报至外部平台解析:{}", JSONObject.toJSONString(moduleMsg));
+        String msgId = moduleMsg.getMsgId();
         String sn = moduleMsg.getSN();
+        logger.info("[{}] sn [{}] report data to thirdParty parse..:{}", msgId, sn, JSONObject.toJSONString(moduleMsg));
         JSONObject terminalPayload = moduleMsg.getPayload();
         int pktType = terminalPayload.getInteger("pktType");
         if (pktType == 4)
@@ -283,22 +289,23 @@ public class DataMntServiceImpl implements DataMntService {
             for (String coId : coIds) {
                 int value = info.getInteger(coId);
                 SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(Integer.parseInt(dev.split("-")[0]), coId);
-                Integer valueBase = signalModel == null?1: signalModel.getValueBase();
-                info.put(coId, (double) value / (valueBase == null ? 1 : valueBase));
+                Integer valueBase = (signalModel == null ? 1 : signalModel.getValueBase());
+                info.put(coId, (double) value / (valueBase == 0 ? 1 : valueBase));
             }
 
         }
         // 向向外部网关发送运行状态报文
         try {
-            rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+            logger.info("[{}] sn [{}] report data to thirdParty ", msgId, sn);
+            rpcModule.postMsg(msgId, new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
         } catch (IOException e) {
-            logger.error("数据上报异常" + e.toString());
+            logger.info("[{}] sn [{}] report data to thirdParty error [{}] ", msgId, sn, e.toString());
             //日志记录
             Log log = new Log();
             log.setErrorCode(3);
             log.setSN(sn);
             log.setMsgType(moduleMsg.getPktType());
-            log.setMsgId(moduleMsg.getMsgId());
+            log.setMsgId(msgId);
             log.setHostName(host);
             log.setServiceName(name);
             log.setTime(new Date(System.currentTimeMillis()));
@@ -315,6 +322,7 @@ public class DataMntServiceImpl implements DataMntService {
     @Override
     public JSONObject saveRunStatus(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
+        String msgId = moduleMsg.getMsgId();
         //获取redis 信息
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
@@ -332,16 +340,17 @@ public class DataMntServiceImpl implements DataMntService {
             businessExecutor.execute(() -> {
                 // 向向外部网关发送运行状态报文
                 try {
+                    logger.info("[{}] sn [{}] run status data to thirdParty ", msgId, sn);
                     moduleMsg.setPktType(PktType.DATA_STATUS);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.error("发送至外部业务注册异常" + e.toString());
+                    logger.info("[{}] sn [{}] run status data to thirdParty error [{}] ", msgId, sn, e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);
                     log.setSN(sn);
                     log.setMsgType(moduleMsg.getPktType());
-                    log.setMsgId(moduleMsg.getMsgId());
+                    log.setMsgId(msgId);
                     log.setHostName(host);
                     log.setServiceName(name);
                     log.setTime(new Date(System.currentTimeMillis()));
@@ -349,8 +358,6 @@ public class DataMntServiceImpl implements DataMntService {
                     e.printStackTrace();
                 }
             });
-
-
             result.put("result", 1);
             return result;
         }

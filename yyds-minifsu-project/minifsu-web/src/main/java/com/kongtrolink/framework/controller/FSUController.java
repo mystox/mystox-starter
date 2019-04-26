@@ -183,7 +183,7 @@ public class FSUController {
 
     @RequestMapping(value = "/terminal/import", method = RequestMethod.POST)
     public JsonResult terminalImport(@RequestParam MultipartFile file, HttpServletRequest request) {
-// 解析 Excel 文件
+        // 解析 Excel 文件
         JSONArray snList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
         DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
