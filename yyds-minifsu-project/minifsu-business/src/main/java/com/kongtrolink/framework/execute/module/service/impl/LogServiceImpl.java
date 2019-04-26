@@ -22,7 +22,6 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public JSONObject saveLog(ModuleMsg moduleMsg) {
-
         JSONObject msgPayload = moduleMsg.getPayload();
         Log log = JSONObject.toJavaObject(msgPayload, Log.class);
         //日志记录

@@ -69,9 +69,6 @@ public class JsonResult {
             System.out.println(sdf.format(new Date())+" >> "+this);
             return;
         }
-        if (data.toString().contains("Tier") == false && data.toString().contains("DeviceType") == false) {
-            System.out.println(sdf.format(new Date())+" >> "+this);
-        }
     }
     
 }
