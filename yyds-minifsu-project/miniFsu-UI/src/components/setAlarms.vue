@@ -202,7 +202,7 @@
         this.setThreshold(res)
       },
       clear(res) {
-//        console.log(res)
+      //  console.log(res)
       },
 
       showDialog(dialogName, item) {
