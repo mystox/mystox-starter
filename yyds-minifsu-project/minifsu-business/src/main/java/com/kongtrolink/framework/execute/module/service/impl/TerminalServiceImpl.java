@@ -307,7 +307,7 @@ public class TerminalServiceImpl implements TerminalService {
                 result = (JSONObject) JSONObject.toJSON(terminal);
             result.put("STATUS", 0);
         }
-        result.put("result", 0);
+        result.put("result", 1);
         return result;
 
     }

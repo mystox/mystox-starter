@@ -280,7 +280,7 @@ public class MinifsuControllerApplicationTests {
         /************************* 注册********************************/
         for (int i = 0; i < 1; i++) {
             String msgId = "00000" + i + "";
-            String registerMsg = "{\"msgId\":\"" + msgId + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
+            /*String registerMsg = "{\"msgId\":\"" + msgId + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
             response = sendMSG(requestHead, rpcModuleBase, registerMsg);
             System.out.println("终端注册结果: " + response.getPayload());
 
@@ -302,7 +302,7 @@ public class MinifsuControllerApplicationTests {
             String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}},{\"dev\":\"3-1\",\"info\":{\"201001\":12}},{\"dev\":\"3-1\",\"info\":{\"101001\":12,\"101002\":12}},{\"dev\":\"3-1\",\"info\":{\"301001\":12}}]}}\n";
             requestHead.put("payload", dataMsg);
             response = sendMSG(requestHead, rpcModuleBase, dataMsg);
-            System.out.println("设备上报结果" + response.getPayload());
+            System.out.println("设备上报结果" + response.getPayload());*/
             //11包 运状包
             Thread.sleep(5000L);
             String data = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\n" +
@@ -317,10 +317,10 @@ public class MinifsuControllerApplicationTests {
             response = sendMSG(requestHead, rpcModuleBase, data);
             System.out.println("设备上报结果" + response.getPayload());
             Thread.sleep(5000L);
-            String heart = "{\"msgId\":\"000050\",\"ts\":1553500171,\"payload\":{\"pktType\":0,\"SN\":\"MINI210121000001\"}}\n";
+            /*String heart = "{\"msgId\":\"000050\",\"ts\":1553500171,\"payload\":{\"pktType\":0,\"SN\":\"MINI210121000001\"}}\n";
             requestHead.put("payload", heart);
             response = sendMSG(requestHead, rpcModuleBase, heart);
-            System.out.println("设备心跳结果" + response.getPayload());
+            System.out.println("设备心跳结果" + response.getPayload());*/
 
         }
         /*String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
