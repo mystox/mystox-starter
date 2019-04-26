@@ -1347,6 +1347,7 @@ public class TowerService {
 
         if (redisUtils.hasKey(key)) {
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            logger.info("-----------------------login pre-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
             if (!redisOnlineInfo.isOnline() &&
                     (redisOnlineInfo.getLastTimeLogin() + redisOnlineInfo.getLoginInterval() < System.currentTimeMillis() / 1000) &&
                     redisUtils.hasKey(RedisTable.VPN_HASH) &&
@@ -1355,6 +1356,7 @@ public class TowerService {
                 long time = redisUtils.getExpire(key);
                 redisOnlineInfo.setLogining(true);
                 redisUtils.set(key, redisOnlineInfo, time);
+                logger.info("-----------------------login start-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
                 taskExecutor.execute(new CntbLoginService(sn,
                         towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,

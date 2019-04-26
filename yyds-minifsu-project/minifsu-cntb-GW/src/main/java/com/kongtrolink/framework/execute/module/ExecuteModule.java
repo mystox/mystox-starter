@@ -53,12 +53,16 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
         JSONObject infoPayload = moduleMsg.getPayload();
 
         if (moduleMsg.getPktType().equals("service_gw")) {
-            String reqMsg = infoPayload.getString("msg");
-            String ip = infoPayload.getString("ip");
-            int port = infoPayload.getInteger("port");
-            String resMsg = FSUServiceClientUtil.sendReq(reqMsg, ip, port);
-            response.put("msg", resMsg);
-            result = (resMsg != null);
+            try {
+                String reqMsg = infoPayload.getString("msg");
+                String ip = infoPayload.getString("ip");
+                int port = infoPayload.getInteger("port");
+                String resMsg = FSUServiceClientUtil.sendReq(reqMsg, ip, port);
+                response.put("msg", resMsg);
+                result = (resMsg != null);
+            } catch (Exception e) {
+                logger.error("向铁塔发送请求异常：" + JSONObject.toJSONString(e));
+            }
         }
 
         //todo
