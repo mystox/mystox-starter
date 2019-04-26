@@ -3,15 +3,18 @@ package com.kongtrolink.framework.execute.module.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.*;
+import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
-import com.kongtrolink.framework.execute.module.dao.FsuDao;
+import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
 import com.kongtrolink.framework.execute.module.model.Device;
 import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.service.TerminalService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,8 +34,15 @@ import java.util.Map;
  */
 @Service
 public class TerminalServiceImpl implements TerminalService {
-    private final FsuDao fsuDao;
+    Logger logger = LoggerFactory.getLogger(TerminalServiceImpl.class);
 
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.rpc.port}")
+    private String port;
+    @Value("${server.name}")
+    private String name;
+    private final LogDao logDao;
     private final TerminalDao terminalDao;
     private final DeviceDao deviceDao;
 
@@ -52,8 +62,8 @@ public class TerminalServiceImpl implements TerminalService {
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(FsuDao fsuDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
-        this.fsuDao = fsuDao;
+    public TerminalServiceImpl(LogDao logDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
+        this.logDao = logDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
@@ -174,7 +184,7 @@ public class TerminalServiceImpl implements TerminalService {
         List<Terminal> terminals = JSONArray.parseArray(terminalArray.toJSONString(), Terminal.class);
 
 
-        List<String> duplicateSn = new ArrayList<>();
+        List<String> duplicateSn = new ArrayList<>();//重复sn
 
         for (Terminal terminal : terminals) {
             String sn = terminal.getSN();
@@ -222,24 +232,45 @@ public class TerminalServiceImpl implements TerminalService {
         if (runStatusRhythm != null) terminal.setRunStatusRhythm((Integer) runStatusRhythm);
         Object coordinate = jsonObject.get("coordinate");
         if (runStatusRhythm != null) terminal.setCoordinate((String) coordinate);
-
+        String bid = jsonObject.getString("BID");
+        if (StringUtils.isBlank(bid)) bid = "default";
+        JSONObject result = new JSONObject();
         String fsuId = (String) jsonObject.get("fsuId");
-        if (StringUtils.isNotBlank(fsuId)) {
+        if (StringUtils.isNotBlank(fsuId)) { //存在 fsuid 进入绑定流程
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
             try {
                 JSONArray devList = redisUtils.getHash(RedisHashTable.SN_DEVICE_LIST_HASH, sn, JSONArray.class);
-                moduleMsg.setPktType(PktType.FSU_BIND);
                 jsonObject.put("devList", devList);
-                rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                //获取BIP
+                Order orderByBid = terminalDao.findOrderByBid(bid);
+                jsonObject.put("BIP", orderByBid.getBIP()); //默认发往default
+                moduleMsg.setPktType(PktType.FSU_BIND);
+                RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                String bindResult = rpcMessage.getPayload();
+                JSONObject jsonObject1 = JSONObject.parseObject(bindResult);
+                Integer resultInt = jsonObject1.getInteger("result");
+                if (resultInt == 1) {
+                    terminal.setBindMark(true);
+                    terminalDao.saveTerminal(terminal);
+                }
+                result.put("result", resultInt);
+                return result;
             } catch (IOException e) {
+                logger.error("发送至外部业务绑定异常" + e.toString());
+                //日志记录
+                Log log = new Log();
+                log.setErrorCode(3);
+                log.setSN(sn);
+                log.setMsgType(moduleMsg.getPktType());
+                log.setMsgId(moduleMsg.getMsgId());
+                log.setHostName(host);
+                log.setServiceName(name);
+                log.setTime(new Date(System.currentTimeMillis()));
+                logDao.saveLog(log);
                 e.printStackTrace();
             }
-
-        } else {
-            terminalDao.saveTerminal(terminal);
         }
-
-        JSONObject result = new JSONObject();
+        terminalDao.saveTerminal(terminal);
         result.put("result", 1);
         return result;
     }
@@ -262,6 +293,11 @@ public class TerminalServiceImpl implements TerminalService {
         return result;
     }
 
+    /**
+     * 获取终端状态
+     * @param moduleMsg
+     * @return
+     */
     @Override
     public JSONObject TerminalStatus(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();

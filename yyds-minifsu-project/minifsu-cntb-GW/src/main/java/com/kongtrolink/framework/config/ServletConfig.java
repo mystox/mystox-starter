@@ -21,6 +21,7 @@ public class ServletConfig {
         //通过默认路径无法找到services.xml，这里需要指定一下路径，且必须是绝对路径
         cntbServlet.addInitParameter("axis2.repository.path", resourcePath);
 //        cntbServlet.addInitParameter("axis2.repository.path", this.getClass().getResource("/WEB-INF").getPath().toString());
+//        System.out.println(this.getClass().getResource("/WEB-INF").getPath().toString());
         cntbServlet.setLoadOnStartup(1);
         return cntbServlet;
     }

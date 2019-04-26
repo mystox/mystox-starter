@@ -56,4 +56,5 @@ public class PktType {
     public final static String TERMINAL_UNBIND = "terminal_unbind"; //终端解绑
     public final static String SET_TERMINAL = "set_terminal"; //终端配置
     public final static String TERMINAL_BIND = "terminal_bind"; //终端配置
+    public final static String HEART = "heart"; //心跳
 }

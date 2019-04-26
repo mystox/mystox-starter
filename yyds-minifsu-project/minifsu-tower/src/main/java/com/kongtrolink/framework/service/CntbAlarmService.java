@@ -71,24 +71,38 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
         List<RedisAlarm> redisAlarmList = new ArrayList<>();
 
-        for (String key : list) {
-            RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
+        try {
+            for (String key : list) {
+                RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
 
-            if (!checkReport(redisAlarm)) {
-                continue;
+                if (!checkReport(redisAlarm)) {
+                    continue;
+                }
+                logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
+
+                redisAlarm.setReporting(true);
+                redisUtils.set(key, redisAlarm);
+
+                redisAlarmList.add(redisAlarm);
             }
 
-            redisAlarmList.add(redisAlarm);
+            if (redisAlarmList.size() == 0) {
+                return;
+            }
+
+            sendAlarm(redisAlarmList);
+        } finally {
+            for (RedisAlarm redisAlarm : redisAlarmList) {
+                String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
+                redisAlarm.setReporting(false);
+                redisUtils.set(key, redisAlarm);
+                logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+            }
         }
 
-        if (redisAlarmList.size() == 0) {
-            return;
-        }
-
-        sendAlarm(redisAlarmList);
 
         for (RedisAlarm redisAlarm : redisAlarmList) {
-            if (alarmLogDao.upsert(redisAlarm)) {
+            if (!alarmLogDao.upsert(redisAlarm)) {
                 //todo 日志记录错误信息
                 logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
             }
@@ -102,6 +116,11 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
      * @return
      */
     private boolean checkReport(RedisAlarm redisAlarm) {
+        if (redisAlarm.isReporting()) {
+            //当前告警正在上报
+            return false;
+        }
+
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.BEGIN) && redisAlarm.isStartReported()) {
             //当前告警状态为BEGIN且已成功上报，则不再上报
             return false;
@@ -190,6 +209,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 redisAlarm.setReportCount(0);
                 if (!redisAlarm.isStartReported()) {
                     redisAlarm.setStartReported(true);
+                    logger.info("-----------------------alarm success-----------------------" + JSONObject.toJSONString(redisAlarm));
                 } else if (!redisAlarm.isEndReported()) {
                     redisAlarm.setEndReported(true);
                     redisUtils.del(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())));
@@ -201,6 +221,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 redisAlarm.setReportCount(redisAlarm.getReportCount() + 1);
             }
             redisUtils.set(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())), redisAlarm);
+            logger.info("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
         }
 
         return result;

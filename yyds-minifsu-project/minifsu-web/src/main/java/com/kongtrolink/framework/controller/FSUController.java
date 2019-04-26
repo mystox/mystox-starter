@@ -183,7 +183,7 @@ public class FSUController {
 
     @RequestMapping(value = "/terminal/import", method = RequestMethod.POST)
     public JsonResult terminalImport(@RequestParam MultipartFile file, HttpServletRequest request) {
-// 解析 Excel 文件
+        // 解析 Excel 文件
         JSONArray snList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
         DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
@@ -200,7 +200,7 @@ public class FSUController {
             JSONObject result = fsuService.saveTerminal(snList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult(false);
+                    JsonResult jsonResult = new JsonResult("存在重复列",false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -231,8 +231,9 @@ public class FSUController {
                 alarmModel.put("thresholdFlag", cell[r][7]);
                 alarmModel.put("level", cell[r][8]);
                 alarmModel.put("hystersis", cell[r][9]);
-                alarmModel.put("recoverDelay", cell[r][12]);
-                alarmModel.put("repeatDelay", cell[r][13]);
+                alarmModel.put("delay", cell[r][12]);
+                alarmModel.put("recoverDelay", cell[r][13]);
+                alarmModel.put("repeatDelay", cell[r][14]);
                 alarmModel.put("alarmDesc", cell[r][16]);
                 alarmModel.put("normalDesc", cell[r][17]);
                 alarmModel.put("highRateI", cell[r][18]);

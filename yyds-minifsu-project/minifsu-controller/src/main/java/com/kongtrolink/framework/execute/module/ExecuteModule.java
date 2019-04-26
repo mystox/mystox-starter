@@ -93,6 +93,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     || PktType.SET_DATA_TERMINAL.equals(pktType)
                     || PktType.TERMINAL_REBOOT.equals(pktType)
                     ) {                                                     //服务>>>>>>>>终端
+                logger.info(">>>>>>>>>>terminal==={}===", payloadObject.toJSONString());
                 JSON result = sendTerminalExecute(msgId, payloadObject);
                 return responseMsg(result, msgId);
 
@@ -243,39 +244,50 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.GET_RUNSTATE.equals(pktType)
                 || PktType.GET_TERMINAL_LOG.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
+            logger.info("[{}]>>>>>>>>>>business==={}===",msgId,payloadObject);
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
-                || PktType.FSU_BIND.equals(pktType) //business ---> 绑定
+                || PktType.HEART.equals(pktType) // business ---> 心跳
+                || PktType.FSU_BIND.equals(pktType) // business ---> 绑定
                 || PktType.DATA_STATUS.equals(pktType) //business ---> 运行状态上报
                 || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_REPORT.equals(pktType) //monitor ---> 实时数据上报
                 || PktType.DATA_CHANGE.equals(pktType) //monitor ---> 变化数据上报
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
-            //获取通讯信息中外部服务ip
-            String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
-            JSONObject value = redisUtils.get(key, JSONObject.class);
-            if (value != null && (Integer) value.get("STATUS") == 2) {
-                String addrStr = (String) value.get("BIP");
-                if (StringUtils.isNotBlank(addrStr)) {
-                    String[] addrs = addrStr.split(";");
-                    for (String addr : addrs) {
-                        if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
-                            String[] addrArr = addr.split(":");
-                            JSONObject registerJson = moduleMsg.getPayload();
-                            registerJson.put("innerIp", hostname);
-                            registerJson.put("innerPort", port);
-                            return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
-                        } else {
-                            logger.error("bip[{}] illegal...", addr);
-                        }
-                    }
-                } else {
-                    logger.warn("BIP is NULL...send to default BID[default]", addrStr);
+            logger.info("[{}]>>>>>>>>>>thirdParty==={}===",msgId, msg);
+            String addrStr = "";
+            JSONObject payload = msg.getPayload();
+            if (payload != null) { //绑定需要带BIP
+                addrStr = payload.getString("BIP");
+            }
+            if (StringUtils.isBlank(addrStr)) {
+                //获取通讯信息中外部服务ip
+                String key = RedisHashTable.COMMUNICATION_HASH + ":" + msg.getSN();
+                JSONObject value = redisUtils.get(key, JSONObject.class);
+                if (value != null && (Integer) value.get("STATUS") == 2) {
+                    addrStr = (String) value.get("BIP");
                 }
+            }
+
+            if (StringUtils.isNotBlank(addrStr)) {
+                String[] addrs = addrStr.split(";");
+                for (String addr : addrs) {
+                    if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
+                        String[] addrArr = addr.split(":");
+                        JSONObject registerJson = moduleMsg.getPayload();
+                        registerJson.put("innerIp", hostname);
+                        registerJson.put("innerPort", port);
+                        return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
+                    } else {
+                        logger.error("[{}]bip[{}] illegal...", msgId,addr);
+                    }
+                }
+            } else {
+                logger.warn("[{}]BIP{} is NULL...send to default ", msgId,addrStr);
             }
         }
         JSONObject responsePayload = new JSONObject();
@@ -301,11 +313,11 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String gip = (String) payloadObject.get("gip");
         JSONObject msgPayload = terminalMsg.getPayload();
         String SN = (String) msgPayload.get("SN");
-        terminalPayloadSave(msgId, SN,terminalString); //终端接收的报文保存
+        terminalPayloadSave(msgId, SN, terminalString); //终端接收的报文保存
         TerminalMsg terminalResp = new TerminalMsg(); //响应终端消息实体 payload
         terminalResp.setMsgId(msgId);
         if (msgPayload == null) {
-            logger.error("payload is null...[{}]", payloadObject);
+            logger.error("[{}]payload is null...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
             responsePayload.put("result", StateCode.JSON_ILLEGAL);
             terminalResp.setPayload(responsePayload);
@@ -355,6 +367,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         /***************************注册流程*********************************/
         if (TerminalPktType.REGISTRY.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
+            logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             int result = (int) responsePayload.get("result");
             if (result == StateCode.FAILED) {
@@ -374,6 +387,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || TerminalPktType.HEART.getKey() == pktType //心跳
                 ) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
+            logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //事务处理
             terminalResp.setPayload(responsePayload);
             responsePayload.put("pktType", pktType);
@@ -382,6 +396,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         /****************************数据变化上报DATA_CHANGE 实时数据上报DATA_REPORT*******************************/
         if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
+            logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);
             terminalResp.setPayload(responsePayload);
@@ -391,6 +406,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (TerminalPktType.FILE_GET.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
             try {
+                logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
                 RpcNotifyProto.RpcMessage response = rpcModule.postMsg(msgId, new InetSocketAddress(businessHost, businessPort), JSONObject.toJSONString(moduleMsg));
                 if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
                 {
@@ -437,8 +453,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     }
 
-    Object terminalResponse(String msgId, String sn ,TerminalMsg terminalResp) {
-        terminalPayloadSave(msgId, sn,terminalResp); //----------------------->记录终端响应日志
+    Object terminalResponse(String msgId, String sn, TerminalMsg terminalResp) {
+        terminalPayloadSave(msgId, sn, terminalResp); //----------------------->记录终端响应日志
         return JSONObject.toJSON(terminalResp);
     }
 
@@ -452,13 +468,13 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         controllerExecutor.execute(() -> {
             ModuleMsg moduleMsg = null;
             if (payload != null && payload instanceof JSON) {//非空json结果保存
-                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN,(JSONObject) payload);
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, (JSONObject) payload);
 
             } else if (payload != null && payload instanceof String) {
                 JSONObject jsonPayload = JSONObject.parseObject((String) payload);
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
-                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN,jsonPayload);
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
             } else return;
             try {
                 sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //异步保存
@@ -467,7 +483,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 e.printStackTrace();
             }
         });
-
 
 
     }

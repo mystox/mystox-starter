@@ -42,15 +42,17 @@ public class FileServiceImpl implements FileService {
     @Override
     public byte[] fileGet(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
+        String msgId = moduleMsg.getMsgId();
 
         //获取redis 信息增加升级状态
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
         value.put("STATE", 3); //新增升级状态
         int expiredTime = (int) value.get("expired");
-        redisUtils.set(key, value,expiredTime);
+        redisUtils.set(key, value, expiredTime);
 
         JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
+        logger.info("[{}] sn [{}]  get file [{}] ", msgId, sn, payload);
         JSONObject fileMsg = (JSONObject) payload.get("file");
         String filename = (String) fileMsg.get("fileName");
         Integer fileType = (Integer) fileMsg.get("type");
@@ -59,11 +61,17 @@ public class FileServiceImpl implements FileService {
         Integer endIndex = (Integer) fileMsg.get("endIndex");
         try {
             File file = ResourceUtils.getFile(snPath + File.separator + sn + File.separator + filename);
+            if (!file.exists()) {
+                logger.error("[{}] sn [{}]  FILE [{}] not exists!!!", msgId, sn, file.getAbsoluteFile());
+                return new byte[]{0};
+            }
             long fileLen = file.length();
             if (fileLen > Integer.MAX_VALUE)
-                logger.error("FILE" + file.getAbsoluteFile() + "is to large then MAX_INTEGER!!!");
-            if (fileLen < startIndex + 1) // 起始index 大于文件长度返回错误
+                logger.error("[{}] sn [{}]  FILE [{}] is to large then MAX_INTEGER!!!", msgId, sn, file.getAbsoluteFile());
+            if (fileLen < startIndex + 1) {// 起始index 大于文件长度返回错误
+                logger.error("[{}] sn [{}]  FILE [{}] fileLen[{}] < startIndex[{}]+ 1!!!", msgId, sn,fileLen,startIndex );
                 return new byte[]{0};
+            }
             if (fileLen < endIndex + 1)
                 endIndex = Math.toIntExact(fileLen - 1);
 
@@ -91,8 +99,10 @@ public class FileServiceImpl implements FileService {
             bytes[responseLen - 1] = (byte) (CRC >> 8 & 0xFF);
             return bytes;
         } catch (FileNotFoundException e) {
+            logger.error("[{}] sn [{}]  FILE exception [{}] !!!", msgId, sn, e.toString());
             e.printStackTrace();
         } catch (IOException e) {
+            logger.error("[{}] sn [{}]  FILE exception [{}] !!!", msgId, sn, e.toString());
             e.printStackTrace();
         }
         return new byte[]{0};
@@ -102,7 +112,9 @@ public class FileServiceImpl implements FileService {
     public JSONObject getCompilerFile(ModuleMsg moduleMsg) {
 
         String sn = moduleMsg.getSN();
+        String msgId = moduleMsg.getMsgId();
         JSONObject param = moduleMsg.getPayload();
+        logger.info("[{}] sn [{}]  get compilerFile [{}] ", msgId, sn,param);
         String urlStr = (String) param.get("url");
         String name = (String) param.get("name");
         InputStream is = null;

@@ -148,7 +148,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.SIGNAL_MODEL_IMPORT.equals(pktType)) { // 终端流
             JSONObject jsonObject = dataMntService.saveSignalModel(moduleMsg);
             result = jsonObject.toJSONString();
-        } else if (PktType.TERMINAL_STATUS.equals(pktType)) { // 终端流
+        } else if (PktType.TERMINAL_STATUS.equals(pktType)) { // 终终端运行状态
             JSONObject jsonObject = terminalService.TerminalStatus(moduleMsg);
             result = jsonObject.toJSONString();
         } else if (PktType.GET_ALARMS.equals(pktType)) { // 获取告警列表

@@ -77,16 +77,26 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
     @Override
     public void run() {
-        if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
-                redisUtils.hasKey(RedisTable.VPN_HASH) &&
-                redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
-            return;
-        }
+        try {
+            if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
+                    redisUtils.hasKey(RedisTable.VPN_HASH) &&
+                    redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
+                return;
+            }
 
-        Login info = getLoginInfo(redisOnlineInfo);
+            Login info = getLoginInfo(redisOnlineInfo);
 
-        if (info != null) {
-            login(info);
+            if (info != null) {
+                login(info);
+            }
+        } finally {
+            redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+            if (redisOnlineInfo != null) {
+                redisOnlineInfo.setLogining(false);
+                long time = redisUtils.getExpire(key);
+                redisUtils.set(key, redisOnlineInfo, time);
+            }
+            logger.info("-----------------------login finally-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
         }
     }
 
@@ -212,11 +222,13 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
                 if (loginAck != null && Integer.parseInt(loginAck.getRightLevel()) == 2) {
                     onlineInfo.setOnline(true);
                     onlineInfo.setAlarmIp(loginAck.getScIp());
+                    logger.info("-----------------------login success-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
                 }
                 onlineInfo.setLastTimeRecvTowerMsg(System.currentTimeMillis()/1000);
                 onlineInfo.setLastTimeLogin(System.currentTimeMillis()/1000);
                 long time = redisUtils.getExpire(key);
                 redisUtils.set(key, onlineInfo, time);
+                logger.info("-----------------------login end-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
             }
         }
     }

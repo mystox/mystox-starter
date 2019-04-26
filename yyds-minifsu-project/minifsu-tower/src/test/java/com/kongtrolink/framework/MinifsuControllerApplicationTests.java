@@ -248,11 +248,18 @@ public class MinifsuControllerApplicationTests {
 
 //		ModuleMsg msg = createTimeCheckRequest();
 
-//		ModuleMsg msg = createDataChangeRequest();
+		ModuleMsg msg = createDataChangeRequest();
 
-		ModuleMsg msg = createAlarmRequest();
+//		ModuleMsg msg = createAlarmRequest();
 
-		response = sendMSG(rpcModuleBase, msg);
+		for (int i = 0; i < 300; ++i) {
+			try {
+				response = sendMSG(rpcModuleBase, msg);
+//				Thread.sleep(1);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		System.out.println("终端属性上报结果: "+response.getPayload());
 	}
 
@@ -326,10 +333,10 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	private static ModuleMsg createDataChangeRequest() {
-		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI210121000001");
+		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI201904180005");
 
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("SN", "MINI210121000001");
+		jsonObject.put("SN", "MINI201904180005");
 
 		List<JSONObject> list = new ArrayList<>();
 
@@ -358,6 +365,8 @@ public class MinifsuControllerApplicationTests {
 		list.add(data1);
 		list.add(data2);
 		jsonObject.put("data", list);
+		jsonObject.put("innerIp", "172.16.5.228");
+		jsonObject.put("innerPort", 18800);
 
 		msg.setPayload(jsonObject);
 
