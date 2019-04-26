@@ -44,7 +44,7 @@
         <template slot-scope="scope">
           <div>
             <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
-             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind">/ 解绑</i>
+             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
             <router-link :to="{
                   path: '/devices',
                   query: {
@@ -286,10 +286,10 @@
       },
 
       // 解绑FSU
-      unbind() {
+      unbind(item) {
         let param = {
         }
-        this.$api.unbind(param, this.$route.query.sN).then((res)=> {
+        this.$api.unbind(param, item.sN).then((res)=> {
           this.getFsuList();
         })
       },

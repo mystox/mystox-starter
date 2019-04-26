@@ -99,8 +99,8 @@ export default {
             },
 
             // 解绑
-            unbind(param) {
-                return post(`${base}fsu/unbind`, param, successMsg, failMsg);
+            unbind(param, sn) {
+                return post(`${base}fsu/unbind?sn=${sn}`, param, successMsg, failMsg);
             },
 
             // 获取终端列表
