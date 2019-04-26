@@ -8,7 +8,7 @@
                  label-position="right"
                  :inline="true">
           <el-form-item label="SN" prop="sn" label-width="35px">
-            <el-input v-model="searcher.sn" placeholder="请输入SN">
+            <el-input v-model.trim="searcher.sn" placeholder="请输入SN">
             </el-input>
           </el-form-item>
         </el-form>
@@ -43,7 +43,8 @@
         :label="$t('SECURITY.USER.OPERATION')" width="400">
         <template slot-scope="scope">
           <div>
-            <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">绑定</i>
+            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
+             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
             <router-link :to="{
                   path: '/devices',
                   query: {
@@ -114,9 +115,9 @@
           },
           {
             label: '绑定状态',
-            value: 'bindStatus',
+            value: 'bindMark',
             // width: 270,
-            filter: 'nullFilter',
+            filter: 'bindMarkFilter',
             className: '',
           },
           {
@@ -259,6 +260,7 @@
         this.$refs[dialogName].toModal();
       },
 
+      // 绑定FSU
       setFsu(res) {
         let params = {
           "fsuId" : res.fsuId,
@@ -278,7 +280,17 @@
           "alarmRhythm" : 1000,
           "coordinate" : "120.261175,30.317344"
         };
-        this.$api.setFsu(params).then(() => {
+        this.$api.setFsu(params).then((res) => {
+          this.getFsuList();
+        })
+      },
+
+      // 解绑FSU
+      unbind(item) {
+        let param = {
+        }
+        this.$api.unbind(param, item.sN).then((res)=> {
+          this.getFsuList();
         })
       },
 

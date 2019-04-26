@@ -163,6 +163,17 @@ export default {
             return '升级中';
         }
       },
+      // 绑定状态
+      'bindMarkFilter': (val) => {
+        switch(val){
+          case true:
+          case 'true':
+            return '绑定';
+          case false:
+          case 'false':
+            return '未绑定';
+        }
+      },
       // 是否
       'yesOrNoFilter': (val) => {
         switch(val){
