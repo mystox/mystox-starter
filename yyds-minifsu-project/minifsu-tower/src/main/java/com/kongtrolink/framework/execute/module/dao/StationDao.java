@@ -94,8 +94,8 @@ public class StationDao {
         boolean result = false;
 
         Criteria criteria = Criteria
-                .where("fsuId").is(sn)
-                .and("sn").is(fsuId)
+                .where("fsuId").is(fsuId)
+                .and("sn").is(sn)
                 .and("disabled").is(false);
 
         Update update = new Update();

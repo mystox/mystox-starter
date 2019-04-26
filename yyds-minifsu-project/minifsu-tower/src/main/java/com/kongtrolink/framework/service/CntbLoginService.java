@@ -174,6 +174,9 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @return 上报铁塔类型
      */
     private String getCarrier(String type) {
+        if (type == null) {
+            return "";
+        }
         if (!redisUtils.hasKey(RedisTable.CARRIER_HASH) ||
                 !redisUtils.hHasKey(RedisTable.CARRIER_HASH, type)) {
             Map<String, String> map = carrierDao.getAll();
