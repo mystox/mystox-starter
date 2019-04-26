@@ -258,7 +258,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             String addrStr = "";
             JSONObject payload = msg.getPayload();
-            if (payload != null) {
+            if (payload != null) { //绑定需要带BIP
                 addrStr = payload.getString("BIP");
             }
             if (StringUtils.isBlank(addrStr)){

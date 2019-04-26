@@ -11,13 +11,22 @@ public class Terminal
     private String id;
     private String SN;
     private String type;
-    private String BID;
+    private String BID = "default";
     private Integer heartCycle = 10;
     private Integer businessRhythm = 30;
     private Integer alarmRhythm =1;
     private Integer runStatusRhythm = 100;
     private String vendor;
     private String coordinate;
+    private boolean bindMark = false;
+
+    public boolean isBindMark() {
+        return bindMark;
+    }
+
+    public void setBindMark(boolean bindMark) {
+        this.bindMark = bindMark;
+    }
 
     public String getCoordinate() {
         return coordinate;
