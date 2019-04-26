@@ -60,7 +60,8 @@ public class FSUController {
     @RequestMapping("/unbind")
     public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody,String sn) {
         JSONObject result = fsuService.unbind(sn);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
 
     @RequestMapping("/list")
