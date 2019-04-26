@@ -1,9 +1,7 @@
-
 logging:
   level:
    root: info
    org.apache.hadoop.util.Shell: OFF
-
 spring:
   redis:
     ## Redis数据库索引(默认为0)
@@ -40,7 +38,7 @@ executor:
 
 rpc:
   client:
-    timeout: 60000
+    timeout: 60000 #rpc请求超时时间
   monitor:
     hostname: 172.16.6.39
     port: 18810

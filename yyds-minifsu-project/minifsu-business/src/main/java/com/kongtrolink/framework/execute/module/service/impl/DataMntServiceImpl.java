@@ -191,11 +191,10 @@ public class DataMntServiceImpl implements DataMntService {
         JSONArray redisSignalObj = redisUtils.getHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSONArray.class);
         if (redisSignalObj != null) {
             List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(redisSignalObj.toString(), AlarmSignalConfig.class);
-
             for (AlarmSignalConfig signalConfig : alarmSignals) {
                 String alarmId1 = signalConfig.getAlarmId();
                 if (alarmId1.equals(alarmId)) {
-                    alarmSignalConfig.setThreshold(threshold);
+                    signalConfig.setThreshold(threshold);
                     break;
                 }
             }
@@ -292,7 +291,6 @@ public class DataMntServiceImpl implements DataMntService {
                 Integer valueBase = (signalModel == null ? 1 : signalModel.getValueBase());
                 info.put(coId, (double) value / (valueBase == 0 ? 1 : valueBase));
             }
-
         }
         // 向向外部网关发送运行状态报文
         try {
@@ -340,11 +338,11 @@ public class DataMntServiceImpl implements DataMntService {
             businessExecutor.execute(() -> {
                 // 向向外部网关发送运行状态报文
                 try {
-                    logger.info("[{}] sn [{}] run status data to thirdParty ", msgId, sn);
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] ", msgId, sn,PktType.DATA_STATUS);
                     moduleMsg.setPktType(PktType.DATA_STATUS);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.info("[{}] sn [{}] run status data to thirdParty error [{}] ", msgId, sn, e.toString());
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn,PktType.DATA_STATUS, e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);

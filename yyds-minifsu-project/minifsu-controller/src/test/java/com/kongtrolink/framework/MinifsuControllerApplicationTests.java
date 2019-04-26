@@ -279,7 +279,7 @@ public class MinifsuControllerApplicationTests {
 
         /************************* 注册********************************/
         for (int i = 0; i < 1; i++) {
-           /* String msgId = "00000" + i + "";
+            String msgId = "00000" + i + "";
             String registerMsg = "{\"msgId\":\"" + msgId + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI210121000001\"}}";
             response = sendMSG(requestHead, rpcModuleBase, registerMsg);
             System.out.println("终端注册结果: " + response.getPayload());
@@ -316,7 +316,7 @@ public class MinifsuControllerApplicationTests {
             requestHead.put("payload", data);
             response = sendMSG(requestHead, rpcModuleBase, data);
             System.out.println("设备上报结果" + response.getPayload());
-            Thread.sleep(5000L);*/
+            Thread.sleep(5000L);
             String heart = "{\"msgId\":\"000050\",\"ts\":1553500171,\"payload\":{\"pktType\":0,\"SN\":\"MINI210121000001\"}}\n";
             requestHead.put("payload", heart);
             response = sendMSG(requestHead, rpcModuleBase, heart);

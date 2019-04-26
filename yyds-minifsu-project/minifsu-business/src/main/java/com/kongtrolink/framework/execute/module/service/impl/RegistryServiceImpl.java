@@ -181,7 +181,6 @@ public class RegistryServiceImpl implements RegistryService {
             }
             JSONArray devsJson = (JSONArray) devsObject;
             List<String> devList = JSONArray.parseArray(devsJson.toJSONString(), String.class);
-
             // 同步告警点信息表至redis
             List<Device> devices = deviceDao.findDevicesBySnAndValid(sn); //获取有效
             List<Device> newDeviceList = new ArrayList<>(); //新增设备
@@ -440,7 +439,7 @@ public class RegistryServiceImpl implements RegistryService {
                     moduleMsg.setPktType(PktType.HEART);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.error("[{}] sn [{}] send heart msg to [{}] error [{}]", msgId, sn,PktType.REGISTRY_CNTB,e.toString());
+                    logger.error("[{}] sn [{}] send heart msg to [{}] error [{}]", msgId, sn,PktType.HEART,e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);

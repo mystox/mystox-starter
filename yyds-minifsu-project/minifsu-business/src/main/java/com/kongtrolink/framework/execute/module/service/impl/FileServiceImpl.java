@@ -112,7 +112,9 @@ public class FileServiceImpl implements FileService {
     public JSONObject getCompilerFile(ModuleMsg moduleMsg) {
 
         String sn = moduleMsg.getSN();
+        String msgId = moduleMsg.getMsgId();
         JSONObject param = moduleMsg.getPayload();
+        logger.info("[{}] sn [{}]  get compilerFile [{}] ", msgId, sn,param);
         String urlStr = (String) param.get("url");
         String name = (String) param.get("name");
         InputStream is = null;

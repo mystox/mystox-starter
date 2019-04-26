@@ -287,11 +287,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 logger.warn("BIP{} is NULL...send to default ", addrStr);
             }
         }
-        //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务绑定 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        if (PktType.FSU_BIND.equals(pktType)) { //business ---> 绑定
-
-
-        }
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("result", StateCode.FAILED);
         return responsePayload;
