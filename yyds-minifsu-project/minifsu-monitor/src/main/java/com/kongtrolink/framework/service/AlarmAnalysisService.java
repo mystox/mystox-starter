@@ -67,13 +67,16 @@ public class AlarmAnalysisService {
         if(null == alarmSignalObj){
             return null;
         }
+        String dev = dev_colId.substring(0, dev_colId.indexOf("_"));
         List<AlarmSignalConfig> alarmSignals = JSONArray.parseArray(alarmSignalObj.toString(), AlarmSignalConfig.class);
         for (AlarmSignalConfig alarmSignal : alarmSignals) {        //比较各个告警点
             if (!alarmSignal.getEnable()) {
                 continue;//告警屏蔽
             }
             float value = signalValue;
-            String keyAlarmId = dev_colId + CoreConstant.LINE_CUT_OFF + alarmSignal.getAlarmId();//dev_colId_alarmId
+            //20190428修改keyAlarmId为dev_alarmId，去除信号点信息，为兼容后续组合和关联功能
+
+            String keyAlarmId = dev + CoreConstant.LINE_CUT_OFF + alarmSignal.getAlarmId();//dev_colId_alarmId
             Object beforAlarmObj = beforAlarmMap.get(keyAlarmId);
             Object beginDelayAlarmObj = beginDelayAlarmMap.get(keyAlarmId);
             Integer thresholdBase = alarmSignal.getThresholdBase();
@@ -89,7 +92,7 @@ public class AlarmAnalysisService {
                     continue ;
                 }
                 //liuddtodo:设置dev_colId，告警注册和保存历史告警时需要。但是保存在redis中的真实告警和延迟告警需要去除，后期优化节约空间
-                alarm.setDev_colId(dev_colId);
+                alarm.setDev(dev);
                 //填充告警序列号，虽然延迟告警也填充序列号，可能浪费序列号并且增加redis操作，但是代码可读性更高
                 alarm.setNum((int)redisUtils.hincr(alarm_num_hash, fsu.getSN(), 1d));
                 delayService.beginDelayAlarm(alarm, alarmSignal, curDate, beforAlarmMap, beginDelayAlarmMap, keyAlarmId);
