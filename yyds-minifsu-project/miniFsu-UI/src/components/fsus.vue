@@ -43,8 +43,16 @@
         :label="$t('SECURITY.USER.OPERATION')" width="400">
         <template slot-scope="scope">
           <div>
-            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
-             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
+            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">
+              / 绑定
+            </i>
+            <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">
+              / 解绑
+            </i>
+            <!-- <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="">/ 升级</i> -->
+            <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('upgradeDialog', scope.row)">
+              / 升级
+            </i>
             <router-link :to="{
                   path: '/devices',
                   query: {
@@ -83,6 +91,7 @@
       </el-table-column>
     </table-box>
     <modal :option="optionBind" ref="bindDialog"></modal>
+    <modal :option="optionUpgrade" ref="upgradeDialog"></modal>
   </div>
 </template>
 
@@ -99,13 +108,6 @@
         fsuList: [],
         userGroups: [],
         columns: [
-          // {
-          //   label: 'SN 名称',
-          //   value: 'name',
-          //   // width: 270,
-          //   filter: 'nullFilter',
-          //   className: '',
-          // },
           {
             label: 'SN 编码',
             value: 'sN',
@@ -129,7 +131,6 @@
           },
         ],
         modifyCont: {
-          
         },
         pagination: {
           total: 0,
@@ -138,6 +139,7 @@
           onChange: this.onPaginationChanged
         },
         loading: false,
+        documentList: [],
       }
     },
     computed: {
@@ -190,6 +192,35 @@
           }
         }
       },
+      optionUpgrade() {
+        return {
+          name: '升级',
+          form: {
+            'SN ID': [
+              {
+                type: 'span',
+                text: this.modifyCont.sN,
+                rule: {}
+              }
+            ],
+            '选择升级文件': [
+              {
+                type: 'select',
+                name: 'document',
+                options: this.documentList,
+                rule: {}
+              }
+            ],
+          },
+          clearText: this.$t('OPERATION.CLEAR'),
+          clear: this.clear,
+          executeText: this.$t('OPERATION.CONFIRM'),
+          execute: this.executeModify,
+          style: {
+            // width: '50%',
+          }
+        }
+      },
     },
     methods: {
       // 模拟数据
@@ -221,6 +252,21 @@
         }, (err)=> {
           if (err) this.loading = false;
         })
+      },
+
+      // 获取升级文件信息列表
+      getDocumentList() {
+        this.$api.getDocumentList().then((res=> {
+          // 获取对应目录下的文件列表
+          this.documentList = res.data.filter(v=> {
+            return v.name === 'software'
+          })[0].list;
+          // 改成formCell 需要的数据结构
+          this.documentList.forEach(v=> {
+            v.value = v.url;
+            v.label = v.name;
+          })
+        }).bind(this))
       },
 
       // 分页变化回调
@@ -330,6 +376,7 @@
     mounted() {
       // this.addMockData();
       this.getFsuList(true);
+      this.getDocumentList();
     }
   }
 </script>

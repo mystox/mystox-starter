@@ -119,7 +119,7 @@
           },
           {
             label: '报文类型',
-            value: 'pktType',
+            value: 'pktTypeName',
             // width: 270,
             filter: 'nullFilter',
             className: '',
