@@ -463,7 +463,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @return
      */
     Object terminalResponse(String msgId, String sn, TerminalMsg terminalResp) {
-        terminalPayloadSave(msgId, sn, terminalResp); //----------------------->记录终端响应日志
+        terminalPayloadSave(msgId, sn, JSONObject.toJSON(terminalResp)); //----------------------->记录终端响应日志
         return JSONObject.toJSON(terminalResp);
     }
 
@@ -484,9 +484,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
                 moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
-            } else if (payload != null && payload instanceof TerminalMsg) {
-                moduleMsg = (ModuleMsg) payload;
-                moduleMsg.setPktType(PktType.TERMINAL_LOG_SAVE);
             } else {
                 return;
             }
