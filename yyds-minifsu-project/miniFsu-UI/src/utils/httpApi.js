@@ -103,6 +103,11 @@ export default {
                 return post(`${base}fsu/unbind?sn=${sn}`, param, successMsg, failMsg);
             },
 
+            // 获取升级文件列表信息
+            getDocumentList(param, sn) {
+                return post(`${base}resource/getDocumentList`, param);
+            },
+
             // 获取终端列表
             getFsuList(param) {
                 return post(`${base}fsu/list`, param);
