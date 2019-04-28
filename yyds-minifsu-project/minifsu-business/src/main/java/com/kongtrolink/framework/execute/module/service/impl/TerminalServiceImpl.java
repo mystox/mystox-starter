@@ -298,9 +298,6 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public JSONObject unBind(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
-        JSONObject payload = moduleMsg.getPayload();
-        String fsuId = payload.getString("fsuId");
-
         JSONObject result = new JSONObject();
         moduleMsg.setPktType(PktType.FSU_BIND);
         RpcNotifyProto.RpcMessage rpcMessage = null;
@@ -319,6 +316,8 @@ public class TerminalServiceImpl implements TerminalService {
                 return result;
             } else {
                 logger.error("[{}] sn [{}] unbind terminal false...",moduleMsg.getMsgId(),sn);
+                result.put("result", resultInt);
+                return result;
             }
         } catch (IOException e) {
             e.printStackTrace();

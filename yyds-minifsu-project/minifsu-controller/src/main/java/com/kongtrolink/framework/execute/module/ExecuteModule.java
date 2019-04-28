@@ -242,6 +242,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.TERMINAL_STATUS.equals(pktType)
                 || PktType.SET_TERMINAL.equals(pktType)
                 || PktType.GET_RUNSTATE.equals(pktType)
+                || PktType.FSU_UNBIND.equals(pktType)
                 || PktType.GET_TERMINAL_LOG.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
             logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);

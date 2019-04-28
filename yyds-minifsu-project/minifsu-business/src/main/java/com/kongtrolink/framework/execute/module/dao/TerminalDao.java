@@ -121,13 +121,13 @@ public class TerminalDao {
 
     public Long getRunStateCount(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime + "")));
+                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("createTime").gte(new Date(startTime));
             }
         }
         return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_RUN_STATE);
@@ -135,16 +135,16 @@ public class TerminalDao {
 
     public Long getTerminalLogCount(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime + "")));
+                criteria.and("recordTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("recordTime").gte(new Date(startTime));
             }
         }
-        return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_RUN_STATE);
+        return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_LOG);
     }
 
 

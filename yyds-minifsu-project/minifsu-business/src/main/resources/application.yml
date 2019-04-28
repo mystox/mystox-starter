@@ -5,8 +5,8 @@ logging:
    org.mongodb.driver.*: OFF
 
 mongodb:
-  uri: mongodb://172.16.6.9:27017/minifsu2
-#  uri: mongodb://172.16.5.228:27017/mini-fsu-db
+#  uri: mongodb://172.16.6.9:27017/minifsu2
+  uri: mongodb://172.16.5.228:27017/mini-fsu-db
 #  uri: mongodb://172.16.5.213:27017/db_cntb_minifsu
 
 server:
@@ -29,8 +29,8 @@ spring:
       max-idle: 100
     ## 连接池中的最小空闲连接
       min-idle: 20
-#    host: 172.16.5.228
-    host: 172.16.5.26
+    host: 172.16.5.228
+#    host: 172.16.5.26
     port: 6379
 
 resource:
