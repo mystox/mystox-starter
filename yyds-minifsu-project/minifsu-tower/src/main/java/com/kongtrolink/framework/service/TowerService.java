@@ -200,6 +200,10 @@ public class TowerService {
     private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) throws Exception {
         List<JsonDevice> result = new ArrayList<>();
 
+        if (fsuId.length() != 14) {
+            throw new Exception("铁塔FSUID有误,fsuId:" + fsuId);
+        }
+
         JSONArray array = request.getJSONArray("devCodeList");
         for (int i = 0; i < array.size(); ++i) {
             String deviceId = array.getString(i);
