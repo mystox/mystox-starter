@@ -43,15 +43,30 @@ public class FileServiceImpl implements FileService {
     public byte[] fileGet(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
         String msgId = moduleMsg.getMsgId();
+        JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
 
         //获取redis 信息增加升级状态
         String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
         JSONObject value = redisUtils.get(key, JSONObject.class);
-        value.put("STATE", 3); //新增升级状态
-        int expiredTime = (int) value.get("expired");
+        if (value == null) {
+            logger.error("[{}] sn [{}] communication msg is null [{}] ", msgId, sn, payload);
+            return new byte[]{0};
+        }
+
+
+        Integer status = value.getInteger("STATUS");
+        if (status != null && status != 3) {
+            if (status == 0) {
+                logger.error("[{}] sn [{}] communication status is 0 [{}] ", msgId, sn, payload);
+                return new byte[]{0};
+            } else if (status == 2) {
+                logger.warn("[{}] sn [{}] communication status set to 3 [{}] ", msgId, sn, payload);
+                value.put("STATUS", 3); //新增升级状态
+            }
+        }
+        int expiredTime = value.getInteger("expired");
         redisUtils.set(key, value, expiredTime);
 
-        JSONObject payload = moduleMsg.getPayload();//设备信息包的报文
         logger.info("[{}] sn [{}]  get file [{}] ", msgId, sn, payload);
         JSONObject fileMsg = (JSONObject) payload.get("file");
         String filename = (String) fileMsg.get("fileName");
@@ -69,7 +84,7 @@ public class FileServiceImpl implements FileService {
             if (fileLen > Integer.MAX_VALUE)
                 logger.error("[{}] sn [{}]  FILE [{}] is to large then MAX_INTEGER!!!", msgId, sn, file.getAbsoluteFile());
             if (fileLen < startIndex + 1) {// 起始index 大于文件长度返回错误
-                logger.error("[{}] sn [{}]  FILE [{}] fileLen[{}] < startIndex[{}]+ 1!!!", msgId, sn,fileLen,startIndex );
+                logger.error("[{}] sn [{}]  FILE [{}] fileLen[{}] < startIndex[{}]+ 1!!!", msgId, sn, fileLen, startIndex);
                 return new byte[]{0};
             }
             if (fileLen < endIndex + 1)
@@ -114,7 +129,7 @@ public class FileServiceImpl implements FileService {
         String sn = moduleMsg.getSN();
         String msgId = moduleMsg.getMsgId();
         JSONObject param = moduleMsg.getPayload();
-        logger.info("[{}] sn [{}]  get compilerFile [{}] ", msgId, sn,param);
+        logger.info("[{}] sn [{}]  get compilerFile [{}] ", msgId, sn, param);
         String urlStr = (String) param.get("url");
         String name = (String) param.get("name");
         InputStream is = null;
