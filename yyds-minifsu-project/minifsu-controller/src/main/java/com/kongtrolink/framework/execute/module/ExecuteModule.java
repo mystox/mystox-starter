@@ -554,7 +554,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             } else {
                 return (JSON) JSON.parse(response.getPayload());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            logger.error("[{}] [{}]rpc request error...[{}]", msgId, host + ":" + port, e.toString());
             e.printStackTrace();
             result.put("result", 0);
         }
