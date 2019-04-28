@@ -59,4 +59,6 @@ public interface TerminalService
     JSONObject getRunStates(ModuleMsg moduleMsg);
 
     JSONObject getTerminalPayloadLog(ModuleMsg moduleMsg);
+
+    JSONObject unBind(ModuleMsg moduleMsg);
 }

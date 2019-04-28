@@ -18,10 +18,20 @@ public class Terminal
     private Integer runStatusRhythm = 100;
     private String vendor;
     private String coordinate;
+    private String fsuId;
     private boolean bindMark = false;
 
     public boolean isBindMark() {
         return bindMark;
+    }
+
+
+    public String getFsuId() {
+        return fsuId;
+    }
+
+    public void setFsuId(String fsuId) {
+        this.fsuId = fsuId;
     }
 
     public void setBindMark(boolean bindMark) {

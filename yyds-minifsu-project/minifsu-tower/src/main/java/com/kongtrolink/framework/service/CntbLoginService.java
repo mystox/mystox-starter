@@ -89,6 +89,8 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             if (info != null) {
                 login(info);
             }
+        } catch (Exception e) {
+            logger.error("注册过程中出现异常:" + JSONObject.toJSONString(e));
         } finally {
             redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
             if (redisOnlineInfo != null) {
@@ -174,6 +176,9 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @return 上报铁塔类型
      */
     private String getCarrier(String type) {
+        if (type == null) {
+            return "";
+        }
         if (!redisUtils.hasKey(RedisTable.CARRIER_HASH) ||
                 !redisUtils.hHasKey(RedisTable.CARRIER_HASH, type)) {
             Map<String, String> map = carrierDao.getAll();

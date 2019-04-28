@@ -54,7 +54,9 @@
         drag
         :action='alarmModelUrl'
         :before-upload="beforeUpload"
+        :on-success="handleOnSuccess"
         :on-change="onChange"
+        :on-error="handleOnError"
         multiple>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -68,7 +70,9 @@
         drag
         :action='signalModelUrl'
         :before-upload="beforeUpload"
+        :on-success="handleOnSuccess"
         :on-change="onChange"
+        :on-error="handleOnError"
         multiple>
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -110,6 +114,23 @@
           return v.indexOf(val.name);
         })
       },
+
+      handleOnSuccess(val) {
+        this.$message({
+          message: '操作成功',
+          type: 'success',
+          showClose: true,
+        })
+      },
+
+      handleOnError(val) {
+        this.$message({
+          message: '操作失败',
+          type: 'error',
+          showClose: true,
+        })
+      },
+
       onChange(val) {
         console.log(val);
       }

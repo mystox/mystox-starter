@@ -203,7 +203,7 @@ public class FsuServiceImpl implements FsuService {
 
     @Override
     public JSONObject unbind(String sn) {
-        ModuleMsg moduleMsg = new ModuleMsg(PktType.ALARM_MODEL_IMPORT,sn);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.FSU_UNBIND,sn);
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }

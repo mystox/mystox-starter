@@ -214,6 +214,8 @@ public class DataMntServiceImpl implements DataMntService {
         Integer devType = (Integer) payload.get("type");
         Integer resNo = (Integer) payload.get("resNo");
         String port = (String) payload.get("port");
+
+
         Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         if (device == null) return new JSONArray();
         String coId = (String) payload.get("coId");

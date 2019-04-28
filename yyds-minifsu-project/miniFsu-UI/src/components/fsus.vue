@@ -8,7 +8,7 @@
                  label-position="right"
                  :inline="true">
           <el-form-item label="SN" prop="sn" label-width="35px">
-            <el-input v-model="searcher.sn" placeholder="请输入SN">
+            <el-input v-model.trim="searcher.sn" placeholder="请输入SN">
             </el-input>
           </el-form-item>
         </el-form>
@@ -43,7 +43,8 @@
         :label="$t('SECURITY.USER.OPERATION')" width="400">
         <template slot-scope="scope">
           <div>
-            <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">绑定</i>
+            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
+             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
             <router-link :to="{
                   path: '/devices',
                   query: {
@@ -114,9 +115,9 @@
           },
           {
             label: '绑定状态',
-            value: 'bindStatus',
+            value: 'bindMark',
             // width: 270,
-            filter: 'nullFilter',
+            filter: 'bindMarkFilter',
             className: '',
           },
           {
@@ -165,7 +166,7 @@
               {
                 type: 'input',
                 name: 'fsuId',
-                defaultValue: "43048243800189",
+                // defaultValue: "43048243800189",
                 disabled: true,
                 rule: {}
               }
@@ -174,7 +175,7 @@
               {
                 type: 'textarea',
                 name: 'devIds',
-                defaultValue: "43048243800189\n43048240700215\n43048240600130\n43048241820217\n43048243700210\n43048241800169\n43048241830216\n43048241840216\n43048241810169\n43048241500109\n43048241900261\n43048249900010\n43048244500016\n43048241860244",
+                // defaultValue: "43048243800189\n43048240700215\n43048240600130\n43048241820217\n43048243700210\n43048241800169\n43048241830216\n43048241840216\n43048241810169\n43048241500109\n43048241900261\n43048249900010\n43048244500016\n43048241860244",
                 rows: 8,
                 rule: {}
               }
@@ -259,6 +260,7 @@
         this.$refs[dialogName].toModal();
       },
 
+      // 绑定FSU
       setFsu(res) {
         let params = {
           "fsuId" : res.fsuId,
@@ -278,7 +280,18 @@
           "alarmRhythm" : 1000,
           "coordinate" : "120.261175,30.317344"
         };
-        this.$api.setFsu(params).then(() => {
+        this.$api.setFsu(params).then((res) => {
+          this.getFsuList();
+        })
+      },
+
+      // 解绑FSU
+      unbind(item) {
+        let param = {
+          fsuId: item.fsuId
+        }
+        this.$api.unbind(param, item.sN).then((res)=> {
+          this.getFsuList();
         })
       },
 
