@@ -242,6 +242,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.TERMINAL_STATUS.equals(pktType)
                 || PktType.SET_TERMINAL.equals(pktType)
                 || PktType.GET_RUNSTATE.equals(pktType)
+                || PktType.FSU_UNBIND.equals(pktType)
                 || PktType.GET_TERMINAL_LOG.equals(pktType)
                 || PktType.GET_FSU.equals(pktType)) {
             logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
@@ -261,7 +262,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             logger.info("[{}]>>>>>>>>>>thirdParty==={}===", msgId, msg);
             String addrStr = "";
             JSONObject payload = msg.getPayload();
-            if (payload != null) { //绑定需要带BIP
+            if (payload != null) { //绑定|解除绑定需要带BIP
                 addrStr = payload.getString("BIP");
             }
             if (StringUtils.isBlank(addrStr)) {
@@ -553,7 +554,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             } else {
                 return (JSON) JSON.parse(response.getPayload());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            logger.error("[{}] [{}]rpc request error...[{}]", msgId, host + ":" + port, e.toString());
             e.printStackTrace();
             result.put("result", 0);
         }

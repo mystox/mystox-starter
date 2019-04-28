@@ -200,6 +200,10 @@ public class TowerService {
     private List<JsonDevice> getDeviceList(JSONObject request, String fsuId) throws Exception {
         List<JsonDevice> result = new ArrayList<>();
 
+        if (fsuId.length() != 14) {
+            throw new Exception("铁塔FSUID有误,fsuId:" + fsuId);
+        }
+
         JSONArray array = request.getJSONArray("devCodeList");
         for (int i = 0; i < array.size(); ++i) {
             String deviceId = array.getString(i);
@@ -786,7 +790,7 @@ public class TowerService {
 
             refreshLastTimeRecvTowerMsg(getData.getFsuId());
 
-            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(getData.getFsuId()), RedisFsuBind.class);
+            RedisFsuBind redisFsuBind = getFsuBindInfo(getData.getFsuId());
 
             Map<String, List<Signal>> deviceSignalMap = getDeviceSignalMap(getData, redisFsuBind);
 
@@ -907,7 +911,7 @@ public class TowerService {
 
             refreshLastTimeRecvTowerMsg(setPoint.getFsuId());
 
-            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(setPoint.getFsuId()), RedisFsuBind.class);
+            RedisFsuBind redisFsuBind = getFsuBindInfo(setPoint.getFsuId());
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(redisFsuBind.getSn()), RedisOnlineInfo.class);
 
             SetPointAck ack = new SetPointAck();
@@ -980,7 +984,7 @@ public class TowerService {
 
             refreshLastTimeRecvTowerMsg(getThreshold.getFsuId());
 
-            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(getThreshold.getFsuId()), RedisFsuBind.class);
+            RedisFsuBind redisFsuBind = getFsuBindInfo(getThreshold.getFsuId());
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(redisFsuBind.getSn()), RedisOnlineInfo.class);
 
             Map<String, List<Alarm>> deviceAlarmMap = getDeviceThresholdMap(getThreshold, redisFsuBind);
@@ -1178,7 +1182,7 @@ public class TowerService {
 
             refreshLastTimeRecvTowerMsg(setThreshold.getFsuId());
 
-            RedisFsuBind redisFsuBind = redisUtils.get(RedisTable.getFsuBindKey(setThreshold.getFsuId()), RedisFsuBind.class);
+            RedisFsuBind redisFsuBind = getFsuBindInfo(setThreshold.getFsuId());
             RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(redisFsuBind.getSn()), RedisOnlineInfo.class);
 
             SetThresholdAck ack = new SetThresholdAck();
@@ -1261,9 +1265,7 @@ public class TowerService {
      * @param fsuId fsuId
      */
     private void refreshLastTimeRecvTowerMsg(String fsuId) {
-        String fsuBindKey = RedisTable.getFsuBindKey(fsuId);
-
-        RedisFsuBind redisFsuBind = redisUtils.get(fsuBindKey, RedisFsuBind.class);
+        RedisFsuBind redisFsuBind = getFsuBindInfo(fsuId);
         if (redisFsuBind == null) {
             return;
         }
@@ -1284,13 +1286,11 @@ public class TowerService {
      * @return 在线状态
      */
     private boolean checkTowerOnline(String fsuId) {
-        String fsuBindKey = RedisTable.getFsuBindKey(fsuId);
-        if (!redisUtils.hasKey(fsuBindKey)) {
+        RedisFsuBind redisFsuBind = getFsuBindInfo(fsuId);
+        if (redisFsuBind == null) {
             //未查询到该fsuId有绑定sn记录，返回null
             return false;
         }
-
-        RedisFsuBind redisFsuBind = redisUtils.get(fsuBindKey, RedisFsuBind.class);
 
         String key = RedisTable.getRegistryKey(redisFsuBind.getSn());
         if (!redisUtils.hasKey(key)) {
@@ -1309,6 +1309,33 @@ public class TowerService {
         redisUtils.set(key, redisOnlineInfo, time);
 
         return true;
+    }
+
+    /**
+     * 获取fsuId对应绑定信息
+     * @param fsuId fsuId
+     * @return 绑定信息，若为绑定，则为null
+     */
+    private RedisFsuBind getFsuBindInfo(String fsuId) {
+        RedisFsuBind result = null;
+
+        String key = RedisTable.getFsuBindKey(fsuId);
+        result = redisUtils.get(key, RedisFsuBind.class);
+        if (result == null) {
+            JsonStation jsonStation = stationDao.getInfoByFsuId(fsuId);
+            if (jsonStation != null) {
+                List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
+                result = new RedisFsuBind();
+                result.setFsuId(fsuId);
+                result.setSn(jsonStation.getSn());
+                for (JsonDevice jsonDevice : jsonDeviceList) {
+                    result.getDeviceIdList().add(jsonDevice.getDeviceId());
+                }
+                redisUtils.set(key, result);
+            }
+        }
+
+        return result;
     }
 
     /**

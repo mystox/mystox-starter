@@ -1,9 +1,7 @@
 package com.kongtrolink.framework;
 
-import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.runner.BusinessRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -61,7 +60,18 @@ public class MinifsuControllerApplicationTests {
 //		List<RunState> r = mongoTemplate.find(Query.query(Criteria.where("createTime").lte(new Date(0))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
 //		System.out.println(r.size());
 //		SignalModel one = mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(1).and("dataId").is("1001")), SignalModel.class, MongoTableName.SIGNAL_MODEL);
-		List<SignalModel> all = mongoTemplate.findAll(SignalModel.class, MongoTableName.SIGNAL_MODEL);
-		System.out.println(all.size());
+//		List<SignalModel> all = mongoTemplate.findAll(SignalModel.class, MongoTableName.SIGNAL_MODEL);
+//		System.out.println(all.size());
+		Criteria criteria = Criteria.where("sn").is("MINI201904260012");
+		Long startTime = 1556121600000L;
+		if (startTime != null) {
+			Long endTime = 1556553600000L;
+			if (endTime != null) {
+				criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
+			} else {
+				criteria.and("createTime").gte(new Date(startTime));
+			}
+		}
+//		mongoTemplate.count(Query.query())
 	}
 }

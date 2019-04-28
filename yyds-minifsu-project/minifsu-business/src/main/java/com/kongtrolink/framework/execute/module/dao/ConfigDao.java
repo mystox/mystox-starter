@@ -51,10 +51,14 @@ public class ConfigDao {
         return mongoTemplate.findById(id, AlarmSignalConfig.class, MongoTableName.ALARM_SIGNAL_CONFIG);
     }
 
-    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId, String alarmId) {
+    public List<AlarmSignalConfig> findAlarmSignalConfigByDeviceIdAndCoId(String deviceId, String coId, String alarmId,String alarmDesc) {
         Criteria criteria = Criteria.where("deviceId").is(deviceId);
         if (StringUtils.isNotBlank(coId)) {
             criteria.and("coId").is(coId);
+        }
+        if (StringUtils.isNotBlank(alarmDesc))
+        {
+            criteria.and("alarmDesc").regex(alarmDesc);
         }
         if (StringUtils.isNotBlank(alarmId)) {
             if (alarmId.contains("[")) {

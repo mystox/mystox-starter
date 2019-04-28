@@ -249,11 +249,23 @@ public class TerminalServiceImpl implements TerminalService {
                 JSONObject jsonObject1 = JSONObject.parseObject(bindResult);
                 Integer resultInt = jsonObject1.getInteger("result");
                 if (resultInt == 1) {
+                    //解绑其他sn
+                    if (StringUtils.isNotBlank(fsuId)) {
+                        List<Terminal> terminalByFsuId = terminalDao.findTerminalByFsuId(fsuId);
+                        if (terminalByFsuId != null) {
+                            for (Terminal t : terminalByFsuId) {
+                                t.setBindMark(false);
+                                t.setFsuId("");
+                                terminalDao.saveTerminal(t);
+                            }
+                        }
+                    }
+                    //保存SN
                     terminal.setBindMark(true);
                     terminal.setFsuId(fsuId);
                     terminalDao.saveTerminal(terminal);
                 } else {
-                    logger.error("[{}] sn [{}] bind terminal false...",moduleMsg.getMsgId(),sn);
+                    logger.error("[{}] sn [{}] bind terminal false...", moduleMsg.getMsgId(), sn);
                 }
                 result.put("result", resultInt);
                 return result;
@@ -276,29 +288,35 @@ public class TerminalServiceImpl implements TerminalService {
         result.put("result", 1);
         return result;
     }
+
     /**
      * 终端解绑
+     *
      * @param moduleMsg
      * @return
      */
     @Override
     public JSONObject unBind(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();
-        JSONObject payload = moduleMsg.getPayload();
-        String fsuId = payload.getString("fsuId");
-        if (StringUtils.isNotBlank(fsuId)) {
-
-        }
         JSONObject result = new JSONObject();
         moduleMsg.setPktType(PktType.FSU_BIND);
         RpcNotifyProto.RpcMessage rpcMessage = null;
+        JSONObject payload = moduleMsg.getPayload();
+        if (payload != null) {
+            String fsuId = payload.getString("fsuId");
+        }
+
         try {
+            Terminal terminal = terminalDao.findTerminalBySn(sn);
             moduleMsg.setPktType(PktType.TERMINAL_UNBIND);
+            String bid = terminal.getBID();
+            //获取BIP
+            Order orderByBid = terminalDao.findOrderByBid(bid);
+            payload.put("BIP", orderByBid.getBIP()); //默认发往default
             rpcMessage = rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
             String bindResult = rpcMessage.getPayload();
             JSONObject jsonObject1 = JSONObject.parseObject(bindResult);
             Integer resultInt = jsonObject1.getInteger("result");
-            Terminal terminal = terminalDao.findTerminalBySn(sn);
             if (resultInt == 1) {
                 terminal.setBindMark(false);
                 terminal.setFsuId("");
@@ -306,7 +324,9 @@ public class TerminalServiceImpl implements TerminalService {
                 result.put("result", resultInt);
                 return result;
             } else {
-                logger.error("[{}] sn [{}] unbind terminal false...",moduleMsg.getMsgId(),sn);
+                logger.error("[{}] sn [{}] unbind terminal false...", moduleMsg.getMsgId(), sn);
+                result.put("result", resultInt);
+                return result;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -314,6 +334,7 @@ public class TerminalServiceImpl implements TerminalService {
         result.put("result", 1);
         return result;
     }
+
     @Override
     public JSONObject terminalLogSave(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
@@ -334,6 +355,7 @@ public class TerminalServiceImpl implements TerminalService {
 
     /**
      * 获取终端状态
+     *
      * @param moduleMsg
      * @return
      */

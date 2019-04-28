@@ -50,21 +50,20 @@ public class TerminalDao {
 
     public List<Terminal> findTerminal(JSONObject jsonObject) {
 
-        int count = jsonObject.get("count") == null ? 30 : (int)jsonObject.get("count");
-       int page = jsonObject.get("page") == null ? 1: (int)jsonObject.get("page");
+        int count = jsonObject.get("count") == null ? 30 : (int) jsonObject.get("count");
+        int page = jsonObject.get("page") == null ? 1 : (int) jsonObject.get("page");
         String sn = jsonObject.getString("sn");
         Criteria criteria = new Criteria();
-        if(StringUtils.isNotBlank(sn))
-        {
+        if (StringUtils.isNotBlank(sn)) {
             criteria = Criteria.where("SN").regex(sn);
         }
-        return mongoTemplate.find(Query.query(criteria).skip((page-1)*count).limit(count), Terminal.class, MongoTableName.TERMINAL);
+        return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count), Terminal.class, MongoTableName.TERMINAL);
     }
+
     public Long findTerminalCount(JSONObject jsonObject) {
         String sn = jsonObject.getString("sn");
         Criteria criteria = new Criteria();
-        if(StringUtils.isNotBlank(sn))
-        {
+        if (StringUtils.isNotBlank(sn)) {
             criteria = Criteria.where("SN").regex(sn);
         }
         return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL);
@@ -87,63 +86,69 @@ public class TerminalDao {
     }
 
     public List<TerminalLog> findTerminalLog(String sn, JSONObject search) {
-        int count = search.get("count") == null ? 30 : (int)search.get("count");
-        int page = search.get("page") == null ? 1: (int)search.get("page");
+        int count = search.get("count") == null ? 30 : (int) search.get("count");
+        int page = search.get("page") == null ? 1 : (int) search.get("page");
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("recordTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime +"")));
+                criteria.and("recordTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("recordTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("recordTime").gte(new Date(startTime));
             }
         }
-        return mongoTemplate.find(Query.query(criteria).skip((page-1)*count).limit(count).with(new Sort(new Sort.Order(Sort.Direction.DESC,"recordTime"))), TerminalLog.class, MongoTableName.TERMINAL_LOG);
+        return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count).with(
+                new Sort(new Sort.Order(Sort.Direction.DESC, "recordTime"))), TerminalLog.class, MongoTableName.TERMINAL_LOG);
     }
 
     public List<RunState> findRunStates(String sn, JSONObject search) {
-        int count = search.get("count") == null ? 30 : (int)search.get("count");
-        int page = search.get("page") == null ? 1: (int)search.get("page");
+        int count = search.get("count") == null ? 30 : (int) search.get("count");
+        int page = search.get("page") == null ? 1 : (int) search.get("page");
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime +"")));
+                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("createTime").gte(new Date(startTime));
             }
         }
-        return mongoTemplate.find(Query.query(criteria).skip((page-1)*count).limit(count).with(new Sort(new Sort.Order(Sort.Direction.DESC,"createTime"))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
+        return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count).with(
+                new Sort(new Sort.Order(Sort.Direction.DESC, "createTime"))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
     }
 
     public Long getRunStateCount(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime +"")));
+                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("createTime").gte(new Date(startTime));
             }
         }
         return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_RUN_STATE);
     }
+
     public Long getTerminalLogCount(String sn, JSONObject search) {
         Criteria criteria = Criteria.where("sn").is(sn);
-        Object startTime = search.get("startTime");
+        Long startTime = search.getLong("startTime");
         if (startTime != null) {
-            Object endTime = search.get("endTime");
+            Long endTime = search.getLong("endTime");
             if (endTime != null) {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + ""))).lte(new Date(Long.valueOf(endTime +"")));
+                criteria.and("recordTime").gte(new Date(startTime)).lte(new Date(endTime));
             } else {
-                criteria.and("createTime").gte(new Date(Long.valueOf(startTime + "")));
+                criteria.and("recordTime").gte(new Date(startTime));
             }
         }
-        return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_RUN_STATE);
+        return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL_LOG);
     }
 
 
+    public List<Terminal> findTerminalByFsuId(String fsuId) {
+        return mongoTemplate.find(Query.query(Criteria.where("fsuId").is(fsuId)), Terminal.class,MongoTableName.TERMINAL);
+    }
 }

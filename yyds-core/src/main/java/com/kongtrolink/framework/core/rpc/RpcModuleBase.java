@@ -47,7 +47,7 @@ public class RpcModuleBase {
                 .setPayload(payload)
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId)
                 .build();
-        logger.info("[{}]post message: address:[{}], msgType:[{}],payload:==={}===", msgId, addr.toString(), rpcMessage.getType(), payload);
+        logger.debug("[{}]post message: address:[{}], msgType:[{}],payload:==={}===", msgId, addr.toString(), rpcMessage.getType(), payload);
         RpcNotifyProto.RpcMessage rpcResult = proxy.notify(null, rpcMessage);
         return rpcResult;
     }

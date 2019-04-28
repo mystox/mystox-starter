@@ -215,12 +215,13 @@ public class DataMntServiceImpl implements DataMntService {
         Integer resNo = (Integer) payload.get("resNo");
         String port = (String) payload.get("port");
 
+        String alarmDesc = payload.getString("alarmDesc");
 
         Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         if (device == null) return new JSONArray();
         String coId = (String) payload.get("coId");
         String alarmId = payload.getString("alarmId");
-        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId, alarmId); //根据deviceId和数据点id获取信号点配置列表
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId, alarmId, alarmDesc); //根据deviceId和数据点id获取信号点配置列表
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
@@ -340,11 +341,11 @@ public class DataMntServiceImpl implements DataMntService {
             businessExecutor.execute(() -> {
                 // 向向外部网关发送运行状态报文
                 try {
-                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] ", msgId, sn,PktType.DATA_STATUS);
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] ", msgId, sn, PktType.DATA_STATUS);
                     moduleMsg.setPktType(PktType.DATA_STATUS);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn,PktType.DATA_STATUS, e.toString());
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn, PktType.DATA_STATUS, e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);

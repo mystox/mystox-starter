@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.execute.module.model;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.TerminalPktType;
 
 import java.util.Date;
 
@@ -17,7 +18,7 @@ public class TerminalLog {
     private Integer pktType;
     private JSONObject payload;
     private Integer payloadSize;
-
+    private String pktTypeName;
 
     public TerminalLog() {
     }
@@ -27,10 +28,19 @@ public class TerminalLog {
         this.pktType = pktType;
         this.recordTime = recordTime;
         this.payload = payload;
+        this.pktTypeName = TerminalPktType.toName(pktType);
         if (payload != null)
             this.payloadSize = payload.toString().getBytes().length;
         else
             this.payloadSize = 0;
+    }
+
+    public String getPktTypeName() {
+        return pktTypeName;
+    }
+
+    public void setPktTypeName(String pktTypeName) {
+        this.pktTypeName = pktTypeName;
     }
 
     public Integer getPktType() {

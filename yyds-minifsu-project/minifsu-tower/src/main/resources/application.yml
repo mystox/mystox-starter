@@ -1,15 +1,18 @@
 logging:
   level:
-   root: info
-   org.apache.hadoop.util: OFF #隐藏hadoop日志
-   org.mongodb.driver.*: OFF
+    root: info
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 
 mongodb:
   uri: mongodb://172.16.6.9:27017/minifsu2_tower
 
 server:
   name: minifsu-tower
-  bindIp: 172.16.6.39
+  bindIp: 172.16.6.20
   rpc:
     port: 18881
 
@@ -41,7 +44,7 @@ rpc:
 
 tower:
   gateway: #铁塔WebService网关Ip地址端口号
-    hostname: 172.16.6.39
+    hostname: 172.16.6.20
     port: 18883
   registry:
     timeout: 600000 #终端在线超时时间(秒)

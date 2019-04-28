@@ -52,7 +52,7 @@ public interface FsuService {
 
     JSONObject saveAlarmModelList(JSONArray alarmSignalList);
 
-    JSONObject unbind(String sn);
+    JSONObject unbind(Map<String, Object> requestBody,String sn);
 
     JSONObject getRunState(Map<String, Object> requestBody, String sn);
 

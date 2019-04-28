@@ -8,6 +8,7 @@ import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.ExcelUtil;
 import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +60,7 @@ public class FSUController {
      */
     @RequestMapping("/unbind")
     public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody,String sn) {
-        JSONObject result = fsuService.unbind(sn);
+        JSONObject result = fsuService.unbind(requestBody,sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
@@ -198,10 +199,16 @@ public class FSUController {
 
                 JSONObject snObj = new JSONObject();
                 String sn = cell[r][0];
+                if (StringUtils.isBlank(sn))
+                {
+                    JsonResult jsonResult = new JsonResult("存在空SN行",false);
+                    return jsonResult;
+                }
                 if (snSet.contains(sn)) {
                     JsonResult jsonResult = new JsonResult("excel存在重复SN",false);
                     return jsonResult;
                 }
+                snSet.add(sn);
                 snObj.put("SN",sn);
                 snObj.put("vendor", cell[r][1]);
                 snList.add(snObj);
