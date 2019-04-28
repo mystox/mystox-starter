@@ -123,6 +123,13 @@
             className: '',
           },
           {
+            label: '已绑定FSU ID',
+            value: 'fsuId',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
             label: '在线状态',
             value: 'status',
             // width: 270,
@@ -312,19 +319,19 @@
           "fsuId" : res.fsuId,
           "devCodeList" : res.devIds,
           "sn": res.sN,
-          "name" : "test_fsu",
-          "address" : "address",
+          "name" : res.name,
+          "address" : res.address,
           "setUpTime" : new Date().getTime(), 
-          "vpnName": "全国3",
+          "vpnName": res.vpnName,
 
-          "fsuClass":"",
-          "imsi" : "imsi",
-          "operators" : "yytd",
-          "heartCycle" : 10,
-          "businessRhythm" : 100,
-          "runStatusRhythm" : 50,
-          "alarmRhythm" : 1000,
-          "coordinate" : "120.261175,30.317344"
+          "fsuClass": res.fsuClass,
+          "imsi" : res.imsi,
+          "operators" : res.operaters,
+          "heartCycle" : res.heartCycle,
+          "businessRhythm" :res.businessRhythm,
+          "runStatusRhythm" : res.runStatusRhythm,
+          "alarmRhythm" : res.alarmRhythm,
+          "coordinate" : res.coordinate
         };
         this.$api.setFsu(params).then((res) => {
           this.getFsuList();
