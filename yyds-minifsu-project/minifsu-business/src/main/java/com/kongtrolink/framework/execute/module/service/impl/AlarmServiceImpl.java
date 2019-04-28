@@ -71,8 +71,9 @@ public class AlarmServiceImpl implements AlarmService {
         List<Alarm> alarms = JSONArray.parseArray(JSON.toJSONString(payload.get("list")), Alarm.class);
         for (Alarm alarm : alarms) {
             alarm.setSn(sn);
+            alarmDao.save(alarm);
         }
-        alarmDao.save(alarms);
+//        alarmDao.save(alarms);
         JSONObject object = new JSONObject();
         object.put("result", 1);
         return object;

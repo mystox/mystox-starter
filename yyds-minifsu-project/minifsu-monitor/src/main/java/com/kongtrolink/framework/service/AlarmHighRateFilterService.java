@@ -72,7 +72,7 @@ public class AlarmHighRateFilterService {
                 redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
                 if(highRateC == highRateT){
                     //设置高频
-                    beforAlarm.setH((byte)1);
+                    beforAlarm.setHighRate((byte)1);
                 }
                 return beforAlarm;
             }else{

@@ -105,6 +105,7 @@ public class AlarmAnalysisService {
                     //延迟产生过期后第一次数据如果是异常，则告警产生，否则同延迟产生时间内告警消除处理
                     redisUtils.hdel(begin_delay_alarm_hash+fsu.getSN(), keyAlarmId); //删除redis中延迟产生数据
                     highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
+                    //liuddtodo 后期需要修改redis中重复告警延时数据，和将关联或者组合期间消除的告警保存到数据库，状态为待定
                     beginDelayAlarmMap.remove(keyAlarmId);
                 }
             }
@@ -146,8 +147,8 @@ public class AlarmAnalysisService {
             beforAlarm.settRecover(curDate);
         }else{//告警延时消除期间，告警数据再次异常，则将告警开始状态
             beforAlarm.settRecover(null);
-            beforAlarm.setRecoverDelay(0);
-            beforAlarm.setRecoverDelayFT(0);
+            beforAlarm.setRecoverDelay(null);
+            beforAlarm.setRecoverDelayFT(null);
             byte link = beforAlarm.getLink();
             link = (byte) (link & 251);
             beforAlarm.setLink(link);
