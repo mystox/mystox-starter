@@ -52,8 +52,8 @@ public class AlarmDelayService {
      * 功能描述:判断告警消除延迟是否到达时间
      */
     private boolean endInTime(Alarm alarm, Date curDate){
-        int recoverDelay = alarm.getRecoverDelay();
-        long recoverDelayFT = alarm.getRecoverDelayFT();
+        Integer recoverDelay = alarm.getRecoverDelay();
+        Long recoverDelayFT = alarm.getRecoverDelayFT();
         return (curDate.getTime() - recoverDelayFT) < (recoverDelay * 1000);
     }
 
@@ -92,7 +92,7 @@ public class AlarmDelayService {
             return null;
         }
         byte link = beforAlarm.getLink();
-        Integer recoverDelay = alarmSignal.getRecoverDelay();
+        int recoverDelay = alarmSignal.getRecoverDelay();
         byte realEndLink = (byte) (link | EnumAlarmStatus.REALEND.getValue());
         if ((link & EnumAlarmStatus.END.getValue()) != 0) {      //告警消除
             if((link & EnumAlarmStatus.REALEND.getValue()) == 0){   //告警不是真是消除
@@ -100,7 +100,7 @@ public class AlarmDelayService {
                     beforAlarm.setLink(realEndLink);
                     return beforAlarm;
                 }
-                if(0 == beforAlarm.getRecoverDelayFT()){ /*填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点*/
+                if(null == beforAlarm.getRecoverDelayFT()){ /*填充信号点告警消除延迟以及结束延迟，避免告警延迟时再次获取信号点*/
                     beforAlarm.setRecoverDelay(alarmSignal.getRecoverDelay());
                     beforAlarm.setRecoverDelayFT(curDate.getTime());
                     return beforAlarm;
@@ -151,6 +151,9 @@ public class AlarmDelayService {
                 alarm.setLink(link);
                 //修改产生时间为当前时间
                 alarm.settReport(curDate);
+                //去除产生延迟多余字段
+                alarm.setDelay(null);
+                alarm.setBeginDelayFT(null);
                 alarmMap.put(key, (JSONObject)JSONObject.toJSON(alarm));
             }
         }
@@ -175,6 +178,9 @@ public class AlarmDelayService {
                         alarm.setLink((byte) (link | EnumAlarmStatus.REALEND.getValue()));
                         //修改消除时间为当前时间
                         alarm.settRecover(curDate);
+                        //去除延迟消除等多余字段
+                        alarm.setRecoverDelay(null);
+                        alarm.setRecoverDelayFT(null);
                     }
                 }
             }

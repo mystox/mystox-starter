@@ -30,5 +30,9 @@ public class AlarmDao {
         return true;
     }
 
+    public boolean save(Alarm alarm){
+        mongoTemplate.insert(alarm, tableName);
+        return true;
+    }
 
 }
