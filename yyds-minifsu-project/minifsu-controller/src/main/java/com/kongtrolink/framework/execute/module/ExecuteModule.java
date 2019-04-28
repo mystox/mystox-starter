@@ -484,7 +484,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
                 moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
-            } else return;
+            } else if (payload != null && payload instanceof ModuleMsg) {
+                moduleMsg = (ModuleMsg) payload;
+                moduleMsg.setPktType(PktType.TERMINAL_LOG_SAVE);
+            } else {
+                return;
+            }
             try {
                 moduleMsg.setMsgId(msgId);
                 logger.info("[{}]terminal_log>>>>>>>>>>business terminal log save ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
