@@ -257,7 +257,7 @@ public class TerminalServiceImpl implements TerminalService {
                             for (Terminal t : terminalByFsuId)
                             {
                                 t.setBindMark(false);
-                                t.setFsuId(fsuId);
+                                t.setFsuId("");
                                 terminalDao.saveTerminal(t);
                             }
                         }

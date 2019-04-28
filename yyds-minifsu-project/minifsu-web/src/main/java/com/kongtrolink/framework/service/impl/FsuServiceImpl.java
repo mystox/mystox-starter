@@ -166,8 +166,9 @@ public class FsuServiceImpl implements FsuService {
     }
 
     @Override
-    public JSONObject unbind(String sn) {
+    public JSONObject unbind(Map<String, Object> requestBody,String sn) {
         ModuleMsg moduleMsg = new ModuleMsg(PktType.FSU_UNBIND,sn);
+        moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }
