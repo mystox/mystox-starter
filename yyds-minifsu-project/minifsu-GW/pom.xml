@@ -11,7 +11,7 @@
 	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>minifsu-GW</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>minifsu-net-GW</name>
+	<name>minifsu-GW</name>
 	<description>fsu网关服务</description>
 	<packaging>jar</packaging>
 

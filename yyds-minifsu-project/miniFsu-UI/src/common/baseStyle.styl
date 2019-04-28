@@ -1,0 +1,155 @@
+html, body
+  height: 100%
+  //min-width: 1280px;
+  line-height 1
+  font-weight 200
+  font-family 'PingFang SC', 'STHeitiSC-Light', 'Helvetica-Light', Arial, sans-serif;
+
+
+/*
+  -------------flex lay out---------------
+*/
+
+
+/* -------横向flexbox----------- */
+// 横向容器
+.flex
+  display: flex;
+
+.flex-content-around
+  display: flex
+  justify-content: space-around
+
+.flex-content-between
+  display: flex
+  justify-content: space-between
+
+
+.flex-content-center
+  display: flex
+  justify-content: center
+
+.flex-content-start
+  display: flex
+  justify-content: flex-start
+
+.flex-content-end
+  display: flex
+  justify-content: flex-end
+
+// 竖向容器
+
+.flex-column
+  display: flex;
+  flex-direction: column;
+
+.flex-column-content-around
+  display: flex
+  flex-direction: column
+  justify-content: space-around
+
+.flex-column-content-between
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+
+.flex-column-content-center
+  display: flex
+  flex-direction: column
+  justify-content: center
+
+.flex-column-content-start
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+
+.flex-column-content-end
+  display: flex
+  flex-direction: column
+  justify-content: flex-end
+
+// 剩余空间分配给子元素
+.flex-auto
+  flex: auto
+.flex-1
+  flex: 1
+.flex-6
+  flex: 6
+
+
+/* ---------竖向flexBox（所有元素在 方向上统一居中）---------- */
+.flex-column
+  display: flex
+  flex-direction: column
+
+.flex-align-items-start
+  display: flex
+  align-items: flex-start
+
+.flex-align-items-center
+  display: flex
+  align-items: center
+
+.flex-align-items-end
+  display: flex
+  align-items: flex-end
+
+.flex-align-items-baseline
+  display: flex
+  align-items: baseline
+
+.flex-align-items-streth
+  display: flex
+  align-items: streth
+
+
+.flex-align-content-start
+  display: flex
+  align-content: flex-start
+
+
+/* wrap */
+
+.flex-nowrap
+  display: flex
+  flex-wrap: nowrap
+
+.flex-warp
+  display: flex
+  flex-wrap: wrap
+
+/* 搜索栏样式 */
+.el-form--inline
+  .el-form-item__content
+    .el-select
+      .el-input
+        width 100px
+    .el-input
+      width 180px
+
+/* 说明当中两个嵌入的dialog append-to-dialog */
+body
+  .extend-board-dialog
+    //background: red;
+    .el-dialog
+      width: 1000px !important;
+      .boards-wrapper
+        display: flex;
+        // flex-direction: column;
+        justify-content: center;
+        .left
+          width: 50%;
+        .right
+          width: 50%;
+
+.font-green
+  color: 'green';
+.font-gray
+  color: '#dddddd';
+.font-red
+  color: 'red';
+
+
+.el-button.el-picker-panel__link-btn.el-button--text.el-button--mini
+  span
+    display: none;
