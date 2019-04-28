@@ -45,42 +45,6 @@ public class FsuServiceImpl implements FsuService {
         if (requestBody == null) return null;
         String sn = (String) requestBody.get("sn");
 
-        /*if (fsuCode != null)
-        {
-            String code = fsuCode;
-            String tierCode = StringUtils.substring(code, 0, 6);
-            if (StringUtils.isNotBlank(tierCode) && StringUtils.length(tierCode) >= 2)
-            {
-                StringBuilder sb = new StringBuilder();
-                Map<String, String> tierMap = ControllerInstance.getInstance().getTierMap();
-                String firstTier = StringUtils.substring(tierCode, 0, 2);
-                sb.append(tierMap.get(firstTier));
-                if (StringUtils.length(tierCode) >= 4)
-                {
-                    String secondTier = StringUtils.substring(tierCode, 0, 4);
-                    String secondTierName = tierMap.get(secondTier);
-                    if (StringUtils.isNotBlank(secondTierName))
-                    {
-                        sb.append("-");
-                        sb.append(tierMap.get(secondTier));
-                        if (StringUtils.length(tierCode) >= 6)
-                        {
-
-                            String tierName = tierMap.get(tierCode);
-                            if (StringUtils.isNotBlank(tierName))
-                            {
-                                sb.append("-");
-                                sb.append(tierName);
-                            }
-                        }
-                    }
-                }
-                requestBody.put("tierName", sb.toString());
-            }
-        }*/
-//        BeanUtils.copyProperties(requestBody, fsu);
-//        fsuDao.saveFsu(fsu);
-
         ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_TERMINAL, sn);
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
@@ -202,8 +166,9 @@ public class FsuServiceImpl implements FsuService {
     }
 
     @Override
-    public JSONObject unbind(String sn) {
+    public JSONObject unbind(Map<String, Object> requestBody,String sn) {
         ModuleMsg moduleMsg = new ModuleMsg(PktType.FSU_UNBIND,sn);
+        moduleMsg.setPayload((JSONObject) JSON.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
     }

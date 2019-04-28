@@ -35,12 +35,12 @@ public class TerminalLog {
             this.payloadSize = 0;
     }
 
-    public String getName() {
+    public String getPktTypeName() {
         return pktTypeName;
     }
 
-    public void setName(String name) {
-        this.pktTypeName = name;
+    public void setPktTypeName(String pktTypeName) {
+        this.pktTypeName = pktTypeName;
     }
 
     public Integer getPktType() {
