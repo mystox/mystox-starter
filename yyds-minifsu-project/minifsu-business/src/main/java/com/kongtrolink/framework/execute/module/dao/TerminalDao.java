@@ -148,4 +148,7 @@ public class TerminalDao {
     }
 
 
+    public List<Terminal> findTerminalByFsuId(String fsuId) {
+        return mongoTemplate.find(Query.query(Criteria.where("fsuId").is(fsuId)), Terminal.class,MongoTableName.TERMINAL);
+    }
 }
