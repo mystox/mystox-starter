@@ -202,6 +202,7 @@ public class FSUController {
                     JsonResult jsonResult = new JsonResult("excel存在重复SN",false);
                     return jsonResult;
                 }
+                snSet.add(sn);
                 snObj.put("SN",sn);
                 snObj.put("vendor", cell[r][1]);
                 snList.add(snObj);
