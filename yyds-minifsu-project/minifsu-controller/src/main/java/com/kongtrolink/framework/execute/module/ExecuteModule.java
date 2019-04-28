@@ -484,7 +484,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
                 moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
-            } else if (payload != null && payload instanceof ModuleMsg) {
+            } else if (payload != null && payload instanceof TerminalMsg) {
                 moduleMsg = (ModuleMsg) payload;
                 moduleMsg.setPktType(PktType.TERMINAL_LOG_SAVE);
             } else {
@@ -492,10 +492,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             }
             try {
                 moduleMsg.setMsgId(msgId);
-                logger.info("[{}]terminal_log>>>>>>>>>>business terminal log save ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
+                logger.debug("[{}]terminal_log>>>>>>>>>>business terminal log save ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
                 sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //异步保存
             } catch (Exception e) {
-                logger.error("[{}]terminal_log>>>>>>>>>>business terminal log save error ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
+                logger.debug("[{}]terminal_log>>>>>>>>>>business terminal log save error ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
                 e.printStackTrace();
             }
         });

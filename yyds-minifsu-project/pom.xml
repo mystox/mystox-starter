@@ -8,7 +8,6 @@
 		<version>1.0.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.kongtrolink.framework</groupId>
 	<name>yyds-minifsu-project</name>
 	<artifactId>yyds-minifsu-project</artifactId>
 	<version>1.0.0</version>
