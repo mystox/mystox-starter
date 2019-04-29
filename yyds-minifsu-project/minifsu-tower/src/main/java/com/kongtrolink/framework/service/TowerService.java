@@ -543,7 +543,7 @@ public class TowerService {
         for (int i = 0; i < array.size(); ++i) {
             JSONObject jsonObject = array.getJSONObject(i);
 
-            String[] dev = jsonObject.getString("dev_colId").split("_")[0].split("-");
+            String[] dev = jsonObject.getString("dev").split("-");
             int type = Integer.parseInt(dev[0]);
             int resNo = Integer.parseInt(dev[1]);
 
@@ -627,7 +627,7 @@ public class TowerService {
             return null;
         }
 
-        result.setHighFrequency(info.getInteger("h") == 1);
+        result.setHighFrequency(info.getInteger("highRate") == 1);
         result.setValue(info.getString("value"));
 
         result.setFsuId(fsuId);
