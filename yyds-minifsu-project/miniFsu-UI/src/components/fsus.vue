@@ -40,19 +40,13 @@
         :resizable='false'>
       </el-table-column>
       <el-table-column
-        :label="$t('SECURITY.USER.OPERATION')" width="400">
+        :label="$t('SECURITY.USER.OPERATION')" width="550">
         <template slot-scope="scope">
           <div>
-            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">
-              / 绑定
-            </i>
-            <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">
-              / 解绑
-            </i>
-            <!-- <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="">/ 升级</i> -->
-            <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('upgradeDialog', scope.row)">
-              / 升级
-            </i>
+            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
+            <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
+            <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i>
+            <!-- <i style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i> -->
             <router-link :to="{
                   path: '/devices',
                   query: {
@@ -90,8 +84,41 @@
         </template>
       </el-table-column>
     </table-box>
+
+    <el-dialog :title="'升级'" :visible.sync="upgradeDialogVisible" :close-on-click-modal="false" @close="handleCancel">
+      <el-form :model="upgradeParam" label-width="125px" ref="upgradeDialog">
+        <el-form-item label="SN ID">
+          <span>{{modifyCont.sN}}</span>
+        </el-form-item>
+        <el-form-item label="选择升级类型" prop="type" v-show="typeList.length != 0">
+          <el-select v-model="upgradeParam.type" auto-complete="off" style="width:200px;" @change="handleChange">
+            <el-option v-for="(item, index) in typeList" :label="item.label" :value="item.value" :key="index">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择升级文件" prop="documentObj" v-show="typeList.length != 0">
+          <el-select v-model="upgradeParam.documentObj" auto-complete="off" style="width:200px;" :disabled="!upgradeParam.type">
+            <el-option v-for="(item, index) in documentList" :label="item.label" :value="item" :key="index">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="后端编译" v-show="upgradeParam.type && (upgradeParam.documentObj && upgradeParam.documentObj.name) && typeList.length != 0">
+          <el-button @click="compiler" type="primary"> 编译 </el-button>
+        </el-form-item>
+        <el-form-item label="引擎编译结果" v-if="compilerInfo.engine">
+          <span>{{compilerInfo.engine}}</span>
+        </el-form-item>
+        <el-form-item label="适配层编译结果" v-if="compilerInfo.program">
+          <span style>{{compilerInfo.program}}</span>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click.native="handleCancel">取消</el-button>
+        <el-button type="primary" @click.native="upgrade" :disabled="!(compilerInfo.engine || compilerInfo.program)">确定</el-button>
+      </div>
+    </el-dialog>
+
     <modal :option="optionBind" ref="bindDialog"></modal>
-    <modal :option="optionUpgrade" ref="upgradeDialog"></modal>
   </div>
 </template>
 
@@ -106,7 +133,6 @@
         },
         multipleSelection: [],
         fsuList: [],
-        userGroups: [],
         columns: [
           {
             label: 'SN 编码',
@@ -123,6 +149,13 @@
             className: '',
           },
           {
+            label: '在线状态',
+            value: 'status',
+            // width: 270,
+            filter: 'statusFilter',
+            className: '',
+          },
+          {
             label: '已绑定FSU ID',
             value: 'fsuId',
             // width: 270,
@@ -130,23 +163,45 @@
             className: '',
           },
           {
-            label: '在线状态',
-            value: 'status',
+            label: '适配层版本号',
+            value: 'adapterVer',
             // width: 270,
-            filter: 'statusFilter',
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '引擎版本号',
+            value: 'engineVer',
+            // width: 270,
+            filter: 'nullFilter',
             className: '',
           },
         ],
         modifyCont: {
         },
+        typeList: [
+          {label: '引擎', value: 1},
+          {label: '适配层', value: 2}
+        ],
         pagination: {
           total: 0,
           currentPage: 1,
           pageSize: 15,
           onChange: this.onPaginationChanged
         },
+        upgradeParam: {
+          type: null,
+          documentObj: '',
+        },
         loading: false,
+        allDocument: [],
         documentList: [],
+        disabled: true,
+        upgradeDialogVisible: false,
+        compilerInfo: {
+          engine: '',
+          program: '',
+        },
       }
     },
     computed: {
@@ -161,16 +216,6 @@
                 rule: {}
               }
             ],
-            // 'SN 设备列表': [
-            //   {
-            //     type: 'textarea',
-            //     name: 'snDeviceList',
-            //     defaultValue: '123123123\n123123123\n123123123\n123123123\n123123123\n',
-            //     disabled: true,
-            //     rows: 8,
-            //     rule: {}
-            //   }
-            // ],
             'FSU ID': [
               {
                 type: 'input',
@@ -195,36 +240,6 @@
           executeText: this.$t('OPERATION.CONFIRM'),
           execute: this.executeModify,
           style: {
-            // width: '50%',
-          }
-        }
-      },
-      optionUpgrade() {
-        return {
-          name: '升级',
-          form: {
-            'SN ID': [
-              {
-                type: 'span',
-                text: this.modifyCont.sN,
-                rule: {}
-              }
-            ],
-            '选择升级文件': [
-              {
-                type: 'select',
-                name: 'document',
-                options: this.documentList,
-                rule: {}
-              }
-            ],
-          },
-          clearText: this.$t('OPERATION.CLEAR'),
-          clear: this.clear,
-          executeText: this.$t('OPERATION.CONFIRM'),
-          execute: this.executeModify,
-          style: {
-            // width: '50%',
           }
         }
       },
@@ -264,16 +279,104 @@
       // 获取升级文件信息列表
       getDocumentList() {
         this.$api.getDocumentList().then((res=> {
-          // 获取对应目录下的文件列表
-          this.documentList = res.data.filter(v=> {
-            return v.name === 'software'
-          })[0].list;
-          // 改成formCell 需要的数据结构
-          this.documentList.forEach(v=> {
-            v.value = v.url;
-            v.label = v.name;
-          })
+          // 获取文件目录
+          this.allDocument = res.data;
         }).bind(this))
+      },
+
+      // 处理选择升级类型
+      handleChange(val) {
+        this.upgradeParam.documentObj = {};
+        this.documentList = this.allDocument.filter(v=> {
+          return v.name === (val === 1 ? 'engine' : 'program');
+        })[0].list;
+
+        if (this.documentList.length === 0) return;
+        
+        // 改成formCell 需要的数据结构
+        this.documentList.forEach(v=> {
+          this.$set(v, 'label', v.name);
+          this.$set(v, 'value', v);
+        })
+      },
+
+      // 点击编译
+      compiler() {
+        let name = this.upgradeParam.documentObj.name;
+        let url = this.upgradeParam.documentObj.url;
+        let host = 'http://172.16.6.39:8081/'
+        let param = {
+          "url": host + url,
+          "name": name,
+          "type": this.upgradeParam.type,
+          "md5": 'sdfwefwefwef',
+        }
+        this.$api.compiler(param, this.modifyCont.sN).then((res=> {
+          if (res.data.result === 1) {
+            if (this.upgradeParam.type === 1) {
+              this.compilerInfo['engine'] = `编译成功,文件名为${res.data.fileName},文件大小为${res.data.totalLen}`;
+              this.delOption(1);
+              this.paramForUpgradeEngine = {
+                "fileName": res.data.fileName,
+                "totalLen": res.data.totalLen,
+                "type": this.upgradeParam.type,
+                "md5": "12342jlagjkljl24gajklgj"
+              }
+            } else if (this.upgradeParam.type === 2) {
+              this.compilerInfo['program'] = `编译成功,文件名为${res.data.fileName},文件大小为${res.data.totalLen}`;
+              this.delOption(2);
+              this.paramForUpgradeProgram = {
+                "fileName": res.data.fileName,
+                "totalLen": res.data.totalLen,
+                "type": this.upgradeParam.type,
+                "md5": "12342jlagjkljl24gajklgj"
+              }
+            }
+          } 
+          this.$refs['upgradeDialog'].resetFields();
+        }).bind(this))
+      },
+      
+      // 删除已经选择过的option
+      delOption(type) {
+        // this.documentList = this.documentList.filter(v=> {
+        //   return v.name != fileName;
+        // })
+        this.typeList = this.typeList.filter(v=> {
+          return v.value != type;
+        })
+      },
+
+
+      // 点击升级
+      upgrade() {
+        if (this.compilerInfo.engine) {
+          this.$api.upgrade(this.paramForUpgradeEngine, this.modifyCont.sN).then(res=> {
+            // console.log(res);
+          });
+        } 
+        this.$nextTick(()=> {
+          if (this.compilerInfo.program) {
+            this.$api.upgrade(this.paramForUpgradeProgram, this.modifyCont.sN).then(res=> {
+              // console.log(res);
+            });
+          }
+        })
+
+      },
+
+      // 点击取消
+      handleCancel() {
+        this.upgradeDialogVisible = false;
+        this.$refs['upgradeDialog'].resetFields();
+        this.compilerInfo = {
+          engine: '',
+          program: '',
+        };
+        this.typeList = [
+          {label: '引擎', value: 1},
+          {label: '适配层', value: 2}
+        ];
       },
 
       // 分页变化回调
@@ -299,8 +402,16 @@
       // 点击模态框确定按钮。
       executeModify(res) {
         this.modifyCont = Object.assign({}, this.modifyCont, res);
-        this.modifyCont.devIds = res.devIds.split('\n');
+        if (res.devIds) {
+          this.modifyCont.devIds = res.devIds.split('\n');
+        }
         this.setFsu(this.modifyCont);
+      },
+
+      // 升级
+      executeUpgrade(res) {
+        this.upgradeParam = Object.assign({}, res);
+        this.upgrade()
       },
 
       // 关闭模态框
@@ -310,7 +421,12 @@
 
       showDialog(dialogName, item) {
         item && (this.modifyCont = item);
-        this.$refs[dialogName].toModal();
+        this.$refs[dialogName] &&this.$refs[dialogName].toModal();
+      },
+      
+      showUpgradeDialog(item) {
+        item && (this.modifyCont = item);
+        this.upgradeDialogVisible = true;
       },
 
       // 绑定FSU
@@ -322,7 +438,7 @@
           "name" : res.name,
           "address" : res.address,
           "setUpTime" : new Date().getTime(), 
-          "vpnName": res.vpnName,
+          "vpnName": '全国7',
 
           "fsuClass": res.fsuClass,
           "imsi" : res.imsi,
@@ -347,38 +463,6 @@
           this.getFsuList();
         })
       },
-
-      deleteContents(callback) {
-        let params = {
-          users: this.multipleSelection
-        };
-        this.appHttp.postDeleteUsers(params).then(() => {
-          callback && callback.call(this);
-        })
-      },
-
-      deleteContentsNeedValidated() {
-        if (this.multipleSelection.length === 0) {
-          this.$message({message: "请选择删除项", type: 'warning', showClose: true})
-        } else {
-          this.$confirm('此操作将永久删除所选项, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.deleteContents(function() {
-              this.getUsers();
-            })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除',
-              showClose: true
-            });
-          });
-        }
-      },
-
     },
     mounted() {
       // this.addMockData();

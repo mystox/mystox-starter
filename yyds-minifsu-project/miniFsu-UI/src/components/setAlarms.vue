@@ -15,7 +15,7 @@
                  label-position="right"
                  :inline="true">
           <!--使用重置功能需要给item元素传入prop属性-->
-          <el-form-item label="告警描述" prop="alarmDesc" label-width="70px">
+          <el-form-item label="告警名称" prop="alarmDesc" label-width="70px">
             <el-input v-model.trim="searcher.alarmDesc" placeholder="请输入告警名称">
             </el-input>
           </el-form-item>
@@ -92,7 +92,7 @@
             className: '',
           },
           {
-            label: '告警描述',
+            label: '告警名称',
             value: 'alarmDesc',
             // width: 270,
             filter: 'nullFilter',

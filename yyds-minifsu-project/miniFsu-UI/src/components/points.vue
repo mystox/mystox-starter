@@ -54,25 +54,10 @@
         :className = 'item.className'
         :resizable='false'>
       </el-table-column>
-      <!-- <el-table-column :label="'SN'" fixed="left">
-        <template slot-scope="scope">
-          <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
-            <router-link :to="{
-                  path: '/points',
-                  query: {
-                      deviceId: scope.row.deviceId
-                  }
-                }" tag="span">
-              {{scope.row.username}}
-            </router-link>
-          </div>
-        </template>
-      </el-table-column> -->
       <el-table-column
         :label="$t('SECURITY.USER.OPERATION')" fixed="right">
         <template slot-scope="scope">
-          <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('setSignalDialog', scope.row)"
-          v-if="scope.row.dataType === 'AO' || scope.row.dataType === 'DO'">
+          <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('setSignalDialog', scope.row)" v-if="scope.row.dataType === 'AO' || scope.row.dataType === 'DO'">
             设置信号点值
             </i>          
         </template>
@@ -136,6 +121,13 @@
           {
             label: '信号点 ID',
             value: 'coId',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
+            label: '信号点值',
+            value: 'value',
             // width: 270,
             filter: 'nullFilter',
             className: '',

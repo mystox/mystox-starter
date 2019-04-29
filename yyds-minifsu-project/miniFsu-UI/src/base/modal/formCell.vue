@@ -39,10 +39,12 @@
       v-else-if = "cell.type === 'select'"
       @input = "modelFn"
       :value = "bind"
+      @change = "cell.handleChange"
+      :disabled = "cell.disabled"
       :placeholder="cell.placeholder">
       <el-option
-        v-for="item in cell.options"
-        :key="item.value || item.label || item" :label="(item.label || item) | modalFilter(cell.filter)"
+        v-for="(item, index) in cell.options"
+        :key="index" :label="(item.label || item) | modalFilter(cell.filter)"
         @input = "modelFn"
         :value="(item.value != undefined ? item.value : item)">
       </el-option>
@@ -52,8 +54,9 @@
     <el-button
       v-else-if = "cell.type === 'button'"
       v-html = "nonFormElementRule.cooling[cell.name] || cell.html"
-      @click="btnClickHandle(cell)"
-      :disabled="!nonFormElementValid[cell.name] || !!nonFormElementRule.cooling[cell.name]">
+      type = "cell.styleType || primary"
+      :disabled="cell.disabled"
+      @click="cell.handleClick(cell)">
     </el-button>
 
     <!-- dateTimePicker 时间选择器 name, style, [start], [end], [placeholder], [format], [rule], [defaultValue] -->
