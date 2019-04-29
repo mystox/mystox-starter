@@ -304,7 +304,8 @@
       compiler() {
         let name = this.upgradeParam.documentObj.name;
         let url = this.upgradeParam.documentObj.url;
-        let host = 'http://172.16.6.39:8081/'
+        // let host = 'http://172.16.6.39:8081/'
+        let host = process.env.API_HOST;
         let param = {
           "url": host + url,
           "name": name,
