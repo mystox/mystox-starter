@@ -23,6 +23,7 @@ public class AlarmSignalConfig {
     private int recoverDelay; //告警恢复延时
     private Integer repeatDelay; //告警重复延时
     private String alarmDesc; //告警描述
+    private String normalDesc; //正常时时描述
 
     //高频过滤，暂时所有告警点都有
     private int highRateI;      //高频过滤间隔highrateinteval（单位为秒）
