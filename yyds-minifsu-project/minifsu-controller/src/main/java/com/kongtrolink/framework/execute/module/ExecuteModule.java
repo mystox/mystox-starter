@@ -93,7 +93,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     || PktType.SET_DATA_TERMINAL.equals(pktType)
                     || PktType.TERMINAL_REBOOT.equals(pktType)
                     ) {                                                     //服务>>>>>>>>终端
-                logger.info(">>>>>>>>>>terminal==={}===", payloadObject.toJSONString());
+                logger.info("[{}]>>>>>>>>>>terminal==={}===", msgId, payloadObject.toJSONString());
                 JSON result = sendTerminalExecute(msgId, payloadObject);
                 return responseMsg(result, msgId);
 
@@ -176,7 +176,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             snCommunication = redisUtils.get(key, JSONObject.class);
             if (snCommunication == null) {
                 // 错误信息记录日志
-                saveLog(msgId, sn, StateCode.CONNECT_ERROR,moduleMsg.getPktType());
+                saveLog(msgId, sn, StateCode.CONNECT_ERROR, moduleMsg.getPktType());
                 return result;
             }
 
@@ -188,7 +188,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), netAddrArr[0], Integer.parseInt(netAddrArr[1]));
         } catch (Exception e) {
             // 错误信息记录日志
-            saveLog(msgId, sn, StateCode.REDIS_ERROR,moduleMsg.getPktType());
+            saveLog(msgId, sn, StateCode.REDIS_ERROR, moduleMsg.getPktType());
             e.printStackTrace();
             return result;
         }
