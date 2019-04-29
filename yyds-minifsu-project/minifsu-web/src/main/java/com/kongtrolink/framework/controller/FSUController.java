@@ -32,6 +32,7 @@ import java.util.Set;
 public class FSUController {
 
     private FsuService fsuService;
+
     @Autowired
     public void setFsuService(FsuService fsuService) {
         this.fsuService = fsuService;
@@ -52,15 +53,15 @@ public class FSUController {
             return new JsonResult("fsu未绑定配置,继续配置", true);
     }
 
- /**
+    /**
      * 检查fsu是否已经配置,需要重新绑定
      *
      * @param requestBody
      * @return
      */
     @RequestMapping("/unbind")
-    public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody,String sn) {
-        JSONObject result = fsuService.unbind(requestBody,sn);
+    public JsonResult unbind(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
+        JSONObject result = fsuService.unbind(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
@@ -96,13 +97,15 @@ public class FSUController {
     public JsonResult upgrade(@RequestBody Map<String, Object> requestBody, String sn) {
 
         JSONObject result = fsuService.upgrade(requestBody, sn);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
 
     @RequestMapping("/compiler")
     public JsonResult compiler(@RequestBody Map<String, Object> requestBody, String sn) {
         JSONObject result = fsuService.compiler(requestBody, sn);
-        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
 
 
@@ -141,12 +144,14 @@ public class FSUController {
         JSONObject result = fsuService.getFsuStatus(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
-  @RequestMapping("/getRunState")
+
+    @RequestMapping("/getRunState")
     public JsonResult getRunState(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
 
-      JSONObject result  = fsuService.getRunState(requestBody, sn);
-      return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
+        JSONObject result = fsuService.getRunState(requestBody, sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) : new JsonResult(result);
     }
+
     @RequestMapping("/getTerminalLog")
     public JsonResult getTerminalPayload(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
         JSONObject result = fsuService.getTerminalPayload(requestBody, sn);
@@ -199,22 +204,23 @@ public class FSUController {
 
                 JSONObject snObj = new JSONObject();
                 String sn = cell[r][0];
-                if (StringUtils.isBlank(sn))
-                {
-                    return new JsonResult("存在空SN行",false);
+                if (StringUtils.isBlank(sn)) {
+                    return new JsonResult("存在空SN行", false);
                 }
                 if (snSet.contains(sn)) {
-                    return new JsonResult("excel存在重复SN",false);
+                    return new JsonResult("excel存在重复SN", false);
                 }
                 snSet.add(sn);
-                snObj.put("SN",sn);
+                snObj.put("SN", sn);
                 snObj.put("vendor", cell[r][1]);
+                String model = cell[r][2];
+                snObj.put("model", StringUtils.isNotBlank(model) ? model : "mmu100");
                 snList.add(snObj);
             }
             JSONObject result = fsuService.saveTerminal(snList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("存在重复列",false);
+                    JsonResult jsonResult = new JsonResult("存在重复列", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -225,7 +231,8 @@ public class FSUController {
         }
         return new JsonResult("请求失败", false);
     }
- @RequestMapping(value = "/alarmModel/import", method = RequestMethod.POST)
+
+    @RequestMapping(value = "/alarmModel/import", method = RequestMethod.POST)
     public JsonResult alarmModelImport(@RequestParam MultipartFile file, HttpServletRequest request) {
 // 解析 Excel 文件
         JSONArray alarmSignalList = new JSONArray();
@@ -257,7 +264,7 @@ public class FSUController {
             JSONObject result = fsuService.saveAlarmModelList(alarmSignalList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("导入失败",false);
+                    JsonResult jsonResult = new JsonResult("导入失败", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -268,7 +275,8 @@ public class FSUController {
         }
         return new JsonResult("请求失败", false);
     }
- @RequestMapping(value = "/signalModel/import", method = RequestMethod.POST)
+
+    @RequestMapping(value = "/signalModel/import", method = RequestMethod.POST)
     public JsonResult signalModelImport(@RequestParam MultipartFile file, HttpServletRequest request) {
 // 解析 Excel 文件
         JSONArray signalModelList = new JSONArray();
@@ -290,7 +298,7 @@ public class FSUController {
             JSONObject result = fsuService.saveSignalModelList(signalModelList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("导入失败",false);
+                    JsonResult jsonResult = new JsonResult("导入失败", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }

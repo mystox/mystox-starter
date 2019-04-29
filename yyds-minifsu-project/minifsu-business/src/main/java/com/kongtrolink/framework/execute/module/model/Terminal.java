@@ -17,9 +17,18 @@ public class Terminal
     private Integer alarmRhythm =1;
     private Integer runStatusRhythm = 100;
     private String vendor;
+    private String model = "mu001"; //终端型号 默认 mmu001
     private String coordinate;
-    private String fsuId;
+    private String fsuId; //fsuId
     private boolean bindMark = false;
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
 
     public boolean isBindMark() {
         return bindMark;

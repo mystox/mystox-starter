@@ -1,7 +1,9 @@
 package com.kongtrolink.framework;
 
+import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
+import com.kongtrolink.framework.execute.module.model.Order;
 import com.kongtrolink.framework.runner.BusinessRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +21,7 @@ import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MinifsuControllerApplicationTests {
+public class MinifsuBusinessApplicationTests {
 
 
 
@@ -57,6 +59,8 @@ public class MinifsuControllerApplicationTests {
 	public void testMongo()
 	{
 
+		Order aDefault = mongoTemplate.findById("default", Order.class, MongoTableName.ORDER);
+		System.out.println(aDefault.getBID());
 //		List<RunState> r = mongoTemplate.find(Query.query(Criteria.where("createTime").lte(new Date(0))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
 //		System.out.println(r.size());
 //		SignalModel one = mongoTemplate.findOne(Query.query(Criteria.where("deviceType").is(1).and("dataId").is("1001")), SignalModel.class, MongoTableName.SIGNAL_MODEL);

@@ -132,8 +132,9 @@ public class TerminalServiceImpl implements TerminalService {
         JSONArray snList = new JSONArray();
         for (Terminal terminal : terminals) {
             String terminalId = terminal.getId();
-            TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
             JSONObject terminalJSON = (JSONObject) JSONObject.toJSON(terminal);
+            String model = terminal.getModel();
+            terminalJSON.put("FSUType", model);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + terminal.getSN();
             JSONObject value = redisUtils.get(key, JSONObject.class);
             if (value != null) {
@@ -141,6 +142,7 @@ public class TerminalServiceImpl implements TerminalService {
             } else {
                 terminalJSON.put("status", 0);
             }
+            TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
             if (terminalProperties != null)
                 terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));
             snList.add(terminalJSON);
@@ -185,8 +187,6 @@ public class TerminalServiceImpl implements TerminalService {
         JSONArray terminalArray = moduleMsg.getArrayPayload();
 
         List<Terminal> terminals = JSONArray.parseArray(terminalArray.toJSONString(), Terminal.class);
-
-
         List<String> duplicateSn = new ArrayList<>();//重复sn
 
         for (Terminal terminal : terminals) {
