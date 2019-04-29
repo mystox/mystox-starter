@@ -11,6 +11,7 @@ import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
 import com.kongtrolink.framework.execute.module.model.Device;
 import com.kongtrolink.framework.execute.module.model.*;
+import com.kongtrolink.framework.execute.module.service.LogService;
 import com.kongtrolink.framework.execute.module.service.TerminalService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,11 +46,13 @@ public class TerminalServiceImpl implements TerminalService {
     private final LogDao logDao;
     private final TerminalDao terminalDao;
     private final DeviceDao deviceDao;
-
     private final RedisUtils redisUtils;
-
-
     private RpcModule rpcModule;
+    private LogService logService;
+    @Autowired
+    public void setLogService(LogService logService) {
+        this.logService = logService;
+    }
 
     @Autowired
     public void setRpcModule(RpcModule rpcModule) {
@@ -270,17 +273,8 @@ public class TerminalServiceImpl implements TerminalService {
                 result.put("result", resultInt);
                 return result;
             } catch (IOException e) {
+                saveLog(moduleMsg.getMsgId(), sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
                 logger.error("发送至外部业务绑定异常" + e.toString());
-                //日志记录
-                Log log = new Log();
-                log.setErrorCode(3);
-                log.setSN(sn);
-                log.setMsgType(moduleMsg.getPktType());
-                log.setMsgId(moduleMsg.getMsgId());
-                log.setHostName(host);
-                log.setServiceName(name);
-                log.setTime(new Date(System.currentTimeMillis()));
-                logDao.saveLog(log);
                 e.printStackTrace();
             }
         }
@@ -402,5 +396,19 @@ public class TerminalServiceImpl implements TerminalService {
         return result;
     }
 
+    /**
+     * 保存运行时错误日志
+     *
+     * @param msgId
+     * @param sn
+     * @param msgType
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+        Log log = new Log(new Date(System.currentTimeMillis()),
+                stateCode,
+                sn, msgType, msgId, name, host);
+        logService.saveLog(log);
+    }
 
 }
