@@ -294,7 +294,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         String gip = (String) payloadObject.get("gip");
         JSONObject msgPayload = terminalMsg.getPayload();
         String SN = msgPayload.getString("SN");
-        terminalPayloadSave(msgId, SN, terminalString); //终端接收的报文保存
+        //终端接收的报文保存
+        terminalPayloadSave(msgId, SN, terminalString);
         TerminalMsg terminalResp = new TerminalMsg(); //响应终端消息实体 payload
         terminalResp.setMsgId(msgId);
         /*if (msgPayload == null) {
