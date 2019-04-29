@@ -318,19 +318,23 @@
               this.compilerInfo['engine'] = `编译成功,文件名为${res.data.fileName},文件大小为${res.data.totalLen}`;
               this.delOption(1);
               this.paramForUpgradeEngine = {
-                "fileName": res.data.fileName,
-                "totalLen": res.data.totalLen,
-                "type": this.upgradeParam.type,
-                "md5": "12342jlagjkljl24gajklgj"
+                file: {
+                  "fileName": res.data.fileName,
+                  "totalLen": res.data.totalLen,
+                  "type": this.upgradeParam.type,
+                  "md5": "12342jlagjkljl24gajklgj"
+                }
               }
             } else if (this.upgradeParam.type === 2) {
               this.compilerInfo['program'] = `编译成功,文件名为${res.data.fileName},文件大小为${res.data.totalLen}`;
               this.delOption(2);
               this.paramForUpgradeProgram = {
-                "fileName": res.data.fileName,
-                "totalLen": res.data.totalLen,
-                "type": this.upgradeParam.type,
-                "md5": "12342jlagjkljl24gajklgj"
+                file: {
+                  "fileName": res.data.fileName,
+                  "totalLen": res.data.totalLen,
+                  "type": this.upgradeParam.type,
+                  "md5": "12342jlagjkljl24gajklgj"
+                }
               }
             }
           } 
