@@ -176,17 +176,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             snCommunication = redisUtils.get(key, JSONObject.class);
             if (snCommunication == null) {
                 // 错误信息记录日志
-                Log log = new Log();
-                log.setMsgType(moduleMsg.getPktType());
-                log.setSN(sn);
-                log.setTime(new Date());
-                log.setServiceName(serverName);
-                log.setHostName(hostname);
-                log.setMsgId(msgId);
-                log.setErrorCode(StateCode.CONNECT_ERROR);
-                moduleMsg.setPktType(PktType.LOG_SAVE);
-                moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
-                sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+                saveLog(msgId, sn, StateCode.CONNECT_ERROR,moduleMsg.getPktType());
                 return result;
             }
 
@@ -197,19 +187,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             String[] netAddrArr = netAddr.split(":");
             return sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), netAddrArr[0], Integer.parseInt(netAddrArr[1]));
         } catch (Exception e) {
-            e.printStackTrace();
             // 错误信息记录日志
-            Log log = new Log();
-            log.setMsgType(moduleMsg.getPktType());
-            log.setSN(sn);
-            log.setTime(new Date());
-            log.setServiceName(serverName);
-            log.setHostName(hostname);
-            log.setMsgId(msgId);
-            log.setErrorCode(StateCode.REDIS_ERROR);
-            moduleMsg.setPktType(PktType.LOG_SAVE);
-            moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
-            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+            saveLog(msgId, sn, StateCode.REDIS_ERROR,moduleMsg.getPktType());
+            e.printStackTrace();
             return result;
         }
 
@@ -317,15 +297,16 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         terminalPayloadSave(msgId, SN, terminalString); //终端接收的报文保存
         TerminalMsg terminalResp = new TerminalMsg(); //响应终端消息实体 payload
         terminalResp.setMsgId(msgId);
-        if (msgPayload == null) {
+        /*if (msgPayload == null) {
+            saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
             logger.error("[{}]payload is null...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
-            responsePayload.put("result", StateCode.JSON_ILLEGAL);
+            responsePayload.put("result", StateCode.FAILED);
             terminalResp.setPayload(responsePayload);
             return terminalResponse(msgId, SN, terminalResp);
-        }
+        }*/
 
-        ModuleMsg moduleMsg = new ModuleMsg(); //服务间消息实体
+        ModuleMsg moduleMsg = new ModuleMsg(); //构建服务间消息实体
         moduleMsg.setMsgId(msgId);
         moduleMsg.setUuid(uuid);
         moduleMsg.setSN(SN);
@@ -333,22 +314,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         try {
             communicationRefresh(SN, gip, uuid);
         } catch (Exception e) {
+            saveLog(msgId, SN, StateCode.CONNECT_ERROR, payloadObject.getString("pktType"));
             e.printStackTrace();
             JSONObject responsePayload = new JSONObject();
             responsePayload.put("result", StateCode.FAILED);
             responsePayload.put("msgId", msgId);
             // 错误信息记录日志
-            Log log = new Log();
-            log.setMsgType((String) payloadObject.get("pktType"));
-            log.setSN(SN);
-            log.setTime(new Date());
-            log.setServiceName(serverName);
-            log.setHostName(hostname);
-            log.setMsgId(msgId);
-            log.setErrorCode(StateCode.REDIS_ERROR);
-            moduleMsg.setPktType(PktType.LOG_SAVE);
-            moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
-            sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
             terminalResp.setPayload(responsePayload);
             return terminalResponse(msgId, SN, terminalResp);
         }
@@ -412,17 +383,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 if (RpcNotifyProto.MessageType.ERROR.equals(response.getType()))//错误请求信息
                 {
                     // 错误信息记录日志
-                    Log log = new Log();
-                    log.setMsgType((String) payloadObject.get("pktType"));
-                    log.setSN(SN);
-                    log.setTime(new Date());
-                    log.setServiceName(serverName);
-                    log.setHostName(hostname);
-                    log.setMsgId(msgId);
-                    log.setErrorCode(StateCode.FAILED);
-                    moduleMsg.setPktType(PktType.LOG_SAVE);
-                    moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
-                    sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
+                    saveLog(msgId, SN, StateCode.CONNECT_ERROR, payloadObject.getString("pktType"));
                     return new Byte[]{0}; // 错误返回0
                 } else {
                     if (RpcNotifyProto.PayloadType.BYTE == response.getPayloadType()) { //如果返回为文件流则获取流返回
@@ -430,26 +391,18 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     }
                 }
             } catch (IOException e) {
+                // 错误信息记录日志
+                saveLog(msgId, SN, StateCode.CONNECT_ERROR, payloadObject.getString("pktType"));
                 e.printStackTrace();
             }
         }
 
+        // 错误信息记录日志
+        saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("msgId", msgId);
         responsePayload.put("result", StateCode.FAILED);
-        // 错误信息记录日志
-        Log log = new Log();
-        log.setMsgType((String) payloadObject.get("pktType"));
-        log.setSN(SN);
-        log.setTime(new Date());
-        log.setServiceName(serverName);
-        log.setHostName(hostname);
-        log.setMsgId(msgId);
-        log.setErrorCode(StateCode.FAILED);
         terminalResp.setPayload(responsePayload);
-        moduleMsg.setPktType(PktType.LOG_SAVE);
-        moduleMsg.setPayload((JSONObject) JSONObject.toJSON(log));
-        sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
         return terminalResponse(msgId, SN, terminalResp);
 
     }
@@ -539,7 +492,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     }
 
     /**
-     * 发送至事务处理的消息
+     * 发送至服务的消息
      *
      * @param msgId
      * @param payload
@@ -558,10 +511,24 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             }
         } catch (Throwable e) {
             logger.error("[{}] [{}]rpc request error...[{}]", msgId, host + ":" + port, e.toString());
-            e.printStackTrace();
+//            e.printStackTrace();
             result.put("result", 0);
         }
         return result;
+    }
+
+    /**
+     * 保存运行时错误日志
+     *
+     * @param msgId
+     * @param sn
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, int stateCode, String msgType) {
+        Log log = new Log(new Date(System.currentTimeMillis()), stateCode, sn, msgType, msgId, serverName, hostname);
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.LOG_SAVE, sn, (JSONObject) JSONObject.toJSON(log));
+        moduleMsg.setMsgId(msgId);
+        sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort);
     }
 
 

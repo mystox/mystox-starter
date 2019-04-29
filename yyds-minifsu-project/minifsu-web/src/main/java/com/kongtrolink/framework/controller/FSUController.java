@@ -201,12 +201,10 @@ public class FSUController {
                 String sn = cell[r][0];
                 if (StringUtils.isBlank(sn))
                 {
-                    JsonResult jsonResult = new JsonResult("存在空SN行",false);
-                    return jsonResult;
+                    return new JsonResult("存在空SN行",false);
                 }
                 if (snSet.contains(sn)) {
-                    JsonResult jsonResult = new JsonResult("excel存在重复SN",false);
-                    return jsonResult;
+                    return new JsonResult("excel存在重复SN",false);
                 }
                 snSet.add(sn);
                 snObj.put("SN",sn);

@@ -7,6 +7,7 @@ import com.kongtrolink.framework.core.utils.ByteUtil;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.service.FileService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,6 @@ public class FileServiceImpl implements FileService {
             logger.error("[{}] sn [{}] communication msg is null [{}] ", msgId, sn, payload);
             return new byte[]{0};
         }
-
 
         Integer status = value.getInteger("STATUS");
         if (status != null && status != 3) {
@@ -131,6 +131,10 @@ public class FileServiceImpl implements FileService {
         JSONObject param = moduleMsg.getPayload();
         logger.info("[{}] sn [{}]  get compilerFile [{}] ", msgId, sn, param);
         String urlStr = (String) param.get("url");
+        if (StringUtils.isNotBlank(urlStr))
+        {
+            urlStr=  urlStr.replace("\\", "/"); //系统容错
+        }
         String name = (String) param.get("name");
         InputStream is = null;
         JSONObject jsonObject = new JSONObject();
@@ -156,7 +160,6 @@ public class FileServiceImpl implements FileService {
         } catch (IOException e) {
             jsonObject.put("result", 0);
             e.printStackTrace();
-
         } finally {
             if (is != null) {
                 try {

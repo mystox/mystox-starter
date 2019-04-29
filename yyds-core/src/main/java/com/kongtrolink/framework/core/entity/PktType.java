@@ -31,13 +31,10 @@ public class PktType {
     public final static String LOGOUT = "logout";
     public final static String CONNECT = "connect";//终端网关报文通讯
     public final static String CLEANUP = "cleanUp";//终端网关报文通讯
-    public final static String REGISTRY = "registry";//SN上报注册
     public final static String REGISTRY_CNTB = "registry_cntb";//SN上报注册至外部业务平台
     public final static String FSU_BIND = "fsu_bind";//終端綁定SN
-    public final static String FSU_REPORT = "fsu_report"; //FSU信息上报
-    public final static String DEV_LIST = "dev_list"; //上报终端接入设备信息
-    public final static String DATA_REGISTER = "data_register"; //数据注册
-    public final static String FILE_GET = "file_get"; //告警注册
+    public final static String DATA_REGISTER = "data_register"; //实时数据上报外部平台
+    public final static String FILE_GET = "file_get"; //终端获取升级文件
     public final static String ALARM_SAVE = "alarm_save"; //保存告警
     public final static String LOG_SAVE = "log_save"; //保存日志
     public final static String ALARM_REGISTER = "alarm_register"; //告警注册
