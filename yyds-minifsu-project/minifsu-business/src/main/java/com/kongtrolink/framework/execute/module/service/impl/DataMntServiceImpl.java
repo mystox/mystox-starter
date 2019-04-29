@@ -221,7 +221,7 @@ public class DataMntServiceImpl implements DataMntService {
         if (device == null) return new JSONArray();
         String coId = (String) payload.get("coId");
         String alarmId = payload.getString("alarmId");
-        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId, alarmId, alarmDesc); //根据deviceId和数据点id获取信号点配置列表
+        List<AlarmSignalConfig> alarmSignalConfigList = configDao.findAlarmSignalConfigByDeviceIdAndCoId(device.getId(), coId, alarmId,alarmDesc); //根据deviceId和数据点id获取信号点配置列表
         return (JSONArray) JSONArray.toJSON(alarmSignalConfigList);
     }
 
@@ -341,11 +341,11 @@ public class DataMntServiceImpl implements DataMntService {
             businessExecutor.execute(() -> {
                 // 向向外部网关发送运行状态报文
                 try {
-                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] ", msgId, sn, PktType.DATA_STATUS);
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] ", msgId, sn,PktType.DATA_STATUS);
                     moduleMsg.setPktType(PktType.DATA_STATUS);
                     rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
                 } catch (IOException e) {
-                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn, PktType.DATA_STATUS, e.toString());
+                    logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn,PktType.DATA_STATUS, e.toString());
                     //日志记录
                     Log log = new Log();
                     log.setErrorCode(3);
@@ -383,12 +383,19 @@ public class DataMntServiceImpl implements DataMntService {
 
         List<SignalModel> signalModels = JSONArray.parseArray(jsonArray.toJSONString(), SignalModel.class);
         for (SignalModel signalModel : signalModels) {
-            SignalModel signalModel1 = configDao.findSignalModelByDeviceTypeAndCoId(signalModel.getDeviceType(), signalModel.getDataId());
-            if (signalModel1 != null) {
-                BeanUtils.copyProperties(signalModel, signalModel1, "id");
-                configDao.saveSignalModel(signalModel1);
-            } else
-                configDao.saveSignalModel(signalModel);
+            try {
+                SignalModel signalModel1 = configDao.findSignalModelByDeviceTypeAndCoId(signalModel.getDeviceType(), signalModel.getDataId());
+                if (signalModel1 != null) {
+                    BeanUtils.copyProperties(signalModel, signalModel1, "id");
+                    configDao.saveSignalModel(signalModel1);
+                } else
+                    configDao.saveSignalModel(signalModel);
+            } catch (Exception e) {
+                System.out.println(signalModel);
+            }finally
+             {
+
+            }
         }
         JSONObject result = new JSONObject();
         result.put("result", 1);

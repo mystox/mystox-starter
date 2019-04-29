@@ -223,7 +223,7 @@ public class FSUController {
             JSONObject result = fsuService.saveTerminal(snList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("存在重复列", false);
+                    JsonResult jsonResult = new JsonResult("事务处理导入失败", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }

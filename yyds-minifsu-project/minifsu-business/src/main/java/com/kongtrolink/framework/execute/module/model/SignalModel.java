@@ -79,4 +79,18 @@ public class SignalModel {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
+    @Override
+    public String toString() {
+        return "SignalModel{" +
+                "id='" + id + '\'' +
+                ", dataId='" + dataId + '\'' +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", deviceType=" + deviceType +
+                ", unit='" + unit + '\'' +
+                ", snModel='" + snModel + '\'' +
+                ", valueBase=" + valueBase +
+                '}';
+    }
 }
