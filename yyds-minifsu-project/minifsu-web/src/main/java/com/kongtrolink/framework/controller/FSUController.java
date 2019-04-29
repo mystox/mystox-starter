@@ -213,7 +213,7 @@ public class FSUController {
                 snSet.add(sn);
                 snObj.put("SN", sn);
                 snObj.put("vendor", cell[r][1]);
-                String model = cell[r][2];
+                String model = "";
                 snObj.put("model", StringUtils.isNotBlank(model) ? model : "mmu100");
                 snList.add(snObj);
             }
