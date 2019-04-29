@@ -11,19 +11,27 @@ import java.util.Date;
 public class Alarm {
 
     private String id;
-    private String sn;              //设备sn
-    private String dev_colId;       //信号点告警点id,注册和保存告警需要使用
-    private String alarmId;         //告警点id
-    private float value;            //告警值
-    private byte link;              //告警所处环节(1-开始；2-开始报文上报成功；4-结束报文；8结束报文上报成功,16延迟产生，32延迟消除)
-    private Date tReport;           //产生时间
-    private Date tRecover;          //消除时间
-    private int delay;              //告警产生延时(单位为秒)
-    private long beginDelayFT;      //告警产生延迟第一次时间
-    private int recoverDelay;       //告警恢复延时
-    private long recoverDelayFT;     //告警消除下一次时间
-    private int num;                //告警序列号，终端内唯一
-    private byte h;                  //是否高频
+    private String sn;                  //设备sn
+    private String dev;                 //设备id,注册和保存告警需要使用
+    private String alarmId;             //告警点id
+    private float value;                //告警值
+    private byte link;                  //告警所处环节(1-开始；2-开始报文上报成功；4-结束报文；8结束报文上报成功,16延迟产生，32延迟消除)
+    private Date tReport;               //产生时间
+    private Date tRecover;              //消除时间
+    private Integer delay;              //告警产生延时(单位为秒)
+    private Long beginDelayFT;          //告警产生延迟第一次时间
+    private Integer recoverDelay;       //告警恢复延时
+    private Long recoverDelayFT;        //告警消除下一次时间
+    private int num;                    //告警序列号，终端内唯一
+    private byte highRate;              //是否高频
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getSn() {
         return sn;
@@ -33,68 +41,12 @@ public class Alarm {
         this.sn = sn;
     }
 
-    public String getDev_colId() {
-        return dev_colId;
+    public String getDev() {
+        return dev;
     }
 
-    public void setDev_colId(String dev_colId) {
-        this.dev_colId = dev_colId;
-    }
-
-    public byte getH() {
-        return h;
-    }
-
-    public void setH(byte h) {
-        this.h = h;
-    }
-
-    public long getRecoverDelayFT() {
-        return recoverDelayFT;
-    }
-
-    public void setRecoverDelayFT(long recoverDelayFT) {
-        this.recoverDelayFT = recoverDelayFT;
-    }
-
-    public long getBeginDelayFT() {
-        return beginDelayFT;
-    }
-
-    public void setBeginDelayFT(long beginDelayFT) {
-        this.beginDelayFT = beginDelayFT;
-    }
-
-    public int getRecoverDelay() {
-        return recoverDelay;
-    }
-
-    public void setRecoverDelay(int recoverDelay) {
-        this.recoverDelay = recoverDelay;
-    }
-
-    public int getDelay() {
-        return delay;
-    }
-
-    public void setDelay(int delay) {
-        this.delay = delay;
-    }
-
-    public byte getLink() {
-        return link;
-    }
-
-    public void setLink(byte link) {
-        this.link = link;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setDev(String dev) {
+        this.dev = dev;
     }
 
     public String getAlarmId() {
@@ -113,12 +65,12 @@ public class Alarm {
         this.value = value;
     }
 
-    public int getNum() {
-        return num;
+    public byte getLink() {
+        return link;
     }
 
-    public void setNum(int num) {
-        this.num = num;
+    public void setLink(byte link) {
+        this.link = link;
     }
 
     public Date gettReport() {
@@ -135,5 +87,53 @@ public class Alarm {
 
     public void settRecover(Date tRecover) {
         this.tRecover = tRecover;
+    }
+
+    public Integer getDelay() {
+        return delay;
+    }
+
+    public void setDelay(Integer delay) {
+        this.delay = delay;
+    }
+
+    public Long getBeginDelayFT() {
+        return beginDelayFT;
+    }
+
+    public void setBeginDelayFT(Long beginDelayFT) {
+        this.beginDelayFT = beginDelayFT;
+    }
+
+    public Integer getRecoverDelay() {
+        return recoverDelay;
+    }
+
+    public void setRecoverDelay(Integer recoverDelay) {
+        this.recoverDelay = recoverDelay;
+    }
+
+    public Long getRecoverDelayFT() {
+        return recoverDelayFT;
+    }
+
+    public void setRecoverDelayFT(Long recoverDelayFT) {
+        this.recoverDelayFT = recoverDelayFT;
+    }
+
+    public int getNum() {
+        return num;
+    }
+
+    public void setNum(int num) {
+        this.num = num;
+    }
+
+    public byte getHighRate() {
+        return highRate;
+    }
+
+    public void setHighRate(byte highRate) {
+        this.highRate = highRate;
     }
 }

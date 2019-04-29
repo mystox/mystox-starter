@@ -262,7 +262,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             logger.info("[{}]>>>>>>>>>>thirdParty==={}===", msgId, msg);
             String addrStr = "";
             JSONObject payload = msg.getPayload();
-            if (payload != null) { //绑定需要带BIP
+            if (payload != null) { //绑定|解除绑定需要带BIP
                 addrStr = payload.getString("BIP");
             }
             if (StringUtils.isBlank(addrStr)) {
@@ -463,7 +463,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @return
      */
     Object terminalResponse(String msgId, String sn, TerminalMsg terminalResp) {
-        terminalPayloadSave(msgId, sn, terminalResp); //----------------------->记录终端响应日志
+        terminalPayloadSave(msgId, sn, JSONObject.toJSON(terminalResp)); //----------------------->记录终端响应日志
         return JSONObject.toJSON(terminalResp);
     }
 
@@ -484,13 +484,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
                 if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
                 moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
-            } else return;
+            } else {
+                return;
+            }
             try {
                 moduleMsg.setMsgId(msgId);
-                logger.info("[{}]terminal_log>>>>>>>>>>business terminal log save ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
+                logger.debug("[{}]terminal_log>>>>>>>>>>business terminal log save ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
                 sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), businessHost, businessPort); //异步保存
             } catch (Exception e) {
-                logger.error("[{}]terminal_log>>>>>>>>>>business terminal log save error ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
+                logger.debug("[{}]terminal_log>>>>>>>>>>business terminal log save error ==={}===", msgId, JSONObject.toJSONString(moduleMsg));
                 e.printStackTrace();
             }
         });
@@ -554,7 +556,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             } else {
                 return (JSON) JSON.parse(response.getPayload());
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            logger.error("[{}] [{}]rpc request error...[{}]", msgId, host + ":" + port, e.toString());
             e.printStackTrace();
             result.put("result", 0);
         }

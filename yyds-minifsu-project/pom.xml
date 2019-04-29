@@ -8,17 +8,14 @@
 		<version>1.0.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.kongtrolink.framework</groupId>
 	<name>yyds-minifsu-project</name>
 	<artifactId>yyds-minifsu-project</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>minifsu-GW</module>
 		<module>minifsu-monitor</module>
 		<module>minifsu-business</module>
 		<module>minifsu-controller</module>
-		<module>minifsu-registry</module>
 		<module>minifsu-cntb-GW</module>
 		<module>minifsu-tower</module>
 		<module>minifsu-web</module>

@@ -47,41 +47,57 @@ public class AlarmHighRateFilterService {
         String sn = fsu.getSN();
         int highRateI = alarmSignal.getHighRateI();
         int highRateT = alarmSignal.getHighRateT();
-        long highRateFT ;
-        int highRateC ;
-        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
-        if(highRateObj == null){
-            if(highRateT == 0){
-                return beforAlarm;
-            }
-            highRateObj = new JSONObject();
-            highRateObj.put("highRateC", 1);
-            highRateObj.put("highRateFT", curDate.getTime());
-            redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
-            return  beforAlarm;
-        }else{
-            highRateFT = highRateObj.getLong("highRateFT");
-            highRateC = highRateObj.getInteger("highRateC");
-            long diff = curDate.getTime() - highRateFT;
-            boolean inTime = diff < highRateI*1000;
-            if(inTime){
-                if(highRateC >= highRateT){
-                    return null;
-                }
-                highRateObj.put("highRateC", ++highRateC);
-                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
-                if(highRateC == highRateT){
-                    //设置高频
-                    beforAlarm.setH((byte)1);
-                }
-                return beforAlarm;
-            }else{
-                highRateObj.put("highRateC", 1);
-                highRateObj.put("highRateFT", curDate.getTime());
-                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
-                return beforAlarm;
-            }
+        String highRateKey = highrate_hash + sn + ":" + keyAlarmId;
+        double highRate = redisUtils.hincr(highRateKey, keyAlarmId, 1);
+        if(highRate == 1){
+            //如果高频信息为1，需要重新创建有效时间
+            redisUtils.expire(highRateKey, highRateI);
+            return beforAlarm;
         }
+        if(highRate == highRateT){
+            //设置高频
+            beforAlarm.setHighRate((byte)1);
+            return beforAlarm;
+        }else if(highRate > highRateT){
+            return null;
+        }
+        return beforAlarm;
+
+
+
+//        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
+//        if(highRateObj == null){
+//            if(highRateT == 0){
+//                return beforAlarm;
+//            }
+//            highRateObj = new JSONObject();
+//            highRateObj.put("highRateC", 1);
+//            highRateObj.put("highRateFT", curDate.getTime());
+//            redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//            return  beforAlarm;
+//        }else{
+//            highRateFT = highRateObj.getLong("highRateFT");
+//            highRateC = highRateObj.getInteger("highRateC");
+//            long diff = curDate.getTime() - highRateFT;
+//            boolean inTime = diff < highRateI*1000;
+//            if(inTime){
+//                if(highRateC >= highRateT){
+//                    return null;
+//                }
+//                highRateObj.put("highRateC", ++highRateC);
+//                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//                if(highRateC == highRateT){
+//                    //设置高频
+//                    beforAlarm.setHighRate((byte)1);
+//                }
+//                return beforAlarm;
+//            }else{
+//                highRateObj.put("highRateC", 1);
+//                highRateObj.put("highRateFT", curDate.getTime());
+//                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//                return beforAlarm;
+//            }
+//        }
     }
 
     /**
@@ -90,16 +106,21 @@ public class AlarmHighRateFilterService {
      * 功能描述:减少高频过滤属性
      */
     public void reduceHighRateInfo(String sn, String keyAlarmId){
-        JSONObject highRateObj = (JSONObject)redisUtils.hget(highrate_hash + sn, keyAlarmId);
-        if(null != highRateObj){
-            int highRateC = highRateObj.getInteger("highRateC");
-            if(1 == highRateC){
-                redisUtils.hdel(highrate_hash + sn, keyAlarmId);
-            }else{
-                highRateObj.put("highRateC", --highRateC);
-                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
-            }
+        String highRateKey = highrate_hash + sn + ":" + keyAlarmId;
+        double hdecr = redisUtils.hdecr(highRateKey, keyAlarmId, 1);
+        if(-1 == hdecr){
+            redisUtils.hdel(highRateKey, keyAlarmId);
         }
+//        JSONObject highRateObj = (JSONObject)redisUtils.hget(highRateKey, keyAlarmId);
+//        if(null != highRateObj){
+//            int highRateC = highRateObj.getInteger("highRateC");
+//            if(1 == highRateC){
+//                redisUtils.hdel(highrate_hash + sn, keyAlarmId);
+//            }else{
+//                highRateObj.put("highRateC", --highRateC);
+//                redisUtils.hset(highrate_hash + sn, keyAlarmId, highRateObj);
+//            }
+//        }
     }
 
     /**
