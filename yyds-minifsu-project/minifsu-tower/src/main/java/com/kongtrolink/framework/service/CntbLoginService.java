@@ -19,8 +19,10 @@ import com.kongtrolink.framework.entity.xml.msg.XmlList;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.CarrierDao;
+import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.model.RedisFsuBind;
 import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
+import com.kongtrolink.framework.jsonType.JsonDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -31,7 +33,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +52,8 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     private int port;
     private RpcModule rpcModule;
     private RedisUtils redisUtils;
+    private DeviceMatchService deviceMatchService;
+    private DeviceDao deviceDao;
     private CarrierDao carrierDao;
 
     private RedisOnlineInfo redisOnlineInfo;
@@ -60,11 +66,13 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @param rpcModule rpcModule
      * @param redisUtils redisUtils
      * @param rpcClient rpcClient
+     * @param deviceMatchService 设备匹配帮助类
+     * @param deviceDao 设备信息数据库操作
      * @param carrierDao 运营商信息数据库操作
      */
     public CntbLoginService(String sn, String hostname, int port,
                             RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
-                            CarrierDao carrierDao) {
+                            DeviceMatchService deviceMatchService, DeviceDao deviceDao, CarrierDao carrierDao) {
         super(rpcClient);
         this.key = RedisTable.getRegistryKey(sn);
         this.hostname = hostname;
@@ -72,6 +80,8 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         this.rpcModule = rpcModule;
         this.redisUtils = redisUtils;
         this.redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);
+        this.deviceMatchService = deviceMatchService;
+        this.deviceDao = deviceDao;
         this.carrierDao = carrierDao;
     }
 
@@ -81,6 +91,10 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
             if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
                     redisUtils.hasKey(RedisTable.VPN_HASH) &&
                     redisUtils.hHasKey(RedisTable.VPN_HASH, redisOnlineInfo.getLocalName()))) {
+                return;
+            }
+
+            if (!updateDevice(redisOnlineInfo)) {
                 return;
             }
 
@@ -114,6 +128,47 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     }
 
     /**
+     * 更新设备信息
+     * @param onlineInfo redis中在线信息
+     * @return 更新结果
+     */
+    private boolean updateDevice(RedisOnlineInfo onlineInfo) {
+        InetSocketAddress addr = new InetSocketAddress(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort());
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("sn", onlineInfo.getSn());
+        String request = createRequestMsg(PktType.GET_DEVICES, jsonObject);
+
+        String response = postMsg(request, addr);
+        JSONArray jsonArray = JSONArray.parseArray(response);
+
+        if (jsonArray == null) {
+            logger.error("注册时获取设备列表失败:" + response);
+            return false;
+        }
+        List<JsonDevice> curList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.size(); ++i) {
+            JsonDevice jsonDevice = new JsonDevice();
+            jsonDevice.setType(jsonArray.getJSONObject(i).getInteger("type"));
+            jsonDevice.setResNo(jsonArray.getJSONObject(i).getInteger("resNo"));
+            jsonDevice.setPort(jsonArray.getJSONObject(i).getString("port"));
+            curList.add(jsonDevice);
+        }
+
+        List<JsonDevice> cntbList = deviceDao.getListByFsuId(onlineInfo.getFsuId());
+        for (JsonDevice jsonDevice : cntbList) {
+            jsonDevice.setPort(null);
+            jsonDevice.setResNo(0);
+            jsonDevice.setType(0);
+        }
+        deviceMatchService.matchingDevice(cntbList, curList);
+        deviceDao.deleteListByFsuId(onlineInfo.getFsuId());
+        deviceDao.insertListByFsuId(cntbList);
+
+        return true;
+    }
+
+    /**
      * 获取注册信息
      * @param onlineInfo redis中在线信息
      * @return 注册信息
@@ -127,9 +182,9 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         jsonObject.put("sn", onlineInfo.getSn());
         String request = createRequestMsg(PktType.GET_FSU, jsonObject);
 
-        JSONObject jsonResponse = postMsg(request, addr);
+        JSONObject jsonResponse = JSONObject.parseObject(postMsg(request, addr));
 
-        if (!jsonResponse.containsKey("list")) {
+        if (jsonResponse == null || (!jsonResponse.containsKey("list"))) {
             return result;
         }
         JSONArray array = jsonResponse.getJSONArray("list");
@@ -216,9 +271,9 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
         String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, jsonObject);
 
-        JSONObject jsonResponse = postMsg(request, addr);
+        JSONObject jsonResponse = JSONObject.parseObject(postMsg(request, addr));
 
-        if (jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
+        if (jsonResponse != null && jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
             String resXmlMsg = jsonResponse.getString("msg");
             LoginAck loginAck = analyzeMsg(resXmlMsg);
 
@@ -301,14 +356,13 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
      * @param addr 请求地址
      * @return 回复信息
      */
-    private JSONObject postMsg(String request, InetSocketAddress addr) {
-        JSONObject result = null;
+    private String postMsg(String request, InetSocketAddress addr) {
+        String result = null;
 
         RpcNotifyProto.RpcMessage rpcMessage = null;
         try {
             rpcMessage = rpcModule.postMsg("", addr, request);
-            String response = rpcMessage.getPayload();
-            result = JSONObject.parseObject(response);
+            result = rpcMessage.getPayload();
         } catch (IOException e) {
             logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + addr.getHostName() + ",port:" + addr.getPort() + ",msg:" + request);
         }
