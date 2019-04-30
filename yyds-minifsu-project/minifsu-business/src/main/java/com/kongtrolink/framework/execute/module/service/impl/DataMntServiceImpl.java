@@ -234,7 +234,7 @@ public class DataMntServiceImpl implements DataMntService {
         Integer devType = Integer.parseInt(dev.split("-")[0]);
         String coId = payload.getString("stePoint");
         if (StringUtils.isBlank(coId)) payload.getString("setPoint");
-        Integer data = payload.getInteger("steData");
+        Double data = payload.getDouble("steData");
         if (data == null) payload.getInteger("setData");
         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
         Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
