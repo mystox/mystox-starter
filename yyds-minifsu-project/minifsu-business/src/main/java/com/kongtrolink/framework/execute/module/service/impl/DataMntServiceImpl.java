@@ -239,7 +239,9 @@ public class DataMntServiceImpl implements DataMntService {
         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
         Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
         JSONObject terminalPayload = payload;
-        terminalPayload.put("data", data * valueBase);
+
+        terminalPayload.put("steData", data * valueBase);
+        terminalPayload.put("stePoint", coId);
 
         try {
             logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, data * valueBase);
