@@ -241,7 +241,6 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject terminalPayload = payload;
 
         terminalPayload.put("steData", data * valueBase);
-        terminalPayload.put("stePoint", coId);
 
         try {
             logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, data * valueBase);
