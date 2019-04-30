@@ -136,8 +136,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         InetSocketAddress addr = new InetSocketAddress(redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort());
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("sn", onlineInfo.getSn());
-        String request = createRequestMsg(PktType.GET_DEVICES, jsonObject);
+        String request = createRequestMsg(PktType.GET_DEVICES, onlineInfo.getSn(), jsonObject);
 
         String response = postMsg(request, addr);
         JSONArray jsonArray = JSONArray.parseArray(response);
@@ -180,7 +179,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sn", onlineInfo.getSn());
-        String request = createRequestMsg(PktType.GET_FSU, jsonObject);
+        String request = createRequestMsg(PktType.GET_FSU, onlineInfo.getSn(), jsonObject);
 
         JSONObject jsonResponse = JSONObject.parseObject(postMsg(request, addr));
 
@@ -269,7 +268,7 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
         jsonObject.put("port", redisOnlineInfo.getLoginPort());
         jsonObject.put("msg", reqXmlMsg);
 
-        String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, jsonObject);
+        String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, "", jsonObject);
 
         JSONObject jsonResponse = JSONObject.parseObject(postMsg(request, addr));
 
@@ -341,11 +340,12 @@ public class CntbLoginService extends RpcModuleBase implements Runnable {
     /**
      * 创建请求报文
      * @param pktType 报文头类型
+     * @param sn sn
      * @param payload 发送信息
      * @return 字符串报文
      */
-    private String createRequestMsg(String pktType, JSONObject payload){
-        ModuleMsg moduleMsg = new ModuleMsg(pktType);
+    private String createRequestMsg(String pktType, String sn, JSONObject payload) {
+        ModuleMsg moduleMsg = new ModuleMsg(pktType, sn);
         moduleMsg.setPayload(payload);
         return JSON.toJSONString(moduleMsg);
     }
