@@ -94,15 +94,15 @@
       },
 
       handleOnSuccess(val) {
-        if (val.success) {
+        if (val.data.success) {
           this.$message({
-            message: val.info || '操作成功',
+            message: val.data.info || '操作成功',
             type: 'success',
             showClose: true,
           })
         } else {
           this.$message({
-            message: val.info || '操作失败',
+            message: val.data.info || '操作失败',
             type: 'error',
             showClose: true,
           })
