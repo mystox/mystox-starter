@@ -1,0 +1,1 @@
+mvn install:install-file -DgeneratePom=true -DgroupId=nblot -DartifactId=api-client -Dversion=1.0.1 -Dpackaging=jar -Dfile=E:\IdeaProjects\minifsu2_gateway\GateWay-NB-Ctcc\lib\api-client-1.0.1.jar

@@ -13,7 +13,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>GateWay-Tcp</module>
-        <!--<module>GateWay-Gw</module>-->
         <module>GateWay-NB-Cmcc</module>
         <module>GateWay-NB-Ctcc</module>
     </modules>

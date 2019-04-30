@@ -1,0 +1,38 @@
+logging:
+  level:
+    root: info
+    org:
+      apache:
+        hadoop:
+          util: OFF
+
+
+netty:
+  tcp:
+    port: 8090
+  boss:
+    thread: 2
+  worker:
+    thread: 2
+  so:
+    keepalive: true
+    backlog: 100
+
+server:
+  name: GateWay-Tcp
+  bindIp: 172.16.6.39
+  rpc:
+    port: 17701
+    timeout: 6000
+
+rpc:
+  client:
+    timeout: 20000
+  controller:
+    hostname: 172.16.6.39
+    port: 18800
+
+executor:
+  threadPool:
+    corePoolSize: 10 #核心执行线程数
+    maxPoolSize: 1000 #最大维护线程数

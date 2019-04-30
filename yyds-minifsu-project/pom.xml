@@ -19,6 +19,6 @@
 		<module>minifsu-cntb-GW</module>
 		<module>minifsu-tower</module>
 		<module>minifsu-web</module>
-		<!--<module>minifsu-gateway</module>-->
+		<module>minifsu-gateway</module>
 	</modules>
 </project>
