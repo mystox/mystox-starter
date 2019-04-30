@@ -193,7 +193,7 @@ public class TowerService {
     }
 
     /**
-     * 更新数据库中的设备列表
+     * 获取设备列表
      * @param request 请求信息
      * @param fsuId fsuId
      */
@@ -937,8 +937,8 @@ public class TowerService {
                     }
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("dev", jsonDevice.getType() + "-" + jsonDevice.getResNo());
-                    jsonObject.put("setPoint", Integer.valueOf(signal.getSignalId()));
-                    jsonObject.put("setData", Float.valueOf(tSemaphore.getSetupVal()));
+                    jsonObject.put("stePoint", Integer.valueOf(signal.getSignalId()));
+                    jsonObject.put("steData", Float.valueOf(tSemaphore.getSetupVal()));
 
                     ModuleMsg msg = new ModuleMsg(PktType.SET_DATA, redisOnlineInfo.getSn());
                     msg.setPayload(jsonObject);
@@ -1405,7 +1405,7 @@ public class TowerService {
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
                 taskExecutor.execute(new CntbLoginService(sn,
                         towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
-                        carrierDao));
+                        deviceMatchService, deviceDao ,carrierDao));
                 System.out.println(taskExecutor.getActiveCount());
             }
         }
