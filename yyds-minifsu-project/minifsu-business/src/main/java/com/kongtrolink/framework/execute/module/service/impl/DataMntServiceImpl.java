@@ -239,11 +239,11 @@ public class DataMntServiceImpl implements DataMntService {
         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
         Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
         JSONObject terminalPayload = payload;
-
-        terminalPayload.put("steData", data * valueBase);
+        int terminalData = new Long(Math.round(data * valueBase)).intValue();
+        terminalPayload.put("steData", terminalData);
 
         try {
-            logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, data * valueBase);
+            logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, terminalData);
             // 向终端设置信号点值报文
             moduleMsg.setPktType(PktType.SET_DATA_TERMINAL);
             moduleMsg.setPayload(terminalPayload);
