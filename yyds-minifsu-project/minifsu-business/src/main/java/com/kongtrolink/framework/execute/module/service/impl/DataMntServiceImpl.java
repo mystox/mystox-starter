@@ -232,8 +232,10 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject payload = moduleMsg.getPayload();
         String dev = (String) payload.get("dev");
         Integer devType = Integer.parseInt(dev.split("-")[0]);
-        String coId = payload.get("stePoint") + "";
-        Integer data = (Integer) payload.get("steData");
+        String coId = payload.getString("stePoint");
+        if (StringUtils.isBlank(coId)) payload.getString("setPoint");
+        Integer data = payload.getInteger("steData");
+        if ( data== null)payload.getInteger("setData");
         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
         Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
         JSONObject terminalPayload = payload;

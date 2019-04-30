@@ -1,0 +1,33 @@
+#设置平台的IP
+nbIot:
+  token:  77f306974ff164307ff92642a2296e05
+  masterApiKey: 32cv8Br7SQXflJFPD14fiZxF9EM=
+  packageTime:  20
+
+server:
+  name: GateWay-NB-Cmcc
+  bindIp: 172.16.6.39
+  rpc:
+    port: 18882
+    timeout: 6000
+  port: 17700
+
+rpc:
+  client:
+    timeout: 20000
+  controller:
+    hostname: 172.16.6.39
+    port: 18800
+
+executor:
+  threadPool:
+    corePoolSize: 10 #核心执行线程数
+    maxPoolSize: 1000 #最大维护线程数
+
+logging:
+  level:
+    root: info
+    org:
+      apache:
+        hadoop:
+          util: OFF
