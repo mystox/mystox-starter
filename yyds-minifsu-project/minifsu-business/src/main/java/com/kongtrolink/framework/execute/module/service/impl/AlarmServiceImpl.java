@@ -123,6 +123,7 @@ public class AlarmServiceImpl implements AlarmService {
             int devType = Integer.valueOf(dev.split("-")[0]);
             int resNo = Integer.valueOf(dev.split("-")[1]);
             Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, null);
+            if (device == null) continue;
             AlarmSignalConfig alarmSignalConfig = configDao.findAlarmSignalConfigByDeviceIdAndAlarmId(device.getId(), alarm.getAlarmId());
             if (alarmSignalConfig != null) {
                 alarmJson.put("level", alarmSignalConfig.getLevel());

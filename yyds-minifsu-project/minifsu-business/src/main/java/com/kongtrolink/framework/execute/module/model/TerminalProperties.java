@@ -21,14 +21,15 @@ public class TerminalProperties {
     private Integer signalStrength;
     private String engineVer;
     private String adapterVer;
-    private String model;
+    private String macId;
 
-    public String getModel() {
-        return model;
+
+    public String getMacId() {
+        return macId;
     }
 
-    public void setModel(String model) {
-        this.model = model;
+    public void setMacId(String macId) {
+        this.macId = macId;
     }
 
     public Integer getBusiness() {

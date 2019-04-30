@@ -54,6 +54,11 @@
         :className = 'item.className'
         :resizable='false'>
       </el-table-column>
+      <el-table-column :label="'告警描述'" fixed="right">
+        <template slot-scope="scope">
+          <span>{{scope.row.name}}值为{{scope.row.value}}</span>
+        </template>
+      </el-table-column>
       <!-- <el-table-column :label="'SN'" fixed="left">
         <template slot-scope="scope">
           <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
@@ -146,7 +151,7 @@
           },
           {
             label: '门限',
-            value: 'value',
+            value: 'threshold',
             // width: 270,
             filter: 'nullFilter',
             className: '',
@@ -161,13 +166,6 @@
           {
             label: '等级',
             value: 'level',
-            // width: 270,
-            filter: 'nullFilter',
-            className: '',
-          },
-          {
-            label: '描述',
-            value: 'desc',
             // width: 270,
             filter: 'nullFilter',
             className: '',

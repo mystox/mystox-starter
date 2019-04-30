@@ -162,6 +162,16 @@ export default {
             getRunState(param, sn) {
                 return post(`${base}fsu/getRunState?sn=${sn}`, param)
             },
+
+            // 编译
+            compiler(param, sn) {
+                return post(`${base}fsu/compiler?sn=${sn}`, param)
+            },
+
+            // 升级
+            upgrade(param, sn) {
+                return post(`${base}fsu/upgrade?sn=${sn}`, param)
+            },
         }
     }
 }

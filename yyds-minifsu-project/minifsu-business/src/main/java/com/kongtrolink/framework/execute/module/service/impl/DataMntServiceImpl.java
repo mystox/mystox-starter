@@ -232,12 +232,16 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject payload = moduleMsg.getPayload();
         String dev = (String) payload.get("dev");
         Integer devType = Integer.parseInt(dev.split("-")[0]);
-        String coId = payload.get("stePoint") + "";
-        Integer data = (Integer) payload.get("steData");
+        String coId = payload.getString("stePoint");
+        if (StringUtils.isBlank(coId)) payload.getString("setPoint");
+        Integer data = payload.getInteger("steData");
+        if (data == null) payload.getInteger("setData");
         SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(devType, coId);
         Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
         JSONObject terminalPayload = payload;
-        terminalPayload.put("data", data * valueBase);
+
+        terminalPayload.put("steData", data * valueBase);
+        terminalPayload.put("stePoint", coId);
 
         try {
             logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, data * valueBase);
@@ -248,9 +252,8 @@ public class DataMntServiceImpl implements DataMntService {
                     new InetSocketAddress(controllerHost, controllerPort),
                     JSONObject.toJSONString(moduleMsg));
             if (!RpcNotifyProto.MessageType.ERROR.equals(rpcMessage.getType())) {
-                JSONObject result = new JSONObject();
-                result.put("result", 1);
-                return result;
+                String payload1 = rpcMessage.getPayload();
+                return JSONObject.parseObject(payload1);
             }
         } catch (IOException e) {
             logger.error("[{}] sn [{}]  set data [{}]to terminal error [{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, e.toString());

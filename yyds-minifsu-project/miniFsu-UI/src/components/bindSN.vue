@@ -90,15 +90,23 @@
     },
     methods: {
       beforeUpload(val) {
-        console.log(val);
+        // console.log(val);
       },
 
       handleOnSuccess(val) {
-        this.$message({
-          message: '操作成功',
-          type: 'success',
-          showClose: true,
-        })
+        if (val.data.success) {
+          this.$message({
+            message: val.data.info || '操作成功',
+            type: 'success',
+            showClose: true,
+          })
+        } else {
+          this.$message({
+            message: val.data.info || '操作失败',
+            type: 'error',
+            showClose: true,
+          })
+        }
       },
 
       handleOnError(val) {

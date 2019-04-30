@@ -53,20 +53,11 @@
         :className = 'item.className'
         :resizable='false'>
       </el-table-column>
-      <!-- <el-table-column :label="'SN'" fixed="left">
+      <el-table-column :label="'告警描述'" fixed="right">
         <template slot-scope="scope">
-          <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
-            <router-link :to="{
-                  path: '/points',
-                  query: {
-                      deviceId: scope.row.deviceId
-                  }
-                }" tag="span">
-              {{scope.row.username}}
-            </router-link>
-          </div>
+          <span>{{scope.row.name}}值为{{scope.row.value}}</span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <!-- <el-table-column
         :label="$t('SECURITY.USER.OPERATION')" fixed="right">
         <template slot-scope="scope">
@@ -145,7 +136,7 @@
           },
           {
             label: '门限',
-            value: 'value',
+            value: 'threshold',
             // width: 270,
             filter: 'nullFilter',
             className: '',

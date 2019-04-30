@@ -54,25 +54,10 @@
         :className = 'item.className'
         :resizable='false'>
       </el-table-column>
-      <!-- <el-table-column :label="'SN'" fixed="left">
-        <template slot-scope="scope">
-          <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
-            <router-link :to="{
-                  path: '/points',
-                  query: {
-                      deviceId: scope.row.deviceId
-                  }
-                }" tag="span">
-              {{scope.row.username}}
-            </router-link>
-          </div>
-        </template>
-      </el-table-column> -->
       <el-table-column
         :label="$t('SECURITY.USER.OPERATION')" fixed="right">
         <template slot-scope="scope">
-          <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('setSignalDialog', scope.row)"
-          v-if="scope.row.dataType === 'AO' || scope.row.dataType === 'DO'">
+          <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('setSignalDialog', scope.row)" v-if="scope.row.dataType === 'AO' || scope.row.dataType === 'DO'">
             设置信号点值
             </i>          
         </template>
@@ -141,6 +126,13 @@
             className: '',
           },
           {
+            label: '信号点值',
+            value: 'value',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
             label: '信号点类型',
             value: 'dataType',
             // width: 270,
@@ -165,6 +157,7 @@
           {label: '关', value: 0 },
           {label: '开', value: 1 }
         ],
+        dev: '',
       }
     },
     computed: {
@@ -267,10 +260,10 @@
       },
 
       executeModify(res) {
-        this.updateContent(res)
+        this.setSignal(res)
       },
       clear(res) {
-//        console.log(res)
+      //  console.log(res)
       },
 
       showDialog(dialogName, item) {
@@ -282,64 +275,18 @@
 
       },
 
-      addContent(res) {
-        let params = {
-          username: res.username,
-          password: res.password,
-          group_name: res.group_name,
-          comment: res.comment
-        };
-        this.appHttp.postAddUser(params).then(() => {
-          this.getUsers();
-        })
-      },
-
       // 设置信号点值
-      updateContent(res) {
+      setSignal(res) {
         let params = {
-          // dev: this.dev,
-          // stePoint: this.modifyCont.coId,
-          // steData: res.value,
-          "dev":"3-1",
-          "stePoint":201001,
-          "steData":1
+          "dev": this.dev,
+          "stePoint": this.modifyCont.coId - 0,
+          "steData": res.value - 0,
         };
-        this.$api.setSignal(params, this.$route.query.sN).then(() => {
+        debugger;
+        this.$api.setSignal(params, this.$route.query.sN).then(((res) => {
           this.getSignalList();
-        })
+        }).bind(this))
       },
-
-      deleteContents(callback) {
-        let params = {
-          users: this.multipleSelection
-        };
-        this.appHttp.postDeleteUsers(params).then(() => {
-          callback && callback.call(this);
-        })
-      },
-
-      deleteContentsNeedValidated() {
-        if (this.multipleSelection.length === 0) {
-          this.$message({message: "请选择删除项", type: 'warning', showClose: true})
-        } else {
-          this.$confirm('此操作将永久删除所选项, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.deleteContents(function() {
-              this.getUsers();
-            })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除',
-              showClose: true
-            });
-          });
-        }
-      },
-
     },
     mounted() {
       // this.addMockData();

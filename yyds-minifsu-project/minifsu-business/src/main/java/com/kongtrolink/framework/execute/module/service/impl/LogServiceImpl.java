@@ -17,17 +17,32 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class LogServiceImpl implements LogService {
+
+    private LogDao logDao;
+
     @Autowired
-    LogDao logDao;
+    public void setLogDao(LogDao logDao) {
+        this.logDao = logDao;
+    }
 
     @Override
     public JSONObject saveLog(ModuleMsg moduleMsg) {
         JSONObject msgPayload = moduleMsg.getPayload();
         Log log = JSONObject.toJavaObject(msgPayload, Log.class);
+        JSONObject result = new JSONObject();
+        try {
+            //日志记录
+            saveLog(log);
+            result.put("result", StateCode.SUCCESS);
+        } catch (Exception e) {
+            result.put("result", StateCode.FAILED);
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public void saveLog(Log log) {
         //日志记录
         logDao.saveLog(log);
-        JSONObject result = new JSONObject();
-        result.put("result", StateCode.SUCCESS);
-        return result;
     }
 }
