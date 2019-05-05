@@ -38,9 +38,10 @@ public class TimeDataAnalysisService {
             for(String key  : info.keySet()){
                 String dev_colId = devKey + key;
                 long aFloat = info.get(key);
-                dev_colId_valMap.put(dev_colId, (int)aFloat);
+                int intVal = (int)aFloat;
+                dev_colId_valMap.put(dev_colId, intVal);
                 //更新实时数据
-                redisUtils.hset(sn_data_hash, dev_colId, aFloat);
+                redisUtils.hset(sn_data_hash, dev_colId, intVal);
             }
         }
         return dev_colId_valMap;
