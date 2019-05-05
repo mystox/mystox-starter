@@ -96,7 +96,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         registerData(msgId, moduleMsg);
 
         //解析保存实时数据和告警
-        Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
+        Map<String, Integer> dev_colId_valMap = timeDateService.analysisData(fsu);
         //解析告警
         Map<String, JSONObject>  alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate);
         //告警注册与消除
