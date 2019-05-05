@@ -33,14 +33,14 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理告警
      */
-    public Map<String, JSONObject> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate){
+    public Map<String, JSONObject> analysisAlarm(JsonFsu fsu, Map<String, Integer> dev_colId_valMap, Date curDate){
         String beginDelayTable = begin_delay_alarm_hash + fsu.getSN();
         //获取FSU下所有以前告警
         Map<String, JSONObject> beforAlarmMap = redisUtils.hmget(sn__alarm_hash + fsu.getSN());
         //获取所有的告警开始延迟
         Map<String, JSONObject> beginDelayAlarmMap = redisUtils.hmget(beginDelayTable);//延迟产生或延迟消除的告警
         //处理上报的各个信号点告警数据
-        for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
+        for(Map.Entry<String, Integer> entry : dev_colId_valMap.entrySet()){
             handleSignal(fsu, entry, beforAlarmMap, beginDelayAlarmMap, curDate);
         }
         beforAlarmMap = delayService.handleEndDelayHistory(beforAlarmMap, curDate);
@@ -59,10 +59,10 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理信号点下的所有告警点
      */
-    public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Float> entry,
+    public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Integer> entry,
                          Map<String, JSONObject> beforAlarmMap, Map<String, JSONObject> beginDelayAlarmMap, Date curDate){
         String dev_colId = entry.getKey();
-        Float signalValue = entry.getValue();
+        Integer signalValue = entry.getValue();
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, fsu.getSN() + "_" + dev_colId);
         if(null == alarmSignalObj){
             return null;
