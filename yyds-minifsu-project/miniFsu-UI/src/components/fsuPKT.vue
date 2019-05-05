@@ -31,7 +31,7 @@
         </el-form>
       </div>
       <div slot="operate">
-        <el-button type="primary" @click="getTerminalLog()">查询</el-button>
+        <el-button type="primary" @click="goSearch">查询</el-button>
       </div>
     </operation-bar-layout>
     <table-box
@@ -215,6 +215,15 @@
           });
         }
         this.pagination.total = this.fsuList.length;
+      },
+
+      /**
+       * 查询之前，需要初始化分页 
+       */
+      goSearch() {
+        this.pagination.currentPage = 1;
+        this.pagination.pageSize = 15;
+        this.getTerminalLog();
       },
 
       getTerminalLog() {
