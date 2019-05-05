@@ -32,10 +32,10 @@ spring:
       enabled: true
 server:
   name: minifsu-web
-  bindIp: 172.16.6.39
+  bindIp: 172.16.6.50
 rpc:
   client:
     timeout: 60000
   controller:
-    hostname: 172.16.6.39
+    hostname: 172.16.6.50
     port: 18800
