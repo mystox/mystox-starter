@@ -8,13 +8,13 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
-import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.RunStateDao;
 import com.kongtrolink.framework.execute.module.model.Device;
 import com.kongtrolink.framework.execute.module.model.RunState;
 import com.kongtrolink.framework.execute.module.model.SignalModel;
 import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
+import com.kongtrolink.framework.execute.module.service.LogService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,6 @@ public class DataMntServiceImpl implements DataMntService {
     private String port;
     @Value("${server.name}")
     private String name;
-    private final LogDao logDao;
     private final RedisUtils redisUtils;
 
     private final DeviceDao deviceDao;
@@ -57,10 +56,14 @@ public class DataMntServiceImpl implements DataMntService {
     private final RunStateDao runStateDao;
 
     private ConfigDao configDao;
+    private LogService logService;
+    @Autowired
+    public void setLogService(LogService logService) {
+        this.logService = logService;
+    }
 
     @Autowired
-    public DataMntServiceImpl(LogDao logDao, RedisUtils redisUtils, DeviceDao deviceDao, RunStateDao runStateDao, ThreadPoolTaskExecutor businessExecutor) {
-        this.logDao = logDao;
+    public DataMntServiceImpl(RedisUtils redisUtils, DeviceDao deviceDao, RunStateDao runStateDao, ThreadPoolTaskExecutor businessExecutor) {
         this.redisUtils = redisUtils;
         this.deviceDao = deviceDao;
         this.runStateDao = runStateDao;
@@ -257,15 +260,7 @@ public class DataMntServiceImpl implements DataMntService {
         } catch (IOException e) {
             logger.error("[{}] sn [{}]  set data [{}]to terminal error [{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, e.toString());
             //日志记录
-            Log log = new Log();
-            log.setErrorCode(StateCode.CONNECT_ERROR);
-            log.setSN(sn);
-            log.setMsgType(moduleMsg.getPktType());
-            log.setMsgId(moduleMsg.getMsgId());
-            log.setHostName(host);
-            log.setServiceName(name);
-            log.setTime(new Date(System.currentTimeMillis()));
-            logDao.saveLog(log);
+            saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
         }
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -304,15 +299,7 @@ public class DataMntServiceImpl implements DataMntService {
         } catch (IOException e) {
             logger.info("[{}] sn [{}] report data to thirdParty error [{}] ", msgId, sn, e.toString());
             //日志记录
-            Log log = new Log();
-            log.setErrorCode(3);
-            log.setSN(sn);
-            log.setMsgType(moduleMsg.getPktType());
-            log.setMsgId(msgId);
-            log.setHostName(host);
-            log.setServiceName(name);
-            log.setTime(new Date(System.currentTimeMillis()));
-            logDao.saveLog(log);
+            saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
             e.printStackTrace();
         }
 
@@ -349,15 +336,7 @@ public class DataMntServiceImpl implements DataMntService {
                 } catch (IOException e) {
                     logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn, PktType.DATA_STATUS, e.toString());
                     //日志记录
-                    Log log = new Log();
-                    log.setErrorCode(3);
-                    log.setSN(sn);
-                    log.setMsgType(moduleMsg.getPktType());
-                    log.setMsgId(msgId);
-                    log.setHostName(host);
-                    log.setServiceName(name);
-                    log.setTime(new Date(System.currentTimeMillis()));
-                    logDao.saveLog(log);
+                    saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
                     e.printStackTrace();
                 }
             });
@@ -365,16 +344,7 @@ public class DataMntServiceImpl implements DataMntService {
             return result;
         }
         //日志记录
-        Log log = new Log();
-        if (value != null) log.setErrorCode(StateCode.UNREGISTY); //判断通讯异常
-        else log.setErrorCode(StateCode.CONNECT_ERROR);
-        log.setSN(sn);
-        log.setMsgType(moduleMsg.getPktType());
-        log.setMsgId(moduleMsg.getMsgId());
-        log.setHostName(host);
-        log.setServiceName(name);
-        log.setTime(new Date(System.currentTimeMillis()));
-        logDao.saveLog(log);
+        saveLog(msgId,sn,moduleMsg.getPktType(),value != null ? StateCode.UNREGISTY : StateCode.CONNECT_ERROR);
         result.put("result", StateCode.UNREGISTY);
         return result;
     }
@@ -395,6 +365,22 @@ public class DataMntServiceImpl implements DataMntService {
         JSONObject result = new JSONObject();
         result.put("result", 1);
         return result;
+    }
+
+
+    /**
+     * 保存运行时错误日志
+     *
+     * @param msgId
+     * @param sn
+     * @param msgType
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+        Log log = new Log(new Date(System.currentTimeMillis()),
+                stateCode,
+                sn, msgType, msgId, name, host);
+        logService.saveLog(log);
     }
 
 }
