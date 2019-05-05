@@ -56,6 +56,7 @@ public class DataMntServiceImpl implements DataMntService {
     private final RunStateDao runStateDao;
 
     private ConfigDao configDao;
+
     private LogService logService;
     @Autowired
     public void setLogService(LogService logService) {

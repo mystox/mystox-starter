@@ -22,6 +22,26 @@ public class Terminal
     private String fsuId; //fsuId
     private boolean bindMark = false;
 
+    private String name;
+    private String address;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getModel() {
         return model;
     }
