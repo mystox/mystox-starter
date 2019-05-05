@@ -223,7 +223,7 @@ public class FSUController {
             JSONObject result = fsuService.saveTerminal(snList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    result.remove("remove");
+                    result.remove("result");
                     JsonResult jsonResult = new JsonResult("导入失败[" + result.toJSONString()+"]", false);
                     jsonResult.setData(result);
                     return jsonResult;
