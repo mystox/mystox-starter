@@ -224,6 +224,7 @@ public class FSUController {
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     JsonResult jsonResult = new JsonResult("事务处理导入失败", false);
+                    result.remove("result");
                     jsonResult.setData(result);
                     return jsonResult;
                 }
