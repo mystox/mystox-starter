@@ -46,7 +46,7 @@
             <!-- v-if="!scope.row.bindMark" -->
             <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
             <!-- v-if="scope.row.bindMark"  -->
-            <i style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
+            <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
             <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i>
             <!-- <i style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i> -->
             <router-link :to="{
