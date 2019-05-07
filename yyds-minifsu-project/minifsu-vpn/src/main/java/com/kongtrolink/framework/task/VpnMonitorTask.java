@@ -40,25 +40,30 @@ public class VpnMonitorTask {
     }
 
     private void linuxTower() {
-        logger.info("start");
+//        logger.info("start");
         String folder = "/var/run/";
         for (String vpn : vpnList) {
-            logger.info("check " + vpn);
+//            logger.info("check " + vpn);
             try {
                 String filePath = folder + "ppp-" + vpn + ".pid";
                 File file = new File(filePath);
                 if (!file.exists()) {
-                    logger.info(filePath + " not exist");
-                    exec("echo 'c " + vpn + "' > /var/run/xl2tpd/l2tp-control");
+//                    logger.info(filePath + " not exist");
+                    exec(new String[] {"/bin/sh", "-c", "echo 'c " + vpn + "' > /var/run/xl2tpd/l2tp-control"});
                 }
                 if (file.exists()) {
                     String content = readFile(filePath);
-                    logger.info(filePath + ":" + content);
+//                    logger.info(filePath + ":" + content);
                     String interfaceName = content.split("\n")[1];
-                    logger.info("interfaceName:" + interfaceName);
-                    String[] ipList = exec("ifconfig " + interfaceName + " | egrep \"((25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\\.){3}(25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\" -o").split("\n");
-                    logger.info("ipList:" + JSONObject.toJSONString(ipList));
-                    if (ipList.length == 3 && !(redisUtils.hget("vpn_hash", vpn).toString().equals(ipList[0]))) {
+//                    logger.info("interfaceName:" + interfaceName);
+                    String[] ipList = exec(new String[] {"/bin/bash", "-c", "ifconfig " + interfaceName + " | egrep \"((25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\\.){3}(25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\" -o"}).split("\n");
+//                    logger.info("ipList:" + JSONObject.toJSONString(ipList));
+                    if (ipList.length == 3) {
+                        if (redisUtils.hHasKey("vpn_hash", vpn)) {
+                            if (redisUtils.hget("vpn_hash", vpn).toString().equals(ipList[0])) {
+                                return;
+                            }
+                        }
                         redisUtils.hset("vpn_hash", vpn, ipList[0]);
                     }
                 }
@@ -73,9 +78,10 @@ public class VpnMonitorTask {
      * @param cmd cmd
      * @return 命令返回结果，执行失败返回null
      */
-    private String exec(String cmd) {
+    private String exec(String[] cmd) {
         String result = "";
         try {
+//            logger.info("cmd:" + cmd[2]);
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor(10, TimeUnit.SECONDS);
             int processResult = p.exitValue();
@@ -89,6 +95,7 @@ public class VpnMonitorTask {
                     result += line + "\n";
                 }
             }
+//            logger.info("result:\n" + result);
         } catch (Exception ex) {
             result = null;
             logger.error("执行命令失败：" + cmd + "\n" + ex.getMessage());
