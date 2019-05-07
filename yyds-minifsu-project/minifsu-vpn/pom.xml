@@ -9,7 +9,7 @@
     </parent>
     <artifactId>minifsu-vpn</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>minifsu-tower</name>
+    <name>minifsu-vpn</name>
     <description>vpn服务</description>
     <packaging>jar</packaging>
     <properties>
