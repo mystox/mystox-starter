@@ -9,6 +9,7 @@ logging:
 vpn:
   osVersion: linux #vpn服务操作系统
   agent: tower #vpn代理商
+  vpnList: QG7 #待检测的VPN名称列表，以‘,’分隔
 
 server:
   name: minifsu-vpn
