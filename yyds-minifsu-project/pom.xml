@@ -20,5 +20,6 @@
 		<module>minifsu-tower</module>
 		<module>minifsu-web</module>
 		<module>minifsu-gateway</module>
+		<module>minifsu-vpn</module>
 	</modules>
 </project>
