@@ -59,5 +59,6 @@ tower:
     loginInterval: 120 #注册间隔(秒)
     alarmReportLimit: 5 #单条告警上报次数上限
     alarmReportInterval: 60 #告警上报间隔(秒)
+    dataSaveInterval: 30 #历史数据保存间隔(分钟)
   login:
     regMode: 2  #注册模式(枚举值，1：原有注册模块，2：新的注册械)，可为空，为空表示采用原有的注册模式 固定为2

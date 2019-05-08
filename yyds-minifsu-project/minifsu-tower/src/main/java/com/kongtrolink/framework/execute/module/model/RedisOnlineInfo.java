@@ -40,6 +40,8 @@ public class RedisOnlineInfo {
     private int alarmInterval;
     //告警上报次数上限
     private int alarmReportLimit;
+    //历史数据保存间隔(分钟)
+    private int dataSaveInterval;
     //注册机Ip
     private String loginIp;
     //注册机端口
@@ -169,6 +171,14 @@ public class RedisOnlineInfo {
         this.alarmReportLimit = alarmReportLimit;
     }
 
+    public int getDataSaveInterval() {
+        return dataSaveInterval;
+    }
+
+    public void setDataSaveInterval(int dataSaveInterval) {
+        this.dataSaveInterval = dataSaveInterval;
+    }
+
     public String getLoginIp() {
         return loginIp;
     }
@@ -231,6 +241,7 @@ public class RedisOnlineInfo {
         this.loginInterval = jsonLoginParam.getLoginInterval();
         this.alarmInterval = jsonLoginParam.getAlarmReportInterval();
         this.alarmReportLimit = jsonLoginParam.getAlarmReportLimit();
+        this.dataSaveInterval = jsonLoginParam.getDataSaveInterval();
     }
 
     /**

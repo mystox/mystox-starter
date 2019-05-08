@@ -65,6 +65,7 @@ public class VpnMonitorTask {
                             }
                         }
                         redisUtils.hset("vpn_hash", vpn, ipList[0]);
+                        logger.info(vpn + " IP发生变化:" + ipList[0]);
                     }
                 }
             } catch (Exception ex) {
