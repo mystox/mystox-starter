@@ -43,7 +43,9 @@
         :label="$t('SECURITY.USER.OPERATION')" width="550">
         <template slot-scope="scope">
           <div>
-            <i v-if="!scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
+            <!-- v-if="!scope.row.bindMark" -->
+            <i style="color: #20A0FF; cursor: pointer;" @click="showDialog('bindDialog', scope.row)">/ 绑定</i>
+            <!-- v-if="scope.row.bindMark"  -->
             <i v-if="scope.row.bindMark" style="color: #20A0FF; cursor: pointer;" @click="unbind(scope.row)">/ 解绑</i>
             <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i>
             <!-- <i style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i> -->
@@ -163,6 +165,13 @@
             className: '',
           },
           {
+            label: 'SN 别名',
+            value: 'name',
+            // width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
             label: '适配层版本号',
             value: 'adapterVer',
             // width: 270,
@@ -220,7 +229,7 @@
               {
                 type: 'input',
                 name: 'fsuId',
-                // defaultValue: "43048243800189",
+                defaultValue: this.modifyCont.fsuId || '',
                 disabled: true,
                 rule: {}
               }
@@ -357,13 +366,13 @@
       upgrade() {
         if (this.compilerInfo.engine) {
           this.$api.upgrade(this.paramForUpgradeEngine, this.modifyCont.sN).then(res=> {
-            // console.log(res);
+            this.upgradeDialogVisible = false;
           });
         } 
         this.$nextTick(()=> {
           if (this.compilerInfo.program) {
             this.$api.upgrade(this.paramForUpgradeProgram, this.modifyCont.sN).then(res=> {
-              // console.log(res);
+              this.upgradeDialogVisible = false;              
             });
           }
         })
@@ -426,7 +435,7 @@
 
       showDialog(dialogName, item) {
         item && (this.modifyCont = item);
-        this.$refs[dialogName] &&this.$refs[dialogName].toModal();
+        this.$refs[dialogName] && this.$refs[dialogName].toModal();
       },
       
       showUpgradeDialog(item) {
@@ -438,7 +447,7 @@
       setFsu(res) {
         let params = {
           "fsuId" : res.fsuId,
-          "devCodeList" : res.devIds,
+          "devCodeList" : res.devIds || [],
           "sn": res.sN,
           "name" : res.name,
           "address" : res.address,

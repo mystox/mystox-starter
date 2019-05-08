@@ -170,7 +170,7 @@ export default {
 
             // 升级
             upgrade(param, sn) {
-                return post(`${base}fsu/upgrade?sn=${sn}`, param)
+                return post(`${base}fsu/upgrade?sn=${sn}`, param, successMsg, failMsg)
             },
         }
     }

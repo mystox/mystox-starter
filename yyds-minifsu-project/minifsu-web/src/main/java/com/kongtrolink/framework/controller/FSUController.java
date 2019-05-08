@@ -215,7 +215,7 @@ public class FSUController {
                 snObj.put("vendor", cell[r][1]);
                 String model = "";
                 if (cell[r].length > 1) {
-                    model = cell[r][2];
+                    model = cell[r][1];
                 }
                 snObj.put("model", StringUtils.isNotBlank(model) ? model : "mmu100");
                 snList.add(snObj);
@@ -223,7 +223,8 @@ public class FSUController {
             JSONObject result = fsuService.saveTerminal(snList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("事务处理导入失败", false);
+                    result.remove("result");
+                    JsonResult jsonResult = new JsonResult("导入失败[" + result.toJSONString()+"]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -267,7 +268,8 @@ public class FSUController {
             JSONObject result = fsuService.saveAlarmModelList(alarmSignalList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("导入失败", false);
+                    result.remove("result");
+                    JsonResult jsonResult = new JsonResult("导入告警点表失败[" + result.toJSONString()+"]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -301,7 +303,8 @@ public class FSUController {
             JSONObject result = fsuService.saveSignalModelList(signalModelList);
             if (result != null) {
                 if ((int) result.get("result") == 0) {
-                    JsonResult jsonResult = new JsonResult("导入失败", false);
+                    result.remove("result");
+                    JsonResult jsonResult = new JsonResult("导入信号点失败[" + result.toJSONString()+"]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }

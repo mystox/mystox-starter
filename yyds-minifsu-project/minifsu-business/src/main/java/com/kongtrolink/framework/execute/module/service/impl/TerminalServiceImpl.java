@@ -49,6 +49,7 @@ public class TerminalServiceImpl implements TerminalService {
     private final RedisUtils redisUtils;
     private RpcModule rpcModule;
     private LogService logService;
+
     @Autowired
     public void setLogService(LogService logService) {
         this.logService = logService;
@@ -218,9 +219,12 @@ public class TerminalServiceImpl implements TerminalService {
         if (StringUtils.isBlank(sn)) {
             sn = jsonObject.getString("sN");
             if (StringUtils.isBlank(sn)) {
-                JSONObject result = new JSONObject();
-                result.put("result", 0);
-                return result;
+                sn = jsonObject.getString("sn");
+                if (StringUtils.isBlank(sn)) {
+                    JSONObject result = new JSONObject();
+                    result.put("result", 0);
+                    return result;
+                }
             }
         }
         Terminal terminal = terminalDao.findTerminalBySn(sn);
@@ -232,8 +236,14 @@ public class TerminalServiceImpl implements TerminalService {
         if (alarmRhythm != null) terminal.setAlarmRhythm((Integer) alarmRhythm);
         Object runStatusRhythm = jsonObject.get("runStatusRhythm");
         if (runStatusRhythm != null) terminal.setRunStatusRhythm((Integer) runStatusRhythm);
-        Object coordinate = jsonObject.get("coordinate");
-        if (runStatusRhythm != null) terminal.setCoordinate((String) coordinate);
+
+        String coordinate = jsonObject.getString("coordinate");
+        if (StringUtils.isNotBlank(coordinate)) terminal.setCoordinate(coordinate);
+        String name = jsonObject.getString("name"); //别名
+        if (StringUtils.isNotBlank(coordinate)) terminal.setName(name);
+        String address = jsonObject.getString("address"); //坐标
+        if (StringUtils.isNotBlank(coordinate)) terminal.setAddress(address);
+
         String bid = jsonObject.getString("BID");
         if (StringUtils.isBlank(bid)) bid = "default";
         JSONObject result = new JSONObject();
