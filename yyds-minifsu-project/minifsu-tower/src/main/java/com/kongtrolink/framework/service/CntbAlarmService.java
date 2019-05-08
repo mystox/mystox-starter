@@ -46,9 +46,9 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
     private RedisUtils redisUtils;
     private AlarmLogDao alarmLogDao;
 
-    public CntbAlarmService(String sn, String hostname, int port,
-                            RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
-                            AlarmLogDao alarmLogDao) {
+    CntbAlarmService(String sn, String hostname, int port,
+                     RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
+                     AlarmLogDao alarmLogDao) {
         super(rpcClient);
         this.redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(sn), RedisOnlineInfo.class);
         this.hostname = hostname;
@@ -116,7 +116,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
     /**
      * 检查告警是否可上报
      * @param redisAlarm 告警信息
-     * @return
+     * @return 是否上报
      */
     private boolean checkReport(RedisAlarm redisAlarm) {
         if (redisAlarm.isReporting()) {
@@ -147,10 +147,8 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
     /**
      * 向铁塔平台发送告警
      * @param redisAlarmList 告警信息
-     * @return 发送结果
      */
-    private boolean sendAlarm(List<RedisAlarm> redisAlarmList) {
-        boolean result = false;
+    private void sendAlarm(List<RedisAlarm> redisAlarmList) {
 
         List<TAlarm> tAlarmList = new ArrayList<>();
         for (RedisAlarm redisAlarm : redisAlarmList) {
@@ -182,7 +180,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
         String reqXmlMsg = getXmlMsg(sendAlarm);
         if (null == reqXmlMsg) {
-            return result;
+            return;
         }
 
         InetSocketAddress addr = new InetSocketAddress(hostname, port);
@@ -192,10 +190,11 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
         jsonObject.put("port", 8080);
         jsonObject.put("msg", reqXmlMsg);
 
-        String request = createRequestMsg(CntbPktTypeTable.SERVICE_GW, jsonObject);
+        String request = createRequestMsg(jsonObject);
 
         JSONObject jsonResponse = postMsg(request, addr);
 
+        boolean result = false;
         if (jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
             String resXmlMsg = jsonResponse.getString("msg");
             SendAlarmAck sendAlarmAck = analyzeMsg(resXmlMsg);
@@ -226,8 +225,6 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             redisUtils.set(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())), redisAlarm);
             logger.debug("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
         }
-
-        return result;
     }
 
     /**
@@ -250,12 +247,11 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
     /**
      * 创建请求报文
-     * @param pktType 报文头类型
      * @param payload 发送信息
      * @return 字符串报文
      */
-    private String createRequestMsg(String pktType, JSONObject payload){
-        ModuleMsg moduleMsg = new ModuleMsg(pktType);
+    private String createRequestMsg(JSONObject payload){
+        ModuleMsg moduleMsg = new ModuleMsg(CntbPktTypeTable.SERVICE_GW);
         moduleMsg.setPayload(payload);
         return JSON.toJSONString(moduleMsg);
     }
