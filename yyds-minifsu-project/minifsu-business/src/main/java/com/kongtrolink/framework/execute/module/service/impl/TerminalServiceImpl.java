@@ -228,6 +228,8 @@ public class TerminalServiceImpl implements TerminalService {
             }
         }
         Terminal terminal = terminalDao.findTerminalBySn(sn);
+
+
         Object heartCycle = jsonObject.get("heartCycle");
         if (heartCycle != null) terminal.setHeartCycle((Integer) heartCycle);
         Object businessRhythm = jsonObject.get("businessRhythm");
@@ -237,13 +239,17 @@ public class TerminalServiceImpl implements TerminalService {
         Object runStatusRhythm = jsonObject.get("runStatusRhythm");
         if (runStatusRhythm != null) terminal.setRunStatusRhythm((Integer) runStatusRhythm);
 
+        Boolean enableHeart = jsonObject.getBoolean("enableHeart");
+        if (runStatusRhythm != null) {
+            terminal.setEnableHeart(enableHeart);
+        }
+
         String coordinate = jsonObject.getString("coordinate");
         if (StringUtils.isNotBlank(coordinate)) terminal.setCoordinate(coordinate);
         String name = jsonObject.getString("name"); //别名
         if (StringUtils.isNotBlank(coordinate)) terminal.setName(name);
         String address = jsonObject.getString("address"); //坐标
         if (StringUtils.isNotBlank(coordinate)) terminal.setAddress(address);
-
         String bid = jsonObject.getString("BID");
         if (StringUtils.isBlank(bid)) bid = "default";
         JSONObject result = new JSONObject();
@@ -276,19 +282,26 @@ public class TerminalServiceImpl implements TerminalService {
                     //保存SN
                     terminal.setBindMark(true);
                     terminal.setFsuId(fsuId);
-                    terminalDao.saveTerminal(terminal);
                 } else {
                     logger.error("[{}] sn [{}] bind terminal false...", moduleMsg.getMsgId(), sn);
                 }
                 result.put("result", resultInt);
-                return result;
             } catch (IOException e) {
                 saveLog(moduleMsg.getMsgId(), sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
                 logger.error("发送至外部业务绑定异常" + e.toString());
                 e.printStackTrace();
             }
         }
+
         terminalDao.saveTerminal(terminal);
+
+        if (enableHeart != null) {
+            //获取redis 信息
+            String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
+            JSONObject value = redisUtils.get(key, JSONObject.class);
+            value.put("STATUS", 0);
+            redisUtils.set(key, value,value.getLong("expired"));
+        }
         result.put("result", 1);
         return result;
     }

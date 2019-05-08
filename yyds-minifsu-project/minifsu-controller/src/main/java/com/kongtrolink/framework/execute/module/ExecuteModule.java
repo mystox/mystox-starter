@@ -76,13 +76,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     /**
      * 默认业务程序执行体
-     *
-     * @param
-     * @return
      */
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload) {
-        String response = "";
         JSONObject payloadObject = JSONObject.parseObject(payload);
         String pktType = (String) payloadObject.get("pktType");//服务间通讯类型
         if (StringUtils.isNotBlank(pktType)) {
@@ -91,6 +87,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 return responseMsg(result, msgId);
             } else if (PktType.UPGRADE.equals(pktType)
                     || PktType.SET_DATA_TERMINAL.equals(pktType)
+                    || PktType.SET_THRESHOLD_TERMINAL.equals(pktType)
                     || PktType.TERMINAL_REBOOT.equals(pktType)
                     ) {                                                     //服务>>>>>>>>终端
                 logger.info("[{}]>>>>>>>>>>terminal==={}===", msgId, payloadObject.toJSONString());
@@ -116,7 +113,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @param msgId  消息id
      * @return 返回payload实例
      */
-    public RpcNotifyProto.RpcMessage responseMsg(Object result, String msgId) {
+    private RpcNotifyProto.RpcMessage responseMsg(Object result, String msgId) {
 
         if (result == null) {
             JSONObject jsonResult = new JSONObject();
@@ -149,7 +146,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     /**
      * 处理发送至终端的消息 服务>>>>>>>终端
      *
-     * @return
+     * @return 返回json结果
      */
     private JSON sendTerminalExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
@@ -161,7 +158,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         int pktTypeInt = TerminalPktType.toKey(pktType);
         JSONObject result = new JSONObject();
         result.put("result", 0);
-        if (pktTypeInt == -1) return result;
+        if (pktTypeInt == -1) {
+            logger.error("[{}] can't find terminalPktType[{}]",msgId,pktType);
+            return result;
+        }
         msgPayload.put("pktType", pktTypeInt);
         //payload组装消息成终端消息格式{"msgId":"000009","pkgSum":1,"ts":1552043047,"payload":{"pktType":4,"result":1}}
         TerminalMsg requestMsg = new TerminalMsg();
@@ -169,13 +169,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         requestMsg.setMsgId(msgId);
         //将消息放入payload
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestMsg));
-        JSONObject snCommunication = null;
+        JSONObject snCommunication;
         try {
             //根据SN获取uuid和gip
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             snCommunication = redisUtils.get(key, JSONObject.class);
             if (snCommunication == null) {
                 // 错误信息记录日志
+                logger.error("[{}] can't find communication_hash[{}]",msgId,key);
                 saveLog(msgId, sn, StateCode.CONNECT_ERROR, moduleMsg.getPktType());
                 return result;
             }
@@ -211,7 +212,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.GET_DATA.equals(pktType) //获取实时数据
                 || PktType.SET_DATA.equals(pktType) //设置信号点值
                 || PktType.SET_STATION.equals(pktType) //设置终端或绑定
-                || PktType.SET_ALARM_PARAM.equals(pktType)
+                || PktType.SET_ALARM_PARAM.equals(pktType) //设置门限值
                 || PktType.DATA_REGISTER.equals(pktType) //外报数据解析
                 || PktType.GET_ALARM_PARAM.equals(pktType)
                 || PktType.GET_ALARMS.equals(pktType) //web <--- 获取告警
@@ -280,8 +281,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     /**
      * 处理来自终端的消息 终端>>>>>>>服务
      *
-     * @param payloadObject
-     * @return
+     * @param msgId         消息id
+     * @param payloadObject 终端报文
+     * @return 返回终端业务处理结果
      */
     private Object receiveTerminalExecute(String msgId, JSONObject payloadObject) {
         //解析消息报文
@@ -435,10 +437,16 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, (JSONObject) payload);
 
             } else if (payload != null && payload instanceof String) {
-                JSONObject jsonPayload = JSONObject.parseObject((String) payload);
-                if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
-                if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
-                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
+                JSONObject jsonPayload = null;
+                try {
+                    jsonPayload = JSONObject.parseObject((String) payload);
+                    if (jsonPayload.get("uuid") != null) jsonPayload.remove("uuid");
+                    if (jsonPayload.get("gip") != null) jsonPayload.remove("gip");
+                    moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, jsonPayload);
+                } catch (Exception e) {
+                    moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, (String) payload);
+                    e.printStackTrace();
+                }
             } else {
                 return;
             }
@@ -513,7 +521,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             }
         } catch (Throwable e) {
             logger.error("[{}] [{}]rpc request error...[{}]", msgId, host + ":" + port, e.toString());
-//            e.printStackTrace();
+            e.printStackTrace();
             result.put("result", 0);
         }
         return result;
