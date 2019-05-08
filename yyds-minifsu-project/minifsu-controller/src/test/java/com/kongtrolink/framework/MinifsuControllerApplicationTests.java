@@ -274,7 +274,7 @@ public class MinifsuControllerApplicationTests {
         JSONObject requestHead = new JSONObject();
         String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
         requestHead.put("uuid", uuid);
-        requestHead.put("gip", "172.16.6.39:17701");
+        requestHead.put("gip", "172.16.6.50:17701");
         requestHead.put("pktType", PktType.CONNECT);
 
         /************************* 注册********************************/
@@ -350,7 +350,7 @@ public class MinifsuControllerApplicationTests {
 
 
     static RpcNotifyProto.RpcMessage sendMSG(JSONObject requestHead, RpcModuleBase rpcModuleBase, Object msg) {
-        String ip = "172.16.6.39";
+        String ip = "172.16.6.50";
         int port = 18800;
         RpcNotifyProto.RpcMessage response = null;
         requestHead.put("payload", msg);

@@ -15,16 +15,16 @@ public class ModuleMsg {
     private String uuid;
     private String SN;
     private JSONObject payload;
+    private String strPayload;
     private JSONArray arrayPayload;
 
     public ModuleMsg() {
     }
 
-    public ModuleMsg(String pktType, String uuid, String SN, JSONObject payload) {
+    public ModuleMsg(String pktType, String SN, String strPayload) {
         this.pktType = pktType;
-        this.uuid = uuid;
         this.SN = SN;
-        this.payload = payload;
+        this.strPayload = strPayload;
     }
 
     public ModuleMsg(String pktType, String SN, JSONObject payload) {
@@ -33,14 +33,17 @@ public class ModuleMsg {
         this.payload = payload;
     }
 
-    public ModuleMsg(String pktType, JSONObject payload) {
-        this.pktType = pktType;
-        this.payload = payload;
-    }
-
     public ModuleMsg(String pktType, String SN) {
         this.pktType = pktType;
         this.SN = SN;
+    }
+
+    public String getStrPayload() {
+        return strPayload;
+    }
+
+    public void setStrPayload(String strPayload) {
+        this.strPayload = strPayload;
     }
 
     public ModuleMsg(String pktType) {

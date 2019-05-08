@@ -11,6 +11,7 @@ import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
 import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.model.Device;
+import com.kongtrolink.framework.execute.module.service.DataMntService;
 import com.kongtrolink.framework.execute.module.service.LogService;
 import com.kongtrolink.framework.execute.module.service.RegistryService;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +54,13 @@ public class RegistryServiceImpl implements RegistryService {
     private final RedisUtils redisUtils;
     private RpcModule rpcModule;
     private LogService logService;
+    private DataMntService dataMntServiceImpl;
+
+
+    @Autowired
+    public void setDataMntServiceImpl(DataMntService dataMntServiceImpl) {
+        this.dataMntServiceImpl = dataMntServiceImpl;
+    }
 
     @Autowired
     public void setLogService(LogService logService) {
@@ -143,6 +151,8 @@ public class RegistryServiceImpl implements RegistryService {
                 result.put("businessRhythm", businessRhythm);
                 result.put("alarmRhythm", alarmRhythm);
                 result.put("runStatusRhythm", runStatusRhythm);
+                int enableHeart = getHeartEnableByEngineVersion(terminal); //心跳开关
+                result.put("enableHeart", enableHeart);
                 return result;
             } else {
                 saveLog(msgId, sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
@@ -182,7 +192,7 @@ public class RegistryServiceImpl implements RegistryService {
             //处理和保存设备
             List<Device> deviceList = deviceDispose(sn, devsObject);
             //根据设备列表生成和保存告警配置信息
-            signalConfigDispose(sn, moduleMsg.getUuid(), deviceList);
+            signalConfigDispose(msgId, sn, moduleMsg.getUuid(), deviceList);
             value.put("STATUS", 2);
             int expiredTime = (int) value.get("expired");
             redisUtils.set(key, value, expiredTime);
@@ -212,10 +222,10 @@ public class RegistryServiceImpl implements RegistryService {
     /**
      * 设备列表处理
      *
-     * @param sn
-     * @param devsObject
+     * @param sn         sn
+     * @param devsObject 设备json实体
      */
-    List<Device> deviceDispose(String sn, Object devsObject) {
+    private List<Device> deviceDispose(String sn, Object devsObject) {
         JSONArray devsJson = (JSONArray) devsObject;
         List<String> devList = JSONArray.parseArray(devsJson.toJSONString(), String.class);
         // 同步告警点信息表至redis
@@ -268,11 +278,11 @@ public class RegistryServiceImpl implements RegistryService {
     /**
      * 根据设备列表生产告警点配置信息
      *
-     * @param sn
-     * @param uuid
-     * @param deviceList
+     * @param sn         sn
+     * @param uuid       uuid数据版本
+     * @param deviceList 设备列表
      */
-    void signalConfigDispose(String sn, String uuid, List<Device> deviceList) {
+    private void signalConfigDispose(String msgId, String sn, String uuid, List<Device> deviceList) {
         for (Device device : deviceList) { //根据设备产生最新配置信息表
             String deviceId = device.getId();
             Integer type = device.getType();
@@ -322,8 +332,23 @@ public class RegistryServiceImpl implements RegistryService {
             for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {//告警配置写入redis
                 redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
             }
+
+            businessExecutor.execute(() -> {
+                JSONObject jsonObject = dataMntServiceImpl.alarmConfigPush(msgId, sn, devDataId, alarmConfigKeyMap);//注册结束 设置线程 往终端推送
+                for (int i = 0; jsonObject.getInteger("result").equals(0) || i < 3; i++) {
+                    //推送错误 重新注册
+                    try {
+                        Thread.sleep(2000L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    logger.warn("[{}] push threshold to terminal error retry ...[{}]", msgId, i);
+                    jsonObject = dataMntServiceImpl.alarmConfigPush(msgId, sn, devDataId, alarmConfigKeyMap);//注册结束 设置线程 往终端推送
+                }
+            });
         }
     }
+
 
     @Override
     public JSONObject registerTerminal(ModuleMsg moduleMsg) {
@@ -377,6 +402,15 @@ public class RegistryServiceImpl implements RegistryService {
         return result;
     }
 
+    /**
+     * 根据引擎版本判断是否上报心跳, 默认上报心跳
+     *
+     * @return 1开 0 关
+     */
+    private int getHeartEnableByEngineVersion(Terminal terminal) {
+        return terminal.isEnableHeart() ? 1 : 0;
+    }
+
     private boolean otherLogic() {
         return true;
     }
@@ -404,9 +438,9 @@ public class RegistryServiceImpl implements RegistryService {
                         redisUtils.deleteHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, keys.toArray(s));
                     }
                     //日志记录
-                    Log log = new Log(new Date(msgPayload.getLong("time")),msgPayload.getInteger("code"),
-                    sn,moduleMsg.getPktType(),moduleMsg.getMsgId(),
-                            msgPayload.getString("serverName"),msgPayload.getString("serverHost"));
+                    Log log = new Log(new Date(msgPayload.getLong("time")), msgPayload.getInteger("code"),
+                            sn, moduleMsg.getPktType(), moduleMsg.getMsgId(),
+                            msgPayload.getString("serverName"), msgPayload.getString("serverHost"));
                     logService.saveLog(log);
                 }
             }
@@ -452,12 +486,12 @@ public class RegistryServiceImpl implements RegistryService {
     /**
      * 保存运行时错误日志
      *
-     * @param msgId
-     * @param sn
-     * @param msgType
-     * @param stateCode
+     * @param msgId     消息id
+     * @param sn        sn
+     * @param msgType   消息类型
+     * @param stateCode 状态code
      */
-    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+    private void saveLog(String msgId, String sn, String msgType, int stateCode) {
         Log log = new Log(new Date(System.currentTimeMillis()),
                 stateCode,
                 sn, msgType, msgId, name, host);

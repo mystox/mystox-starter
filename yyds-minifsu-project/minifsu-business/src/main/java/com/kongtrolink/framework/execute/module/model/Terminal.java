@@ -21,10 +21,19 @@ public class Terminal
     private String coordinate;
     private String fsuId; //fsuId
     private boolean bindMark = false;
+    private boolean enableHeart = true; //默认上报心跳
 
     private String name;
     private String address;
 
+
+    public boolean isEnableHeart() {
+        return enableHeart;
+    }
+
+    public void setEnableHeart(boolean enableHeart) {
+        this.enableHeart = enableHeart;
+    }
 
     public String getName() {
         return name;

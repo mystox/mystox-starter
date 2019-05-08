@@ -22,6 +22,7 @@ public class PktType {
     public final static String DEL_DEVICE = "del_device";
     public final static String GET_ALARM_PARAM = "get_alarm_param";
     public final static String SET_ALARM_PARAM = "set_alarm_param"; //设置门限值
+    public final static String SET_THRESHOLD_TERMINAL = "set_threshold_terminal"; //设置终端门限值
     public final static String GET_ALARMS = "get_alarms";
     public final static String GET_STATION = "get_station";
     public final static String SET_STATION = "set_station"; //设置绑定

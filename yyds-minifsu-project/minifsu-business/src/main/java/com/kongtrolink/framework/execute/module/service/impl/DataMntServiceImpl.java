@@ -9,10 +9,8 @@ import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.ConfigDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.RunStateDao;
+import com.kongtrolink.framework.execute.module.model.*;
 import com.kongtrolink.framework.execute.module.model.Device;
-import com.kongtrolink.framework.execute.module.model.RunState;
-import com.kongtrolink.framework.execute.module.model.SignalModel;
-import com.kongtrolink.framework.execute.module.model.SignalType;
 import com.kongtrolink.framework.execute.module.service.DataMntService;
 import com.kongtrolink.framework.execute.module.service.LogService;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by mystoxlol on 2019/4/10, 18:57.
@@ -58,6 +54,7 @@ public class DataMntServiceImpl implements DataMntService {
     private ConfigDao configDao;
 
     private LogService logService;
+
     @Autowired
     public void setLogService(LogService logService) {
         this.logService = logService;
@@ -188,8 +185,7 @@ public class DataMntServiceImpl implements DataMntService {
             if (delay != null)
                 alarmSignalConfig.setDelay(delay);
             alarmId = alarmSignalConfig.getAlarmId();
-            //设置数据库值
-            configDao.saveAlarmSignalConfig(alarmSignalConfig);
+
         }
         //设置内存值
         JSONArray redisSignalObj = redisUtils.getHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSONArray.class);
@@ -202,14 +198,90 @@ public class DataMntServiceImpl implements DataMntService {
                     break;
                 }
             }
+            //推送门限值
+            Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap = new HashMap<>();
+            alarmConfigKeyMap.put(alarmConfigKey, alarmSignals);
+            JSONObject jsonObject = alarmConfigPush(msgId, sn, dev, alarmConfigKeyMap); //web/app设置门限值推送至终端
+            if (jsonObject != null) {
+                int rInt = jsonObject.getInteger("result");
+                if (rInt == 0) {
+                    logger.error("[{}] sn [{}]  push threshold to terminal error", msgId, sn);
+                    return jsonObject;
+                }
+            }
+            //设置数据库值
+            configDao.saveAlarmSignalConfig(alarmSignalConfig);
+            //设置内存值
             redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, alarmSignals);
+            return jsonObject;
         } else {
             logger.warn("[{}] sn [{}]  set threshold in redis is null ", msgId, sn);
         }
-
         result.put("result", 1);
         return result;
     }
+
+    /**
+     * 推送门限告警
+     *
+     * @param alarmConfigKeyMap 门限配置
+     */
+    public JSONObject alarmConfigPush(String msgId, String sn, String devId, Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap) {
+
+        logger.info("[{}] sn [{}] push alarmConfig(推送门限值) dev: [{}]", msgId, sn, devId);
+        JSONObject result = new JSONObject();
+        JSONObject payload = new JSONObject();
+        payload.put("SN", sn);
+        payload.put("dev", devId);
+        List<Map<String, Object>> pointThresholds = new ArrayList<>();
+        payload.put("points", pointThresholds);
+        //告警配置(门限)格式化
+        for (String alarmConfigKey : alarmConfigKeyMap.keySet()) {
+            //提取dev pointId(coId)
+            String[] keyArr = alarmConfigKey.split("_");
+            String coId = keyArr[2];
+            JSONObject pointThreshold = new JSONObject();
+            pointThresholds.add(pointThreshold);
+            pointThreshold.put("point", Integer.valueOf(coId));
+            List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
+            alarmSignalConfigs.forEach(alarmSignalConfig -> {
+                Integer coType = alarmSignalConfig.getCoType();
+                if (coType.equals(2)) return;
+                Double threshold = alarmSignalConfig.getThreshold();
+                Integer thresholdBase = alarmSignalConfig.getThresholdBase();
+                Integer thresholdFlag = alarmSignalConfig.getThresholdFlag();
+                int value = (int) (threshold * thresholdBase);
+                JSONArray thresholdArray = pointThreshold.getJSONArray(thresholdFlag + "");
+                if (thresholdArray == null) {
+                    thresholdArray = new JSONArray();
+                    pointThreshold.put(thresholdFlag + "", thresholdArray);
+                }
+                thresholdArray.add(Integer.toUnsignedLong(value));
+            });
+        }
+        ModuleMsg moduleMsg = new ModuleMsg(PktType.SET_THRESHOLD_TERMINAL, sn);
+        try {
+            //向终端推送门限报文
+            moduleMsg.setMsgId(msgId);
+            moduleMsg.setPayload(payload);
+            logger.info("[{}] sn [{}]  push threshold [{}] to terminal dev:[{}] data:[{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, devId, payload);
+            RpcNotifyProto.RpcMessage rpcMessage = rpcModule.postMsg(msgId,
+                    new InetSocketAddress(controllerHost, controllerPort),
+                    JSONObject.toJSONString(moduleMsg));
+            if (!RpcNotifyProto.MessageType.ERROR.equals(rpcMessage.getType())) {
+                String payload1 = rpcMessage.getPayload();
+                return JSONObject.parseObject(payload1);
+            }
+            result.put("result", 0);
+        } catch (IOException e) {
+            logger.error("[{}] sn [{}]  push threshold [{}] to terminal error [{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, e.toString());
+            //日志记录
+            saveLog(msgId, sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
+            result.put("result", 0);
+        }
+        return result;
+    }
+
 
     @Override
     public JSONArray getThreshold(ModuleMsg moduleMsg) {
@@ -218,9 +290,7 @@ public class DataMntServiceImpl implements DataMntService {
         Integer devType = (Integer) payload.get("type");
         Integer resNo = (Integer) payload.get("resNo");
         String port = (String) payload.get("port");
-
         String alarmDesc = payload.getString("alarmDesc");
-
         Device device = deviceDao.findDeviceByTypeResNoPort(sn, devType, resNo, port); //根据信号点的devType获取deviceId
         if (device == null) return new JSONArray();
         String coId = (String) payload.get("coId");
@@ -247,7 +317,7 @@ public class DataMntServiceImpl implements DataMntService {
         terminalPayload.put("steData", terminalData);
 
         try {
-            logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, terminalData);
+            logger.info("[{}] sn [{}]  set data [{}]to terminal [point:{},data:{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, coId, terminalPayload);
             // 向终端设置信号点值报文
             moduleMsg.setPktType(PktType.SET_DATA_TERMINAL);
             moduleMsg.setPayload(terminalPayload);
@@ -261,7 +331,7 @@ public class DataMntServiceImpl implements DataMntService {
         } catch (IOException e) {
             logger.error("[{}] sn [{}]  set data [{}]to terminal error [{}] ", msgId, sn, PktType.SET_DATA_TERMINAL, e.toString());
             //日志记录
-            saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
+            saveLog(msgId, sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
         }
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -300,7 +370,7 @@ public class DataMntServiceImpl implements DataMntService {
         } catch (IOException e) {
             logger.info("[{}] sn [{}] report data to thirdParty error [{}] ", msgId, sn, e.toString());
             //日志记录
-            saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
+            saveLog(msgId, sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
             e.printStackTrace();
         }
 
@@ -337,7 +407,7 @@ public class DataMntServiceImpl implements DataMntService {
                 } catch (IOException e) {
                     logger.info("[{}] sn [{}] run status data to thirdParty pktType[{}] error [{}] ", msgId, sn, PktType.DATA_STATUS, e.toString());
                     //日志记录
-                    saveLog(msgId,sn,moduleMsg.getPktType(),StateCode.CONNECT_ERROR);
+                    saveLog(msgId, sn, moduleMsg.getPktType(), StateCode.CONNECT_ERROR);
                     e.printStackTrace();
                 }
             });
@@ -345,7 +415,7 @@ public class DataMntServiceImpl implements DataMntService {
             return result;
         }
         //日志记录
-        saveLog(msgId,sn,moduleMsg.getPktType(),value != null ? StateCode.UNREGISTY : StateCode.CONNECT_ERROR);
+        saveLog(msgId, sn, moduleMsg.getPktType(), value != null ? StateCode.UNREGISTY : StateCode.CONNECT_ERROR);
         result.put("result", StateCode.UNREGISTY);
         return result;
     }

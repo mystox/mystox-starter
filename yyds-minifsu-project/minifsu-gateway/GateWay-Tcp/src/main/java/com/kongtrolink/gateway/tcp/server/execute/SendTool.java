@@ -55,6 +55,7 @@ public class SendTool {
             return result;
         } catch (IOException e)
         {
+            logger.error("rpc执行错误...");
             e.printStackTrace();
         }
         return null;
