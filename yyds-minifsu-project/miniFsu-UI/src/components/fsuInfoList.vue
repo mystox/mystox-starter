@@ -102,14 +102,14 @@
         userGroups: [],
         columns: [
           {
-            label: 'CPU 使用',
+            label: 'CPU使用(%)',
             value: 'cpuUse',
             width: 270,
             filter: 'nullFilter',
             className: '',
           },
           {
-            label: '内存使用',
+            label: '内存使用(%)',
             value: 'memUse',
             width: 270,
             filter: 'nullFilter',

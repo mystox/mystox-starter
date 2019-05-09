@@ -111,7 +111,7 @@
         userGroups: [],
         columns: [
           {
-            label: '流量大小',
+            label: '流量大小(B)',
             value: 'payloadSize',
             // width: 270,
             filter: 'nullFilter',
