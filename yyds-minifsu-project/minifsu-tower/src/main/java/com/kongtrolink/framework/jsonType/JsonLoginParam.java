@@ -20,6 +20,8 @@ public class JsonLoginParam {
     private int alarmReportLimit;
     //告警上报间隔(秒)
     private int alarmReportInterval;
+    //历史数据保存间隔(分钟)
+    private int dataSaveInterval = 30;
 
     public String getFsuId() {
         return fsuId;
@@ -75,5 +77,13 @@ public class JsonLoginParam {
 
     public void setAlarmReportInterval(int alarmReportInterval) {
         this.alarmReportInterval = alarmReportInterval;
+    }
+
+    public int getDataSaveInterval() {
+        return dataSaveInterval;
+    }
+
+    public void setDataSaveInterval(int dataSaveInterval) {
+        this.dataSaveInterval = dataSaveInterval;
     }
 }

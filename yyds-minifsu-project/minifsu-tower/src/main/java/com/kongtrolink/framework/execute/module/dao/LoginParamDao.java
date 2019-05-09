@@ -21,6 +21,11 @@ public class LoginParamDao {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    /**
+     * 获取指定FSU的注册参数信息
+     * @param fsuId fsuId
+     * @return 注册参数信息
+     */
     public JsonLoginParam getInfoByFsuId(String fsuId) {
         Criteria criteria = Criteria.where("fsuId").is(fsuId);
         return mongoTemplate.findOne(Query.query(criteria),
@@ -44,6 +49,7 @@ public class LoginParamDao {
         update.set("loginInterval", info.getLoginInterval());
         update.set("alarmReportLimit", info.getAlarmReportLimit());
         update.set("alarmReportInterval", info.getAlarmReportInterval());
+        update.set("dataSaveInterval", info.getDataSaveInterval());
 
         WriteResult writeResult = mongoTemplate.upsert(Query.query(criteria),
                 update, MongoDBTable.T_LOGIN_PARAM);

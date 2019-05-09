@@ -6,15 +6,16 @@ logging:
   pattern:
     console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
-
-mongodb:
-  uri: mongodb://172.16.6.9:27017/minifsu2_tower
+vpn:
+  osVersion: linux #vpn服务操作系统
+  agent: tower #vpn代理商
+  vpnList: QG7 #待检测的VPN名称列表，以‘,’分隔
 
 server:
-  name: minifsu-tower
+  name: minifsu-vpn
   bindIp: 172.16.6.20
   rpc:
-    port: 18881
+    port: 18890
 
 spring:
   redis:
@@ -38,27 +39,3 @@ executor:
   threadPool:
     corePoolSize: 10 #核心执行线程数
     maxPoolSize: 1000 #最大维护线程数
-rpc:
-  client:
-    timeout: 20000
-
-tower:
-  gateway: #铁塔WebService网关Ip地址端口号
-    hostname: 172.16.6.20
-    port: 18883
-  registry:
-    timeout: 600000 #终端在线超时时间(秒)
-  binding:
-    dictMode: 1 #信号量字典版本(枚举值，1：标准版，适用3/4G信号的基站；2：精减版，适用2G信号的基站，默认1)
-    disabled: false #是否解除绑定
-    disabledTime: 0 #解除绑定时间
-  loginParam:
-    heartbeatInterval: 60 #铁塔平台心跳周期(秒)
-    heartbeatTimeoutLimit: 5 #心跳超时次数上限
-    loginLimit: -1 #注册次数上限(未使用)
-    loginInterval: 120 #注册间隔(秒)
-    alarmReportLimit: 5 #单条告警上报次数上限
-    alarmReportInterval: 60 #告警上报间隔(秒)
-    dataSaveInterval: 30 #历史数据保存间隔(分钟)
-  login:
-    regMode: 2  #注册模式(枚举值，1：原有注册模块，2：新的注册械)，可为空，为空表示采用原有的注册模式 固定为2

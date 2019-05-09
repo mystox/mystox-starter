@@ -130,7 +130,7 @@ public class MinifsuControllerApplicationTests {
 //		redisUtils.hset("12", "24", "re");
 //		System.out.println(redisUtils.hHasKey("12", "23"));
 
-		Set<String> list = redisUtils.keys(RedisTable.DATA_HASH + "43048243800189:" + "*");
+		Set<String> list = redisUtils.keys(RedisTable.getDataKey("43048243800189:", "*"));
 		System.out.println(list);
 	}
 
@@ -333,10 +333,10 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	private static ModuleMsg createDataChangeRequest() {
-		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI201904180005");
+		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI201904260011");
 
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("SN", "MINI201904180005");
+		jsonObject.put("SN", "MINI201904260011");
 
 		List<JSONObject> list = new ArrayList<>();
 
