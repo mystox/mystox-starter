@@ -26,7 +26,7 @@ public class VpnMonitorTask {
     @Value("${vpn.agent}")
     private String agent;
 
-    @Value("#{'${vpn.vpnList}'.split(',')}")
+    @Value("#{'${vpn.vpnList}'.split(';')}")
     private List<String> vpnList;
 
     @Autowired
@@ -43,13 +43,14 @@ public class VpnMonitorTask {
 //        logger.info("start");
         String folder = "/var/run/";
         for (String vpn : vpnList) {
+            String[] vpnInfo = vpn.split(",");
 //            logger.info("check " + vpn);
             try {
-                String filePath = folder + "ppp-" + vpn + ".pid";
+                String filePath = folder + "ppp-" + vpnInfo[0] + ".pid";
                 File file = new File(filePath);
                 if (!file.exists()) {
 //                    logger.info(filePath + " not exist");
-                    exec(new String[] {"/bin/sh", "-c", "echo 'c " + vpn + "' > /var/run/xl2tpd/l2tp-control"});
+                    exec(new String[] {"/bin/sh", "-c", "echo 'c " + vpnInfo[0] + "' > /var/run/xl2tpd/l2tp-control"});
                 }
                 if (file.exists()) {
                     String content = readFile(filePath);
@@ -59,13 +60,14 @@ public class VpnMonitorTask {
                     String[] ipList = exec(new String[] {"/bin/bash", "-c", "ifconfig " + interfaceName + " | egrep \"((25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\\.){3}(25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\" -o"}).split("\n");
 //                    logger.info("ipList:" + JSONObject.toJSONString(ipList));
                     if (ipList.length == 3) {
-                        if (redisUtils.hHasKey("vpn_hash", vpn)) {
-                            if (redisUtils.hget("vpn_hash", vpn).toString().equals(ipList[0])) {
+                        if (redisUtils.hHasKey("vpn_hash", vpnInfo[0])) {
+                            if (redisUtils.hget("vpn_hash", vpnInfo[0]).toString().equals(ipList[0])) {
                                 return;
                             }
                         }
-                        redisUtils.hset("vpn_hash", vpn, ipList[0]);
-                        logger.info(vpn + " IP发生变化:" + ipList[0]);
+                        exec(new String[] { "route add -net " + vpnInfo[1] + " netmask " + vpnInfo[2] + " dev " + interfaceName });
+                        redisUtils.hset("vpn_hash", vpnInfo[0], ipList[0]);
+                        logger.info(vpnInfo[0] + " IP发生变化:" + ipList[0]);
                     }
                 }
             } catch (Exception ex) {
