@@ -1352,7 +1352,7 @@ public class TowerService {
         if (redisOnlineInfo == null) {
             return;
         }
-        RedisFsuBind redisFsuBind = getFsuBindInfo(redisOnlineInfo.getSn());
+        RedisFsuBind redisFsuBind = getFsuBindInfo(redisOnlineInfo.getFsuId());
         if (redisFsuBind == null) {
             return;
         }
@@ -1385,6 +1385,7 @@ public class TowerService {
                 if (redisData.getValues().containsKey(signal.getCntbId())) {
                     hisData.setValue(redisData.getValues().get(signal.getCntbId()).toString());
                 }
+                list.add(hisData);
             }
         }
         hisDataDao.insertList(list);

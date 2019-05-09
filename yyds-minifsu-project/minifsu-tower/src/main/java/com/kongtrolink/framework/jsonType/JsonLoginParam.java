@@ -21,7 +21,7 @@ public class JsonLoginParam {
     //告警上报间隔(秒)
     private int alarmReportInterval;
     //历史数据保存间隔(分钟)
-    private int dataSaveInterval;
+    private int dataSaveInterval = 30;
 
     public String getFsuId() {
         return fsuId;

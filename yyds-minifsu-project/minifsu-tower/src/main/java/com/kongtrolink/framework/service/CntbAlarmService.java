@@ -79,7 +79,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                     if (!checkReport(redisAlarm)) {
                         continue;
                     }
-                    logger.debug("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
 
                     redisAlarm.setReporting(true);
                     redisUtils.set(key, redisAlarm);
@@ -97,7 +97,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                     String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
                     redisAlarm.setReporting(false);
                     redisUtils.set(key, redisAlarm);
-                    logger.debug("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
                 }
             }
 
@@ -211,7 +211,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 redisAlarm.setReportCount(0);
                 if (!redisAlarm.isStartReported()) {
                     redisAlarm.setStartReported(true);
-                    logger.debug("-----------------------alarm success-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    logger.info("-----------------------alarm success-----------------------" + JSONObject.toJSONString(redisAlarm));
                 } else if (!redisAlarm.isEndReported()) {
                     redisAlarm.setEndReported(true);
                     redisUtils.del(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())));
@@ -223,7 +223,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 redisAlarm.setReportCount(redisAlarm.getReportCount() + 1);
             }
             redisUtils.set(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())), redisAlarm);
-            logger.debug("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
+            logger.info("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
         }
     }
 
