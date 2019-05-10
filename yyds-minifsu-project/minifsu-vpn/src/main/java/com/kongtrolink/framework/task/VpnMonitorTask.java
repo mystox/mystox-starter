@@ -65,7 +65,7 @@ public class VpnMonitorTask {
                                 return;
                             }
                         }
-                        exec(new String[] { "route add -net " + vpnInfo[1] + " netmask " + vpnInfo[2] + " dev " + interfaceName });
+                        exec(new String[] { "/bin/sh", "-c", "route add -net " + vpnInfo[1] + " netmask " + vpnInfo[2] + " dev " + interfaceName });
                         redisUtils.hset("vpn_hash", vpnInfo[0], ipList[0]);
                         logger.info(vpnInfo[0] + " IP发生变化:" + ipList[0]);
                     }
