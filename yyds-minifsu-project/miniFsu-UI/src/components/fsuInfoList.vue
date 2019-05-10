@@ -116,6 +116,13 @@
             className: '',
           },
           {
+            label: '信号强度(db)',
+            value: 'csq',
+            width: 270,
+            filter: 'nullFilter',
+            className: '',
+          },
+          {
             label: '时间',
             value: 'createTime',
             width: 270,
