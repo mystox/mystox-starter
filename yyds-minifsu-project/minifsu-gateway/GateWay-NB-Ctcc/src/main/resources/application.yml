@@ -7,7 +7,9 @@ nbIot:
   packageTime:  60
   outIp: 112.17.133.189 #对外的IP 接收电信推送用
   outPort: 17702
-
+management:
+  security:
+    enabled: false
 server:
   name: GateWay-NB-Ctcc
   bindIp: 172.16.6.39

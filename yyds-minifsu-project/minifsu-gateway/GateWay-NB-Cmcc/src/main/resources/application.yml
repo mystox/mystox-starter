@@ -11,7 +11,9 @@ server:
     port: 18882
     timeout: 6000
   port: 17700
-
+management:
+  security:
+    enabled: false
 rpc:
   client:
     timeout: 20000

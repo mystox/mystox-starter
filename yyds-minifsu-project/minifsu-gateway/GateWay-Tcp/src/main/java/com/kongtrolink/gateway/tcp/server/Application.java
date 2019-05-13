@@ -17,9 +17,11 @@ import io.netty.handler.logging.LoggingHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -35,6 +37,7 @@ import java.util.Set;
  */
 @SpringBootApplication(scanBasePackages = "com.kongtrolink")
 @ComponentScan(value = "com.kongtrolink")
+@EnableAutoConfiguration
 public class Application{
 
 	public static void main(String[] args) throws Exception {

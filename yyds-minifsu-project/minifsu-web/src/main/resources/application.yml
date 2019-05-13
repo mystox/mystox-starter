@@ -16,4 +16,7 @@ logging:
 #    location: classpath:/,classpath:/config
 server:
   port: 8081
+management:
+  security:
+    enabled: false
 

@@ -252,7 +252,7 @@ public class MinifsuControllerApplicationTests {
 
 //		ModuleMsg msg = createAlarmRequest();
 
-		for (int i = 0; i < 300; ++i) {
+		for (int i = 0; i < 1; ++i) {
 			try {
 				response = sendMSG(rpcModuleBase, msg);
 //				Thread.sleep(1);
@@ -452,7 +452,7 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	static RpcNotifyProto.RpcMessage sendMSG(RpcModuleBase rpcModuleBase, ModuleMsg msg) {
-		String ip = "172.16.6.20";
+		String ip = "172.16.6.50";
 		int port = 18881;
 		RpcNotifyProto.RpcMessage response = null;
 		try {

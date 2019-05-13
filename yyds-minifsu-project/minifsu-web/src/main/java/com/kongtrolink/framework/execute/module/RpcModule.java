@@ -9,6 +9,7 @@ import com.kongtrolink.framework.core.service.ModuleInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
@@ -20,6 +21,7 @@ import java.net.InetSocketAddress;
  * update record:
  */
 @Service
+@RefreshScope
 public class RpcModule extends RpcModuleBase implements ModuleInterface
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
