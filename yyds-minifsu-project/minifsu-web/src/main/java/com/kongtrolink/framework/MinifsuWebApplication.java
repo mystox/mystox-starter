@@ -10,8 +10,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
-public class MinifsuWebApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(MinifsuWebApplication.class, args);
-    }
+public class MinifsuWebApplication
+{
+	public static void main(String[] args) {
+		SpringApplication.run(MinifsuWebApplication.class, args);
+	}
 }

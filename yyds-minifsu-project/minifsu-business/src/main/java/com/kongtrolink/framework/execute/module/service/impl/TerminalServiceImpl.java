@@ -25,7 +25,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mystoxlol on 2019/3/25, 10:34.
@@ -73,26 +72,6 @@ public class TerminalServiceImpl implements TerminalService {
         this.redisUtils = redisUtils;
     }
 
-    @Override
-    public JSONObject setFsu(Map<String, Object> requestBody) {
-        return null;
-    }
-
-    @Override
-    public Fsu getFsu(ModuleMsg requestBody) {
-        return null;
-    }
-
-
-    @Override
-    public JSONObject upgrade(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
-
-    @Override
-    public JSONObject compiler(Map<String, Object> requestBody) {
-        return null;
-    }
 
     @Override
     public JSONArray getDeviceList(ModuleMsg moduleMsg) {
@@ -105,21 +84,6 @@ public class TerminalServiceImpl implements TerminalService {
         return (JSONArray) JSONObject.toJSON(devicesBySn);
     }
 
-
-    @Override
-    public JSONObject deleteDevice(Map<String, Object> requestBody) {
-        return null;
-    }
-
-    @Override
-    public JSONObject addDevice(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
-
-    @Override
-    public List<Fsu> getFsuListByCoordinate(Map fsuMap) {
-        return null;
-    }
 
     @Override
     public JSONObject listFsu(ModuleMsg requestBody) {
@@ -153,35 +117,6 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
 
-    @Override
-    public List<Fsu> searchFsu(Map<String, Object> requestBody) {
-        return null;
-    }
-
-    @Override
-    public JSONObject getFsuStatus(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
-
-    @Override
-    public List<OperatHistory> getOperationHistory(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Integer> getFsuDeviceCountMap(List<String> fsuIds) {
-        return null;
-    }
-
-    @Override
-    public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
-
-    @Override
-    public JSONObject logoutFsu(Map<String, Object> requestBody, String fsuId) {
-        return null;
-    }
 
     @Override
     public JSONObject saveTerminal(ModuleMsg moduleMsg) {
