@@ -33,30 +33,30 @@ public class DeviceMatchService {
      * @param cntbList 当前需要进行匹配的铁塔设备ID列表
      * @param curList 当前已知内部设备列表
      */
-    public void matchingDevice(List<JsonDevice> cntbList, List<JsonDevice> curList) {
+    void matchingDevice(List<JsonDevice> cntbList, List<JsonDevice> curList) {
 
         clearMatch(cntbList);
         sortCntbDevList(cntbList);
-        sortDevList(curList);
 
         if (curList == null || curList.size() == 0) {
             return;
         }
 
+        sortDevList(curList);
+
         //todo 遍历curList，在cntbList中查找对应的铁塔设备ID，并将信息填入cntbList中
-        for (int i = 0; i < curList.size(); ++i) {
-            String cntbType = getCntbType(curList.get(i).getType());
+        for (JsonDevice curDevice : curList) {
+            String cntbType = getCntbType(curDevice.getType());
             if (cntbType == null) {
                 //获取不到铁塔设备类型，跳过
                 continue;
             }
-            for (int j = 0; j < cntbList.size(); ++j) {
-                JsonDevice jsonDevice = cntbList.get(j);
+            for (JsonDevice jsonDevice : cntbList) {
                 if (jsonDevice.getDeviceId().indexOf(cntbType) == CNTB_TYPE_START_INDEX &&
                         jsonDevice.getPort() == null) {
-                    jsonDevice.setPort(curList.get(i).getPort());
-                    jsonDevice.setType(curList.get(i).getType());
-                    jsonDevice.setResNo(curList.get(i).getResNo());
+                    jsonDevice.setPort(curDevice.getPort());
+                    jsonDevice.setType(curDevice.getType());
+                    jsonDevice.setResNo(curDevice.getResNo());
                     break;
                 }
             }
@@ -97,7 +97,7 @@ public class DeviceMatchService {
      * @param devList 设备列表
      */
     private void sortCntbDevList(List<JsonDevice> devList) {
-        Collections.sort(devList, (arg0, arg1) -> {
+        devList.sort((arg0, arg1) -> {
             String type0 = getCntbType(arg0.getDeviceId());
             String no0 = arg0.getDeviceId().substring(CNTB_TYPE_END_INDEX, CNTB_DEVICE_ID_LENGTH);
 
@@ -117,7 +117,7 @@ public class DeviceMatchService {
      * @param deviceId 铁塔设备Id
      * @return 设备类型
      */
-    public String getCntbType(String deviceId) {
+    String getCntbType(String deviceId) {
         String result = deviceId.substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
         if (result.equals("18")) {
             //若为18，则是环境变量，需再取一位作为设备类型
@@ -131,10 +131,10 @@ public class DeviceMatchService {
      * @param devList 待清除列表
      */
     private void clearMatch(List<JsonDevice> devList) {
-        for (int i = 0; i < devList.size(); ++i) {
-            devList.get(i).setPort(null);
-            devList.get(i).setType(-1);
-            devList.get(i).setResNo(-1);
+        for (JsonDevice jsonDevice : devList) {
+            jsonDevice.setPort(null);
+            jsonDevice.setType(-1);
+            jsonDevice.setResNo(-1);
         }
     }
 
@@ -143,11 +143,11 @@ public class DeviceMatchService {
      * @param devList 设备列表
      */
     private void sortDevList(List<JsonDevice> devList) {
-        Collections.sort(devList, (arg0, arg1) -> {
+        devList.sort((arg0, arg1) -> {
             if (arg0.getType() == arg1.getType()) {
-                return Integer.valueOf(arg0.getResNo()).compareTo((Integer.valueOf(arg1.getResNo())));
+                return Integer.compare(arg0.getResNo(), arg1.getResNo());
             } else {
-                return Integer.valueOf(arg0.getType()).compareTo(Integer.valueOf(arg1.getType()));
+                return Integer.compare(arg0.getType(), arg1.getType());
             }
         });
     }

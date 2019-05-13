@@ -75,30 +75,34 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                     break;
                 case PktType.FSU_BIND:
                     result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
-                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     break;
                 case PktType.TERMINAL_UNBIND:
-                    result = towerService.fsuUnbind(moduleMsg.getSN(), infoPayload);
+                    result = towerService.fsuUnbind(moduleMsg.getSN());
                     break;
                 case PktType.DATA_CHANGE:
                 case PktType.DATA_REPORT:
-                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     towerService.checkAlarm(moduleMsg.getSN());
                     result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
+                    towerService.saveHisData(moduleMsg.getSN());
                     break;
                 case PktType.DATA_STATUS:
-                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     towerService.checkAlarm(moduleMsg.getSN());
                     result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
+                    towerService.saveHisData(moduleMsg.getSN());
                     break;
                 case PktType.ALARM_REGISTER:
-                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
                     towerService.checkAlarm(moduleMsg.getSN());
+                    towerService.saveHisData(moduleMsg.getSN());
                     break;
                 default:
-                    towerService.checkOnline(moduleMsg.getSN(), infoPayload);
+                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     towerService.checkAlarm(moduleMsg.getSN());
+                    towerService.saveHisData(moduleMsg.getSN());
                     result = true;
                     break;
             }
@@ -135,7 +139,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             if (type.equals(CntbPktTypeTable.GET_FSUINFO) && code == CntbPktTypeTable.GET_FSUINFO_CODE) {
                 result = towerService.cntbGetFsuInfo(request);
             } else if (type.equals(CntbPktTypeTable.TIME_CHECK) && code == CntbPktTypeTable.TIME_CHECK_CODE) {
-                result = towerService.cntbTimeCheck(request);
+                result = towerService.cntbTimeCheck();
             } else if (type.equals(CntbPktTypeTable.GET_DATA) && code == CntbPktTypeTable.GET_DATA_CODE) {
                 result = towerService.cntbGetData(request);
             } else if (type.equals(CntbPktTypeTable.SET_POINT) && code == CntbPktTypeTable.SET_POINT_CODE) {
@@ -145,11 +149,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             } else if (type.equals(CntbPktTypeTable.SET_THRESHOLD) && code == CntbPktTypeTable.SET_THRESHOLD_CODE) {
                 result = towerService.cntbSetThreshold(request);
             }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
         return result;

@@ -2,19 +2,20 @@ package com.kongtrolink.framework.entity;
 
 public class RedisTable {
     public final static String CNTBTYPE_TYPE_HASH = "cntbType_type_hash";
-    public final static String CNTBTYPE_SIGNAL_HASH = "cntbType_signal_hash:";
-    public final static String CNTBTYPE_ALARM_HASH = "cntbType_alarm_hash:";
-    public final static String TERMINAL_HASH = "terminal_hash:";
-    public final static String FSU_BIND_HASH = "fsu_bind_hash:";
+    private final static String CNTBTYPE_SIGNAL_HASH = "cntbType_signal_hash:";
+    private final static String CNTBTYPE_ALARM_HASH = "cntbType_alarm_hash:";
+    private final static String TERMINAL_HASH = "terminal_hash:";
+    private final static String FSU_BIND_HASH = "fsu_bind_hash:";
     public final static String VPN_HASH = "vpn_hash";
     public final static String CARRIER_HASH = "carrier_hash";
-    public final static String DATA_HASH = "data_hash:";
-    public final static String ALARM_HASH = "alarm_hash:";
+    private final static String DATA_HASH = "data_hash:";
+    private final static String ALARM_HASH = "alarm_hash:";
+    private final static String HIS_DATA_HASH = "his_data:";
 
     /**
      * 获取redis中注册记录的key值
      * @param sn sn
-     * @return
+     * @return 注册记录key
      */
     public static String getRegistryKey(String sn) {
         return RedisTable.TERMINAL_HASH + sn;
@@ -60,12 +61,21 @@ public class RedisTable {
     }
 
     /**
-     * 获取活动告警key
+     * 获取redis中活动告警key
      * @param fsuId fsuId
      * @param serialNo 告警序列号
      * @return 活动告警key
      */
     public static String getAlarmKey(String fsuId, String serialNo) {
         return RedisTable.ALARM_HASH + fsuId + ":" + serialNo;
+    }
+
+    /**
+     * 获取redis中历史数据保存信息的key
+     * @param fsuId fsuId
+     * @return 历史数据保存信息key
+     */
+    public static String getHisDataKey(String fsuId) {
+        return RedisTable.HIS_DATA_HASH + fsuId;
     }
 }
