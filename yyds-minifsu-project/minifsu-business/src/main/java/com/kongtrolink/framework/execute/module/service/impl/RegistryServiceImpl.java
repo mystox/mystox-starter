@@ -247,7 +247,6 @@ public class RegistryServiceImpl implements RegistryService {
                         && deviceResNo.equals(newDevice.getResNo())) { //存在对应类型设置有效
                     device.setInvalidTime(new Date(0L));
                     newDevice.setInvalidTime(new Date(0L));
-                    break;
                 }
             }
             deviceDao.save(device);
