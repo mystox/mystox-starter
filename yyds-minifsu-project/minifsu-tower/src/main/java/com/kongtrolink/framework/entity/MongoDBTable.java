@@ -11,4 +11,5 @@ public class MongoDBTable {
     public final static String T_CARRIER = "t_carrier";
     public final static String T_ALARM_LOG = "t_alarm_log";
     public final static String T_HIS_DATA = "t_his_data";
+    public final static String T_LOG = "t_log";
 }
