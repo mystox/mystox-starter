@@ -639,24 +639,28 @@ public class TowerService {
 
         JsonStation jsonStation = stationDao.getInfoBySn(sn);
 
-        String fsuId = jsonStation.getFsuId();
+        if (jsonStation != null) {
+            String fsuId = jsonStation.getFsuId();
 
-        String key = RedisTable.getRegistryKey(sn);
-        if (redisUtils.hasKey(key)) {
-            redisUtils.del(key);
-        }
-        if (redisUtils.hasKey(RedisTable.getFsuBindKey(fsuId))) {
-            redisUtils.del(RedisTable.getFsuBindKey(fsuId));
-        }
-        if (redisUtils.hasKey(RedisTable.getHisDataKey(fsuId))) {
-            redisUtils.del(RedisTable.getHisDataKey(fsuId));
-        }
-        Set<String> list = redisUtils.keys(RedisTable.getDataKey(fsuId, "*"));
-        for (String dataKey : list) {
-            redisUtils.del(dataKey);
-        }
+            String key = RedisTable.getRegistryKey(sn);
+            if (redisUtils.hasKey(key)) {
+                redisUtils.del(key);
+            }
+            if (redisUtils.hasKey(RedisTable.getFsuBindKey(fsuId))) {
+                redisUtils.del(RedisTable.getFsuBindKey(fsuId));
+            }
+            if (redisUtils.hasKey(RedisTable.getHisDataKey(fsuId))) {
+                redisUtils.del(RedisTable.getHisDataKey(fsuId));
+            }
+            Set<String> list = redisUtils.keys(RedisTable.getDataKey(fsuId, "*"));
+            for (String dataKey : list) {
+                redisUtils.del(dataKey);
+            }
 
-        result = stationDao.unbindByFsuIdAndSn(sn, fsuId);
+            result = stationDao.unbindByFsuIdAndSn(sn, fsuId);
+        } else {
+            result = true;
+        }
 
         return result;
     }
