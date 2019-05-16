@@ -97,6 +97,7 @@ public class CntbLoginService {
                 login(redisOnlineInfo, info);
             }
         } catch (Exception e) {
+            saveLog("", sn, CntbPktTypeTable.LOGIN, StateCode.FAILED);
             logger.error("注册过程中出现异常:" + JSONObject.toJSONString(e));
         } finally {
             redisOnlineInfo = redisUtils.get(key, RedisOnlineInfo.class);

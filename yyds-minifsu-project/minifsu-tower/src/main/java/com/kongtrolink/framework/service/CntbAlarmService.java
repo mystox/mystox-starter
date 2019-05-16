@@ -118,6 +118,7 @@ public class CntbAlarmService {
                 }
             }
         } catch (Exception e) {
+            saveLog("", sn, PktType.ALARM_REGISTER, StateCode.FAILED);
             logger.error("上报告警过程中出现异常:" + JSONObject.toJSONString(e));
         }
     }
