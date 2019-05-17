@@ -14,7 +14,7 @@
         </el-form>
       </div>
       <div slot="operate">
-        <el-button type="primary" @click="getFsuList">查询</el-button>
+        <el-button type="primary" @click="goSearch">查询</el-button>
       </div>
     </operation-bar-layout>
     <table-box
@@ -98,13 +98,14 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="选择升级文件" prop="documentObj" v-show="typeList.length != 0">
+        <!-- <el-form-item label="选择升级文件" prop="documentObj" v-show="typeList.length != 0">
           <el-select v-model="upgradeParam.documentObj" auto-complete="off" style="width:200px;" :disabled="!upgradeParam.type">
             <el-option v-for="(item, index) in documentList" :label="item.label" :value="item" :key="index">
             </el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="后端编译" v-show="upgradeParam.type && (upgradeParam.documentObj && upgradeParam.documentObj.name) && typeList.length != 0">
+        </el-form-item> -->
+        <!-- <el-form-item label="后端编译" v-show="upgradeParam.type && (upgradeParam.documentObj && upgradeParam.documentObj.name) && typeList.length != 0"> -->
+        <el-form-item label="后端编译" v-show="upgradeParam.type && typeList.length != 0">
           <el-button @click="compiler" type="primary"> 编译 </el-button>
         </el-form-item>
         <el-form-item label="引擎编译结果" v-if="compilerInfo.engine">
@@ -268,12 +269,18 @@
         this.pagination.total = this.fsuList.length;
       },
 
+      // 查询 查询页码需要重置为第一页。
+      goSearch() {
+        this.pagination.currentPage = 1;
+        this.getFsuList();
+      },
+
       // 获取FSU（sn）列表
       getFsuList() {
         let param = {
           sn: this.searcher.sn,
-          page: this.pagination.currentPage ,
-          count: this.pagination.pageSize ,
+          page: this.pagination.currentPage,
+          count: this.pagination.pageSize,
         };
         this.$api.getFsuList(param).then((res) => {
           if (!res.data) return;
@@ -311,15 +318,15 @@
 
       // 点击编译
       compiler() {
-        let name = this.upgradeParam.documentObj.name;
-        let url = this.upgradeParam.documentObj.url;
+        // let name = this.upgradeParam.documentObj.name;
+        // let url = this.upgradeParam.documentObj.url;
         // let host = 'http://172.16.6.39:8081/'
-        let host = 'http://' + window.location.host + '/';
+        // let host = 'http://' + window.location.host + '/';
         let param = {
-          "url": host + url,
-          "name": name,
+          // "url": host + url,
+          // "name": name,
           "type": this.upgradeParam.type,
-          "md5": 'sdfwefwefwef',
+          // "md5": 'sdfwefwefwef',
         }
         this.$api.compiler(param, this.modifyCont.sN).then((res=> {
           if (res.data.result === 1) {
