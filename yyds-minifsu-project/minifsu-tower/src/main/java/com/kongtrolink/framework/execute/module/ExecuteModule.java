@@ -1,18 +1,22 @@
 package com.kongtrolink.framework.execute.module;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.Log;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.StateCode;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
+import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.service.TowerService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -21,6 +25,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
@@ -39,6 +44,14 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
 
     @Autowired
     private TowerService towerService;
+
+    @Autowired
+    LogDao logDao;
+
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.name}")
+    private String name;
 
     @Override
     public boolean init()
@@ -107,6 +120,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                     break;
             }
         } catch (Exception e) {
+            saveLog(moduleMsg.getMsgId(), moduleMsg.getSN(), moduleMsg.getPktType(), StateCode.FAILED);
             logger.error("处理请求异常：PktType:" + moduleMsg.getPktType() + ",payload:" +
                     moduleMsg.getPayload() + ",Exception:" + JSONObject.toJSONString(e));
         }
@@ -153,5 +167,19 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
             e.printStackTrace();
         }
         return result;
+    }
+
+    /**
+     * 保存日志
+     * @param msgId
+     * @param sn
+     * @param msgType
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+        Log log = new Log(new Date(System.currentTimeMillis()),
+                stateCode,
+                sn, msgType, msgId, name, host);
+        logDao.save(log);
     }
 }

@@ -2,10 +2,11 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.config.rpc.RpcClient;
+import com.kongtrolink.framework.core.entity.Log;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
+import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.StateCode;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
-import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.RedisTable;
@@ -14,10 +15,14 @@ import com.kongtrolink.framework.entity.xml.msg.*;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.AlarmLogDao;
+import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.model.RedisAlarm;
 import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -27,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -35,31 +41,35 @@ import java.util.Set;
  * 铁塔上报告警服务
  * 新建文件 2019-4-22 15:53:02
  */
-public class CntbAlarmService extends RpcModuleBase implements Runnable {
+@Service
+public class CntbAlarmService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private RedisOnlineInfo redisOnlineInfo;
-    private String hostname;
-    private int port;
-    private RpcModule rpcModule;
-    private RedisUtils redisUtils;
-    private AlarmLogDao alarmLogDao;
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.name}")
+    private String name;
 
-    CntbAlarmService(String sn, String hostname, int port,
-                     RpcModule rpcModule, RedisUtils redisUtils, RpcClient rpcClient,
-                     AlarmLogDao alarmLogDao) {
-        super(rpcClient);
-        this.redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(sn), RedisOnlineInfo.class);
-        this.hostname = hostname;
-        this.port = port;
-        this.rpcModule = rpcModule;
-        this.redisUtils = redisUtils;
-        this.alarmLogDao = alarmLogDao;
-    }
+    @Autowired
+    RpcModule rpcModule;
+    @Autowired
+    RedisUtils redisUtils;
+    @Autowired
+    AlarmLogDao alarmLogDao;
+    @Autowired
+    LogDao logDao;
+    @Value("${tower.gateway.hostname}")
+    private String towerGatewayHostname;
+    @Value("${tower.gateway.port}")
+    private int towerGatewayPort;
 
-    @Override
-    public void run() {
+    /**
+     * 开始告警
+     * @param sn sn
+     */
+    public void startAlarm(String sn) {
+        RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(sn), RedisOnlineInfo.class);
         try {
             if (redisOnlineInfo == null || !redisOnlineInfo.isOnline()) {
                 //未获取到redis中在线信息或铁塔平台离线，不上报告警
@@ -76,7 +86,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 for (String key : list) {
                     RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
 
-                    if (!checkReport(redisAlarm)) {
+                    if (!checkReport(redisOnlineInfo, redisAlarm)) {
                         continue;
                     }
                     logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
@@ -91,7 +101,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                     return;
                 }
 
-                sendAlarm(redisAlarmList);
+                sendAlarm(redisOnlineInfo, redisAlarmList);
             } finally {
                 for (RedisAlarm redisAlarm : redisAlarmList) {
                     String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
@@ -101,24 +111,25 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 }
             }
 
-
             for (RedisAlarm redisAlarm : redisAlarmList) {
                 if (!alarmLogDao.upsert(redisAlarm)) {
-                    //todo 日志记录错误信息
+                    saveLog("", "", PktType.ALARM_REGISTER, StateCode.MONGO_ERROR);
                     logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
                 }
             }
         } catch (Exception e) {
+            saveLog("", sn, PktType.ALARM_REGISTER, StateCode.FAILED);
             logger.error("上报告警过程中出现异常:" + JSONObject.toJSONString(e));
         }
     }
 
     /**
      * 检查告警是否可上报
+     * @param redisOnlineInfo redis中在线信息
      * @param redisAlarm 告警信息
      * @return 是否上报
      */
-    private boolean checkReport(RedisAlarm redisAlarm) {
+    private boolean checkReport(RedisOnlineInfo redisOnlineInfo, RedisAlarm redisAlarm) {
         if (redisAlarm.isReporting()) {
             //当前告警正在上报
             return false;
@@ -146,9 +157,10 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
 
     /**
      * 向铁塔平台发送告警
+     * @param redisOnlineInfo redis中在线信息
      * @param redisAlarmList 告警信息
      */
-    private void sendAlarm(List<RedisAlarm> redisAlarmList) {
+    private void sendAlarm(RedisOnlineInfo redisOnlineInfo, List<RedisAlarm> redisAlarmList) {
 
         List<TAlarm> tAlarmList = new ArrayList<>();
         for (RedisAlarm redisAlarm : redisAlarmList) {
@@ -183,14 +195,14 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             return;
         }
 
-        InetSocketAddress addr = new InetSocketAddress(hostname, port);
+        InetSocketAddress addr = new InetSocketAddress(towerGatewayHostname, towerGatewayPort);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("ip", redisOnlineInfo.getAlarmIp());
         jsonObject.put("port", 8080);
         jsonObject.put("msg", reqXmlMsg);
 
-        String request = createRequestMsg(jsonObject);
+        ModuleMsg request = createRequestMsg(jsonObject);
 
         JSONObject jsonResponse = postMsg(request, addr);
 
@@ -239,6 +251,7 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
             Message message = new Message(sendAlarm);
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
+            saveLog("", "", CntbPktTypeTable.SEND_ALARM, StateCode.XML_ILLEGAL);
             logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(sendAlarm));
         }
 
@@ -250,10 +263,10 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
      * @param payload 发送信息
      * @return 字符串报文
      */
-    private String createRequestMsg(JSONObject payload){
+    private ModuleMsg createRequestMsg(JSONObject payload){
         ModuleMsg moduleMsg = new ModuleMsg(CntbPktTypeTable.SERVICE_GW);
         moduleMsg.setPayload(payload);
-        return JSON.toJSONString(moduleMsg);
+        return moduleMsg;
     }
 
     /**
@@ -262,15 +275,16 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
      * @param addr 请求地址
      * @return 回复信息
      */
-    private JSONObject postMsg(String request, InetSocketAddress addr) {
+    private JSONObject postMsg(ModuleMsg request, InetSocketAddress addr) {
         JSONObject result = null;
 
         RpcNotifyProto.RpcMessage rpcMessage = null;
         try {
-            rpcMessage = rpcModule.postMsg("", addr, request);
+            rpcMessage = rpcModule.postMsg("", addr, JSONObject.toJSONString(request));
             String response = rpcMessage.getPayload();
             result = JSONObject.parseObject(response);
         } catch (IOException e) {
+            saveLog(request.getMsgId(), request.getSN(), request.getPktType(), StateCode.CONNECT_ERROR);
             logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + addr.getHostName() + ",port:" + addr.getPort() + ",msg:" + request);
         }
 
@@ -296,11 +310,27 @@ public class CntbAlarmService extends RpcModuleBase implements Runnable {
                 result = (SendAlarmAck)MessageUtil.stringToMessage(reqInfoStr, SendAlarmAck.class);
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
+            saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
             logger.error("AnalyzeXmlMsg: String转Document失败,xml:" + xml);
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
             logger.error("GetXmlMsg: String转实体类失败,xml" + xml);
         }
 
         return result;
+    }
+
+    /**
+     * 保存日志
+     * @param msgId
+     * @param sn
+     * @param msgType
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+        Log log = new Log(new Date(System.currentTimeMillis()),
+                stateCode,
+                sn, msgType, msgId, name, host);
+        logDao.save(log);
     }
 }

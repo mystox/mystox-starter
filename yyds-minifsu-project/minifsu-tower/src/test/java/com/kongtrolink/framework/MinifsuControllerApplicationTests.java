@@ -252,7 +252,7 @@ public class MinifsuControllerApplicationTests {
 
 //		ModuleMsg msg = createAlarmRequest();
 
-		for (int i = 0; i < 300; ++i) {
+		for (int i = 0; i < 1; ++i) {
 			try {
 				response = sendMSG(rpcModuleBase, msg);
 //				Thread.sleep(1);
