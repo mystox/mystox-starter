@@ -640,4 +640,10 @@ public class RedisUtils
         }
         return result;
     }
+
+    public <T> List hashMultiGet(String hashTable, List<String> keys, Class<T> clazz) {
+        List list = redisTemplate.opsForHash().multiGet(hashTable, keys);
+
+        return (List<T>) list;
+    }
 }

@@ -9,6 +9,8 @@ import com.kongtrolink.framework.util.ExcelUtil;
 import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,7 @@ import java.util.Set;
 @RequestMapping("/fsu")
 public class FSUController {
 
+    Logger logger = LoggerFactory.getLogger(FSUController.class);
     private FsuService fsuService;
 
 
@@ -150,25 +153,6 @@ public class FSUController {
 
         JSONArray result = fsuService.getDeviceList(requestBody, sn);
         if (result != null) {
-            /*Map<String, String> dStationMap = ControllerInstance.getInstance().getdStationMap();
-            Map<String, String> roomStationMap = ControllerInstance.getInstance().getRoomStationMap();*/
-//            JSONArray data = (JSONArray) result.get("data");
-          /*  JSONArray devices = (JSONArray) data.get("devices");
-            for (Object object : devices)
-            {
-                JSONObject device = (JSONObject) object;
-                String code = (String) device.get("code");
-                String sCode = StringUtils.substring(code, 6, 9);
-                if ("418".equals(sCode))
-                {
-                    String room_code = StringUtils.substring(code, 7, 10);
-                    device.put("name", roomStationMap.get(room_code));
-                } else
-                {
-                    String name = dStationMap.get(sCode);
-                    device.put("name", StringUtils.isBlank(name) ? "未知设备" : name);
-                }
-            }*/
             return new JsonResult(result);
         } else return new JsonResult("请求错误或者超时", false);
     }
@@ -361,5 +345,11 @@ public class FSUController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        logger.info("sendRedirect:{}",url);
+    }
+    @RequestMapping(value = "/remoteCompilerFileDowna")
+    public void remoteCompilerFileDowna(@RequestBody JSONObject body, HttpServletResponse response,HttpServletRequest request) {
+        String url = body.getString("url");
+        logger.info("forward:{}",url);
     }
 }

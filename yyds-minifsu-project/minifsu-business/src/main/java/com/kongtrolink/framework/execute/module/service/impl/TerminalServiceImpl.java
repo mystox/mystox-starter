@@ -303,9 +303,18 @@ public class TerminalServiceImpl implements TerminalService {
             TerminalProperties terminalPropertiesByTerminalId = terminalDao.findTerminalPropertiesByTerminalId(terminalBySn.getId());
             adapterVer = terminalPropertiesByTerminalId.getAdapterVer();
         }
-        Integer businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
-        Integer productId = compilerDao.getProductId(sn.substring(0, 6));
         JSONObject result = new JSONObject();
+        Integer businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
+        if (businessSceneId == null){
+            result.put("result", 0);
+            return result;
+        }
+        Integer productId = compilerDao.getProductId(sn.substring(0, 6));
+        if (productId == null)
+        {
+            result.put("result", 0);
+            return result;
+        }
         result.put("businessSceneId", businessSceneId);
         result.put("productId", productId);
         result.put("fileVersionId", fileVersionId);

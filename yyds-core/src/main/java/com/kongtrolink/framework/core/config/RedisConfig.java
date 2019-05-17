@@ -63,7 +63,6 @@ public class RedisConfig
             factory.setHostName(this.properties.getHost());
             factory.setPort(this.properties.getPort());
             factory.setDatabase(this.properties.getDatabase());
-            factory.setUsePool(true);
             if (this.properties.getPassword() != null)
             {
                 factory.setPassword(this.properties.getPassword());
@@ -122,9 +121,6 @@ public class RedisConfig
         config.setMaxIdle(props.getMaxIdle());
         config.setMinIdle(props.getMinIdle());
         config.setMaxWaitMillis(props.getMaxWait());
-        config.setMinEvictableIdleTimeMillis(1000);
-        config.setNumTestsPerEvictionRun(1000);
-        config.setMinEvictableIdleTimeMillis(1000);
         return config;
     }
 

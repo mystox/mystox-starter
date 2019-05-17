@@ -222,7 +222,7 @@ public class FsuServiceImpl implements FsuService {
         JSONObject result = new JSONObject();
         String body = forEntity.getBody();
         JSONObject compilerDeviceInfo = JSON.parseObject(body);
-        if (compilerConfig != null) {
+        if (compilerConfig.getInteger("result") ==null || compilerConfig.getInteger("result") != 0) {
             Integer fileVersionId = compilerConfig.getInteger("fileVersionId");
             Integer businessSceneId = compilerConfig.getInteger("businessSceneId");
             Integer productId = compilerConfig.getInteger("productId");
@@ -232,15 +232,15 @@ public class FsuServiceImpl implements FsuService {
             JSONArray deviceInfoXlsList = compilerDeviceInfo.getJSONObject("DeviceInfoXlsHelperDic").
                     getJSONObject(fileVersionId + "").getJSONObject(businessSceneId + "").getJSONObject(productId + "")
                     .getJSONArray("DeviceInfoXlsList");
-            compilerDeviceInfo.put("DeviceNameDic", deviceNameDic);
-            compilerDeviceInfo.put("DeviceInfoXlsList", deviceInfoXlsList);
+            result.put("DeviceNameDic", deviceNameDic);
+            result.put("DeviceInfoXlsList", deviceInfoXlsList);
 
         } else {
             result.put("result", 0);
             result.put("info", "compilerConfig can not find");
             return result;
         }
-        return compilerDeviceInfo;
+        return result;
 
     }
 
@@ -254,7 +254,7 @@ public class FsuServiceImpl implements FsuService {
         String body = forEntity.getBody();
         JSONObject engineInfo = JSON.parseObject(body);
         JSONObject compilerConfig = getCompilerConfig(compilerBody, sn);
-        if (compilerConfig != null) {
+        if (compilerConfig.getInteger("result") ==null || compilerConfig.getInteger("result") != 0) {
             Integer fileVersionId = compilerConfig.getInteger("fileVersionId");
             Integer businessSceneId = compilerConfig.getInteger("businessSceneId");
             Integer productId = compilerConfig.getInteger("productId");
@@ -346,6 +346,9 @@ public class FsuServiceImpl implements FsuService {
         result.put("GUID", guid);
         result.put("md5", md5);
         result.put("url", url);
+
+        String path = "AppResources/sn/"+sn+"/"+name;
+        result.put("path", path);
         return result;
     }
 

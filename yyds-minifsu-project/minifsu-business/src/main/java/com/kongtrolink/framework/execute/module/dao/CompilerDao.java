@@ -23,14 +23,18 @@ public class CompilerDao {
     public Integer getBusinessSceneId(String adapterVer) {
 
         JSONObject businessScene = mongoTemplate.findOne(Query.query(Criteria.where("adapterVersion").in(adapterVer)), JSONObject.class, MongoTableName.COMPILER_BUSINESSSCENE_DIC);
+        if (businessScene!=null)
         return businessScene.getInteger("businessSceneId");
+        else return null;
 
     }
 
     public Integer getProductId(String rule) {
 
         JSONObject product = mongoTemplate.findOne(Query.query(Criteria.where("productRule").in(rule)), JSONObject.class, MongoTableName.COMPILER_PRODUCT_DIC);
+        if (product != null)
         return product.getInteger("productId");
+        else  return null;
 
     }
 }
