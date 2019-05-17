@@ -100,9 +100,30 @@ public class DataMntServiceImpl implements DataMntService {
         String dev = type + "-" + resNo;
         //获取实时数据的key
         String table = RedisHashTable.SN_DATA_HASH + sn;
-        Set<String> mntData = redisUtils.getHkeys(RedisHashTable.SN_DATA_HASH + sn, dev + "_*");
+        Set<String> mntData = redisUtils.getHkeys(table, dev + "_*");
+        List<String> mntList = new ArrayList<>(mntData);
+        List<Integer> values = redisUtils.hashMultiGet(table,mntList,Integer.class);
         JSONArray jsonArray = new JSONArray();
-        for (String key : mntData) { //通过key获取实时数据
+        for (int i=0; i<mntList.size();i++)
+        {
+            String key = mntList.get(i);
+            JSONObject coData = new JSONObject();
+//            Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
+            Integer value = values.get(i);
+            String coId = key.replaceFirst(dev + "_", "");
+            coData.put("coId", coId);
+            SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
+            Integer valueBase = signalModel == null ? 1 : signalModel.getValueBase();
+            double value1 = Double.valueOf(value + "");
+            coData.put("value", value1 / valueBase);
+            coData.put("name", signalModel != null ? signalModel.getName() : null);
+            coData.put("unit", signalModel != null ? signalModel.getUnit() : null);
+            coData.put("type", signalModel != null ? signalModel.getType() : null);
+            JSONObject data = tranceDataId(coId); //数据点翻译
+            coData.putAll(data);
+            jsonArray.add(coData);
+        }
+        /*for (String key : mntList) { //通过key获取实时数据
             JSONObject coData = new JSONObject();
             Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
             String coId = key.replaceFirst(dev + "_", "");
@@ -117,7 +138,7 @@ public class DataMntServiceImpl implements DataMntService {
             JSONObject data = tranceDataId(coId); //数据点翻译
             coData.putAll(data);
             jsonArray.add(coData);
-        }
+        }*/
         JSONObject result = new JSONObject();
         result.put("dev", dev);
         result.put("info", jsonArray);
