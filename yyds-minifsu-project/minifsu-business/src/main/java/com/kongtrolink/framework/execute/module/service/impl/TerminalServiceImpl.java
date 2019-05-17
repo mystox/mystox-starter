@@ -6,6 +6,7 @@ import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
+import com.kongtrolink.framework.execute.module.dao.CompilerDao;
 import com.kongtrolink.framework.execute.module.dao.DeviceDao;
 import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.dao.TerminalDao;
@@ -42,8 +43,11 @@ public class TerminalServiceImpl implements TerminalService {
     private String port;
     @Value("${server.name}")
     private String name;
+    @Value("${compiler.fileVersionId}")
+    private String fileVersionId;
     private final LogDao logDao;
     private final TerminalDao terminalDao;
+    private final CompilerDao compilerDao;
     private final DeviceDao deviceDao;
     private final RedisUtils redisUtils;
     private RpcModule rpcModule;
@@ -59,17 +63,19 @@ public class TerminalServiceImpl implements TerminalService {
         this.rpcModule = rpcModule;
     }
 
+
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
     @Value("${rpc.controller.port}")
     private int controllerPort;
 
     @Autowired
-    public TerminalServiceImpl(LogDao logDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils) {
+    public TerminalServiceImpl(LogDao logDao, TerminalDao terminalDao, DeviceDao deviceDao, RedisUtils redisUtils, CompilerDao compilerDao) {
         this.logDao = logDao;
         this.terminalDao = terminalDao;
         this.deviceDao = deviceDao;
         this.redisUtils = redisUtils;
+        this.compilerDao = compilerDao;
     }
 
 
@@ -288,6 +294,25 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public JSONObject getCompilerConfig(ModuleMsg moduleMsg) {
+        String sn = moduleMsg.getSN();
+        JSONObject payload = moduleMsg.getPayload();
+        String adapterVer = payload.getString("adapterVer");
+        if(StringUtils.isBlank(adapterVer)) {
+            Terminal terminalBySn = terminalDao.findTerminalBySn(sn);
+            TerminalProperties terminalPropertiesByTerminalId = terminalDao.findTerminalPropertiesByTerminalId(terminalBySn.getId());
+            adapterVer = terminalPropertiesByTerminalId.getAdapterVer();
+        }
+        Integer businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
+        Integer productId = compilerDao.getProductId(sn.substring(0, 6));
+        JSONObject result = new JSONObject();
+        result.put("businessSceneId", businessSceneId);
+        result.put("productId", productId);
+        result.put("fileVersionId", fileVersionId);
+        return result;
+    }
+
+    @Override
     public JSONObject terminalLogSave(ModuleMsg moduleMsg) {
         JSONObject payload = moduleMsg.getPayload();
         JSONObject terminalPayload = (JSONObject) payload.get("payload");
@@ -368,5 +393,8 @@ public class TerminalServiceImpl implements TerminalService {
                 sn, msgType, msgId, name, host);
         logService.saveLog(log);
     }
+
+
+
 
 }

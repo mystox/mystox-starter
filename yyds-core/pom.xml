@@ -54,13 +54,13 @@
         <!--</dependency>-->
 
 
-        <!-- MQTT -->
+      <!--  &lt;!&ndash; MQTT &ndash;&gt;
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>1.1.0</version>
             <type>jar</type>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>

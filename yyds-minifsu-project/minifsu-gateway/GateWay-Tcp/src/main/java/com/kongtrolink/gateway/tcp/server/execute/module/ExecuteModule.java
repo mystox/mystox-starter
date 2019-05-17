@@ -64,7 +64,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     ctx.writeAndFlush(frame);
                     result.setResult(1);
                     result.setInfo("success");
-                    logger.info(" 下发数据成功");
+                    logger.info(" 下发数据成功[{}]",message);
                 }
             }
         }catch (Exception e){
@@ -122,5 +122,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();
     }
+
 
 }

@@ -1,9 +1,9 @@
 package com.kongtrolink.framework;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
-import com.kongtrolink.framework.execute.module.model.Order;
 import com.kongtrolink.framework.runner.BusinessRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,11 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -58,8 +58,10 @@ public class MinifsuBusinessApplicationTests {
 	@Test
 	public void testMongo()
 	{
+		JSONObject businessScene = mongoTemplate.findOne(Query.query(Criteria.where("adapterVersion").in("9.0.0.1")), JSONObject.class, MongoTableName.COMPILER_BUSINESSSCENE_DIC);
+		System.out.println(businessScene);
 
-		Order aDefault = mongoTemplate.findById("default", Order.class, MongoTableName.ORDER);
+	/*	Order aDefault = mongoTemplate.findById("default", Order.class, MongoTableName.ORDER);
 		System.out.println(aDefault.getBID());
 //		List<RunState> r = mongoTemplate.find(Query.query(Criteria.where("createTime").lte(new Date(0))), RunState.class, MongoTableName.TERMINAL_RUN_STATE);
 //		System.out.println(r.size());
@@ -75,7 +77,7 @@ public class MinifsuBusinessApplicationTests {
 			} else {
 				criteria.and("createTime").gte(new Date(startTime));
 			}
-		}
+		}*/
 //		mongoTemplate.count(Query.query())
 	}
 }

@@ -9,7 +9,7 @@ logging:
 
 mongodb:
   uri: mongodb://172.16.6.9:27017/minifsu2
-#  uri: mongodb://172.16.5.228:27017/mini-fsu-db
+#  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
 #  uri: mongodb://172.16.5.213:27017/db_cntb_minifsu
 
 server:
@@ -53,3 +53,9 @@ rpc:
     port: 18800
 register:
   delay: 100 #注册延时随机基数 注册随机值区间 delay ~ delay * 2
+
+switch:
+  threshold:
+    engineVer: 1.3.7.9 #不需要下发门限的版本号
+compiler:
+  fileVersionId: 1 #1 测试 2 正式 3 稳定

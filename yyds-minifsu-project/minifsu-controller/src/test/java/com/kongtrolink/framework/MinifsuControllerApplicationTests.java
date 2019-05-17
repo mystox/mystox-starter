@@ -273,7 +273,7 @@ public class MinifsuControllerApplicationTests {
         //1包注册
         JSONObject requestHead = new JSONObject();
         String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
-        requestHead.put("uuid", uuid);
+        requestHead.put("uuid", "adcb64f0");
         requestHead.put("gip", "172.16.6.50:17701");
         requestHead.put("pktType", PktType.CONNECT);
 
@@ -298,7 +298,7 @@ public class MinifsuControllerApplicationTests {
                 }
 
             }
-            //3包 数据包 数据变化包
+           /* //3包 数据包 数据变化包
             String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":12}},{\"dev\":\"3-1\",\"info\":{\"201001\":12}},{\"dev\":\"3-1\",\"info\":{\"101001\":12,\"101002\":12}},{\"dev\":\"3-1\",\"info\":{\"301001\":12}}]}}\n";
             requestHead.put("payload", dataMsg);
             response = sendMSG(requestHead, rpcModuleBase, dataMsg);
@@ -320,7 +320,7 @@ public class MinifsuControllerApplicationTests {
             String heart = "{\"msgId\":\"000050\",\"ts\":1553500171,\"payload\":{\"pktType\":0,\"SN\":\"MINI210121000001\"}}\n";
             requestHead.put("payload", heart);
             response = sendMSG(requestHead, rpcModuleBase, heart);
-            System.out.println("设备心跳结果" + response.getPayload());
+            System.out.println("设备心跳结果" + response.getPayload());*/
         }
         /*String cleanMsg = "{\"code\":4,\"serverHost\":\"127.0.0.1\",\"serverName\":\"net-GW\",\"time\":1553500102000}";
         System.out.println(cleanMsg);
@@ -345,7 +345,10 @@ public class MinifsuControllerApplicationTests {
         requestHead.put("payload", fileMsg);
         response = sendMSG(requestHead, rpcModuleBase, fileMsg);
         System.out.println("文件流结果: "+response.getBytePayload().toString());*/
-
+        /*//3包 设备包
+        String deviceMsg = "{\"msgId\":\"01557794749\",\"payload\":{\"pktType\":3,\"SN\":\"MINI201904260013\",\"devList\":[\"0-255-0-0-0110103\",\"1-0-1-1-0990101\",\"3-1-1-1-0990201\",\"211-0-0-1-0170601\",\"100-0-0-1-0160301\",\"101-1-0-1-0160101\"]}}";
+        response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
+        System.out.println("设备上报结果" + response.getPayload());*/
     }
 
 

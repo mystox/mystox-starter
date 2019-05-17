@@ -149,6 +149,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @return 返回json结果
      */
     private JSON sendTerminalExecute(String msgId, JSONObject payloadObject) {
+
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
         JSONObject msgPayload = moduleMsg.getPayload();
         msgId = StringUtils.isBlank(msgId) ? moduleMsg.getMsgId() : msgId;
@@ -159,7 +160,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         JSONObject result = new JSONObject();
         result.put("result", 0);
         if (pktTypeInt == -1) {
-            logger.error("[{}] can't find terminalPktType[{}]",msgId,pktType);
+            logger.error("[{}] can't find terminalPktType[{}]", msgId, pktType);
             return result;
         }
         msgPayload.put("pktType", pktTypeInt);
@@ -176,7 +177,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             snCommunication = redisUtils.get(key, JSONObject.class);
             if (snCommunication == null) {
                 // 错误信息记录日志
-                logger.error("[{}] can't find communication_hash[{}]",msgId,key);
+                logger.error("[{}] can't find communication_hash[{}]", msgId, key);
                 saveLog(msgId, sn, StateCode.CONNECT_ERROR, moduleMsg.getPktType());
                 return result;
             }
@@ -186,6 +187,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             //发送至网关
             String netAddr = (String) snCommunication.get("GWip");
             String[] netAddrArr = netAddr.split(":");
+            terminalPayloadSave(msgId, sn, moduleMsg);//下发至终端报文保存
             return sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), netAddrArr[0], Integer.parseInt(netAddrArr[1]));
         } catch (Exception e) {
             // 错误信息记录日志
@@ -225,7 +227,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.GET_RUNSTATE.equals(pktType)
                 || PktType.FSU_UNBIND.equals(pktType)
                 || PktType.GET_TERMINAL_LOG.equals(pktType)
-                || PktType.GET_FSU.equals(pktType)) {
+                || PktType.GET_FSU.equals(pktType)
+                || PktType.GET_COMPILER_VERSION.equals(pktType)//获取编译版本信息
+                ) {
             logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
@@ -447,6 +451,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, (String) payload);
                     e.printStackTrace();
                 }
+            } else if (payload != null && payload instanceof ModuleMsg) {
+                moduleMsg = new ModuleMsg(PktType.TERMINAL_LOG_SAVE, SN, ((ModuleMsg) payload).getPayload());
             } else {
                 return;
             }

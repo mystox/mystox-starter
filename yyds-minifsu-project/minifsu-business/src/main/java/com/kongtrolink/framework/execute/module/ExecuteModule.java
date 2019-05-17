@@ -172,6 +172,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         } else if (PktType.FSU_UNBIND.equals(pktType)) { //終端解绑
             JSONObject jsonObject = terminalService.unBind(moduleMsg);
             result = jsonObject.toJSONString();
+        } else if (PktType.GET_COMPILER_VERSION.equals(pktType)) { //終端解绑
+            JSONObject jsonObject = terminalService.getCompilerConfig(moduleMsg);
+            result = jsonObject.toJSONString();
         }
 
 

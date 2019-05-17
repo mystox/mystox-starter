@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -25,6 +27,22 @@ public class ExecutorConfig
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);
+        //线程池维护线程的最大数量
+        poolTaskExecutor.setMaxPoolSize(MAX_POOL_SIZE);
+        //线程池所使用的缓冲队列
+        poolTaskExecutor.setQueueCapacity(200);
+        //线程池维护线程所允许的空闲时间
+        poolTaskExecutor.setKeepAliveSeconds(10000);
+        poolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        return poolTaskExecutor;
+    }
+    @Bean(name = "thresholdExecutor")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public ThreadPoolTaskExecutor thresholdExecutor()
+    {
+        ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
+        //线程池维护线程的最少数量
+        poolTaskExecutor.setCorePoolSize(1); //门限的i线程池队列
         //线程池维护线程的最大数量
         poolTaskExecutor.setMaxPoolSize(MAX_POOL_SIZE);
         //线程池所使用的缓冲队列

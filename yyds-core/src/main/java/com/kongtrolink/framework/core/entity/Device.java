@@ -11,7 +11,35 @@ public class Device {
     private Integer type;    //设备类型
     private Integer resNo;   //资源编号
     private Integer port; //设备端口
+    private String name; //设备名称
+    private String version; //设备版本
+    private String serialNumber; //设备序列号 | 地址
     private String SN;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
     public String getSN() {
         return SN;

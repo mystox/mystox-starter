@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -57,6 +58,7 @@ public class RegistryServiceImpl implements RegistryService {
     private DataMntService dataMntServiceImpl;
 
 
+
     @Autowired
     public void setDataMntServiceImpl(DataMntService dataMntServiceImpl) {
         this.dataMntServiceImpl = dataMntServiceImpl;
@@ -73,10 +75,21 @@ public class RegistryServiceImpl implements RegistryService {
     }
 
     private final ThreadPoolTaskExecutor businessExecutor;
+
     @Value("${rpc.controller.hostname}")
     private String controllerHost;
     @Value("${rpc.controller.port}")
     private int controllerPort;
+
+//    private ThreadPoolTaskExecutor thresholdExecutor;
+
+
+    @Autowired
+    ObjectFactory<ThreadPoolTaskExecutor> thresholdExecutor;
+//    @Autowired
+//    public void setThresholdExecutor(ThreadPoolTaskExecutor thresholdExecutor) {
+//        this.thresholdExecutor = thresholdExecutor;
+//    }
 
     @Autowired
     public RegistryServiceImpl(TerminalDao terminalDao, ConfigDao configDao, DeviceDao deviceDao, RedisUtils redisUtils, ThreadPoolTaskExecutor businessExecutor) {
@@ -239,10 +252,14 @@ public class RegistryServiceImpl implements RegistryService {
                 Integer devType = Integer.parseInt(devArr[0]);
                 String devPort = devArr[1];
                 Integer devResNo = Integer.parseInt(devArr[3]);
+                Integer serialNumber = Integer.parseInt(devArr[2]); //地址 == 设备序列号
+                String version = devArr[4]; //协议编码
                 Device device = new Device();
                 device.setPort(devPort);
                 device.setResNo(devResNo);
                 device.setType(devType);
+                device.setVersion(version);
+                device.setSerialNumber(serialNumber);
                 newDeviceList.add(device);
             }
         }
@@ -255,9 +272,9 @@ public class RegistryServiceImpl implements RegistryService {
                 if (deviceType.equals(newDevice.getType())
                         && devicePort.equals(newDevice.getPort())
                         && deviceResNo.equals(newDevice.getResNo())) { //存在对应类型设置有效
+                    BeanUtils.copyProperties(newDevice,device);
                     device.setInvalidTime(new Date(0L));
                     newDevice.setInvalidTime(new Date(0L));
-                    break;
                 }
             }
             deviceDao.save(device);
@@ -283,6 +300,7 @@ public class RegistryServiceImpl implements RegistryService {
      * @param deviceList 设备列表
      */
     private void signalConfigDispose(String msgId, String sn, String uuid, List<Device> deviceList) {
+        ThreadPoolTaskExecutor thresholdTask = thresholdExecutor.getObject(); //初始化推送任务池
         for (Device device : deviceList) { //根据设备产生最新配置信息表
             String deviceId = device.getId();
             Integer type = device.getType();
@@ -333,17 +351,22 @@ public class RegistryServiceImpl implements RegistryService {
                 redisUtils.setHash(RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH, alarmConfigKey, JSON.toJSON(alarmConfigKeyMap.get(alarmConfigKey)));
             }
 
-            businessExecutor.execute(() -> {
+            thresholdTask.execute(() -> {
                 JSONObject jsonObject = dataMntServiceImpl.alarmConfigPush(msgId, sn, devDataId, alarmConfigKeyMap);//注册结束 设置线程 往终端推送
-                for (int i = 0; jsonObject.getInteger("result").equals(0) || i < 3; i++) {
+                for (int i = 0; jsonObject.getInteger("result").equals(0) && i < 3; i++) {
                     //推送错误 重新注册
                     try {
-                        Thread.sleep(2000L);
+                        Thread.sleep(1000L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     logger.warn("[{}] push threshold to terminal error retry ...[{}]", msgId, i);
                     jsonObject = dataMntServiceImpl.alarmConfigPush(msgId, sn, devDataId, alarmConfigKeyMap);//注册结束 设置线程 往终端推送
+                }
+                try {
+                    Thread.sleep(500L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             });
         }

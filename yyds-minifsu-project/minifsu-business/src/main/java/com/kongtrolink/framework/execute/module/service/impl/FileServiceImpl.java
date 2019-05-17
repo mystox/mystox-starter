@@ -81,6 +81,8 @@ public class FileServiceImpl implements FileService {
                 return new byte[]{0};
             }
             long fileLen = file.length();
+            if (startIndex ==0) //锁定文件
+                file.setWritable(false);
             if (fileLen > Integer.MAX_VALUE)
                 logger.error("[{}] sn [{}]  FILE [{}] is to large then MAX_INTEGER!!!", msgId, sn, file.getAbsoluteFile());
             if (fileLen < startIndex + 1) {// 起始index 大于文件长度返回错误
@@ -112,6 +114,10 @@ public class FileServiceImpl implements FileService {
             int CRC = ByteUtil.getCRC(filePayload); // 获取CRC16(MODBUS) 校验码
             bytes[responseLen - 2] = (byte) (CRC & 0xFF);
             bytes[responseLen - 1] = (byte) (CRC >> 8 & 0xFF);
+
+
+            if (fileLen == startIndex + 1) //升级最后一包释放文件锁
+                file.setWritable(true);
             return bytes;
         } catch (FileNotFoundException e) {
             logger.error("[{}] sn [{}]  FILE exception [{}] !!!", msgId, sn, e.toString());
@@ -120,11 +126,13 @@ public class FileServiceImpl implements FileService {
             logger.error("[{}] sn [{}]  FILE exception [{}] !!!", msgId, sn, e.toString());
             e.printStackTrace();
         }
+
         return new byte[]{0};
     }
 
     @Override
     public JSONObject getCompilerFile(ModuleMsg moduleMsg) {
+
 
         String sn = moduleMsg.getSN();
         String msgId = moduleMsg.getMsgId();
@@ -149,8 +157,17 @@ public class FileServiceImpl implements FileService {
                 dir.mkdirs();
             }
             File file = ResourceUtils.getFile(snPath + File.separator + sn + File.separator + name);
+
             if (file.exists()) {
-                file.deleteOnExit();
+                if(file.canWrite()) {
+                    file.deleteOnExit();
+                }
+                else {
+                    logger.error("[{}] sn [{}] file can not write..");
+                    jsonObject.put("result", 0);
+                    jsonObject.put("info", "file can not write");
+                    return jsonObject;
+                }
             }
             file.createNewFile();
             FileUtils.copyInputStreamToFile(is, file);

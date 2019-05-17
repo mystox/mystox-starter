@@ -29,4 +29,6 @@ public interface TerminalService
     JSONObject getTerminalPayloadLog(ModuleMsg moduleMsg);
 
     JSONObject unBind(ModuleMsg moduleMsg);
+
+    JSONObject getCompilerConfig(ModuleMsg moduleMsg);
 }

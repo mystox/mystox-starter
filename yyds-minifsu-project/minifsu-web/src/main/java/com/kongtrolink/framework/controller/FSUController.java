@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.Set;
 public class FSUController {
 
     private FsuService fsuService;
+
 
     @Autowired
     public void setFsuService(FsuService fsuService) {
@@ -101,8 +104,41 @@ public class FSUController {
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
     }
 
+    /**
+     * 获取编译所需设备信息
+     *
+     * @return
+     */
+    @RequestMapping("/getCompilerDeviceInfo")
+    public JsonResult getCompilerDeviceInfo(@RequestBody JSONObject compilerBody,String sn) {
+        JSONObject result = fsuService.getCompilerDeviceInfo(compilerBody,sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                new JsonResult(result);
+    } /**
+     * 获取编译配置
+     *
+     * @return
+     */
+    @RequestMapping("/getCompilerConfig")
+    public JsonResult getCompilerConfig(@RequestBody JSONObject compilerBody,String sn) {
+        JSONObject result = fsuService.getCompilerConfig(compilerBody,sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                new JsonResult(result);
+    }
+    /**
+     * 生成编译文件
+     *
+     * @return
+     */
+    @RequestMapping("/compilerFile")
+    public JsonResult compilerFile(@RequestBody JSONObject compilerBody) {
+        JSONObject result = fsuService.compilerFile(compilerBody);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                new JsonResult(result);
+    }
+
     @RequestMapping("/compiler")
-    public JsonResult compiler(@RequestBody Map<String, Object> requestBody, String sn) {
+    public JsonResult compiler(@RequestBody JSONObject requestBody, String sn) {
         JSONObject result = fsuService.compiler(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
@@ -224,7 +260,7 @@ public class FSUController {
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     result.remove("result");
-                    JsonResult jsonResult = new JsonResult("导入失败[" + result.toJSONString()+"]", false);
+                    JsonResult jsonResult = new JsonResult("导入失败[" + result.toJSONString() + "]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -269,7 +305,7 @@ public class FSUController {
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     result.remove("result");
-                    JsonResult jsonResult = new JsonResult("导入告警点表失败[" + result.toJSONString()+"]", false);
+                    JsonResult jsonResult = new JsonResult("导入告警点表失败[" + result.toJSONString() + "]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -304,7 +340,7 @@ public class FSUController {
             if (result != null) {
                 if ((int) result.get("result") == 0) {
                     result.remove("result");
-                    JsonResult jsonResult = new JsonResult("导入信号点失败[" + result.toJSONString()+"]", false);
+                    JsonResult jsonResult = new JsonResult("导入信号点失败[" + result.toJSONString() + "]", false);
                     jsonResult.setData(result);
                     return jsonResult;
                 }
@@ -316,4 +352,14 @@ public class FSUController {
         return new JsonResult("请求失败", false);
     }
 
+
+    @RequestMapping(value = "/remoteCompilerFileDown")
+    public void remoteCompilerFileDown(@RequestBody JSONObject body, HttpServletResponse response) {
+        String url = body.getString("url");
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

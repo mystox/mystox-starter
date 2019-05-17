@@ -1,6 +1,6 @@
 logging:
   level:
-    root: debug
+    root: info
     org.apache.hadoop.util.Shell: OFF
   pattern:
     console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
@@ -38,13 +38,13 @@ executor:
     corePoolSize: 10 #核心执行线程数
     maxPoolSize: 1000 #最大维护线程数
 
-
 rpc:
   client:
     timeout: 60000 #rpc请求超时时间
   monitor:
     hostname: 172.16.6.50
     port: 18810
+    pktType:
   business:
     hostname: 172.16.6.50
     port: 18830

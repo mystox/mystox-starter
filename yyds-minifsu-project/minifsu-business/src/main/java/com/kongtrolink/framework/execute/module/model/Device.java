@@ -16,10 +16,29 @@ public class Device {
     private Integer resNo;   //资源编号
     private String port; //设备端口
     private String name; //设备名称
+    private String version; //设备版本
+    private Integer serialNumber; //设备序列号 | 地址
     @Field("SN")
     private String SN;
 
     private Date invalidTime; //0为有效
+
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Integer getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(Integer serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
     public String getName() {
         return name;

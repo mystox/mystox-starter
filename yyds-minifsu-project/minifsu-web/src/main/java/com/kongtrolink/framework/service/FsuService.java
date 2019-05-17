@@ -22,7 +22,7 @@ public interface FsuService {
 
     JSONObject upgrade(Map<String, Object> requestBody, String fsuId);
 
-    JSONObject compiler(Map<String, Object> requestBody, String sn);
+    JSONObject compiler(JSONObject requestBody, String sn);
 
     JSONArray getDeviceList(Map<String, Object> requestBody, String fsuId);
 
@@ -57,4 +57,11 @@ public interface FsuService {
     JSONObject getRunState(Map<String, Object> requestBody, String sn);
 
     JSONObject getTerminalPayload(Map<String, Object> requestBody, String sn);
+
+    JSONObject getCompilerDeviceInfo(JSONObject compilerBody, String sn);
+    JSONObject compilerFile(JSONObject compilerBody);
+
+    JSONObject getCompilerConfig(Map<String, Object> requestBody, String sn);
+    JSONObject getEngineInfo(JSONObject compilerBody, String sn);
+
 }
