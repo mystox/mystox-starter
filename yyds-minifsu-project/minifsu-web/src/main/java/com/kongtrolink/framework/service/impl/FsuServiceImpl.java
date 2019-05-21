@@ -324,6 +324,7 @@ public class FsuServiceImpl implements FsuService {
             Integer productId = compilerConfig.getInteger("productId");
             JSONObject compilerResult = compileBody(guid, fileVersionId, businessSceneId, productId, deviceInfoList);
             if (!compilerResult.getBoolean("Result")) {
+                logger.error("编译服务器执行结果失败:{}",compilerResult.toJSONString());
                 result.put("result", 0);
                 result.put("info", compilerResult.toJSONString());
                 return result;

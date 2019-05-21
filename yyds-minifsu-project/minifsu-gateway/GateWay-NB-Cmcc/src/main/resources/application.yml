@@ -10,7 +10,7 @@ server:
   rpc:
     port: 18882
     timeout: 6000
-  port: 17700
+  port: 17703
 management:
   security:
     enabled: false
