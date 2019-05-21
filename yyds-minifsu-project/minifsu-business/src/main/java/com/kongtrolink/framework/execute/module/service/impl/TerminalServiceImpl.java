@@ -365,6 +365,11 @@ public class TerminalServiceImpl implements TerminalService {
 
     }
 
+    /**
+     * 运行状态信息
+     * @param moduleMsg
+     * @return
+     */
     @Override
     public JSONObject getRunStates(ModuleMsg moduleMsg) {
         String sn = moduleMsg.getSN();

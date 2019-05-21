@@ -489,6 +489,8 @@ public class DataMntServiceImpl implements DataMntService {
             runState.setMemUse((String) payload.get("memUse"));
             runState.setSysTime((Long.parseLong(payload.get("sysTime") + "")));
             runState.setCsq((Integer) payload.get("csq"));
+            runState.setFlashStatus((Integer) payload.get("flashStatus"));
+            runState.setEleCom((Integer) payload.get("eleCom"));
             runState.setCreateTime(new Date());
             runStateDao.saveRunState(runState);
             businessExecutor.execute(() -> {

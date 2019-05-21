@@ -16,6 +16,24 @@ public class RunState {
     private Long sysTime; //终端系统时间
     private Integer csq; //信号强度
     private Date createTime;
+    private Integer flashStatus;
+    private Integer eleCom;
+
+    public Integer getFlashStatus() {
+        return flashStatus;
+    }
+
+    public void setFlashStatus(Integer flashStatus) {
+        this.flashStatus = flashStatus;
+    }
+
+    public Integer getEleCom() {
+        return eleCom;
+    }
+
+    public void setEleCom(Integer eleCom) {
+        this.eleCom = eleCom;
+    }
 
     public Date getCreateTime() {
         return createTime;
