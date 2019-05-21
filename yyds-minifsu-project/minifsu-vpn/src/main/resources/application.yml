@@ -9,7 +9,7 @@ logging:
 vpn:
   osVersion: linux #vpn服务操作系统
   agent: tower #vpn代理商
-  vpnList: QG7 #待检测的VPN名称列表，以‘,’分隔
+  vpnList: QG7,172.29.0.0,255.255.0.0 #待检测的VPN列表，格式为“名称,destination,netmask”，以‘;’分隔
 
 server:
   name: minifsu-vpn

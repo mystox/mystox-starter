@@ -333,10 +333,10 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	private static ModuleMsg createDataChangeRequest() {
-		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI201904180005");
+		ModuleMsg msg = new ModuleMsg(PktType.DATA_CHANGE, "MINI201904260011");
 
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("SN", "MINI201904180005");
+		jsonObject.put("SN", "MINI201904260011");
 
 		List<JSONObject> list = new ArrayList<>();
 

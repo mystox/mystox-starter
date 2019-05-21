@@ -45,6 +45,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String hostname;
     @Value("${server.rpc.port}")
     private String port;
+    @Value("${server.outerIp}")
+    private String outerIp;
+    @Value("${server.rpc.outerPort}")
+    private String outerPort;
     @Value("${rpc.business.hostname}")
     private String businessHost;
     @Value("${rpc.business.port}")
@@ -265,8 +269,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                     if (StringUtils.isNotBlank(addr) && addr.contains(":")) {
                         String[] addrArr = addr.split(":");
                         JSONObject registerJson = moduleMsg.getPayload();
-                        registerJson.put("innerIp", hostname);
-                        registerJson.put("innerPort", port);
+                        registerJson.put("innerIp", outerIp);
+                        registerJson.put("innerPort", outerPort);
                         return sendPayLoad(msgId, JSONObject.toJSONString(msg), addrArr[0], Integer.parseInt(addrArr[1]));
                     } else {
                         logger.error("[{}]bip[{}] illegal...", msgId, addr);

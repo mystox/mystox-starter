@@ -3,10 +3,13 @@ package com.kongtrolink.framework.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.Log;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.StateCode;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.utils.RedisUtils;
@@ -68,13 +71,22 @@ public class TowerService {
     @Autowired
     HisDataDao hisDataDao;
     @Autowired
-    DeviceMatchService deviceMatchService;
+    LogDao logDao;
     @Autowired
-    private RpcModule rpcModule;
+    CntbLoginService cntbLoginService;
+    @Autowired
+    CntbAlarmService cntbAlarmService;
+    @Autowired
+    DeviceMatchService deviceMatchService;
     @Autowired
     RpcClient rpcClient;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+
+    @Value("${server.bindIp}")
+    private String host;
+    @Value("${server.name}")
+    private String name;
 
     @Value("${tower.gateway.hostname}")
     private String towerGatewayHostname;
@@ -137,6 +149,7 @@ public class TowerService {
         JsonStation curStation = stationDao.getInfoByFsuId(jsonStation.getFsuId());
         if (curStation != null) {
             if (!fsuUnbind(curStation.getSn())) {
+                saveLog("", curStation.getSn(), PktType.FSU_BIND, StateCode.MONGO_ERROR);
                 logger.error("TERMINAL_UNBIND: 原终端解绑失败,sn:" + curStation.getSn() + ",fsuId:" + curStation.getFsuId());
                 return result;
             }
@@ -262,6 +275,7 @@ public class TowerService {
                 boolean unbindResult = stationDao.unbindByFsuIdAndSn(curStation.getSn(), curStation.getFsuId());
                 redisUtils.del(RedisTable.getRegistryKey(curStation.getSn()));
                 if (!unbindResult) {
+                    saveLog("", curStation.getSn(), PktType.FSU_BIND, StateCode.MONGO_ERROR);
                     logger.error("TERMINAL_UNBIND: 终端解绑失败,sn:" + curStation.getSn() + ",fsuId:" + curStation.getFsuId());
                 }
             }
@@ -491,6 +505,7 @@ public class TowerService {
             }
 
             if (!alarmLogDao.upsert(redisAlarm)) {
+                saveLog("", redisOnlineInfo.getSn(), PktType.ALARM_REGISTER, StateCode.MONGO_ERROR);
                 logger.error("ALARM_REGISTER: 数据库记录失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
                 continue;
             }
@@ -504,6 +519,7 @@ public class TowerService {
                 curRedisAlarm = redisAlarm;
             }
             if (!redisUtils.set(alarmKey, curRedisAlarm)) {
+                saveLog("", redisOnlineInfo.getSn(), PktType.ALARM_REGISTER, StateCode.REDIS_ERROR);
                 logger.error("ALARM_REGISTER: redis记录失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
             }
         }
@@ -623,24 +639,28 @@ public class TowerService {
 
         JsonStation jsonStation = stationDao.getInfoBySn(sn);
 
-        String fsuId = jsonStation.getFsuId();
+        if (jsonStation != null) {
+            String fsuId = jsonStation.getFsuId();
 
-        String key = RedisTable.getRegistryKey(sn);
-        if (redisUtils.hasKey(key)) {
-            redisUtils.del(key);
-        }
-        if (redisUtils.hasKey(RedisTable.getFsuBindKey(fsuId))) {
-            redisUtils.del(RedisTable.getFsuBindKey(fsuId));
-        }
-        if (redisUtils.hasKey(RedisTable.getHisDataKey(fsuId))) {
-            redisUtils.del(RedisTable.getHisDataKey(fsuId));
-        }
-        Set<String> list = redisUtils.keys(RedisTable.getDataKey(fsuId, "*"));
-        for (String dataKey : list) {
-            redisUtils.del(dataKey);
-        }
+            String key = RedisTable.getRegistryKey(sn);
+            if (redisUtils.hasKey(key)) {
+                redisUtils.del(key);
+            }
+            if (redisUtils.hasKey(RedisTable.getFsuBindKey(fsuId))) {
+                redisUtils.del(RedisTable.getFsuBindKey(fsuId));
+            }
+            if (redisUtils.hasKey(RedisTable.getHisDataKey(fsuId))) {
+                redisUtils.del(RedisTable.getHisDataKey(fsuId));
+            }
+            Set<String> list = redisUtils.keys(RedisTable.getDataKey(fsuId, "*"));
+            for (String dataKey : list) {
+                redisUtils.del(dataKey);
+            }
 
-        result = stationDao.unbindByFsuIdAndSn(sn, fsuId);
+            result = stationDao.unbindByFsuIdAndSn(sn, fsuId);
+        } else {
+            result = true;
+        }
 
         return result;
     }
@@ -678,6 +698,7 @@ public class TowerService {
             ack.setResult(1);
             result = getXmlMsg(new MessageResp(ack));
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.GET_FSUINFO, StateCode.XML_ILLEGAL);
             logger.error("CntbGetFsuInfo: 解析请求报文失败：" + request);
         }
 
@@ -749,6 +770,7 @@ public class TowerService {
 
             result = getXmlMsg(new MessageResp(ack));
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.GET_DATA, StateCode.XML_ILLEGAL);
             logger.error("CntbGetData: 解析请求报文失败,request:" + request);
         }
 
@@ -886,6 +908,7 @@ public class TowerService {
             }
 
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.SET_POINT, StateCode.XML_ILLEGAL);
             logger.error("CntbSetPoint: 解析请求报文失败,request:" + request);
         }
 
@@ -978,6 +1001,7 @@ public class TowerService {
             result = getXmlMsg(new MessageResp(getThresholdAck));
 
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.GET_THRESHOLD, StateCode.XML_ILLEGAL);
             logger.error("CntbGetThreshold: 解析请求报文失败,request:" + request);
         }
 
@@ -1059,6 +1083,7 @@ public class TowerService {
         try {
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
+            saveLog("", "", "", StateCode.XML_ILLEGAL);
             logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(message));
         }
 
@@ -1158,6 +1183,7 @@ public class TowerService {
             }
 
         } catch (JAXBException e) {
+            saveLog("", "", CntbPktTypeTable.SET_THRESHOLD, StateCode.XML_ILLEGAL);
             logger.error("CntbSetThreshold: 解析请求报文失败,request:" + request);
         }
 
@@ -1180,6 +1206,7 @@ public class TowerService {
         try {
             response = rpcModuleBase.postMsg("", new InetSocketAddress(ip, port), JSONObject.toJSONString(msg));
         } catch (IOException e) {
+            saveLog(msg.getMsgId(), msg.getSN(), msg.getPktType(), StateCode.CONNECT_ERROR);
             logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + ip + ",port:" + port + ",msg:" + msg);
         }
         return response;
@@ -1327,9 +1354,7 @@ public class TowerService {
                 redisUtils.set(key, redisOnlineInfo, time);
                 logger.debug("-----------------------login start-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
-                taskExecutor.execute(new CntbLoginService(sn,
-                        towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient,
-                        deviceMatchService, deviceDao ,carrierDao));
+                taskExecutor.execute(() -> cntbLoginService.startLogin(sn));
             }
         }
     }
@@ -1339,8 +1364,7 @@ public class TowerService {
      * @param sn sn
      */
     public void checkAlarm(String sn) {
-        taskExecutor.execute(new CntbAlarmService(sn,
-                towerGatewayHostname, towerGatewayPort, rpcModule, redisUtils, rpcClient, alarmLogDao));
+        taskExecutor.execute(() -> cntbAlarmService.startAlarm(sn));
     }
 
     /**
@@ -1352,7 +1376,7 @@ public class TowerService {
         if (redisOnlineInfo == null) {
             return;
         }
-        RedisFsuBind redisFsuBind = getFsuBindInfo(redisOnlineInfo.getSn());
+        RedisFsuBind redisFsuBind = getFsuBindInfo(redisOnlineInfo.getFsuId());
         if (redisFsuBind == null) {
             return;
         }
@@ -1385,8 +1409,23 @@ public class TowerService {
                 if (redisData.getValues().containsKey(signal.getCntbId())) {
                     hisData.setValue(redisData.getValues().get(signal.getCntbId()).toString());
                 }
+                list.add(hisData);
             }
         }
         hisDataDao.insertList(list);
+    }
+
+    /**
+     * 保存日志
+     * @param msgId
+     * @param sn
+     * @param msgType
+     * @param stateCode
+     */
+    void saveLog(String msgId, String sn, String msgType, int stateCode) {
+        Log log = new Log(new Date(System.currentTimeMillis()),
+                stateCode,
+                sn, msgType, msgId, name, host);
+        logDao.save(log);
     }
 }

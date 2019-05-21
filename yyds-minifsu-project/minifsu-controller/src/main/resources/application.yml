@@ -30,8 +30,11 @@ spring:
 server:
   name: minifsu-controller
   bindIp: 172.16.6.50
+  outerIp: 172.16.6.50
   rpc:
     port: 18800
+    outerPort: 18800
+
 
 executor:
   threadPool:
