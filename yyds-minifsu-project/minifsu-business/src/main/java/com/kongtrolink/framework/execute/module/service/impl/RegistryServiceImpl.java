@@ -272,7 +272,8 @@ public class RegistryServiceImpl implements RegistryService {
                 if (deviceType.equals(newDevice.getType())
                         && devicePort.equals(newDevice.getPort())
                         && deviceResNo.equals(newDevice.getResNo())) { //存在对应类型设置有效
-                    BeanUtils.copyProperties(newDevice,device);
+                    device.setVersion(newDevice.getVersion());
+                    device.setSerialNumber(newDevice.getSerialNumber());
                     device.setInvalidTime(new Date(0L));
                     newDevice.setInvalidTime(new Date(0L));
                 }
