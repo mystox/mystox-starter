@@ -298,6 +298,7 @@ public class TerminalServiceImpl implements TerminalService {
         String sn = moduleMsg.getSN();
         JSONObject payload = moduleMsg.getPayload();
         String adapterVer = payload.getString("adapterVer");
+        adapterVer = adapterVer.split("\\.")[0] + ".*";
         if(StringUtils.isBlank(adapterVer)) {
             Terminal terminalBySn = terminalDao.findTerminalBySn(sn);
             TerminalProperties terminalPropertiesByTerminalId = terminalDao.findTerminalPropertiesByTerminalId(terminalBySn.getId());
