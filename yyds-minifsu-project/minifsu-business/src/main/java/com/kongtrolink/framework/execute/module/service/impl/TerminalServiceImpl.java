@@ -181,7 +181,7 @@ public class TerminalServiceImpl implements TerminalService {
         if (runStatusRhythm != null) terminal.setRunStatusRhythm((Integer) runStatusRhythm);
 
         Boolean enableHeart = jsonObject.getBoolean("enableHeart");
-        if (runStatusRhythm != null) {
+        if (enableHeart != null) {
             terminal.setEnableHeart(enableHeart);
         }
 
@@ -312,7 +312,7 @@ public class TerminalServiceImpl implements TerminalService {
         Integer productId = compilerDao.getProductId(sn.substring(0, 6));
         if (productId == null)
         {
-            result.put("result", 0);
+            result.put("result", 1);
             return result;
         }
         result.put("businessSceneId", businessSceneId);
