@@ -153,7 +153,7 @@ public class RegistryServiceImpl implements RegistryService {
                     runStatusRhythm = 100;//默认10s
                 value.put("runStatusRhythm", runStatusRhythm);
 
-                int miniCount = Math.min(Math.min(businessRhythm, alarmRhythm), runStatusRhythm);
+                int miniCount = businessRhythm;
                 int expiredTime = miniCount * heartCycle * 3;
                 value.put("expired", expiredTime); //三倍最低心跳时间
                 redisUtils.set(key, value);
