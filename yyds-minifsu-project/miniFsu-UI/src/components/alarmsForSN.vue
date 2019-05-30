@@ -2,7 +2,7 @@
   <div class="alarmList flex-column">
     <sc-breadcrumb 
       :urls="[
-        {name: 'SN列表', path: '/fsus'},
+        {name: 'SN列表', path: _ctx + '/fsus'},
         {name: '实时告警'},
       ]"
     ></sc-breadcrumb>

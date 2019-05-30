@@ -27,6 +27,49 @@ export default {
     Vue.component(Tabs.name, Tabs)
     Vue.component(OperationBar.name, OperationBar)
     Vue.component(Breadcrumb.name, Breadcrumb)
+
+    Vue.prototype.$tableFilter = filters => {
+      let filter = Vue.filter('modalFilter')
+      if (filters) {
+        return (row, column, cellValue) => {
+          return filter(cellValue, filters)
+        }
+      }
+    }
+
+    const getSingleNodePath = (node) => {
+      if (node.key === '-1') {
+        return ''
+      } else {
+        return getSingleNodePath(node.parent) + node.key
+      }
+    }
+    Vue.prototype.$tree = {
+      getTierTree (tree, callback) {
+        Vue.prototype.$api.getTierTree().then((res) => {
+          let firstTier = res.data.firstTier
+          firstTier = {
+            enterpriseId: null,
+            uniqueCode: null,
+            name: '全部',
+            code: '-1',
+            nextTier: firstTier
+          }
+          tree.data = [firstTier]
+          if (tree.ready) {
+            callback(tree)
+          } else {
+            tree.onReady = callback
+          }
+        })
+      },
+      getNodesPath (nodes) {
+        if (!Array.isArray(nodes)) {
+          nodes = [nodes]
+        }
+        return nodes.map(v => getSingleNodePath(v))
+      }
+    }
+    Vue.prototype._ctx = process.env.SCLOUD_CTX
   }
 }
-

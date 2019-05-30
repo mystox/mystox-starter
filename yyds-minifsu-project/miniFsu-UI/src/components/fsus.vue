@@ -50,7 +50,7 @@
             <i v-if="scope.row.status === 2" style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i>
             <!-- <i style="color: #20A0FF; cursor: pointer;" @click="showUpgradeDialog(scope.row)">/ 升级</i> -->
             <router-link :to="{
-                  path: '/devices',
+                  path: _ctx + '/devices',
                   query: {
                       sN: scope.row.sN
                   }
@@ -59,7 +59,7 @@
             </router-link>
             <router-link v-if="scope.row.status === 2"
             :to="{
-                  path: '/alarmsForSN',
+                  path: _ctx + '/alarmsForSN',
                   query: {
                       sN: scope.row.sN,
                   }
@@ -67,7 +67,7 @@
               / 实时告警
             </router-link>
             <router-link :to="{
-                  path: '/fsuInfoList',
+                  path: _ctx + '/fsuInfoList',
                   query: {
                       sN: scope.row.sN
                   }
@@ -75,7 +75,7 @@
               / SN 运行状态
             </router-link>
             <router-link :to="{
-                  path: '/fsuPKT',
+                  path: _ctx + '/fsuPKT',
                   query: {
                       sN: scope.row.sN
                   }

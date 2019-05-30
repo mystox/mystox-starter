@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import axios from 'axios'
 
 // use element-ui
 import ElementUI from 'element-ui';
@@ -38,6 +39,10 @@ Vue.use(filter);
 // use custom $api
 import httpApi from '@/utils/httpApi.js'
 Vue.use(httpApi);
+Vue.prototype.$http = axios
+// 平常是空字符串,  并入云管的时候为/minifsu
+// 这句话在base/index.js里也有  由于main.js不包括在云管里
+Vue.prototype._ctx = process.env.SCLOUD_CTX
 
 Vue.config.productionTip = false;
 

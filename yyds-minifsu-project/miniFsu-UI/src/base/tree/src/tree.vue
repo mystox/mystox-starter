@@ -26,42 +26,6 @@
 
 <script>
 import ElTreee from './el-tree.vue'
-import Vue from 'vue'
-
-const getSingleNodePath = (node) => {
-  if (node.key === '-1') {
-    return ''
-  } else {
-    return getSingleNodePath(node.parent) + node.key
-  }
-}
-
-Vue.prototype.$tree = {
-  getTierTree (tree, callback) {
-    Vue.prototype.$api.getTierTree().then((res) => {
-      let firstTier = res.data.firstTier
-      firstTier = {
-        enterpriseId: null,
-        uniqueCode: null,
-        name: '全部',
-        code: '-1',
-        nextTier: firstTier
-      }
-      tree.data = [firstTier]
-      if (tree.ready) {
-        callback(tree)
-      } else {
-        tree.onReady = callback
-      }
-    })
-  },
-  getNodesPath (nodes) {
-    if (!Array.isArray(nodes)) {
-      nodes = [nodes]
-    }
-    return nodes.map(v => getSingleNodePath(v))
-  }
-}
 
 export default {
   name: 'tree',
