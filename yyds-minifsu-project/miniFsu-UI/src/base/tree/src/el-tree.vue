@@ -22,10 +22,7 @@
 <script>
 import TreeStore from './model/tree-store'
 import ElTreeNodee from './tree-node.vue'
-import {
-  t
-} from 'element-ui/src/locale'
-import emitter from 'element-ui/src/mixins/emitter'
+import emitter from '../mixins/emitter'
 export default {
   name: 'ElTreee',
   mixins: [emitter],
@@ -48,7 +45,7 @@ export default {
     emptyText: {
       type: String,
       default () {
-        return t('el.tree.emptyText')
+        return '暂无数据'
       }
     },
     renderAfterExpand: {

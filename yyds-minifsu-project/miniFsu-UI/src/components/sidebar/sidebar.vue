@@ -110,6 +110,7 @@
       width 180px
       .link-li
         display: inline-block
+        width 100%
       // .el-submenu__icon-arrow
       //   right 8px
       // .el-submenu

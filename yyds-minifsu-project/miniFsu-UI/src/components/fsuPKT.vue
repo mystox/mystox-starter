@@ -2,7 +2,7 @@
   <div class="fsuList flex-column">
     <sc-breadcrumb
       :urls="[
-        {name: 'SN列表', path: '/fsus'},
+        {name: 'SN列表', path: _ctx + '/fsus'},
         {name: 'SN 日志记录'},
       ]"
     ></sc-breadcrumb>

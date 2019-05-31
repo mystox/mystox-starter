@@ -2,7 +2,7 @@
   <div class="deviceList flex-column">
     <sc-breadcrumb
       :urls="[
-        {name: 'SN列表', path: '/fsus'},
+        {name: 'SN列表', path: _ctx + '/fsus'},
         {name: '设备列表'},
       ]"
     ></sc-breadcrumb>
@@ -49,7 +49,7 @@
         <template slot-scope="scope">
           <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
             <router-link :to="{
-                  path: '/points',
+                  path: _ctx + '/points',
                   query: {
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,
@@ -61,7 +61,7 @@
               实时数据
             </router-link>
             <router-link :to="{
-                  path: '/alarmsForDevice',
+                  path: _ctx + '/alarmsForDevice',
                   query: {
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,
@@ -74,7 +74,7 @@
              / 实时告警
             </router-link>
             <router-link :to="{
-                  path: '/setAlarms',
+                  path: _ctx + '/setAlarms',
                   query: {
                       deviceId: scope.row.id,
                       resNo: scope.row.resNo,

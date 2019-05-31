@@ -70,10 +70,7 @@
 </template>
 
 <script type="text/jsx">
-import ElCollapseTransition from 'element-ui/src/transitions/collapse-transition'
-import ElCheckbox from 'element-ui/packages/checkbox'
-import ElRadio from 'element-ui/packages/radio'
-import emitter from 'element-ui/src/mixins/emitter'
+import emitter from '../mixins/emitter'
 
 export default {
   name: 'ElTreeNodee',
@@ -97,9 +94,6 @@ export default {
   },
 
   components: {
-    ElCollapseTransition,
-    ElCheckbox,
-    ElRadio,
     NodeContent: {
       props: {
         node: {

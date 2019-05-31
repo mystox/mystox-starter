@@ -1,4 +1,4 @@
-import objectAssign from 'element-ui/src/utils/merge'
+import objectAssign from '../../mixins/merge'
 import {
   markNodeData,
   NODE_KEY

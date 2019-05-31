@@ -3,7 +3,7 @@
     <sc-breadcrumb
       :urls="[
         {name: 'SN列表'},
-        {name: '设备列表', path: '/devices', query: {sN: $route.query.sN}},
+        {name: '设备列表', path: _ctx + '/devices', query: {sN: $route.query.sN}},
         {name: '设备下实时告警'},
       ]"
     ></sc-breadcrumb>
@@ -63,7 +63,7 @@
         <template slot-scope="scope">
           <div style="font-size: 14px; color: #20A0FF; cursor: pointer;">
             <router-link :to="{
-                  path: '/points',
+                  path: _ctx + '/points',
                   query: {
                       deviceId: scope.row.deviceId
                   }

@@ -54,15 +54,6 @@
 
 <script>
 // import ElTable1 from './table/src/table.vue'
-import Vue from 'vue'
-Vue.prototype.$tableFilter = filters => {
-  let filter = Vue.filter('modalFilter')
-  if (filters) {
-    return (row, column, cellValue) => {
-      return filter(cellValue, filters)
-    }
-  }
-}
 export default {
   name: 'tableBox',
   // components: {ElTable1},

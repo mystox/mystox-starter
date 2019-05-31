@@ -3,7 +3,7 @@
     <sc-breadcrumb
       :urls="[
         {name: 'SN列表'},
-        {name: '设备列表', path: '/devices', query: {sN: $route.query.sN}},
+        {name: '设备列表', path: _ctx + '/devices', query: {sN: $route.query.sN}},
         {name: '实时数据'},
       ]"
     ></sc-breadcrumb>
