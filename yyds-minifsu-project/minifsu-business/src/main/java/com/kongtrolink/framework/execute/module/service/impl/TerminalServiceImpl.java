@@ -314,7 +314,7 @@ public class TerminalServiceImpl implements TerminalService {
             }
             if (verSrr.length == 7)
             {
-                Pattern p = Pattern.compile("(\\d\\.){5}");
+                Pattern p = Pattern.compile("(\\d*\\.){5}");
                 Matcher matcher = p.matcher(adapterVer);
                 if (matcher.find())
                 {
@@ -341,9 +341,9 @@ public class TerminalServiceImpl implements TerminalService {
 
     public static void main(String[] args)
     {
-        String s = "1.2.3.4.5.6.7";
+        String s = "11.22.3.4.5.6.7";
         String[] a = s.split("\\.", 2);
-        Pattern p = Pattern.compile("(\\d\\.){5}");
+        Pattern p = Pattern.compile("(\\d*\\.){5}");
         Matcher matcher = p.matcher(s);
         if (matcher.find())
         {
