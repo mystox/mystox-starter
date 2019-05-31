@@ -18,8 +18,9 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -338,18 +339,65 @@ public class FSUController {
 
 
     @RequestMapping(value = "/remoteCompilerFileDown")
-    public void remoteCompilerFileDown(@RequestBody JSONObject body, HttpServletResponse response) {
-        String url = body.getString("url");
+    public void remoteCompilerFileDown(@RequestBody(required = false) JSONObject body, HttpServletResponse response,HttpServletRequest request) {
+//        String url = body.getString("url");
+        String urlStr = body.getString("url");
+        if (StringUtils.isNotBlank(urlStr))
+        {
+            urlStr=  urlStr.replace("\\", "/"); //系统容错
+        }
+        InputStream is = null;
+
+//        String url = "http://172.16.5.123:32804/Engine/Test/7/MMU100/CassEngine.bin";
         try {
-            response.sendRedirect(url);
-        } catch (IOException e) {
+            URL url = new URL(urlStr);
+            URLConnection urlc = url.openConnection();
+            urlc.setConnectTimeout(100000);
+            urlc.setReadTimeout(100000);
+            is = urlc.getInputStream();
+            response.setContentType("application/force-download");// 设置强制下载不打开
+//            response.addHeader("Content-Disposition", "attachment;fileName=" + );// 设置文件名
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+//                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(is);
+                OutputStream os = response.getOutputStream();
+                int i = bis.read(buffer);
+                while (i != -1) {
+                    os.write(buffer, 0, i);
+                    i = bis.read(buffer);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+//            request.getRequestDispatcher(url).forward(request,response);
+//            response.sendRedirect(url);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        logger.info("sendRedirect:{}",url);
+//        logger.info("sendRedirect:{}",url);
     }
     @RequestMapping(value = "/remoteCompilerFileDowna")
-    public void remoteCompilerFileDowna(@RequestBody JSONObject body, HttpServletResponse response,HttpServletRequest request) {
+    public void remoteCompilerFileDowna(@RequestBody JSONObject body, HttpServletResponse response) {
         String url = body.getString("url");
         logger.info("forward:{}",url);
+
     }
 }

@@ -129,6 +129,7 @@ public class ResourceController {
     public void documentDownload(@RequestParam String filename, @RequestParam String path, HttpServletResponse response) {
         File file = FileUtils.getFile(path);
         outFile(file,filename,response);
+
     }
 
 

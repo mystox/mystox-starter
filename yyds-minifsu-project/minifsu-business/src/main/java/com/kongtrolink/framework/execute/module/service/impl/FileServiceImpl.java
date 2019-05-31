@@ -149,9 +149,9 @@ public class FileServiceImpl implements FileService {
         try {
             URL url = new URL(urlStr);
             URLConnection urlc = url.openConnection();
-            is = urlc.getInputStream();
             urlc.setConnectTimeout(100000);
             urlc.setReadTimeout(100000);
+            is = urlc.getInputStream();
             File dir = ResourceUtils.getFile(snPath + File.separator + sn + File.separator);
             if (!dir.exists()) {
                 dir.mkdirs();

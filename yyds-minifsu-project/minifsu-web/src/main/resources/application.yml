@@ -15,7 +15,7 @@ logging:
 #    name: user-table,app-common
 #    location: classpath:/,classpath:/config
 server:
-  port: 8081
+  port: 18081
 management:
   security:
     enabled: false
