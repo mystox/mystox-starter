@@ -26,6 +26,8 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by mystoxlol on 2019/3/25, 10:34.
@@ -121,7 +123,6 @@ public class TerminalServiceImpl implements TerminalService {
         result.put("list", snList);
         return result;
     }
-
 
 
     @Override
@@ -241,7 +242,7 @@ public class TerminalServiceImpl implements TerminalService {
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + sn;
             JSONObject value = redisUtils.get(key, JSONObject.class);
             value.put("STATUS", 0);
-            redisUtils.set(key, value,value.getLong("expired"));
+            redisUtils.set(key, value, value.getLong("expired"));
         }
         result.put("result", 1);
         return result;
@@ -298,21 +299,37 @@ public class TerminalServiceImpl implements TerminalService {
         String sn = moduleMsg.getSN();
         JSONObject payload = moduleMsg.getPayload();
         String adapterVer = payload.getString("adapterVer");
-        if(StringUtils.isBlank(adapterVer)) {
+        if (StringUtils.isBlank(adapterVer)) {
             Terminal terminalBySn = terminalDao.findTerminalBySn(sn);
             TerminalProperties terminalPropertiesByTerminalId = terminalDao.findTerminalPropertiesByTerminalId(terminalBySn.getId());
             adapterVer = terminalPropertiesByTerminalId.getAdapterVer();
         }
-        adapterVer = adapterVer.split("\\.")[0] + ".*";
-        JSONObject result = new JSONObject();
         Integer businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
-        if (businessSceneId == null){
+        JSONObject result = new JSONObject();
+        if (businessSceneId == null)
+        {
+            String[] verSrr = adapterVer.split("\\.");
+            if (verSrr.length == 4) {
+                adapterVer = verSrr[0] + ".*";
+            }
+            if (verSrr.length == 7)
+            {
+                Pattern p = Pattern.compile("(\\d\\.){5}");
+                Matcher matcher = p.matcher(adapterVer);
+                if (matcher.find())
+                {
+                    String group = matcher.group(0);
+                    adapterVer = group + "*";
+                }
+            }
+            businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
+        }
+        if (businessSceneId == null) {
             result.put("result", 0);
             return result;
         }
         Integer productId = compilerDao.getProductId(sn.substring(0, 6));
-        if (productId == null)
-        {
+        if (productId == null) {
             result.put("result", 1);
             return result;
         }
@@ -320,6 +337,22 @@ public class TerminalServiceImpl implements TerminalService {
         result.put("productId", productId);
         result.put("fileVersionId", fileVersionId);
         return result;
+    }
+
+    public static void main(String[] args)
+    {
+        String s = "1.2.3.4.5.6.7";
+        String[] a = s.split("\\.", 2);
+        Pattern p = Pattern.compile("(\\d\\.){5}");
+        Matcher matcher = p.matcher(s);
+        if (matcher.find())
+        {
+            String group = matcher.group(0);
+            System.out.println(group);
+        }
+        System.out.println(a.length);
+        System.out.println(a[0]);
+
     }
 
     @Override
@@ -367,6 +400,7 @@ public class TerminalServiceImpl implements TerminalService {
 
     /**
      * 运行状态信息
+     *
      * @param moduleMsg
      * @return
      */
@@ -408,8 +442,6 @@ public class TerminalServiceImpl implements TerminalService {
                 sn, msgType, msgId, name, host);
         logService.saveLog(log);
     }
-
-
 
 
 }
