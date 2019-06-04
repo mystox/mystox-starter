@@ -246,6 +246,7 @@ public class FsuServiceImpl implements FsuService {
 
     @Override
     public JSONObject getEngineInfo(JSONObject compilerBody, String sn) {
+        logger.info(compilerBody.toJSONString());
         JSONObject result = new JSONObject();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
