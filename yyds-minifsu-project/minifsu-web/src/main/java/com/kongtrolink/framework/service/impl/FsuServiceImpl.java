@@ -305,11 +305,15 @@ public class FsuServiceImpl implements FsuService {
         String url = "";
         if (type == 1) { //升级引擎
             JSONObject engineVerDic = getEngineInfo(requestBody, sn);
-            name = engineVerDic.getString("Name");
-            engineVerDic.getString("Version");
-            md5 = engineVerDic.getString("MD5");
-            url = engineVerDic.getString("Url");
-            url = compilerServerUrl + ":" + engineDownloadPort + "/" + url;
+            if (engineVerDic.getInteger("result") ==null || engineVerDic.getInteger("result") != 0) {
+                name = engineVerDic.getString("Name");
+                engineVerDic.getString("Version");
+                md5 = engineVerDic.getString("MD5");
+                url = engineVerDic.getString("Url");
+                url = compilerServerUrl + ":" + engineDownloadPort + "/" + url;
+            }else {
+                return engineVerDic;
+            }
         }
         if (type == 2) { //升级适配层
             JSONArray deviceInfoList = requestBody.getJSONArray("deviceInfoList");
