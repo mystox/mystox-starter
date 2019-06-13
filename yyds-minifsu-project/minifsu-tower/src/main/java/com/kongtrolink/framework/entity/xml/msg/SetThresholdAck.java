@@ -30,7 +30,7 @@ public class SetThresholdAck extends Info {
 
     @Override
     public PKType pkType() {
-        return new PKType(CntbPktTypeTable.SET_POINT_ACK, CntbPktTypeTable.SET_POINT_ACK_CODE);
+        return new PKType(CntbPktTypeTable.SET_THRESHOLD_ACK, CntbPktTypeTable.SET_THRESHOLD_ACK_CODE);
     }
 
     public String getFsuId() {
