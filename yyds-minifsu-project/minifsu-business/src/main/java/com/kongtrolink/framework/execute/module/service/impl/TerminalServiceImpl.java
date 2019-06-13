@@ -306,6 +306,7 @@ public class TerminalServiceImpl implements TerminalService {
         }
         Integer businessSceneId = compilerDao.getBusinessSceneId(adapterVer);
         JSONObject result = new JSONObject();
+
         if (businessSceneId == null)
         {
             String[] verSrr = adapterVer.split("\\.");
@@ -339,21 +340,6 @@ public class TerminalServiceImpl implements TerminalService {
         return result;
     }
 
-    public static void main(String[] args)
-    {
-        String s = "11.22.3.4.5.6.7";
-        String[] a = s.split("\\.", 2);
-        Pattern p = Pattern.compile("(\\d*\\.){5}");
-        Matcher matcher = p.matcher(s);
-        if (matcher.find())
-        {
-            String group = matcher.group(0);
-            System.out.println(group);
-        }
-        System.out.println(a.length);
-        System.out.println(a[0]);
-
-    }
 
     @Override
     public JSONObject terminalLogSave(ModuleMsg moduleMsg) {

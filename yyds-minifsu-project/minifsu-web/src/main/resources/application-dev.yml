@@ -37,7 +37,7 @@ rpc:
   client:
     timeout: 60000
   controller:
-    hostname: 172.16.6.50
+    hostname: 172.16.6.109
     port: 18800
 compiler:
   server:
