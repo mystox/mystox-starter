@@ -14,7 +14,7 @@
     <modules>
         <module>GateWay-Tcp</module>
         <module>GateWay-NB-Cmcc</module>
-        <module>GateWay-NB-Ctcc</module>
+        <!--<module>GateWay-NB-Ctcc</module>-->
     </modules>
 
 
