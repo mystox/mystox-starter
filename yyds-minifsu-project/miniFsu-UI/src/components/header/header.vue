@@ -1,20 +1,17 @@
 <template>
   <div class="header">
-    <div v-if="comFunc.authorityMap(2000, authModules)" class="brand" style="background: #ffffff">
-      <img src="./logo-cmcc.png" alt="">
-    </div>
-    <div v-else-if="comFunc.authorityMap([1000, 4000], authModules)" class="brand" style="background: #256AAA;">
+    <div class="brand" style="background: #545c64;">
       <img style="width: 130px;" src="./logo-home.png" alt="logo">
     </div>
     <ul class="nav-bar">
-      <li class="userInfo">
+      <!-- <li class="userInfo">
         <span class="icon iconfont icon-user icon-lg"></span>
        {{username ? username : '-'}}
-      </li>
+      </li> -->
      <!--  <li @click="dialogVisible = true">
         <i class="icon iconfont icon-shuoming icon-lg"></i><span >{{$t('NAV.NAV_INSTRUCTION')}}</span>
       </li> -->
-      <li v-if="authModules && comFunc.authorityMap(null, authModules)">
+      <!-- <li v-if="authModules && comFunc.authorityMap(null, authModules)">
         <el-select v-model="selectedLang"  @change="handleSelectedChange">
           <el-option v-for="item in langOptions"
                      :label="item.label"
@@ -22,7 +19,7 @@
                      :value="item.value">
           </el-option>
         </el-select>
-      </li>
+      </li> -->
 
       <li class="logout" @click="toLogout()">
         <i class="icon iconfont icon-tuichu icon-lg"></i><span >{{$t('NAV.NAV_LOGOUT')}}</span>
@@ -38,12 +35,8 @@
 </template>
 
 <script>
-  import Instruction from '../instruction/instruction'
   export default {
-    name: 'v-header',
-    components: {
-      "v-instruction": Instruction,
-    },
+    name: 'headerbar',
     props: {
     },
     data () {
@@ -67,9 +60,9 @@
         username = JSON.parse(sessionStorage.getItem("username"));
         return username
       },
-      authModules() {
-        return JSON.parse(sessionStorage.getItem('user')).modules;
-      },
+      // authModules() {
+      //   return JSON.parse(sessionStorage.getItem('user')).modules;
+      // },
   },
     methods: {
       handleSelectedChange(val) {
@@ -80,9 +73,9 @@
        * 注销登录
        * */
       toLogout() {
-        sessionStorage.removeItem('user');    // 清除session中的用户信息
+        sessionStorage.removeItem('username');    // 清除session中的用户信息
         this.$router.push('/');    // 路由跳转到登录页。
-        window.location.reload();
+        // window.location.reload();
       },
       /*
       * 选中导航之后触发
@@ -130,6 +123,8 @@
       line-height: 56px;
       position: absolute;
       right: 22px;
+      .logout
+        cursor pointer
       li
         margin-right: 20px;
         display: inline-block;

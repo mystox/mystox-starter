@@ -58,6 +58,7 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
               return Promise.resolve(res);
             } else {
               message(failMsg || res.info, "error", true);
+              return Promise.reject(res.info);
             }
           },
           httpErr => {
@@ -74,6 +75,11 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
     const failMsg = "操作失败";
 
     const $api = {
+      // 登录
+      authLogin (param) {
+        return post(`${base}auth/login`, param);
+      },
+      
       // 导入终端列表
       importTerminalList (param) {
         return post(`${base}fsu/terminal/import`, param, successMsg, failMsg);

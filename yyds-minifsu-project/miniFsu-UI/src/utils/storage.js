@@ -19,7 +19,7 @@ export default {
             // use SessionStorage
 
             setSessionItem(key, value) {
-                sessionStorage.setItem(key, JSON.stringfy(value));
+                sessionStorage.setItem(key, JSON.stringify(value));
             },
 
             getSessionItem(key) {

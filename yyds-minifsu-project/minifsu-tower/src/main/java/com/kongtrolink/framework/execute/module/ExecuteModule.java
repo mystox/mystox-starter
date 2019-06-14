@@ -88,7 +88,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                     break;
                 case PktType.FSU_BIND:
                     result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
-                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
+//                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
                     break;
                 case PktType.TERMINAL_UNBIND:
                     result = towerService.fsuUnbind(moduleMsg.getSN());

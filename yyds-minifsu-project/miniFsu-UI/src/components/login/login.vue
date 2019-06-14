@@ -36,7 +36,6 @@
                 >
                 登录
               </el-button>
-              <!--<el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>-->
             </el-form-item>
             <el-form-item>
               <el-button type="info" @click="resetForm('loginForm')">重置</el-button>
@@ -64,13 +63,13 @@
       };
 
       let validatePass = (rule, value, callback) => {
-        if (value === '') {
+        if (!value) {
           callback(new Error('密码不可为空'));
         };
-        let byteNum = this.comFunc.getByteNum(value);
-        if (this.comFunc.getByteNum(value) > 20) {
-          callback(new Error('密码输入过长'));
-        }
+        // let byteNum = this.comFunc.getByteNum(value);
+        // if (this.comFunc.getByteNum(value) > 20) {
+        //   callback(new Error('密码输入过长'));
+        // }
         setTimeout(() => {
           callback(); // 运行回调，加载动画
         }, 1000);
@@ -107,19 +106,16 @@
           username: this.ruleForm.username,
           password: this.ruleForm.password
         };
-        this.$router.push('/fsus');
-        // this.appHttp.postLogin(params).then(function (data) {
-        //   // this.$storage.setSessionItem('user', data);
-        //   // this.$storage.setSessionItem('username', this.ruleForm.username);
-        //   this.$emit('user', this.user);
-        //   this.$router.push('/main');
-        // }.bind(this))
+        this.$api.authLogin(params).then(((data)=> {
+          // this.$emit('user', this.user);
+          this.$storage.setSessionItem('username', this.ruleForm.username);
+          this.$router.push('/fsus');
+        }).bind(this))
       },
       submitForm(formName) {
-        this.toLogin();
-        // this.$refs[formName].validate( (valid)=> {
-          // valid && this.toLogin();
-        // })
+        this.$refs[formName].validate( (valid)=> {
+          valid && this.toLogin();
+        })
       },
       resetForm(formName) {
         this.$refs[formName].resetFields();

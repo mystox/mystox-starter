@@ -43,7 +43,7 @@ const webpackConfig = {
   },
   // 输出到静态目录下
   output: {
-    path: resolve('/dist/'),
+    path: resolve('../minifsu-web/src/main/resources/static/SCloud/'),
     filename: '[name].js',
   },
   resolve: {

@@ -5,9 +5,9 @@
       <v-sidebar></v-sidebar>
     </div>
 
-    <!-- <div class="header-wrapper">
-      <v-header></v-header>
-    </div> -->
+    <div class="header-wrapper">
+      <v-headerbar></v-headerbar>
+    </div>
 
     <div class="content-wrapper">
       <!--<keep-alive>-->
@@ -20,12 +20,12 @@
 
 <script>
   import sidebar from './sidebar/sidebar.vue';
-  // import header from './header/header.vue';
+  import headerbar from './header/header.vue';
   export default {
     name: 's-main-layout',
     components: {
       'v-sidebar': sidebar,
-      // 'v-header': header
+      'v-headerbar': headerbar
     },
   }
 </script>
