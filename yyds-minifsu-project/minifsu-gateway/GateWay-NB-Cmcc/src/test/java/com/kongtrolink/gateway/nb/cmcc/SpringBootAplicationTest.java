@@ -52,6 +52,13 @@ public class SpringBootAplicationTest {
 
 
 
+    }
+
+
+    @Test
+    public void addDevice() {
+
+        service.addDevice("testAdd","1234","123456789012345");
 
 
     }
