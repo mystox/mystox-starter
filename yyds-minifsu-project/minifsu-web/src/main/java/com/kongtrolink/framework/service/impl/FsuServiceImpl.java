@@ -363,7 +363,7 @@ public class FsuServiceImpl implements FsuService {
         if (type == 1)  //升级引擎
             url = downEngine + "/" + guid;
         if (type == 2) //升级适配层
-            url = downAdapter + "/" + guid;
+            url = downAdapter + "/" + guid + "/" + name;
 
         result.put("url", url);
         String path = "AppResources/sn/" + sn + "/" + name;
