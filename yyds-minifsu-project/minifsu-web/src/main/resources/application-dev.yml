@@ -42,7 +42,8 @@ rpc:
 compiler:
   server:
     url: http://172.16.5.123 #编译服务器地址
-    outUrl: http://172.16.5.123 #编译服务器外网地址
+    downEngine: http://172.16.5.123: #编译服务器外网地址
+    downAdapter: http://172.16.5.123: #编译服务器外网地址
     compilerPort: 14141 #适配层编译服务端口
     compilerDownloadPort: 32810 #编译服务器文件下载端口
     enginePort: 24242 #引擎服务端口

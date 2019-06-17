@@ -43,6 +43,12 @@ public class FsuServiceImpl implements FsuService {
     @Value("${compiler.server.url:http://omc.kongtrolink.com}")
     private String compilerServerUrl;
 
+    @Value("${compiler.server.downAdapter:http://omc.kongtrolink.com}")
+    private String downAdapter;
+
+    @Value("${compiler.server.downEngine:http://omc.kongtrolink.com}")
+    private String downEngine;
+
     @Value("${compiler.server.url:http://omc.kongtrolink.com}")
     private String outCompilerServerUrl;
 
@@ -302,7 +308,6 @@ public class FsuServiceImpl implements FsuService {
         JSONObject result = new JSONObject();
         String guid = UUID.randomUUID().toString();
 
-
         String md5 = "";
         String name = "";
         String url = "";
@@ -355,10 +360,12 @@ public class FsuServiceImpl implements FsuService {
         result.put("GUID", guid);
         result.put("md5", md5);
 
-        url = outCompilerServerUrl + ":" + compilerServerDownloadPort + "/" + guid;
+        if (type == 1)  //升级引擎
+            url = downEngine + "/" + guid;
+        if (type == 2) //升级适配层
+            url = downAdapter + "/" + guid;
+
         result.put("url", url);
-
-
         String path = "AppResources/sn/" + sn + "/" + name;
         result.put("path", path);
         return result;
