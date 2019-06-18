@@ -43,6 +43,15 @@ public class FsuServiceImpl implements FsuService {
     @Value("${compiler.server.url:http://omc.kongtrolink.com}")
     private String compilerServerUrl;
 
+    @Value("${compiler.server.downAdapter:http://omc.kongtrolink.com}")
+    private String downAdapter;
+
+    @Value("${compiler.server.downEngine:http://omc.kongtrolink.com}")
+    private String downEngine;
+
+    @Value("${compiler.server.url:http://omc.kongtrolink.com}")
+    private String outCompilerServerUrl;
+
     @Value("${compiler.server.compilerPort}")
     private int compilerServerPort;
 
@@ -222,7 +231,7 @@ public class FsuServiceImpl implements FsuService {
         JSONObject result = new JSONObject();
         String body = forEntity.getBody();
         JSONObject compilerDeviceInfo = JSON.parseObject(body);
-        if (compilerConfig.getInteger("result") ==null || compilerConfig.getInteger("result") != 0) {
+        if (compilerConfig.getInteger("result") == null || compilerConfig.getInteger("result") != 0) {
             Integer fileVersionId = compilerConfig.getInteger("fileVersionId");
             Integer businessSceneId = compilerConfig.getInteger("businessSceneId");
             Integer productId = compilerConfig.getInteger("productId");
@@ -255,7 +264,7 @@ public class FsuServiceImpl implements FsuService {
         String body = forEntity.getBody();
         JSONObject engineInfo = JSON.parseObject(body);
         JSONObject compilerConfig = getCompilerConfig(compilerBody, sn);
-        if (compilerConfig.getInteger("result") ==null || compilerConfig.getInteger("result") != 0) {
+        if (compilerConfig.getInteger("result") == null || compilerConfig.getInteger("result") != 0) {
             Integer fileVersionId = compilerConfig.getInteger("fileVersionId");
             Integer businessSceneId = compilerConfig.getInteger("businessSceneId");
             Integer productId = compilerConfig.getInteger("productId");
@@ -299,19 +308,18 @@ public class FsuServiceImpl implements FsuService {
         JSONObject result = new JSONObject();
         String guid = UUID.randomUUID().toString();
 
-
         String md5 = "";
         String name = "";
         String url = "";
         if (type == 1) { //升级引擎
             JSONObject engineVerDic = getEngineInfo(requestBody, sn);
-            if (engineVerDic.getInteger("result") ==null || engineVerDic.getInteger("result") != 0) {
+            if (engineVerDic.getInteger("result") == null || engineVerDic.getInteger("result") != 0) {
                 name = engineVerDic.getString("Name");
                 engineVerDic.getString("Version");
                 md5 = engineVerDic.getString("MD5");
                 url = engineVerDic.getString("Url");
                 url = compilerServerUrl + ":" + engineDownloadPort + "/" + url;
-            }else {
+            } else {
                 return engineVerDic;
             }
         }
@@ -321,7 +329,7 @@ public class FsuServiceImpl implements FsuService {
                 HashedMap deviceListSearch = new HashedMap();
                 JSONArray deviceList = getDeviceList(deviceListSearch, sn);
                 List<Device> devices = JSONArray.parseArray(deviceList.toJSONString(), Device.class);//获取device列表
-                deviceInfoList = createDeviceInfoList(requestBody,sn, devices);   //编译设备信息列表生成
+                deviceInfoList = createDeviceInfoList(requestBody, sn, devices);   //编译设备信息列表生成
             }
             JSONObject compilerConfig = getCompilerConfig(requestBody, sn);
             Integer fileVersionId = compilerConfig.getInteger("fileVersionId");
@@ -329,7 +337,7 @@ public class FsuServiceImpl implements FsuService {
             Integer productId = compilerConfig.getInteger("productId");
             JSONObject compilerResult = compileBody(guid, fileVersionId, businessSceneId, productId, deviceInfoList);
             if (!compilerResult.getBoolean("Result")) {
-                logger.error("编译服务器执行结果失败:{}",compilerResult.toJSONString());
+                logger.error("编译服务器执行结果失败:{}", compilerResult.toJSONString());
                 result.put("result", 0);
                 result.put("info", compilerResult.toJSONString());
                 return result;
@@ -351,9 +359,14 @@ public class FsuServiceImpl implements FsuService {
         result.put("name", name);
         result.put("GUID", guid);
         result.put("md5", md5);
-        result.put("url", url);
 
-        String path = "AppResources/sn/"+sn+"/"+name;
+        if (type == 1)  //升级引擎
+            url = downEngine + "/" + guid;
+        if (type == 2) //升级适配层
+            url = downAdapter + "/" + guid + "/" + name;
+
+        result.put("url", url);
+        String path = "AppResources/sn/" + sn + "/" + name;
         result.put("path", path);
         return result;
     }

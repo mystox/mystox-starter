@@ -57,6 +57,15 @@ public class TerminalDao {
         if (StringUtils.isNotBlank(sn)) {
             criteria = Criteria.where("SN").regex(sn);
         }
+        String fsuId = jsonObject.getString("fsuId");
+        if (StringUtils.isNotBlank(sn)) {
+            criteria = Criteria.where("fsuId").regex(fsuId);
+        }
+        String name = jsonObject.getString("name");
+        if (StringUtils.isNotBlank(sn)) {
+            criteria = Criteria.where("name").regex(name);
+        }
+
         return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count), Terminal.class, MongoTableName.TERMINAL);
     }
 
