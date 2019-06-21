@@ -130,7 +130,7 @@ public class MinifsuControllerApplicationTests {
 //		redisUtils.hset("12", "24", "re");
 //		System.out.println(redisUtils.hHasKey("12", "23"));
 
-		Set<String> list = redisUtils.keys(RedisTable.getDataKey("43048243800189:", "*"));
+		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
 		System.out.println(list);
 	}
 
@@ -231,6 +231,15 @@ public class MinifsuControllerApplicationTests {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	@Test
+	public void test111() {
+		try {
+			System.out.println(JSONObject.toJSONString(null));
+		} catch (Exception ex) {
+			System.out.println(ex);
 		}
 	}
 

@@ -1,10 +1,8 @@
 package com.kongtrolink.framework.service;
 
-import com.kongtrolink.framework.entity.RedisTable;
-import com.kongtrolink.framework.core.utils.RedisUtils;
-import com.kongtrolink.framework.execute.module.dao.DevTypeDao;
 import com.kongtrolink.framework.execute.module.model.DevType;
 import com.kongtrolink.framework.jsonType.JsonDevice;
+import com.kongtrolink.framework.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +17,7 @@ import java.util.*;
 public class DeviceMatchService {
 
     @Autowired
-    DevTypeDao devTypeDao;
-
-    @Autowired
-    RedisUtils redisUtils;
+    CommonUtils commonUtils;
 
     private final static int CNTB_TYPE_START_INDEX = 7;
     private final static int CNTB_TYPE_END_INDEX = 9;
@@ -46,13 +41,13 @@ public class DeviceMatchService {
 
         //todo 遍历curList，在cntbList中查找对应的铁塔设备ID，并将信息填入cntbList中
         for (JsonDevice curDevice : curList) {
-            String cntbType = getCntbType(curDevice.getType());
-            if (cntbType == null) {
+            DevType devType = commonUtils.getDevTypeByType(curDevice.getType());
+            if (devType == null) {
                 //获取不到铁塔设备类型，跳过
                 continue;
             }
             for (JsonDevice jsonDevice : cntbList) {
-                if (jsonDevice.getDeviceId().indexOf(cntbType) == CNTB_TYPE_START_INDEX &&
+                if (jsonDevice.getDeviceId().indexOf(devType.getCntbType()) == CNTB_TYPE_START_INDEX &&
                         jsonDevice.getPort() == null) {
                     jsonDevice.setPort(curDevice.getPort());
                     jsonDevice.setType(curDevice.getType());
@@ -61,35 +56,6 @@ public class DeviceMatchService {
                 }
             }
         }
-    }
-
-    /**
-     * 获取内部设备类型对应的铁塔设备类型
-     * @param type 内部设备类型
-     * @return 铁塔设备类型，若未找到，返回null
-     */
-    private String getCntbType(int type) {
-        if (!redisUtils.hasKey(RedisTable.CNTBTYPE_TYPE_HASH)) {
-            Map<Integer, String > map = devTypeDao.getAll();
-            Map<String, Object> tmp = new HashMap<>();
-            //遍历map中的键
-            for (Integer key : map.keySet()) {
-                tmp.put(key.toString(), map.get(key));
-            }
-            if (!redisUtils.hmset(RedisTable.CNTBTYPE_TYPE_HASH, tmp, 0)) {
-                //redis中添加失败，返回null
-                return null;
-            }
-        }
-        if (!redisUtils.hHasKey(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type))) {
-            DevType devType = devTypeDao.getInfoByType(type);
-            if (devType == null ||
-                !redisUtils.hset(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type), devType.getCntbType())) {
-                //找不到对应设备类型或redis中添加失败，返回null
-                return null;
-            }
-        }
-        return redisUtils.hget(RedisTable.CNTBTYPE_TYPE_HASH, String.valueOf(type)).toString();
     }
 
     /**
@@ -117,7 +83,7 @@ public class DeviceMatchService {
      * @param deviceId 铁塔设备Id
      * @return 设备类型
      */
-    String getCntbType(String deviceId) {
+    public String getCntbType(String deviceId) {
         String result = deviceId.substring(CNTB_TYPE_START_INDEX, CNTB_TYPE_END_INDEX);
         if (result.equals("18")) {
             //若为18，则是环境变量，需再取一位作为设备类型

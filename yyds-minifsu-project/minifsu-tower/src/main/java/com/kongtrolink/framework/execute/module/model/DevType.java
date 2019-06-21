@@ -8,6 +8,8 @@ public class DevType {
     private int type;
     //铁塔设备类型
     private String cntbType;
+    //铁塔设备名称
+    private String name;
 
     public int getType() {
         return type;
@@ -23,5 +25,13 @@ public class DevType {
 
     public void setCntbType(String cntbType) {
         this.cntbType = cntbType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
