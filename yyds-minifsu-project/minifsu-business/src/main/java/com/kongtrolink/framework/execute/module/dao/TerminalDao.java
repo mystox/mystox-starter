@@ -58,22 +58,35 @@ public class TerminalDao {
             criteria = Criteria.where("SN").regex(sn);
         }
         String fsuId = jsonObject.getString("fsuId");
-        if (StringUtils.isNotBlank(sn)) {
+        if (StringUtils.isNotBlank(fsuId)) {
             criteria = Criteria.where("fsuId").regex(fsuId);
         }
         String name = jsonObject.getString("name");
-        if (StringUtils.isNotBlank(sn)) {
+        if (StringUtils.isNotBlank(name)) {
             criteria = Criteria.where("name").regex(name);
+        }
+        Boolean isMap = jsonObject.getBoolean("isMap");
+        if (isMap != null && isMap) {
+            return mongoTemplate.find(Query.query(criteria), Terminal.class, MongoTableName.TERMINAL);
         }
 
         return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count), Terminal.class, MongoTableName.TERMINAL);
     }
+
 
     public Long findTerminalCount(JSONObject jsonObject) {
         String sn = jsonObject.getString("sn");
         Criteria criteria = new Criteria();
         if (StringUtils.isNotBlank(sn)) {
             criteria = Criteria.where("SN").regex(sn);
+        }
+        String fsuId = jsonObject.getString("fsuId");
+        if (StringUtils.isNotBlank(fsuId)) {
+            criteria = Criteria.where("fsuId").regex(fsuId);
+        }
+        String name = jsonObject.getString("name");
+        if (StringUtils.isNotBlank(name)) {
+            criteria = Criteria.where("name").regex(name);
         }
         return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL);
     }
@@ -158,6 +171,6 @@ public class TerminalDao {
 
 
     public List<Terminal> findTerminalByFsuId(String fsuId) {
-        return mongoTemplate.find(Query.query(Criteria.where("fsuId").is(fsuId)), Terminal.class,MongoTableName.TERMINAL);
+        return mongoTemplate.find(Query.query(Criteria.where("fsuId").is(fsuId)), Terminal.class, MongoTableName.TERMINAL);
     }
 }

@@ -474,25 +474,32 @@ public class FsuServiceImpl implements FsuService {
 
 
     @Override
-    public List<Fsu> getFsuListByCoordinate(Map fsuMap) {
+    public JSONArray getFsuListByCoordinate(Map fsuMap) {
         String coordinate = (String) fsuMap.get("coordinate");
         if (StringUtils.isBlank(coordinate))
             return null;
         String[] coordinateLocation = coordinate.split(",");
 
-//        List<Fsu> fsuList = listFsu(null);
-        List<Fsu> fsuList = new ArrayList<>();
+        fsuMap.put("isMap", true);
+        JSONObject jsonObject = listFsu(fsuMap);
+        JSONArray fsuList = jsonObject.getJSONArray("list");
 
-        List<Fsu> result = new ArrayList<>();
-        for (Fsu fsu : fsuList) {
-            String fsuCoordinate = fsu.getCoordinate();
-            if (StringUtils.isNotBlank(fsuCoordinate)) {
-                String[] fsuCoordinateArr = fsuCoordinate.split(",");
+        JSONArray result = new JSONArray();
+        for (Object fsu : fsuList) {
+            if(fsu instanceof JSONObject) {
+                JSONObject fsuJson = (JSONObject) fsu;
+                String fsuCoordinate = fsuJson.getString("coordinate");
+                if (StringUtils.isNotBlank(fsuCoordinate)) {
+                    String[] fsuCoordinateArr = fsuCoordinate.split(",");
 
-                double distance = LocationUtils.getDistance(fsuCoordinateArr[0], fsuCoordinateArr[1], coordinateLocation[0], coordinateLocation[1]);
-                if (distance < 2000) {
-                    result.add(fsu);
+                    double distance = LocationUtils.getDistance(fsuCoordinateArr[0], fsuCoordinateArr[1], coordinateLocation[0], coordinateLocation[1]);
+                    if (distance < 2000) {
+                        result.add(fsuJson);
+                    }
                 }
+            }else
+            {
+                logger.error("fsu can't cast to JSONObject...{}" ,fsu.toString());
             }
         }
         return result;

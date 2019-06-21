@@ -21,23 +21,27 @@ login:
 #      host: 172.16.6.9
 #      port: 27017
 #      database: 3dConfiguration
+
 spring:
-  data:
-    mongodb:
-      host: 172.16.6.9
-      port: 27017
-      database: minifsu2
   http:
     multipart:
       enabled: true
+  redis:
+    ## Redis数据库索引(默认为0)
+    database: 2
+    ## 连接超时时间（毫秒）
+    timeout: 60000
+    ## 连接池最大连接数（使用负值表示没有限制）
+    host: 172.16.5.26
+    port: 6379
 server:
   name: minifsu-web
-  bindIp: 172.16.6.50
+  bindIp: 172.16.6.240
 rpc:
   client:
     timeout: 60000
   controller:
-    hostname: 172.16.6.109
+    hostname: 172.16.6.240
     port: 18800
 compiler:
   server:

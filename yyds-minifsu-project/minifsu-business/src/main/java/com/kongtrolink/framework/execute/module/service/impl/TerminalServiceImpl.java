@@ -110,11 +110,18 @@ public class TerminalServiceImpl implements TerminalService {
             terminalJSON.put("FSUType", model);
             String key = RedisHashTable.COMMUNICATION_HASH + ":" + terminal.getSN();
             JSONObject value = redisUtils.get(key, JSONObject.class);
+            String wip = "";
             if (value != null) {
                 terminalJSON.put("status", value.get("STATUS"));
             } else {
                 terminalJSON.put("status", 0);
             }
+                Order orderByBid = terminalDao.findOrderByBid(terminal.getBID());
+                if (orderByBid!=null)
+                {
+                    wip = orderByBid.getBIP();
+                }
+            terminalJSON.put("wip", wip);
             TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
             if (terminalProperties != null)
                 terminalJSON.putAll((JSONObject) JSONObject.toJSON(terminalProperties));

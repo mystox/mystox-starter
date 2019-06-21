@@ -81,7 +81,7 @@ public class FSUController {
 
     @RequestMapping("/getFsuListByCoordinate")
     public JsonResult getFsuListByCoordinate(@RequestBody(required = false) Map<String, Object> requestBody) {
-        List<Fsu> result = fsuService.getFsuListByCoordinate(requestBody);
+        JSONArray result = fsuService.getFsuListByCoordinate(requestBody);
         return new JsonResult(result);
 
     }

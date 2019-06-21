@@ -26,7 +26,7 @@ public interface FsuService {
 
     JSONArray getDeviceList(Map<String, Object> requestBody, String fsuId);
 
-    List<Fsu>  getFsuListByCoordinate(Map fsuMap);
+    JSONArray  getFsuListByCoordinate(Map fsuMap);
 
     JSONObject listFsu(Map<String, Object> requestBody);
 
