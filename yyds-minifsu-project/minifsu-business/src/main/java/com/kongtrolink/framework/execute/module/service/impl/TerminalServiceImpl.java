@@ -119,7 +119,7 @@ public class TerminalServiceImpl implements TerminalService {
                 Order orderByBid = terminalDao.findOrderByBid(terminal.getBID());
                 if (orderByBid!=null)
                 {
-                    wip = orderByBid.getBIP();
+                    wip = orderByBid.getWIP();
                 }
             terminalJSON.put("wip", wip);
             TerminalProperties terminalProperties = terminalDao.findTerminalPropertiesByTerminalId(terminalId);
@@ -177,8 +177,6 @@ public class TerminalServiceImpl implements TerminalService {
             }
         }
         Terminal terminal = terminalDao.findTerminalBySn(sn);
-
-
         Object heartCycle = jsonObject.get("heartCycle");
         if (heartCycle != null) terminal.setHeartCycle((Integer) heartCycle);
         Object businessRhythm = jsonObject.get("businessRhythm");
@@ -196,9 +194,11 @@ public class TerminalServiceImpl implements TerminalService {
         String coordinate = jsonObject.getString("coordinate");
         if (StringUtils.isNotBlank(coordinate)) terminal.setCoordinate(coordinate);
         String name = jsonObject.getString("name"); //别名
-        if (StringUtils.isNotBlank(coordinate)) terminal.setName(name);
+        if (StringUtils.isNotBlank(name)) terminal.setName(name);
+        String userId = jsonObject.getString("userId"); //运维人员id
+        if (StringUtils.isNotBlank(userId)) terminal.setUserId(userId);
         String address = jsonObject.getString("address"); //坐标
-        if (StringUtils.isNotBlank(coordinate)) terminal.setAddress(address);
+        if (StringUtils.isNotBlank(address)) terminal.setAddress(address);
         String bid = jsonObject.getString("BID");
         if (StringUtils.isBlank(bid)) bid = "default";
         JSONObject result = new JSONObject();

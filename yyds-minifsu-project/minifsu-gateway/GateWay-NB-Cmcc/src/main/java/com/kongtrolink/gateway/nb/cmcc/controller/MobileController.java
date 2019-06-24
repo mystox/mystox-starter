@@ -1,6 +1,7 @@
 package com.kongtrolink.gateway.nb.cmcc.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.gateway.nb.cmcc.entity.CommandInfo;
 import com.kongtrolink.gateway.nb.cmcc.entity.DeviceInfo;
 import com.kongtrolink.gateway.nb.cmcc.entity.base.BaseAck;
@@ -31,8 +32,9 @@ public class MobileController {
 
     @RequestMapping("/addDevice")
     public @ResponseBody
-    JsonResult addDevice(@RequestBody DeviceInfo deviceInfo) {
+    JsonResult addDevice(@RequestBody JSONObject requestBody) {
         try{
+            DeviceInfo deviceInfo = JSONObject.toJavaObject(requestBody, DeviceInfo.class);
             BaseAck value = nbIotService.addDevice(deviceInfo.getTitle(),deviceInfo.getImei(),deviceInfo.getImsi());
             AddDeviceAck ack = EntityUtil.getEntity(value,AddDeviceAck.class);
             System.out.println("id:"+ack.getDevice_id());

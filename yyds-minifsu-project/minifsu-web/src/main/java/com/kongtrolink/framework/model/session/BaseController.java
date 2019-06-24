@@ -99,6 +99,13 @@ public abstract class BaseController {
         return null;
     }
 
+    public List<String> getManagerUsers() {
+        Object attribute = getSession().getAttribute(SessionConstant.USER_MANAGER_LIST);
+        if (attribute != null)
+            return JSONArray.parseArray(JSON.toJSONString(attribute), String.class);
+        return null;
+    }
+
     public String getClientVersion() {
         return (String) getSession().getAttribute(SessionConstant.CLIENT_VERSION);
     }

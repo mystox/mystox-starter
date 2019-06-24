@@ -52,10 +52,7 @@ compiler:
     compilerDownloadPort: 32810 #编译服务器文件下载端口
     enginePort: 24242 #引擎服务端口
     engineDownloadPort: 32804 #引擎服务器文件下载端口
-  businessScene:
-    4:
-    - 9.0.0.1
-  product:
-    10:
-    - MMU100
-    - MINI21
+nb:
+  url:
+    cmcc: http://172.16.6.240:17703 #移动NB服务的WEB接口,可以为外网映射,与nb订阅关联的地址同义
+    ctcc: http://

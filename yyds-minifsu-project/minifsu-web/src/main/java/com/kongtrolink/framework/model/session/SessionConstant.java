@@ -26,6 +26,7 @@ public class SessionConstant {
      */
 
     public static final String CURRENT_ORG_TREE = "CURRENT_ORG_TREE";//当前有用户组织树
+    public static final String USER_MANAGER_LIST = "USER_MANAGER_LIST";//当前用户管辖的用户列表
 
     public static final String LOGIN_USER_SUB_SERVICE = "LOGIN_USER_SUB_SERVICE";//存放当前用户订阅的服务
 

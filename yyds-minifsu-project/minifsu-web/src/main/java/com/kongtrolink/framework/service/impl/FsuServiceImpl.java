@@ -13,6 +13,7 @@ import com.kongtrolink.framework.dao.OperatorHistoryDao;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.model.OperatHistory;
 import com.kongtrolink.framework.service.FsuService;
+import com.kongtrolink.framework.util.JsonResult;
 import com.kongtrolink.framework.util.LocationUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * \* @Author: mystox
@@ -63,6 +67,11 @@ public class FsuServiceImpl implements FsuService {
 
     @Value("${compiler.server.engineDownloadPort}")
     private int engineDownloadPort;
+
+    @Value("${nb.url.cmcc}")
+    private String cmccNetUrl;
+    @Value("${nb.url.ctcc}")
+    private String ctccNetUrl;
 
 
     private RestTemplate restTemplate;
@@ -275,6 +284,25 @@ public class FsuServiceImpl implements FsuService {
             result.put("info", "compilerConfig can not find");
             return result;
         }
+    }
+
+    @Override
+    public JSONObject registerToNb(Map<String, Object> requestBody, String sn) {
+        JSONObject result = new JSONObject();
+        if (requestBody == null) {
+            return null;
+        }
+        JSONObject deviceJson = new JSONObject();
+        deviceJson.put("imsi", requestBody.get("imsi"));
+        deviceJson.put("imei",requestBody.get("imei"));
+        deviceJson.put("title", sn);
+        ResponseEntity<JsonResult> forEntity = restTemplate.getForEntity(restTemplate + "/addDevice", JsonResult.class, deviceJson);
+        JsonResult body = forEntity.getBody();
+        logger.info("register result: {}",body);
+        if (body.isSuccess()) {
+            result.put("result", 1);
+        }
+        return result;
     }
 
 

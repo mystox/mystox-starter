@@ -13,6 +13,16 @@ public class User implements Serializable{
     private String username;
     private String password;
 
+    private String currentRoleName;
+
+
+    public String getCurrentRoleName() {
+        return currentRoleName;
+    }
+
+    public void setCurrentRoleName(String currentRoleName) {
+        this.currentRoleName = currentRoleName;
+    }
 
     public String getUsername() {
         return username;

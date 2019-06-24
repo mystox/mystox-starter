@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.execute.module.dao;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.execute.module.model.*;
@@ -59,14 +60,18 @@ public class TerminalDao {
         }
         String fsuId = jsonObject.getString("fsuId");
         if (StringUtils.isNotBlank(fsuId)) {
-            criteria = Criteria.where("fsuId").regex(fsuId);
+            criteria = criteria.and("fsuId").regex(fsuId);
         }
         String name = jsonObject.getString("name");
         if (StringUtils.isNotBlank(name)) {
-            criteria = Criteria.where("name").regex(name);
+            criteria = criteria.and("name").regex(name);
+        }
+        JSONArray userIds = jsonObject.getJSONArray("userIds");
+        if (userIds != null && userIds.size() > 0) {
+            criteria = criteria.and("userId").in(userIds);
         }
         Boolean isMap = jsonObject.getBoolean("isMap");
-        if (isMap != null && isMap) {
+        if (isMap != null && isMap) { //地图搜索
             return mongoTemplate.find(Query.query(criteria), Terminal.class, MongoTableName.TERMINAL);
         }
 
@@ -82,11 +87,15 @@ public class TerminalDao {
         }
         String fsuId = jsonObject.getString("fsuId");
         if (StringUtils.isNotBlank(fsuId)) {
-            criteria = Criteria.where("fsuId").regex(fsuId);
+            criteria = criteria.and("fsuId").regex(fsuId);
         }
         String name = jsonObject.getString("name");
         if (StringUtils.isNotBlank(name)) {
-            criteria = Criteria.where("name").regex(name);
+            criteria = criteria.and("name").regex(name);
+        }
+        JSONArray userIds = jsonObject.getJSONArray("userIds");
+        if (userIds != null && userIds.size() > 0) {
+            criteria = criteria.and("userId").in(userIds);
         }
         return mongoTemplate.count(Query.query(criteria), MongoTableName.TERMINAL);
     }

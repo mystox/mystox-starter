@@ -64,4 +64,5 @@ public interface FsuService {
     JSONObject getCompilerConfig(Map<String, Object> requestBody, String sn);
     JSONObject getEngineInfo(JSONObject compilerBody, String sn);
 
+    JSONObject registerToNb(Map<String, Object> requestBody, String sn);
 }
