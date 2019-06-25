@@ -195,10 +195,10 @@ public class TerminalServiceImpl implements TerminalService {
         if (StringUtils.isNotBlank(coordinate)) terminal.setCoordinate(coordinate);
         String name = jsonObject.getString("name"); //别名
         if (StringUtils.isNotBlank(name)) terminal.setName(name);
-        String userId = jsonObject.getString("userId"); //运维人员id
-        if (StringUtils.isNotBlank(userId)) terminal.setUserId(userId);
+        String userId = jsonObject.getString("name"); //别名
+        if (StringUtils.isNotBlank(coordinate)) terminal.setName(name);
         String address = jsonObject.getString("address"); //坐标
-        if (StringUtils.isNotBlank(address)) terminal.setAddress(address);
+        if (StringUtils.isNotBlank(coordinate)) terminal.setAddress(address);
         String bid = jsonObject.getString("BID");
         if (StringUtils.isBlank(bid)) bid = "default";
         JSONObject result = new JSONObject();
