@@ -2,5 +2,5 @@
 module.exports = {
   NODE_ENV: '"production"',
   API_HOST: '"/"',
-  SCLOUD_CTX: '""',
+  SCLOUD_CTX: '""',s
 }
