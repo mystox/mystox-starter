@@ -26,6 +26,7 @@ const webpackConfig = {
   entry: {
     base: resolve('/src/base/index.js'),
     dispose: resolve('/src/base/dispose.js'),
+    lang: resolve('/src/lang/index.js'),
     api: resolve('/src/utils/apiList.js'),
     filter: resolve('/src/utils/filter.js'),
     alarmsForDevice: resolve('/src/components/alarmsForDevice.vue'),
