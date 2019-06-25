@@ -1,27 +1,20 @@
 package com.kongtrolink.framework.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.Log;
-import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.StateCode;
-import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
-import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
-import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.entity.xml.base.Message;
 import com.kongtrolink.framework.entity.xml.msg.*;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
-import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.dao.AlarmLogDao;
-import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.execute.module.model.RedisAlarm;
 import com.kongtrolink.framework.execute.module.model.RedisOnlineInfo;
+import com.kongtrolink.framework.utils.CommonUtils;
+import com.kongtrolink.framework.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -30,11 +23,8 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author fengw
@@ -46,55 +36,40 @@ public class CntbAlarmService {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Value("${server.bindIp}")
-    private String host;
-    @Value("${server.name}")
-    private String name;
-
     @Autowired
-    RpcModule rpcModule;
+    RpcService rpcService;
     @Autowired
-    RedisUtils redisUtils;
+    CommonUtils commonUtils;
     @Autowired
     AlarmLogDao alarmLogDao;
     @Autowired
-    LogDao logDao;
-    @Value("${tower.gateway.hostname}")
-    private String towerGatewayHostname;
-    @Value("${tower.gateway.port}")
-    private int towerGatewayPort;
+    LogUtils logUtils;
 
     /**
      * 开始告警
      * @param sn sn
      */
     public void startAlarm(String sn) {
-        RedisOnlineInfo redisOnlineInfo = redisUtils.get(RedisTable.getRegistryKey(sn), RedisOnlineInfo.class);
+        RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
         try {
             if (redisOnlineInfo == null || !redisOnlineInfo.isOnline()) {
                 //未获取到redis中在线信息或铁塔平台离线，不上报告警
                 return;
             }
-            Set<String> list = redisUtils.keys(RedisTable.getAlarmKey(redisOnlineInfo.getFsuId(), "*"));
-            if (list.size() == 0) {
-                return;
-            }
 
-            List<RedisAlarm> redisAlarmList = new ArrayList<>();
+            List<RedisAlarm> redisAlarmList = commonUtils.getRedisAlarmList(redisOnlineInfo.getFsuId());
 
             try {
-                for (String key : list) {
-                    RedisAlarm redisAlarm = redisUtils.get(key, RedisAlarm.class);
-
+                for (int i = redisAlarmList.size() - 1; i >= 0; --i) {
+                    RedisAlarm redisAlarm = redisAlarmList.get(i);
                     if (!checkReport(redisOnlineInfo, redisAlarm)) {
+                        redisAlarmList.remove(i);
                         continue;
                     }
                     logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
 
                     redisAlarm.setReporting(true);
-                    redisUtils.set(key, redisAlarm);
-
-                    redisAlarmList.add(redisAlarm);
+                    commonUtils.setRedisAlarm(redisAlarm);
                 }
 
                 if (redisAlarmList.size() == 0) {
@@ -104,21 +79,20 @@ public class CntbAlarmService {
                 sendAlarm(redisOnlineInfo, redisAlarmList);
             } finally {
                 for (RedisAlarm redisAlarm : redisAlarmList) {
-                    String key = RedisTable.getAlarmKey(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
                     redisAlarm.setReporting(false);
-                    redisUtils.set(key, redisAlarm);
+                    commonUtils.setRedisAlarm(redisAlarm);
                     logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
                 }
             }
 
             for (RedisAlarm redisAlarm : redisAlarmList) {
                 if (!alarmLogDao.upsert(redisAlarm)) {
-                    saveLog("", "", PktType.ALARM_REGISTER, StateCode.MONGO_ERROR);
+                    logUtils.saveLog("", "", PktType.ALARM_REGISTER, StateCode.MONGO_ERROR);
                     logger.error("SendAlarm:告警保存失败,redisAlarm:" + JSONObject.toJSONString(redisAlarm));
                 }
             }
         } catch (Exception e) {
-            saveLog("", sn, PktType.ALARM_REGISTER, StateCode.FAILED);
+            logUtils.saveLog("", sn, PktType.ALARM_REGISTER, StateCode.FAILED);
             logger.error("上报告警过程中出现异常:" + JSONObject.toJSONString(e));
         }
     }
@@ -195,19 +169,11 @@ public class CntbAlarmService {
             return;
         }
 
-        InetSocketAddress addr = new InetSocketAddress(towerGatewayHostname, towerGatewayPort);
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("ip", redisOnlineInfo.getAlarmIp());
-        jsonObject.put("port", 8080);
-        jsonObject.put("msg", reqXmlMsg);
-
-        ModuleMsg request = createRequestMsg(jsonObject);
-
-        JSONObject jsonResponse = postMsg(request, addr);
+        JSONObject jsonResponse = rpcService.requestCntb(reqXmlMsg, redisOnlineInfo.getAlarmIp(), 8080);
 
         boolean result = false;
-        if (jsonResponse.containsKey("result") && (jsonResponse.getInteger("result") == 1)) {
+        if (jsonResponse != null && jsonResponse.containsKey("result")
+                && (jsonResponse.getInteger("result") == 1)) {
             String resXmlMsg = jsonResponse.getString("msg");
             SendAlarmAck sendAlarmAck = analyzeMsg(resXmlMsg);
 
@@ -226,7 +192,7 @@ public class CntbAlarmService {
                     logger.info("-----------------------alarm success-----------------------" + JSONObject.toJSONString(redisAlarm));
                 } else if (!redisAlarm.isEndReported()) {
                     redisAlarm.setEndReported(true);
-                    redisUtils.del(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())));
+                    commonUtils.delRedisAlarm(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
                     continue;
                 } else {
                     continue;
@@ -234,7 +200,7 @@ public class CntbAlarmService {
             } else {
                 redisAlarm.setReportCount(redisAlarm.getReportCount() + 1);
             }
-            redisUtils.set(RedisTable.getAlarmKey(redisAlarm.getFsuId(), String.valueOf(redisAlarm.getSerialNo())), redisAlarm);
+            commonUtils.setRedisAlarm(redisAlarm);
             logger.info("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
         }
     }
@@ -251,41 +217,8 @@ public class CntbAlarmService {
             Message message = new Message(sendAlarm);
             result = MessageUtil.messageToString(message);
         } catch (Exception ex) {
-            saveLog("", "", CntbPktTypeTable.SEND_ALARM, StateCode.XML_ILLEGAL);
+            logUtils.saveLog("", "", CntbPktTypeTable.SEND_ALARM, StateCode.XML_ILLEGAL);
             logger.error("GetXmlMsg: 实体类转xml失败,msg:" + JSONObject.toJSONString(sendAlarm));
-        }
-
-        return result;
-    }
-
-    /**
-     * 创建请求报文
-     * @param payload 发送信息
-     * @return 字符串报文
-     */
-    private ModuleMsg createRequestMsg(JSONObject payload){
-        ModuleMsg moduleMsg = new ModuleMsg(CntbPktTypeTable.SERVICE_GW);
-        moduleMsg.setPayload(payload);
-        return moduleMsg;
-    }
-
-    /**
-     * 发送请求
-     * @param request 请求报文
-     * @param addr 请求地址
-     * @return 回复信息
-     */
-    private JSONObject postMsg(ModuleMsg request, InetSocketAddress addr) {
-        JSONObject result = null;
-
-        RpcNotifyProto.RpcMessage rpcMessage = null;
-        try {
-            rpcMessage = rpcModule.postMsg("", addr, JSONObject.toJSONString(request));
-            String response = rpcMessage.getPayload();
-            result = JSONObject.parseObject(response);
-        } catch (IOException e) {
-            saveLog(request.getMsgId(), request.getSN(), request.getPktType(), StateCode.CONNECT_ERROR);
-            logger.error("sendRpcMsg: 发送Rpc请求失败,ip:" + addr.getHostName() + ",port:" + addr.getPort() + ",msg:" + request);
         }
 
         return result;
@@ -310,27 +243,13 @@ public class CntbAlarmService {
                 result = (SendAlarmAck)MessageUtil.stringToMessage(reqInfoStr, SendAlarmAck.class);
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
+            logUtils.saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
             logger.error("AnalyzeXmlMsg: String转Document失败,xml:" + xml);
         } catch (JAXBException e) {
-            saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
+            logUtils.saveLog("", "", CntbPktTypeTable.SEND_ALARM_ACK, StateCode.XML_ILLEGAL);
             logger.error("GetXmlMsg: String转实体类失败,xml" + xml);
         }
 
         return result;
-    }
-
-    /**
-     * 保存日志
-     * @param msgId
-     * @param sn
-     * @param msgType
-     * @param stateCode
-     */
-    void saveLog(String msgId, String sn, String msgType, int stateCode) {
-        Log log = new Log(new Date(System.currentTimeMillis()),
-                stateCode,
-                sn, msgType, msgId, name, host);
-        logDao.save(log);
     }
 }

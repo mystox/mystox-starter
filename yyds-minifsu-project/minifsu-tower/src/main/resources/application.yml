@@ -1,6 +1,6 @@
 logging:
   level:
-    root: debug
+    root: info
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
   pattern:
@@ -12,7 +12,8 @@ mongodb:
 
 server:
   name: minifsu-tower
-  bindIp: 172.16.6.50
+  bindIp: 172.16.6.20
+  port: 27856
   rpc:
     port: 18881
 
@@ -44,7 +45,7 @@ rpc:
 
 tower:
   gateway: #铁塔WebService网关Ip地址端口号
-    hostname: 172.16.6.50
+    hostname: 172.16.6.20
     port: 18883
   registry:
     timeout: 600000 #终端在线超时时间(秒)

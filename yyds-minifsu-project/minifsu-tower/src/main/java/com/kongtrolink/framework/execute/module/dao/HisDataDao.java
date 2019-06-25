@@ -39,9 +39,7 @@ public class HisDataDao {
      * @return 历史数据信息列表
      */
     public List<HisData> getList(String fsuId, String deviceId, String signalId, long startTime, long endTime) {
-        Criteria criteria = Criteria
-                .where("time").gt(startTime)
-                .and("time").lt(endTime);
+        Criteria criteria = new Criteria();
         if (fsuId != null && !fsuId.equals("")) {
             criteria.and("fsuId").is(fsuId);
         }
@@ -51,6 +49,10 @@ public class HisDataDao {
         if (signalId != null && !signalId.equals("")) {
             criteria.and("signalId").is(signalId);
         }
+        criteria.andOperator(
+                Criteria.where("time").gt(startTime),
+                Criteria.where("time").lt(endTime)
+        );
         return mongoTemplate.find(Query.query(criteria),
                 HisData.class, MongoDBTable.T_HIS_DATA);
     }
