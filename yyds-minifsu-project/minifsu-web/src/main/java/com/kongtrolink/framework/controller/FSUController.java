@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.exception.ExcelParseException;
-import com.kongtrolink.framework.model.User;
 import com.kongtrolink.framework.model.session.BaseController;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.ExcelUtil;
@@ -74,10 +73,7 @@ public class FSUController extends BaseController {
 
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
-
-
-        User user = getUser();
-        String roleName = user.getCurrentRoleName();
+        String roleName = getCurrentRoleName();
         if (!isAdmin() ) {
             if (!isManager() && (isRoot() || (StringUtils.isNotBlank(roleName) && roleName.contains("管理员")))) {
                 List<String> managerUsers = getManagerUsers();
@@ -103,7 +99,7 @@ public class FSUController extends BaseController {
     public JsonResult registerToNb(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
         JSONObject result = fsuService.registerToNb(requestBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
-                0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
+                0 == result.getInteger("result") ? new JsonResult(result.toJSONString(), false) : new JsonResult(result);
     }
 
     @RequestMapping("/getFsu")
@@ -238,6 +234,7 @@ public class FSUController extends BaseController {
 
     @RequestMapping(value = "/terminal/import", method = RequestMethod.POST)
     public JsonResult terminalImport(@RequestParam MultipartFile file, HttpServletRequest request) {
+        String userId = getUserId();
         // 解析 Excel 文件
         JSONArray snList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
@@ -249,6 +246,7 @@ public class FSUController extends BaseController {
             for (int r = 0; r < cell.length; r++) {
 
                 JSONObject snObj = new JSONObject();
+                snObj.put("userId", userId);
                 String sn = cell[r][0];
                 if (StringUtils.isBlank(sn)) {
                     return new JsonResult("存在空SN行", false);

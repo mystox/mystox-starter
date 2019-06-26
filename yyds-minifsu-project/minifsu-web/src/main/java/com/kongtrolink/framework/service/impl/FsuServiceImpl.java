@@ -296,11 +296,15 @@ public class FsuServiceImpl implements FsuService {
         deviceJson.put("imsi", requestBody.get("imsi"));
         deviceJson.put("imei",requestBody.get("imei"));
         deviceJson.put("title", sn);
-        ResponseEntity<JsonResult> forEntity = restTemplate.getForEntity(restTemplate + "/addDevice", JsonResult.class, deviceJson);
+        deviceJson.put("type", requestBody.get("type"));
+        ResponseEntity<JsonResult> forEntity = restTemplate.postForEntity(cmccNetUrl + "/addDevice", deviceJson, JsonResult.class);
         JsonResult body = forEntity.getBody();
         logger.info("register result: {}",body);
         if (body.isSuccess()) {
             result.put("result", 1);
+        }else {
+            result.put("result", 0);
+            result.put("info", body.getInfo());
         }
         return result;
     }

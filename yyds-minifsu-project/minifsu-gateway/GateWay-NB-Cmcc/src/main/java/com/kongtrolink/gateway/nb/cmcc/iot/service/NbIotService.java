@@ -1,6 +1,9 @@
 package com.kongtrolink.gateway.nb.cmcc.iot.service;
 
 
+import cmcc.iot.onenet.javasdk.api.device.DeleteDeviceApi;
+import cmcc.iot.onenet.javasdk.api.device.FindDevicesListApi;
+import cmcc.iot.onenet.javasdk.response.BasicResponse;
 import cmcciot.nbapi.entity.Device;
 import cmcciot.nbapi.entity.Execute;
 import cmcciot.nbapi.entity.Resources;
@@ -42,6 +45,20 @@ public class NbIotService {
         BaseAck baseAck = deviceOpe.operation(device, JSON.toJSONString(device));
         LOGGER.info(baseAck.toString());
         return baseAck;
+    }
+
+    /**
+     * 分类	IMEI	IMSI	            chip	    备注
+     * 正式设备	15位数字	不超过15位数字，不为空	无	     正式设备无需chip值
+     * 测试设备	4位数字	不超过15位数字，不为空	取值1-6	 测试设备必须填写chip值
+     */
+    public BasicResponse<JSONObject> findDevice(String title, String imei, String imsi) {
+        FindDevicesListApi api = new FindDevicesListApi(title, null, null, null, null, null, null, null, null, null,
+                nbIotConfig.getMasterApiKey());
+        BasicResponse<JSONObject> response = api.executeApi();
+        LOGGER.info("errno:"+response.errno+" error:"+response.error);
+        LOGGER.info(response.getJson());
+        return response;
     }
 
     /**
@@ -97,4 +114,15 @@ public class NbIotService {
     }
 
 
+    public void removeDevice(String id) {
+        /**
+         * 设备删除
+         * 参数顺序与构造函数顺序一致
+         * @param devid: 设备ID,String
+         * @param key: masterkey
+         */
+        DeleteDeviceApi api = new DeleteDeviceApi(id, nbIotConfig.getMasterApiKey());
+        BasicResponse<Void> response = api.executeApi();
+        System.out.println("errno:"+response.errno+" error:"+response.error);
+    }
 }

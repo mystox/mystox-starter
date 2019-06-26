@@ -1,19 +1,22 @@
 package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.MongoTableName;
 import com.kongtrolink.framework.dao.FsuDevicesDao;
+import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.ResponseEntity;
+import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 
@@ -80,10 +83,29 @@ public class YyjwAppServerApplicationTests {
 
     }
 
+    @MockBean
+    RedisOperationsSessionRepository redisOperationsSessionRepository;
 
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    @Value("${nb.url.cmcc}")
+    private String cmccNetUrl;
+
+    @Test
+    public void testTemplate() {
+        JSONObject deviceJson = new JSONObject();
+        deviceJson.put("imsi", "111");
+        deviceJson.put("imei","111");
+        deviceJson.put("title", "1111");
+        ResponseEntity<JsonResult> forEntity = restTemplate.postForEntity(cmccNetUrl + "/addDevice", deviceJson, JsonResult.class);
+        System.out.println(forEntity.getBody());
+    }
 
     public static void main(String[] args)
     {
+
         File file = FileUtils.getFile("E:\\IdeaProjects\\YYDS\\AppResources\\sn\\MINI201904180001\\123");
         System.out.println(file.length());
     }

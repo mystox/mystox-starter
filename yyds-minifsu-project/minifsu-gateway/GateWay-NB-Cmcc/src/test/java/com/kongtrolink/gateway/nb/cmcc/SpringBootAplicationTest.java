@@ -1,5 +1,9 @@
 package com.kongtrolink.gateway.nb.cmcc;
 
+import cmcc.iot.onenet.javasdk.api.device.FindDevicesListApi;
+import cmcciot.nbapi.entity.Device;
+import cmcciot.nbapi.online.CreateDeviceOpe;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.gateway.nb.cmcc.entity.base.BaseAck;
 import com.kongtrolink.gateway.nb.cmcc.entity.iot.ResourceAck;
@@ -58,7 +62,32 @@ public class SpringBootAplicationTest {
     @Test
     public void addDevice() {
 
-        service.addDevice("testAdd","1234","123456789012345");
+//        BaseAck testAdd = service.addDevice("testAdd", "123456789012345", "123456789012345");
+//        System.out.println(testAdd);
+
+
+
+    }
+    public static void main(String[] args)
+    {
+
+        CreateDeviceOpe deviceOpe = new CreateDeviceOpe("dXEYY0fKmauVJ3vStt2ZpXw59YY=");
+        Device device = new Device("sn", "1238", "123456789012345");
+        BaseAck baseAck = deviceOpe.operation(device, JSON.toJSONString(device));
+        System.out.println(baseAck);
+        String id = "532382104";
+        String key = "dXEYY0fKmauVJ3vStt2ZpXw59YY=";
+         JSONObject auth_info = new JSONObject();
+        auth_info.put("1238", "123456789012345");
+        FindDevicesListApi api = new FindDevicesListApi("sn", "", null, null, null, null, null, null, null, null,
+                key);
+//        BasicResponse<DeviceList> response = api.executeApi();
+//        System.out.println("errno:"+response.errno+" error:"+response.error);
+//        System.out.println(response.getJson());
+//
+//        DeleteDeviceApi delete = new DeleteDeviceApi(id, key);
+//        BasicResponse<Void> deleterep = delete.executeApi();
+//        System.out.println("errno:"+response.errno+" error:"+response.error);
 
 
     }

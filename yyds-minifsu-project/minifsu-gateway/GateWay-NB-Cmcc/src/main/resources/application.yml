@@ -2,11 +2,12 @@
 nbIot:
   token:  77f306974ff164307ff92642a2296e05
   masterApiKey: 32cv8Br7SQXflJFPD14fiZxF9EM=
+#  masterApiKey: dXEYY0fKmauVJ3vStt2ZpXw59YY=
   packageTime:  20
 
 server:
   name: GateWay-NB-Cmcc
-  bindIp: 172.16.6.50
+  bindIp: 172.16.6.240
   rpc:
     port: 18882
     timeout: 6000
@@ -18,7 +19,7 @@ rpc:
   client:
     timeout: 20000
   controller:
-    hostname: 172.16.6.50
+    hostname: 172.16.6.240
     port: 18800
 
 executor:
