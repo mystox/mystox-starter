@@ -196,7 +196,7 @@ public class TerminalServiceImpl implements TerminalService {
         String name = jsonObject.getString("name"); //别名
         if (StringUtils.isNotBlank(name)) terminal.setName(name);
         String userId = jsonObject.getString("userId"); //绑定用户
-        if (StringUtils.isNotBlank(userId)) terminal.setName(userId);
+        if (StringUtils.isNotBlank(userId)) terminal.setUserId(userId);
         String address = jsonObject.getString("address"); //坐标
         if (StringUtils.isNotBlank(coordinate)) terminal.setAddress(address);
         String bid = jsonObject.getString("BID");
