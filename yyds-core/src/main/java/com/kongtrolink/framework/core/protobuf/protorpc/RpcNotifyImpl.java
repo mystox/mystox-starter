@@ -36,7 +36,7 @@ public abstract class RpcNotifyImpl implements RpcNotify, RpcNotifyProto.RpcNoti
         String method = rpcMessage.getMethod();
         String jsonPayLoad = rpcMessage.getPayload();
         RpcNotifyProto.PayloadType payloadType = rpcMessage.getPayloadType();
-        //根据service & method 具体执行业务逻辑 如果没有指定service与方法, 则直接执行默认方法 service | method 指定但未找到配置,则放回错误
+        //根据service & method 具体执行业务逻辑 如果没有指定service与方法, 则直接执行默认方法 service | method 指定但未找到配置,则返回错误
         RpcNotifyProto.RpcMessage result = null;
         if (RpcNotifyProto.PayloadType.BYTE == payloadType) {
             ByteString bytes = rpcMessage.getBytePayload();

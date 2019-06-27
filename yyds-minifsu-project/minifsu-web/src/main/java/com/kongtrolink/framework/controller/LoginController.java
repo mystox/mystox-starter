@@ -42,4 +42,9 @@ public class LoginController
         }
 
     }
+
+    @RequestMapping("/sessionCheck")
+    public JsonResult sessionCheck() {
+        return new JsonResult();
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
@@ -27,6 +28,7 @@ import java.net.UnknownHostException;
  */
 @Configuration
 @EnableConfigurationProperties(RedisProperties.class)
+@EnableRedisRepositories(basePackages = {"com.kongtrolink.auth.repository.redis"})
 public class RedisConfig
 {
 
@@ -49,7 +51,6 @@ public class RedisConfig
         template.afterPropertiesSet();
         return template;
     }
-
     @Bean
     public RedisConnectionFactory jedisConnectionFactory()
     {

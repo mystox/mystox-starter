@@ -26,6 +26,16 @@ public class Terminal
     private String name;
     private String address;
 
+    private String userId;
+
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public boolean isEnableHeart() {
         return enableHeart;

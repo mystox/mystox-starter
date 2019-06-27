@@ -26,7 +26,7 @@ public interface FsuService {
 
     JSONArray getDeviceList(Map<String, Object> requestBody, String fsuId);
 
-    List<Fsu>  getFsuListByCoordinate(Map fsuMap);
+    JSONArray  getFsuListByCoordinate(Map fsuMap);
 
     JSONObject listFsu(Map<String, Object> requestBody);
 
@@ -64,4 +64,5 @@ public interface FsuService {
     JSONObject getCompilerConfig(Map<String, Object> requestBody, String sn);
     JSONObject getEngineInfo(JSONObject compilerBody, String sn);
 
+    JSONObject registerToNb(Map<String, Object> requestBody, String sn);
 }

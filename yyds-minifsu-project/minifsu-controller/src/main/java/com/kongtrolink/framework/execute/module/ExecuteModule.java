@@ -85,6 +85,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload) {
         JSONObject payloadObject = JSONObject.parseObject(payload);
         String pktType = (String) payloadObject.get("pktType");//服务间通讯类型
+        //TODO 记录操作日志
         if (StringUtils.isNotBlank(pktType)) {
             if (PktType.CONNECT.equals(pktType)) {                          //终端>>>>>>>>>服务
                 Object result = receiveTerminalExecute(msgId, payloadObject);

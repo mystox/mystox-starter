@@ -480,9 +480,15 @@
         let param = {
           fsuId: item.fsuId
         }
-        this.$api.unbind(param, item.sN).then((res)=> {
-          this.getFsuList();
-        })
+        this.$confirm("是否解绑该设备？", "提示", {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then((()=> {
+          this.$api.unbind(param, item.sN).then((res)=> {
+            this.getFsuList();
+          })
+        }).bind(this))
       },
     },
     mounted() {

@@ -9,9 +9,20 @@ import java.io.Serializable;
  * \
  */
 public class User implements Serializable{
+    private String id;
     private String username;
     private String password;
 
+    private String currentRoleName;
+
+
+    public String getCurrentRoleName() {
+        return currentRoleName;
+    }
+
+    public void setCurrentRoleName(String currentRoleName) {
+        this.currentRoleName = currentRoleName;
+    }
 
     public String getUsername() {
         return username;
@@ -27,6 +38,14 @@ public class User implements Serializable{
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

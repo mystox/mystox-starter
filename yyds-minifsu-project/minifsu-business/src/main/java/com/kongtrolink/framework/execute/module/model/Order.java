@@ -11,6 +11,15 @@ public class Order
     private String id;
     private String BID;
     private String BIP;
+    private String WIP;
+
+    public String getWIP() {
+        return WIP;
+    }
+
+    public void setWIP(String WIP) {
+        this.WIP = WIP;
+    }
 
     public String getId()
     {

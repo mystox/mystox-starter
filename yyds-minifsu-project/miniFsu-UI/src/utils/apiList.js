@@ -77,7 +77,23 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
     const $api = {
       // 登录
       authLogin (param) {
-        return post(`${base}auth/login`, param);
+        // return post(`${base}auth/login`, param);
+        return Vue.prototype.$http.post('/api/proxy_ap/system/login_login.action', `username=${param.username}&password=${param.password}`, { 
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded' 
+          } 
+        }).then((res)=> {
+          return post(`/api/proxy_ap/commonFunc/saveCurrentService`, res.data.data[0])
+        }).then((res)=> {
+          return Vue.prototype.$http.post('/api/proxy_ap/system/switchEnterprise', `GuoDong`, { 
+            headers: {
+              'Content-Type': 'application/json' 
+            } 
+          })
+        }).then((res)=>{
+          // console.log(res)
+          return post(`/api/proxy_ap/commonFunc/saveCurrentService`, res.data.data[2])
+        })
       },
       
       // 导入终端列表

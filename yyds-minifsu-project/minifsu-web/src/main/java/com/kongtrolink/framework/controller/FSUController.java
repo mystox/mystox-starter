@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.exception.ExcelParseException;
+import com.kongtrolink.framework.model.session.BaseController;
 import com.kongtrolink.framework.service.FsuService;
 import com.kongtrolink.framework.util.ExcelUtil;
 import com.kongtrolink.framework.util.JsonResult;
@@ -21,10 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * \* @Author: mystox
@@ -34,7 +32,7 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/fsu")
-public class FSUController {
+public class FSUController extends BaseController {
 
     Logger logger = LoggerFactory.getLogger(FSUController.class);
     private FsuService fsuService;
@@ -75,15 +73,33 @@ public class FSUController {
 
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
+        String roleName = getCurrentRoleName();
+        if (!isAdmin() ) {
+            if (!isManager() && (isRoot() || (StringUtils.isNotBlank(roleName) && roleName.contains("管理员")))) {
+                List<String> managerUsers = getManagerUsers();
+                requestBody.put("userIds", managerUsers);
+            } else {
+                List<String> userIds = new ArrayList<>();
+                userIds.add(getUserId());
+                requestBody.put("userIds", userIds);
+            }
+        }
         JSONObject result = fsuService.listFsu(requestBody);//查询结果
         return new JsonResult(result);
     }
 
     @RequestMapping("/getFsuListByCoordinate")
     public JsonResult getFsuListByCoordinate(@RequestBody(required = false) Map<String, Object> requestBody) {
-        List<Fsu> result = fsuService.getFsuListByCoordinate(requestBody);
+        JSONArray result = fsuService.getFsuListByCoordinate(requestBody);
         return new JsonResult(result);
 
+    }
+
+    @RequestMapping("/registerToNbIot")
+    public JsonResult registerToNb(@RequestBody(required = false) Map<String, Object> requestBody, String sn) {
+        JSONObject result = fsuService.registerToNb(requestBody, sn);
+        return result == null ? new JsonResult("请求错误或者超时", false) :
+                0 == result.getInteger("result") ? new JsonResult(result.toJSONString(), false) : new JsonResult(result);
     }
 
     @RequestMapping("/getFsu")
@@ -95,6 +111,8 @@ public class FSUController {
 
     @RequestMapping("/setFsu")
     public JsonResult setFsu(@RequestBody(required = false) Map<String, Object> requestBody) {
+        String userId = getUserId();
+        requestBody.put("userId", userId);
         JSONObject result = fsuService.setFsu(requestBody);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
@@ -114,21 +132,24 @@ public class FSUController {
      * @return
      */
     @RequestMapping("/getCompilerDeviceInfo")
-    public JsonResult getCompilerDeviceInfo(@RequestBody JSONObject compilerBody,String sn) {
-        JSONObject result = fsuService.getCompilerDeviceInfo(compilerBody,sn);
+    public JsonResult getCompilerDeviceInfo(@RequestBody JSONObject compilerBody, String sn) {
+        JSONObject result = fsuService.getCompilerDeviceInfo(compilerBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 new JsonResult(result);
-    } /**
+    }
+
+    /**
      * 获取编译配置
      *
      * @return
      */
     @RequestMapping("/getCompilerConfig")
-    public JsonResult getCompilerConfig(@RequestBody JSONObject compilerBody,String sn) {
-        JSONObject result = fsuService.getCompilerConfig(compilerBody,sn);
+    public JsonResult getCompilerConfig(@RequestBody JSONObject compilerBody, String sn) {
+        JSONObject result = fsuService.getCompilerConfig(compilerBody, sn);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 new JsonResult(result);
     }
+
     /**
      * 生成编译文件
      *
@@ -213,6 +234,7 @@ public class FSUController {
 
     @RequestMapping(value = "/terminal/import", method = RequestMethod.POST)
     public JsonResult terminalImport(@RequestParam MultipartFile file, HttpServletRequest request) {
+        String userId = getUserId();
         // 解析 Excel 文件
         JSONArray snList = new JSONArray();
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
@@ -224,6 +246,7 @@ public class FSUController {
             for (int r = 0; r < cell.length; r++) {
 
                 JSONObject snObj = new JSONObject();
+                snObj.put("userId", userId);
                 String sn = cell[r][0];
                 if (StringUtils.isBlank(sn)) {
                     return new JsonResult("存在空SN行", false);
@@ -339,12 +362,11 @@ public class FSUController {
 
 
     @RequestMapping(value = "/remoteCompilerFileDown")
-    public void remoteCompilerFileDown(@RequestBody(required = false) JSONObject body, HttpServletResponse response,HttpServletRequest request) {
+    public void remoteCompilerFileDown(@RequestBody(required = false) JSONObject body, HttpServletResponse response, HttpServletRequest request) {
 //        String url = body.getString("url");
         String urlStr = body.getString("url");
-        if (StringUtils.isNotBlank(urlStr))
-        {
-            urlStr=  urlStr.replace("\\", "/"); //系统容错
+        if (StringUtils.isNotBlank(urlStr)) {
+            urlStr = urlStr.replace("\\", "/"); //系统容错
         }
         InputStream is = null;
 
@@ -378,7 +400,8 @@ public class FSUController {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }if (is != null) {
+                }
+                if (is != null) {
                     try {
                         is.close();
                     } catch (IOException e) {
@@ -394,10 +417,12 @@ public class FSUController {
         }
 //        logger.info("sendRedirect:{}",url);
     }
+
     @RequestMapping(value = "/remoteCompilerFileDowna")
     public void remoteCompilerFileDowna(@RequestBody JSONObject body, HttpServletResponse response) {
         String url = body.getString("url");
-        logger.info("forward:{}",url);
+        logger.info("forward:{}", url);
 
     }
+
 }

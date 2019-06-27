@@ -1,6 +1,9 @@
 package com.kongtrolink.gateway.nb.cmcc.controller;
 
 
+import cmcc.iot.onenet.javasdk.response.BasicResponse;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.gateway.nb.cmcc.entity.CommandInfo;
 import com.kongtrolink.gateway.nb.cmcc.entity.DeviceInfo;
 import com.kongtrolink.gateway.nb.cmcc.entity.base.BaseAck;
@@ -30,46 +33,81 @@ public class MobileController {
     NbIotService nbIotService;
 
     @RequestMapping("/addDevice")
-    public @ResponseBody
-    JsonResult addDevice(@RequestBody DeviceInfo deviceInfo) {
-        try{
-            BaseAck value = nbIotService.addDevice(deviceInfo.getTitle(),deviceInfo.getImei(),deviceInfo.getImsi());
-            AddDeviceAck ack = EntityUtil.getEntity(value,AddDeviceAck.class);
-            System.out.println("id:"+ack.getDevice_id());
-            System.out.println("psk:"+ack.getPsk());
+    public
+    @ResponseBody
+    JsonResult addDevice(@RequestBody(required = false) JSONObject requestBody) {
+        System.out.println(requestBody);
+        try {
+            DeviceInfo deviceInfo = JSONObject.toJavaObject(requestBody, DeviceInfo.class);
+            String title = deviceInfo.getTitle();
+            String imei = deviceInfo.getImei();
+            String type = requestBody.getString("type");
+
+            title = imei + "_" + title;
+            BasicResponse<JSONObject> response = nbIotService.findDevice(imei, null, null);
+            JSONObject data = response.getData();
+            if (data.getInteger("total_count") != 0) {
+                JSONArray devices = data.getJSONArray("devices");
+//                List<DeviceList.DeviceItem> devices = data.getDevices();
+                for (Object o : devices) {
+                    JSONObject device = (JSONObject) o;
+//                    String id = device.getId();
+                    String id = device.getString("id");
+                    if (title.equals(device.getString("title"))) {
+                        JSONObject auth_info = device.getJSONObject("auth_info");
+                        auth_info.keySet().contains(imei);
+                        {
+                            if (!"deleteAdd".equals(type)) {
+                                return new JsonResult("设备重复注册", false);
+                            } else {
+                                nbIotService.removeDevice(id);
+
+                            }
+                        }
+                    }
+                }
+            }
+            BaseAck value = nbIotService.addDevice(title, imei, deviceInfo.getImsi());
+            AddDeviceAck ack = EntityUtil.getEntity(value, AddDeviceAck.class);
+            System.out.println("id:" + ack.getDevice_id());
+            System.out.println("psk:" + ack.getPsk());
             return new JsonResult(value.toString());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return new JsonResult("异常 "+e.getMessage(),false);
+            return new JsonResult("异常 " + e.getMessage(), false);
         }
     }
 
     @RequestMapping("/getResources")
-    public @ResponseBody JsonResult getResources(@RequestBody DeviceInfo deviceInfo) {
-        try{
+    public
+    @ResponseBody
+    JsonResult getResources(@RequestBody DeviceInfo deviceInfo) {
+        try {
             BaseAck value = nbIotService.getResources(deviceInfo.getImei());
-            ResourceAck ack  = EntityUtil.getEntity(value,ResourceAck.class);
+            ResourceAck ack = EntityUtil.getEntity(value, ResourceAck.class);
             return new JsonResult(ack);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return new JsonResult("异常 "+e.getMessage(),false);
+            return new JsonResult("异常 " + e.getMessage(), false);
         }
 
     }
 
     @RequestMapping("/command")
-    public @ResponseBody JsonResult command(@RequestBody CommandInfo commandInfo) {
-        try{
+    public
+    @ResponseBody
+    JsonResult command(@RequestBody CommandInfo commandInfo) {
+        try {
             String command = commandInfo.getCommand();
             String imei = commandInfo.getImei();
             Integer objId = commandInfo.getObjId();
             Integer objInstId = commandInfo.getObjInstId();
             Integer executeResId = commandInfo.getExecuteResId();
-            BaseAck value = nbIotService.command(command,imei,objId,objInstId,executeResId);
+            BaseAck value = nbIotService.command(command, imei, objId, objInstId, executeResId);
             return new JsonResult(value.toString());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return new JsonResult("异常 "+e.getMessage(),false);
+            return new JsonResult("异常 " + e.getMessage(), false);
         }
 
     }

@@ -65,10 +65,7 @@ public class JsonResult {
     
     private void printResult() {
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (data == null) {
             System.out.println(sdf.format(new Date())+" >> "+this);
-            return;
-        }
     }
     
 }
