@@ -135,8 +135,10 @@ public class TowerService {
 
         // 若重新绑定，需重新向铁塔平台注册
         RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
-        redisOnlineInfo.setOnline(false);
-        commonUtils.setRedisOnlineInfo(redisOnlineInfo);
+        if (redisOnlineInfo != null) {
+            redisOnlineInfo.setOnline(false);
+            commonUtils.setRedisOnlineInfo(redisOnlineInfo);
+        }
 
         return result;
     }
