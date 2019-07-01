@@ -343,14 +343,15 @@ public class FsuServiceImpl implements FsuService {
         String md5 = "";
         String name = "";
         String url = "";
+        String enginePath = "";
         if (type == 1) { //升级引擎
             JSONObject engineVerDic = getEngineInfo(requestBody, sn);
             if (engineVerDic.getInteger("result") == null || engineVerDic.getInteger("result") != 0) {
                 name = engineVerDic.getString("Name");
                 engineVerDic.getString("Version");
                 md5 = engineVerDic.getString("MD5");
-                url = engineVerDic.getString("Url");
-                url = compilerServerUrl + ":" + engineDownloadPort + "/" + url;
+                enginePath = engineVerDic.getString("Url");
+                url = compilerServerUrl + ":" + engineDownloadPort + "/" + enginePath;
             } else {
                 return engineVerDic;
             }
@@ -393,7 +394,7 @@ public class FsuServiceImpl implements FsuService {
         result.put("md5", md5);
 
         if (type == 1)  //升级引擎
-            url = downEngine + "/" + guid+ "/" + name;
+            url = downEngine + "/" + enginePath;
         if (type == 2) //升级适配层
             url = downAdapter + "/" + guid + "/" + name;
 
