@@ -133,12 +133,8 @@ public class TowerService {
         //更新基站信息
         result = updateStationBindDB(jsonStation, jsonLoginParam, jsonDeviceList);
 
-        // 若重新绑定，需重新向铁塔平台注册
-        RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
-        if (redisOnlineInfo != null) {
-            redisOnlineInfo.setOnline(false);
-            commonUtils.setRedisOnlineInfo(redisOnlineInfo);
-        }
+        // 若重新绑定，删除redis中的终端信息，重新注册重新绑定设备
+        commonUtils.delRedisOnlineInfo(sn);
 
         return result;
     }
