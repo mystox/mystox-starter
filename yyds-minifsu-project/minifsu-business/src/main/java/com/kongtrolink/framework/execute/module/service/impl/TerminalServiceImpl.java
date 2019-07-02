@@ -202,6 +202,7 @@ public class TerminalServiceImpl implements TerminalService {
         String bid = jsonObject.getString("BID");
         if (StringUtils.isBlank(bid)) bid = "default";
         JSONObject result = new JSONObject();
+        result.put("result", 1);
         String fsuId = (String) jsonObject.get("fsuId");
         if (StringUtils.isNotBlank(fsuId)) { //存在 fsuid 进入绑定流程
             // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
@@ -251,7 +252,7 @@ public class TerminalServiceImpl implements TerminalService {
             value.put("STATUS", 0);
             redisUtils.set(key, value, value.getLong("expired"));
         }
-        result.put("result", 1);
+
         return result;
     }
 
@@ -358,7 +359,7 @@ public class TerminalServiceImpl implements TerminalService {
             Integer pktType = (Integer) terminalPayload.get("pktType");
             terminalLog = new TerminalLog(sn, pktType, new Date(), payload);
         } else {
-            terminalLog = new TerminalLog(sn, null, new Date(), payload);
+            terminalLog = new TerminalLog(sn, -1, new Date(), payload);
         }
         terminalDao.saveTerminalLog(terminalLog);
         JSONObject result = new JSONObject();

@@ -50,7 +50,6 @@ public class RedisUtils
 
     public Set<String> keys(String keyPattern) {
        return redisTemplate.keys(keyPattern);
-
     }
 
     public <T> T getHash(String hashTable, String key, Class<T> clazz)
