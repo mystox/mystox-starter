@@ -83,7 +83,7 @@
           resource: '',
           desc: ''
         },
-        url: `${base}fsu/terminal/import`
+        url: (this._ctx ? this.$store.state.menu.currentMark + '/' : base) + `fsu/terminal/import`
       }
     },
     computed: {
