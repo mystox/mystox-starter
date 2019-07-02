@@ -100,8 +100,8 @@
           resource: '',
           desc: ''
         },
-        signalModelUrl: (this._ctx ? this.$store.state.menu.currentMark : base) + `fsu/signalModel/import`,
-        alarmModelUrl: (this._ctx ? this.$store.state.menu.currentMark : base) + `fsu/alarmModel/import`
+        signalModelUrl: (this._ctx ? this.$store.state.menu.currentMark + '/' : base) + `fsu/signalModel/import`,
+        alarmModelUrl: (this._ctx ? this.$store.state.menu.currentMark + '/' : base) + `fsu/alarmModel/import`
       }
     },
     computed: {
