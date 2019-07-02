@@ -90,6 +90,11 @@ public class FSUController extends BaseController {
 
     @RequestMapping("/getFsuListByCoordinate")
     public JsonResult getFsuListByCoordinate(@RequestBody(required = false) Map<String, Object> requestBody) {
+        String roleName = getCurrentRoleName();
+        if (!isAdmin() && !isManager() && !isRoot() && !roleName.contains("管理员")) {
+            String userId = getUserId();
+            requestBody.put("userId", userId);
+        }
         JSONArray result = fsuService.getFsuListByCoordinate(requestBody);
         return new JsonResult(result);
 
