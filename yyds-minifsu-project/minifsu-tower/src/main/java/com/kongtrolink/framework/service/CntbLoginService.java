@@ -127,6 +127,13 @@ public class CntbLoginService {
         deviceDao.deleteListByFsuId(redisOnlineInfo.getFsuId());
         deviceDao.insertListByFsuId(cntbList);
 
+        //删除redis中未找到对应设备的deviceId数据信息
+        for (JsonDevice jsonDevice : cntbList) {
+            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1) {
+                commonUtils.delRedisData(redisOnlineInfo.getFsuId(), jsonDevice.getDeviceId());
+            }
+        }
+
         return true;
     }
 
