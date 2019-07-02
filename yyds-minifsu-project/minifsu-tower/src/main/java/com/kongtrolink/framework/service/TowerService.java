@@ -221,6 +221,13 @@ public class TowerService {
         }
         deviceMatchService.matchingDevice(result, curList);
 
+        //删除redis中未找到对应设备的deviceId数据信息
+        for (JsonDevice jsonDevice : result) {
+            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1) {
+                commonUtils.delRedisData(fsuId, jsonDevice.getDeviceId());
+            }
+        }
+
         return result;
     }
 

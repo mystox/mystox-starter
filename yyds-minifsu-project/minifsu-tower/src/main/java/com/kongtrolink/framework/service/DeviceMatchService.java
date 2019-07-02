@@ -39,7 +39,7 @@ public class DeviceMatchService {
 
         sortDevList(curList);
 
-        //todo 遍历curList，在cntbList中查找对应的铁塔设备ID，并将信息填入cntbList中
+        //遍历curList，在cntbList中查找对应的铁塔设备ID，并将信息填入cntbList中
         for (JsonDevice curDevice : curList) {
             DevType devType = commonUtils.getDevTypeByType(curDevice.getType());
             if (devType == null) {
