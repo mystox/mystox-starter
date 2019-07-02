@@ -74,7 +74,7 @@ public class FSUController extends BaseController {
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
         String roleName = getCurrentRoleName();
-        if (!isAdmin() ) {
+        if (!isAdmin()) {
             if (!isManager() && (isRoot() || (StringUtils.isNotBlank(roleName) && roleName.contains("管理员")))) {
                 List<String> managerUsers = getManagerUsers();
                 requestBody.put("userIds", managerUsers);
@@ -111,8 +111,11 @@ public class FSUController extends BaseController {
 
     @RequestMapping("/setFsu")
     public JsonResult setFsu(@RequestBody(required = false) Map<String, Object> requestBody) {
-        String userId = getUserId();
-        requestBody.put("userId", userId);
+        String roleName = getCurrentRoleName();
+        if (!isAdmin() && !isManager() && !isRoot() && !roleName.contains("管理员")) {
+            String userId = getUserId();
+            requestBody.put("userId", userId);
+        }
         JSONObject result = fsuService.setFsu(requestBody);
         return result == null ? new JsonResult("请求错误或者超时", false) :
                 0 == result.getInteger("result") ? new JsonResult("执行任务失败", false) : new JsonResult(result);
