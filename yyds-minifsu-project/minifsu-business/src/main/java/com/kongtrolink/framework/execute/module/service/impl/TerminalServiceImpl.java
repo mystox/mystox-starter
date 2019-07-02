@@ -359,7 +359,7 @@ public class TerminalServiceImpl implements TerminalService {
             Integer pktType = (Integer) terminalPayload.get("pktType");
             terminalLog = new TerminalLog(sn, pktType, new Date(), payload);
         } else {
-            terminalLog = new TerminalLog(sn, null, new Date(), payload);
+            terminalLog = new TerminalLog(sn, -1, new Date(), payload);
         }
         terminalDao.saveTerminalLog(terminalLog);
         JSONObject result = new JSONObject();
