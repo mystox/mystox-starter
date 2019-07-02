@@ -74,8 +74,8 @@ public class FSUController extends BaseController {
     @RequestMapping("/list")
     public JsonResult list(@RequestBody(required = false) Map<String, Object> requestBody) {
         String roleName = getCurrentRoleName();
-        if (!isAdmin()) {
-            if (!isManager() && (isRoot() || (StringUtils.isNotBlank(roleName) && roleName.contains("管理员")))) {
+        if (!isAdmin()&& !isManager() ) {
+            if ((isRoot() || (StringUtils.isNotBlank(roleName) && roleName.contains("管理员")))) {
                 List<String> managerUsers = getManagerUsers();
                 requestBody.put("userIds", managerUsers);
             } else {
