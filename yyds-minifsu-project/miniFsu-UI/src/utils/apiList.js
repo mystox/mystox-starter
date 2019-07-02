@@ -18,7 +18,7 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
     const get = (url, param, successMsg, failMsg) => {
       openFullScreen();
       return Vue.prototype.$http
-        .get(url, { params: param })
+        .get((process.env.SCLOUD_CTX ? Vue.prototype.$store.state.menu.currentMark : '') + url, { params: param })
         .then(
           response => {
             closeFullScreen();
@@ -46,7 +46,7 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
       openFullScreen();
       return Vue.prototype.$http({
         method: "post",
-        url: url,
+        url: (process.env.SCLOUD_CTX ? Vue.prototype.$store.state.menu.currentMark : '') + url,
         data: param
       })
         .then(
