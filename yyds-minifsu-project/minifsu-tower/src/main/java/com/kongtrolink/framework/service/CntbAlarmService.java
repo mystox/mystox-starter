@@ -79,9 +79,11 @@ public class CntbAlarmService {
                 sendAlarm(redisOnlineInfo, redisAlarmList);
             } finally {
                 for (RedisAlarm redisAlarm : redisAlarmList) {
-                    redisAlarm.setReporting(false);
-                    commonUtils.setRedisAlarm(redisAlarm);
-                    logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    if (!redisAlarm.isEndReported()) {
+                        redisAlarm.setReporting(false);
+                        commonUtils.setRedisAlarm(redisAlarm);
+                        logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    }
                 }
             }
 
@@ -189,19 +191,20 @@ public class CntbAlarmService {
                 redisAlarm.setReportCount(0);
                 if (!redisAlarm.isStartReported()) {
                     redisAlarm.setStartReported(true);
-                    logger.info("-----------------------alarm success-----------------------" + JSONObject.toJSONString(redisAlarm));
+                    logger.info("-----------------------alarm begin success-----------------------" + JSONObject.toJSONString(redisAlarm));
                 } else if (!redisAlarm.isEndReported()) {
                     redisAlarm.setEndReported(true);
                     commonUtils.delRedisAlarm(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
+                    logger.info("-----------------------alarm end success-----------------------" + JSONObject.toJSONString(redisAlarm));
                     continue;
                 } else {
                     continue;
                 }
             } else {
                 redisAlarm.setReportCount(redisAlarm.getReportCount() + 1);
+                logger.info("-----------------------alarm reported fail-----------------------" + JSONObject.toJSONString(redisAlarm));
             }
             commonUtils.setRedisAlarm(redisAlarm);
-            logger.info("-----------------------alarm end-----------------------" + JSONObject.toJSONString(redisAlarm));
         }
     }
 
