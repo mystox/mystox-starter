@@ -9,7 +9,7 @@ package com.kongtrolink.framework.core.entity;
 public enum TerminalPktType
 {
 
-    BAK(-1, "bak","回包"), //应用服务给终端的未定义回包
+    BAK(-1, "bak","异常报文"), //应用服务给终端的未定义回包
     HEART(0, "heart","心跳"), //SN上报注册
     REGISTRY(1, "registry","注册"), //SN上报注册
     TERMINAL_REPORT(2, "terminal_report","终端属性"), //终端信息上报

@@ -25,10 +25,10 @@ public class TerminalLog {
 
     public TerminalLog(String sn, Integer pktType, Date recordTime, JSONObject payload) {
         this.sn = sn;
-        this.pktType = pktType;
+        this.pktType = pktType == null ? -1: pktType;
         this.recordTime = recordTime;
         this.payload = payload;
-        this.pktTypeName = pktType!= null ?TerminalPktType.toName(pktType):"undefined";
+        this.pktTypeName = (pktType!= null ?TerminalPktType.toName(pktType):TerminalPktType.toName(-1));
         if (payload != null)
             this.payloadSize = payload.toString().getBytes().length;
         else
@@ -89,5 +89,10 @@ public class TerminalLog {
 
     public void setPayloadSize(Integer payloadSize) {
         this.payloadSize = payloadSize;
+    }
+    public static void main(String[] args)
+    {
+        TerminalLog t = new TerminalLog("sn",null,new Date(),new JSONObject());
+        System.out.println(JSONObject.toJSONString(t));
     }
 }
