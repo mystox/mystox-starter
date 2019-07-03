@@ -13,7 +13,8 @@ module.exports = {
     proxyTable: {
       '/api':{
         // target:'http://172.16.5.228:8081/',  // wawngnn
-        target:'http://172.16.5.26/',  // wumy
+        // target:'http://172.16.5.26/',  // wumy
+        target:'http://172.16.5.210/',  // wawngnn
         changeOrigin: true,
         pathRewrite:{
          '^/api':''

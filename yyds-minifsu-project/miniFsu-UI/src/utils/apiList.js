@@ -78,21 +78,33 @@ export default (openFullScreen = () => {}, closeFullScreen = () => {}) => ({
       // 登录
       authLogin (param) {
         // return post(`${base}auth/login`, param);
+
+        let GuoDong;
+        let uniqueCode = 'guodong'
         return Vue.prototype.$http.post('/api/proxy_ap/system/login_login.action', `username=${param.username}&password=${param.password}`, { 
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded' 
           } 
-        }).then((res)=> {
+        }).then((res) => {
           return post(`/api/proxy_ap/commonFunc/saveCurrentService`, res.data.data[0])
-        }).then((res)=> {
-          return Vue.prototype.$http.post('/api/proxy_ap/system/switchEnterprise', `GuoDong`, { 
+        }).then(() => {
+          return post('/api/proxy_ap/commonFunc/enterprise/stat/list')
+        }).then((res) => {
+          GuoDong = res.data.find(e => e.enterprise.uniqueCode === uniqueCode).subService;
+          GuoDong = GuoDong.find(s => s.name === '微站平台');
+          return Vue.prototype.$http.post('/api/proxy_ap/system/switchEnterprise', uniqueCode, { 
             headers: {
               'Content-Type': 'application/json' 
             } 
           })
-        }).then((res)=>{
+        }).then(()=>{
           // console.log(res)
-          return post(`/api/proxy_ap/commonFunc/saveCurrentService`, res.data.data[2])
+          return post(`/api/proxy_ap/commonFunc/saveCurrentService`, GuoDong)
+        }).catch(e => {
+          Vue.prototype.$message({
+            type: 'error',
+            message: '没有该服务'
+          })
         })
       },
       
