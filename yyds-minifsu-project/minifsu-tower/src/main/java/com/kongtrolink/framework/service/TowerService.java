@@ -487,14 +487,6 @@ public class TowerService {
     private RedisAlarm createRedisAlarm(Alarm alarm, JSONObject info,
                                         String fsuId, String deviceId) {
         RedisAlarm result = new RedisAlarm();
-        if ((info.getInteger("link") & 32) > 0) {
-            result.setAlarmFlag(false);
-        } else if ((info.getInteger("link") & 16) > 0) {
-            result.setAlarmFlag(true);
-        } else {
-            logger.info("ALARM_REGISTER: 无法识别告警标识,link:" + info.getInteger("link"));
-            return null;
-        }
 
         result.setHighFrequency(info.getInteger("highRate") == 1);
         result.setValue(info.getString("value"));
@@ -508,8 +500,18 @@ public class TowerService {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         result.setStartTime(simpleDateFormat.format(info.getLongValue("tReport")));
-        if (info.containsKey("tRecover")) {
-            result.setEndTime(simpleDateFormat.format(info.getLongValue("tRecover")));
+
+        if ((info.getInteger("link") & 32) > 0) {
+            result.setAlarmFlag(false);
+            //当告警结束时再解析结束时间
+            if (info.containsKey("tRecover")) {
+                result.setEndTime(simpleDateFormat.format(info.getLongValue("tRecover")));
+            }
+        } else if ((info.getInteger("link") & 16) > 0) {
+            result.setAlarmFlag(true);
+        } else {
+            logger.info("ALARM_REGISTER: 无法识别告警标识,link:" + info.getInteger("link"));
+            return null;
         }
 
         result.setStartReported(false);
