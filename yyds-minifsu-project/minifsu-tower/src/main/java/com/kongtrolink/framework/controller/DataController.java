@@ -82,6 +82,11 @@ public class DataController {
 
             RedisData redisData = commonUtils.getRedisData(fsuId, deviceId);
 
+            if (redisData == null || redisData.getValues().isEmpty()) {
+                message = WebMessage.NOT_FOUND_DATA;
+                throw new Exception(sn + "-" + fsuId + "-" + deviceId);
+            }
+
             long datetime = System.currentTimeMillis();
             for (Signal signal : signalList) {
                 JSONObject jsonObject = new JSONObject();
@@ -92,7 +97,7 @@ public class DataController {
                 jsonObject.put("value", 0);
                 jsonObject.put("dateTime", datetime);
                 jsonObject.put("dataType", commonUtils.getSignalTypeName(signal.getIdType()));
-                if (redisData != null && redisData.getValues().containsKey(signal.getCntbId())) {
+                if (redisData.getValues().containsKey(signal.getCntbId())) {
                     jsonObject.put("value", Float.valueOf(redisData.getValues().get(signal.getCntbId()).toString()));
                 }
                 data.add(jsonObject);
@@ -480,9 +485,17 @@ public class DataController {
 
                 String deviceId = redisAlarm.getDeviceId();
 
+                String cntbType = deviceMatchService.getCntbType(deviceId);
+                List<DevType> devTypeList = commonUtils.getDevTypeByCntbType(cntbType);
+                if (devTypeList.size() == 0) {
+                    message = WebMessage.NOT_FOUND_DEVICE_TYPE;
+                    throw new Exception(sn + "-" + fsuId + "-" + deviceId);
+                }
+
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("alarmId", redisAlarm.getId());
-                jsonObject.put("deviceId",deviceId);
+                jsonObject.put("deviceId", deviceId);
+                jsonObject.put("name", devTypeList.get(0).getName());
                 jsonObject.put("alarmTime", redisAlarm.getStartTime());
                 jsonObject.put("level", redisAlarm.getAlarmLevel());
                 jsonObject.put("desc", redisAlarm.getAlarmDesc());
@@ -492,13 +505,6 @@ public class DataController {
                 JsonDevice jsonDevice = deviceDao.getInfoByFsuIdAndDeviceId(fsuId, deviceId);
                 if (jsonDevice == null || jsonDevice.getPort() == null) {
                     message = WebMessage.NOT_FOUND_DEVICE;
-                    throw new Exception(sn + "-" + fsuId + "-" + deviceId);
-                }
-
-                String cntbType = deviceMatchService.getCntbType(deviceId);
-                List<DevType> devTypeList = commonUtils.getDevTypeByCntbType(cntbType);
-                if (devTypeList.size() == 0) {
-                    message = WebMessage.NOT_FOUND_DEVICE_TYPE;
                     throw new Exception(sn + "-" + fsuId + "-" + deviceId);
                 }
 
