@@ -9,5 +9,6 @@ public class WebMessage {
     public final static String NOT_FOUND_DEVICE_TYPE = "未找到设备类型信息";
     public final static String NOT_FOUND_SIGNAL = "未找到设备对应信号点";
     public final static String NOT_FOUND_SIGNAL_LIST = "未找到设备对应信号点列表";
+    public final static String NOT_FOUND_DATA = "未找到设备数据信息";
     public final static String NOT_FOUND_ALARM = "未找到设备对应告警点";
 }
