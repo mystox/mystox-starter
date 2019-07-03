@@ -82,7 +82,7 @@ public class DataController {
 
             RedisData redisData = commonUtils.getRedisData(fsuId, deviceId);
 
-            if (redisData == null) {
+            if (redisData == null || redisData.getValues().isEmpty()) {
                 message = WebMessage.NOT_FOUND_DATA;
                 throw new Exception(sn + "-" + fsuId + "-" + deviceId);
             }
