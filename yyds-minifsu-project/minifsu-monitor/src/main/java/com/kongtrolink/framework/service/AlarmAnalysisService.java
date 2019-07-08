@@ -35,14 +35,14 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理告警
      */
-    public Map<String, JSONObject> analysisAlarm(JsonFsu fsu, Map<String, Integer> dev_colId_valMap, Date curDate){
+    public Map<String, JSONObject> analysisAlarm(JsonFsu fsu, Map<String, Float> dev_colId_valMap, Date curDate){
         String beginDelayTable = begin_delay_alarm_hash + fsu.getSN();
         //获取FSU下所有以前告警
         Map<String, JSONObject> beforAlarmMap = redisUtils.hmget(sn__alarm_hash + fsu.getSN());
         //获取所有的告警开始延迟
         Map<String, JSONObject> beginDelayAlarmMap = redisUtils.hmget(beginDelayTable);//延迟产生或延迟消除的告警
         //处理上报的各个信号点告警数据
-        for(Map.Entry<String, Integer> entry : dev_colId_valMap.entrySet()){
+        for(Map.Entry<String, Float> entry : dev_colId_valMap.entrySet()){
             handleSignal(fsu, entry, beforAlarmMap, beginDelayAlarmMap, curDate);
         }
         beforAlarmMap = delayService.handleEndDelayHistory(beforAlarmMap, curDate);
@@ -61,10 +61,10 @@ public class AlarmAnalysisService {
      * @date: 2019/4/12 17:07
      * 功能描述:处理信号点下的所有告警点
      */
-    public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Integer> entry,
+    public Map<String, JSONObject> handleSignal(JsonFsu fsu, Map.Entry<String, Float> entry,
                          Map<String, JSONObject> beforAlarmMap, Map<String, JSONObject> beginDelayAlarmMap, Date curDate){
         String dev_colId = entry.getKey();
-        Integer signalValue = entry.getValue();
+        Float signalValue = entry.getValue();
         Object alarmSignalObj = redisUtils.hget(sn_dev_id_alarmsignal_hash, fsu.getSN() + "_" + dev_colId);
         if(null == alarmSignalObj){
             return null;
@@ -110,8 +110,8 @@ public class AlarmAnalysisService {
                 delayService.endDelayAlarm(beforAlarm, alarmSignal, curDate);
                 beforAlarmMap.put(keyAlarmId, (JSONObject) JSONObject.toJSON(beforAlarm));
             }else if(null != beginDelayAlarmObj){
-                if( (alarmSignal.getThresholdFlag() ==  1 && value < alarmSignal.getThreshold() )
-                        || (alarmSignal.getThresholdFlag() ==0 && value > alarmSignal.getThreshold()) ){
+                if( (alarmSignal.getThresholdFlag() ==  1 && value <= alarmSignal.getThreshold() )
+                        || (alarmSignal.getThresholdFlag() ==0 && value >= alarmSignal.getThreshold()) ){
                     //延迟产生过期后第一次数据如果是异常，则告警产生，否则同延迟产生时间内告警消除处理
                     redisUtils.hdel(begin_delay_alarm_hash+fsu.getSN(), keyAlarmId); //删除redis中延迟产生数据
                     highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
@@ -151,7 +151,7 @@ public class AlarmAnalysisService {
      * 如果结束告警上报铁塔未成功，此时继续来结束告警标志
      */
     private Alarm endAlarm(Alarm beforAlarm, float value, AlarmSignalConfig alarmSignal, Date curDate){
-        if( (alarmSignal.getThresholdFlag() ==  1 && value < alarmSignal.getThreshold())
+        if( (alarmSignal.getThresholdFlag() ==  1 && value < alarmSignal.getThreshold() )
                 || (alarmSignal.getThresholdFlag() ==0 && value > alarmSignal.getThreshold()) ){
             byte link = beforAlarm.getLink();
             link = (byte)(link | EnumAlarmStatus.END.getValue());

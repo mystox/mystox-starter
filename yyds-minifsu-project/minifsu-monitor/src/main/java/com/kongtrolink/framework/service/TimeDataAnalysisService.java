@@ -29,19 +29,17 @@ public class TimeDataAnalysisService {
      * @date: 2019/4/12 16:32
      * 功能描述:解析实时数据
      */
-    public Map<String, Integer> analysisData(JsonFsu fsu){
+    public Map<String, Float> analysisData(JsonFsu fsu){
         String sn_data_hash = RedisHashTable.SN_DATA_HASH + fsu.getSN();
-        Map<String, Integer> dev_colId_valMap = new HashMap<>();
+        Map<String, Float> dev_colId_valMap = new HashMap<>();
         for(JsonDevice device : fsu.getData()){
             StringBuilder devKey = new StringBuilder(device.getDev()).append(CoreConstant.LINE_CUT_OFF);
-            HashMap<String, Long> info = device.getInfo();
+            HashMap<String, Float> info = device.getInfo();
             for(String key  : info.keySet()){
                 String dev_colId = devKey + key;
-                long aFloat = info.get(key);
-                int intVal = (int)aFloat;
-                dev_colId_valMap.put(dev_colId, intVal);
+                dev_colId_valMap.put(dev_colId, info.get(key));
                 //更新实时数据
-                redisUtils.hset(sn_data_hash, dev_colId, intVal);
+                redisUtils.hset(sn_data_hash, dev_colId, info.get(key));
             }
         }
         return dev_colId_valMap;

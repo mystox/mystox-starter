@@ -26,15 +26,18 @@ public class AlarmRepeatService {
         }
         String sn = fsu.getSN();
         Integer repeatDelay = signalConfig.getRepeatDelay();
-        String repeatKey = repeat_hash + sn + ":" + keyAlarmId;
-        double repeatCount = redisUtils.hincr(repeatKey, keyAlarmId, 1);
-        if(1 == repeatCount){
-            //如果为1，说明该告警没有重复延时，需要设置redis该键的有效时间
-            redisUtils.expire(repeatKey, repeatDelay);
-            return beforAlarm;
+        if(null != repeatDelay) {       //该告警需要重复延时
+            String repeatKey = repeat_hash + sn + ":" + keyAlarmId;
+            double repeatCount = redisUtils.hincr(repeatKey, keyAlarmId, 1);
+            if (1 == repeatCount) {
+                //如果为1，说明该告警没有重复延时，需要设置redis该键的有效时间
+                redisUtils.expire(repeatKey, repeatDelay);
+                return beforAlarm;
+            }
+            //如果不是1，说明已经重复延时了，返回空
+            return null;
         }
-        //如果不是1，说明已经重复延时了，返回空
-        return null;
+        return beforAlarm;
     }
 
     /**
