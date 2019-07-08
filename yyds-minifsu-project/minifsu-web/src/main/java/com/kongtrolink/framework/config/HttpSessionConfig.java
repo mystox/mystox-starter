@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
  * Created by mystox on 2018/6/19.
  */
 @Configuration
-@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 600, redisNamespace = "db02")
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 18000, redisNamespace = "db02")
 public class HttpSessionConfig
 {
 
@@ -47,7 +47,7 @@ public class HttpSessionConfig
         RedisOperationsSessionRepository sessionRepository =  new RedisOperationsSessionRepository(redisTemplate);
         FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
         sessionRepository.setDefaultSerializer(fastJsonRedisSerializer);
-        sessionRepository.setDefaultMaxInactiveInterval(1800);
+        sessionRepository.setDefaultMaxInactiveInterval(18000);
         return sessionRepository;
     }
 }
