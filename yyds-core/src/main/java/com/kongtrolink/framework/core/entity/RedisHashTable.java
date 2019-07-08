@@ -15,6 +15,7 @@ public class RedisHashTable
     public final static String SN_ALARM_HASH = "sn_alarm_hash_";  //实时告警{sn1:alarmObjectList}
     public final static String SN_BEGIN_DELAY_ALARM_HASH = "sn_begin_delay_hash";  //告警开始延迟记录表
     public final static String HIGHRATE_SN_HASH  = "sn_highrage_";  //告警高频过滤表
+    public final static String REPEAT_SN_HASH  = "sn_repeat_";  //重复延迟过滤表
     public final static String SN_ALARM_NUM_HASH = "sn_alarm_num_hash";     //告警序列号（SN内唯一，不需要用自增）
 
 }
