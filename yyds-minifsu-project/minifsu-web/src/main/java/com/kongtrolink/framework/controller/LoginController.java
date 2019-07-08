@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.config.LoginConfig;
+import com.kongtrolink.framework.model.session.BaseController;
 import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("auth")
-public class LoginController
+public class LoginController extends BaseController
 {
 
     @Autowired
@@ -45,6 +46,7 @@ public class LoginController
 
     @RequestMapping("/sessionCheck")
     public JsonResult sessionCheck() {
+        getSession().setMaxInactiveInterval(24*7*3600);
         return new JsonResult();
     }
 }
