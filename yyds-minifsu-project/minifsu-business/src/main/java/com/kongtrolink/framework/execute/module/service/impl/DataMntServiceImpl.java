@@ -25,6 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.*;
 
@@ -102,14 +103,21 @@ public class DataMntServiceImpl implements DataMntService {
         String table = RedisHashTable.SN_DATA_HASH + sn;
         Set<String> mntData = redisUtils.getHkeys(table, dev + "_*");
         List<String> mntList = new ArrayList<>(mntData);
-        List<Integer> values = redisUtils.hashMultiGet(table,mntList,Integer.class);
+        List values = redisUtils.hashMultiGet(table, mntList, Integer.class);
         JSONArray jsonArray = new JSONArray();
-        for (int i=0; i<mntList.size();i++)
-        {
+        for (int i = 0; i < mntList.size(); i++) {
             String key = mntList.get(i);
             JSONObject coData = new JSONObject();
 //            Object value = redisUtils.getHash(RedisHashTable.SN_DATA_HASH + sn, key);
-            Integer value = values.get(i);
+            Integer value = new Integer(0);
+            Object o = values.get(i);
+            if (o instanceof BigDecimal) {
+                BigDecimal b = (BigDecimal) o;
+                value = b.intValue();
+            } else if (o instanceof Integer)
+            {
+                value = (Integer) o;
+            }
             String coId = key.replaceFirst(dev + "_", "");
             coData.put("coId", coId);
             SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);

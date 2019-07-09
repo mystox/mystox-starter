@@ -165,7 +165,8 @@ public class ResourceServiceImpl implements ResourceService {
                         for (File document : files) {
                             String filename = document.getName();
                             list.add(new Document(filename,
-                                    filename.contains(".") ? filename.split("\\.")[1] : "",
+//                                    filename.contains(".") ? filename.split("\\.")[1] : "",
+                                    filename.contains(".") ? filename.substring(0,filename.lastIndexOf("\\.")) : "",
                                     document.getPath()));
                         }
                         DirectoryVo vo = new DirectoryVo();
