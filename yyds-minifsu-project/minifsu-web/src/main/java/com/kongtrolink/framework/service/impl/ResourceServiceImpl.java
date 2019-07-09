@@ -166,7 +166,7 @@ public class ResourceServiceImpl implements ResourceService {
                             String filename = document.getName();
                             list.add(new Document(filename,
 //                                    filename.contains(".") ? filename.split("\\.")[1] : "",
-                                    filename.contains(".") ? filename.substring(0,filename.lastIndexOf("\\.")) : "",
+                                    filename.contains(".") ? filename.substring(filename.lastIndexOf("."),filename.length()) : "",
                                     document.getPath()));
                         }
                         DirectoryVo vo = new DirectoryVo();
@@ -186,6 +186,7 @@ public class ResourceServiceImpl implements ResourceService {
         return result;
 
     }
+
 
    /* public static void main(String[] args)
     {
