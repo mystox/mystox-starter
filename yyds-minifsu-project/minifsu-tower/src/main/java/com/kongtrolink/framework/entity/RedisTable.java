@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.entity;
 
 public class RedisTable {
+    private final static String LOCK = "lock:";
     private final static String CNTBTYPE_TYPE_HASH = "cntbType_type_hash:";
     private final static String CNTBTYPE_SIGNAL_HASH = "cntbType_signal_hash:";
     private final static String CNTBTYPE_ALARM_HASH = "cntbType_alarm_hash:";
@@ -11,6 +12,10 @@ public class RedisTable {
     private final static String DATA_HASH = "data_hash:";
     private final static String ALARM_HASH = "alarm_hash:";
     private final static String HIS_DATA_HASH = "his_data:";
+
+    public static String getLockKey(String sn) {
+        return RedisTable.LOCK + sn;
+    }
 
     public static String getDevTypeKey(String type, String cntbType) {
         return RedisTable.CNTBTYPE_TYPE_HASH + type + "_" + cntbType;

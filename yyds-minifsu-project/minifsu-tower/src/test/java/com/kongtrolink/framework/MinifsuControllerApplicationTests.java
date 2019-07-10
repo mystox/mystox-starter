@@ -18,6 +18,8 @@ import com.kongtrolink.framework.entity.xml.msg.GetData;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.TowerRunner;
+import com.kongtrolink.framework.service.CntbLoginService;
+import com.kongtrolink.framework.service.RpcService;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -237,6 +239,7 @@ public class MinifsuControllerApplicationTests {
 	@Test
 	public void test111() {
 		try {
+			String.valueOf(null);
 			System.out.println(JSONObject.toJSONString(null));
 		} catch (Exception ex) {
 			System.out.println(ex);
@@ -261,8 +264,9 @@ public class MinifsuControllerApplicationTests {
 
 //		ModuleMsg msg = createAlarmRequest();
 
-		for (int i = 0; i < 1; ++i) {
+		for (int i = 0; i < 10; ++i) {
 			try {
+				msg.setMsgId(i + "");
 				response = sendMSG(rpcModuleBase, msg);
 //				Thread.sleep(1);
 			} catch (Exception e) {
@@ -461,7 +465,7 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	static RpcNotifyProto.RpcMessage sendMSG(RpcModuleBase rpcModuleBase, ModuleMsg msg) {
-		String ip = "172.16.6.50";
+		String ip = "172.16.6.20";
 		int port = 18881;
 		RpcNotifyProto.RpcMessage response = null;
 		try {
@@ -472,5 +476,40 @@ public class MinifsuControllerApplicationTests {
 		return response;
 	}
 
+	@Autowired
+	RpcService rpcService;
 
+	@Test
+	public void testRpcService(){
+		rpcService.getDevices("MMU001X190500007", "172.16.5.228", 18800);
+	}
+
+	@Autowired
+	CntbLoginService cntbLoginService;
+
+	@Test
+	public void testLogin() {
+		cntbLoginService.startLogin("MMU001X190500007");
+	}
+
+	@Test
+	public void testJson() {
+		Test11 t = new Test11();
+		t.setNum(1);
+
+		System.out.println(JSONObject.toJSONString(t));
+	}
 }
+
+class Test11 {
+	private int Num;
+
+	public int getNum() {
+		return Num;
+	}
+
+	public void setNum(int num) {
+		Num = num;
+	}
+}
+

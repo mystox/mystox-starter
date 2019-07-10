@@ -12,6 +12,7 @@ import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.dao.LogDao;
 import com.kongtrolink.framework.service.TowerService;
+import com.kongtrolink.framework.utils.CommonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by mystoxlol on 2019/2/25, 19:25.
@@ -40,14 +43,21 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private ThreadPoolTaskExecutor controllerExecutor;
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     private TowerService towerService;
 
     @Autowired
+    CommonUtils commonUtils;
+
+    private ConcurrentHashMap<String, ConcurrentLinkedQueue<ModuleMsg>> msgHashMap = new ConcurrentHashMap();
+
+    @Autowired
     LogDao logDao;
 
+    @Value("${spring.redis.lockTimeout}")
+    private int lockTimeout;
     @Value("${server.bindIp}")
     private String host;
     @Value("${server.name}")
@@ -66,66 +76,31 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
      * @param
      * @return
      */
-
     @Override
     protected RpcNotifyProto.RpcMessage execute(String msgId, String payload)
     {
         JSONObject response = new JSONObject();
-        boolean result = false;
+        boolean result = true;
 
         ModuleMsg moduleMsg = JSONObject.parseObject(payload, ModuleMsg.class);
 
-        JSONObject infoPayload = moduleMsg.getPayload();
-
-        try {
-            //处理请求
-            //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
-            switch (moduleMsg.getPktType()) {
-                case CntbPktTypeTable.GW_SERVICE:
-                    String responseMsg = scMessage(infoPayload);
-                    response.put("msg", responseMsg);
-                    result = responseMsg != null;
-                    break;
-                case PktType.FSU_BIND:
-                    result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
-//                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
-                    break;
-                case PktType.TERMINAL_UNBIND:
-                    result = towerService.fsuUnbind(moduleMsg.getSN());
-                    break;
-                case PktType.DATA_CHANGE:
-                case PktType.DATA_REPORT:
-                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
-                    towerService.checkAlarm(moduleMsg.getSN());
-                    result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
-                    towerService.saveHisData(moduleMsg.getSN());
-                    break;
-                case PktType.DATA_STATUS:
-                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
-                    towerService.checkAlarm(moduleMsg.getSN());
-                    result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
-                    towerService.saveHisData(moduleMsg.getSN());
-                    break;
-                case PktType.ALARM_REGISTER:
-                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
-                    result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
-                    towerService.checkAlarm(moduleMsg.getSN());
-                    towerService.saveHisData(moduleMsg.getSN());
-                    break;
-                default:
-                    towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
-                    towerService.checkAlarm(moduleMsg.getSN());
-                    towerService.saveHisData(moduleMsg.getSN());
-                    result = true;
-                    break;
+        //若为铁塔平台发送请求，则scMessage方法的返回值为向铁塔返回的xml报文，若为null则返回失败
+        if (moduleMsg.getPktType().equals(CntbPktTypeTable.GW_SERVICE)) {
+            String responseMsg = scMessage(moduleMsg.getPayload());
+            response.put("msg", responseMsg);
+            result = (responseMsg != null);
+        } else {
+            ConcurrentLinkedQueue<ModuleMsg> msgQueue = new ConcurrentLinkedQueue();
+            ConcurrentLinkedQueue<ModuleMsg> curQueue = msgHashMap.putIfAbsent(moduleMsg.getSN(), msgQueue);
+            if (curQueue == null) {
+                curQueue = msgQueue;
             }
-        } catch (Exception e) {
-            saveLog(moduleMsg.getMsgId(), moduleMsg.getSN(), moduleMsg.getPktType(), StateCode.FAILED);
-            logger.error("处理请求异常：PktType:" + moduleMsg.getPktType() + ",payload:" +
-                    moduleMsg.getPayload() + ",Exception:" + JSONObject.toJSONString(e));
+            curQueue.add(moduleMsg);
+
+            logger.info("execute: receive msg: " + payload + ", msgHashMap.size: " + msgHashMap.size() + ", queue.size:" + msgHashMap.get(moduleMsg.getSN()).size());
+            taskExecutor.execute(() -> handleMsg(moduleMsg.getSN()));
         }
 
-        //todo
         response.put("result", result ? 1 : 0);
 
         return RpcNotifyProto.RpcMessage.newBuilder()
@@ -134,6 +109,96 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface
                 .setPayload(response.toJSONString())
                 .setMsgId(StringUtils.isBlank(msgId)?"":msgId)
                 .build();
+    }
+
+    private void handleMsg(String sn) {
+        boolean result = false;
+
+        String lock = null;
+
+        try {
+            if (!msgHashMap.containsKey(sn)) {
+                //该sn没有对应消息，直接返回
+                return;
+            }
+
+            ConcurrentLinkedQueue<ModuleMsg> msgQueue = msgHashMap.get(sn);
+            if (msgQueue.size() == 0) {
+                return;
+            }
+
+            lock = commonUtils.getRedisLock(sn, lockTimeout);
+            if (lock == null) {
+                //未取得redis锁，直接返回
+                logger.info("handleMsg: getRedisLock failed, sn: " + sn + ", msgHashMap.size: " + msgHashMap.size() + ", queue.size:" + msgHashMap.get(sn).size());
+                return;
+            }
+            logger.info("handleMsg: getRedisLock success, sn: " + sn + ", lock: " + lock);
+
+            ModuleMsg moduleMsg = msgQueue.poll();
+            if (moduleMsg == null) {
+                return;
+            }
+
+            logger.info("handleMsg: lock: " + lock + ", msg: " + JSONObject.toJSONString(moduleMsg));
+            JSONObject infoPayload = moduleMsg.getPayload();
+
+            try {
+                //处理请求
+                switch (moduleMsg.getPktType()) {
+                    case PktType.FSU_BIND:
+                        result = towerService.fsuBind(moduleMsg.getSN(), infoPayload);
+                        break;
+                    case PktType.TERMINAL_UNBIND:
+                        result = towerService.fsuUnbind(moduleMsg.getSN());
+                        break;
+                    case PktType.DATA_CHANGE:
+                    case PktType.DATA_REPORT:
+                        towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
+                        towerService.checkAlarm(moduleMsg.getSN());
+                        result = towerService.rcvData(moduleMsg.getSN(), infoPayload);
+                        towerService.saveHisData(moduleMsg.getSN());
+                        break;
+                    case PktType.DATA_STATUS:
+                        towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
+                        towerService.checkAlarm(moduleMsg.getSN());
+                        result = towerService.rcvFsuInfo(moduleMsg.getSN(), infoPayload);
+                        towerService.saveHisData(moduleMsg.getSN());
+                        break;
+                    case PktType.ALARM_REGISTER:
+                        towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
+                        result = towerService.rcvAlarm(moduleMsg.getSN(), infoPayload);
+                        towerService.checkAlarm(moduleMsg.getSN());
+                        towerService.saveHisData(moduleMsg.getSN());
+                        break;
+                    default:
+                        towerService.refreshTowerOnlineInfo(moduleMsg.getSN(), infoPayload);
+                        towerService.checkAlarm(moduleMsg.getSN());
+                        towerService.saveHisData(moduleMsg.getSN());
+                        result = true;
+                        break;
+                }
+            } catch (Exception e) {
+                saveLog(moduleMsg.getMsgId(), moduleMsg.getSN(), moduleMsg.getPktType(), StateCode.FAILED);
+                logger.error("处理请求异常：PktType:" + moduleMsg.getPktType() + ",payload:" +
+                        moduleMsg.getPayload() + ",Exception:" + JSONObject.toJSONString(e));
+            }
+
+
+            if (!result) {
+                logger.error("处理请求失败：PktType:" + moduleMsg.getPktType() + ",payload:" +
+                        moduleMsg.getPayload() + ",Exception:" + "handleMsg");
+            }
+
+        } catch (Exception e) {
+            logger.error("处理请求异常 ,Exception:" + JSONObject.toJSONString(e));
+        } finally {
+            if (lock != null) {
+                commonUtils.redisUnlock(sn, lock);
+                logger.info("handleMsg: redisUnlock success, sn: " + sn + ",lock: " + lock);
+                handleMsg(sn);
+            }
+        }
     }
 
     /**

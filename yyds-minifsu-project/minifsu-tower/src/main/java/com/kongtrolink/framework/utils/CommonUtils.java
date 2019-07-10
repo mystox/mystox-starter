@@ -43,6 +43,16 @@ public class CommonUtils {
     @Value("${tower.registry.timeout}")
     private int registryTimeout;
 
+    public String getRedisLock(String sn, int timeout) {
+        String key = RedisTable.getLockKey(sn);
+        return redisUtils.lock(key, timeout);
+    }
+
+    public void redisUnlock(String sn, String value) {
+        String key = RedisTable.getLockKey(sn);
+        redisUtils.unlock(key, value);
+    }
+
     /**
      * 获取当前sn在redis中的信息
      * @param sn sn

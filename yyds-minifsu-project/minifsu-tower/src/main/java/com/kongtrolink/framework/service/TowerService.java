@@ -67,8 +67,6 @@ public class TowerService {
     CntbAlarmService cntbAlarmService;
     @Autowired
     DeviceMatchService deviceMatchService;
-    @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
 
     //信号字典表模式
     @Value("${tower.binding.dictMode}")
@@ -1157,7 +1155,7 @@ public class TowerService {
                 commonUtils.setRedisOnlineInfo(redisOnlineInfo);
                 logger.debug("-----------------------login start-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
                 //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
-                taskExecutor.execute(() -> cntbLoginService.startLogin(sn));
+                cntbLoginService.startLogin(sn);
             }
         }
     }
@@ -1167,7 +1165,7 @@ public class TowerService {
      * @param sn sn
      */
     public void checkAlarm(String sn) {
-        taskExecutor.execute(() -> cntbAlarmService.startAlarm(sn));
+        cntbAlarmService.startAlarm(sn);
     }
 
     /**

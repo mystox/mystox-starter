@@ -34,6 +34,7 @@ spring:
       min-idle: 20
     host: 172.16.5.26
     port: 6379
+    lockTimeout: 5000 #redis锁超时时间，毫秒
 
 executor:
   threadPool:
