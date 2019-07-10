@@ -22,8 +22,8 @@ public class AlarmAnalysisService {
     AlarmHighRateFilterService highRateFilterService;
     @Autowired
     AlarmDelayService delayService;
-    @Autowired
-    AlarmRepeatService repeatService;
+//    @Autowired
+//    AlarmRepeatService repeatService;
 
     private String sn_dev_id_alarmsignal_hash = RedisHashTable.SN_DEV_ID_ALARM_SIGNAL_HASH;
     private String sn__alarm_hash = RedisHashTable.SN_ALARM_HASH;
@@ -94,10 +94,10 @@ public class AlarmAnalysisService {
                     continue ;
                 }
                 //重复延迟流程
-                alarm = repeatService.handleAlarm(fsu, alarm, alarmSignal, keyAlarmId);
-                if(null == alarm){
-                    continue;
-                }
+//                alarm = repeatService.handleAlarm(fsu, alarm, alarmSignal, keyAlarmId);
+//                if(null == alarm){
+//                    continue;
+//                }
                 //liuddtodo:设置dev_colId，告警注册和保存历史告警时需要。但是保存在redis中的真实告警和延迟告警需要去除，后期优化节约空间
                 alarm.setDev(dev);
                 //填充告警序列号，虽然延迟告警也填充序列号，可能浪费序列号并且增加redis操作，但是代码可读性更高
@@ -116,7 +116,7 @@ public class AlarmAnalysisService {
                     redisUtils.hdel(begin_delay_alarm_hash+fsu.getSN(), keyAlarmId); //删除redis中延迟产生数据
                     highRateFilterService.reduceHighRateInfo(fsu.getSN(),  keyAlarmId);
                     //删除重复延时信息85`0
-                    repeatService.reduceRepeatInfo(fsu.getSN(), keyAlarmId);
+//                    repeatService.reduceRepeatInfo(fsu.getSN(), keyAlarmId);
                     //liuddtodo 后期需要修改redis中重复告警延时数据，和将关联或者组合期间消除的告警保存到数据库，状态为待定
                     beginDelayAlarmMap.remove(keyAlarmId);
                 }
