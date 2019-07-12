@@ -480,7 +480,13 @@ public class DataController {
                 throw new Exception(sn + "-" + fsuId);
             }
 
+            boolean isDesc = true;
+            if (requestBody.containsKey("isDesc")) {
+                isDesc = (boolean)requestBody.get("isDesc");
+            }
+
             List<RedisAlarm> redisAlarmList = commonUtils.getRedisAlarmList(redisOnlineInfo.getFsuId());
+            sortRedisAlarmListByStartTime(redisAlarmList, isDesc);
             for (RedisAlarm redisAlarm : redisAlarmList) {
 
                 String deviceId = redisAlarm.getDeviceId();
@@ -493,6 +499,7 @@ public class DataController {
                 }
 
                 JSONObject jsonObject = new JSONObject();
+                jsonObject.put("serialNo", redisAlarm.getSerialNo());
                 jsonObject.put("alarmId", redisAlarm.getId());
                 jsonObject.put("deviceId", deviceId);
                 jsonObject.put("name", devTypeList.get(0).getName());
@@ -539,5 +546,23 @@ public class DataController {
 
             return jsonResult;
         }
+    }
+
+    private void sortRedisAlarmListByStartTime(List<RedisAlarm> redisAlarmList, boolean isDesc) {
+        redisAlarmList.sort((arg0, arg1) -> {
+            int result;
+
+            if (arg0.getStartTime().equals(arg1.getStartTime())) {
+                result = arg0.getSerialNo().compareTo(arg1.getSerialNo());
+            } else {
+                result = arg0.getStartTime().compareTo(arg1.getStartTime());
+            }
+
+            if (isDesc) {
+                result *= -1;
+            }
+
+            return result;
+        });
     }
 }
