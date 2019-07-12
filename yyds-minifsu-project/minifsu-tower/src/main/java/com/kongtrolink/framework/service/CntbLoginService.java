@@ -58,7 +58,6 @@ public class CntbLoginService {
     @Autowired
     LogUtils logUtils;
 
-
     /**
      * 开始注册
      * @param sn sn
@@ -67,11 +66,13 @@ public class CntbLoginService {
 
         RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
         try {
-            if (!(redisOnlineInfo != null && !redisOnlineInfo.isOnline() &&
-                    (commonUtils.getVpnIp(redisOnlineInfo.getLocalName()) != null))) {
+            if (redisOnlineInfo == null || redisOnlineInfo.isOnline() || (commonUtils.getVpnIp(redisOnlineInfo.getLocalName()) == null) ||
+                (redisOnlineInfo.getLastTimeLogin() + redisOnlineInfo.getLoginInterval() >= System.currentTimeMillis() / 1000)) {
+                // 当 redis中没有终端信息 或 铁塔平台在线 或 对应VPNIP有误 或 上次注册时间+注册间隔大于等于当前时间 时，不注册，直接返回
                 return;
             }
 
+            logger.debug("-----------------------login start-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
             if (!updateDevice(redisOnlineInfo)) {
                 return;
             }
@@ -81,15 +82,11 @@ public class CntbLoginService {
             if (info != null) {
                 login(redisOnlineInfo, info);
             }
+
         } catch (Exception e) {
             logUtils.saveLog("", sn, CntbPktTypeTable.LOGIN, StateCode.FAILED);
-            logger.error("注册过程中出现异常:" + JSONObject.toJSONString(e));
+            logger.error("注册过程中出现异常，SN：" + sn + "，Exception：" + JSONObject.toJSONString(e));
         } finally {
-            redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
-            if (redisOnlineInfo != null) {
-                redisOnlineInfo.setLogining(false);
-                commonUtils.setRedisOnlineInfo(redisOnlineInfo);
-            }
             logger.debug("-----------------------login finally-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
         }
     }
@@ -105,7 +102,7 @@ public class CntbLoginService {
                 redisOnlineInfo.getInnerIp(), redisOnlineInfo.getInnerPort());
 
         if (jsonArray == null) {
-            logger.error("注册时获取设备列表失败");
+            logger.error("注册时获取设备列表失败，SN：" + redisOnlineInfo.getSn());
             return false;
         }
         List<JsonDevice> curList = new ArrayList<>();

@@ -1130,8 +1130,6 @@ public class TowerService {
      * @param sn sn
      */
     public void refreshTowerOnlineInfo(String sn, JSONObject request) {
-        String key = RedisTable.getRegistryKey(sn);
-
         refreshRedisOnlineInfo(sn, request.getString("innerIp"), request.getInteger("innerPort"));
 
         RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
@@ -1144,20 +1142,7 @@ public class TowerService {
             }
         }
 
-        redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
-        if (redisOnlineInfo != null) {
-            logger.debug("-----------------------login pre-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
-            if (!redisOnlineInfo.isOnline() &&
-                    (redisOnlineInfo.getLastTimeLogin() + redisOnlineInfo.getLoginInterval() < System.currentTimeMillis() / 1000) &&
-                    (commonUtils.getVpnIp(redisOnlineInfo.getLocalName()) != null) &&
-                    (!redisOnlineInfo.isLogining())) {
-                redisOnlineInfo.setLogining(true);
-                commonUtils.setRedisOnlineInfo(redisOnlineInfo);
-                logger.debug("-----------------------login start-----------------------" + JSONObject.toJSONString(redisOnlineInfo));
-                //若铁塔离线且本地VPN连接正常，启动线程执行注册流程
-                cntbLoginService.startLogin(sn);
-            }
-        }
+        cntbLoginService.startLogin(sn);
     }
 
     /**
