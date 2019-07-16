@@ -8,7 +8,10 @@ import com.kongtrolink.framework.jsonType.JsonFsu;
 import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,19 +32,73 @@ public class TimeDataAnalysisService {
      * @date: 2019/4/12 16:32
      * 功能描述:解析实时数据
      */
-    public Map<String, Float> analysisData(JsonFsu fsu){
-        String sn_data_hash = RedisHashTable.SN_DATA_HASH + fsu.getSN();
-        Map<String, Float> dev_colId_valMap = new HashMap<>();
-        for(JsonDevice device : fsu.getData()){
+    public Map<String, Integer> analysisData(JsonFsu fsu){
+        Map<String, Integer> dev_colId_valMap = new HashMap<>();
+        List<JsonDevice> data = fsu.getData();
+        if(null == data){
+            return dev_colId_valMap;
+        }
+        for(JsonDevice device : data){
             StringBuilder devKey = new StringBuilder(device.getDev()).append(CoreConstant.LINE_CUT_OFF);
-            HashMap<String, Float> info = device.getInfo();
+            HashMap<String, Long> info = device.getInfo();
+            if(null == info){
+                return dev_colId_valMap;
+            }
             for(String key  : info.keySet()){
                 String dev_colId = devKey + key;
-                dev_colId_valMap.put(dev_colId, info.get(key));
+                long aFloat = info.get(key);
+                int intVal = (int)aFloat;
+                dev_colId_valMap.put(dev_colId, intVal);
                 //更新实时数据
-                redisUtils.hset(sn_data_hash, dev_colId, info.get(key));
+//                redisUtils.hset(sn_data_hash, dev_colId, intVal);
             }
         }
         return dev_colId_valMap;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/5/24 10:08
+     * 功能描述:更新实时数据到redis
+     */
+    public void updateData(JsonFsu fsu, Map<String, Integer> dev_colId_valMap){
+        String sn_data_hash = RedisHashTable.SN_DATA_HASH + fsu.getSN();
+        for(String key : dev_colId_valMap.keySet()){
+            redisUtils.hset(sn_data_hash, key, dev_colId_valMap.get(key));
+        }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/5/24 10:27
+     * 功能描述:DI点告警情况变化后，需要拼接到fsu中，推送给你铁塔
+     */
+    public JsonFsu jointFsu(JsonFsu fsu, Map<String, Integer> DI_dev_colId_valMap){
+        if(null == DI_dev_colId_valMap || DI_dev_colId_valMap.size()==0){
+            return fsu;
+        }
+        List<JsonDevice> data = fsu.getData();
+        if(null == data){
+            data = new ArrayList<>();
+            fsu.setData(data);
+        }
+        for(String key : DI_dev_colId_valMap.keySet()){
+            String[] split = key.split(CoreConstant.LINE_CUT_OFF);
+            String dev = split[0];
+            String alarmId = split[1];
+            int value = DI_dev_colId_valMap.get(key);
+            JsonDevice device = fsu.getJsonDeviceByDev(dev);
+            if(null == device){
+                device = new JsonDevice();
+                data.add(device);
+            }
+            HashMap<String, Long> info = device.getInfo();
+            if(null == info){
+                info = new HashMap<>();
+                device.setInfo(info);
+            }
+            info.put(alarmId, new Long(value));
+        }
+        return fsu;
     }
 }

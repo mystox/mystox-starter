@@ -14,6 +14,23 @@ public class JsonFsu {
     private String SN;
     private List<JsonDevice> data;
 
+    /**
+     * @auther: liudd
+     * @date: 2019/5/24 13:52
+     * 功能描述:根据dev获取列表中对应的JsonDevice
+     */
+    public JsonDevice getJsonDeviceByDev(String dev){
+        if(null == data){
+            return null;
+        }
+        for(JsonDevice device : data){
+            if(dev.equals(device.getDev())){
+                return device;
+            }
+        }
+        return null;
+    }
+
     public Integer getPktType() {
         return pktType;
     }

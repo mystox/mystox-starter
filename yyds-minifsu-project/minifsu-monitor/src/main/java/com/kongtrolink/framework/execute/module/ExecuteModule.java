@@ -88,20 +88,16 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         ModuleMsg moduleMsg = JSON.parseObject(payload, ModuleMsg.class);
         JSONObject infoPayload = moduleMsg.getPayload();
         JsonFsu fsu = JSONObject.parseObject(infoPayload.toJSONString(), JsonFsu.class);
+        String pktType = moduleMsg.getPktType();
         if(!checkCommunication(infoPayload)){
-            saveLog(msgId, fsu, curDate, moduleMsg.getPktType());
+            saveLog(msgId, fsu, curDate, pktType);
             return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
         }
-        //注册数据
-        registerData(msgId, moduleMsg);
 
-        //解析保存实时数据和告警
-        Map<String, Float> dev_colId_valMap = timeDateService.analysisData(fsu);
-        //解析告警
-        Map<String, JSONObject>  alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, curDate);
-        //告警注册与消除
-        if(!alarmMap.isEmpty()) {
-            registerService.register(msgId, fsu, alarmMap, curDate);
+        if("1".equals(pktType)){
+            clientGister(fsu);
+        }else{
+            clientReportDate(msgId, moduleMsg, fsu, curDate);
         }
         return createResp(response, result, StringUtils.isBlank(msgId)? "" : msgId);
     }
@@ -123,19 +119,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 JSON.toJSONString(msg), rpcModule);
         taskExecutor.execute(task);
     }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/4/25 10:51
-     * 功能描述:数据注册给铁塔
-     */
-    private void registerData(String msgId, ModuleMsg dataMsg){
-        dataMsg.setPktType(PktType.DATA_REGISTER);
-        RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
-                JSON.toJSONString(dataMsg), rpcModule);
-        taskExecutor.execute(rpcTask);
-    }
-
 
     /**
      * @auther: liudd
@@ -172,5 +155,67 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 .setType(responseType).setPayload(result)
                 .setPayloadType(RpcNotifyProto.PayloadType.JSON)
                 .setMsgId(StringUtils.isBlank(msgId) ? "" : msgId).build();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/5/24 14:17
+     * 功能描述:终端注册
+     */
+    private void clientGister(JsonFsu fsu){
+        Map<String, Integer> DI_dev_colId_valMap = new HashMap<>();
+        //获取FSU下所有以前告警
+        Map<String, JSONObject> beforAlarmMap = redisUtils.hmget(RedisHashTable.SN_ALARM_HASH + fsu.getSN());
+        for(String key : beforAlarmMap.keySet()){
+            JSONObject alarmJson = beforAlarmMap.get(key);
+            Alarm alarm = JSON.parseObject(alarmJson.toJSONString(), Alarm.class);
+            if(EnumSignalColType.AO.equals(alarm.getCoType())){
+                DI_dev_colId_valMap.put(key, 1);
+            }
+        }
+        //更新实时数据的DI点
+        timeDateService.updateData(fsu, DI_dev_colId_valMap);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/5/24 14:39
+     * 功能描述:终端变化数据上报
+     */
+    private void clientReportDate(String msgId, ModuleMsg moduleMsg, JsonFsu fsu, Date curDate){
+        //解析保存实时数据和告警
+        Map<String, Integer> dev_colId_valMap = timeDateService.analysisData(fsu);
+        //解析告警
+        Map<String, Integer> DI_dev_colId_valMap = new HashMap<>();
+        Map<String, JSONObject>  alarmMap = analysisService.analysisAlarm(fsu, dev_colId_valMap, DI_dev_colId_valMap, curDate);
+
+        //更新实时数据到redis中
+        dev_colId_valMap.putAll(DI_dev_colId_valMap);
+        timeDateService.updateData(fsu, dev_colId_valMap);
+        if(DI_dev_colId_valMap.size() != 0){
+            //拼接新的fsu，并转换成消息体发给控制中心
+            timeDateService.jointFsu(fsu, DI_dev_colId_valMap);
+            JSONObject fsuJsonObj = (JSONObject)JSON.toJSON(fsu);
+            moduleMsg.setPayload(fsuJsonObj);
+        }
+        //注册数据
+        registerData(msgId, moduleMsg);
+
+        //告警注册与消除
+        if(!alarmMap.isEmpty()) {
+            registerService.register(msgId, fsu, alarmMap, curDate);
+        }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/4/25 10:51
+     * 功能描述:数据注册给铁塔
+     */
+    private void registerData(String msgId, ModuleMsg dataMsg){
+        dataMsg.setPktType(PktType.DATA_REGISTER);
+        RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
+                JSON.toJSONString(dataMsg), rpcModule);
+        taskExecutor.execute(rpcTask);
     }
 }

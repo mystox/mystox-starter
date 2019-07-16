@@ -24,6 +24,15 @@ public class Alarm {
     private Long recoverDelayFT;        //告警消除下一次时间
     private int num;                    //告警序列号，终端内唯一
     private byte highRate;              //是否高频
+    private Integer coType;             //关联数据点类型
+
+    public Integer getCoType() {
+        return coType;
+    }
+
+    public void setCoType(Integer coType) {
+        this.coType = coType;
+    }
 
     public String getId() {
         return id;
