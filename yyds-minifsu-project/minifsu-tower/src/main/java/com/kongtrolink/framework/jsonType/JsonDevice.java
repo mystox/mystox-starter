@@ -14,7 +14,7 @@ public class JsonDevice {
     private String deviceId;
     //端口
     private String port;
-    //设备版本号
+    //设备类型
     private int type;
     //资源编号
     private int resNo;

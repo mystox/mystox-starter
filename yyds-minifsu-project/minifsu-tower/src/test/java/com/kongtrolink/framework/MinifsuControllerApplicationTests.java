@@ -9,6 +9,7 @@ import com.kongtrolink.framework.execute.module.dao.AlarmDao;
 import com.kongtrolink.framework.execute.module.dao.SignalDao;
 import com.kongtrolink.framework.execute.module.model.Alarm;
 import com.kongtrolink.framework.execute.module.model.RedisAlarm;
+import com.kongtrolink.framework.execute.module.model.RedisData;
 import com.kongtrolink.framework.execute.module.model.Signal;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
@@ -135,8 +136,9 @@ public class MinifsuControllerApplicationTests {
 //		redisUtils.hset("12", "24", "re");
 //		System.out.println(redisUtils.hHasKey("12", "23"));
 
-		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
-		System.out.println(list);
+		RedisData redisData = commonUtils.getRedisData("43072243800562", "43072243800562");
+//		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
+//		System.out.println(list);
 	}
 
 	@Test
