@@ -503,6 +503,13 @@ public class MinifsuControllerApplicationTests {
 		System.out.println(JSONObject.toJSONString(t));
 	}
 
+	@Test
+	public void testSubstring() {
+		String s = "33010141810001";
+		s = s.substring(7, 14);
+		boolean result = s.startsWith("181");
+	}
+
 	class Test11 {
 		private int Num;
 
