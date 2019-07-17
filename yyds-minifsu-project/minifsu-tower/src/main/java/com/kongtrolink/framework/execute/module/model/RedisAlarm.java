@@ -15,7 +15,6 @@ public class RedisAlarm {
     private String alarmFlag;
     private String alarmDesc;
 
-    private boolean reporting;
     private String startTime;
     private String endTime;
     private String value;
@@ -104,14 +103,6 @@ public class RedisAlarm {
 
     public void setAlarmDesc(String alarmDesc) {
         this.alarmDesc = alarmDesc;
-    }
-
-    public boolean isReporting() {
-        return reporting;
-    }
-
-    public void setReporting(boolean reporting) {
-        this.reporting = reporting;
     }
 
     public String getStartTime() {
