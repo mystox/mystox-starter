@@ -47,7 +47,7 @@ public class DeviceMatchService {
                 continue;
             }
             for (JsonDevice jsonDevice : cntbList) {
-                if (jsonDevice.getDeviceId().indexOf(devType.getCntbType()) == CNTB_TYPE_START_INDEX &&
+                if (jsonDevice.getDeviceId().substring(CNTB_TYPE_START_INDEX).startsWith(devType.getCntbType()) &&
                         jsonDevice.getPort() == null) {
                     jsonDevice.setPort(curDevice.getPort());
                     jsonDevice.setType(curDevice.getType());

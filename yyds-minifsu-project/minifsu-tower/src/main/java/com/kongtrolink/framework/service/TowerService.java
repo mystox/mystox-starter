@@ -221,7 +221,8 @@ public class TowerService {
 
         //删除redis中未找到对应设备的deviceId数据信息
         for (JsonDevice jsonDevice : result) {
-            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1) {
+            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1 &&
+                (!deviceMatchService.getCntbType(jsonDevice.getDeviceId()).equals("38"))) {
                 commonUtils.delRedisData(fsuId, jsonDevice.getDeviceId());
             }
         }
@@ -421,7 +422,7 @@ public class TowerService {
         List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
         if (jsonDeviceList.size() == 0) {
             //若该fsuId下没有设备id，则不需处理，直接返回false
-            return false;
+            return result;
         }
 
         JSONArray array = request.getJSONArray("alarmList");
@@ -482,7 +483,7 @@ public class TowerService {
      * @param deviceId deviceId
      * @return 告警信息
      */
-    private RedisAlarm createRedisAlarm(Alarm alarm, JSONObject info,
+    public RedisAlarm createRedisAlarm(Alarm alarm, JSONObject info,
                                         String fsuId, String deviceId) {
         RedisAlarm result = new RedisAlarm();
 

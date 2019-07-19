@@ -67,9 +67,6 @@ public class CntbAlarmService {
                         continue;
                     }
                     logger.info("-----------------------alarm start-----------------------" + JSONObject.toJSONString(redisAlarm));
-
-                    redisAlarm.setReporting(true);
-                    commonUtils.setRedisAlarm(redisAlarm);
                 }
 
                 if (redisAlarmList.size() == 0) {
@@ -80,7 +77,6 @@ public class CntbAlarmService {
             } finally {
                 for (RedisAlarm redisAlarm : redisAlarmList) {
                     if (!redisAlarm.isEndReported()) {
-                        redisAlarm.setReporting(false);
                         commonUtils.setRedisAlarm(redisAlarm);
                         logger.info("-----------------------alarm finally-----------------------" + JSONObject.toJSONString(redisAlarm));
                     }
@@ -106,10 +102,6 @@ public class CntbAlarmService {
      * @return 是否上报
      */
     private boolean checkReport(RedisOnlineInfo redisOnlineInfo, RedisAlarm redisAlarm) {
-        if (redisAlarm.isReporting()) {
-            //当前告警正在上报
-            return false;
-        }
 
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.BEGIN) && redisAlarm.isStartReported()) {
             //当前告警状态为BEGIN且已成功上报，则不再上报
@@ -119,6 +111,11 @@ public class CntbAlarmService {
             //当前告警状态为END且已成功上报，则不再上报
             return false;
         }
+        if (redisAlarm.getAlarmFlag().equals(RedisAlarm.END) && !redisAlarm.isStartReported()) {
+            //如果告警已结束且开始告警还未上报，则不再上报
+            return false;
+        }
+
 
         if (redisAlarm.getLastReportTime() + 24 * 60 * 60 > System.currentTimeMillis() / 1000) {
             //上次上报时间距离当前时间超过24小时，则上报次数清0，返回true

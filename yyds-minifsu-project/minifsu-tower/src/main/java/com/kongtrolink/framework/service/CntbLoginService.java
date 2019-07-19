@@ -115,18 +115,26 @@ public class CntbLoginService {
         }
 
         List<JsonDevice> cntbList = deviceDao.getListByFsuId(redisOnlineInfo.getFsuId());
+        logger.info("startLogin-updateDevice-getListByFsuId，SN：" + redisOnlineInfo.getSn() +
+                    "，cntbList：" + JSONObject.toJSONString(cntbList));
         for (JsonDevice jsonDevice : cntbList) {
             jsonDevice.setPort(null);
             jsonDevice.setResNo(0);
             jsonDevice.setType(0);
         }
         deviceMatchService.matchingDevice(cntbList, curList);
+        logger.info("startLogin-updateDevice-matchingDevice，SN：" + redisOnlineInfo.getSn() +
+                    "，cntbList：" + JSONObject.toJSONString(cntbList) +
+                    "，curList：" + JSONObject.toJSONString(curList));
         deviceDao.deleteListByFsuId(redisOnlineInfo.getFsuId());
         deviceDao.insertListByFsuId(cntbList);
+        logger.info("startLogin-updateDevice-insertListByFsuId，SN：" + redisOnlineInfo.getSn() +
+                    "，cntbList：" + JSONObject.toJSONString(cntbList));
 
         //删除redis中未找到对应设备的deviceId数据信息
         for (JsonDevice jsonDevice : cntbList) {
-            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1) {
+            if (jsonDevice.getPort() == null && jsonDevice.getType() == -1 && jsonDevice.getResNo() == -1 &&
+                (!deviceMatchService.getCntbType(jsonDevice.getDeviceId()).equals("38"))) {
                 commonUtils.delRedisData(redisOnlineInfo.getFsuId(), jsonDevice.getDeviceId());
             }
         }

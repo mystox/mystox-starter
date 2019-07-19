@@ -8,6 +8,8 @@ import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.execute.module.dao.AlarmDao;
 import com.kongtrolink.framework.execute.module.dao.SignalDao;
 import com.kongtrolink.framework.execute.module.model.Alarm;
+import com.kongtrolink.framework.execute.module.model.RedisAlarm;
+import com.kongtrolink.framework.execute.module.model.RedisData;
 import com.kongtrolink.framework.execute.module.model.Signal;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
@@ -20,6 +22,8 @@ import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.TowerRunner;
 import com.kongtrolink.framework.service.CntbLoginService;
 import com.kongtrolink.framework.service.RpcService;
+import com.kongtrolink.framework.service.TowerService;
+import com.kongtrolink.framework.utils.CommonUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -132,8 +136,9 @@ public class MinifsuControllerApplicationTests {
 //		redisUtils.hset("12", "24", "re");
 //		System.out.println(redisUtils.hHasKey("12", "23"));
 
-		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
-		System.out.println(list);
+		RedisData redisData = commonUtils.getRedisData("43072243800562", "43072243800562");
+//		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
+//		System.out.println(list);
 	}
 
 	@Test
@@ -499,17 +504,41 @@ public class MinifsuControllerApplicationTests {
 
 		System.out.println(JSONObject.toJSONString(t));
 	}
-}
 
-class Test11 {
-	private int Num;
-
-	public int getNum() {
-		return Num;
+	@Test
+	public void testSubstring() {
+		String s = "33010141810001";
+		s = s.substring(7, 14);
+		boolean result = s.startsWith("181");
 	}
 
-	public void setNum(int num) {
-		Num = num;
+	class Test11 {
+		private int Num;
+
+		public int getNum() {
+			return Num;
+		}
+
+		public void setNum(int num) {
+			Num = num;
+		}
+	}
+
+	@Autowired
+	TowerService towerService;
+	@Autowired
+	CommonUtils commonUtils;
+
+	@Test
+	public void testAlarm() {
+		String fsuId = "43072243800562";
+		String deviceId = "43072241830542";
+		String info = "{\"dev\":\"140-3\",\"num\":5172,\"link\":55,\"alarmId\":\"4001\",\"tRecover\":1562851181129,\"highRate\":0,\"tReport\":1562851177915,\"value\":27.97}";
+		JSONObject jsonObject = JSONObject.parseObject(info);
+		String[] dev = jsonObject.getString("dev").split("-");
+		int type = Integer.parseInt(dev[0]);
+		Alarm alarm = commonUtils.getAlarm(type, jsonObject.getString("alarmId"));
+		RedisAlarm redisAlarm = towerService.createRedisAlarm(alarm, jsonObject, fsuId, deviceId);
 	}
 }
 
