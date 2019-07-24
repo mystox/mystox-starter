@@ -108,14 +108,15 @@ public class CntbAlarmService {
             return false;
         }
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.END) && redisAlarm.isEndReported()) {
-            //当前告警状态为END且已成功上报，则不再上报
+            //当前告警状态为END且已成功上报，则不再上报并从redis中删除
+            commonUtils.delRedisAlarm(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
             return false;
         }
         if (redisAlarm.getAlarmFlag().equals(RedisAlarm.END) && !redisAlarm.isStartReported()) {
-            //如果告警已结束且开始告警还未上报，则不再上报
+            //如果告警已结束且开始告警还未上报，则不再上报并从redis中删除
+            commonUtils.delRedisAlarm(redisAlarm.getFsuId(), redisAlarm.getSerialNo());
             return false;
         }
-
 
         if (redisAlarm.getLastReportTime() + 24 * 60 * 60 > System.currentTimeMillis() / 1000) {
             //上次上报时间距离当前时间超过24小时，则上报次数清0，返回true
