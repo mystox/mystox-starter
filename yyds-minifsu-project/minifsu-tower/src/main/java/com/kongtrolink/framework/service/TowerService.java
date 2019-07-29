@@ -415,6 +415,7 @@ public class TowerService {
         RedisOnlineInfo redisOnlineInfo = commonUtils.getRedisOnlineInfo(sn);
         if (redisOnlineInfo == null) {
             //终端在redis中不存在，说明离线，返回false
+            logger.info("ALARM_REGISTER: 终端在redis中不存在，离线,sn:" + sn);
             return result;
         }
 
@@ -422,10 +423,12 @@ public class TowerService {
         List<JsonDevice> jsonDeviceList = deviceDao.getListByFsuId(fsuId);
         if (jsonDeviceList.size() == 0) {
             //若该fsuId下没有设备id，则不需处理，直接返回false
+            logger.info("ALARM_REGISTER: 该fsuId下没有设备id，不需处理,fsuId:" + fsuId);
             return result;
         }
 
         JSONArray array = request.getJSONArray("alarmList");
+        logger.info("ALARM_REGISTER: sn:" + sn + ",alarmList.size():" + array.size());
 
         for (int i = 0; i < array.size(); ++i) {
             JSONObject jsonObject = array.getJSONObject(i);
@@ -448,6 +451,7 @@ public class TowerService {
 
             RedisAlarm redisAlarm = createRedisAlarm(alarm, jsonObject, fsuId, deviceId);
             if (redisAlarm == null) {
+                logger.info("ALARM_REGISTER: 解析告警信息失败,type:" + type + ",jsonObject:" + jsonObject.getString("jsonObject"));
                 continue;
             }
 
