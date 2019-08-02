@@ -310,7 +310,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
             logger.error("[{}]payload is null...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
-            responsePayload.put("result", StateCode.FAILED);
+            responsePayload.put("result", StateCode.JSON_ILLEGAL);
             terminalResp.setPayload(responsePayload);
             return terminalResponse(msgId, SN, terminalResp);
         }

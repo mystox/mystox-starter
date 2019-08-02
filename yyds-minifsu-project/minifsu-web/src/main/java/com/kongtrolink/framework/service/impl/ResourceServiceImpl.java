@@ -163,6 +163,10 @@ public class ResourceServiceImpl implements ResourceService {
                         List<Document> list = new ArrayList<>();
                         File[] files = dir2.listFiles();
                         for (File document : files) {
+                            if (document.isDirectory())
+                            {
+                                continue;
+                            }
                             String filename = document.getName();
                             list.add(new Document(filename,
 //                                    filename.contains(".") ? filename.split("\\.")[1] : "",
@@ -177,10 +181,8 @@ public class ResourceServiceImpl implements ResourceService {
                     }
                 }
             }
-        } catch (FileNotFoundException e) {
+        }  catch (IOException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-
         }
 
         return result;

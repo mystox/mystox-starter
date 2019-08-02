@@ -112,7 +112,7 @@
         </dependencies>
     </dependencyManagement>
     <build>
-        <finalName>0.0.1-SNAPSHOT</finalName>
+        <!--<finalName>0.0.1-SNAPSHOT</finalName>-->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
