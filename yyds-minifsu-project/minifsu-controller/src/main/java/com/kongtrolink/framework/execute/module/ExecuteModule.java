@@ -310,9 +310,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
             logger.error("[{}]payload is null...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
-            Integer pktType = payloadObject.getInteger("pktType");
-
-                responsePayload.put("result", StateCode.FAILED);
+            responsePayload.put("result", StateCode.FAILED);
             terminalResp.setPayload(responsePayload);
             return terminalResponse(msgId, SN, terminalResp);
         }
@@ -412,7 +410,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             }
         }
 
-        if(TerminalPktType.SET_THRESHOLD.getKey() == pktType || TerminalPktType.SET_DATA.getKey() == pktType) {
+        if (TerminalPktType.SET_THRESHOLD.getKey() == pktType || TerminalPktType.SET_DATA.getKey() == pktType) {
             JSONObject responsePayload = new JSONObject();
             responsePayload.put("msgId", msgId);
             responsePayload.put("result", StateCode.JSON_ILLEGAL);
