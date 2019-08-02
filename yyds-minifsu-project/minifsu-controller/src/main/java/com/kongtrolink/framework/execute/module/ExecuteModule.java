@@ -311,14 +311,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             logger.error("[{}]payload is null...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
             Integer pktType = payloadObject.getInteger("pktType");
-            if(pktType != null && TerminalPktType.SET_THRESHOLD.getKey() == pktType) {
-                responsePayload.put("result", StateCode.JSON_ILLEGAL);
-                logger.error("[{}]payload is json illegal...[{}] response is result:8", msgId, payloadObject);
-            }
-            else
-            {
+
                 responsePayload.put("result", StateCode.FAILED);
-            }
             terminalResp.setPayload(responsePayload);
             return terminalResponse(msgId, SN, terminalResp);
         }
@@ -418,6 +412,12 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             }
         }
 
+        if(TerminalPktType.SET_THRESHOLD.getKey() == pktType || TerminalPktType.SET_DATA.getKey() == pktType) {
+            JSONObject responsePayload = new JSONObject();
+            responsePayload.put("msgId", msgId);
+            responsePayload.put("result", StateCode.JSON_ILLEGAL);
+            logger.error("[{}]payload is json illegal...[{}] response is result:8", msgId, payloadObject);
+        }
         // 错误信息记录日志
         saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
         JSONObject responsePayload = new JSONObject();
