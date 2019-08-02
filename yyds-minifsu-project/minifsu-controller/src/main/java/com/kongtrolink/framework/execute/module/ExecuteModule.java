@@ -412,15 +412,16 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
 
         // 错误信息记录日志
-        saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
         JSONObject responsePayload = new JSONObject();
         responsePayload.put("msgId", msgId);
         if (TerminalPktType.SET_THRESHOLD.getKey() == pktType || TerminalPktType.SET_DATA.getKey() == pktType) {
             responsePayload.put("result", StateCode.JSON_ILLEGAL);
             logger.error("[{}]payload is json illegal...[{}] response is result:8", msgId, payloadObject);
+        saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
         } else {
             logger.error("[{}]pktType never execute..[{}] response is result:0", msgId, payloadObject);
             responsePayload.put("result", StateCode.FAILED);
+        saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
         }
         terminalResp.setPayload(responsePayload);
         return terminalResponse(msgId, SN, terminalResp);
