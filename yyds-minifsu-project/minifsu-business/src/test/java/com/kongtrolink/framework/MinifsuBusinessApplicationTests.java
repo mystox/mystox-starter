@@ -1,8 +1,11 @@
 package com.kongtrolink.framework;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.MongoTableName;
+import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.BusinessRunner;
 import org.junit.Test;
@@ -17,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Set;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -79,5 +83,20 @@ public class MinifsuBusinessApplicationTests {
 			}
 		}*/
 //		mongoTemplate.count(Query.query())
+	}
+
+	@Autowired
+	RedisUtils redisUtils;
+	@Test
+	public void testRedis() {
+//		Integer jsonArray = (Integer) redisUtils.getHash(RedisHashTable.SN_DATA_HASH + "MMU001X190500006","0-0_8002");
+//		System.out.println(jsonArray);
+//		JSON json = redisUtils.get(RedisHashTable.SN_DATA_HASH + "MMU001X190500006", JSON.class);
+//		System.out.println(json);
+
+		String table = RedisHashTable.SN_DATA_HASH + "MMU001X190500006";
+		Set<String> hkeys = redisUtils.getHkeys(table, "*");
+		System.out.println(JSON.toJSONString(hkeys));
+
 	}
 }

@@ -58,7 +58,6 @@ public class RegistryServiceImpl implements RegistryService {
     private DataMntService dataMntServiceImpl;
 
 
-
     @Autowired
     public void setDataMntServiceImpl(DataMntService dataMntServiceImpl) {
         this.dataMntServiceImpl = dataMntServiceImpl;
@@ -301,6 +300,7 @@ public class RegistryServiceImpl implements RegistryService {
      * @param deviceList 设备列表
      */
     private void signalConfigDispose(String msgId, String sn, String uuid, List<Device> deviceList) {
+        String table = RedisHashTable.SN_DATA_HASH + sn;
         ThreadPoolTaskExecutor thresholdTask = thresholdExecutor.getObject(); //初始化推送任务池
         for (Device device : deviceList) { //根据设备产生最新配置信息表
             String deviceId = device.getId();
@@ -327,14 +327,18 @@ public class RegistryServiceImpl implements RegistryService {
             Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap = new HashMap<>();
             if (alarmSignals != null && alarmSignals.size() > 0) { //根据模版表格式化数据
                 for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
+                    Integer alarmSignalConfigCoType = alarmSignalConfig.getCoType();
                     String coId = alarmSignalConfig.getCoId();
-
+                    if (alarmSignalConfigCoType == 3) { //如果type==3(DI),实时信号点值设置为0
+                        redisUtils.setHash(table, devDataId+"_"+coId, 0);
+                    }
                     String alarmConfigKey = sn + "_" + devDataId + "_" + coId;
                     List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
                     //根据告警点属性的valueBase处理数据点值的倍数问题!!
                     SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
                     alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
                             signalModel.getValueBase());
+
                     alarmSignalConfig.setUuid(uuid);
 
                     if (alarmSignalConfigs != null) {

@@ -274,7 +274,7 @@ public class MinifsuControllerApplicationTests {
         JSONObject requestHead = new JSONObject();
         String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
         requestHead.put("uuid", "adcb64f0");
-        requestHead.put("gip", "172.16.6.50:17701");
+        requestHead.put("gip", "172.16.6.71:17701");
         requestHead.put("pktType", PktType.CONNECT);
 
         /************************* 注册********************************/
@@ -348,15 +348,19 @@ public class MinifsuControllerApplicationTests {
         String registerMsg = "{\"msgId\":\"" + "设备包" + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI201904260011\"}}";
         response = sendMSG(requestHead, rpcModuleBase, registerMsg);
         System.out.println("终端注册结果: " + response.getPayload());
+        //2包 终端信息
+        String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI201904260011\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
+        response = sendMSG(requestHead, rpcModuleBase, terminalMsg);
+        System.out.println("终端属性上报结果: " + response.getPayload());
         //3包 设备包
-        String deviceMsg = "{\"msgId\":\"01557794749\",\"payload\":{\"pktType\":3,\"SN\":\"MINI201904260011\",\"devList\":[\"0-255-0-0-0110103\",\"140-0-0-2-0150501\",\"1-0-1-1-0990101\"]}}";
+        String deviceMsg = "{\"msgId\":\"01557794749\",\"payload\":{\"pktType\":3,\"SN\":\"MINI201904260011\",\"devList\":[\"0-255-0-0-0110103\",\"9-0-0-2-0150501\",\"1-0-1-1-0990101\"]}}";
         response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
         System.out.println("设备上报结果" + response.getPayload());
     }
 
 
     static RpcNotifyProto.RpcMessage sendMSG(JSONObject requestHead, RpcModuleBase rpcModuleBase, Object msg) {
-        String ip = "172.16.6.50";
+        String ip = "172.16.6.71";
         int port = 18800;
         RpcNotifyProto.RpcMessage response = null;
         requestHead.put("payload", msg);

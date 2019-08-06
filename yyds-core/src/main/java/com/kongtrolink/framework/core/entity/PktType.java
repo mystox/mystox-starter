@@ -57,4 +57,5 @@ public class PktType {
     public final static String TERMINAL_BIND = "terminal_bind"; //终端配置
     public final static String HEART = "heart"; //心跳
     public final static String GET_COMPILER_VERSION = "get_compiler_version"; //获取编译版本信息
+    public final static String REGISTER_INFORM_ALARM = "register_inform_alarm"; //注册通知告警模块
 }
