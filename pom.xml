@@ -10,6 +10,7 @@
     <modules>
         <module>yyds-core</module>
         <module>yyds-minifsu-project</module>
+        <module>yyds-mqtt</module>
     </modules>
     <packaging>pom</packaging>
 

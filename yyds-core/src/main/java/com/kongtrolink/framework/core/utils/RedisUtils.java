@@ -654,6 +654,7 @@ public class RedisUtils
      *                因为会存在并发的线程都会去删除，造成上一个锁失效，结果都获得锁去执行，并发操作失败了就。
      * @return 如果取到锁返回值，未取到锁返回null
      */
+
     public String lock(String key, int timeout) {
 
         int increment = timeout < 0 ? 0 : timeout;
