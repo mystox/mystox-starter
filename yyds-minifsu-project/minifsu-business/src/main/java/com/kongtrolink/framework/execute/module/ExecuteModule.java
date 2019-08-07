@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.ByteString;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
+import com.kongtrolink.framework.core.entity.StateCode;
 import com.kongtrolink.framework.core.entity.TerminalPktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
@@ -97,6 +98,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             result = jsonObject.toJSONString();
         } else if (TerminalPktType.DEV_LIST.getValue().equals(pktType)) { // 设备上报
             JSONObject jsonObject = registryService.registerDevices(moduleMsg);
+            if(StateCode.SUCCESS == jsonObject.getInteger("result")){
+                //发送rpc请求给smonitor
+            }
             result = jsonObject.toJSONString();
         } else if (PktType.CLEANUP.equals(pktType)) { // 注销
             JSONObject jsonObject = registryService.saveCleanupLog(moduleMsg);

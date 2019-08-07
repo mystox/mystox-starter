@@ -29,8 +29,8 @@ spring:
 
 server:
   name: minifsu-controller
-  bindIp: 172.16.6.71
-  outerIp: 172.16.6.71
+  bindIp: 172.16.6.134
+  outerIp: 172.16.6.134
   rpc:
     port: 18800
     outerPort: 18800
@@ -45,11 +45,11 @@ rpc:
   client:
     timeout: 60000 #rpc请求超时时间
   monitor:
-    hostname: 172.16.6.71
+    hostname: 172.16.6.134
     port: 18810
   business:
-    hostname: 172.16.6.71
+    hostname: 172.16.6.134
     port: 18830
   tower:
-    hostname: 172.16.6.71
+    hostname: 172.16.6.134
     port: 18881

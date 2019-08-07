@@ -222,6 +222,22 @@ public class RegistryServiceImpl implements RegistryService {
                     logService.saveLog(log);
                 }
             });
+
+            //通知告警模块
+            businessExecutor.execute(() -> {
+                try {
+                    logger.info("[{}] sn [{}] send devList msg to [{}]", msgId, sn, PktType.REGISTER_INFORM_ALARM);
+                    // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
+                    moduleMsg.setPktType(PktType.REGISTER_INFORM_ALARM);
+                    rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                } catch (IOException e) {
+                    logger.error("[{}] sn [{}] send devList msg to [{}] error [{}]", msgId, sn, PktType.REGISTER_INFORM_ALARM, e.toString());
+                    //日志记录.  //日志记录
+                    Log log = new Log(new Date(System.currentTimeMillis()),
+                            StateCode.CONNECT_ERROR, sn, moduleMsg.getPktType(), msgId, name, host);
+                    logService.saveLog(log);
+                }
+            });
             //设备上报流程执行完毕
             result.put("result", StateCode.SUCCESS);
             return result;
