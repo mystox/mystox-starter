@@ -239,10 +239,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通完monitor >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        if (PktType.REGISTER_INFORM_ALARM.equals(pktType) //business ---> monitor
-                ) {
+        if (PktType.REGISTER_INFORM_ALARM.equals(pktType)){ //business ---> monitor
             return sendPayLoad(msgId, payloadObject.toJSONString(), monitorHost, monitorPort);
         }
+
+        if(PktType.MONITOR_TO_POWER_DATA.equals(pktType)){  //告警模块发送实时数据给铁塔
+            return sendPayLoad(msgId, payloadObject.toJSONString(), towerHost, towerPort);
+        }
+
+
             //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
