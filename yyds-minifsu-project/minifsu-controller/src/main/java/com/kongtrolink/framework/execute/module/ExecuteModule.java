@@ -59,10 +59,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String monitorHost;
     @Value("${rpc.monitor.port}")
     private int monitorPort;
-    @Value("${rpc.tower.hostname}")
-    private String towerHost;
-    @Value("${rpc.tower.port}")
-    private int towerPort;
+//    @Value("${rpc.tower.hostname}")
+//    private String towerHost;
+//    @Value("${rpc.tower.port}")
+//    private int towerPort;
 
 
     @Value("${redis.communication.expired:1200}")
@@ -242,13 +242,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (PktType.REGISTER_INFORM_ALARM.equals(pktType)){ //business ---> monitor
             return sendPayLoad(msgId, payloadObject.toJSONString(), monitorHost, monitorPort);
         }
-
-        if(PktType.MONITOR_TO_POWER_DATA.equals(pktType)){  //告警模块发送实时数据给铁塔
-            return sendPayLoad(msgId, payloadObject.toJSONString(), towerHost, towerPort);
-        }
-
-
-            //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
                 || PktType.HEART.equals(pktType) // business ---> 心跳
@@ -257,6 +251,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_REPORT.equals(pktType) //monitor ---> 实时数据上报
                 || PktType.DATA_CHANGE.equals(pktType) //monitor ---> 变化数据上报
+                || PktType.MONITOR_TO_POWER_DATA.equals(pktType) //monitor ----> 告警模块发送实时数据给铁塔
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             logger.info("[{}]>>>>>>>>>>thirdParty==={}===", msgId, msg);
