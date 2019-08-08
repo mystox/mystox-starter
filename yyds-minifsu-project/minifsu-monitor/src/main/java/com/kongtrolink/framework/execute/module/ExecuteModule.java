@@ -213,7 +213,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * 功能描述:数据注册给铁塔
      */
     private void registerData(String msgId, ModuleMsg dataMsg){
-        dataMsg.setPktType(PktType.DATA_REGISTER);
+        dataMsg.setPktType(PktType.MONITOR_TO_POWER_DATA);
         RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
                 JSON.toJSONString(dataMsg), rpcModule);
         taskExecutor.execute(rpcTask);
