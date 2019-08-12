@@ -247,7 +247,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
                 || PktType.TERMINAL_UNBIND.equals(pktType) //business ---> 绑定
                 || PktType.DATA_REPORT.equals(pktType) //monitor ---> 实时数据上报
                 || PktType.DATA_CHANGE.equals(pktType) //monitor ---> 变化数据上报
-                || PktType.MONITOR_TO_POWER_DATA.equals(pktType) //monitor ----> 告警模块发送实时数据给铁塔
                 ) { // 铁塔事务的路由由BIP 决定 towHost/towerPort来源于redis.BIP
             ModuleMsg msg = payloadObject.toJavaObject(ModuleMsg.class);
             logger.info("[{}]>>>>>>>>>>thirdParty==={}===", msgId, msg);
