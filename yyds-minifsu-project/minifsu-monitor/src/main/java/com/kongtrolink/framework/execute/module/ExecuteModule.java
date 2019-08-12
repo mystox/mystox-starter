@@ -194,12 +194,17 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         timeDateService.updateData(fsu, dev_colId_valMap);
         if(DI_dev_colId_valMap.size() != 0){
             //拼接新的fsu，并转换成消息体发给控制中心
-            timeDateService.jointFsu(fsu, DI_dev_colId_valMap);
-            JSONObject fsuJsonObj = (JSONObject)JSON.toJSON(fsu);
+            JsonFsu DIFsu = new JsonFsu();
+            DIFsu.setDtm(fsu.getDtm());
+            DIFsu.setPktType(fsu.getPktType());
+            DIFsu.setSN(fsu.getSN());
+            timeDateService.jointFsu(DIFsu, DI_dev_colId_valMap);
+            JSONObject fsuJsonObj = (JSONObject)JSON.toJSON(DIFsu);
             moduleMsg.setPayload(fsuJsonObj);
+            //将变化DI数据发送给铁塔
+            registerData(msgId, moduleMsg);
         }
-        //注册数据
-        registerData(msgId, moduleMsg);
+
 
         //告警注册与消除
         if(!alarmMap.isEmpty()) {
@@ -213,7 +218,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * 功能描述:数据注册给铁塔
      */
     private void registerData(String msgId, ModuleMsg dataMsg){
-        dataMsg.setPktType(PktType.MONITOR_TO_POWER_DATA);
+        dataMsg.setPktType(PktType.DATA_REGISTER);
         RpcTask rpcTask = new RpcTask(msgId, new InetSocketAddress(controllerName, controllerPort),
                 JSON.toJSONString(dataMsg), rpcModule);
         taskExecutor.execute(rpcTask);
