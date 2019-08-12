@@ -59,10 +59,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String monitorHost;
     @Value("${rpc.monitor.port}")
     private int monitorPort;
-//    @Value("${rpc.tower.hostname}")
-//    private String towerHost;
-//    @Value("${rpc.tower.port}")
-//    private int towerPort;
 
 
     @Value("${redis.communication.expired:1200}")
