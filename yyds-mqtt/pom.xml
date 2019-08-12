@@ -12,7 +12,8 @@
     <artifactId>yyds-mqtt</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>yyds-mqtt-client</module>
+        <module>yyds-mqtt-starter</module>
+        <module>yyds-mqtt-demo</module>
     </modules>
 
 
