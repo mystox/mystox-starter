@@ -58,7 +58,6 @@ public class RegistryServiceImpl implements RegistryService {
     private DataMntService dataMntServiceImpl;
 
 
-
     @Autowired
     public void setDataMntServiceImpl(DataMntService dataMntServiceImpl) {
         this.dataMntServiceImpl = dataMntServiceImpl;
@@ -223,6 +222,22 @@ public class RegistryServiceImpl implements RegistryService {
                     logService.saveLog(log);
                 }
             });
+
+            //通知告警模块
+            businessExecutor.execute(() -> {
+                try {
+                    logger.info("[{}] sn [{}] send register result msg to [{}]", msgId, sn, PktType.REGISTER_INFORM_ALARM);
+                    // 向网关发送业注册报文{"SN","00000",DEVICE_LIST} 即向业务平台事务处理发送注册信息
+                    moduleMsg.setPktType(PktType.REGISTER_INFORM_ALARM);
+                    rpcModule.postMsg(moduleMsg.getMsgId(), new InetSocketAddress(controllerHost, controllerPort), JSONObject.toJSONString(moduleMsg));
+                } catch (IOException e) {
+                    logger.error("[{}] sn [{}] send register result msg to [{}] error [{}]", msgId, sn, PktType.REGISTER_INFORM_ALARM, e.toString());
+                    //日志记录.  //日志记录
+                    Log log = new Log(new Date(System.currentTimeMillis()),
+                            StateCode.CONNECT_ERROR, sn, moduleMsg.getPktType(), msgId, name, host);
+                    logService.saveLog(log);
+                }
+            });
             //设备上报流程执行完毕
             result.put("result", StateCode.SUCCESS);
             return result;
@@ -301,6 +316,7 @@ public class RegistryServiceImpl implements RegistryService {
      * @param deviceList 设备列表
      */
     private void signalConfigDispose(String msgId, String sn, String uuid, List<Device> deviceList) {
+        String table = RedisHashTable.SN_DATA_HASH + sn;
         ThreadPoolTaskExecutor thresholdTask = thresholdExecutor.getObject(); //初始化推送任务池
         for (Device device : deviceList) { //根据设备产生最新配置信息表
             String deviceId = device.getId();
@@ -327,14 +343,18 @@ public class RegistryServiceImpl implements RegistryService {
             Map<String, List<AlarmSignalConfig>> alarmConfigKeyMap = new HashMap<>();
             if (alarmSignals != null && alarmSignals.size() > 0) { //根据模版表格式化数据
                 for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
+                    Integer alarmSignalConfigCoType = alarmSignalConfig.getCoType();
                     String coId = alarmSignalConfig.getCoId();
-
+                    if (alarmSignalConfigCoType == 3) { //如果type==3(DI),实时信号点值设置为0
+                        redisUtils.setHash(table, devDataId+"_"+coId, 0);
+                    }
                     String alarmConfigKey = sn + "_" + devDataId + "_" + coId;
                     List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
                     //根据告警点属性的valueBase处理数据点值的倍数问题!!
                     SignalModel signalModel = configDao.findSignalModelByDeviceTypeAndCoId(type, coId);
                     alarmSignalConfig.setThresholdBase(signalModel == null ? 1 :
                             signalModel.getValueBase());
+
                     alarmSignalConfig.setUuid(uuid);
 
                     if (alarmSignalConfigs != null) {

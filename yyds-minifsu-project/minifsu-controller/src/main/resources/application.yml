@@ -21,16 +21,16 @@ spring:
       max-idle: 100
     ## 连接池中的最小空闲连接
       min-idle: 20
-#    host: 172.16.5.26
-    host: 172.16.5.228
+    host: 172.16.5.26
+#    host: 172.16.5.228
     port: 6379
     communication:
       expired: 1200 #通讯信息默认过期时间
 
 server:
   name: minifsu-controller
-  bindIp: 172.16.6.240
-  outerIp: 172.16.6.240
+  bindIp: 172.16.6.134
+  outerIp: 172.16.6.134
   rpc:
     port: 18800
     outerPort: 18800
@@ -45,12 +45,11 @@ rpc:
   client:
     timeout: 60000 #rpc请求超时时间
   monitor:
-    hostname: 172.16.6.240
+    hostname: 172.16.6.134
     port: 18810
-    pktType:
   business:
-    hostname: 172.16.6.240
+    hostname: 172.16.6.134
     port: 18830
   tower:
-    hostname: 172.16.6.240
+    hostname: 172.16.6.134
     port: 18881

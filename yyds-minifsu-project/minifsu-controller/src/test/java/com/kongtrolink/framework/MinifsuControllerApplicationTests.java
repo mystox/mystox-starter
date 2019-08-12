@@ -188,10 +188,10 @@ public class MinifsuControllerApplicationTests {
         registerNet.put("pktType", PktType.CONNECT);
         //4包 数据包
 //    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":2000000}}]}}\n";
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"1-1\",\"info\":{\"1001\":260, \"125001\":30}}]}}\n";
 //        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"3001\":11}}]}}\n";
         registerNet.put("payload", dataMsg);
-        JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.211", 18800);
+        JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.134", 18800);
         System.out.println("数据包信息上传结果: " + result);
     }
 
@@ -213,7 +213,7 @@ public class MinifsuControllerApplicationTests {
 
     @Test
     public void registerFSU() {
-        String host = "172.16.6.211";
+        String host = "172.16.6.134";
         String registerMsg = "{\"msgId\":\"000021\",\"payload\":{\"pktType\":1,\"SN\":\"LIUDD210121000001\"}}";
         JSONObject registerNet = new JSONObject();
         registerNet.put("uuid", "e93b019a-edc1-4769-a61d-915297bca091");
@@ -230,7 +230,7 @@ public class MinifsuControllerApplicationTests {
             System.out.println("终端信息上传结果: " + result);
             if ((Integer) ((Map) result.get("payload")).get("result") == 1) {
                 //3包 设备包
-                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"LIUDD210121000001\",\"devList\": [\"3-0-0-1-0110103\",\"1-0-1-1-0990101\",\"6-1-1-1-0990201\"]}}";
+                String deviceMsg = "{\"msgId\":\"000009\",\"payload\":{\"pktType\":3,\"SN\":\"LIUDD210121000001\",\"devList\": [\"3-0-1-1-0110103\",\"1-0-1-1-0990101\"]}}";
                 registerNet.put("payload", deviceMsg);
                 result = sendPayLoad("", registerNet.toJSONString(), host, 18800);
                 System.out.println("设备信息上传结果: " + result);
@@ -274,7 +274,7 @@ public class MinifsuControllerApplicationTests {
         JSONObject requestHead = new JSONObject();
         String uuid = UUID.randomUUID().toString(); //uuid只有重新注册才会变更
         requestHead.put("uuid", "adcb64f0");
-        requestHead.put("gip", "172.16.6.50:17701");
+        requestHead.put("gip", "172.16.6.71:17701");
         requestHead.put("pktType", PktType.CONNECT);
 
         /************************* 注册********************************/
@@ -348,15 +348,19 @@ public class MinifsuControllerApplicationTests {
         String registerMsg = "{\"msgId\":\"" + "设备包" + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI201904260011\"}}";
         response = sendMSG(requestHead, rpcModuleBase, registerMsg);
         System.out.println("终端注册结果: " + response.getPayload());
+        //2包 终端信息
+        String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI201904260011\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
+        response = sendMSG(requestHead, rpcModuleBase, terminalMsg);
+        System.out.println("终端属性上报结果: " + response.getPayload());
         //3包 设备包
-        String deviceMsg = "{\"msgId\":\"01557794749\",\"payload\":{\"pktType\":3,\"SN\":\"MINI201904260011\",\"devList\":[\"0-255-0-0-0110103\",\"140-0-0-2-0150501\",\"1-0-1-1-0990101\"]}}";
+        String deviceMsg = "{\"msgId\":\"01557794749\",\"payload\":{\"pktType\":3,\"SN\":\"MINI201904260011\",\"devList\":[\"0-255-0-0-0110103\",\"9-0-0-2-0150501\",\"1-0-1-1-0990101\"]}}";
         response = sendMSG(requestHead, rpcModuleBase, deviceMsg);
         System.out.println("设备上报结果" + response.getPayload());
     }
 
 
     static RpcNotifyProto.RpcMessage sendMSG(JSONObject requestHead, RpcModuleBase rpcModuleBase, Object msg) {
-        String ip = "172.16.6.50";
+        String ip = "172.16.6.71";
         int port = 18800;
         RpcNotifyProto.RpcMessage response = null;
         requestHead.put("payload", msg);

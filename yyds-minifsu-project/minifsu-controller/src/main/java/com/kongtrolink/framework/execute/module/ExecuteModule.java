@@ -59,10 +59,6 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
     private String monitorHost;
     @Value("${rpc.monitor.port}")
     private int monitorPort;
-    @Value("${rpc.tower.hostname}")
-    private String towerHost;
-    @Value("${rpc.tower.port}")
-    private int towerPort;
 
 
     @Value("${redis.communication.expired:1200}")
@@ -238,6 +234,10 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             logger.info("[{}]>>>>>>>>>>business==={}===", msgId, payloadObject);
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
+        //>>>>>>>>>>>>>>>>>>>>>>>>>>>通完monitor >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        if (PktType.REGISTER_INFORM_ALARM.equals(pktType)){ //business ---> monitor
+            return sendPayLoad(msgId, payloadObject.toJSONString(), monitorHost, monitorPort);
+        }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if (PktType.REGISTRY_CNTB.equals(pktType) //business ---> 注册终端
                 || PktType.ALARM_REGISTER.equals(pktType) // monitor ---> 注册告警
@@ -381,7 +381,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         /****************************数据变化上报DATA_CHANGE 实时数据上报DATA_REPORT*******************************/
         if (TerminalPktType.DATA_REPORT.getKey() == pktType || TerminalPktType.DATA_CHANGE.getKey() == pktType) {
             moduleMsg.setPktType(TerminalPktType.toValue(pktType));
-            logger.info("[{}]terminal>>>>>>>>>>business==={}===", msgId, payloadObject);
+            logger.info("[{}]terminal>>>>>>>>>>monitor==={}===", msgId, payloadObject);
             JSONObject responsePayload = (JSONObject) sendPayLoad(msgId, JSONObject.toJSONString(moduleMsg), monitorHost, monitorPort); //>>>>实时监控处理
             responsePayload.put("pktType", pktType);
             terminalResp.setPayload(responsePayload);

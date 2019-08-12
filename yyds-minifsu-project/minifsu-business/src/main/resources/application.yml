@@ -8,13 +8,13 @@ logging:
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 
 mongodb:
-#  uri: mongodb://172.16.6.9:27017/minifsu2
-  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
+  uri: mongodb://172.16.6.9:27017/minifsu2
+#  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
 #  uri: mongodb://172.16.5.213:27017/db_cntb_minifsu
 
 server:
   name: minifsu-business #服务名称
-  bindIp: 172.16.6.240 #服务本机地址
+  bindIp: 172.16.6.134 #服务本机地址
   rpc:
     port: 18830 #服务rpc_server占用端口
 spring:
@@ -32,8 +32,8 @@ spring:
       max-idle: 100
     ## 连接池中的最小空闲连接
       min-idle: 20
-    host: 172.16.5.228
-#    host: 172.16.5.26
+#    host: 172.16.5.228
+    host: 172.16.5.26
     port: 6379
 
 resource:
@@ -49,7 +49,7 @@ rpc:
   client:
     timeout: 60000 #rpc请求超时时间
   controller: #controller服务配置信息
-    hostname: 172.16.6.240
+    hostname: 172.16.6.134
     port: 18800
 register:
   delay: 100 #注册延时随机基数 注册随机值区间 delay ~ delay * 2

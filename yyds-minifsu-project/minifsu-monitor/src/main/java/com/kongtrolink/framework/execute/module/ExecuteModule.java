@@ -94,7 +94,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return createResp(response, "{'pktType':4,'result':2}", StringUtils.isBlank(msgId)? "" : msgId);
         }
 
-        if("1".equals(pktType)){
+        if(PktType.REGISTER_INFORM_ALARM.equals(pktType)){
             clientGister(fsu);
         }else{
             clientReportDate(msgId, moduleMsg, fsu, curDate);

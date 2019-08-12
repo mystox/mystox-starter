@@ -30,7 +30,7 @@ spring:
 
 server:
   name: minifsu-monitor
-  bindIp: 172.16.6.50
+  bindIp: 172.16.6.134
   rpc:
     port: 18810
   port: 18081
@@ -45,5 +45,5 @@ rpc:
   client:
     timeout: 200000
   controller:
-    hostname: 172.16.6.50
+    hostname: 172.16.6.134
     port: 18800
