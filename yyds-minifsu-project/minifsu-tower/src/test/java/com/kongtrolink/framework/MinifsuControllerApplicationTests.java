@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
-import com.kongtrolink.framework.entity.RedisTable;
+import com.kongtrolink.framework.entity.xml.msg.GetData;
 import com.kongtrolink.framework.execute.module.dao.AlarmDao;
 import com.kongtrolink.framework.execute.module.dao.SignalDao;
 import com.kongtrolink.framework.execute.module.model.Alarm;
@@ -16,14 +16,13 @@ import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.msg.SetPoint;
-import com.kongtrolink.framework.entity.xml.msg.GetData;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.TowerRunner;
 import com.kongtrolink.framework.service.CntbLoginService;
-import com.kongtrolink.framework.service.RpcService;
 import com.kongtrolink.framework.service.TowerService;
 import com.kongtrolink.framework.utils.CommonUtils;
+import com.kongtrolink.framework.service.RpcService;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +55,7 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	@Autowired
-	RpcModule rpcModule;
+    RpcModule rpcModule;
 	/**
 	 * rpc spring 测试方法
 	 */
@@ -126,7 +125,7 @@ public class MinifsuControllerApplicationTests {
 	SignalDao signalDao;
 
 	@Autowired
-	AlarmDao alarmDao;
+    AlarmDao alarmDao;
 
 	@Test
 	public void testRedis() {
@@ -482,7 +481,7 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	@Autowired
-	RpcService rpcService;
+    RpcService rpcService;
 
 	@Test
 	public void testRpcService(){
@@ -490,7 +489,7 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	@Autowired
-	CntbLoginService cntbLoginService;
+    CntbLoginService cntbLoginService;
 
 	@Test
 	public void testLogin() {
@@ -525,9 +524,9 @@ public class MinifsuControllerApplicationTests {
 	}
 
 	@Autowired
-	TowerService towerService;
+    TowerService towerService;
 	@Autowired
-	CommonUtils commonUtils;
+    CommonUtils commonUtils;
 
 	@Test
 	public void testAlarm() {

@@ -357,7 +357,7 @@ public class InvokeResponse implements org.apache.axis2.databinding.ADBBean {
                             String nsUri = reader.getNamespaceContext()
                                                            .getNamespaceURI(nsPrefix);
 
-                            return (InvokeResponse) com.kongtrolink.framework.fsuservice.ExtensionMapper.getTypeObject(nsUri,
+                            return (InvokeResponse) ExtensionMapper.getTypeObject(nsUri,
                                 type, reader);
                         }
                     }

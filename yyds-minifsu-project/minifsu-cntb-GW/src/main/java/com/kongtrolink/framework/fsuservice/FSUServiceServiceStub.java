@@ -114,8 +114,8 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
      * Auto generated method signature
      * @param invoke14
      */
-    public com.kongtrolink.framework.fsuservice.InvokeResponse invoke(
-        com.kongtrolink.framework.fsuservice.Invoke invoke14)
+    public InvokeResponse invoke(
+        Invoke invoke14)
         throws java.rmi.RemoteException {
         org.apache.axis2.context.MessageContext _messageContext = null;
 
@@ -160,9 +160,9 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
 
             Object object = fromOM(_returnEnv.getBody()
                                                        .getFirstElement(),
-                    com.kongtrolink.framework.fsuservice.InvokeResponse.class);
+                    InvokeResponse.class);
 
-            return (com.kongtrolink.framework.fsuservice.InvokeResponse) object;
+            return (InvokeResponse) object;
         } catch (AxisFault f) {
             org.apache.axiom.om.OMElement faultElt = f.getDetail();
 
@@ -225,8 +225,8 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
     /**
      * Auto generated method signature for Asynchronous Invocations
      */
-    public void startinvoke(com.kongtrolink.framework.fsuservice.Invoke invoke14,
-        final com.kongtrolink.framework.fsuservice.FSUServiceServiceCallbackHandler callback)
+    public void startinvoke(Invoke invoke14,
+        final FSUServiceServiceCallbackHandler callback)
         throws java.rmi.RemoteException {
         org.apache.axis2.client.OperationClient _operationClient = _serviceClient.createClient(_operations[0].getName());
         _operationClient.getOptions()
@@ -267,8 +267,8 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
 
                         Object object = fromOM(resultEnv.getBody()
                                                                   .getFirstElement(),
-                                com.kongtrolink.framework.fsuservice.InvokeResponse.class);
-                        callback.receiveResultinvoke((com.kongtrolink.framework.fsuservice.InvokeResponse) object);
+                                InvokeResponse.class);
+                        callback.receiveResultinvoke((InvokeResponse) object);
                     } catch (AxisFault e) {
                         callback.receiveErrorinvoke(e);
                     }
@@ -381,10 +381,10 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
 
     //http://127.0.0.1:8080/services/FSUService
     private org.apache.axiom.om.OMElement toOM(
-        com.kongtrolink.framework.fsuservice.Invoke param, boolean optimizeContent)
+            Invoke param, boolean optimizeContent)
         throws AxisFault {
         try {
-            return param.getOMElement(com.kongtrolink.framework.fsuservice.Invoke.MY_QNAME,
+            return param.getOMElement(Invoke.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw AxisFault.makeFault(e);
@@ -392,10 +392,10 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
     }
 
     private org.apache.axiom.om.OMElement toOM(
-        com.kongtrolink.framework.fsuservice.InvokeResponse param,
+        InvokeResponse param,
         boolean optimizeContent) throws AxisFault {
         try {
-            return param.getOMElement(com.kongtrolink.framework.fsuservice.InvokeResponse.MY_QNAME,
+            return param.getOMElement(InvokeResponse.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw AxisFault.makeFault(e);
@@ -403,15 +403,15 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
     }
 
     private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
-        org.apache.axiom.soap.SOAPFactory factory,
-        com.kongtrolink.framework.fsuservice.Invoke param, boolean optimizeContent,
-        javax.xml.namespace.QName elementQName)
+            org.apache.axiom.soap.SOAPFactory factory,
+            Invoke param, boolean optimizeContent,
+            javax.xml.namespace.QName elementQName)
         throws AxisFault {
         try {
             org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
             emptyEnvelope.getBody()
                          .addChild(param.getOMElement(
-                    com.kongtrolink.framework.fsuservice.Invoke.MY_QNAME, factory));
+                    Invoke.MY_QNAME, factory));
 
             return emptyEnvelope;
         } catch (org.apache.axis2.databinding.ADBException e) {
@@ -432,12 +432,12 @@ public class FSUServiceServiceStub extends org.apache.axis2.client.Stub {
     private Object fromOM(org.apache.axiom.om.OMElement param,
         Class type) throws AxisFault {
         try {
-            if (com.kongtrolink.framework.fsuservice.Invoke.class.equals(type)) {
-                return com.kongtrolink.framework.fsuservice.Invoke.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (Invoke.class.equals(type)) {
+                return Invoke.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
 
-            if (com.kongtrolink.framework.fsuservice.InvokeResponse.class.equals(type)) {
-                return com.kongtrolink.framework.fsuservice.InvokeResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (InvokeResponse.class.equals(type)) {
+                return InvokeResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
         } catch (Exception e) {
             throw AxisFault.makeFault(e);

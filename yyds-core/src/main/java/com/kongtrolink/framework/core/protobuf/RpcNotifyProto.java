@@ -102,7 +102,7 @@ public final class RpcNotifyProto {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.getDescriptor().getEnumTypes().get(0);
+      return RpcNotifyProto.getDescriptor().getEnumTypes().get(0);
     }
 
     private static final MessageType[] VALUES = values();
@@ -221,7 +221,7 @@ public final class RpcNotifyProto {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.getDescriptor().getEnumTypes().get(1);
+      return RpcNotifyProto.getDescriptor().getEnumTypes().get(1);
     }
 
     private static final PayloadType[] VALUES = values();
@@ -404,7 +404,7 @@ public final class RpcNotifyProto {
     }
     public static final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptor() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.getDescriptor().getEnumTypes().get(2);
+      return RpcNotifyProto.getDescriptor().getEnumTypes().get(2);
     }
 
     private static final ErrorCode[] VALUES = values();
@@ -448,7 +448,7 @@ public final class RpcNotifyProto {
      *消息类型
      * </pre>
      */
-    com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType getType();
+    RpcNotifyProto.MessageType getType();
 
     // optional string msgId = 2;
     /**
@@ -547,7 +547,7 @@ public final class RpcNotifyProto {
      *消息流类型
      * </pre>
      */
-    com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType();
+    RpcNotifyProto.PayloadType getPayloadType();
 
     // optional string payload = 5;
     /**
@@ -610,7 +610,7 @@ public final class RpcNotifyProto {
      *错误信息
      * </pre>
      */
-    com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode getError();
+    RpcNotifyProto.ErrorCode getError();
 
     // optional string uuid = 9;
     /**
@@ -692,7 +692,7 @@ public final class RpcNotifyProto {
             }
             case 8: {
               int rawValue = input.readEnum();
-              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType value = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.valueOf(rawValue);
+              RpcNotifyProto.MessageType value = RpcNotifyProto.MessageType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(1, rawValue);
               } else {
@@ -723,7 +723,7 @@ public final class RpcNotifyProto {
             }
             case 48: {
               int rawValue = input.readEnum();
-              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode value = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.valueOf(rawValue);
+              RpcNotifyProto.ErrorCode value = RpcNotifyProto.ErrorCode.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(6, rawValue);
               } else {
@@ -734,7 +734,7 @@ public final class RpcNotifyProto {
             }
             case 56: {
               int rawValue = input.readEnum();
-              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType value = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.valueOf(rawValue);
+              RpcNotifyProto.PayloadType value = RpcNotifyProto.PayloadType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(7, rawValue);
               } else {
@@ -767,14 +767,14 @@ public final class RpcNotifyProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
+      return RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_fieldAccessorTable
+      return RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.class, com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.Builder.class);
+              RpcNotifyProto.RpcMessage.class, RpcNotifyProto.RpcMessage.Builder.class);
     }
 
     public static com.google.protobuf.Parser<RpcMessage> PARSER =
@@ -795,7 +795,7 @@ public final class RpcNotifyProto {
     private int bitField0_;
     // required .com.kongtrolink.core.MessageType type = 1;
     public static final int TYPE_FIELD_NUMBER = 1;
-    private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType type_;
+    private RpcNotifyProto.MessageType type_;
     /**
      * <code>required .com.kongtrolink.core.MessageType type = 1;</code>
      *
@@ -813,7 +813,7 @@ public final class RpcNotifyProto {
      *消息类型
      * </pre>
      */
-    public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType getType() {
+    public RpcNotifyProto.MessageType getType() {
       return type_;
     }
 
@@ -984,7 +984,7 @@ public final class RpcNotifyProto {
 
     // required .com.kongtrolink.core.PayloadType payloadType = 7;
     public static final int PAYLOADTYPE_FIELD_NUMBER = 7;
-    private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType payloadType_;
+    private RpcNotifyProto.PayloadType payloadType_;
     /**
      * <code>required .com.kongtrolink.core.PayloadType payloadType = 7;</code>
      *
@@ -1002,7 +1002,7 @@ public final class RpcNotifyProto {
      *消息流类型
      * </pre>
      */
-    public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType() {
+    public RpcNotifyProto.PayloadType getPayloadType() {
       return payloadType_;
     }
 
@@ -1087,7 +1087,7 @@ public final class RpcNotifyProto {
 
     // optional .com.kongtrolink.core.ErrorCode error = 6;
     public static final int ERROR_FIELD_NUMBER = 6;
-    private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode error_;
+    private RpcNotifyProto.ErrorCode error_;
     /**
      * <code>optional .com.kongtrolink.core.ErrorCode error = 6;</code>
      *
@@ -1105,7 +1105,7 @@ public final class RpcNotifyProto {
      *错误信息
      * </pre>
      */
-    public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode getError() {
+    public RpcNotifyProto.ErrorCode getError() {
       return error_;
     }
 
@@ -1165,14 +1165,14 @@ public final class RpcNotifyProto {
     }
 
     private void initFields() {
-      type_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.REQUEST;
+      type_ = RpcNotifyProto.MessageType.REQUEST;
       msgId_ = "";
       service_ = "";
       method_ = "";
-      payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+      payloadType_ = RpcNotifyProto.PayloadType.JSON;
       payload_ = "";
       bytePayload_ = com.google.protobuf.ByteString.EMPTY;
-      error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
+      error_ = RpcNotifyProto.ErrorCode.NO_ERROR;
       uuid_ = "";
     }
     private byte memoizedIsInitialized = -1;
@@ -1284,10 +1284,10 @@ public final class RpcNotifyProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage)) {
+      if (!(obj instanceof RpcNotifyProto.RpcMessage)) {
         return super.equals(obj);
       }
-      com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage other = (com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage) obj;
+      RpcNotifyProto.RpcMessage other = (RpcNotifyProto.RpcMessage) obj;
 
       boolean result = true;
       result = result && (hasType() == other.hasType());
@@ -1389,53 +1389,53 @@ public final class RpcNotifyProto {
       return hash;
     }
 
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(byte[] data)
+    public static RpcNotifyProto.RpcMessage parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(java.io.InputStream input)
+    public static RpcNotifyProto.RpcMessage parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseDelimitedFrom(java.io.InputStream input)
+    public static RpcNotifyProto.RpcMessage parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseDelimitedFrom(
+    public static RpcNotifyProto.RpcMessage parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parseFrom(
+    public static RpcNotifyProto.RpcMessage parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1444,7 +1444,7 @@ public final class RpcNotifyProto {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage prototype) {
+    public static Builder newBuilder(RpcNotifyProto.RpcMessage prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -1460,17 +1460,17 @@ public final class RpcNotifyProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessageOrBuilder {
+       implements RpcNotifyProto.RpcMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
+        return RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_fieldAccessorTable
+        return RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.class, com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.Builder.class);
+                RpcNotifyProto.RpcMessage.class, RpcNotifyProto.RpcMessage.Builder.class);
       }
 
       // Construct using com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.newBuilder()
@@ -1493,7 +1493,7 @@ public final class RpcNotifyProto {
 
       public Builder clear() {
         super.clear();
-        type_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.REQUEST;
+        type_ = RpcNotifyProto.MessageType.REQUEST;
         bitField0_ = (bitField0_ & ~0x00000001);
         msgId_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -1501,13 +1501,13 @@ public final class RpcNotifyProto {
         bitField0_ = (bitField0_ & ~0x00000004);
         method_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
-        payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+        payloadType_ = RpcNotifyProto.PayloadType.JSON;
         bitField0_ = (bitField0_ & ~0x00000010);
         payload_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
         bytePayload_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000040);
-        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
+        error_ = RpcNotifyProto.ErrorCode.NO_ERROR;
         bitField0_ = (bitField0_ & ~0x00000080);
         uuid_ = "";
         bitField0_ = (bitField0_ & ~0x00000100);
@@ -1520,23 +1520,23 @@ public final class RpcNotifyProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
+        return RpcNotifyProto.internal_static_com_kongtrolink_core_RpcMessage_descriptor;
       }
 
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage getDefaultInstanceForType() {
-        return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance();
+      public RpcNotifyProto.RpcMessage getDefaultInstanceForType() {
+        return RpcNotifyProto.RpcMessage.getDefaultInstance();
       }
 
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage build() {
-        com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage result = buildPartial();
+      public RpcNotifyProto.RpcMessage build() {
+        RpcNotifyProto.RpcMessage result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage buildPartial() {
-        com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage result = new com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage(this);
+      public RpcNotifyProto.RpcMessage buildPartial() {
+        RpcNotifyProto.RpcMessage result = new RpcNotifyProto.RpcMessage(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1581,16 +1581,16 @@ public final class RpcNotifyProto {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage) {
-          return mergeFrom((com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage)other);
+        if (other instanceof RpcNotifyProto.RpcMessage) {
+          return mergeFrom((RpcNotifyProto.RpcMessage)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage other) {
-        if (other == com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance()) return this;
+      public Builder mergeFrom(RpcNotifyProto.RpcMessage other) {
+        if (other == RpcNotifyProto.RpcMessage.getDefaultInstance()) return this;
         if (other.hasType()) {
           setType(other.getType());
         }
@@ -1648,11 +1648,11 @@ public final class RpcNotifyProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage parsedMessage = null;
+        RpcNotifyProto.RpcMessage parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage) e.getUnfinishedMessage();
+          parsedMessage = (RpcNotifyProto.RpcMessage) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1664,7 +1664,7 @@ public final class RpcNotifyProto {
       private int bitField0_;
 
       // required .com.kongtrolink.core.MessageType type = 1;
-      private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType type_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.REQUEST;
+      private RpcNotifyProto.MessageType type_ = RpcNotifyProto.MessageType.REQUEST;
       /**
        * <code>required .com.kongtrolink.core.MessageType type = 1;</code>
        *
@@ -1682,7 +1682,7 @@ public final class RpcNotifyProto {
        *消息类型
        * </pre>
        */
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType getType() {
+      public RpcNotifyProto.MessageType getType() {
         return type_;
       }
       /**
@@ -1692,7 +1692,7 @@ public final class RpcNotifyProto {
        *消息类型
        * </pre>
        */
-      public Builder setType(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType value) {
+      public Builder setType(RpcNotifyProto.MessageType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1710,7 +1710,7 @@ public final class RpcNotifyProto {
        */
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        type_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.MessageType.REQUEST;
+        type_ = RpcNotifyProto.MessageType.REQUEST;
         onChanged();
         return this;
       }
@@ -2010,7 +2010,7 @@ public final class RpcNotifyProto {
       }
 
       // required .com.kongtrolink.core.PayloadType payloadType = 7;
-      private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+      private RpcNotifyProto.PayloadType payloadType_ = RpcNotifyProto.PayloadType.JSON;
       /**
        * <code>required .com.kongtrolink.core.PayloadType payloadType = 7;</code>
        *
@@ -2028,7 +2028,7 @@ public final class RpcNotifyProto {
        *消息流类型
        * </pre>
        */
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType getPayloadType() {
+      public RpcNotifyProto.PayloadType getPayloadType() {
         return payloadType_;
       }
       /**
@@ -2038,7 +2038,7 @@ public final class RpcNotifyProto {
        *消息流类型
        * </pre>
        */
-      public Builder setPayloadType(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType value) {
+      public Builder setPayloadType(RpcNotifyProto.PayloadType value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -2056,7 +2056,7 @@ public final class RpcNotifyProto {
        */
       public Builder clearPayloadType() {
         bitField0_ = (bitField0_ & ~0x00000010);
-        payloadType_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.PayloadType.JSON;
+        payloadType_ = RpcNotifyProto.PayloadType.JSON;
         onChanged();
         return this;
       }
@@ -2212,7 +2212,7 @@ public final class RpcNotifyProto {
       }
 
       // optional .com.kongtrolink.core.ErrorCode error = 6;
-      private com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
+      private RpcNotifyProto.ErrorCode error_ = RpcNotifyProto.ErrorCode.NO_ERROR;
       /**
        * <code>optional .com.kongtrolink.core.ErrorCode error = 6;</code>
        *
@@ -2230,7 +2230,7 @@ public final class RpcNotifyProto {
        *错误信息
        * </pre>
        */
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode getError() {
+      public RpcNotifyProto.ErrorCode getError() {
         return error_;
       }
       /**
@@ -2240,7 +2240,7 @@ public final class RpcNotifyProto {
        *错误信息
        * </pre>
        */
-      public Builder setError(com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode value) {
+      public Builder setError(RpcNotifyProto.ErrorCode value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -2258,7 +2258,7 @@ public final class RpcNotifyProto {
        */
       public Builder clearError() {
         bitField0_ = (bitField0_ & ~0x00000080);
-        error_ = com.kongtrolink.framework.core.protobuf.RpcNotifyProto.ErrorCode.NO_ERROR;
+        error_ = RpcNotifyProto.ErrorCode.NO_ERROR;
         onChanged();
         return this;
       }
@@ -2389,8 +2389,8 @@ public final class RpcNotifyProto {
        */
       public abstract void notify(
           com.google.protobuf.RpcController controller,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request,
-          com.google.protobuf.RpcCallback<com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage> done);
+          RpcNotifyProto.RpcMessage request,
+          com.google.protobuf.RpcCallback<RpcNotifyProto.RpcMessage> done);
 
     }
 
@@ -2400,8 +2400,8 @@ public final class RpcNotifyProto {
         @java.lang.Override
         public  void notify(
             com.google.protobuf.RpcController controller,
-            com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request,
-            com.google.protobuf.RpcCallback<com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage> done) {
+            RpcNotifyProto.RpcMessage request,
+            com.google.protobuf.RpcCallback<RpcNotifyProto.RpcMessage> done) {
           impl.notify(controller, request, done);
         }
 
@@ -2428,7 +2428,7 @@ public final class RpcNotifyProto {
           }
           switch(method.getIndex()) {
             case 0:
-              return impl.notify(controller, (com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage)request);
+              return impl.notify(controller, (RpcNotifyProto.RpcMessage)request);
             default:
               throw new java.lang.AssertionError("Can't get here.");
           }
@@ -2444,7 +2444,7 @@ public final class RpcNotifyProto {
           }
           switch(method.getIndex()) {
             case 0:
-              return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance();
+              return RpcNotifyProto.RpcMessage.getDefaultInstance();
             default:
               throw new java.lang.AssertionError("Can't get here.");
           }
@@ -2460,7 +2460,7 @@ public final class RpcNotifyProto {
           }
           switch(method.getIndex()) {
             case 0:
-              return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance();
+              return RpcNotifyProto.RpcMessage.getDefaultInstance();
             default:
               throw new java.lang.AssertionError("Can't get here.");
           }
@@ -2474,13 +2474,13 @@ public final class RpcNotifyProto {
      */
     public abstract void notify(
         com.google.protobuf.RpcController controller,
-        com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request,
-        com.google.protobuf.RpcCallback<com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage> done);
+        RpcNotifyProto.RpcMessage request,
+        com.google.protobuf.RpcCallback<RpcNotifyProto.RpcMessage> done);
 
     public static final
         com.google.protobuf.Descriptors.ServiceDescriptor
         getDescriptor() {
-      return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.getDescriptor().getServices().get(0);
+      return RpcNotifyProto.getDescriptor().getServices().get(0);
     }
     public final com.google.protobuf.Descriptors.ServiceDescriptor
         getDescriptorForType() {
@@ -2500,8 +2500,8 @@ public final class RpcNotifyProto {
       }
       switch(method.getIndex()) {
         case 0:
-          this.notify(controller, (com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage)request,
-            com.google.protobuf.RpcUtil.<com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage>specializeCallback(
+          this.notify(controller, (RpcNotifyProto.RpcMessage)request,
+            com.google.protobuf.RpcUtil.<RpcNotifyProto.RpcMessage>specializeCallback(
               done));
           return;
         default:
@@ -2519,7 +2519,7 @@ public final class RpcNotifyProto {
       }
       switch(method.getIndex()) {
         case 0:
-          return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance();
+          return RpcNotifyProto.RpcMessage.getDefaultInstance();
         default:
           throw new java.lang.AssertionError("Can't get here.");
       }
@@ -2535,7 +2535,7 @@ public final class RpcNotifyProto {
       }
       switch(method.getIndex()) {
         case 0:
-          return com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance();
+          return RpcNotifyProto.RpcMessage.getDefaultInstance();
         default:
           throw new java.lang.AssertionError("Can't get here.");
       }
@@ -2546,7 +2546,7 @@ public final class RpcNotifyProto {
       return new Stub(channel);
     }
 
-    public static final class Stub extends com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcNotify implements Interface {
+    public static final class Stub extends RpcNotifyProto.RpcNotify implements Interface {
       private Stub(com.google.protobuf.RpcChannel channel) {
         this.channel = channel;
       }
@@ -2559,17 +2559,17 @@ public final class RpcNotifyProto {
 
       public  void notify(
           com.google.protobuf.RpcController controller,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request,
-          com.google.protobuf.RpcCallback<com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage> done) {
+          RpcNotifyProto.RpcMessage request,
+          com.google.protobuf.RpcCallback<RpcNotifyProto.RpcMessage> done) {
         channel.callMethod(
           getDescriptor().getMethods().get(0),
           controller,
           request,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance(),
+          RpcNotifyProto.RpcMessage.getDefaultInstance(),
           com.google.protobuf.RpcUtil.generalizeCallback(
             done,
-            com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.class,
-            com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance()));
+            RpcNotifyProto.RpcMessage.class,
+            RpcNotifyProto.RpcMessage.getDefaultInstance()));
       }
     }
 
@@ -2579,9 +2579,9 @@ public final class RpcNotifyProto {
     }
 
     public interface BlockingInterface {
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage notify(
+      public RpcNotifyProto.RpcMessage notify(
           com.google.protobuf.RpcController controller,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request)
+          RpcNotifyProto.RpcMessage request)
           throws com.google.protobuf.ServiceException;
     }
 
@@ -2592,15 +2592,15 @@ public final class RpcNotifyProto {
 
       private final com.google.protobuf.BlockingRpcChannel channel;
 
-      public com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage notify(
+      public RpcNotifyProto.RpcMessage notify(
           com.google.protobuf.RpcController controller,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage request)
+          RpcNotifyProto.RpcMessage request)
           throws com.google.protobuf.ServiceException {
-        return (com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage) channel.callBlockingMethod(
+        return (RpcNotifyProto.RpcMessage) channel.callBlockingMethod(
           getDescriptor().getMethods().get(0),
           controller,
           request,
-          com.kongtrolink.framework.core.protobuf.RpcNotifyProto.RpcMessage.getDefaultInstance());
+          RpcNotifyProto.RpcMessage.getDefaultInstance());
       }
 
     }

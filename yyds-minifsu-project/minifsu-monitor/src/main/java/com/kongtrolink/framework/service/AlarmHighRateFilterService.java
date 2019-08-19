@@ -3,12 +3,12 @@ package com.kongtrolink.framework.service;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.core.entity.AlarmSignalConfig;
-import com.kongtrolink.framework.core.entity.CoreConstant;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonFsu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 
 /**

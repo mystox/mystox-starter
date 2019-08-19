@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.execute.module.dao.*;
@@ -10,7 +9,6 @@ import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.service.DeviceMatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.session.SessionProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

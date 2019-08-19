@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.config.MongoConfig;
 import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.jsonType.JsonStation;
 import com.mongodb.WriteResult;

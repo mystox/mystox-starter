@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.execute.module.dao;
 
-import com.kongtrolink.framework.entity.MongoDBTable;
 import com.kongtrolink.framework.execute.module.model.Carrier;
+import com.kongtrolink.framework.entity.MongoDBTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;

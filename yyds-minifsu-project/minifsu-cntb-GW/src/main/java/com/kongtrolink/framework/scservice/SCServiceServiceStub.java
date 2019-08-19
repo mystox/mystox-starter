@@ -112,8 +112,8 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
     /**
      * Auto generated method signature
      */
-    public com.kongtrolink.framework.scservice.InvokeResponse invoke(
-        com.kongtrolink.framework.scservice.Invoke invoke14)
+    public InvokeResponse invoke(
+        Invoke invoke14)
         throws java.rmi.RemoteException {
         org.apache.axis2.context.MessageContext _messageContext = null;
 
@@ -158,9 +158,9 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
 
             Object object = fromOM(_returnEnv.getBody()
                                                        .getFirstElement(),
-                    com.kongtrolink.framework.scservice.InvokeResponse.class);
+                    InvokeResponse.class);
 
-            return (com.kongtrolink.framework.scservice.InvokeResponse) object;
+            return (InvokeResponse) object;
         } catch (org.apache.axis2.AxisFault f) {
             org.apache.axiom.om.OMElement faultElt = f.getDetail();
 
@@ -226,8 +226,8 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
      * @see com.kongtrolink.framework.scservice.SCServiceService#startinvoke
      * @param invoke14
      */
-    public void startinvoke(com.kongtrolink.framework.scservice.Invoke invoke14,
-        final com.kongtrolink.framework.scservice.SCServiceServiceCallbackHandler callback)
+    public void startinvoke(Invoke invoke14,
+        final SCServiceServiceCallbackHandler callback)
         throws java.rmi.RemoteException {
         org.apache.axis2.client.OperationClient _operationClient = _serviceClient.createClient(_operations[0].getName());
         _operationClient.getOptions()
@@ -268,8 +268,8 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
 
                         Object object = fromOM(resultEnv.getBody()
                                                                   .getFirstElement(),
-                                com.kongtrolink.framework.scservice.InvokeResponse.class);
-                        callback.receiveResultinvoke((com.kongtrolink.framework.scservice.InvokeResponse) object);
+                                InvokeResponse.class);
+                        callback.receiveResultinvoke((InvokeResponse) object);
                     } catch (org.apache.axis2.AxisFault e) {
                         callback.receiveErrorinvoke(e);
                     }
@@ -382,10 +382,10 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
 
     //http://127.0.0.1:8080/services/SCService
     private org.apache.axiom.om.OMElement toOM(
-        com.kongtrolink.framework.scservice.Invoke param, boolean optimizeContent)
+            Invoke param, boolean optimizeContent)
         throws org.apache.axis2.AxisFault {
         try {
-            return param.getOMElement(com.kongtrolink.framework.scservice.Invoke.MY_QNAME,
+            return param.getOMElement(Invoke.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw org.apache.axis2.AxisFault.makeFault(e);
@@ -393,10 +393,10 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
     }
 
     private org.apache.axiom.om.OMElement toOM(
-        com.kongtrolink.framework.scservice.InvokeResponse param,
+        InvokeResponse param,
         boolean optimizeContent) throws org.apache.axis2.AxisFault {
         try {
-            return param.getOMElement(com.kongtrolink.framework.scservice.InvokeResponse.MY_QNAME,
+            return param.getOMElement(InvokeResponse.MY_QNAME,
                 org.apache.axiom.om.OMAbstractFactory.getOMFactory());
         } catch (org.apache.axis2.databinding.ADBException e) {
             throw org.apache.axis2.AxisFault.makeFault(e);
@@ -404,15 +404,15 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
     }
 
     private org.apache.axiom.soap.SOAPEnvelope toEnvelope(
-        org.apache.axiom.soap.SOAPFactory factory,
-        com.kongtrolink.framework.scservice.Invoke param, boolean optimizeContent,
-        javax.xml.namespace.QName elementQName)
+            org.apache.axiom.soap.SOAPFactory factory,
+            Invoke param, boolean optimizeContent,
+            javax.xml.namespace.QName elementQName)
         throws org.apache.axis2.AxisFault {
         try {
             org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
             emptyEnvelope.getBody()
                          .addChild(param.getOMElement(
-                    com.kongtrolink.framework.scservice.Invoke.MY_QNAME, factory));
+                    Invoke.MY_QNAME, factory));
 
             return emptyEnvelope;
         } catch (org.apache.axis2.databinding.ADBException e) {
@@ -433,12 +433,12 @@ public class SCServiceServiceStub extends org.apache.axis2.client.Stub {
     private Object fromOM(org.apache.axiom.om.OMElement param,
         Class type) throws org.apache.axis2.AxisFault {
         try {
-            if (com.kongtrolink.framework.scservice.Invoke.class.equals(type)) {
-                return com.kongtrolink.framework.scservice.Invoke.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (Invoke.class.equals(type)) {
+                return Invoke.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
 
-            if (com.kongtrolink.framework.scservice.InvokeResponse.class.equals(type)) {
-                return com.kongtrolink.framework.scservice.InvokeResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
+            if (InvokeResponse.class.equals(type)) {
+                return InvokeResponse.Factory.parse(param.getXMLStreamReaderWithoutCaching());
             }
         } catch (Exception e) {
             throw org.apache.axis2.AxisFault.makeFault(e);

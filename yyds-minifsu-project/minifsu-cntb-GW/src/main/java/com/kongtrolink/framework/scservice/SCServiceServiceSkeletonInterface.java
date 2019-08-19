@@ -15,6 +15,6 @@ public interface SCServiceServiceSkeletonInterface {
      *
      * @param invoke
      */
-    public com.kongtrolink.framework.scservice.InvokeResponse invoke(
-            com.kongtrolink.framework.scservice.Invoke invoke);
+    public InvokeResponse invoke(
+            Invoke invoke);
 }

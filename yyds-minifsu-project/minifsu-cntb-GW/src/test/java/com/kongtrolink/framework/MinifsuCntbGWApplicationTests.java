@@ -1,6 +1,5 @@
 package com.kongtrolink.framework;
 
-import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.runner.CntbGWRunner;
 import com.kongtrolink.framework.util.FSUServiceClientUtil;
@@ -10,10 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -26,7 +21,7 @@ public class MinifsuCntbGWApplicationTests {
 	}
 
 	@Autowired
-	RpcModule rpcModule;
+    RpcModule rpcModule;
 	/**
 	 * rpc spring 测试方法
 	 */

@@ -17,8 +17,8 @@ public class SCServiceServiceSkeleton
      * @param invoke0
      * @return invokeResponse1
      */
-    public com.kongtrolink.framework.scservice.InvokeResponse invoke(
-        com.kongtrolink.framework.scservice.Invoke invoke0) {
+    public InvokeResponse invoke(
+        Invoke invoke0) {
         //TODO : fill this with the necessary business logic
         throw new UnsupportedOperationException("Please implement " +
             this.getClass().getName() + "#invoke");

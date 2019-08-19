@@ -5,7 +5,6 @@ import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonFsu;
-import com.kongtrolink.framework.jsonType.JsonSignal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

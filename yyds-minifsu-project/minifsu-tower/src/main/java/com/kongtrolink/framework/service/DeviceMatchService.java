@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.service;
 
-import com.kongtrolink.framework.execute.module.model.DevType;
 import com.kongtrolink.framework.jsonType.JsonDevice;
+import com.kongtrolink.framework.execute.module.model.DevType;
 import com.kongtrolink.framework.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

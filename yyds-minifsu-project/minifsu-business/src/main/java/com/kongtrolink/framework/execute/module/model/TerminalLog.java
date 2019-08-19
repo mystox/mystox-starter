@@ -28,7 +28,7 @@ public class TerminalLog {
         this.pktType = pktType == null ? -1: pktType;
         this.recordTime = recordTime;
         this.payload = payload;
-        this.pktTypeName = (pktType!= null ?TerminalPktType.toName(pktType):TerminalPktType.toName(-1));
+        this.pktTypeName = (pktType!= null ? TerminalPktType.toName(pktType):TerminalPktType.toName(-1));
         if (payload != null)
             this.payloadSize = payload.toString().getBytes().length;
         else

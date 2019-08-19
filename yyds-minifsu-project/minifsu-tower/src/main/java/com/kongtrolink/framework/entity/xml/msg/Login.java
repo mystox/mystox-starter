@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.entity.xml.msg;
 
+import com.kongtrolink.framework.entity.xml.base.PKType;
 import com.kongtrolink.framework.entity.CntbPktTypeTable;
 import com.kongtrolink.framework.entity.xml.base.Info;
-import com.kongtrolink.framework.entity.xml.base.PKType;
 
 import javax.xml.bind.annotation.*;
 

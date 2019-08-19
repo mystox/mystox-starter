@@ -11,7 +11,7 @@ public class StateCode {
     public final static int SUCCESS = 1; //请求成功
     public final static int UNREGISTY = 2; //未注册
     public final static int CONNECT_ERROR = 3; //通信出错
-    public final static int CONNECT_INTERRUPT = 4; //
+    public final static int CONNECT_INTERRUPT = 4; //通讯中断
     public final static int REDIS_ERROR = 5; //redis异常
     public final static int MONGO_ERROR = 6; //MONGO数据库异常
     public final static int ILLEGAL_LOG = 7; //非法登录

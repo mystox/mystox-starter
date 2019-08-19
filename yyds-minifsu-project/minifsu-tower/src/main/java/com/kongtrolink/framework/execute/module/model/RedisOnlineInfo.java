@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.execute.module.model;
 
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
-import com.kongtrolink.framework.jsonType.JsonRegistry;
 import com.kongtrolink.framework.jsonType.JsonStation;
+import com.kongtrolink.framework.jsonType.JsonRegistry;
 
 /**
  * @author fengw

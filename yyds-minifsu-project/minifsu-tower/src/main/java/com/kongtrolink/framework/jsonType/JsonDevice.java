@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.jsonType;
 
-import com.kongtrolink.framework.core.entity.Device;
-
 /**
  * @author fengw
  * 铁塔设备ID列表信息

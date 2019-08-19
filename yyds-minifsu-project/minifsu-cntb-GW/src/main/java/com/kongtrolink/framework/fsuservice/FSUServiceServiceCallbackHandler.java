@@ -43,7 +43,7 @@ public abstract class FSUServiceServiceCallbackHandler {
      * override this method for handling normal response from invoke operation
      */
     public void receiveResultinvoke(
-        com.kongtrolink.framework.fsuservice.InvokeResponse result) {
+        InvokeResponse result) {
     }
 
     /**

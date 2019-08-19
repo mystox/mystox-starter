@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.task;
 
-import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.execute.module.RpcModule;
+
 import java.net.InetSocketAddress;
 
 /**

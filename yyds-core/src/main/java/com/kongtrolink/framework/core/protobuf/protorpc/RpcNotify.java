@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.core.protobuf.protorpc;
 
 import com.google.protobuf.RpcController;
-import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.ProtocolEnum;
+import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import org.apache.hadoop.ipc.ProtocolInfo;
 
 /**

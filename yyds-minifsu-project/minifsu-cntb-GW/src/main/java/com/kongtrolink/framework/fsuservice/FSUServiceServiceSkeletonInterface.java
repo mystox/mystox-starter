@@ -15,6 +15,6 @@ public interface FSUServiceServiceSkeletonInterface {
      *
      * @param invoke
      */
-    public com.kongtrolink.framework.fsuservice.InvokeResponse invoke(
-            com.kongtrolink.framework.fsuservice.Invoke invoke);
+    public InvokeResponse invoke(
+            Invoke invoke);
 }

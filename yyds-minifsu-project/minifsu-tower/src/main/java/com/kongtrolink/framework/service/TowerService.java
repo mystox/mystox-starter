@@ -4,25 +4,24 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.StateCode;
-import com.kongtrolink.framework.entity.CntbPktTypeTable;
-import com.kongtrolink.framework.entity.RedisTable;
 import com.kongtrolink.framework.entity.xml.base.MessageResp;
-import com.kongtrolink.framework.entity.xml.msg.GetData;
-import com.kongtrolink.framework.entity.xml.msg.GetFsuInfo;
 import com.kongtrolink.framework.entity.xml.msg.*;
 import com.kongtrolink.framework.entity.xml.util.MessageUtil;
 import com.kongtrolink.framework.execute.module.dao.*;
 import com.kongtrolink.framework.execute.module.model.*;
-import com.kongtrolink.framework.jsonType.JsonStation;
 import com.kongtrolink.framework.jsonType.JsonDevice;
 import com.kongtrolink.framework.jsonType.JsonLoginParam;
+import com.kongtrolink.framework.jsonType.JsonStation;
+import com.kongtrolink.framework.entity.CntbPktTypeTable;
+import com.kongtrolink.framework.entity.RedisTable;
+import com.kongtrolink.framework.entity.xml.msg.GetData;
+import com.kongtrolink.framework.entity.xml.msg.GetFsuInfo;
 import com.kongtrolink.framework.utils.CommonUtils;
 import com.kongtrolink.framework.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
@@ -578,7 +577,7 @@ public class TowerService {
         String result = null;
 
         try {
-            GetFsuInfo getFsuInfo = (GetFsuInfo)MessageUtil.stringToMessage(request, GetFsuInfo.class);
+            GetFsuInfo getFsuInfo = (GetFsuInfo) MessageUtil.stringToMessage(request, GetFsuInfo.class);
 
             if (getFsuInfo == null || isTowerOffline(getFsuInfo.getFsuId())) {
                 return result;

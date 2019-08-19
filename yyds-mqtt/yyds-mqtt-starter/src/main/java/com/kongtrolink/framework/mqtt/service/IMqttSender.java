@@ -1,4 +1,4 @@
-package tech.mystox.demo.service;
+package com.kongtrolink.framework.mqtt.service;
 
 /**
  * Created by mystoxlol on 2019/8/6, 14:15.
@@ -7,11 +7,11 @@ package tech.mystox.demo.service;
  * update record:
  */
 
+import com.kongtrolink.framework.mqtt.config.MqttConfig;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import tech.mystox.demo.config.MqttConfig;
 
 /**
  * MQTT生产者消息发送接口

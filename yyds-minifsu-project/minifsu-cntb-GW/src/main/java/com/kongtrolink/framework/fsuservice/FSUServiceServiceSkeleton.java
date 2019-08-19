@@ -10,7 +10,6 @@ package com.kongtrolink.framework.fsuservice;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.config.rpc.RpcClient;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
-import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
 import org.apache.hadoop.conf.Configuration;
@@ -41,7 +40,7 @@ public class FSUServiceServiceSkeleton implements FSUServiceServiceSkeletonInter
      * @param invoke0
      * @return invokeResponse1
      */
-    public com.kongtrolink.framework.fsuservice.InvokeResponse invoke(com.kongtrolink.framework.fsuservice.Invoke invoke0) {
+    public InvokeResponse invoke(Invoke invoke0) {
         LOGGER.info("*********************FSU回复 start****************************************");
         LOGGER.info("[LSCService Web Server]  receive request...");
         try {

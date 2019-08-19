@@ -43,7 +43,7 @@ public abstract class SCServiceServiceCallbackHandler {
      * override this method for handling normal response from invoke operation
      */
     public void receiveResultinvoke(
-        com.kongtrolink.framework.scservice.InvokeResponse result) {
+        InvokeResponse result) {
     }
 
     /**

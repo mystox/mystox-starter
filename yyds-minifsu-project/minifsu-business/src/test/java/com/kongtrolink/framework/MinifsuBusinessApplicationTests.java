@@ -36,7 +36,7 @@ public class MinifsuBusinessApplicationTests {
 	}
 
 	@Autowired
-	RpcModule rpcModule;
+    RpcModule rpcModule;
 	/**
 	 * rpc spring 测试方法
 	 */

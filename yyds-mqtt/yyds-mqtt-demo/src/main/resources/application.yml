@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: yytd-mqtt-demo
+server:
+  port: 51000
+jar:
+  path: ./jarResources
