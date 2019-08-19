@@ -345,8 +345,9 @@ public class RegistryServiceImpl implements RegistryService {
                 for (AlarmSignalConfig alarmSignalConfig : alarmSignals) {
                     Integer alarmSignalConfigCoType = alarmSignalConfig.getCoType();
                     String coId = alarmSignalConfig.getCoId();
+                    String alarmId = alarmSignalConfig.getAlarmId();
                     if (alarmSignalConfigCoType == 3) { //如果type==3(DI),实时信号点值设置为0
-                        redisUtils.setHash(table, devDataId+"_"+coId, 0);
+                        redisUtils.setHash(table, devDataId+"_"+alarmId, 0);
                     }
                     String alarmConfigKey = sn + "_" + devDataId + "_" + coId;
                     List<AlarmSignalConfig> alarmSignalConfigs = alarmConfigKeyMap.get(alarmConfigKey);
