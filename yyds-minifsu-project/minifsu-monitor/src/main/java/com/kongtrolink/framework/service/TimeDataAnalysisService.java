@@ -90,6 +90,7 @@ public class TimeDataAnalysisService {
             JsonDevice device = fsu.getJsonDeviceByDev(dev);
             if(null == device){
                 device = new JsonDevice();
+                device.setDev(dev);
                 data.add(device);
             }
             HashMap<String, Long> info = device.getInfo();
