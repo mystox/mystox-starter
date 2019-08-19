@@ -7,8 +7,10 @@ import com.kongtrolink.framework.core.entity.*;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.protobuf.protorpc.RpcNotifyImpl;
 import com.kongtrolink.framework.core.service.ModuleInterface;
+import com.kongtrolink.framework.core.utils.ByteUtil;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.model.TerminalMsg;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,6 +67,8 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Value("${redis.communication.expired:1200}")
     private long communicationExpired;
+    @Value("${redis.msg.expired:1200}")
+    private long msgExpired;
 
     @Autowired
     private ThreadPoolTaskExecutor controllerExecutor;
@@ -206,6 +212,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      */
     private JSON moduleExecute(String msgId, JSONObject payloadObject) {
         ModuleMsg moduleMsg = JSONObject.toJavaObject(payloadObject, ModuleMsg.class);
+        if (StringUtils.isBlank(msgId)) msgId = moduleMsg.getMsgId();
         String pktType = moduleMsg.getPktType();
         //>>>>>>>>>>>>>>>>>>>>>>>>>通往事务处理 >>>>>>>>>>>>>>>>>>>
         if (PktType.CLEANUP.equals(pktType)//注销
@@ -235,7 +242,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             return sendPayLoad(msgId, payloadObject.toJSONString(), businessHost, businessPort);
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通完monitor >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        if (PktType.REGISTER_INFORM_ALARM.equals(pktType)){ //business ---> monitor
+        if (PktType.REGISTER_INFORM_ALARM.equals(pktType)) { //business ---> monitor
             return sendPayLoad(msgId, payloadObject.toJSONString(), monitorHost, monitorPort);
         }
         //>>>>>>>>>>>>>>>>>>>>>>>>>>>通往外部服务 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -318,6 +325,15 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         terminalPayloadSave(msgId, SN, terminalString);  //终端接收的报文保存
         terminalResp.setMsgId(msgId);
 
+        if (idempotenceDeal(SN, msgId, terminalString))//幂等性处理,如遇重复，返回重复代码处理。
+        {
+            saveLog(msgId, SN, StateCode.MSG_DUPLICATE, payloadObject.getString("pktType"));
+            logger.error("[{}]msg duplicate receive...[{}]", msgId, payloadObject);
+            JSONObject responsePayload = new JSONObject();
+            responsePayload.put("result", StateCode.MSG_DUPLICATE);
+            terminalResp.setPayload(responsePayload);
+            return terminalResponse(msgId, SN, terminalResp);
+        }
 
         ModuleMsg moduleMsg = new ModuleMsg(); //构建服务间消息实体
         moduleMsg.setMsgId(msgId);
@@ -417,15 +433,53 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         if (TerminalPktType.SET_THRESHOLD.getKey() == pktType || TerminalPktType.SET_DATA.getKey() == pktType) {
             responsePayload.put("result", StateCode.JSON_ILLEGAL);
             logger.error("[{}]payload is json illegal...[{}] response is result:8", msgId, payloadObject);
-        saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
+            saveLog(msgId, SN, StateCode.JSON_ILLEGAL, payloadObject.getString("pktType"));
         } else {
             logger.error("[{}]pktType never execute..[{}] response is result:0", msgId, payloadObject);
             responsePayload.put("result", StateCode.FAILED);
-        saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
+            saveLog(msgId, SN, StateCode.FAILED, payloadObject.getString("pktType"));
         }
         terminalResp.setPayload(responsePayload);
         return terminalResponse(msgId, SN, terminalResp);
 
+    }
+
+    /**
+     * 幂等性处理
+     *
+     * @param sn
+     * @param msgId
+     * @return
+     */
+    private boolean idempotenceDeal(String sn, String msgId, String payload) {
+
+        String hashTable = RedisHashTable.SN_MSGID;
+        byte[] bytes = payload.getBytes();
+        int crc = ByteUtil.getCRC(bytes);
+        List<Integer> msg = new ArrayList<>();
+        msg.add(crc);
+        //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
+        String key = hashTable + ":" + sn + ":" + msgId;
+        if (!redisUtils.hasKeyLocked(key, payload)) {//是否isAbsent,添加并返回true
+            msg = (List<Integer>) redisUtils.get(key);
+            if (!msg.contains(crc)) {
+                msg.add(crc);
+                List<Integer> msgOld = (List<Integer>) redisUtils.getAndSet(key, msg);
+                if (ListUtils.isEqualList(msg,msgOld)) {
+                    logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, payload);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, payload);
+                return true;
+            }
+        } else {
+            //添加消息记录
+            redisUtils.set(key, msg, msgExpired);
+            return false;
+        }
     }
 
     /**

@@ -198,7 +198,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             JSONObject fsuJsonObj = (JSONObject)JSON.toJSON(fsu);
             moduleMsg.setPayload(fsuJsonObj);
         }
-        //注册数据
+        //将实时数据或者变化DI数据发送给铁塔
         registerData(msgId, moduleMsg);
 
         //告警注册与消除

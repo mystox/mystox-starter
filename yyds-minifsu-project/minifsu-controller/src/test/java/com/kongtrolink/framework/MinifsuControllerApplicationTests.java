@@ -26,7 +26,14 @@ import redis.clients.jedis.ScanParams;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -188,7 +195,7 @@ public class MinifsuControllerApplicationTests {
         registerNet.put("pktType", PktType.CONNECT);
         //4包 数据包
 //    String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"MINI210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"1001\":5,\"3001\":5,\"301001\":2300,\"302001\":100}}]}}\n";
-        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"1-1\",\"info\":{\"1001\":260, \"125001\":30}}]}}\n";
+        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"1-1\",\"info\":{\"1001\":1, \"125001\":66000}}]}}\n";
 //        String dataMsg = "{\"msgId\":\"000049\",\"pkgSum\":1,\"ts\":1553500171,\"payload\":{\"pktType\":4,\"SN\":\"LIUDD210121000001\",\"dts\":1553500148,\"data\":[{\"dev\":\"3-1\",\"info\":{\"3001\":11}}]}}\n";
         registerNet.put("payload", dataMsg);
         JSONObject result = sendPayLoad("", registerNet.toJSONString(), "172.16.6.134", 18800);
@@ -345,11 +352,11 @@ public class MinifsuControllerApplicationTests {
         requestHead.put("payload", fileMsg);
         response = sendMSG(requestHead, rpcModuleBase, fileMsg);
         System.out.println("文件流结果: "+response.getBytePayload().toString());*/
-        String registerMsg = "{\"msgId\":\"" + "设备包" + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI201904260011\"}}";
+        String registerMsg = "{\"msgId\":\"" + "000001" + "\",\"payload\":{\"pktType\":1,\"SN\":\"MINI201904260011\"}}";
         response = sendMSG(requestHead, rpcModuleBase, registerMsg);
         System.out.println("终端注册结果: " + response.getPayload());
         //2包 终端信息
-        String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI201904260011\",\"business\":0,\"acessMode\":1,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
+        String terminalMsg = "{\"msgId\":\"000006\",\"payload\":{\"pktType\":2,\"SN\":\"MINI201904260011\",\"business\":0,\"acessMode\":2,\"carrier\":\"CM\",\"nwType\":\"NB\",\"wmType\":\"A8300\",\"wmVendor\":\"LS\",\"imsi\":\"460042350102767\",\"imei\":\"868348030574374\",\"signalStrength\":24,\"engineVer\":\"1.3.7.2\",\"adapterVer\":\"8.0.0.1\"}}";
         response = sendMSG(requestHead, rpcModuleBase, terminalMsg);
         System.out.println("终端属性上报结果: " + response.getPayload());
         //3包 设备包
@@ -372,5 +379,45 @@ public class MinifsuControllerApplicationTests {
         return response;
     }
 
+
+    @Test
+    public void testResdisLock() {
+
+        Object andSet = redisTemplate.opsForValue().getAndSet("abc","123");
+        System.out.println(andSet);
+        Object abc = redisTemplate.opsForValue().getAndSet("abc", "456");
+        System.out.println(abc);
+        System.out.println("redis lock");
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(100);
+
+       /* for (int i = 0; i<100; i++) {
+            final int a = i;
+            workQueue.add(()->{
+                Boolean lock_test = redisTemplate.opsForValue().setIfAbsent("lock_test1", 123);
+                System.out.println("结果"+a+lock_test);
+            });
+
+        }*/
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 1000, 600, TimeUnit.MILLISECONDS, workQueue);
+        for (int i = 0; i < 100; i++) {
+            final int a = i;
+            executor.execute(() -> {
+                String key = "lock_test" + a % 10;
+                Boolean lock_test = redisTemplate.opsForValue().setIfAbsent(key, a);
+                if (lock_test)
+                {
+                    redisTemplate.opsForValue().set(key,a,30,TimeUnit.SECONDS);
+                }
+                System.out.println(a + "结果" + a % 10 + lock_test);
+            });
+
+        }
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }

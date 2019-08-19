@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.core.config.rpc;
 
-import com.google.protobuf.RpcCallback;
-import com.google.protobuf.RpcController;
+import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.ipc.RPC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +40,8 @@ public class RpcConfig
     org.apache.hadoop.conf.Configuration configuration()
     {
         org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
-        configuration.set("ipc.client.rpc-timeout.ms", rpcClientTimeout);
+        configuration.set(CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_KEY, rpcClientTimeout);
+        configuration.set(CommonConfigurationKeys.IPC_CLIENT_CONNECT_MAX_RETRIES_KEY, "3");
         return configuration;
     }
     @Bean
@@ -51,52 +51,5 @@ public class RpcConfig
     }
 
 
-    RpcController rpcController()
-    {
-       return  new RpcController()
-        {
-            @Override
-            public void reset()
-            {
-
-            }
-
-            @Override
-            public boolean failed()
-            {
-                return false;
-            }
-
-            @Override
-            public String errorText()
-            {
-                return null;
-            }
-
-            @Override
-            public void startCancel()
-            {
-
-            }
-
-            @Override
-            public void setFailed(String reason)
-            {
-
-            }
-
-            @Override
-            public boolean isCanceled()
-            {
-                return false;
-            }
-
-            @Override
-            public void notifyOnCancel(RpcCallback<Object> callback)
-            {
-
-            }
-        };
-    }
 
 }
