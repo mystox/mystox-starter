@@ -688,4 +688,18 @@ public class RedisUtils
             redisTemplate.opsForValue().getOperations().delete(key);
         }
     }
+
+    public boolean hasKeyLocked(String key,Object value) {
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
+    }
+
+
+
+    public Object getAndSet(String key,Object value) {
+        return redisTemplate.opsForValue().getAndSet(key, value);
+    }
+
+
+
+
 }

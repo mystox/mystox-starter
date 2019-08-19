@@ -14,7 +14,7 @@ mongodb:
 
 server:
   name: minifsu-business #服务名称
-  bindIp: 172.16.6.134 #服务本机地址
+  bindIp: 172.16.6.71 #服务本机地址
   rpc:
     port: 18830 #服务rpc_server占用端口
 spring:
@@ -49,7 +49,7 @@ rpc:
   client:
     timeout: 60000 #rpc请求超时时间
   controller: #controller服务配置信息
-    hostname: 172.16.6.134
+    hostname: 172.16.6.71
     port: 18800
 register:
   delay: 100 #注册延时随机基数 注册随机值区间 delay ~ delay * 2
