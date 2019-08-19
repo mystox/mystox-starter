@@ -3,7 +3,6 @@ package com.kongtrolink.framework;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
@@ -11,7 +10,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class, MongoAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableRedisHttpSession
 public class MinifsuWebApplication
 {
