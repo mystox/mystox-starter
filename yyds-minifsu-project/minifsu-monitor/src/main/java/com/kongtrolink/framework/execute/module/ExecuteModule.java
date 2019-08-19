@@ -197,10 +197,9 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             timeDateService.jointFsu(fsu, DI_dev_colId_valMap);
             JSONObject fsuJsonObj = (JSONObject)JSON.toJSON(fsu);
             moduleMsg.setPayload(fsuJsonObj);
-            //将变化DI数据发送给铁塔
-            registerData(msgId, moduleMsg);
         }
-
+        //将实时数据或者变化DI数据发送给铁塔
+        registerData(msgId, moduleMsg);
 
         //告警注册与消除
         if(!alarmMap.isEmpty()) {
