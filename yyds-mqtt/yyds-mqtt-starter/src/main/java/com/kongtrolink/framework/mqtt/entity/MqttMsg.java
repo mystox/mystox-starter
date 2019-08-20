@@ -12,9 +12,19 @@ import java.util.UUID;
 public class MqttMsg {
     private String msgId = UUID.randomUUID().toString();
     private String topic;
+    private String sourceAddress; //消息源地址，一般为生产消息的服务code serverName+"_"+serverVersion
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
+
+
+    public String getSourceAddress() {
+        return sourceAddress;
+    }
+
+    public void setSourceAddress(String sourceAddress) {
+        this.sourceAddress = sourceAddress;
+    }
 
     public String getMsgId() {
         return msgId;

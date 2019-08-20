@@ -2,6 +2,8 @@ spring:
   application:
     name: yytd-mqtt-demo
 server:
+  name: YYTD_MQTT_DEMO
+  version: 1.0.0
   port: 51000
 jar:
-  path: ./jarResources
+  path: ./jarResources #jar包存放路径 默认为./jarResources

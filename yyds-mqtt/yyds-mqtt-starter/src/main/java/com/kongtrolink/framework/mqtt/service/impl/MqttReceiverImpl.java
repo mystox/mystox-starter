@@ -32,7 +32,7 @@ public class MqttReceiverImpl implements MqttReceiver {
     private static String JAR = "jar://";
     private static String HTTP = "http://";
 
-    @Value("${jar.path}")
+    @Value("${jar.path:./jarResources}")
     private String jarPath;
 
     /**
@@ -55,11 +55,9 @@ public class MqttReceiverImpl implements MqttReceiver {
                 Object bean = SpringContextUtil.getBean(clazz);
                 Method method = clazz.getDeclaredMethod(methodName, MqttMsg.class);
                 MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
-                Object invoke = method.invoke(bean, mqttMsg);
+                Object invoke = method.invoke(bean, mqttMsg.getPayload());
                 result = JSONObject.toJSONString(invoke);
                 logger.info("local result: {}", result);
-
-
             } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -77,9 +75,10 @@ public class MqttReceiverImpl implements MqttReceiver {
                 Thread.currentThread().setContextClassLoader(classLoader);
                 Class<?> clazz = classLoader.loadClass(className);// 使用loadClass方法加载class,这个class是在urls参数指定的classpath下边。
                 Method taskMethod = clazz.getMethod(methodName, String.class);
-                Object invoke = taskMethod.invoke(clazz.newInstance(), payload);
+                MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
+                Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
                 result = JSONObject.toJSONString(invoke);
-                logger.info("jar result: {}" + result);
+                logger.info("jar result: {}", result);
             } catch (MalformedURLException | InstantiationException | IllegalAccessException
                     | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
@@ -91,8 +90,8 @@ public class MqttReceiverImpl implements MqttReceiver {
 
         String topic_ack = getAcyBySubList();
 
-        if(StringUtils.isNotBlank(topic_ack))
-        iMqttSender.sendToMqtt(topic_ack,2,result);
+        if (StringUtils.isNotBlank(topic_ack))
+            iMqttSender.sendToMqtt(topic_ack, 2, result);
 
         return "ok";
     }
