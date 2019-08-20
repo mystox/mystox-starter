@@ -465,6 +465,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
             if (!msg.contains(crc)) {
                 msg.add(crc);
                 List<Integer> msgOld = (List<Integer>) redisUtils.getAndSet(key, msg);
+                redisUtils.set(key, msg, msgExpired);
                 if (ListUtils.isEqualList(msg,msgOld)) {
                     logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, payload);
                     return true;
