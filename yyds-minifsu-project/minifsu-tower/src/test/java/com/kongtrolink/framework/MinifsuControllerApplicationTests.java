@@ -28,8 +28,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -128,17 +130,53 @@ public class MinifsuControllerApplicationTests {
 	@Autowired
 	AlarmDao alarmDao;
 
+	@Autowired
+	private ThreadPoolTaskExecutor taskExecutor;
+
+	@Value("${spring.redis.lockTimeout}")
+	private int lockTimeout;
+
 	@Test
 	public void testRedis() {
 //		RedisData redisData = redisUtils.get(RedisTable.DATA_HASH + "1:1", RedisData.class);
 
-//		System.out.println(redisUtils.hHasKey("12", "23"));
+		String vpn = commonUtils.getVpnIp("QG6");
+		System.out.println(vpn);
 //		redisUtils.hset("12", "24", "re");
 //		System.out.println(redisUtils.hHasKey("12", "23"));
 
-		RedisData redisData = commonUtils.getRedisData("43072243800562", "43072243800562");
+//		RedisData redisData = commonUtils.getRedisData("43072243800562", "43072243800562");
 //		Set<String> list = redisUtils.keys(RedisTable.getDataKey("12029143800188", "*188"));
 //		System.out.println(list);
+
+//		taskExecutor.execute(() -> lock("th1", 1000));
+//		taskExecutor.execute(() -> lock("th2", 1000));
+//		taskExecutor.execute(() -> lock("th3", 1000));
+//		taskExecutor.execute(() -> lock("th4", 1000));
+//
+//		try {
+//			Thread.sleep(10000);
+//		} catch (Exception ex) {
+//
+//		}
+	}
+
+	private void lock(String name, int count) {
+		for (int i = 0; i < count; ++i) {
+			String value = redisUtils.lock("lock", 10);
+			if (value != null) {
+				System.out.println(name + " get lock success, i: " + i + ", lock:" + value);
+				try {
+					Thread.sleep(3);
+				} catch (Exception ex) {
+
+				}
+				redisUtils.unlock("lock", value);
+				System.out.println(name + " unlock success, i: " + i + ", lock:" + value);
+			} else {
+				System.out.println(name + " get lock fail, i: " + i);
+			}
+		}
 	}
 
 	@Test

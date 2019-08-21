@@ -44,13 +44,17 @@ public class VpnMonitorTask {
         String folder = "/var/run/";
         for (String vpn : vpnList) {
             String[] vpnInfo = vpn.split(",");
-//            logger.info("check " + vpn);
+            logger.debug("check " + vpn);
             try {
                 String filePath = folder + "ppp-" + vpnInfo[0] + ".pid";
                 File file = new File(filePath);
                 if (!file.exists()) {
-//                    logger.info(filePath + " not exist");
+                    if (redisUtils.hHasKey("vpn_hash", vpnInfo[0])) {
+                        redisUtils.hdel("vpn_hash", vpnInfo[0]);
+                    }
+                    logger.debug(filePath + " not exist");
                     exec(new String[] {"/bin/sh", "-c", "echo 'c " + vpnInfo[0] + "' > /var/run/xl2tpd/l2tp-control"});
+                    logger.info(vpnInfo[0] + " 正在连接");
                 }
                 if (file.exists()) {
                     String content = readFile(filePath);
@@ -58,7 +62,7 @@ public class VpnMonitorTask {
                     String interfaceName = content.split("\n")[1];
 //                    logger.info("interfaceName:" + interfaceName);
                     String[] ipList = exec(new String[] {"/bin/bash", "-c", "ifconfig " + interfaceName + " | egrep \"((25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\\.){3}(25[0-5]|2[0-4][0-9]|((1[0-9]{2})|([1-9]?[0-9])))\" -o"}).split("\n");
-//                    logger.info("ipList:" + JSONObject.toJSONString(ipList));
+                    logger.debug(vpnInfo[0] + "ipList:" + JSONObject.toJSONString(ipList));
                     if (ipList.length == 3) {
                         if (redisUtils.hHasKey("vpn_hash", vpnInfo[0])) {
                             if (redisUtils.hget("vpn_hash", vpnInfo[0]).toString().equals(ipList[0])) {
