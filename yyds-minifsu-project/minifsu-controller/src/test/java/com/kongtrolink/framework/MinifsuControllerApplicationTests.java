@@ -8,10 +8,12 @@ import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
+import com.kongtrolink.framework.core.utils.ByteUtil;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.model.TerminalMsg;
 import com.kongtrolink.framework.runner.ControllerRunner;
+import org.apache.commons.collections.SetUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,10 +28,7 @@ import redis.clients.jedis.ScanParams;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -398,11 +397,11 @@ public class MinifsuControllerApplicationTests {
             });
 
         }*/
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 1000, 600, TimeUnit.MILLISECONDS, workQueue);
-        for (int i = 0; i < 100; i++) {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1000, 1000, 600, TimeUnit.MILLISECONDS, workQueue);
+        for (int i = 0; i < 1000; i++) {
             final int a = i;
             executor.execute(() -> {
-                String key = "lock_test" + a % 10;
+                String key = "lock_test" + a % 1000;
                 Boolean lock_test = redisTemplate.opsForValue().setIfAbsent(key, a);
                 if (lock_test)
                 {
@@ -418,6 +417,47 @@ public class MinifsuControllerApplicationTests {
             e.printStackTrace();
         }
 
+    }
+
+
+    /**
+     * 幂等性处理
+     *
+     */
+    @Test
+    private void idempotenceDealTest() {
+
+        long msgExpired = 600;
+        String payload = "test1";
+        String sn = "1111111111111111";
+        String msgId = "";
+
+        String hashTable = RedisHashTable.SN_MSGID;
+        byte[] bytes = payload.getBytes();
+        int crc = ByteUtil.getCRC(bytes);
+        Set msg = new HashSet();
+        msg.add(crc);
+        //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
+        String key = hashTable + ":" + sn + ":" + msgId;
+        if (!redisUtils.hasKeyLocked(key, msg)) {//是否isAbsent,添加并返回true 注备升级redis接口2.0可以直接设置超时
+            msg = (Set) redisUtils.get(key);
+            if (!msg.contains(crc)) {
+                msg.add(crc);
+                Set msgOld = (Set) redisUtils.getAndSet(key, msg);
+                redisUtils.set(key, msg, msgExpired); //此处直接超时代码不准确
+                if (SetUtils.isEqualSet(msg, msgOld)) {
+                    System.out.println("[{}] is duplicate and discard it ...[{}]"+msgId+payload);
+                } else {
+                    System.out.println("不重复");
+                }
+            } else {
+                System.out.println("[{}] is duplicate and discard it ...[{}]"+msgId+payload);
+            }
+        } else {
+            //添加消息记录
+            redisUtils.set(key, msg, msgExpired); //此处直接超时代码不准确
+            System.out.println("不重复");
+        }
     }
 
 }
