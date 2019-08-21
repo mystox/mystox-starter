@@ -460,7 +460,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         msg.add(crc);
         //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
         String key = hashTable + ":" + sn + ":" + msgId;
-        if (!redisUtils.hasKeyLocked(key, payload)) {//是否isAbsent,添加并返回true
+        if (!redisUtils.hasKeyLocked(key, msg)) {//是否isAbsent,添加并返回true
             msg = (List<Integer>) redisUtils.get(key);
             if (!msg.contains(crc)) {
                 msg.add(crc);
