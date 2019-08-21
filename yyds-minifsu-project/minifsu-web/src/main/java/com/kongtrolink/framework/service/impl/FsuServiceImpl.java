@@ -7,9 +7,6 @@ import com.kongtrolink.framework.core.entity.Device;
 import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.core.entity.ModuleMsg;
 import com.kongtrolink.framework.core.entity.PktType;
-import com.kongtrolink.framework.dao.FsuDao;
-import com.kongtrolink.framework.dao.FsuDevicesDao;
-import com.kongtrolink.framework.dao.OperatorHistoryDao;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.model.OperatHistory;
 import com.kongtrolink.framework.service.FsuService;
@@ -84,13 +81,6 @@ public class FsuServiceImpl implements FsuService {
 
     @Autowired
     RpcModule rpcModule;
-    @Autowired
-    FsuDao fsuDao;
-    @Autowired
-    FsuDevicesDao fsuDevicesDao;
-
-    @Autowired
-    OperatorHistoryDao operatorHistoryDao;
 
     @Override
     public JSONObject setFsu(Map<String, Object> requestBody) {
@@ -101,6 +91,11 @@ public class FsuServiceImpl implements FsuService {
         moduleMsg.setPayload((JSONObject) JSONObject.toJSON(requestBody));
         JSONObject result = rpcModule.syncRequestData(moduleMsg, JSONObject.class);
         return result;
+    }
+
+    @Override
+    public Fsu getFsu(Map<String, Object> requestBody) {
+        return null;
     }
 
 
@@ -125,14 +120,14 @@ public class FsuServiceImpl implements FsuService {
 
     @Override
     public List<OperatHistory> getOperationHistory(Map<String, Object> requestBody, String fsuId) {
-        return operatorHistoryDao.findByCondition(requestBody, fsuId);
-
+        return null;
     }
 
     @Override
     public Map<String, Integer> getFsuDeviceCountMap(List<String> fsuIds) {
-        return fsuDevicesDao.getFsuDeviceCount(fsuIds);
+        return null;
     }
+
 
     @Override
     public JSONObject getOperationHistoryByMqtt(Map<String, Object> requestBody, String sn) {
@@ -550,14 +545,6 @@ public class FsuServiceImpl implements FsuService {
 
     @Override
     public List<Fsu> searchFsu(Map<String, Object> requestBody) {
-        if (requestBody == null) return null;
-        return fsuDao.findByCondition(requestBody);
-    }
-
-    @Override
-    public Fsu getFsu(Map<String, Object> requestBody) {
-        if (requestBody == null) return null;
-        String fsuId = (String) requestBody.get("fsuId");
-        return fsuDao.findByFsuId(fsuId);
+        return null;
     }
 }
