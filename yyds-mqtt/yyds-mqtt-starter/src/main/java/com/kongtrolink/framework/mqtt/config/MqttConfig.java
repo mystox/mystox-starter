@@ -41,10 +41,10 @@ public class MqttConfig {
         WILL_DATA = "offline".getBytes();
     }
 
-    @Value("${mqtt.username}")
+    @Value("${mqtt.username:root}")
     private String username;
 
-    @Value("${mqtt.password}")
+    @Value("${mqtt.password:123456}")
     private String password;
 
     @Value("${mqtt.url}")
@@ -134,7 +134,7 @@ public class MqttConfig {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
                 producerClientId,
                 mqttClientFactory());
-        messageHandler.setAsync(true);
+        messageHandler.setAsync(true); //异步
         messageHandler.setDefaultTopic(producerDefaultTopic);
         return messageHandler;
     }
