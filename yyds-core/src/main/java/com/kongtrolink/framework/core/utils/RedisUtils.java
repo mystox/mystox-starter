@@ -3,10 +3,8 @@ package com.kongtrolink.framework.core.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -694,10 +692,58 @@ public class RedisUtils
         return redisTemplate.opsForValue().setIfAbsent(key, value);
     }
 
+    /**
+     * 1.* redis 的事务超时
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean setIfAbsentAndExpired(String key,Object value,long timeout,TimeUnit unit) {
+        SessionCallback<Boolean> sessionCallback = new SessionCallback<Boolean>() {
+            List<Object> exec = null;
+            @Override
+            @SuppressWarnings("unchecked")
+            public Boolean execute(RedisOperations operations) throws DataAccessException {
+                operations.multi();
+                redisTemplate.opsForValue().setIfAbsent(key,value);
+                redisTemplate.expire(key,timeout, TimeUnit.SECONDS);
+                exec = operations.exec();
+                if(exec.size() > 0) {
+                    return (Boolean) exec.get(0);
+                }
+                return false;
+            }
+        };
+        return (Boolean) redisTemplate.execute(sessionCallback);
+    }
+
 
 
     public Object getAndSet(String key,Object value) {
         return redisTemplate.opsForValue().getAndSet(key, value);
+    }
+
+
+
+    public Object getAndSetAndExpired(String key,Object value,long timeout,TimeUnit unit) {
+
+
+        SessionCallback sessionCallback = new SessionCallback() {
+            List<Object> exec = null;
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                operations.multi();
+                redisTemplate.opsForValue().getAndSet(key,value);
+                redisTemplate.expire(key,timeout, TimeUnit.SECONDS);
+                exec = operations.exec();
+                if(exec.size() > 0) {
+                    return exec.get(0);
+                }
+                return null;
+            }
+        };
+        return redisTemplate.execute(sessionCallback);
     }
 
 

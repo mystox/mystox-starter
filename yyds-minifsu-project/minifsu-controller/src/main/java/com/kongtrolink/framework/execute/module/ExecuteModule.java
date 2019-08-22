@@ -67,7 +67,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
 
     @Value("${redis.communication.expired:1200}")
     private long communicationExpired;
-    @Value("${redis.msg.expired:1200}")
+    @Value("${redis.msg.expired:3600}")
     private long msgExpired;
 
     @Autowired
@@ -325,8 +325,7 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
         terminalPayloadSave(msgId, SN, terminalString);  //终端接收的报文保存
         terminalResp.setMsgId(msgId);
 
-        if (idempotenceDeal(SN, msgId, terminalString))//幂等性处理,如遇重复，返回重复代码处理。
-        {
+        if (!idempotenceDeal(SN, msgId, terminalString)) {//幂等性处理,如遇重复，返回重复代码处理。
             saveLog(msgId, SN, StateCode.MSG_DUPLICATE, payloadObject.getString("pktType"));
             logger.error("[{}]msg duplicate receive...[{}]", msgId, payloadObject);
             JSONObject responsePayload = new JSONObject();
@@ -451,37 +450,22 @@ public class ExecuteModule extends RpcNotifyImpl implements ModuleInterface {
      * @param msgId
      * @return
      */
-    private boolean idempotenceDeal(String sn, String msgId, String terminalString) {
+    private boolean idempotenceDeal(String sn, String msgId, String payload) {
 
         String hashTable = RedisHashTable.SN_MSGID;
-        byte[] bytes = terminalString.getBytes();
+        byte[] bytes = payload.getBytes();
         int crc = ByteUtil.getCRC(bytes);
-        List<Integer> msg = new ArrayList<>();
-        msg.add(crc);
         //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
-        String key = hashTable + ":" + sn + ":" + msgId;
-        if (!redisUtils.hasKeyLocked(key, msg)) {//是否isAbsent,添加并返回true
-            msg = (List<Integer>) redisUtils.get(key);
-            if (!msg.contains(crc)) { //如果消息体不包含，则说明msg一样，消息内容不一样的容错
-                msg.add(crc);
-                List<Integer> msgOld = (List<Integer>) redisUtils.getAndSet(key, msg);
-                redisUtils.set(key, msg, msgExpired);
-                if (ListUtils.isEqualList(msg,msgOld)) {
-                    logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, terminalString);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, terminalString);
-                return true;
-            }
-        } else {
-            //添加消息记录
-            redisUtils.set(key, msg, msgExpired);
-            return false;
-        }
+        String key = hashTable + ":" + sn + ":" + msgId + "_" + crc;
+        return redisUtils.setIfAbsentAndExpired(key, payload, msgExpired, TimeUnit.SECONDS);
+//        if (!redisUtils.setIfAbsentAndExpired(key, 1, msgExpired, TimeUnit.SECONDS)) {//是否isAbsent,添加并返回true 注备升级redis接口2.0可以直接设置超时
+//            logger.warn("[{}] is duplicate and discard it ...[{}]", msgId, payload);
+//            return true;
+//        } else {
+//            return false;
+//        }
     }
+
 
     /**
      * 终端日志保存

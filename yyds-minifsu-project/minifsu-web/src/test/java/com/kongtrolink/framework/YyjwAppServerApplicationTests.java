@@ -1,7 +1,6 @@
 package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.dao.FsuDevicesDao;
 import com.kongtrolink.framework.util.JsonResult;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,11 +22,7 @@ import java.io.File;
 @SpringBootTest
 public class YyjwAppServerApplicationTests {
     Logger logger = LoggerFactory.getLogger("~");
-    @Autowired
-    MongoTemplate mongoTemplate;
 
-    @Autowired
-    FsuDevicesDao fsuDevicesDao;
 
     @Test
     public void contextLoads() {

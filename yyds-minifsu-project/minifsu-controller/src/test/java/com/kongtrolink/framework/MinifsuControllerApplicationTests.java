@@ -8,13 +8,17 @@ import com.kongtrolink.framework.core.entity.PktType;
 import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.protobuf.RpcNotifyProto;
 import com.kongtrolink.framework.core.rpc.RpcModuleBase;
+import com.kongtrolink.framework.core.utils.ByteUtil;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.execute.module.RpcModule;
 import com.kongtrolink.framework.execute.module.model.TerminalMsg;
 import com.kongtrolink.framework.runner.ControllerRunner;
+import org.apache.commons.collections.SetUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -383,12 +387,12 @@ public class MinifsuControllerApplicationTests {
     @Test
     public void testResdisLock() {
 
-        Object andSet = redisTemplate.opsForValue().getAndSet("abc","123");
+        Object andSet = redisTemplate.opsForValue().getAndSet("abc", "123");
         System.out.println(andSet);
         Object abc = redisTemplate.opsForValue().getAndSet("abc", "456");
         System.out.println(abc);
         System.out.println("redis lock");
-        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(100);
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(1000);
 
        /* for (int i = 0; i<100; i++) {
             final int a = i;
@@ -398,15 +402,14 @@ public class MinifsuControllerApplicationTests {
             });
 
         }*/
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 1000, 600, TimeUnit.MILLISECONDS, workQueue);
-        for (int i = 0; i < 100; i++) {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1000, 1000, 600, TimeUnit.MILLISECONDS, workQueue);
+        for (int i = 0; i < 1000; i++) {
             final int a = i;
             executor.execute(() -> {
-                String key = "lock_test" + a % 10;
+                String key = "lock_test" + a % 100;
                 Boolean lock_test = redisTemplate.opsForValue().setIfAbsent(key, a);
-                if (lock_test)
-                {
-                    redisTemplate.opsForValue().set(key,a,30,TimeUnit.SECONDS);
+                if (lock_test) {
+                    redisTemplate.opsForValue().set(key, a, 30, TimeUnit.SECONDS);
                 }
                 System.out.println(a + "结果" + a % 10 + lock_test);
             });
@@ -419,5 +422,98 @@ public class MinifsuControllerApplicationTests {
         }
 
     }
+
+
+    Logger logger = LoggerFactory.getLogger("test");
+
+    /**
+     * 幂等性处理
+     * 此处实现存在缺陷已经放弃
+     */
+    @Test
+    public void idempotenceDealTest() {
+
+        long msgExpired = 600;
+        String payload = "test1213";
+        String sn = "1111111111111111";
+        String msgId = "0123456789";
+
+        String hashTable = RedisHashTable.SN_MSGID;
+        byte[] bytes = payload.getBytes();
+        int crc = ByteUtil.getCRC(bytes);
+        List msg = new ArrayList();
+        //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
+        String key = hashTable + ":" + sn + ":" + msgId;
+        if (!redisUtils.setIfAbsentAndExpired(key, msg, msgExpired, TimeUnit.SECONDS)) {//是否isAbsent,添加并返回true 注备升级redis接口2.0可以直接设置超时
+            msg = (List) redisUtils.get(key);
+            if (!msg.contains(crc)) {
+                msg.add(crc);
+                List msgOld = (List) redisUtils.getAndSetAndExpired(key, msg, msgExpired, TimeUnit.SECONDS);
+//                redisUtils.set(key, msg, msgExpired); //此处直接超时代码不准确
+                if (SetUtils.isEqualSet(msg, msgOld)) {
+                    logger.info("[{}] is duplicate and discard it ...[{}]", msgId, payload);
+                } else {
+                    logger.info("不重复");
+                }
+            } else {
+                logger.info("[{}] is duplicate and discard it ...[{}]", msgId, payload);
+            }
+        } else {
+            //添加消息记录
+//            redisUtils.set(key, msg, msgExpired); //此处直接超时代码不准确
+            logger.info("不重复");
+        }
+    }
+
+    @Test
+    public void idempotenceDealTest2() {
+
+        long msgExpired = 600;
+        String payload = "test1213";
+        String sn = "1111111111111111";
+        String msgId = "0123456789";
+
+        String hashTable = RedisHashTable.SN_MSGID;
+        byte[] bytes = payload.getBytes();
+        int crc = ByteUtil.getCRC(bytes);
+        //理论上保证sn+msgId的唯一性，但出现两者重复时，对比报文内容做出最终的重复性判断
+        String key = hashTable + ":" + sn + ":" + msgId + "_" + crc;
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(1000);
+
+       /* for (int i = 0; i<100; i++) {
+            final int a = i;
+            workQueue.add(()->{
+                Boolean lock_test = redisTemplate.opsForValue().setIfAbsent("lock_test1", 123);
+                System.out.println("结果"+a+lock_test);
+            });
+
+        }*/
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1000, 1000, 6000, TimeUnit.MILLISECONDS, workQueue);
+        for (int i = 0; i < 100; i++) {
+            final int a = i;
+            executor.execute(() -> {
+                String lkey = key + "lock_test" + a % 20;
+//                System.out.println(lkey);
+                boolean b = redisUtils.setIfAbsentAndExpired(lkey, 1, msgExpired, TimeUnit.SECONDS);
+                System.out.println(lkey+":"+b);
+            });
+
+        }
+       /* for (int i=0;i<10;i++)
+        {
+            final int a = i;
+            String lkey = key + "lock_test" + a % 1;
+            System.out.println(lkey);
+            boolean b = redisUtils.setIfAbsentAndExpired(lkey, 1, msgExpired, TimeUnit.SECONDS);
+            System.out.println(lkey+":"+b);
+        }*/
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
 }
