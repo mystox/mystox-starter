@@ -9,6 +9,13 @@ package com.kongtrolink.framework.mqtt.service;
 public interface MqttHandler {
 
     /**
+     * 组装topicId
+     *
+     * @param operaCode
+     * @return
+     */
+    public String assembleSubTopic(String operaCode);
+    /**
      * 增加topic订阅
      * @param topic
      * @param qos

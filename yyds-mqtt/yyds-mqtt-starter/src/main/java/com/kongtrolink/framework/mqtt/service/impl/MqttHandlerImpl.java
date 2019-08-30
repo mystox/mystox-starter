@@ -1,7 +1,10 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.kongtrolink.framework.mqtt.service.MqttHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
@@ -15,13 +18,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqttHandlerImpl implements MqttHandler {
 
+    Logger logger = LoggerFactory.getLogger(MqttHandlerImpl.class);
 
+
+    @Value("${server.name}")
+    private String serverName;
+
+    @Value("${server.version}")
+    private String serverVersion;
 
     @Autowired
     private MessageProducer messageProducer;
 
+
+
+    @Override
+    public String assembleSubTopic(String operaCode) {
+        return serverName +"_"+ serverVersion + "/" + operaCode;
+
+
+    }
+
+
     @Override
     public void addSubTopic(String topic, int qos) {
+        logger.info("增加订阅信息");
+
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topic, 2);
 
@@ -29,6 +51,7 @@ public class MqttHandlerImpl implements MqttHandler {
 
     @Override
     public void addSubTopic(String... topic) {
+
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topic);
     }

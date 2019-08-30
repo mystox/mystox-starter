@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.task;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

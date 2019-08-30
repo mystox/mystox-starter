@@ -1,0 +1,3 @@
+YYTD_MQTT_DEMO:
+  sayHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/sayHello
+  fooHi: jarName.jar/**.*.*/foo

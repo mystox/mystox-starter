@@ -6,6 +6,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by mystoxlol on 2019/8/14, 16:47.
  * company: kongtrolink
@@ -14,6 +17,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SpringContextUtil implements ApplicationContextAware{
+
+    private static Map<String, String> serviceMap;
     /**
      * 上下文对象实例
      */
@@ -21,6 +26,7 @@ public class SpringContextUtil implements ApplicationContextAware{
 
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        serviceMap = new HashMap<>();
         this.applicationContext = applicationContext;
     }
 
@@ -65,4 +71,11 @@ public class SpringContextUtil implements ApplicationContextAware{
         return getApplicationContext().getBean(name, clazz);
     }
 
+    public static Map<String, String> getServiceMap() {
+        return serviceMap;
+    }
+
+    public static void setServiceMap(Map<String, String> serviceMap) {
+        SpringContextUtil.serviceMap = serviceMap;
+    }
 }

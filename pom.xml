@@ -9,8 +9,10 @@
     <version>1.0.0</version>
     <modules>
         <module>yyds-core</module>
-        <!--<module>yyds-minifsu-project</module>-->
+        <module>yyds-common</module>
+        <module>yyds-minifsu-project</module>
         <module>yyds-mqtt</module>
+        <module>yyds-register</module>
     </modules>
     <packaging>pom</packaging>
 

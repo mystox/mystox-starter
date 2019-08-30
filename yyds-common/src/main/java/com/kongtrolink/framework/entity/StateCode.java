@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.mqtt.entity;
+package com.kongtrolink.framework.entity;
 
 /**
  * Created by mystoxlol on 2019/4/2, 15:40.

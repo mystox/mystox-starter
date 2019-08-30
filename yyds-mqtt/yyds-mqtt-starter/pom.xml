@@ -30,6 +30,11 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>com.kongtrolink.framework</groupId>
+            <artifactId>yyds-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-integration</artifactId>
         </dependency>

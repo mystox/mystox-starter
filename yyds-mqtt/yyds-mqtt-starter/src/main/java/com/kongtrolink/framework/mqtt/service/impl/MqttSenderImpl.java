@@ -1,10 +1,13 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.mqtt.entity.MqttMsg;
 import com.kongtrolink.framework.mqtt.entity.PayloadType;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqttSenderImpl implements MqttSender {
 
+    Logger logger = LoggerFactory.getLogger(MqttHandlerImpl.class);
     @Value("${mqtt.producer.defaultTopic}")
     private String producerDefaultTopic;
 
@@ -39,11 +43,16 @@ public class MqttSenderImpl implements MqttSender {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
-                String topic = preconditionSend(serverCode, operaCode);
+                String topic = preconditionSend(localServerCode, operaCode);
                 //组建消息体
-                MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode,payload);
+                MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+                logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
                 mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
+
+
             }
+        } else {
+            logger.error("message send error[{}]...", StateCode.FAILED);
         }
     }
 
@@ -78,7 +87,8 @@ public class MqttSenderImpl implements MqttSender {
     private String preconditionSend(String serverCode, String operaCode) {
         return serverCode + "/" + operaCode;
     }
-    private MqttMsg buildMqttMsg(String topicId,String localServerCode, String payload) {
+
+    private MqttMsg buildMqttMsg(String topicId, String localServerCode, String payload) {
         MqttMsg mqttMsg = new MqttMsg();
         mqttMsg.setTopic(topicId);
         mqttMsg.setPayloadType(PayloadType.STRING);

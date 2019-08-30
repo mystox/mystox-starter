@@ -29,6 +29,7 @@ public class MqttRestController {
 
     @Autowired
     MqttHandler mqttHandler;
+
     @Autowired
     MqttSender mqttSender;
 
@@ -39,9 +40,9 @@ public class MqttRestController {
     }
 
     @RequestMapping("/sendMsg")
-    public String sendMqtt(@RequestParam String serviceCode, @RequestParam String operaCode,
+    public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        mqttSender.sendToMqtt(serviceCode, operaCode, message);
+        mqttSender.sendToMqtt(serverCode, operaCode, message);
         return "ok";
     }
 

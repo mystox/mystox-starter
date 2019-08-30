@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class LocalServiceImpl implements LocalService {
     @Override
     public String hello(MqttMsg mqttMsg) {
-        System.out.println(mqttMsg.toString());
+        System.out.println("这是local收到的消息：============"+mqttMsg.toString());
         return "hello_ack";
-    }
+}
 }
