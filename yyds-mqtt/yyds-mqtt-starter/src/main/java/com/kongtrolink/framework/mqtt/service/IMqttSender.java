@@ -13,13 +13,18 @@ import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.Future;
+
 /**
  * MQTT生产者消息发送接口
  * <p>MessagingGateway要指定生产者的通道名称</p>
  * @author BBF
  */
 @Component
-@MessagingGateway(defaultRequestChannel = MqttConfig.CHANNEL_NAME_OUT)
+@MessagingGateway(defaultRequestChannel = MqttConfig.CHANNEL_NAME_OUT,
+        defaultRequestTimeout = "10000"/*,
+        defaultReplyChannel = MqttConfig.CHANNEL_REPLY,
+        defaultReplyTimeout = "10000"*/)
 public interface IMqttSender {
 
     /**
@@ -50,4 +55,9 @@ public interface IMqttSender {
     void sendToMqtt(@Header(MqttHeaders.TOPIC) String topic,
                     @Header(MqttHeaders.QOS) int qos,
                     String payload);
+
+
+    Future<String> sendToMqttSyn(@Header(MqttHeaders.TOPIC) String topic,
+                         @Header(MqttHeaders.QOS) int qos,
+                         String payload);
 }

@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.api;
 
-import com.kongtrolink.framework.mqtt.entity.MqttMsg;
+import com.kongtrolink.framework.entity.MqttMsg;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 

@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
-import com.kongtrolink.framework.mqtt.service.MqttHandler;
+import com.kongtrolink.framework.service.MqttHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +35,18 @@ public class MqttHandlerImpl implements MqttHandler {
     @Override
     public String assembleSubTopic(String operaCode) {
         return serverName +"_"+ serverVersion + "/" + operaCode;
-
-
     }
-
 
     @Override
     public void addSubTopic(String topic, int qos) {
-        logger.info("增加订阅信息");
-
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topic, 2);
-
     }
 
     @Override
-    public void addSubTopic(String... topic) {
-
+    public void addSubTopic(String... topics) {
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
-        messageProducer.addTopic(topic);
+        messageProducer.addTopic(topics);
     }
 
     @Override

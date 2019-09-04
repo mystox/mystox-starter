@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.mqtt.service;
+package com.kongtrolink.framework.service;
 
 /**
  * Created by mystoxlol on 2019/8/20, 10:08.

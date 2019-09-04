@@ -1,6 +1,4 @@
-package com.kongtrolink.framework.mqtt.entity;
-
-import com.alibaba.fastjson.JSONObject;
+package com.kongtrolink.framework.entity;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -18,6 +16,7 @@ public class MqttMsg {
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
+
 
 
     public String getSourceAddress() {
@@ -77,12 +76,5 @@ public class MqttMsg {
                 ", payload='" + payload + '\'' +
                 ", bytePayload=" + Arrays.toString(bytePayload) +
                 '}';
-    }
-    public static void main(String[] args)
-    {
-        MqttMsg mqttMsg = new MqttMsg();
-        mqttMsg.setPayloadType(PayloadType.STRING);
-        mqttMsg.setPayload("你好");
-        System.out.println(JSONObject.toJSONString(mqttMsg));
     }
 }

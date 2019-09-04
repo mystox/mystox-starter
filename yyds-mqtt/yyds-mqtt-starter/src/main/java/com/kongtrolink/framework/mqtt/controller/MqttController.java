@@ -2,8 +2,8 @@ package com.kongtrolink.framework.mqtt.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.mqtt.service.MqttHandler;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
+import com.kongtrolink.framework.service.MqttHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

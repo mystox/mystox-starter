@@ -10,7 +10,15 @@ public interface MqttSender {
 
     void sendToMqtt(String serverCode, String operaCode,
                     String payload);
+
     void sendToMqtt(String serverCode, String operaCode,
+                    int qos,
+                    String payload);
+
+    String sendToMqttSyn(String serverCode, String operaCode,
+                    int qos,
+                    String payload);
+    String sendToMqttSyn2(String serverCode, String operaCode,
                     int qos,
                     String payload);
 }

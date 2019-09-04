@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.mqtt.service.MqttHandler;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MqttHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +43,13 @@ public class MqttRestController {
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
         mqttSender.sendToMqtt(serverCode, operaCode, message);
+        return "ok";
+    }
+
+    @RequestMapping("/sendMsgSyn")
+    public String sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
+                           @RequestBody String message) {
+        mqttSender.sendToMqttSyn(serverCode, operaCode, 2,message);
         return "ok";
     }
 

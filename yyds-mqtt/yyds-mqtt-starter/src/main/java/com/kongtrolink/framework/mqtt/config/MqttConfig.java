@@ -20,8 +20,10 @@ import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 
 /**
  * Created by mystoxlol on 2019/8/5, 14:35.
@@ -74,6 +76,7 @@ public class MqttConfig {
      * 发布的bean名称
      */
     public static final String CHANNEL_NAME_OUT = "mqttOutboundChannel";
+    public static final String CHANNEL_REPLY = "mqttReplyBoundChannel";
 
 
     /**
@@ -122,6 +125,11 @@ public class MqttConfig {
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
+/*
+    @Bean(name = CHANNEL_REPLY)
+    public MessageChannel mqttReplyChannel() {
+        return new DirectChannel();
+    }*/
 
     /**
      * MQTT消息处理器（生产者）
@@ -136,6 +144,9 @@ public class MqttConfig {
                 mqttClientFactory());
         messageHandler.setAsync(true); //异步
         messageHandler.setDefaultTopic(producerDefaultTopic);
+        messageHandler.setCompletionTimeout(1000);
+
+
         return messageHandler;
     }
 
@@ -181,16 +192,23 @@ public class MqttConfig {
     @ServiceActivator(inputChannel = CHANNEL_NAME_IN)
     public MessageHandler handler() {
 
-        return message -> {
+        MessageHandler messageHandler = new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
 //            System.out.println(message);
-            //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
-            Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-            if (mqtt_duplicate) {
-                logger.warn("message receive duplicate [{}]", message);
+                //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
+                Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
+                if (mqtt_duplicate) {
+                    logger.warn("message receive duplicate [{}]", message);
+                }
+                String topic = message.getHeaders().get("mqtt_topic").toString();
+                String result = mqttReceiver.receive(topic, message.getPayload().toString());
+                logger.info("message execute result: [{}]", result);
             }
-            String topic = message.getHeaders().get("mqtt_topic").toString();
-            mqttReceiver.receive(topic, message.getPayload().toString());
         };
+        System.out.println(messageHandler.toString());
+//        messageHandler.handleMessage(MessageBuilder.withPayload("123").setHeader(MqttHeaders.TOPIC,"123").build());
+        return messageHandler;
     }
 
 

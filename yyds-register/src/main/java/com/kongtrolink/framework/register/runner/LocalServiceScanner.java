@@ -88,7 +88,7 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
                         if (StringUtils.isEmpty(code)) {
                             code = method.getName();
                         }
-                        sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + code);
+                        sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName());
                         sub.setOperaCode(code);
                     }
                     subList.add(sub);

@@ -1,15 +1,20 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.MqttMsg;
+import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
-import com.kongtrolink.framework.mqtt.entity.MqttMsg;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
+import com.kongtrolink.framework.register.service.ServiceRegistry;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.integration.annotation.MessageEndpoint;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -18,7 +23,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Map;
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -26,7 +30,7 @@ import java.util.Map;
  * description:
  * update record:
  */
-@Component
+@MessageEndpoint
 //@PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:jarRes.yml")
 public class MqttReceiverImpl implements MqttReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MqttReceiverImpl.class);
@@ -41,6 +45,8 @@ public class MqttReceiverImpl implements MqttReceiver {
     @Resource
     private IMqttSender iMqttSender;
 
+    @Autowired
+    private ServiceRegistry serviceRegistry;
 
     @Override
     public String receive(String topic, String payload) {
@@ -106,9 +112,23 @@ public class MqttReceiverImpl implements MqttReceiver {
 
 //        return SpringContextUtil.getServiceMap().get(topic);
         //todo
-        Map<String, String> serviceMap = SpringContextUtil.getServiceMap();
+        try {
+            String data = serviceRegistry.getData(topic);
+            if (StringUtils.isNotBlank(data)) {
+                RegisterSub sub = JSONObject.parseObject(data, RegisterSub.class);
+                if (sub!=null)
+                return sub.getExecuteUnit();
+            }
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "";
+
+        /*Map<String, String> serviceMap = SpringContextUtil.getServiceMap();
         String s = serviceMap.get(topic);
-        return s;
+        return s;*/
         //注册中心获取topic对应的jar单元
         /*if ("YYTD_MQTT_DEMO_1.0.0/sayHello".equals(topic))
             return "jar://mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/sayHello";
@@ -122,5 +142,28 @@ public class MqttReceiverImpl implements MqttReceiver {
         return "topic_ack";
     }
 
+
+
+    /*@ServiceActivator(inputChannel = CHANNEL_NAME_IN)
+    public MessageHandler handler() {
+
+        MessageHandler messageHandler = new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+//            System.out.println(message);
+                //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
+                Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
+                if (mqtt_duplicate) {
+                    logger.warn("message receive duplicate [{}]", message);
+                }
+                String topic = message.getHeaders().get("mqtt_topic").toString();
+                String result = receive(topic, message.getPayload().toString());
+                logger.info("message execute result: [{}]", result);
+            }
+        };
+        System.out.println(messageHandler.toString());
+//        messageHandler.handleMessage(MessageBuilder.withPayload("123").setHeader(MqttHeaders.TOPIC,"123").build());
+        return messageHandler;
+    }*/
 
 }

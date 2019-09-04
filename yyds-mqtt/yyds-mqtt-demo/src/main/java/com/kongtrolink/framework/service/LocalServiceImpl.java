@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.api.LocalService;
-import com.kongtrolink.framework.mqtt.entity.MqttMsg;
+import com.kongtrolink.framework.entity.MqttMsg;
 import org.springframework.stereotype.Component;
 
 /**

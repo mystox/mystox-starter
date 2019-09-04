@@ -1,16 +1,25 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.common.util.MqttUtils;
+import com.kongtrolink.framework.entity.MqttMsg;
+import com.kongtrolink.framework.entity.PayloadType;
 import com.kongtrolink.framework.entity.StateCode;
-import com.kongtrolink.framework.mqtt.entity.MqttMsg;
-import com.kongtrolink.framework.mqtt.entity.PayloadType;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.register.service.ServiceRegistry;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by mystoxlol on 2019/8/19, 8:28.
@@ -21,7 +30,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqttSenderImpl implements MqttSender {
 
-    Logger logger = LoggerFactory.getLogger(MqttHandlerImpl.class);
+    Logger logger = LoggerFactory.getLogger(MqttSenderImpl.class);
     @Value("${mqtt.producer.defaultTopic}")
     private String producerDefaultTopic;
 
@@ -43,7 +52,7 @@ public class MqttSenderImpl implements MqttSender {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
-                String topic = preconditionSend(localServerCode, operaCode);
+                String topic = MqttUtils.preconditionSubTopicId(localServerCode, operaCode);
                 //组建消息体
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
@@ -66,10 +75,44 @@ public class MqttSenderImpl implements MqttSender {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
-                String topic = preconditionSend(serverCode, operaCode);
-                mqttSender.sendToMqtt(topic, qos, payload);
+                String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+                //组建消息体
+                MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+                mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
             }
         }
+    }
+
+    @Override
+    public String sendToMqttSyn(String serverCode, String operaCode, int qos, String payload) {
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        String localServerCode = this.serverName + "_" + this.serverVersion;
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        Future<String> stringFuture = mqttSender.sendToMqttSyn(topic, qos, JSONObject.toJSONString(mqttMsg));
+        String s = null;
+        try {
+            s = stringFuture.get(30, TimeUnit.SECONDS);
+        System.out.println(s);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    @Autowired
+    MqttPahoMessageHandler messageHandler;
+ @Override
+    public String sendToMqttSyn2(String serverCode, String operaCode, int qos, String payload) {
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        String localServerCode = this.serverName + "_" + this.serverVersion;
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        return "";
     }
 
     private boolean isExistsByPubList(String serverCode, String operaCode) {
@@ -79,14 +122,25 @@ public class MqttSenderImpl implements MqttSender {
 
     }
 
+    @Autowired
+    ServiceRegistry serviceRegistry;
+
     private boolean isExistsBySubList(String serverCode, String operaCode) {
-        //todo
-        return true;
+        String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        try {
+            if(serviceRegistry.exists(topicId)){
+                return true;
+            }
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        logger.error("topicId(nodePath) [{}] didn't registered...",topicId);
+        return false;
     }
 
-    private String preconditionSend(String serverCode, String operaCode) {
-        return serverCode + "/" + operaCode;
-    }
+
 
     private MqttMsg buildMqttMsg(String topicId, String localServerCode, String payload) {
         MqttMsg mqttMsg = new MqttMsg();
@@ -96,5 +150,8 @@ public class MqttSenderImpl implements MqttSender {
         mqttMsg.setSourceAddress(localServerCode);
         return mqttMsg;
     }
+
+
+
 
 }
