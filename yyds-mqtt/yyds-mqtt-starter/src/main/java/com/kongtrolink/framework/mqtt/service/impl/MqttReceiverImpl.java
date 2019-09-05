@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.mqtt.support.MqttHeaders;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -23,6 +27,9 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_IN;
+import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_REPLY;
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -53,6 +60,11 @@ public class MqttReceiverImpl implements MqttReceiver {
         logger.info("receive... ..." + payload);
         String unit = getUnitBySubList(topic);
         String result = "";
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
             result = localExecute(unit, payload);
         } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
@@ -78,6 +90,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             Object invoke = method.invoke(bean, mqttMsg);
             String result = JSONObject.toJSONString(invoke);
             logger.info("local result: {}", result);
+            return result;
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -144,13 +157,16 @@ public class MqttReceiverImpl implements MqttReceiver {
 
 
 
-    /*@ServiceActivator(inputChannel = CHANNEL_NAME_IN)
-    public MessageHandler handler() {
 
-        MessageHandler messageHandler = new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-//            System.out.println(message);
+
+    @ServiceActivator(inputChannel = CHANNEL_NAME_IN,outputChannel = CHANNEL_REPLY)
+    public Message<String> messageReceiver(Message<?> message) {
+
+//        System.out.println(message.getPayload());
+//        MessageHandler messageHandler = new MessageHandler() {
+//            @Override
+//            public void handleMessage(Message<?> message) throws MessagingException {
+////            System.out.println(message);
                 //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
                 Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
                 if (mqtt_duplicate) {
@@ -159,11 +175,11 @@ public class MqttReceiverImpl implements MqttReceiver {
                 String topic = message.getHeaders().get("mqtt_topic").toString();
                 String result = receive(topic, message.getPayload().toString());
                 logger.info("message execute result: [{}]", result);
-            }
-        };
-        System.out.println(messageHandler.toString());
-//        messageHandler.handleMessage(MessageBuilder.withPayload("123").setHeader(MqttHeaders.TOPIC,"123").build());
-        return messageHandler;
-    }*/
+//            }
+//        };
+//        System.out.println(messageHandler.toString());
+        return MessageBuilder.withPayload(result).setHeader(MqttHeaders.TOPIC,"123").build();
+//        return messageHandler;
+    }
 
 }

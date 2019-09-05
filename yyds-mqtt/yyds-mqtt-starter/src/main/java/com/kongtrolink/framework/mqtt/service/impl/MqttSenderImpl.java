@@ -5,6 +5,7 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.MqttMsg;
 import com.kongtrolink.framework.entity.PayloadType;
 import com.kongtrolink.framework.entity.StateCode;
+import com.kongtrolink.framework.mqtt.config.MqttConfig;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -12,14 +13,16 @@ import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by mystoxlol on 2019/8/19, 8:28.
@@ -83,27 +86,54 @@ public class MqttSenderImpl implements MqttSender {
         }
     }
 
+    @Autowired
+            @Qualifier("replyProducer")
+    MessageProducer reply;
+
     @Override
     public String sendToMqttSyn(String serverCode, String operaCode, int qos, String payload) {
-        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        String localServerCode = this.serverName + "_" + this.serverVersion;
-        //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
-        Future<String> stringFuture = mqttSender.sendToMqttSyn(topic, qos, JSONObject.toJSONString(mqttMsg));
-        String s = null;
+
+
+
+
+        /*String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        sendToMqtt(serverCode, operaCode, qos, payload);
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        CallBackTopic callBackTopic = new CallBackTopic(topic,reply);
+        Future<MqttMsg> mqttMsgFuture = es.submit(callBackTopic);
         try {
-            s = stringFuture.get(30, TimeUnit.SECONDS);
-        System.out.println(s);
+            MqttMsg mqttMsg = mqttMsgFuture.get(10000, TimeUnit.MILLISECONDS);
+            System.out.println(mqttMsg);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (TimeoutException e) {
             e.printStackTrace();
-        }
-        return s;
-    }
+        }*/
 
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        String localServerCode = this.serverName + "_" + this.serverVersion;
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        Future<?> stringFuture = mqttSender.sendToMqttSyn(topic, qos, JSONObject.toJSONString(mqttMsg));
+        String s = null;
+        try {
+            Object o = stringFuture.get();
+            System.out.println(o);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        System.out.println(s);
+        return "";
+    }
+    @ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
+    public void replyReceiver(Message<?> message) {
+        System.out.println("收到回复"+message);
+
+    }
     @Autowired
     MqttPahoMessageHandler messageHandler;
  @Override

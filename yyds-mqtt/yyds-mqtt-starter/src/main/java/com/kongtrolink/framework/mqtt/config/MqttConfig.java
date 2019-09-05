@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.mqtt.config;
 
-import com.kongtrolink.framework.mqtt.service.MqttReceiver;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,10 +18,8 @@ import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 /**
  * Created by mystoxlol on 2019/8/5, 14:35.
@@ -125,11 +121,11 @@ public class MqttConfig {
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
-/*
+
     @Bean(name = CHANNEL_REPLY)
     public MessageChannel mqttReplyChannel() {
         return new DirectChannel();
-    }*/
+    }
 
     /**
      * MQTT消息处理器（生产者）
@@ -142,7 +138,7 @@ public class MqttConfig {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
                 producerClientId,
                 mqttClientFactory());
-        messageHandler.setAsync(true); //异步
+        messageHandler.setAsync(false); //异步
         messageHandler.setDefaultTopic(producerDefaultTopic);
         messageHandler.setCompletionTimeout(1000);
 
@@ -155,7 +151,7 @@ public class MqttConfig {
      *
      * @return {@link org.springframework.integration.core.MessageProducer}
      */
-    @Bean
+    @Bean("inbound")
     public MessageProducer inbound() {
         // 可以同时消费（订阅）多个Topic
         MqttPahoMessageDrivenChannelAdapter adapter =
@@ -171,6 +167,26 @@ public class MqttConfig {
     }
 
     /**
+     * MQTT消息订阅绑定（消费者）
+     *
+     * @return {@link org.springframework.integration.core.MessageProducer}
+     */
+    @Bean("replyProducer")
+    public MessageProducer reply() {
+        // 可以同时消费（订阅）多个Topic
+        MqttPahoMessageDrivenChannelAdapter adapter =
+                new MqttPahoMessageDrivenChannelAdapter(
+                        "reply", mqttClientFactory(),
+                        StringUtils.split("123", ","));
+        adapter.setCompletionTimeout(completionTimeout);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        // 设置订阅通道
+        adapter.setOutputChannel(mqttReplyChannel());
+        return adapter;
+    }
+
+    /**
      * MQTT信息通道（消费者）
      *
      * @return {@link org.springframework.messaging.MessageChannel}
@@ -180,14 +196,14 @@ public class MqttConfig {
         return new DirectChannel();
     }
 
-    @Autowired
+   /* @Autowired
     MqttReceiver mqttReceiver;
 
-    /**
+    *//**
      * MQTT消息处理器（消费者）
      *
      * @return {@link org.springframework.messaging.MessageHandler}
-     */
+     *//*
     @Bean
     @ServiceActivator(inputChannel = CHANNEL_NAME_IN)
     public MessageHandler handler() {
@@ -210,6 +226,7 @@ public class MqttConfig {
 //        messageHandler.handleMessage(MessageBuilder.withPayload("123").setHeader(MqttHeaders.TOPIC,"123").build());
         return messageHandler;
     }
+*/
 
 
 }

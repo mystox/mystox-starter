@@ -8,6 +8,7 @@ package com.kongtrolink.framework.mqtt.service;
  */
 
 import com.kongtrolink.framework.mqtt.config.MqttConfig;
+import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -57,7 +58,8 @@ public interface IMqttSender {
                     String payload);
 
 
-    Future<String> sendToMqttSyn(@Header(MqttHeaders.TOPIC) String topic,
-                         @Header(MqttHeaders.QOS) int qos,
-                         String payload);
+    @Gateway(requestChannel = MqttConfig.CHANNEL_NAME_OUT/*,replyChannel = MqttConfig.CHANNEL_REPLY,replyTimeout = 6000*/)
+    Future<?> sendToMqttSyn(@Header(MqttHeaders.TOPIC) String topic,
+                                 @Header(MqttHeaders.QOS) int qos,
+                                 String payload);
 }
