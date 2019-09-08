@@ -65,8 +65,6 @@ public class MqttSenderImpl implements MqttSender {
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
                 mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
-
-
             }
         } else {
             logger.error("message send error[{}]...", StateCode.FAILED);
@@ -152,34 +150,9 @@ public class MqttSenderImpl implements MqttSender {
         return "";
     }
 
-    /*@ServiceActivator(inputChannel = CHANNEL_REPLY)
-    public void messageReceiver1(Message<?> message) {
-        System.out.println("messageReceiver1");
-        System.out.println(message.toString());
-//        result = message.getPayload().toString();
-    }
-    @ServiceActivator(inputChannel = CHANNEL_REPLY)
-    public void messageReceiver2(Message<?> message) {
-        System.out.println("messageReceiver2");
-        System.out.println(message.toString());
-//        result = message.getPayload().toString();
-    }*/
-//    @ServiceActivator(inputChannel = MqttConfig.CHANNEL_NAME_OUT)
-//    public void replyReceiver(Message<?> message) {
-//        System.out.println("收到回复"+message);
-//
-//    }
     @Autowired
     MqttPahoMessageHandler messageHandler;
 
-    @Override
-    public String sendToMqttSyn2(String serverCode, String operaCode, int qos, String payload) {
-        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        String localServerCode = this.serverName + "_" + this.serverVersion;
-        //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
-        return "";
-    }
 
     private boolean isExistsByPubList(String serverCode, String operaCode) {
         //todo
@@ -218,8 +191,6 @@ public class MqttSenderImpl implements MqttSender {
 
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        System.out.println("CallBackTopic");
-        System.out.println(message.toString());
         String payload = message.getPayload();
         MqttResp resp = JSONObject.parseObject(payload,MqttResp.class);
         String msgId = resp.getMsgId();

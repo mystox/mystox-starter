@@ -18,7 +18,4 @@ public interface MqttSender {
     String sendToMqttSyn(String serverCode, String operaCode,
                     int qos,
                     String payload);
-    String sendToMqttSyn2(String serverCode, String operaCode,
-                    int qos,
-                    String payload);
 }
