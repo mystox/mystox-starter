@@ -28,7 +28,7 @@ public class MqttController {
     private String serverCode;
 
     @Autowired
-    MqttHandler mqttHandler;
+    MqttHandler mqttHandlerImpl;
 
 
     /**
@@ -45,10 +45,10 @@ public class MqttController {
         logger.info("往注册中心注册订阅实体,跟随注册模块的实现。。。");
         //todo
         //暂时性的内部map
-        String topic = mqttHandler.assembleSubTopic(operaCode);
+        String topic = mqttHandlerImpl.assembleSubTopic(operaCode);
         SpringContextUtil.getServiceMap().put(topic, executeUnit);
         logger.info("add sub topic[{}] to mqtt broker...",topic);
-        mqttHandler.addSubTopic(topic);
+        mqttHandlerImpl.addSubTopic(topic);
         return new JsonResult();
     }
 
@@ -96,7 +96,7 @@ public class MqttController {
         logger.info("delete topic[{}] ...",topic);
         //todo
         logger.info("从注册中心订阅表移除topic...注册模块实现...");
-        mqttHandler.removeSubTopic(topic);
+        mqttHandlerImpl.removeSubTopic(topic);
         return new JsonResult();
     }
 

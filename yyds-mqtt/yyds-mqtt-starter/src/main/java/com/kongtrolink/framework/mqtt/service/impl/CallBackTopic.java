@@ -1,11 +1,14 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
-import com.kongtrolink.framework.entity.MqttMsg;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.springframework.integration.core.MessageProducer;
-import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
+import com.kongtrolink.framework.entity.MqttResp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by mystoxlol on 2019/9/5, 8:49.
@@ -13,28 +16,48 @@ import java.util.concurrent.Callable;
  * description:
  * update record:
  */
-public class CallBackTopic implements Callable<MqttMsg> {
+public class CallBackTopic implements Callable<MqttResp> {
 
-    private String replyTopic;
+    private Logger logger = LoggerFactory.getLogger(CallBackTopic.class);
 
-    MessageProducer reply;
+    private Object lockObj = new Object();
+    private CountDownLatch latch = new CountDownLatch(1);
+    private final Lock lock = new ReentrantLock();
+    private final Condition con = lock.newCondition();
 
-    public CallBackTopic(String replyTopic, MessageProducer reply) {
-        this.replyTopic = replyTopic;
-        this.reply = reply;
+    private boolean flag = true;
+
+    private MqttResp result;
+
+    public void callback(MqttResp result) {
+        System.out.println(this.toString());
+        logger.info("jiesuo");
+        this.result = result;
+        flag = false;
+//        this.lockObj.notify();
+        latch.countDown();
+//        this.con.signal();
     }
 
     @Override
-    public MqttMsg call() throws Exception {
-        System.out.println("等待回复。。。");
-        MqttPahoMessageDrivenChannelAdapter mqttRely = (MqttPahoMessageDrivenChannelAdapter) reply;
-        String ackTopic = "123";
-        MqttMessage mqttMessage = new MqttMessage();
-        Thread.sleep(6000L);
-        mqttRely.messageArrived(ackTopic,mqttMessage);
-        System.out.println("收到消息"+mqttMessage.toString());
-        MqttMsg mqttMsg = new MqttMsg();
-        mqttMsg.setPayload(mqttMessage.toString());
-        return mqttMsg;
+    public MqttResp call() throws Exception {
+        System.out.println(this.toString());
+        logger.info("----------------加锁");
+        latch.await();
+       /* lock.lock();
+        try {
+            while(flag) {
+                System.out.println("阻塞");
+                con.await();
+            }
+
+            con.signal();
+        } finally {
+            lock.unlock();
+        }*/
+        System.out.println("-----------锁");
+        return result;
     }
+
+
 }

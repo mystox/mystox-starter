@@ -49,8 +49,8 @@ public class MqttRestController {
     @RequestMapping("/sendMsgSyn")
     public String sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        mqttSender.sendToMqttSyn(serverCode, operaCode, 2,message);
-        return "ok";
+        String s = mqttSender.sendToMqttSyn(serverCode, operaCode, 2, message);
+        return s;
     }
 
     @RequestMapping("/addTopic")

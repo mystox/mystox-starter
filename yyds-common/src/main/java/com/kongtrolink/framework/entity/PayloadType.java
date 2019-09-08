@@ -30,4 +30,9 @@ public enum  PayloadType {
                 return null;
         }
     }
+
+    public static void main(String[] args)
+    {
+        System.out.println(PayloadType.STRING.toString());
+    }
 }

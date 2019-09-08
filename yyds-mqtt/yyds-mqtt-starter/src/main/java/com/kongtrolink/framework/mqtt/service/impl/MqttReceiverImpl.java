@@ -2,6 +2,7 @@ package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MqttMsg;
+import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
@@ -29,7 +30,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_IN;
-import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_REPLY;
+import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_OUT;
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -56,15 +57,10 @@ public class MqttReceiverImpl implements MqttReceiver {
     private ServiceRegistry serviceRegistry;
 
     @Override
-    public String receive(String topic, String payload) {
+    public MqttResp receive(String topic, MqttMsg payload) {
         logger.info("receive... ..." + payload);
         String unit = getUnitBySubList(topic);
-        String result = "";
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        MqttResp result = null;
         if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
             result = localExecute(unit, payload);
         } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
@@ -78,26 +74,26 @@ public class MqttReceiverImpl implements MqttReceiver {
         return result;
     }
 
-    String localExecute(String unit, String payload) {
+    MqttResp localExecute(String unit, MqttMsg mqttMsg) {
         String[] entity = unit.replace(UnitHead.LOCAL, "").split("/");
         String className = entity[0];
         String methodName = entity[1];
         try {
             Class<?> clazz = Class.forName(className);
             Object bean = SpringContextUtil.getBean(clazz);
-            Method method = clazz.getDeclaredMethod(methodName, MqttMsg.class);
-            MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
-            Object invoke = method.invoke(bean, mqttMsg);
+            Method method = clazz.getDeclaredMethod(methodName, String.class);
+            Object invoke = method.invoke(bean, mqttMsg.getPayload());
             String result = JSONObject.toJSONString(invoke);
+            MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
             logger.info("local result: {}", result);
-            return result;
+            return resp;
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    String jarExecute(String unit, String payload) {
+    MqttResp jarExecute(String unit, MqttMsg mqttMsg) {
         String[] entity = unit.replace(UnitHead.JAR, "").split("/");
         String jarName = entity[0];
         String className = entity[1];
@@ -110,10 +106,11 @@ public class MqttReceiverImpl implements MqttReceiver {
             Thread.currentThread().setContextClassLoader(classLoader);
             Class<?> clazz = classLoader.loadClass(className);// 使用loadClass方法加载class,这个class是在urls参数指定的classpath下边。
             Method taskMethod = clazz.getMethod(methodName, String.class);
-            MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
             Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
             String result = JSONObject.toJSONString(invoke);
+            MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
             logger.info("jar result: {}", result);
+            return resp;
         } catch (MalformedURLException | InstantiationException | IllegalAccessException
                 | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
@@ -129,8 +126,8 @@ public class MqttReceiverImpl implements MqttReceiver {
             String data = serviceRegistry.getData(topic);
             if (StringUtils.isNotBlank(data)) {
                 RegisterSub sub = JSONObject.parseObject(data, RegisterSub.class);
-                if (sub!=null)
-                return sub.getExecuteUnit();
+                if (sub != null)
+                    return sub.getExecuteUnit();
             }
         } catch (KeeperException e) {
             e.printStackTrace();
@@ -156,30 +153,25 @@ public class MqttReceiverImpl implements MqttReceiver {
     }
 
 
+    @ServiceActivator(inputChannel = CHANNEL_NAME_IN, outputChannel = CHANNEL_NAME_OUT)
+    public Message<String> messageReceiver(Message<String> message) {
+        //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
+        Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
+        if (mqtt_duplicate) {
+            logger.warn("message receive duplicate [{}]", message);
+        }
+        String topic = message.getHeaders().get("mqtt_topic").toString();
 
-
-
-    @ServiceActivator(inputChannel = CHANNEL_NAME_IN,outputChannel = CHANNEL_REPLY)
-    public Message<String> messageReceiver(Message<?> message) {
-
-//        System.out.println(message.getPayload());
-//        MessageHandler messageHandler = new MessageHandler() {
-//            @Override
-//            public void handleMessage(Message<?> message) throws MessagingException {
-////            System.out.println(message);
-                //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
-                Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-                if (mqtt_duplicate) {
-                    logger.warn("message receive duplicate [{}]", message);
-                }
-                String topic = message.getHeaders().get("mqtt_topic").toString();
-                String result = receive(topic, message.getPayload().toString());
-                logger.info("message execute result: [{}]", result);
-//            }
-//        };
-//        System.out.println(messageHandler.toString());
-        return MessageBuilder.withPayload(result).setHeader(MqttHeaders.TOPIC,"123").build();
-//        return messageHandler;
+        String payload = message.getPayload();
+        MqttMsg mqttMsg = JSONObject.parseObject(payload,MqttMsg.class);
+        MqttResp result = receive(topic, mqttMsg);
+        String ackTopic = topic + "/ack";
+        result.setTopic(ackTopic);
+        logger.info("message execute result: [{}]", JSONObject.toJSONString(result));
+        return MessageBuilder
+                .withPayload(JSONObject.toJSONString(result))
+                .setHeader(MqttHeaders.TOPIC, ackTopic)
+                .build();
     }
 
 }

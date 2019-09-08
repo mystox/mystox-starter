@@ -141,8 +141,6 @@ public class MqttConfig {
         messageHandler.setAsync(false); //异步
         messageHandler.setDefaultTopic(producerDefaultTopic);
         messageHandler.setCompletionTimeout(1000);
-
-
         return messageHandler;
     }
 

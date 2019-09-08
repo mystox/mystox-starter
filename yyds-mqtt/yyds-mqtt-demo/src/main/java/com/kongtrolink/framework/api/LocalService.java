@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.api;
 
-import com.kongtrolink.framework.entity.MqttMsg;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -13,5 +12,5 @@ import com.kongtrolink.framework.stereotype.Register;
 @Register
 public interface LocalService {
     @OperaCode(code = "sayHi")
-    String hello(MqttMsg mqttMsg);
+    String hello(String param);
 }

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
@@ -20,11 +19,10 @@ import java.util.List;
  * description: 处理一些mqtt的接口操作
  * update record:
  */
-@Service
-@Primary
-public class MqttHandlerImpl implements MqttHandler {
+@Service("mqttHandlerAck")
+public class MqttHandlerAck implements MqttHandler {
 
-    Logger logger = LoggerFactory.getLogger(MqttHandlerImpl.class);
+    Logger logger = LoggerFactory.getLogger(MqttHandlerAck.class);
 
 
     @Value("${server.name}")
@@ -34,7 +32,7 @@ public class MqttHandlerImpl implements MqttHandler {
     private String serverVersion;
 
     @Autowired
-    @Qualifier("inbound")
+    @Qualifier("replyProducer")
     private MessageProducer messageProducer;
 
 
@@ -53,6 +51,7 @@ public class MqttHandlerImpl implements MqttHandler {
 
     @Override
     public void addSubTopic(String... topics) {
+        System.out.println("增加回复的topic");
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topics);
     }

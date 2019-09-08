@@ -29,5 +29,6 @@ public interface MqttHandler {
     public void addSubTopic(String... topic);
 
     public void removeSubTopic(String... topic);
+    public boolean isExists(String topic);
 
 }
