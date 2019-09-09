@@ -14,4 +14,7 @@ public interface FooService {
 
     @OperaCode
     String foo(String foo);
+
+
+
 }
