@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
+import com.kongtrolink.framework.service.MqttSender;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,6 @@ public class MqttSenderImpl implements MqttSender {
     @Autowired
     @Qualifier("mqttHandlerAck")
     MqttHandler mqttHandlerAck;
-
 
 
     @Override
@@ -101,7 +100,7 @@ public class MqttSenderImpl implements MqttSender {
                 //组建topicid
                 String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
                 String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
-                logger.debug("message [{}] send...",mqttMsgJson);
+                logger.debug("message [{}] send...", mqttMsgJson);
                 mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
                 return true;
             }
@@ -130,15 +129,15 @@ public class MqttSenderImpl implements MqttSender {
             CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
-                return new MsgResult(StateCode.SUCCESS,resp.getPayload());
+                return new MsgResult(StateCode.SUCCESS, resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
-                return new MsgResult(StateCode.FAILED,e.toString());
+                logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
+                return new MsgResult(StateCode.FAILED, e.toString());
             } finally {
                 CALLBACKS.remove(mqttMsg.getMsgId());
             }
         }
-        return new MsgResult(StateCode.FAILED,"请求失败");
+        return new MsgResult(StateCode.FAILED, "请求失败");
     }
 
     @Override
@@ -156,17 +155,21 @@ public class MqttSenderImpl implements MqttSender {
     ServiceRegistry serviceRegistry;
 
     private boolean isExistsBySubList(String serverCode, String operaCode) {
-        String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         try {
-            if (serviceRegistry.exists(topicId)) {
+            if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
+                logger.warn("server Slogin to {} jump sublist judged...", serverCode);
                 return true;
             }
+            String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+            if (!serviceRegistry.exists(topicId)) {
+                logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
+            }
+            return true;
         } catch (KeeperException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
         return false;
     }
 
@@ -190,7 +193,7 @@ public class MqttSenderImpl implements MqttSender {
         String payload = message.getPayload();
         MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
         String msgId = resp.getMsgId();
-        logger.debug("message [{}] ack is [{}]",msgId,payload);
+        logger.debug("message [{}] ack is [{}]", msgId, payload);
         CallBackTopic callBackTopic = CALLBACKS.get(msgId);
         if (callBackTopic != null) {
             callBackTopic.callback(resp);

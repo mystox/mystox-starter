@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.register.runner;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.AckEnum;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
 import com.kongtrolink.framework.stereotype.OperaCode;
@@ -26,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,22 +78,24 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
                 AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
                 boolean b = annotationMetadata.hasAnnotation(Register.class.getName());
                 if (b) {
-                    RegisterSub sub = new RegisterSub();
                     ClassMetadata classMetadata = metadataReader.getClassMetadata();
                     String className = classMetadata.getClassName();
                     Class<?> aClass = Class.forName(className);
                     Method[] methods = aClass.getMethods();
                     for (Method method : methods) {
+                        RegisterSub sub = new RegisterSub();
                         OperaCode annotation = method.getAnnotation(OperaCode.class);
                         if (annotation == null) continue;
                         String code = annotation.code();
                         if (StringUtils.isEmpty(code)) {
                             code = method.getName();
                         }
+                        Type genericReturnType = method.getGenericReturnType();
+                        sub.setAck("void".equals(genericReturnType.getTypeName()) ? AckEnum.NA : AckEnum.ACK);
                         sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName());
                         sub.setOperaCode(code);
+                        subList.add(sub);
                     }
-                    subList.add(sub);
                 }
             }
             logger.info("local scanner result: [{}]", JSONObject.toJSONString(subList));

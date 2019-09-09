@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.mqtt.service;
+package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.entity.MsgResult;
 

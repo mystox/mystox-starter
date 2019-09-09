@@ -2,11 +2,15 @@ package com.kongtrolink.framework.register.runner;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.RegisterSub;
+import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
+import com.kongtrolink.framework.service.MqttSender;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mystoxlol on 2019/8/28, 13:31.
@@ -37,6 +42,17 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${server.version}")
     private String version;
 
+    @Value("${register.url:zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183}")
+    private String registerUrl;
+
+    @Value("${register.serverName:AUTH_PLATFORM}")
+    private String registerServerName;
+    @Value("${register.version:1.0.0}")
+    private String registerServerVersion;
+
+    @Value("${spring.profiles.active:dev}")
+    private String devFlag;
+
 
     @Autowired
     ServiceRegistry serviceRegistry;
@@ -45,6 +61,13 @@ public class RegisterRunner implements ApplicationRunner {
     @Autowired
     ServiceScanner jarServiceScanner;
 
+
+    private MqttSender mqttSender;
+
+    @Autowired(required = false)
+    public void setMqttSender(MqttSender mqttSender) {
+        this.mqttSender = mqttSender;
+    }
 
     MqttHandler mqttHandler;
 
@@ -57,9 +80,10 @@ public class RegisterRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         List<RegisterSub> subList = scanSubList();
         RegisterMsg registerMsg = getRegisterMsg();
+        if (registerMsg == null)
+            System.exit(0);
         register(registerMsg, subList);
         subTopic(subList);
-//        subTopic(subList);
         logger.info("register successfully...");
     }
 
@@ -77,6 +101,7 @@ public class RegisterRunner implements ApplicationRunner {
 
     /**
      * 往注册中心注册数据
+     *
      * @param sub
      * @param serverCode
      * @throws KeeperException
@@ -111,6 +136,7 @@ public class RegisterRunner implements ApplicationRunner {
 
     /**
      * 注册中心注册节点信息
+     *
      * @param registerMsg
      * @param subList
      * @throws IOException
@@ -157,11 +183,41 @@ public class RegisterRunner implements ApplicationRunner {
         return subList;
     }
 
+    /**
+     * 通过云管注册服务获取注册中心地址
+     * @return
+     */
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
-        registerMsg.setRegisterType(RegisterType.ZOOKEEPER);
-        registerMsg.setRegisterUrl("172.16.5.26:2181,172.6.5.26:2182,172.6.5.26:2183");
+        if (!serverName.equals(registerServerName)) {
+
+            MsgResult slogin = mqttSender.sendToMqttSyn(
+                    MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
+                    "Slogin", 2, "", 30000L, TimeUnit.MILLISECONDS);
+            Integer stateCode = slogin.getStateCode();
+            if (StateCode.SUCCESS == stateCode) {
+                registerUrl = slogin.getMsg();
+                logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
+            } else {
+                logger.error("slogin failed state[{}], msg: [{}]", stateCode, slogin.getMsg());
+                if ("dev".equals(devFlag)) {
+                    logger.warn("environment ${spring.profiles.active} is dev, set registerUrl is [{}]", registerUrl);
+                } else {
+                    return null;
+                }
+            }
+        }
+        String[] split = StringUtils.split(registerUrl, "://");
+        String registerUrlHeader = split[0];
+        String registerHosts = split[1];
+        if (StringUtils.equals(RegisterType.ZOOKEEPER.toString(), registerUrlHeader.toUpperCase()))
+            registerMsg.setRegisterType(RegisterType.ZOOKEEPER);
+        if (StringUtils.equals(RegisterType.REDIS.toString(), registerUrlHeader.toUpperCase()))
+            registerMsg.setRegisterType(RegisterType.REDIS);
+
+        registerMsg.setRegisterUrl(registerHosts);
         return registerMsg;
     }
+
 
 }

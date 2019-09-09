@@ -1,4 +1,4 @@
-package com.kongtrolink.framework;
+package com.kongtrolink.framework.demo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +11,9 @@ public class ServerDemoApplicationTests {
 
 	@Test
 	public void contextLoads() {
+
+
+
 	}
 
 }

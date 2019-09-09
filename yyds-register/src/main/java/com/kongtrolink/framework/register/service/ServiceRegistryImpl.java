@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 @Service
 public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     Logger logger = LoggerFactory.getLogger(ServiceRegistryImpl.class);
+
     private CountDownLatch latch = new CountDownLatch(1);
     private static final int SESSION_TIMEOUT = 60;
     private ZooKeeper zk;
@@ -34,10 +35,6 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     RegisterRunner registerRunner;
 
 
-   /* public ServiceRegistryImpl(String zkServers) throws IOException, InterruptedException, KeeperException {
-        build(zkServers);
-    }
-*/
     public String getServiceUrl() {
         return serviceUrl;
     }
@@ -57,7 +54,6 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
 
     }
 
-
     public String create(final String path, byte data[], List<ACL> acl,
                          CreateMode createMode)
             throws KeeperException, InterruptedException {
@@ -75,21 +71,20 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
         if (zk == null) {
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this);
             latch.await();
-        }
-        else {
+        } else {
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this::process);
             latch.await();
             registerRunner.multiRegister();
         }
 
-        logger.info("connected to zookeeper "+zk.getState());
+        logger.info("connected to zookeeper " + zk.getState());
 
     }
 
     public String getData(String path) throws KeeperException, InterruptedException {
         byte[] data = zk.getData(path, true, null);
-        if (data!=null)
-        return new String(data);
+        if (data != null)
+            return new String(data);
         else return null;
     }
 
@@ -110,7 +105,6 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
         return zk.getChildren(path, true);
     }
 
-    private boolean reconnectionFlag = false;
     @Override
     public void process(WatchedEvent watchedEvent) {
         if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {

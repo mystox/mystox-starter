@@ -11,8 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class FooServiceImpl implements FooService {
     @Override
-    public String foo(String foo) {
+    public void foo(String foo) {
         System.out.println(foo);
-        return "foo";
+//        return "foo";
+    }
+
+    @Override
+    public String boo(String foo) {
+        return "boo";
     }
 }
