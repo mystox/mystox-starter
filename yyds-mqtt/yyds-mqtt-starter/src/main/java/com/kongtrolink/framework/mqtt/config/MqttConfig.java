@@ -29,7 +29,7 @@ import org.springframework.messaging.MessageHandler;
  */
 @Configuration
 @IntegrationComponentScan("com.kongtrolink.framework")
-@ComponentScan("com.kongtrolink.framework.mqtt")
+@ComponentScan("com.kongtrolink.framework")
 @PropertySource(factory = YamlPropertySourceFactory.class, value = "classpath:mqtt.yml")
 public class MqttConfig {
     private static final Logger logger = LoggerFactory.getLogger(MqttConfig.class);

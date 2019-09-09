@@ -28,5 +28,6 @@ public class MsgResult {
 
     public MsgResult(Integer stateCode, String msg) {
         this.msg = msg;
+        this.stateCode = stateCode;
     }
 }
