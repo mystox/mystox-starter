@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.entity;
 
+import java.util.Arrays;
+
 /**
  * Created by mystoxlol on 2019/9/5, 14:48.
  * company: kongtrolink
@@ -7,11 +9,12 @@ package com.kongtrolink.framework.entity;
  * update record:
  */
 public class MqttResp {
-    private String msgId;
+    private String msgId = "1"+System.currentTimeMillis();
     private String topic;
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
+    private int stateCode = StateCode.SUCCESS;
 
     public MqttResp(String msgId, String payload) {
         this.msgId = msgId;
@@ -19,6 +22,17 @@ public class MqttResp {
         this.payloadType = PayloadType.STRING;
         this.payload = payload;
         this.bytePayload = bytePayload;
+    }
+
+    public MqttResp() {
+    }
+
+    public int getStateCode() {
+        return stateCode;
+    }
+
+    public void setStateCode(int stateCode) {
+        this.stateCode = stateCode;
     }
 
     public String getMsgId() {
@@ -59,5 +73,17 @@ public class MqttResp {
 
     public void setBytePayload(byte[] bytePayload) {
         this.bytePayload = bytePayload;
+    }
+
+    @Override
+    public String toString() {
+        return "MqttResp{" +
+                "msgId='" + msgId + '\'' +
+                ", topic='" + topic + '\'' +
+                ", payloadType=" + payloadType +
+                ", payload='" + payload + '\'' +
+                ", bytePayload=" + Arrays.toString(bytePayload) +
+                ", stateCode=" + stateCode +
+                '}';
     }
 }

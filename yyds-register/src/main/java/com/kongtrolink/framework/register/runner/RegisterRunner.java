@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.RegisterSub;
+import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.entity.StateCode;
+import com.kongtrolink.framework.exception.RegisterAnalyseException;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -45,7 +47,7 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${register.url:zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183}")
     private String registerUrl;
 
-    @Value("${register.serverName:AUTH_PLATFORM}")
+    @Value("${register.serverName:" + ServerName.AUTH_PLATFORM + "}")
     private String registerServerName;
     @Value("${register.version:1.0.0}")
     private String registerServerVersion;
@@ -151,7 +153,8 @@ public class RegisterRunner implements ApplicationRunner {
             for (RegisterSub sub : subList) {
                 setDataToRegistry(sub, serverCode);
             }
-
+        } else {
+            throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
         }
     }
 
@@ -185,16 +188,16 @@ public class RegisterRunner implements ApplicationRunner {
 
     /**
      * 通过云管注册服务获取注册中心地址
+     *
      * @return
      */
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
-
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
                     "Slogin", 2, "", 30000L, TimeUnit.MILLISECONDS);
-            Integer stateCode = slogin.getStateCode();
+            int stateCode = slogin.getStateCode();
             if (StateCode.SUCCESS == stateCode) {
                 registerUrl = slogin.getMsg();
                 logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
@@ -207,7 +210,8 @@ public class RegisterRunner implements ApplicationRunner {
                 }
             }
         }
-        String[] split = StringUtils.split(registerUrl, "://");
+        logger.info("{} registerUrl is: [{}]", serverName, registerUrl);
+        String[] split = registerUrl.split("://");
         String registerUrlHeader = split[0];
         String registerHosts = split[1];
         if (StringUtils.equals(RegisterType.ZOOKEEPER.toString(), registerUrlHeader.toUpperCase()))
@@ -218,6 +222,5 @@ public class RegisterRunner implements ApplicationRunner {
         registerMsg.setRegisterUrl(registerHosts);
         return registerMsg;
     }
-
 
 }

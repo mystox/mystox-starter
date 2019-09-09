@@ -129,7 +129,7 @@ public class MqttSenderImpl implements MqttSender {
             CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
-                return new MsgResult(StateCode.SUCCESS, resp.getPayload());
+                return new MsgResult(resp.getStateCode(), resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
                 return new MsgResult(StateCode.FAILED, e.toString());
