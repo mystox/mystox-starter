@@ -165,7 +165,7 @@ public class MqttConfig {
     }
 
     /**
-     * MQTT消息订阅绑定（消费者）
+     * MQTT消息订阅回复消息
      *
      * @return {@link org.springframework.integration.core.MessageProducer}
      */
@@ -174,8 +174,8 @@ public class MqttConfig {
         // 可以同时消费（订阅）多个Topic
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(
-                        "reply", mqttClientFactory(),
-                        StringUtils.split("123", ","));
+                        producerClientId+"_reply", mqttClientFactory(),
+                        StringUtils.split("topic_ack", ","));
         adapter.setCompletionTimeout(completionTimeout);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -194,37 +194,6 @@ public class MqttConfig {
         return new DirectChannel();
     }
 
-   /* @Autowired
-    MqttReceiver mqttReceiver;
-
-    *//**
-     * MQTT消息处理器（消费者）
-     *
-     * @return {@link org.springframework.messaging.MessageHandler}
-     *//*
-    @Bean
-    @ServiceActivator(inputChannel = CHANNEL_NAME_IN)
-    public MessageHandler handler() {
-
-        MessageHandler messageHandler = new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-//            System.out.println(message);
-                //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
-                Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-                if (mqtt_duplicate) {
-                    logger.warn("message receive duplicate [{}]", message);
-                }
-                String topic = message.getHeaders().get("mqtt_topic").toString();
-                String result = mqttReceiver.receive(topic, message.getPayload().toString());
-                logger.info("message execute result: [{}]", result);
-            }
-        };
-        System.out.println(messageHandler.toString());
-//        messageHandler.handleMessage(MessageBuilder.withPayload("123").setHeader(MqttHeaders.TOPIC,"123").build());
-        return messageHandler;
-    }
-*/
 
 
 }

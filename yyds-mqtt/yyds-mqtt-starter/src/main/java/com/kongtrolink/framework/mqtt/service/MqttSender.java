@@ -1,5 +1,9 @@
 package com.kongtrolink.framework.mqtt.service;
 
+import com.kongtrolink.framework.entity.MsgResult;
+
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by mystoxlol on 2019/8/19, 8:25.
  * company: kongtrolink
@@ -15,7 +19,8 @@ public interface MqttSender {
                     int qos,
                     String payload);
 
-    String sendToMqttSyn(String serverCode, String operaCode,
-                    int qos,
-                    String payload);
+    MsgResult sendToMqttSyn(String serverCode, String operaCode,
+                            String payload);
+    MsgResult sendToMqttSyn(String serverCode, String operaCode,
+                         int qos, String payload, long timeout, TimeUnit timeUnit);
 }

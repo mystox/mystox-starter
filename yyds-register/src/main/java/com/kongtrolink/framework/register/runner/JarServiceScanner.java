@@ -42,25 +42,27 @@ public class JarServiceScanner implements ServiceScanner {
         Yaml yaml = new Yaml(dumperOptions);
         File file = FileUtils.getFile("jarResources/jarRes.yml");
         List<RegisterSub> subList = new ArrayList<>();
-        try {
-            Map load = (Map) yaml.load(new FileInputStream(file));
-            Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
-            if (!CollectionUtils.isEmpty(operaMap)) {
-                Set<Map.Entry<String, String>> entries = operaMap.entrySet();
-                for (Map.Entry<String, String> e : entries) {
-                    RegisterSub sub = new RegisterSub();
-                    String value = e.getValue();
-                    String key = e.getKey();
-                    String executeUnit = UnitHead.JAR + value;
-                    sub.setOperaCode(key);
-                    sub.setExecuteUnit(executeUnit);
-                    subList.add(sub);
+        if (file.exists()) {
+            try {
+                Map load = (Map) yaml.load(new FileInputStream(file));
+                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                if (!CollectionUtils.isEmpty(operaMap)) {
+                    Set<Map.Entry<String, String>> entries = operaMap.entrySet();
+                    for (Map.Entry<String, String> e : entries) {
+                        RegisterSub sub = new RegisterSub();
+                        String value = e.getValue();
+                        String key = e.getKey();
+                        String executeUnit = UnitHead.JAR + value;
+                        sub.setOperaCode(key);
+                        sub.setExecuteUnit(executeUnit);
+                        subList.add(sub);
+                    }
                 }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
-            logger.info("jar scanner result: [{}]", JSONObject.toJSONString(subList));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
+        logger.info("jar scanner result: [{}]", JSONObject.toJSONString(subList));
         return subList;
     }
 }

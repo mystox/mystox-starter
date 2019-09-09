@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.controller;
 
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.service.MqttHandler;
@@ -47,9 +48,9 @@ public class MqttRestController {
     }
 
     @RequestMapping("/sendMsgSyn")
-    public String sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
+    public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        String s = mqttSender.sendToMqttSyn(serverCode, operaCode, 2, message);
+        MsgResult s = mqttSender.sendToMqttSyn(serverCode, operaCode, message);
         return s;
     }
 

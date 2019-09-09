@@ -78,12 +78,13 @@ public class MqttReceiverImpl implements MqttReceiver {
         String[] entity = unit.replace(UnitHead.LOCAL, "").split("/");
         String className = entity[0];
         String methodName = entity[1];
+        String result = "";
         try {
             Class<?> clazz = Class.forName(className);
             Object bean = SpringContextUtil.getBean(clazz);
             Method method = clazz.getDeclaredMethod(methodName, String.class);
             Object invoke = method.invoke(bean, mqttMsg.getPayload());
-            String result = JSONObject.toJSONString(invoke);
+            result = invoke instanceof String ? (String) invoke : JSONObject.toJSONString(invoke);
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
             logger.info("local result: {}", result);
             return resp;
@@ -100,6 +101,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         String methodName = entity[2];
         String url = jarPath + "/" + jarName;
         File file = new File(url);
+        String result = "";
         try {
             URL fileUrl = file.toURI().toURL();
             ClassLoader classLoader = new URLClassLoader(new URL[]{fileUrl});
@@ -107,7 +109,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             Class<?> clazz = classLoader.loadClass(className);// 使用loadClass方法加载class,这个class是在urls参数指定的classpath下边。
             Method taskMethod = clazz.getMethod(methodName, String.class);
             Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
-            String result = JSONObject.toJSONString(invoke);
+            result = invoke instanceof String ? (String) invoke : JSONObject.toJSONString(invoke);
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
             logger.info("jar result: {}", result);
             return resp;
@@ -163,7 +165,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         String topic = message.getHeaders().get("mqtt_topic").toString();
 
         String payload = message.getPayload();
-        MqttMsg mqttMsg = JSONObject.parseObject(payload,MqttMsg.class);
+        MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
         MqttResp result = receive(topic, mqttMsg);
         String ackTopic = topic + "/ack";
         result.setTopic(ackTopic);

@@ -2,10 +2,7 @@ package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
-import com.kongtrolink.framework.entity.MqttMsg;
-import com.kongtrolink.framework.entity.MqttResp;
-import com.kongtrolink.framework.entity.PayloadType;
-import com.kongtrolink.framework.entity.StateCode;
+import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -17,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +46,12 @@ public class MqttSenderImpl implements MqttSender {
 
     @Autowired
     private IMqttSender mqttSender;
+    @Autowired
+    MqttHandler mqttHandler;
+    @Autowired
+    @Qualifier("mqttHandlerAck")
+    MqttHandler mqttHandlerAck;
+
 
 
     @Override
@@ -89,8 +91,8 @@ public class MqttSenderImpl implements MqttSender {
         }
     }
 
-    public void sendToMqtt(String serverCode, String operaCode,
-                           int qos, MqttMsg mqttMsg) {
+    public boolean sendToMqtt(String serverCode, String operaCode,
+                              int qos, MqttMsg mqttMsg) {
         String localServerCode = this.serverName + "_" + this.serverVersion;
         boolean existsByPubList = isExistsByPubList(localServerCode, operaCode);
         if (existsByPubList) {
@@ -98,67 +100,56 @@ public class MqttSenderImpl implements MqttSender {
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
                 String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-                mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
+                String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
+                logger.debug("message [{}] send...",mqttMsgJson);
+                mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                return true;
             }
+            return false;
         }
+        return false;
     }
 
-    @Autowired
-    MqttHandler mqttHandler;
-    @Autowired
-    @Qualifier("mqttHandlerAck")
-    MqttHandler mqttHandlerAck;
 
-//    @Autowired
-//    CallBackTopic callBackTopic;
     @Override
-    public String sendToMqttSyn(String serverCode, String operaCode, int qos, String payload) {
-
+    public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建消息体
         String topicAck = topic + "/ack";
         if (!mqttHandlerAck.isExists(topicAck))
             mqttHandlerAck.addSubTopic(topicAck);
-//        messagingTemplate.sendAndReceive()
-        String s2 = mqttHandlerAck.toString();
-
-//        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
         MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
-        sendToMqtt(serverCode, operaCode, qos, mqttMsg);
-
-        ExecutorService es = Executors.newSingleThreadExecutor();
-//        CallBackTopic callBackTopic = new CallBackTopic(topic);
-        CallBackTopic callBackTopic = new CallBackTopic();
-        FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
-        es.submit(mqttMsgFutureTask);
-        CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
-        try {
-            MqttResp resp = mqttMsgFutureTask.get(10000, TimeUnit.MILLISECONDS);
-            System.out.println("收到回调结果" + JSONObject.toJSONString(resp));
-            return resp.getPayload();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } finally {
-
+        boolean sendResult = sendToMqtt(serverCode, operaCode, qos, mqttMsg);
+        if (sendResult) {
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            CallBackTopic callBackTopic = new CallBackTopic();
+            FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
+            es.submit(mqttMsgFutureTask);
+            CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
+            try {
+                MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
+                return new MsgResult(StateCode.SUCCESS,resp.getPayload());
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+                return new MsgResult(StateCode.FAILED,e.toString());
+            } finally {
+                CALLBACKS.remove(mqttMsg.getMsgId());
+            }
         }
-        return "";
+        return new MsgResult(StateCode.FAILED,"请求失败");
     }
 
-    @Autowired
-    MqttPahoMessageHandler messageHandler;
-
+    @Override
+    public MsgResult sendToMqttSyn(String serverCode, String operaCode, String payload) {
+        return sendToMqttSyn(serverCode, operaCode, 2, payload, 30000L, TimeUnit.MILLISECONDS);
+    }
 
     private boolean isExistsByPubList(String serverCode, String operaCode) {
         //todo
         //是否已经发布
         return true;
-
     }
 
     @Autowired
@@ -189,13 +180,20 @@ public class MqttSenderImpl implements MqttSender {
         return mqttMsg;
     }
 
+    /**
+     * 回复通道
+     *
+     * @param message
+     */
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
         String payload = message.getPayload();
-        MqttResp resp = JSONObject.parseObject(payload,MqttResp.class);
+        MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
         String msgId = resp.getMsgId();
+        logger.debug("message [{}] ack is [{}]",msgId,payload);
         CallBackTopic callBackTopic = CALLBACKS.get(msgId);
-        if (callBackTopic!=null)
+        if (callBackTopic != null) {
             callBackTopic.callback(resp);
+        }
     }
 }

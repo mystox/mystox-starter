@@ -35,9 +35,6 @@ public class MqttHandlerAck implements MqttHandler {
     @Qualifier("replyProducer")
     private MessageProducer messageProducer;
 
-
-
-
     @Override
     public String assembleSubTopic(String operaCode) {
         return serverName +"_"+ serverVersion + "/" + operaCode;
@@ -45,21 +42,23 @@ public class MqttHandlerAck implements MqttHandler {
 
     @Override
     public void addSubTopic(String topic, int qos) {
+        logger.info("add topic: [{}] qos: [{}]", topic,qos);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topic, 2);
     }
 
     @Override
     public void addSubTopic(String... topics) {
-        System.out.println("增加回复的topic");
+        logger.info("add topics: {}", topics);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topics);
     }
 
     @Override
-    public void removeSubTopic(String... topic) {
+    public void removeSubTopic(String... topics) {
+        logger.info("delete topics: {}", topics);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
-        messageProducer.removeTopic(topic);
+        messageProducer.removeTopic(topics);
     }
 
     @Override

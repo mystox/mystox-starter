@@ -10,7 +10,7 @@
     <modules>
         <module>yyds-core</module>
         <module>yyds-common</module>
-        <module>yyds-minifsu-project</module>
+        <!--<module>yyds-minifsu-project</module>-->
         <module>yyds-mqtt</module>
         <module>yyds-register</module>
     </modules>
@@ -28,6 +28,7 @@
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipTest>true</skipTest>
     </properties>
     <build>
         <plugins>

@@ -14,6 +14,7 @@
     <description>注册模块</description>
     <properties>
         <java.version>1.8</java.version>
+        <skipTest>true</skipTest>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -71,6 +72,19 @@
             <version>1.2.52</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <encoding>utf-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
