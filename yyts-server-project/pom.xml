@@ -18,4 +18,27 @@
         <module>foo-server-demo</module>
     </modules>
 
+
+    <properties>
+        <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
+        <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
+        <!--解决格式提示问题-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipTest>true</skipTest>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${build.plugins.plugin.version}</version>
+                <configuration>
+                    <encoding>utf-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

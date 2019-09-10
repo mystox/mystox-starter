@@ -13,7 +13,10 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface FooService {
 
     @OperaCode
-    String foo(String foo);
+    void foo(String foo);
+
+    @OperaCode
+    String boo(String foo);
 
     @OperaCode
     void testVoid(String payload);

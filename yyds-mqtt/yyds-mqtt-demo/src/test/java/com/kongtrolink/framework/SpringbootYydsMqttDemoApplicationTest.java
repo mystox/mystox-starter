@@ -2,7 +2,7 @@ package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.mqtt.config.MqttConfig;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MqttSender;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;

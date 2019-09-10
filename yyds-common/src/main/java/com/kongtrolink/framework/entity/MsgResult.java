@@ -7,14 +7,14 @@ package com.kongtrolink.framework.entity;
  * update record:
  */
 public class MsgResult {
-    private Integer stateCode;
+    private int stateCode;
     private String msg;
 
-    public Integer getStateCode() {
+    public int getStateCode() {
         return stateCode;
     }
 
-    public void setStateCode(Integer stateCode) {
+    public void setStateCode(int stateCode) {
         this.stateCode = stateCode;
     }
 
@@ -26,7 +26,7 @@ public class MsgResult {
         this.msg = msg;
     }
 
-    public MsgResult(Integer stateCode, String msg) {
+    public MsgResult(int stateCode, String msg) {
         this.msg = msg;
         this.stateCode = stateCode;
     }
