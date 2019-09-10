@@ -15,6 +15,7 @@ public interface FooService {
     @OperaCode
     String foo(String foo);
 
-
+    @OperaCode
+    void testVoid(String payload);
 
 }

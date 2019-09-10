@@ -12,5 +12,5 @@ public interface FooPublish {
 
 
     void sendMsg(String serverCode,String operaCode,String payload);
-    MsgResult sendMesgSyn(String serverCode,String operaCode,String payload);
+    MsgResult sendMsgSyn(String serverCode,String operaCode,String payload);
 }

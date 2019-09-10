@@ -3,6 +3,7 @@ package com.kongtrolink.framework.demo.api;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by mystoxlol on 2019/9/9, 13:15.
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * description: 发送消息的demo
  * update record:
  */
+@Service
 public class FooPublishImpl implements FooPublish {
 
     @Autowired
@@ -34,7 +36,7 @@ public class FooPublishImpl implements FooPublish {
      * @return
      */
     @Override
-    public MsgResult sendMesgSyn(String serverCode, String operaCode, String payload) {
+    public MsgResult sendMsgSyn(String serverCode, String operaCode, String payload) {
         MsgResult s = mqttSender.sendToMqttSyn(serverCode, operaCode, payload);
         return s;
     }

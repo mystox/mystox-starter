@@ -76,12 +76,12 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
                 AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
                 boolean b = annotationMetadata.hasAnnotation(Register.class.getName());
                 if (b) {
-                    RegisterSub sub = new RegisterSub();
                     ClassMetadata classMetadata = metadataReader.getClassMetadata();
                     String className = classMetadata.getClassName();
                     Class<?> aClass = Class.forName(className);
                     Method[] methods = aClass.getMethods();
                     for (Method method : methods) {
+                        RegisterSub sub = new RegisterSub();
                         OperaCode annotation = method.getAnnotation(OperaCode.class);
                         if (annotation == null) continue;
                         String code = annotation.code();
@@ -90,8 +90,8 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
                         }
                         sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName());
                         sub.setOperaCode(code);
+                        subList.add(sub);
                     }
-                    subList.add(sub);
                 }
             }
             logger.info("local scanner result: [{}]", JSONObject.toJSONString(subList));
