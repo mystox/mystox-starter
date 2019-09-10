@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.register.runner;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.AckEnum;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
 import org.apache.commons.io.FileUtils;
@@ -30,7 +31,13 @@ import java.util.Set;
 public class JarServiceScanner implements ServiceScanner {
     private Logger logger = LoggerFactory.getLogger(JarServiceScanner.class);
 
-    @Value("${server.name}")
+//    @Value("${server.name}")
+//    private String serverName;
+//
+//    @Value("${server.version}")
+//    private String serverVersion;
+
+    @Value("${server.name}_${server.version}")
     private String serverCode;
 
     @Override
@@ -52,7 +59,10 @@ public class JarServiceScanner implements ServiceScanner {
                         RegisterSub sub = new RegisterSub();
                         String value = e.getValue();
                         String key = e.getKey();
-                        String executeUnit = UnitHead.JAR + value;
+                        String[] split = value.split(":");
+                        String executeUnit = UnitHead.JAR + split[0];
+                        sub.setAck(split.length > 1 && AckEnum.ACK.toString().equals(split[1]) ?
+                                AckEnum.ACK : AckEnum.NA);
                         sub.setOperaCode(key);
                         sub.setExecuteUnit(executeUnit);
                         subList.add(sub);
@@ -64,5 +74,10 @@ public class JarServiceScanner implements ServiceScanner {
         }
         logger.info("jar scanner result: [{}]", JSONObject.toJSONString(subList));
         return subList;
+    }
+
+
+    public void addRegisterSub(RegisterSub sub) {
+
     }
 }

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.register.runner;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -39,10 +40,12 @@ import java.util.concurrent.TimeUnit;
 public class RegisterRunner implements ApplicationRunner {
     private Logger logger = LoggerFactory.getLogger(RegisterRunner.class);
 
+
     @Value("${server.name}")
     private String serverName;
-    @Value("${server.version}")
-    private String version;
+
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
 
     @Value("${register.url:zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183}")
     private String registerUrl;
@@ -86,7 +89,7 @@ public class RegisterRunner implements ApplicationRunner {
             System.exit(0);
         register(registerMsg, subList);
         subTopic(subList);
-        logger.info("register successfully...");
+        logger.info("register successfully..." + serverCode);
     }
 
 
@@ -95,9 +98,8 @@ public class RegisterRunner implements ApplicationRunner {
      */
     public void multiRegister() throws InterruptedException, IOException, KeeperException {
         List<RegisterSub> subList = scanSubList();
-        String serverCode = MqttUtils.preconditionServerCode(serverName, version);
         for (RegisterSub sub : subList) {
-            setDataToRegistry(sub, serverCode);
+            setDataToRegistry(sub);
         }
     }
 
@@ -105,13 +107,12 @@ public class RegisterRunner implements ApplicationRunner {
      * 往注册中心注册数据
      *
      * @param sub
-     * @param serverCode
      * @throws KeeperException
      * @throws InterruptedException
      */
-    void setDataToRegistry(RegisterSub sub, String serverCode) throws KeeperException, InterruptedException {
+    public void setDataToRegistry(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
-        String nodePath = MqttUtils.preconditionSubTopicId(MqttUtils.preconditionServerCode(serverName, version), operaCode);
+        String nodePath = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         if (!serviceRegistry.exists("/mqtt"))
             serviceRegistry.create("/mqtt", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (!serviceRegistry.exists("/mqtt/sub"))
@@ -128,7 +129,7 @@ public class RegisterRunner implements ApplicationRunner {
     private void subTopic(List<RegisterSub> subList) {
         subList.forEach(sub -> {
             String operaCode = sub.getOperaCode();
-            String topicId = MqttUtils.preconditionSubTopicId(MqttUtils.preconditionServerCode(serverName, version), operaCode);
+            String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
             if (mqttHandler != null) {
                 mqttHandler.addSubTopic(topicId, 2);
             }
@@ -149,9 +150,8 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterType registerType = registerMsg.getRegisterType();
         if (RegisterType.ZOOKEEPER.equals(registerType)) {
             serviceRegistry.build(registerMsg.getRegisterUrl());
-            String serverCode = MqttUtils.preconditionServerCode(serverName, version);
             for (RegisterSub sub : subList) {
-                setDataToRegistry(sub, serverCode);
+                setDataToRegistry(sub);
             }
         } else {
             throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
@@ -199,7 +199,10 @@ public class RegisterRunner implements ApplicationRunner {
                     "Slogin", 2, "", 30000L, TimeUnit.MILLISECONDS);
             int stateCode = slogin.getStateCode();
             if (StateCode.SUCCESS == stateCode) {
-                registerUrl = slogin.getMsg();
+                String msg = slogin.getMsg();
+                Object parse = JSON.parse(msg);
+                if (parse instanceof JSONObject)
+                    registerUrl = ((JSONObject) parse).getString("registerUrl");
                 logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
             } else {
                 logger.error("slogin failed state[{}], msg: [{}]", stateCode, slogin.getMsg());
