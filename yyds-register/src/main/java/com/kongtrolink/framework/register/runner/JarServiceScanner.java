@@ -13,9 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +74,42 @@ public class JarServiceScanner implements ServiceScanner {
         return subList;
     }
 
-
-    public void addRegisterSub(RegisterSub sub) {
-
+    @Override
+    public boolean addSub(RegisterSub registerSub) {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        File file = FileUtils.getFile("jarResources/jarRes.yml");
+        if (file.exists()) {
+            FileOutputStream out = null;
+            OutputStreamWriter output = null;
+            try {
+                Map load = (Map) yaml.load(new FileInputStream(file));
+                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                String operaCode = registerSub.getOperaCode();
+                AckEnum ack = registerSub.getAck();
+                String executeUnit = registerSub.getExecuteUnit();
+                operaMap.put(operaCode, executeUnit + ":" + ack);
+                out = FileUtils.openOutputStream(file);
+                output = new OutputStreamWriter(out);
+                yaml.dump(load, output);
+                return true;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                try {
+                    out.close();
+                output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
+
 }

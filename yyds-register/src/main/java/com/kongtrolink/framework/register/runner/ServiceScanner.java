@@ -13,4 +13,6 @@ import java.util.List;
 public interface ServiceScanner {
     List<RegisterSub> getSubList();
 
+    boolean addSub(RegisterSub registerSub);
+
 }

@@ -47,6 +47,7 @@ public class MqttSenderImpl implements MqttSender {
     @Autowired
     private IMqttSender mqttSender;
     @Autowired
+    @Qualifier("mqttHandlerImpl")
     MqttHandler mqttHandler;
     @Autowired
     @Qualifier("mqttHandlerAck")

@@ -107,5 +107,10 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
         return subList;
     }
 
+    @Override
+    public boolean addSub(RegisterSub registerSub) {
+        return false;
+    }
+
 
 }

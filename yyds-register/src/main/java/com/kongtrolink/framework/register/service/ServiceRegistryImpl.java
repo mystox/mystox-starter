@@ -89,7 +89,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     }
 
     public Stat setData(String path, byte[] data) throws KeeperException, InterruptedException {
-        Stat stat = zk.setData(path, data, 0);
+        Stat stat = zk.setData(path, data, -1);
         logger.info(stat.toString());
         return stat;
     }

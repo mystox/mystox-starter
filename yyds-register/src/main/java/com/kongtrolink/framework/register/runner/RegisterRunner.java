@@ -20,6 +20,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -67,16 +68,17 @@ public class RegisterRunner implements ApplicationRunner {
     ServiceScanner jarServiceScanner;
 
 
-    private MqttSender mqttSender;
 
+    private MqttSender mqttSender;
     @Autowired(required = false)
     public void setMqttSender(MqttSender mqttSender) {
         this.mqttSender = mqttSender;
     }
 
-    MqttHandler mqttHandler;
 
+    MqttHandler mqttHandler;
     @Autowired(required = false)
+    @Qualifier("mqttHandlerImpl")
     public void setMqttHandler(MqttHandler mqttHandler) {
         this.mqttHandler = mqttHandler;
     }
@@ -131,6 +133,7 @@ public class RegisterRunner implements ApplicationRunner {
             String operaCode = sub.getOperaCode();
             String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
             if (mqttHandler != null) {
+                if (!mqttHandler.isExists(topicId))
                 mqttHandler.addSubTopic(topicId, 2);
             }
         });

@@ -177,7 +177,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         return MessageBuilder
                 .withPayload(JSONObject.toJSONString(result))
                 .setHeader(MqttHeaders.TOPIC, ackTopic)
-                .setHeader(MqttHeaders.QOS, 0)
+                .setHeader(MqttHeaders.QOS, 2)
                 .build();
     }
 

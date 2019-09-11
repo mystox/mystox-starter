@@ -32,7 +32,7 @@ public class MqttHandlerAck implements MqttHandler {
     private String serverVersion;
 
     @Autowired
-    @Qualifier("replyProducer")
+    @Qualifier(value = "replyProducer")
     private MessageProducer messageProducer;
 
     @Override

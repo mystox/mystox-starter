@@ -5,6 +5,7 @@ import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.service.MqttSender;
 import com.kongtrolink.framework.service.MqttHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +30,7 @@ public class MqttRestController {
     private IMqttSender iMqttSender;
 
     @Autowired
+    @Qualifier("mqttHandlerImpl")
     MqttHandler mqttHandler;
 
     @Autowired
@@ -40,6 +42,13 @@ public class MqttRestController {
         return "ok";
     }
 
+    /**
+     * 异步的mqtt消息发送者
+     * @param serverCode 目标的服务编码：serverName_serverVersion
+     * @param operaCode 操作码
+     * @param message 消息实体
+     * @return
+     */
     @RequestMapping("/sendMsg")
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
@@ -47,6 +56,13 @@ public class MqttRestController {
         return "ok";
     }
 
+    /**
+     * 同步接口发送mqtt消息处理返回值
+     * @param serverCode 目标的服务编码：serverName_serverVersion
+     * @param operaCode 操作码
+     * @param message 消息实体
+     * @return
+     */
     @RequestMapping("/sendMsgSyn")
     public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
