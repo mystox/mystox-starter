@@ -7,5 +7,5 @@ package com.kongtrolink.framework.entity;
  * update record:
  */
 public class OperaCode {
-    public final static String SLOGIN = "Slogin";
+    public final static String SLOGIN = "Slogin"; //服务注册登录
 }

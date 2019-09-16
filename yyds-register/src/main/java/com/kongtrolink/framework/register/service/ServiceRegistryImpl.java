@@ -106,6 +106,11 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     }
 
     @Override
+    public void deleteNode(String path) throws KeeperException, InterruptedException {
+        zk.delete(path,-1);
+    }
+
+    @Override
     public void process(WatchedEvent watchedEvent) {
         if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
             logger.warn("zookeeper connected successful...");

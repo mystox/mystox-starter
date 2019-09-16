@@ -29,11 +29,14 @@ import java.util.Set;
 public class JarServiceScanner implements ServiceScanner {
     private Logger logger = LoggerFactory.getLogger(JarServiceScanner.class);
 
-//    @Value("${server.name}")
+    //    @Value("${server.name}")
 //    private String serverName;
 //
 //    @Value("${server.version}")
 //    private String serverVersion;
+    @Value("${jarResources.path:./jarResources}")
+    private String jarResPath;
+
 
     @Value("${server.name}_${server.version}")
     private String serverCode;
@@ -45,7 +48,7 @@ public class JarServiceScanner implements ServiceScanner {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
-        File file = FileUtils.getFile("jarResources/jarRes.yml");
+        File file = FileUtils.getFile(jarResPath+"/jarRes.yml");
         List<RegisterSub> subList = new ArrayList<>();
         if (file.exists()) {
             try {
@@ -81,7 +84,7 @@ public class JarServiceScanner implements ServiceScanner {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
-        File file = FileUtils.getFile("jarResources/jarRes.yml");
+        File file = FileUtils.getFile(jarResPath+"/jarRes.yml");
         if (file.exists()) {
             FileOutputStream out = null;
             OutputStreamWriter output = null;
@@ -91,7 +94,7 @@ public class JarServiceScanner implements ServiceScanner {
                 String operaCode = registerSub.getOperaCode();
                 AckEnum ack = registerSub.getAck();
                 String executeUnit = registerSub.getExecuteUnit();
-                operaMap.put(operaCode, executeUnit + ":" + ack);
+                operaMap.put(operaCode, executeUnit.replace(UnitHead.JAR,"") + ":" + ack);
                 out = FileUtils.openOutputStream(file);
                 output = new OutputStreamWriter(out);
                 yaml.dump(load, output);
@@ -104,6 +107,41 @@ public class JarServiceScanner implements ServiceScanner {
                 try {
                     out.close();
                 output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteSub(String operaCode) {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        File file = FileUtils.getFile(jarResPath+"/jarRes.yml");
+        if (file.exists()) {
+            FileOutputStream out = null;
+            OutputStreamWriter output = null;
+            try {
+                Map load = (Map) yaml.load(new FileInputStream(file));
+                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                operaMap.remove(operaCode);
+                out = FileUtils.openOutputStream(file);
+                output = new OutputStreamWriter(out);
+                yaml.dump(load, output);
+                return true;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                try {
+                    out.close();
+                    output.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

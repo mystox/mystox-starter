@@ -1,4 +1,7 @@
 YYTD_MQTT_DEMO_1.0.0:
   sayHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/sayHello:ACK
   fooHi: jarName.jar/**.*.*/foo
-  addHello: jar://mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/addHello:NA
+  addHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/addHello:NA
+
+zcgl_*:
+  a: ex

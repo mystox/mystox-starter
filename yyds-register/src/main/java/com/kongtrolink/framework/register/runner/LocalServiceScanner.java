@@ -112,5 +112,10 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
         return false;
     }
 
+    @Override
+    public boolean deleteSub(String operaCode) {
+        return false;
+    }
+
 
 }

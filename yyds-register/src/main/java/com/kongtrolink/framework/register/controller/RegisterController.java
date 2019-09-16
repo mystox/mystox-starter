@@ -1,8 +1,12 @@
-package com.kongtrolink.framework.controller;
+package com.kongtrolink.framework.register.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import org.apache.zookeeper.KeeperException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +26,7 @@ import java.util.List;
 @RequestMapping("/register")
 public class RegisterController
 {
+    Logger logger = LoggerFactory.getLogger(RegisterController.class);
     ServiceRegistry serviceRegistry;
     @Autowired
     public void setZooKeeper(ServiceRegistry serviceRegistry) {
@@ -30,20 +35,23 @@ public class RegisterController
 
 
     @RequestMapping("/getZookeeper")
-    public String getZookeeper(@RequestParam(required = false) String path) {
+    public JsonResult getZookeeper(@RequestParam(required = false) String path) {
         long sessionId = serviceRegistry.getZk().getSessionId();
+
+        JSONObject result = new JSONObject();
+        result.put("zookeeperSession", sessionId);
         List<String> children = null;
         try {
-//            path = "/mqtt";
             String data = serviceRegistry.getData(path);
-            System.out.println(data);
+            logger.info("data: [{}]",data);
+            result.put("data", JSON.parse(data));
             children = serviceRegistry.getChildren(path);
-            System.out.println(children);
+            result.put("children", children);
         } catch (KeeperException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return sessionId+"："+ JSONObject.toJSONString(children);
+        return new JsonResult(result);
     }
 }

@@ -15,4 +15,5 @@ public interface ServiceScanner {
 
     boolean addSub(RegisterSub registerSub);
 
+    boolean deleteSub(String operaCode);
 }

@@ -3,10 +3,7 @@ package com.kongtrolink.framework.register.runner;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
-import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.entity.RegisterSub;
-import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.entity.StateCode;
+import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
@@ -89,9 +86,25 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterMsg registerMsg = getRegisterMsg();
         if (registerMsg == null)
             System.exit(0);
-        register(registerMsg, subList);
-        subTopic(subList);
+        register(registerMsg, subList);//注册操作码信息
+        subTopic(subList);//订阅操作码对应topic
+        registerServer(registerMsg); //注册服务信息
         logger.info("register successfully..." + serverCode);
+    }
+
+    private void registerServer(RegisterMsg registerMsg) {
+        //todo
+       /* RegisterType registerType = registerMsg.getRegisterType();
+        if (RegisterType.ZOOKEEPER.equals(registerType)) {
+            serviceRegistry.build(registerMsg.getRegisterUrl());
+            for (RegisterSub sub : subList) {
+                setDataToRegistry(sub);
+            }
+            //往服务节点注册服务信息
+
+        } else {
+            throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
+        }*/
     }
 
 
@@ -156,6 +169,8 @@ public class RegisterRunner implements ApplicationRunner {
             for (RegisterSub sub : subList) {
                 setDataToRegistry(sub);
             }
+            //往服务节点注册服务信息
+
         } else {
             throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
         }
@@ -199,7 +214,7 @@ public class RegisterRunner implements ApplicationRunner {
         if (!serverName.equals(registerServerName)) {
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
-                    "Slogin", 2, "", 30000L, TimeUnit.MILLISECONDS);
+                    OperaCode.SLOGIN, 2, "", 30000L, TimeUnit.MILLISECONDS);
             int stateCode = slogin.getStateCode();
             if (StateCode.SUCCESS == stateCode) {
                 String msg = slogin.getMsg();
@@ -229,4 +244,18 @@ public class RegisterRunner implements ApplicationRunner {
         return registerMsg;
     }
 
+
+    public static void main(String[] args)
+    {
+
+        ServerDetail serverDetail = new ServerDetail();
+        serverDetail.setHost("127.0.0.1");
+        serverDetail.setRouteMark("proxy_ap");
+        serverDetail.setServerCode(ServerName.AUTH_PLATFORM);
+        serverDetail.setWebPort("8081");
+        serverDetail.setPageMark("proxy_ap");
+        serverDetail.setServerVersion("*");
+        serverDetail.setServerName("云管平台");
+        System.out.println(JSONObject.toJSONString(serverDetail));
+    }
 }
