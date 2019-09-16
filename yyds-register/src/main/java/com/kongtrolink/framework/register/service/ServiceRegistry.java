@@ -34,4 +34,6 @@ public interface ServiceRegistry {
     public void close() throws InterruptedException;
 
     List<String> getChildren(String path) throws KeeperException, InterruptedException;
+
+    void deleteNode(String path) throws KeeperException, InterruptedException;
 }

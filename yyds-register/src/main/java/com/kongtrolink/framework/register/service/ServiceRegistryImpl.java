@@ -89,7 +89,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     }
 
     public Stat setData(String path, byte[] data) throws KeeperException, InterruptedException {
-        Stat stat = zk.setData(path, data, 0);
+        Stat stat = zk.setData(path, data, -1);
         logger.info(stat.toString());
         return stat;
     }
@@ -103,6 +103,11 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     @Override
     public List<String> getChildren(String path) throws KeeperException, InterruptedException {
         return zk.getChildren(path, true);
+    }
+
+    @Override
+    public void deleteNode(String path) throws KeeperException, InterruptedException {
+        zk.delete(path,-1);
     }
 
     @Override

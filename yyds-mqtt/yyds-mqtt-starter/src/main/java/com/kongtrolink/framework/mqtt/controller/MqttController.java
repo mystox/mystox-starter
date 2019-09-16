@@ -2,8 +2,7 @@ package com.kongtrolink.framework.mqtt.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
-import com.kongtrolink.framework.service.MqttHandler;
+import com.kongtrolink.framework.mqtt.service.MqttRestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,35 +24,23 @@ public class MqttController {
     private static final Logger logger = LoggerFactory.getLogger(MqttController.class);
 
 
-    private String serverCode;
-
     @Autowired
-    MqttHandler mqttHandlerImpl;
-
+    MqttRestService mqttRestService;
 
     /**
      * 注册订阅表
+     *
      * @return
      */
     @RequestMapping("/registerSub")
-    public JsonResult registerSub(@RequestBody String body) {
-        logger.info("register sub msg" + body);
-        JSONObject subJson = JSONObject.parseObject(body);
-//        String serverCode = subJson.getString("serverCode");
-        String operaCode = subJson.getString("operaCode");
-        String executeUnit = subJson.getString("executeUnit");
-        logger.info("往注册中心注册订阅实体,跟随注册模块的实现。。。");
-        //todo
-        //暂时性的内部map
-        String topic = mqttHandlerImpl.assembleSubTopic(operaCode);
-        SpringContextUtil.getServiceMap().put(topic, executeUnit);
-        logger.info("add sub topic[{}] to mqtt broker...",topic);
-        mqttHandlerImpl.addSubTopic(topic);
-        return new JsonResult();
+    public JsonResult registerSub(@RequestBody JSONObject subJson) {
+        logger.info("register sub msg" + subJson);
+       return mqttRestService.registerSub(subJson);
     }
 
     /**
      * 注册请求表
+     *
      * @return
      */
     @RequestMapping("/registerPub")
@@ -68,17 +55,17 @@ public class MqttController {
 
     /**
      * 更新订阅表
+     *
      * @return
      */
     @RequestMapping("/updateSub")
-    public JsonResult updateSub() {
-
-        //todo
-        return new JsonResult();
+    public JsonResult updateSub(@RequestBody JSONObject body) {
+        return registerSub(body);
     }
 
     /**
      * 更新请求表
+     *
      * @return
      */
     @RequestMapping("/updatePub")
@@ -89,25 +76,24 @@ public class MqttController {
 
     /**
      * 删除订阅表
+     *
      * @return
      */
     @RequestMapping("/deleteSub")
-    public JsonResult deleteSub(@RequestParam String topic) {
-        logger.info("delete topic[{}] ...",topic);
-        //todo
-        logger.info("从注册中心订阅表移除topic...注册模块实现...");
-        mqttHandlerImpl.removeSubTopic(topic);
-        return new JsonResult();
+    public JsonResult deleteSub(@RequestBody JSONObject body) {
+        logger.info("delete body[{}] ...", body);
+        return mqttRestService.deleteSub(body);
     }
 
     /**
      * 删除请求表
+     *
      * @return
      */
     @RequestMapping("/deletePub")
     public JsonResult deletePub(@RequestParam String topic) {
         //todo
-        logger.info("delete topic[{}] ...",topic);
+        logger.info("delete topic[{}] ...", topic);
         //todo
         logger.info("从注册中心订阅表移除topic...注册模块实现...");
         return new JsonResult();

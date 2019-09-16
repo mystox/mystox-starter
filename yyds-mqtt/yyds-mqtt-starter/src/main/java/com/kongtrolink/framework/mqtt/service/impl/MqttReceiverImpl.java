@@ -1,10 +1,7 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.entity.MqttMsg;
-import com.kongtrolink.framework.entity.MqttResp;
-import com.kongtrolink.framework.entity.RegisterSub;
-import com.kongtrolink.framework.entity.UnitHead;
+import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
@@ -61,12 +58,19 @@ public class MqttReceiverImpl implements MqttReceiver {
         logger.info("receive... ..." + payload);
         String unit = getUnitBySubList(topic);
         MqttResp result = null;
-        if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
-            result = localExecute(unit, payload);
-        } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
-            result = jarExecute(unit, payload);
-        } else if (unit.startsWith(UnitHead.HTTP)) {
-            //todo 执行远程的http服务器
+        try {
+            if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
+                result = localExecute(unit, payload);
+            } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
+                result = jarExecute(unit, payload);
+            } else if (unit.startsWith(UnitHead.HTTP)) {
+                //todo 执行远程的http服务器
+            }
+        } catch (Exception e) {
+            logger.error("msg execute error: [{}]",payload.getMsgId(),e.toString());
+            result = new MqttResp(payload.getMsgId(), e.toString());
+            result.setStateCode(StateCode.FAILED);
+            e.printStackTrace();
         }
        /* String topic_ack = getAcyBySubList();
         if (StringUtils.isNotBlank(topic_ack))
@@ -173,7 +177,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         return MessageBuilder
                 .withPayload(JSONObject.toJSONString(result))
                 .setHeader(MqttHeaders.TOPIC, ackTopic)
-                .setHeader(MqttHeaders.QOS, 0)
+                .setHeader(MqttHeaders.QOS, 2)
                 .build();
     }
 

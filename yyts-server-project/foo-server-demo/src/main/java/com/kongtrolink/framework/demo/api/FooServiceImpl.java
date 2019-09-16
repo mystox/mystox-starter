@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.demo.api;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by mystoxlol on 2019/9/9, 13:03.
@@ -8,12 +8,11 @@ import org.springframework.stereotype.Component;
  * description:
  * update record:
  */
-@Component
+@Service
 public class FooServiceImpl implements FooService {
     @Override
     public void foo(String foo) {
         System.out.println(foo);
-//        return "foo";
     }
 
     @Override

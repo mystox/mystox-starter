@@ -12,12 +12,10 @@ import com.kongtrolink.framework.stereotype.Register;
 @Register
 public interface FooService {
 
-    @OperaCode
+    @OperaCode(code = "fooo")
     void foo(String foo);
 
     @OperaCode
-    String boo(String foo);
-
-
+    String boo(String boo);
 
 }

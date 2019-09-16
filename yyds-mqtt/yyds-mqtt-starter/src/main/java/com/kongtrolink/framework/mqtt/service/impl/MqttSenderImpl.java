@@ -47,6 +47,7 @@ public class MqttSenderImpl implements MqttSender {
     @Autowired
     private IMqttSender mqttSender;
     @Autowired
+    @Qualifier("mqttHandlerImpl")
     MqttHandler mqttHandler;
     @Autowired
     @Qualifier("mqttHandlerAck")
@@ -66,6 +67,8 @@ public class MqttSenderImpl implements MqttSender {
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
                 mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
             }
         } else {
             logger.error("message send error[{}]...", StateCode.FAILED);
@@ -86,7 +89,11 @@ public class MqttSenderImpl implements MqttSender {
                 //组建消息体
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
             }
+        } else {
+            logger.error("message send error[{}]...", StateCode.FAILED);
         }
     }
 
@@ -103,9 +110,12 @@ public class MqttSenderImpl implements MqttSender {
                 logger.debug("message [{}] send...", mqttMsgJson);
                 mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
                 return true;
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
+                return false;
             }
-            return false;
         }
+        logger.error("message send error[{}]...", StateCode.FAILED);
         return false;
     }
 
@@ -129,7 +139,7 @@ public class MqttSenderImpl implements MqttSender {
             CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
-                return new MsgResult(StateCode.SUCCESS, resp.getPayload());
+                return new MsgResult(resp.getStateCode(), resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
                 return new MsgResult(StateCode.FAILED, e.toString());
@@ -163,6 +173,7 @@ public class MqttSenderImpl implements MqttSender {
             String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
             if (!serviceRegistry.exists(topicId)) {
                 logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
+                return false;
             }
             return true;
         } catch (KeeperException e) {
