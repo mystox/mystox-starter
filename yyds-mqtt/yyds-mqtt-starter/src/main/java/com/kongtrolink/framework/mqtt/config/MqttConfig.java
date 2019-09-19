@@ -170,7 +170,7 @@ public class MqttConfig {
      * @return {@link org.springframework.integration.core.MessageProducer}
      */
     @Bean("replyProducer")
-    public MessageProducer reply() {
+    public MessageProducer replyProducer() {
         // 可以同时消费（订阅）多个Topic
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(

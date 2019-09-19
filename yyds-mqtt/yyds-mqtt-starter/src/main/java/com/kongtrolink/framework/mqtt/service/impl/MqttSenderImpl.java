@@ -44,9 +44,12 @@ public class MqttSenderImpl implements MqttSender {
     @Value("${server.version}")
     private String serverVersion;
 
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
     @Autowired
     private IMqttSender mqttSender;
     @Autowired
+    @Qualifier("mqttHandlerImpl")
     MqttHandler mqttHandler;
     @Autowired
     @Qualifier("mqttHandlerAck")
@@ -66,6 +69,8 @@ public class MqttSenderImpl implements MqttSender {
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
                 mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
             }
         } else {
             logger.error("message send error[{}]...", StateCode.FAILED);
@@ -86,26 +91,34 @@ public class MqttSenderImpl implements MqttSender {
                 //组建消息体
                 MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
                 mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
             }
+        } else {
+            logger.error("message send error[{}]...", StateCode.FAILED);
         }
     }
 
     public boolean sendToMqtt(String serverCode, String operaCode,
                               int qos, MqttMsg mqttMsg) {
-        String localServerCode = this.serverName + "_" + this.serverVersion;
-        boolean existsByPubList = isExistsByPubList(localServerCode, operaCode);
+//        String localServerCode = this.serverName + "_" + this.serverVersion;
+        boolean existsByPubList = isExistsByPubList(this.serverCode, operaCode);
         if (existsByPubList) {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
                 String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+                mqttMsg.setOperaCode(operaCode);
                 String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
                 logger.debug("message [{}] send...", mqttMsgJson);
                 mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
                 return true;
+            } else {
+                logger.error("message send error[{}]...", StateCode.FAILED);
+                return false;
             }
-            return false;
         }
+        logger.error("message send error[{}]...", StateCode.FAILED);
         return false;
     }
 
@@ -113,13 +126,13 @@ public class MqttSenderImpl implements MqttSender {
     @Override
     public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        String localServerCode = this.serverName + "_" + this.serverVersion;
+//        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建消息体
-        String topicAck = topic + "/ack";
+        String topicAck = MqttUtils.preconditionSubTopicId(this.serverCode, operaCode) + "/ack";
         if (!mqttHandlerAck.isExists(topicAck))
             mqttHandlerAck.addSubTopic(topicAck);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload);
         boolean sendResult = sendToMqtt(serverCode, operaCode, qos, mqttMsg);
         if (sendResult) {
             ExecutorService es = Executors.newSingleThreadExecutor();
@@ -129,7 +142,7 @@ public class MqttSenderImpl implements MqttSender {
             CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
-                return new MsgResult(StateCode.SUCCESS, resp.getPayload());
+                return new MsgResult(resp.getStateCode(), resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
                 return new MsgResult(StateCode.FAILED, e.toString());
@@ -163,6 +176,7 @@ public class MqttSenderImpl implements MqttSender {
             String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
             if (!serviceRegistry.exists(topicId)) {
                 logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
+                return false;
             }
             return true;
         } catch (KeeperException e) {
@@ -197,6 +211,8 @@ public class MqttSenderImpl implements MqttSender {
         CallBackTopic callBackTopic = CALLBACKS.get(msgId);
         if (callBackTopic != null) {
             callBackTopic.callback(resp);
+        } else {
+            logger.warn("message [{}] ack [{}] is Invalidation...");
         }
     }
 }

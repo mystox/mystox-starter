@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
@@ -20,18 +19,13 @@ import java.util.List;
  * description: 处理一些mqtt的接口操作
  * update record:
  */
-@Service
-@Primary
+@Service(value = "mqttHandlerImpl")
 public class MqttHandlerImpl implements MqttHandler {
 
     Logger logger = LoggerFactory.getLogger(MqttHandlerImpl.class);
 
-
-    @Value("${server.name}")
-    private String serverName;
-
-    @Value("${server.version}")
-    private String serverVersion;
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
 
     @Autowired
     @Qualifier("inbound")
@@ -42,7 +36,7 @@ public class MqttHandlerImpl implements MqttHandler {
 
     @Override
     public String assembleSubTopic(String operaCode) {
-        return serverName +"_"+ serverVersion + "/" + operaCode;
+        return serverCode + "/" + operaCode;
     }
 
     @Override
