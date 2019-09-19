@@ -24,4 +24,12 @@ public interface DBService {
     boolean deleteCITypeConnectionRelationship(JSONObject jsonObject);
 
     JSONArray searchCITypeConnectionRelationship(JSONObject jsonObject);
+
+    boolean addCIProp(JSONObject jsonObject);
+
+    boolean deleteCIProp(JSONObject jsonObject);
+
+    boolean modifyCIProp(JSONObject jsonObject);
+
+    JSONObject searchCIProp(JSONObject jsonObject);
 }
