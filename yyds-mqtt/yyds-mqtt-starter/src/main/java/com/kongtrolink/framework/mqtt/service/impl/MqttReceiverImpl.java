@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
@@ -171,7 +172,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         String payload = message.getPayload();
         MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
         MqttResp result = receive(topic, mqttMsg);
-        String ackTopic = topic + "/ack";
+        String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
         result.setTopic(ackTopic);
         logger.info("message execute result: [{}]", JSONObject.toJSONString(result));
         return MessageBuilder

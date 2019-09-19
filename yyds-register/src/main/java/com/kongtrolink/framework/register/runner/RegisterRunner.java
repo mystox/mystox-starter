@@ -42,6 +42,9 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${server.name}")
     private String serverName;
 
+    @Value("${server.version}")
+    private String serverVersion;
+
     @Value("${server.name}_${server.version}")
     private String serverCode;
 
@@ -212,9 +215,13 @@ public class RegisterRunner implements ApplicationRunner {
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
+            JSONObject server = new JSONObject();
+            server.put("serverName", serverName);
+            server.put("serverVersion", serverVersion);
+            String sLoginPayload = server.toJSONString();
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
-                    OperaCode.SLOGIN, 2, "", 30000L, TimeUnit.MILLISECONDS);
+                    OperaCode.SLOGIN, 2, sLoginPayload, 30000L, TimeUnit.MILLISECONDS);
             int stateCode = slogin.getStateCode();
             if (StateCode.SUCCESS == stateCode) {
                 String msg = slogin.getMsg();
@@ -244,18 +251,4 @@ public class RegisterRunner implements ApplicationRunner {
         return registerMsg;
     }
 
-
-    public static void main(String[] args)
-    {
-
-        ServerDetail serverDetail = new ServerDetail();
-        serverDetail.setHost("127.0.0.1");
-        serverDetail.setRouteMark("proxy_ap");
-        serverDetail.setServerCode(ServerName.AUTH_PLATFORM);
-        serverDetail.setWebPort("8081");
-        serverDetail.setPageMark("proxy_ap");
-        serverDetail.setServerVersion("*");
-        serverDetail.setServerName("云管平台");
-        System.out.println(JSONObject.toJSONString(serverDetail));
-    }
 }

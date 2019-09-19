@@ -32,8 +32,8 @@ mvn install:install-file -DgeneratePom=true -DgroupId=com.kongtrolink.framework 
 ###########消息框架相关配置#############
 server:
   name: FOO_SERVER_DEMO #服务编码
-  version: 1.0.0 #服务版本
-  port: 52002 #服务占用web端口
+  version: 1.0.0 #服务版本,可以扩展为 * app
+  port: 52002 #服务占用web端口 占用拦截{/mqtt/*,/register*}
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
@@ -161,8 +161,6 @@ public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam Stri
 消息发送者载入MqttSender即可实现消息的同步和异步发送，参数分别为：serverCode（目标的服务编码），operaCode(操作码)，message（发送的消息实体，默认为String）
 
 ---
-如有疑问和功能上的需求和完善，直接联系@mystox
-- e-mail: mystox@163.com
 
 
 

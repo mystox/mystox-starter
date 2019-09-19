@@ -44,6 +44,8 @@ public class MqttSenderImpl implements MqttSender {
     @Value("${server.version}")
     private String serverVersion;
 
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
     @Autowired
     private IMqttSender mqttSender;
     @Autowired
@@ -99,13 +101,14 @@ public class MqttSenderImpl implements MqttSender {
 
     public boolean sendToMqtt(String serverCode, String operaCode,
                               int qos, MqttMsg mqttMsg) {
-        String localServerCode = this.serverName + "_" + this.serverVersion;
-        boolean existsByPubList = isExistsByPubList(localServerCode, operaCode);
+//        String localServerCode = this.serverName + "_" + this.serverVersion;
+        boolean existsByPubList = isExistsByPubList(this.serverCode, operaCode);
         if (existsByPubList) {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 //组建topicid
                 String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+                mqttMsg.setOperaCode(operaCode);
                 String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
                 logger.debug("message [{}] send...", mqttMsgJson);
                 mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
@@ -123,13 +126,13 @@ public class MqttSenderImpl implements MqttSender {
     @Override
     public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        String localServerCode = this.serverName + "_" + this.serverVersion;
+//        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建消息体
-        String topicAck = topic + "/ack";
+        String topicAck = MqttUtils.preconditionSubTopicId(this.serverCode, operaCode) + "/ack";
         if (!mqttHandlerAck.isExists(topicAck))
             mqttHandlerAck.addSubTopic(topicAck);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload);
         boolean sendResult = sendToMqtt(serverCode, operaCode, qos, mqttMsg);
         if (sendResult) {
             ExecutorService es = Executors.newSingleThreadExecutor();
@@ -208,6 +211,8 @@ public class MqttSenderImpl implements MqttSender {
         CallBackTopic callBackTopic = CALLBACKS.get(msgId);
         if (callBackTopic != null) {
             callBackTopic.callback(resp);
+        } else {
+            logger.warn("message [{}] ack [{}] is Invalidation...");
         }
     }
 }

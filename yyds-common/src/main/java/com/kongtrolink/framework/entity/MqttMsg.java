@@ -12,12 +12,20 @@ import java.util.UUID;
 public class MqttMsg {
     private String msgId = UUID.randomUUID().toString();
     private String topic;
+    private String operaCode;
     private String sourceAddress; //消息源地址，一般为生产消息的服务code serverName+"_"+serverVersion
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
 
 
+    public String getOperaCode() {
+        return operaCode;
+    }
+
+    public void setOperaCode(String operaCode) {
+        this.operaCode = operaCode;
+    }
 
     public String getSourceAddress() {
         return sourceAddress;

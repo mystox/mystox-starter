@@ -16,7 +16,6 @@
 
     <modules>
         <module>foo-server-demo</module>
-        <module>demo-test</module>
     </modules>
 
 
