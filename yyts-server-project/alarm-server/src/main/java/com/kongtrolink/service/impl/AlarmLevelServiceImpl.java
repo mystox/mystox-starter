@@ -1,11 +1,14 @@
 package com.kongtrolink.service.impl;
 
-import com.kongtrolink.base.StringUtil;
+import com.kongtrolink.base.Contant;
 import com.kongtrolink.dao.AlarmLevelDao;
 import com.kongtrolink.enttiy.AlarmLevel;
-import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.enttiy.EnterpriseLevel;
 import com.kongtrolink.query.AlarmLevelQuery;
+import com.kongtrolink.query.EnterpriseLevelQuery;
 import com.kongtrolink.service.AlarmLevelService;
+import com.kongtrolink.service.EnterpriseLevelService;
+import org.omg.IOP.ENCODING_CDR_ENCAPS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -19,6 +22,8 @@ import java.util.List;
 public class AlarmLevelServiceImpl implements AlarmLevelService {
     @Autowired
     AlarmLevelDao alarmLevelDao;
+    @Autowired
+    EnterpriseLevelService enterpriseLevelService;
 
     @Override
     public void save(AlarmLevel alarmLevel) {
@@ -46,50 +51,48 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
     }
 
     @Override
-    public List<AlarmLevel> getBySourceLevel(String sourceLevel) {
-        return alarmLevelDao.getBySourceLevel(sourceLevel);
+    public AlarmLevel getOne(AlarmLevelQuery alarmLevelQuery) {
+        return alarmLevelDao.getOne(alarmLevelQuery);
     }
 
     @Override
-    public String checkRepeatSource(AlarmLevel alarmLevel) {
-        List<String> sourceLevelList = alarmLevel.getSourceLevelList();
-        StringBuilder stringBuilder = new StringBuilder();
-        for(String sourceLevel : sourceLevelList){
-            List<AlarmLevel> bySourceLevel = getBySourceLevel(sourceLevel);
-            for(AlarmLevel dbAlarmLevel : bySourceLevel){
-                if(!dbAlarmLevel.getId().equals(alarmLevel.getId())){
-                    stringBuilder.append(sourceLevel).append(",");
-                }
-            }
+    public boolean isRepeat(AlarmLevel alarmLevel) {
+        AlarmLevelQuery levelQuery = AlarmLevelQuery.entity2Query(alarmLevel);
+        AlarmLevel one = getOne(levelQuery);
+        if(null == one){
+            return false;
         }
-        String repeatStr = stringBuilder.toString();
-        if(!StringUtil.isNUll(repeatStr)){
-            repeatStr = repeatStr.substring(0, repeatStr.lastIndexOf(","));
-            return repeatStr;
+        if(one.getId().equals(alarmLevel.getId())){
+            return false;
         }
-        return null;
+        return true;
     }
 
     /**
-     * @param uniqueCode
-     * @param sourceLevel
+     * @param levelQuery
      * @auther: liudd
-     * @date: 2019/9/16 16:53
-     * 功能描述:根据告警原等级，获取告警自定义等级
+     * @date: 2019/9/21 9:59
+     * 功能描述：根据uniqueCode， service，deviceType， sourceLevel获取告警等级
+     * 如果没有，则使用该系统默认告警点等级
+     * 并将新告警等级和告警颜色等存入告警
      */
     @Override
-    public String getTargetLevel(String uniqueCode, String sourceLevel) {
-        List<AlarmLevel> targetAlarmLevelList = alarmLevelDao.getTargetLevel(uniqueCode, sourceLevel);
-        if(targetAlarmLevelList.size() == 1){
-            return targetAlarmLevelList.get(0).getTargetLevel();
-        }
-        if(targetAlarmLevelList.size() > 1){
-            for(AlarmLevel alarmLevel : targetAlarmLevelList){
-                if(!StringUtil.isNUll(alarmLevel.getUniqueCode())){
-                    return alarmLevel.getTargetLevel();
-                }
+    public AlarmLevel getAlarmLevel(AlarmLevelQuery levelQuery) {
+        AlarmLevel one = getOne(levelQuery);
+        if(null == one) {
+            //没有找到匹配的等级自定义，使用系统默认等级
+            EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
+            enterpriseLevelQuery.setUniqueCode(levelQuery.getUniqueCode());
+            enterpriseLevelQuery.setService(levelQuery.getService());
+            enterpriseLevelQuery.setDefaultLevel(Contant.YES);
+            EnterpriseLevel enterpriseLevel = enterpriseLevelService.getOne(enterpriseLevelQuery);
+            if (null != enterpriseLevel) {
+                one = new AlarmLevel();
+                one.setSourceLevel(levelQuery.getSourceLevel());
+                one.setTargetLevel(enterpriseLevel.getLevel());
+                one.setColor(enterpriseLevel.getColor());
             }
         }
-        return null;
+        return one;
     }
 }

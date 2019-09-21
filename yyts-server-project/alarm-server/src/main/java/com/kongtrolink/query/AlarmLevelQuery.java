@@ -1,7 +1,9 @@
 package com.kongtrolink.query;
 
 import com.kongtrolink.base.Paging;
+import com.kongtrolink.enttiy.AlarmLevel;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,8 +15,84 @@ public class AlarmLevelQuery extends Paging {
 
     private String id;                 //id
     private String uniqueCode;      //所属企业
-    private List<String> sourceLevelList;    //原等级列表字符串（2,3,5...）
+    private String service;
+    private String deviceType;
+    private String deviceName;
+    private String sourceLevel;     //源等级
     private String targetLevel;    //目标等级
+    private String color;           //目标等级对应的颜色
+    private Date beginTime;
+    private Date endTime;
+
+    public static AlarmLevelQuery entity2Query(AlarmLevel alarmLevel){
+        if(null == alarmLevel){
+            return null;
+        }
+        AlarmLevelQuery levelQuery = new AlarmLevelQuery();
+        levelQuery.setUniqueCode(alarmLevel.getUniqueCode());
+        levelQuery.setService(alarmLevel.getService());
+        levelQuery.setDeviceType(alarmLevel.getDeviceType());
+        levelQuery.setDeviceName(alarmLevel.getDeviceName());
+        levelQuery.setSourceLevel(alarmLevel.getSourceLevel());
+        levelQuery.setTargetLevel(alarmLevel.getTargetLevel());
+        return levelQuery;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getSourceLevel() {
+        return sourceLevel;
+    }
+
+    public void setSourceLevel(String sourceLevel) {
+        this.sourceLevel = sourceLevel;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public Date getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
 
     public String getId() {
         return id;
@@ -30,14 +108,6 @@ public class AlarmLevelQuery extends Paging {
 
     public void setUniqueCode(String uniqueCode) {
         this.uniqueCode = uniqueCode;
-    }
-
-    public List<String> getSourceLevelList() {
-        return sourceLevelList;
-    }
-
-    public void setSourceLevelList(List<String> sourceLevelList) {
-        this.sourceLevelList = sourceLevelList;
     }
 
     public String getTargetLevel() {
