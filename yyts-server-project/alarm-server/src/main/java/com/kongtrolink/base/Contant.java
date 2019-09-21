@@ -23,5 +23,14 @@ public class Contant {
     public static String YES = "是";
     public static String NO = "否";
 
+    public static String TREPORT = "tReport";
+    public static String TRECOVER = "tRecover";
+
+    public static String USEING = "启用";
+    public static String FORBIT = "禁用";
+    public static String DELETED = "已删除";
+
+    public static String UNDERLINE = "_";
+
 
 }

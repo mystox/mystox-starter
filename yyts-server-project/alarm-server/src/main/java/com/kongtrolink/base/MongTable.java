@@ -12,4 +12,5 @@ public class MongTable {
     public static final String ALARM_LEVEL = "alarm_level";             //企业等级和设备信号源等级对应表
     public static final String ALARM = "alarm";
     public static final String ALARM_HISTORY = "alarm_history";
+    public static final String ALARM_CYCLE = "alarm_cycle";
 }
