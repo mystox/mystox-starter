@@ -15,6 +15,27 @@ public class MqttResp {
     private String payload;
     private byte[] bytePayload;
     private int stateCode = StateCode.SUCCESS;
+    private boolean subpackage = false;
+    private int packageCount;//分包总数
+    private int packageNum;//分包编号
+
+
+    public MqttResp(String msgId, byte[] bytePayload, boolean subpackage, int packageNum,int packageCount) {
+        this.msgId = msgId;
+        this.topic = topic;
+        this.payloadType = PayloadType.BYTE;
+        this.bytePayload = bytePayload;
+        this.packageNum = packageNum;
+        this.subpackage = subpackage;
+        this.packageCount = packageCount;
+    }
+
+    public MqttResp(String msgId, byte[] bytePayload) {
+        this.msgId = msgId;
+        this.topic = topic;
+        this.payloadType = PayloadType.BYTE;
+        this.bytePayload = bytePayload;
+    }
 
     public MqttResp(String msgId, String payload) {
         this.msgId = msgId;
@@ -25,6 +46,30 @@ public class MqttResp {
     }
 
     public MqttResp() {
+    }
+
+    public int getPackageCount() {
+        return packageCount;
+    }
+
+    public void setPackageCount(int packageCount) {
+        this.packageCount = packageCount;
+    }
+
+    public int getPackageNum() {
+        return packageNum;
+    }
+
+    public void setPackageNum(int packageNum) {
+        this.packageNum = packageNum;
+    }
+
+    public boolean isSubpackage() {
+        return subpackage;
+    }
+
+    public void setSubpackage(boolean subpackage) {
+        this.subpackage = subpackage;
     }
 
     public int getStateCode() {
