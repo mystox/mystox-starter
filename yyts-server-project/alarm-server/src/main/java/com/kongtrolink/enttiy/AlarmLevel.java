@@ -14,10 +14,55 @@ public class AlarmLevel {
 
     private String id;                      //id
     private String uniqueCode;              //所属企业
-    private List<String> sourceLevelList;   //原等级列表字符串（12345），不添加“，”号等分隔符
+    private String service;                 //服务
+    private String deviceName;              //设备类型名称
+    private String deviceType;              //设备型号
+//    private List<String> sourceLevelList;   //原等级列表字符串（12345），不添加“，”号等分隔符
+    private String sourceLevel;             //源等级
     private String targetLevel;             //目标等级，一条自定义只包含一个目标等级，否则不好判定目标等级重复定义
-    private Date tCreate;                   //创建时间
+    private String color;                   //告警颜色，在确定目标等级时，确定颜色
+    private Date updateTime;                   //创建时间
     private FacadeView creator;             //创建者
+
+    public String getSourceLevel() {
+        return sourceLevel;
+    }
+
+    public void setSourceLevel(String sourceLevel) {
+        this.sourceLevel = sourceLevel;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public String getId() {
         return id;
@@ -35,12 +80,12 @@ public class AlarmLevel {
         this.uniqueCode = uniqueCode;
     }
 
-    public Date gettCreate() {
-        return tCreate;
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
-    public void settCreate(Date tCreate) {
-        this.tCreate = tCreate;
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 
     public FacadeView getCreator() {
@@ -49,14 +94,6 @@ public class AlarmLevel {
 
     public void setCreator(FacadeView creator) {
         this.creator = creator;
-    }
-
-    public List<String> getSourceLevelList() {
-        return sourceLevelList;
-    }
-
-    public void setSourceLevelList(List<String> sourceLevelList) {
-        this.sourceLevelList = sourceLevelList;
     }
 
     public String getTargetLevel() {

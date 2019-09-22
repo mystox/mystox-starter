@@ -16,6 +16,7 @@
 
     <modules>
         <module>foo-server-demo</module>
+        <module>asset-management-server</module>
     </modules>
 
 

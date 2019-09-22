@@ -1,0 +1,63 @@
+package com.kongtrolink.controller;
+
+import com.kongtrolink.base.Contant;
+import com.kongtrolink.enttiy.AlarmCycle;
+import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.query.AlarmCycleQuery;
+import com.kongtrolink.service.AlarmCycleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.List;
+
+/**
+ * @Auther: liudd
+ * @Date: 2019/9/21 11:17
+ * @Description:
+ */
+@Controller
+@RequestMapping("/alarmCycleController")
+public class AlarmCycleController {
+
+    @Autowired
+    AlarmCycleService cycleService;
+
+    @RequestMapping("/add")
+    @ResponseBody
+    public JsonResult add(AlarmCycle alarmCycle){
+        cycleService.save(alarmCycle);
+        return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
+    }
+
+    @RequestMapping("/delete")
+    @ResponseBody
+    public JsonResult delete(AlarmCycleQuery cycleQuery){
+        boolean delete = cycleService.delete(cycleQuery.getId());
+        if(delete){
+            return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, true);
+        }
+        return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, false);
+    }
+
+    @RequestMapping("/update")
+    @ResponseBody
+    public JsonResult update(AlarmCycle alarmCycle){
+        //liuddtodo 可能需要判定重复
+        boolean update = cycleService.update(alarmCycle);
+        if(update){
+            return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
+        }
+        return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_FAIL, false);
+    }
+
+    @RequestMapping("/list")
+    @ResponseBody
+    public JsonResult list(AlarmCycleQuery alarmCycleQuery){
+        List<AlarmCycle> list = cycleService.list(alarmCycleQuery);
+        int count = cycleService.count(alarmCycleQuery);
+        ListResult<AlarmCycle> listResult = new ListResult<>(list, count);
+        return new JsonResult(listResult);
+    }
+}

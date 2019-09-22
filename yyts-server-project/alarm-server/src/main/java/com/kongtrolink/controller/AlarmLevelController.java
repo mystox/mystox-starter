@@ -1,6 +1,5 @@
 package com.kongtrolink.controller;
 
-import com.kongtrolink.base.StringUtil;
 import com.kongtrolink.enttiy.AlarmLevel;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
@@ -27,10 +26,9 @@ public class AlarmLevelController {
     @RequestMapping("add")
     @ResponseBody
     public JsonResult add(AlarmLevel alarmLevel){
-        String repeatStr = levelService.checkRepeatSource(alarmLevel);
-        if(!StringUtil.isNUll(repeatStr)){
-            repeatStr = "原告警等级 " + repeatStr + " 已存在自定义";
-            return new JsonResult(repeatStr, false);
+        boolean repeat = levelService.isRepeat(alarmLevel);
+        if(repeat){
+            return new JsonResult("告警等级已定义!", false);
         }
         levelService.save(alarmLevel);
         return new JsonResult("添加成功", true);
@@ -49,10 +47,9 @@ public class AlarmLevelController {
     @RequestMapping("update")
     @ResponseBody
     public JsonResult update(AlarmLevel alarmLevel){
-        String repeatStr = levelService.checkRepeatSource(alarmLevel);
-        if(!StringUtil.isNUll(repeatStr)){
-            repeatStr = "原告警等级 " + repeatStr + " 已存在自定义";
-            return new JsonResult(repeatStr, false);
+        boolean repeat = levelService.isRepeat(alarmLevel);
+        if(repeat){
+            return new JsonResult("告警等级已定义!", false);
         }
         boolean update = levelService.update(alarmLevel);
         if(update){
