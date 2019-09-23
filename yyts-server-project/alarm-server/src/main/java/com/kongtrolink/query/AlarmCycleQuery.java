@@ -20,6 +20,15 @@ public class AlarmCycleQuery extends Paging{
     private FacadeView creator;
     private Date beginTime;
     private Date endTime;
+    private String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
 
     public String getUniqueCode() {
         return uniqueCode;

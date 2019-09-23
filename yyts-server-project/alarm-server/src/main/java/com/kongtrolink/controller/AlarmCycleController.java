@@ -16,6 +16,7 @@ import java.util.List;
  * @Auther: liudd
  * @Date: 2019/9/21 11:17
  * @Description:
+ * 如果没有启用的自定义周期，默认已消除告警为历史告警
  */
 @Controller
 @RequestMapping("/alarmCycleController")
@@ -44,7 +45,6 @@ public class AlarmCycleController {
     @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(AlarmCycle alarmCycle){
-        //liuddtodo 可能需要判定重复
         boolean update = cycleService.update(alarmCycle);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -59,5 +59,16 @@ public class AlarmCycleController {
         int count = cycleService.count(alarmCycleQuery);
         ListResult<AlarmCycle> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
+    }
+
+    @RequestMapping("/updateState")
+    @ResponseBody
+    public JsonResult updateState(AlarmCycleQuery cycleQuery){
+        boolean result = cycleService.updateState(cycleQuery);
+        String state = cycleQuery.getState();
+        if(result){
+            return new JsonResult(state + Contant.RESULT_SUC, true);
+        }
+        return new JsonResult(state + Contant.RESULT_FAIL, true);
     }
 }

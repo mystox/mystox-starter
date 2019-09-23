@@ -5,6 +5,7 @@ import com.kongtrolink.base.MongTable;
 import com.kongtrolink.base.StringUtil;
 import com.kongtrolink.enttiy.AlarmCycle;
 import com.kongtrolink.query.AlarmCycleQuery;
+import com.kongtrolink.query.AlarmLevelQuery;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,10 @@ public class AlarmCycleDao {
     public boolean delete(String alarmCycleCycleId) {
         Criteria criteria = Criteria.where("_id").is(alarmCycleCycleId);
         Query query = Query.query(criteria);
-        DeleteResult remove = mongoTemplate.remove(query, table);
-        return remove.getDeletedCount()>0 ? true : false;
+        Update update = new Update();
+        update.set("state", Contant.DELETED);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, table);
+        return updateResult.getModifiedCount()>0 ? true : false;
     }
 
     public boolean update(AlarmCycle alarmCycle) {
@@ -106,5 +109,15 @@ public class AlarmCycleDao {
         baseCriteria(criteria, alarmCycleQuery);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, AlarmCycle.class, table);
+    }
+
+    public boolean updateState(AlarmCycleQuery cycleQuery) {
+        Criteria criteria = new Criteria();
+        baseCriteria(criteria, cycleQuery);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", cycleQuery.getState());
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, table);
+        return updateResult.getModifiedCount()>0 ? true : false;
     }
 }

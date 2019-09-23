@@ -2,6 +2,7 @@ package com.kongtrolink.service;
 
 import com.kongtrolink.enttiy.AlarmCycle;
 import com.kongtrolink.query.AlarmCycleQuery;
+import com.kongtrolink.query.AlarmLevelQuery;
 
 import java.util.List;
 import java.util.Map;
@@ -26,4 +27,6 @@ public interface AlarmCycleService {
     AlarmCycle getOne(AlarmCycleQuery alarmCycleQuery);
 
     Map<String, AlarmCycle> entity2CodeSerrviceMap(List<AlarmCycle> alarmCycleList);
+
+    boolean updateState(AlarmCycleQuery cycleQuery);
 }

@@ -25,6 +25,8 @@ public class Contant {
 
     public static String TREPORT = "tReport";
     public static String TRECOVER = "tRecover";
+    public static String TREPORT_NAME = "上报时间";
+    public static String TRECOVER_NAME = "消除时间";
 
     public static String USEING = "启用";
     public static String FORBIT = "禁用";
