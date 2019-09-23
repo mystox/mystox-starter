@@ -7,6 +7,7 @@ import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
@@ -15,9 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -26,9 +25,11 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_IN;
-import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_OUT;
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -41,7 +42,7 @@ import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_NAME_OUT;
 public class MqttReceiverImpl implements MqttReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MqttReceiverImpl.class);
 
-
+    private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小
     @Value("${jarResources.path:./jarResources}")
     private String jarPath;
 
@@ -56,7 +57,7 @@ public class MqttReceiverImpl implements MqttReceiver {
 
     @Override
     public MqttResp receive(String topic, MqttMsg payload) {
-        logger.info("receive... ..." + payload);
+        logger.info("receive... ..." + JSONObject.toJSONString(payload));
         String unit = getUnitBySubList(topic);
         MqttResp result = null;
         try {
@@ -68,7 +69,7 @@ public class MqttReceiverImpl implements MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            logger.error("msg execute error: [{}]",payload.getMsgId(),e.toString());
+            logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
             result = new MqttResp(payload.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
@@ -91,7 +92,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             Object invoke = method.invoke(bean, mqttMsg.getPayload());
             result = invoke instanceof String ? (String) invoke : JSONObject.toJSONString(invoke);
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
-            logger.info("local result: {}", result);
+//            logger.info("local result: {}", result);
             return resp;
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
@@ -160,26 +161,63 @@ public class MqttReceiverImpl implements MqttReceiver {
     }
 
 
-    @ServiceActivator(inputChannel = CHANNEL_NAME_IN, outputChannel = CHANNEL_NAME_OUT)
-    public Message<String> messageReceiver(Message<String> message) {
+    @ServiceActivator(inputChannel = CHANNEL_NAME_IN/*, outputChannel = CHANNEL_NAME_OUT*/)
+    public void messageReceiver(Message<String> message) {
         //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
         Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
         if (mqtt_duplicate) {
             logger.warn("message receive duplicate [{}]", message);
         }
         String topic = message.getHeaders().get("mqtt_topic").toString();
-
         String payload = message.getPayload();
         MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
         MqttResp result = receive(topic, mqttMsg);
         String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
         result.setTopic(ackTopic);
-        logger.info("message execute result: [{}]", JSONObject.toJSONString(result));
-        return MessageBuilder
-                .withPayload(JSONObject.toJSONString(result))
-                .setHeader(MqttHeaders.TOPIC, ackTopic)
-                .setHeader(MqttHeaders.QOS, 2)
-                .build();
+        String ackPayload = JSONObject.toJSONString(result);
+        logger.info("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
+
+        int length = ackPayload.getBytes(Charset.forName("utf-8")).length;
+        if (length > MQTT_PAYLOAD_LIMIT) {
+            //分包
+            List<MqttResp> resultArr = subpackage(result);
+            logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
+            int size = resultArr.size();
+            for (int i = 0; i < size; i++) {
+                MqttResp resp = resultArr.get(i);
+                iMqttSender.sendToMqtt(ackTopic, 2, JSONObject.toJSONString(resp));
+            }
+//            MqttResp resp = resultArr.get(size - 1);
+//            result.setSubpackage(true);
+            //最后一包直接返回
+//            return MessageBuilder
+//                    .withPayload(JSONObject.toJSONString(resp))
+//                    .setHeader(MqttHeaders.TOPIC, ackTopic)
+//                    .setHeader(MqttHeaders.QOS, 2)
+//                    .build();
+
+        } else
+            iMqttSender.sendToMqtt(ackTopic, 2, ackPayload);
+    }
+
+    /**
+     * 分包
+     *
+     * @param ackPayload
+     * @return
+     */
+    private List<MqttResp> subpackage(MqttResp ackPayload) {
+        List<MqttResp> result = new ArrayList<>();
+        String payload = ackPayload.getPayload();
+        byte[] bytes = payload.getBytes(Charset.forName("utf-8"));
+        int length = bytes.length;
+        int count = length / MQTT_PAYLOAD_LIMIT + 1;
+        for (int i = 0; i < count; i++) {
+            byte[] subarray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
+            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count);
+            result.add(resp);
+        }
+        return result;
     }
 
 }

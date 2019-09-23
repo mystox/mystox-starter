@@ -170,9 +170,9 @@ public class RegisterRunner implements ApplicationRunner {
         if (RegisterType.ZOOKEEPER.equals(registerType)) {
             serviceRegistry.build(registerMsg.getRegisterUrl());
             for (RegisterSub sub : subList) {
+            //往服务节点注册服务信息
                 setDataToRegistry(sub);
             }
-            //往服务节点注册服务信息
 
         } else {
             throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
