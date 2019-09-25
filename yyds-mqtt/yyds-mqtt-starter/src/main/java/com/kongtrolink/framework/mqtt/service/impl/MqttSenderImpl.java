@@ -114,11 +114,11 @@ public class MqttSenderImpl implements MqttSender {
                 mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
                 return true;
             } else {
-                logger.error("message send error[{}]...", StateCode.FAILED);
+                logger.error("message send error[{}]...", StateCode.UNREGISTY);
                 return false;
             }
         }
-        logger.error("message send error[{}]...", StateCode.FAILED);
+        logger.error("message send error[{}]...", StateCode.UNREGISTY);
         return false;
     }
 
@@ -145,7 +145,7 @@ public class MqttSenderImpl implements MqttSender {
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
-                return new MsgResult(StateCode.FAILED, e.toString());
+                return new MsgResult(StateCode.TIMEOUT, e.toString());
             } finally {
                 CALLBACKS.remove(mqttMsg.getMsgId());
             }
