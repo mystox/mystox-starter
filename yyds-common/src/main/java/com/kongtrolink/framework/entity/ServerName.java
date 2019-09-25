@@ -8,4 +8,5 @@ package com.kongtrolink.framework.entity;
  */
 public class ServerName {
     public final static String AUTH_PLATFORM = "AUTH_PLATFORM";
+    public final static String ALARM_SERVER = "ALARM_SERVER";       //告警服务
 }
