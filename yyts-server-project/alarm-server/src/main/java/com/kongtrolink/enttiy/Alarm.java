@@ -1,6 +1,7 @@
 package com.kongtrolink.enttiy;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -9,20 +10,65 @@ import java.util.Date;
  */
 public class Alarm {
 
-    private int id;
+    private String id;
+    private String uniqueCode;
+    private String service;
     private String name;        //告警名称
     private float value;        //告警值
     private String level;       //告警等级
     private Date tReport;       //上报时间
     private Date tRecover;      //消除时间
-    private int deviceId;       //设备对应的编码，需要与资产管理对应
+    private String deviceId;    //设备对应的编码，需要与资产管理对应
+    private String state;
+    private String cycleId;     //告警周期id
+    private Map<String, String> AuxilaryMap;
 
-    public int getId() {
+    public Map<String, String> getAuxilaryMap() {
+        return AuxilaryMap;
+    }
+
+    public void setAuxilaryMap(Map<String, String> auxilaryMap) {
+        AuxilaryMap = auxilaryMap;
+    }
+
+    public String getCycleId() {
+        return cycleId;
+    }
+
+    public void setCycleId(String cycleId) {
+        this.cycleId = cycleId;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUniqueCode() {
+        return uniqueCode;
+    }
+
+    public void setUniqueCode(String uniqueCode) {
+        this.uniqueCode = uniqueCode;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getName() {
@@ -65,11 +111,15 @@ public class Alarm {
         this.tRecover = tRecover;
     }
 
-    public int getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getUniqueService(){
+        return this.uniqueCode + this.service;
     }
 }

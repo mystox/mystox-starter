@@ -15,11 +15,20 @@ public class AlarmCycleQuery extends Paging{
     private String id;
     private String uniqueCode;
     private String service;
-    private String propertyStr;
+//    private String propertyStr;
     private Integer diffTime;
     private FacadeView creator;
     private Date beginTime;
     private Date endTime;
+    private String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
 
     public String getUniqueCode() {
         return uniqueCode;
@@ -45,13 +54,13 @@ public class AlarmCycleQuery extends Paging{
         this.service = service;
     }
 
-    public String getPropertyStr() {
-        return propertyStr;
-    }
-
-    public void setPropertyStr(String propertyStr) {
-        this.propertyStr = propertyStr;
-    }
+//    public String getPropertyStr() {
+//        return propertyStr;
+//    }
+//
+//    public void setPropertyStr(String propertyStr) {
+//        this.propertyStr = propertyStr;
+//    }
 
     public Integer getDiffTime() {
         return diffTime;

@@ -1,5 +1,6 @@
 package com.kongtrolink.enttiy;
 
+import com.kongtrolink.base.Contant;
 import com.kongtrolink.base.FacadeView;
 
 import java.util.Date;
@@ -14,11 +15,10 @@ public class AlarmCycle {
     private String id;
     private String uniqueCode;
     private String service;
-    private String propertyStr;
-    private Integer diffTime;
+    private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
     private Date updateTime;
     private FacadeView creator;
-    private String state;
+    private String state = Contant.FORBIT;
 
     public String getState() {
         return state;
@@ -52,14 +52,6 @@ public class AlarmCycle {
         this.service = service;
     }
 
-    public String getPropertyStr() {
-        return propertyStr;
-    }
-
-    public void setPropertyStr(String propertyStr) {
-        this.propertyStr = propertyStr;
-    }
-
     public Integer getDiffTime() {
         return diffTime;
     }
@@ -82,5 +74,29 @@ public class AlarmCycle {
 
     public void setCreator(FacadeView creator) {
         this.creator = creator;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/23 14:42
+     * 功能描述:判断告警是否已经成为历史告警
+     * 当前只支持上报时间和消除时间两个字段
+     */
+    public boolean isHistory(Alarm alarm, Date curDate){
+        if(null == alarm){
+            return false;
+        }
+        if(diffTime < 0){
+            if(null != alarm.gettRecover()){
+                return true;
+            }
+            return false;
+        }
+        Date tReport = alarm.gettReport();
+        long time = curDate.getTime() - tReport.getTime();
+        if(time >= (diffTime * 60 * 1000)){
+            return true;
+        }
+        return false;
     }
 }

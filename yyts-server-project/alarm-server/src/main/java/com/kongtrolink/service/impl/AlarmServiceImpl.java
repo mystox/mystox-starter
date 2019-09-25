@@ -20,62 +20,79 @@ public class AlarmServiceImpl implements AlarmService{
     @Autowired
     AlarmDao alarmDao;
 
+
     /**
      * @param alarm
+     * @param table
      * @auther: liudd
      * @date: 2019/9/11 14:48
      * 功能描述:保存告警
      */
     @Override
-    public void save(Alarm alarm) {
+    public void save(Alarm alarm, String table) {
+        alarmDao.save(alarm, table);
+    }
 
+    @Override
+    public boolean delete(String alarmId, String table) {
+        return alarmDao.delete(alarmId, table);
+    }
+
+    @Override
+    public boolean update(Alarm alarm, String table) {
+        return alarmDao.update(alarm, table);
     }
 
     /**
      * @param alarmQuery
+     * @param table
      * @auther: liudd
      * @date: 2019/9/11 14:48
      * 功能描述:列表
      */
     @Override
-    public List<Alarm> list(AlarmQuery alarmQuery) {
-        return null;
+    public List<Alarm> list(AlarmQuery alarmQuery, String table) {
+        return alarmDao.list(alarmQuery, table);
     }
 
     /**
      * @param alarmQuery
+     * @param table
      * @auther: liudd
      * @date: 2019/9/11 14:48
      * 功能描述:统计
      */
     @Override
-    public int count(AlarmQuery alarmQuery) {
-        return 0;
+    public int count(AlarmQuery alarmQuery, String table) {
+        return alarmDao.count(alarmQuery, table);
     }
 
     /**
      * @param alarmQuery
+     * @param table
      * @auther: liudd
-     * @date: 2019/9/11 14:48
-     * 功能描述:初始化查询条件
+     * @date: 2019/9/24 9:08
+     * 功能描述:批量删除
      */
     @Override
-    public void initQuery(AlarmQuery alarmQuery) {
-
+    public int deleteList(AlarmQuery alarmQuery, String table) {
+        return alarmDao.deleteList(alarmQuery, table);
     }
 
     @Override
-    public void saveRemove(Alarm alarm) {
-
+    public void addList(List<Alarm> alarmList, String table) {
+        alarmDao.addList(alarmList, table);
     }
 
+    /**
+     * @param alarm
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/24 11:10
+     * 功能描述:修改告警属性，包括附属属性
+     */
     @Override
-    public List<Alarm> listRemove(AlarmQuery alarmQuery) {
-        return null;
-    }
-
-    @Override
-    public int countRemove(AlarmQuery alarmQuery) {
-        return 0;
+    public boolean updateProperties(Alarm alarm, String table) {
+        return alarmDao.updateProperties(alarm, table);
     }
 }

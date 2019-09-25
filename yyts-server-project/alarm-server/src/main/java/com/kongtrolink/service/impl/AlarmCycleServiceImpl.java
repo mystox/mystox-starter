@@ -7,7 +7,6 @@ import com.kongtrolink.query.AlarmCycleQuery;
 import com.kongtrolink.service.AlarmCycleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,5 +62,23 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
             map.put(alarmCycle.getUniqueCode() + Contant.UNDERLINE + alarmCycle.getService(), alarmCycle);
         }
         return map;
+    }
+
+    @Override
+    public boolean updateState(AlarmCycleQuery cycleQuery) {
+        //如果是禁用，直接禁用；如果是启用，需要先禁用当前启用的规则
+        String state = cycleQuery.getState();
+        if(Contant.FORBIT.equals(state)){
+            cycleDao.updateState(cycleQuery);
+        }
+        String sourceId = cycleQuery.getId();
+        cycleQuery.setId(null);
+        cycleQuery.setState(Contant.FORBIT);
+        cycleDao.updateState(cycleQuery);
+        //启用新规则
+        cycleQuery.setId(sourceId);
+        cycleQuery.setState(Contant.USEING);
+        boolean result = cycleDao.updateState(cycleQuery);
+        return result;
     }
 }

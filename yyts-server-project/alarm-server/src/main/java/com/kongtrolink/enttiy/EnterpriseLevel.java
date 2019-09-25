@@ -15,9 +15,18 @@ public class EnterpriseLevel {
     private String uniqueCode;
     private String service;
     private String level;
+    private String levelName;
     private String color;
     private Date updateTime;
     private String defaultLevel = Contant.NO;       //默认告警等级
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
 
     public String getDefaultLevel() {
         return defaultLevel;

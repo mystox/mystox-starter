@@ -69,4 +69,17 @@ public class DeviceTypeLevelController {
         ListResult<DeviceTypeLevel> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/25 14:03
+     * 功能描述:获取设备信号信息
+     * 参数：uniqueCode, service
+     */
+    @RequestMapping("/getDeviceTypeList")
+    @ResponseBody
+    public JsonResult getDeviceTypeList(DeviceTypeLevelQuery deviceTypeLevelQuery){
+
+        return new JsonResult();
+    }
 }

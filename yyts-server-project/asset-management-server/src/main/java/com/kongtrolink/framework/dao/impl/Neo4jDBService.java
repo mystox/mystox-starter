@@ -471,12 +471,12 @@ public class Neo4jDBService implements DBService {
             try (Session session = driver.session()) {
                 try (Transaction transaction = session.beginTransaction()) {
 
-                    String name1 = jsonObject.getString("name1");
-                    String name2 = jsonObject.getString("name2");
+                    String name1 = jsonObject.getString("parent");
+                    String name2 = jsonObject.getString("child");
 
                     String cmd = "match (item1:" + Neo4jDBNodeType.CIType + " {name:{Name1}, level: 3}), " +
                             "(item2:" + Neo4jDBNodeType.CIType + " {name:{Name2}, level: 3}), " +
-                            "(item1)-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(item2) " +
+                            "(item1)-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + "]->(item2) " +
                             "return r";
 
                     StatementResult statementResult = transaction.run(cmd,
@@ -752,7 +752,470 @@ public class Neo4jDBService implements DBService {
         return result;
     }
 
+    /**
+     * 新增CI信息
+     * @param jsonObject CI信息
+     * @return 新增结果
+     */
+    @Override
+    public boolean addCI(JSONObject jsonObject) {
 
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String name = jsonObject.getString("type");
+                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3})<-[*1..3]-" +
+                            "(parent:" + Neo4jDBNodeType.CIType + ") return item, parent";
+                    StatementResult statementResult = transaction.run(cmd, Values.parameters("Name", name));
+                    List<Record> recordList = statementResult.list();
+
+                    String code1 = "", code2 = "", code3 = "";
+                    for (Record record:recordList) {
+                        for (org.neo4j.driver.v1.Value value:record.values()) {
+                            int level = value.get("level").asInt();
+                            switch (level) {
+                                case 1:
+                                    code1 = value.get("code").asString();
+                                    break;
+                                case 2:
+                                    code2 = value.get("code").asString();
+                                    break;
+                                case 3:
+                                    code3 = value.get("code").asString();
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (code1.equals("") || code2.equals("") || code3.equals("")) {
+                        return false;
+                    }
+
+                    cmd = "match (type:"+ Neo4jDBNodeType.CIType + " {name:{Name}, level:3}), " +
+                            "(prop:" + Neo4jDBNodeType.CIProp + " {businessCode:''}) " +
+                            "where (prop)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(type) " +
+                            "return prop";
+                    statementResult = transaction.run(cmd, Values.parameters("Name", name));
+                    recordList = statementResult.list();
+                    if (recordList.size() != 1) {
+                        return false;
+                    }
+
+                    JSONObject prop = getCIProp(recordList.get(0));
+                    JSONArray nameArray = prop.getJSONArray("name");
+                    JSONArray typeArray = prop.getJSONArray("type");
+                    String propStr = "";
+                    for (int i = 0; i < nameArray.size(); ++i) {
+                        String propName = nameArray.getString(i);
+                        String propType = typeArray.getString(i);
+
+                        if (jsonObject.containsKey(propName)) {
+                            if (propType.equals("string")) {
+                                propStr += "," + propName + ":'" + jsonObject.getString(propName) + "'";
+                            } else if (propType.equals("number")) {
+                                propStr += "," + propName + ":" + jsonObject.getInteger(propName);
+                            } else if (propType.equals("bool")) {
+                                propStr += "," + propName + ":" + jsonObject.getBoolean(propName);
+                            }
+                        }
+                    }
+
+                    String ciTypeCode = Neo4jUtils.getCITypeCode(code1, code2, code3);
+                    String sn = jsonObject.getString("sn");
+                    int enterpriseCode = jsonObject.getInteger("enterpriseCode");
+                    int serverCode = jsonObject.getInteger("serverCode");
+
+                    String ciId = Neo4jUtils.getCIId(ciTypeCode, sn, enterpriseCode, serverCode);
+                    cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "})";
+                    statementResult = transaction.run(cmd, Values.parameters("Id", ciId));
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().nodesCreated() == 1) {
+                        transaction.success();
+                        result = true;
+                    } else {
+                        transaction.failure();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
+
+    /**
+     * 删除CI信息
+     * @param jsonObject CI信息
+     * @return 删除结果
+     */
+    @Override
+    public boolean deleteCI(JSONObject jsonObject) {
+
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String id = jsonObject.getString("id");
+                    String cmd = "match (:" + Neo4jDBNodeType.CI + " {id:{Id}})" +
+                            "<-[:" + Neo4jDBRelationshipType.ATTACH + "]-(attach:" + Neo4jDBNodeType.CI + ") " +
+                            "detach delete attach";
+                    StatementResult statementResult = transaction.run(cmd, Values.parameters("Id", id));
+
+                    cmd = "match (ci:" + Neo4jDBNodeType.CI + " {id:{Id}}) " +
+                            "where not ()<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(ci) " +
+                            "detach delete ci";
+                    statementResult = transaction.run(cmd, Values.parameters("Id", id));
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().nodesDeleted() > 0) {
+                        transaction.success();
+                        result = true;
+                    } else {
+                        transaction.failure();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
+
+    /**
+     * 修改CI信息
+     * @param jsonObject CI信息
+     * @return 修改结果
+     */
+    @Override
+    public boolean modifyCI(JSONObject jsonObject) {
+
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String id = jsonObject.getString("id");
+                    String typeCode = Neo4jUtils.getTypeCode(id);
+                    String businessCode = Neo4jUtils.getBusinessCode(id);
+
+                    JSONObject basicProp = null, extProp = null;
+
+                    String cmd = "match (prop:" + Neo4jDBNodeType.CIProp + ")-[:" + Neo4jDBRelationshipType.ATTACH +" ]->" +
+                            "(:" + Neo4jDBNodeType.CIType + " {code:'" + typeCode + "'}) " +
+                            "where prop.businessCode = '' or prop.businessCode = '" + businessCode + "' return prop";
+                    StatementResult statementResult = transaction.run(cmd);
+                    List<Record> recordList = statementResult.list();
+
+                    for (Record record:recordList) {
+                        JSONObject prop = getCIProp(record);
+                        if (prop.containsKey("businessCode")) {
+                            extProp = prop;
+                        } else {
+                            basicProp = prop;
+                        }
+                    }
+
+                    if (basicProp != null) {
+
+                        JSONArray nameArray = basicProp.getJSONArray("name");
+                        JSONArray typeArray = basicProp.getJSONArray("type");
+                        String propStr = "";
+                        int count = 0;
+                        for (int i = 0; i < nameArray.size(); ++i) {
+                            String propName = nameArray.getString(i);
+                            String propType = typeArray.getString(i);
+
+                            if (jsonObject.containsKey(propName)) {
+                                count++;
+                                if (propType.equals("string")) {
+                                    propStr += "ci." + propName + " = '" + jsonObject.getString(propName) + "',";
+                                } else if (propType.equals("number")) {
+                                    propStr += "ci." + propName + " = " + jsonObject.getInteger(propName) + ",";
+                                } else if (propType.equals("bool")) {
+                                    propStr += "ci." + propName + " = " + jsonObject.getBoolean(propName) + ",";
+                                }
+                            }
+                        }
+
+                        cmd = "match (ci:" + Neo4jDBNodeType.CI + " {id:{Id}}) set ";
+                        if (count > 0) {
+                            cmd += propStr.substring(0, propStr.length() - 1);
+                            statementResult = transaction.run(cmd, Values.parameters("Id", id));
+                            if (statementResult.summary().counters().propertiesSet() != count) {
+                                transaction.failure();
+                                return result;
+                            }
+                        }
+                    }
+
+                    if (extProp != null) {
+
+                        JSONArray nameArray = extProp.getJSONArray("name");
+                        JSONArray typeArray = extProp.getJSONArray("type");
+                        String propStr = "";
+                        int count = 0;
+                        for (int i = 0; i < nameArray.size(); ++i) {
+                            String propName = nameArray.getString(i);
+                            String propType = typeArray.getString(i);
+
+                            if (jsonObject.containsKey(propName)) {
+                                count++;
+                                if (propType.equals("string")) {
+                                    propStr += "ext." + propName + " = '" + jsonObject.getString(propName) + "',";
+                                } else if (propType.equals("number")) {
+                                    propStr += "ext." + propName + " = " + jsonObject.getInteger(propName) + ",";
+                                } else if (propType.equals("bool")) {
+                                    propStr += "ext." + propName + " = " + jsonObject.getBoolean(propName) + ",";
+                                }
+                            }
+                        }
+
+                        if (count == 0) {
+                            transaction.failure();
+                            return result;
+                        }
+
+                        cmd = "match (ext:" + Neo4jDBNodeType.CI + " {businessCode:'" + businessCode + "'}), " +
+                                "(ci:" + Neo4jDBNodeType.CI + " {id:{Id}}) " +
+                                "where (ext)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(ci) " +
+                                "set " + propStr.substring(0, propStr.length() - 1) + " " +
+                                "return ext";
+                        statementResult = transaction.run(cmd, Values.parameters("Id", id));
+                        recordList = statementResult.list();
+                        if (recordList.size() == 1) {
+                            if (statementResult.summary().counters().propertiesSet() == count) {
+                                transaction.success();
+                                return true;
+                            } else {
+                                transaction.failure();
+                                return false;
+                            }
+                        } else if (recordList.size() > 1){
+                            transaction.failure();
+                            return false;
+                        }
+
+                        cmd = "match (ci:" + Neo4jDBNodeType.CI + " {id:{Id}}) " +
+                                "create (ext:" + Neo4jDBNodeType.CI + " {businessCode:'" + businessCode + "'}) " +
+                                "create (ext)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(ci) " +
+                                "set " + propStr.substring(0, propStr.length() - 1);
+                        statementResult = transaction.run(cmd, Values.parameters("Id", id));
+                        ResultSummary summary = statementResult.summary();
+                        if (summary.counters().nodesCreated() == 1 &&
+                                summary.counters().propertiesSet() == (count + 1) &&
+                                summary.counters().relationshipsCreated() == 1) {
+                            transaction.success();
+                            return true;
+                        } else {
+                            transaction.failure();
+                            return false;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
+
+    /**
+     * 添加CI信息关联关系
+     * @param jsonObject CI信息
+     * @return 添加结果
+     */
+    @Override
+    public boolean addCIRelationship(JSONObject jsonObject) {
+
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String id1 = jsonObject.getString("id1");
+                    String id2 = jsonObject.getString("id2");
+                    String relationshipType = jsonObject.getString("type");
+
+                    String ciType1 = Neo4jUtils.getTypeCode(id1);
+                    String ciType2 = Neo4jUtils.getTypeCode(id2);
+
+                    JSONObject relationship = null;
+
+                    String cmd = "match (:" + Neo4jDBNodeType.CIType + " {code:{Code1}, level:3})" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + "]->" +
+                            "(:" + Neo4jDBNodeType.CIType + " {code:{Code2}, level:3}) " +
+                            "return r";
+                    StatementResult statementResult = transaction.run(cmd,
+                            Values.parameters("Code1", ciType1, "Code2", ciType2));
+                    List<Record> recordList = statementResult.list();
+
+                    for (Record record:recordList) {
+                        JSONObject tmp = getCITypeRelationship(record);
+                        if (tmp.get("type").toString().equals(relationshipType)) {
+                            relationship = tmp;
+                            break;
+                        }
+                    }
+
+                    if (relationship == null) {
+                        statementResult = transaction.run(cmd,
+                                Values.parameters("Code1", ciType2, "Code2", ciType1));
+                        recordList = statementResult.list();
+
+                        for (Record record:recordList) {
+                            JSONObject tmp = getCITypeRelationship(record);
+                            if (tmp.get("type").toString().equals(relationshipType)) {
+                                relationship = tmp;
+                                String temp = id1;
+                                id1 = id2;
+                                id2 = temp;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (relationship == null) {
+                        transaction.failure();
+                        return false;
+                    }
+
+                    CICorrespondenceType ciCorrespondenceType = CICorrespondenceType.values()[relationship.getInteger("correspondence")];
+                    if (ciCorrespondenceType == CICorrespondenceType.One_To_One ||
+                            ciCorrespondenceType == CICorrespondenceType.One_To_Many) {
+                        cmd = "match (:" + Neo4jDBNodeType.CI + " {id:{Id1}})" +
+                                "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}}]->" +
+                                "(:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
+                                "return r";
+                        statementResult = transaction.run(cmd,
+                                Values.parameters("Id1", id1, "Id2", id2, "Type", relationshipType));
+                        recordList = statementResult.list();
+
+                        if (recordList.size() > 0) {
+                            transaction.failure();
+                            return false;
+                        }
+                    }
+
+                    cmd = "match (ci1:" + Neo4jDBNodeType.CI + " {id:{Id1}}), " +
+                            "(ci2:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
+                            "create (ci1)-[:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}}]->(ci2)";
+                    statementResult = transaction.run(cmd,
+                            Values.parameters("Id1", id1, "Id2", id2, "Type", relationshipType));
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().relationshipsCreated() == 1) {
+                        transaction.success();
+                        return true;
+                    } else {
+                        transaction.failure();
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
+
+    /**
+     * 删除CI信息关联关系
+     * @param jsonObject CI信息
+     * @return 删除结果
+     */
+    @Override
+    public boolean deleteCIRelationship(JSONObject jsonObject) {
+
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String id1 = jsonObject.getString("id1");
+                    String id2 = jsonObject.getString("id2");
+                    String relationshipType = jsonObject.getString("type");
+
+                    String cmd = "match (:" + Neo4jDBNodeType.CI + " {id:{Id1}})" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}}]-" +
+                            "(:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
+                            "delete r";
+                    StatementResult statementResult = transaction.run(cmd,
+                            Values.parameters("Id1", id1, "Id2", id2, "Type", relationshipType));
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().relationshipsDeleted() == 1) {
+                        transaction.success();
+                        return true;
+                    } else {
+                        transaction.failure();
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
 
     /**
      * 打开数据库
@@ -814,6 +1277,20 @@ public class Neo4jDBService implements DBService {
         }
 
         return ciProp;
+    }
+
+    /**
+     * 在返回记录中获取CI类型连接关系
+     * @param record 返回记录
+     * @return CI类型连接关系
+     */
+    private JSONObject getCITypeRelationship(Record record) {
+        JSONObject ciRelationship = new JSONObject();
+
+        ciRelationship.put("type", record.values().get(0).get("type").asString());
+        ciRelationship.put("correspondence", record.values().get(0).get("correspondence").asInt());
+
+        return ciRelationship;
     }
 
     /**
