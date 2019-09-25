@@ -21,14 +21,17 @@ public interface AlarmLevelService {
 
     int count(AlarmLevelQuery levelQuery);
 
-    List<AlarmLevel> getBySourceLevel(String sourceLevel);
+    AlarmLevel getOne(AlarmLevelQuery alarmLevelQuery);
 
-    String checkRepeatSource(AlarmLevel alarmLevel);
+    boolean isRepeat(AlarmLevel alarmLevel);
 
     /**
      * @auther: liudd
-     * @date: 2019/9/16 16:53
-     * 功能描述:根据告警原等级，获取告警自定义等级
+     * @date: 2019/9/21 9:59
+     * 功能描述：根据uniqueCode， service，deviceType， sourceLevel获取告警等级
+     * 如果没有，则使用该系统默认告警点等级
+     * 并将新告警等级和告警颜色等存入告警
      */
-    String getTargetLevel(String uniqueCode, String sourceLevel);
+    AlarmLevel getAlarmLevel(AlarmLevelQuery levelQuery);
+
 }

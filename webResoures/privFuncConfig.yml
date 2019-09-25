@@ -1,0 +1,28 @@
+YYTD_MQTT_DEMO:
+  type: #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+  name: #权限名称 必填
+  code: #权限编码 必填同级不可重复
+  priority: #权限权重
+  remark： #备注 可填
+  uri: #uri路径 必填
+  routerMark: #路由标记，不填写继承父节点的标记
+  pageRoute: #页面标记，不填写继承父节点的标记
+  children:
+    - type: #权限类型
+      name: #权限名称
+      code: #权限编码
+      priority: #权限权重
+      remark： #备注
+      uri: #uri路径
+      routerMark: #路由标记
+      pageRoute:
+      children:
+    - type: #权限类型
+      name: #权限名称
+      code: #权限编码
+      priority: #权限权重
+      remark： #备注
+      uri: #uri路径
+      routerMark:
+      pageRoute:
+      children:

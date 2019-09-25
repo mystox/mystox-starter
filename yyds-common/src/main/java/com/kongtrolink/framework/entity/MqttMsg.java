@@ -19,6 +19,8 @@ public class MqttMsg {
     private byte[] bytePayload;
 
 
+
+
     public String getOperaCode() {
         return operaCode;
     }
