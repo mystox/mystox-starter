@@ -471,12 +471,12 @@ public class Neo4jDBService implements DBService {
             try (Session session = driver.session()) {
                 try (Transaction transaction = session.beginTransaction()) {
 
-                    String name1 = jsonObject.getString("name1");
-                    String name2 = jsonObject.getString("name2");
+                    String name1 = jsonObject.getString("parent");
+                    String name2 = jsonObject.getString("child");
 
                     String cmd = "match (item1:" + Neo4jDBNodeType.CIType + " {name:{Name1}, level: 3}), " +
                             "(item2:" + Neo4jDBNodeType.CIType + " {name:{Name2}, level: 3}), " +
-                            "(item1)-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(item2) " +
+                            "(item1)-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + "]->(item2) " +
                             "return r";
 
                     StatementResult statementResult = transaction.run(cmd,
@@ -879,7 +879,7 @@ public class Neo4jDBService implements DBService {
             try (Session session = driver.session()) {
                 try (Transaction transaction = session.beginTransaction()) {
 
-                    String id = jsonObject.getString("ciId");
+                    String id = jsonObject.getString("id");
                     String cmd = "match (:" + Neo4jDBNodeType.CI + " {id:{Id}})" +
                             "<-[:" + Neo4jDBRelationshipType.ATTACH + "]-(attach:" + Neo4jDBNodeType.CI + ") " +
                             "detach delete attach";
