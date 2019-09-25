@@ -32,4 +32,14 @@ public interface DBService {
     boolean modifyCIProp(JSONObject jsonObject);
 
     JSONObject searchCIProp(JSONObject jsonObject);
+
+    boolean addCI(JSONObject jsonObject);
+
+    boolean deleteCI(JSONObject jsonObject);
+
+    boolean modifyCI(JSONObject jsonObject);
+
+    boolean addCIRelationship(JSONObject jsonObject);
+
+    boolean deleteCIRelationship(JSONObject jsonObject);
 }
