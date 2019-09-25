@@ -3,6 +3,7 @@ package com.kongtrolink.query;
 import com.kongtrolink.base.Paging;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -24,6 +25,15 @@ public class AlarmQuery extends Paging {
     private List<String> levelList;
     private List<String> alarmIdList;
     private String state;
+    Map<String, String> deviceInfo; //设备信息作为查询条件
+
+    public Map<String, String> getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(Map<String, String> deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
 
     public String getUniqueCode() {
         return uniqueCode;

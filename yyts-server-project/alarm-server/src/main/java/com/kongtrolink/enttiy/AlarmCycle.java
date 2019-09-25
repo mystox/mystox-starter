@@ -15,8 +15,7 @@ public class AlarmCycle {
     private String id;
     private String uniqueCode;
     private String service;
-    private String propertyStr;
-    private Integer diffTime;
+    private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
     private Date updateTime;
     private FacadeView creator;
     private String state = Contant.FORBIT;
@@ -53,14 +52,6 @@ public class AlarmCycle {
         this.service = service;
     }
 
-    public String getPropertyStr() {
-        return propertyStr;
-    }
-
-    public void setPropertyStr(String propertyStr) {
-        this.propertyStr = propertyStr;
-    }
-
     public Integer getDiffTime() {
         return diffTime;
     }
@@ -95,7 +86,7 @@ public class AlarmCycle {
         if(null == alarm){
             return false;
         }
-        if(Contant.TRECOVER.equals(this.propertyStr)){
+        if(diffTime < 0){
             if(null != alarm.gettRecover()){
                 return true;
             }

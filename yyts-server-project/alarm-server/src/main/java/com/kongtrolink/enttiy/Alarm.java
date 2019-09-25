@@ -1,6 +1,7 @@
 package com.kongtrolink.enttiy;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -20,6 +21,15 @@ public class Alarm {
     private String deviceId;    //设备对应的编码，需要与资产管理对应
     private String state;
     private String cycleId;     //告警周期id
+    private Map<String, String> AuxilaryMap;
+
+    public Map<String, String> getAuxilaryMap() {
+        return AuxilaryMap;
+    }
+
+    public void setAuxilaryMap(Map<String, String> auxilaryMap) {
+        AuxilaryMap = auxilaryMap;
+    }
 
     public String getCycleId() {
         return cycleId;
@@ -107,5 +117,9 @@ public class Alarm {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public String getUniqueService(){
+        return this.uniqueCode + this.service;
     }
 }

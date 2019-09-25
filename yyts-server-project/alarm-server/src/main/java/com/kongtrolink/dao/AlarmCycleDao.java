@@ -47,7 +47,6 @@ public class AlarmCycleDao {
         Criteria criteria = Criteria.where("_id").is(alarmCycle.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("propertyStr", alarmCycle.getPropertyStr());
         update.set("diffTime", alarmCycle.getDiffTime());
         update.set("updateTime", alarmCycle.getUpdateTime());
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, table);
@@ -84,14 +83,14 @@ public class AlarmCycleDao {
         if(!StringUtil.isNUll(service)){
             criteria.and("service").is(service);
         }
-        String propertyStr = cycleQuery.getPropertyStr();
-        if(!StringUtil.isNUll(propertyStr)){
-            if(Contant.TREPORT.equals(propertyStr)){
-                criteria.and(propertyStr).gte(cycleQuery.getDiffTime());
-            }else if(Contant.TRECOVER.equals(propertyStr)){
-                criteria.andOperator(Criteria.where(propertyStr).exists(true), Criteria.where(propertyStr).gte(cycleQuery.getDiffTime()));
-            }
-        }
+//        String propertyStr = cycleQuery.getPropertyStr();
+//        if(!StringUtil.isNUll(propertyStr)){
+//            if(Contant.TREPORT.equals(propertyStr)){
+//                criteria.and(propertyStr).gte(cycleQuery.getDiffTime());
+//            }else if(Contant.TRECOVER.equals(propertyStr)){
+//                criteria.andOperator(Criteria.where(propertyStr).exists(true), Criteria.where(propertyStr).gte(cycleQuery.getDiffTime()));
+//            }
+//        }
         Date beginTime = cycleQuery.getBeginTime();
         Date endTime = cycleQuery.getEndTime();
         if(null != beginTime && null == endTime){

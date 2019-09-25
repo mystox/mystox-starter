@@ -66,4 +66,33 @@ public class AlarmServiceImpl implements AlarmService{
     public int count(AlarmQuery alarmQuery, String table) {
         return alarmDao.count(alarmQuery, table);
     }
+
+    /**
+     * @param alarmQuery
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/24 9:08
+     * 功能描述:批量删除
+     */
+    @Override
+    public int deleteList(AlarmQuery alarmQuery, String table) {
+        return alarmDao.deleteList(alarmQuery, table);
+    }
+
+    @Override
+    public void addList(List<Alarm> alarmList, String table) {
+        alarmDao.addList(alarmList, table);
+    }
+
+    /**
+     * @param alarm
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/24 11:10
+     * 功能描述:修改告警属性，包括附属属性
+     */
+    @Override
+    public boolean updateProperties(Alarm alarm, String table) {
+        return alarmDao.updateProperties(alarm, table);
+    }
 }

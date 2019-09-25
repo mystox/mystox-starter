@@ -1,6 +1,8 @@
 package com.kongtrolink.controller;
 
 import com.kongtrolink.base.Contant;
+import com.kongtrolink.base.EnumLevelName;
+import com.kongtrolink.base.StringUtil;
 import com.kongtrolink.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
@@ -18,7 +20,7 @@ import java.util.List;
  * @Description:
  */
 @Controller
-@RequestMapping("/EnterpriseLevelController")
+@RequestMapping("/enterpriseLevelController")
 public class EnterpriseLevelController {
 
     @Autowired
@@ -32,6 +34,11 @@ public class EnterpriseLevelController {
         if(repeat){
             return new JsonResult("该等级已存在!", false);
         }
+        String levelName = enterpriseLevel.getLevelName();
+        if(StringUtil.isNUll(levelName)){
+            levelName = EnumLevelName.getNameByLevel(enterpriseLevel.getLevel());
+        }
+        enterpriseLevel.setLevelName(levelName);
         enterpriseLevelService.add(enterpriseLevel);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
@@ -54,6 +61,11 @@ public class EnterpriseLevelController {
         if(repeat){
             return new JsonResult("该等级已存在!", false);
         }
+        String levelName = enterpriseLevel.getLevelName();
+        if(StringUtil.isNUll(levelName)){
+            levelName = EnumLevelName.getNameByLevel(enterpriseLevel.getLevel());
+        }
+        enterpriseLevel.setLevelName(levelName);
         boolean update = enterpriseLevelService.update(enterpriseLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -78,5 +90,17 @@ public class EnterpriseLevelController {
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
         }
         return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_FAIL, true);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/25 14:02
+     * 功能描述:获取企业和服务信息
+     */
+    @RequestMapping("/getUniqueServiceList")
+    @ResponseBody
+    public JsonResult getUniqueServiceList(){
+
+        return null;
     }
 }
