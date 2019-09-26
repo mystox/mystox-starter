@@ -7,7 +7,7 @@ import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
-import com.kongtrolink.framework.mqtt.MqttService;
+import com.kongtrolink.framework.mqtt.InnerMqttService;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class EnterpriseLevelController {
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
-    MqttService mqttService;
+    InnerMqttService mqttService;
 
     @RequestMapping("/add")
     @ResponseBody

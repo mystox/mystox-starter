@@ -19,6 +19,7 @@ public class Contant {
     public static String COLOR_YELLOW = "yellow";
     public static String COLOR_BULE = "blue";
     public static String COLOR_GREEN = "green";
+    public static String COLOR_BLACK = "black";     //黑色，无匹配告警等级颜色
 
     public static String YES = "是";
     public static String NO = "否";
@@ -27,6 +28,8 @@ public class Contant {
     public static String TRECOVER = "tRecover";
     public static String TREPORT_NAME = "上报时间";
     public static String TRECOVER_NAME = "消除时间";
+    public static String PENDING = "待处理";
+    public static String RESOLVE = "已消除";
 
     public static String USEING = "启用";
     public static String FORBIT = "禁用";
@@ -36,6 +39,4 @@ public class Contant {
 
     public static String SYSTEM = "系统";
     public static String MANUAL = "手动";
-
-
 }

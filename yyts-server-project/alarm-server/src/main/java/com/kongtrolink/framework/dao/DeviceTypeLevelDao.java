@@ -50,6 +50,18 @@ public class DeviceTypeLevelDao {
         return result.getN()>0 ? true : false;
     }
 
+    /**
+     * @param deviceTypeLevelId
+     * @auther: liudd
+     * @date: 2019/9/26 13:47
+     * 功能描述:根据id获取
+     */
+    public DeviceTypeLevel get(String deviceTypeLevelId) {
+        Criteria criteria = Criteria.where("_id").is(deviceTypeLevelId);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, DeviceTypeLevel.class, table);
+    }
+
     public List<DeviceTypeLevel> list(DeviceTypeLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         Query query = Query.query(criteria);

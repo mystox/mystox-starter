@@ -11,11 +11,18 @@ import java.util.List;
  */
 public interface DeviceTypeLevelService {
 
-    void add(DeviceTypeLevel deviceTypeLevel);
+    boolean add(DeviceTypeLevel deviceTypeLevel);
 
     boolean delete(String deviceTypeLevelId);
 
     boolean update(DeviceTypeLevel deviceTypeLevel);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/26 13:47
+     * 功能描述:根据id获取
+     */
+    DeviceTypeLevel get(String deviceTypeLevelId);
 
     List<DeviceTypeLevel> list(DeviceTypeLevelQuery levelQuery);
 
@@ -23,5 +30,19 @@ public interface DeviceTypeLevelService {
 
     DeviceTypeLevel getOne(DeviceTypeLevelQuery levelQuery);
 
-    boolean isReprat(DeviceTypeLevel typeLevel);
+    boolean isRepeat(DeviceTypeLevel typeLevel);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/26 13:18
+     * 功能描述:根据设备型号告警等级，删除对应的自定义告警等级
+     */
+    int deleteAlarmLevels(DeviceTypeLevel deviceTypeLevel);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/26 13:33
+     * 功能描述:根据设备型号告警，生成新告警自定义等级
+     */
+    boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel);
 }

@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service.impl;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.dao.AlarmLevelDao;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
@@ -28,9 +29,13 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
     EnterpriseLevelService enterpriseLevelService;
 
     @Override
-    public void save(AlarmLevel alarmLevel) {
+    public boolean save(AlarmLevel alarmLevel) {
         alarmLevel.setUpdateTime(new Date());
         alarmLevelDao.save(alarmLevel);
+        if(!StringUtil.isNUll(alarmLevel.getId())){
+            return true ;
+        }
+        return false;
     }
 
     @Override
@@ -115,5 +120,10 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
         alarmLevel.setColor(enterpriseLevel.getColor());
         alarmLevel.setGenerate(Contant.SYSTEM);
         return alarmLevel;
+    }
+
+    @Override
+    public int deleteList(AlarmLevelQuery levelQuery) {
+        return alarmLevelDao.deleteList(levelQuery);
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface AlarmLevelService {
 
-    void save(AlarmLevel alarmLevel);
+    boolean save(AlarmLevel alarmLevel);
 
     boolean delete(String alarmLevelId);
 
@@ -30,12 +30,14 @@ public interface AlarmLevelService {
     /**
      * @auther: liudd
      * @date: 2019/9/21 9:59
-     * 功能描述：根据uniqueCode， service，deviceType， sourceLevel获取告警等级
+     * 功能描述：根据uniqueCode， service，deviceType， deviceModel, sourceLevel获取告警等级
      * 如果没有，则使用该系统默认告警点等级
      * 并将新告警等级和告警颜色等存入告警
      */
     AlarmLevel getAlarmLevel(AlarmLevelQuery levelQuery);
 
     AlarmLevel createAlarmLevel(EnterpriseLevel enterpriseLevel, DeviceTypeLevel deviceTypeLevel);
+
+    int deleteList(AlarmLevelQuery levelQuery);
 
 }

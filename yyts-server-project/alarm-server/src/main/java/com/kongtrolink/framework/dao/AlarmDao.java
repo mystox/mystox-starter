@@ -42,7 +42,6 @@ public class AlarmDao {
         Criteria criteria = Criteria.where("_id").is(alarm.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
-
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -73,6 +72,18 @@ public class AlarmDao {
         if(null != alarmIdList && alarmIdList.size()>0){
             criteria.and("_id").in(alarmIdList);
         }
+        String serial = alarmQuery.getSerial();
+        if(!StringUtil.isNUll(serial)){
+            criteria.and("serial").is(serial);
+        }
+        String signalId = alarmQuery.getSignalId();
+        if(!StringUtil.isNUll(signalId)){
+            criteria.and("signalId").is(signalId);
+        }
+        String deviceId = alarmQuery.getDeviceId();
+        if(!StringUtil.isNUll(deviceId)){
+            criteria.and("deviceId").is(deviceId);
+        }
         List<String> levelList = alarmQuery.getLevelList();
         if(null != levelList && levelList.size()>0){
             criteria.and("level").in(levelList);
@@ -90,6 +101,14 @@ public class AlarmDao {
         }else if(null == beginTime && null != endTime){
             criteria.and("tReport").lte(endTime);
         }
+        String targetLevel = alarmQuery.getTargetLevel();
+        if(!StringUtil.isNUll(targetLevel)){
+            criteria.and("targetLevel").is(targetLevel);
+        }
+        String targetLevelName = alarmQuery.getTargetLevelName();
+        if(!StringUtil.isNUll(targetLevelName)){
+            criteria.and("targetLevelName").is(targetLevelName);
+        }
         //设备属性查询
         Map<String, String> deviceInfo = alarmQuery.getDeviceInfo();
         if(null != deviceInfo){
@@ -106,7 +125,7 @@ public class AlarmDao {
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
-        return (int)remove.getN();
+        return remove.getN();
     }
 
     public void addList(List<Alarm> alarmList, String table) {
@@ -133,5 +152,36 @@ public class AlarmDao {
             return result.getN()>0 ? true : false;
         }
         return true;
+    }
+
+    /**
+     * @param alarmQuery
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:15
+     * 功能描述:获取一个告警
+     */
+    public Alarm getOne(AlarmQuery alarmQuery, String table) {
+        Criteria criteria = new Criteria();
+        baseCriteria(criteria, alarmQuery);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, Alarm.class, table);
+    }
+
+    /**
+     * @param alarm
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:29
+     * 功能描述:告警消除
+     */
+    public boolean resolve(Alarm alarm, String table) {
+        Criteria criteria = Criteria.where("_id").is(alarm.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", alarm.getState());
+        update.set("tRecover", alarm.gettRecover());
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        return result.getN()>0 ? true : false;
     }
 }

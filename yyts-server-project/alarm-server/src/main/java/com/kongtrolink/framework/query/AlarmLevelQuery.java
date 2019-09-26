@@ -2,7 +2,9 @@ package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.Paging;
+import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
+import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 
 import java.util.Date;
 
@@ -135,5 +137,36 @@ public class AlarmLevelQuery extends Paging {
 
     public void setTargetLevel(String targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/9/26 9:47
+     * 功能描述:根据告警对象，直接生成告警等级查询实例，用于告警上报时，生成告警自定义等级
+     */
+    public static AlarmLevelQuery alarm2AlarmLevelQuery(Alarm alarm){
+        if(null == alarm){
+            return null;
+        }
+        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
+        alarmLevelQuery.setUniqueCode(alarm.getUniqueCode());
+        alarmLevelQuery.setService(alarm.getService());
+        alarmLevelQuery.setDeviceType(alarm.getDeviceType());
+        alarmLevelQuery.setDeviceModel(alarm.getDeviceModel());
+        alarmLevelQuery.setSourceLevel(alarm.getLevel());
+        return alarmLevelQuery;
+    }
+
+    public static AlarmLevelQuery deviceTypeLevel2AlarmLevelQuery(DeviceTypeLevel deviceTypeLevel){
+        if(null == deviceTypeLevel){
+            return null;
+        }
+        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
+        alarmLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
+        alarmLevelQuery.setService(deviceTypeLevel.getService());
+        alarmLevelQuery.setDeviceType(deviceTypeLevel.getDeviceType());
+        alarmLevelQuery.setDeviceModel(deviceTypeLevel.getDeviceModel());
+        alarmLevelQuery.setSourceLevel(deviceTypeLevel.getLevel());
+        return alarmLevelQuery;
     }
 }

@@ -7,7 +7,8 @@ import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.mqtt.MqttService;
+import com.kongtrolink.framework.mqtt.InnerMqttService;
+import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
@@ -31,7 +32,7 @@ public class DeviceTypeLevelController {
     @Autowired
     DeviceTypeLevelService typeLevelService;
     @Autowired
-    MqttService mqttService;
+    InnerMqttService mqttService;
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
@@ -40,25 +41,11 @@ public class DeviceTypeLevelController {
     @RequestMapping("/add")
     @ResponseBody
     public JsonResult add(DeviceTypeLevel deviceTypeLevel){
-        //liuddtodo 添加前做等级重复等判定
-        boolean reprat = typeLevelService.isReprat(deviceTypeLevel);
+        boolean reprat = typeLevelService.isRepeat(deviceTypeLevel);
         if(reprat){
             return new JsonResult("设备等级以存在!", false);
         }
         typeLevelService.add(deviceTypeLevel);
-        String level = deviceTypeLevel.getLevel();
-        EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
-        enterpriseLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
-        enterpriseLevelQuery.setService(deviceTypeLevel.getService());
-        enterpriseLevelQuery.setLevel(level);
-        EnterpriseLevel maxLevelSinceLevel = enterpriseLevelService.getMaxLevelSinceLevel(enterpriseLevelQuery);
-        if(null != maxLevelSinceLevel){
-            AlarmLevel alarmLevel = alarmLevelService.createAlarmLevel(maxLevelSinceLevel, deviceTypeLevel);
-            if(null != alarmLevel){
-                alarmLevelService.save(alarmLevel);
-            }
-        }
-
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
 
@@ -75,25 +62,12 @@ public class DeviceTypeLevelController {
     @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(DeviceTypeLevel deviceTypeLevel){
-        //liuddtodo 修改前做等级重复等判定
-        boolean reprat = typeLevelService.isReprat(deviceTypeLevel);
+        boolean reprat = typeLevelService.isRepeat(deviceTypeLevel);
         if(reprat){
-            return new JsonResult("设备等级以存在!", false);
+            return new JsonResult("设备等级已存在!", false);
         }
         boolean update = typeLevelService.update(deviceTypeLevel);
         if(update){
-            String level = deviceTypeLevel.getLevel();
-            EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
-            enterpriseLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
-            enterpriseLevelQuery.setService(deviceTypeLevel.getService());
-            enterpriseLevelQuery.setLevel(level);
-            EnterpriseLevel maxLevelSinceLevel = enterpriseLevelService.getMaxLevelSinceLevel(enterpriseLevelQuery);
-            if(null != maxLevelSinceLevel){
-                AlarmLevel alarmLevel = alarmLevelService.createAlarmLevel(maxLevelSinceLevel, deviceTypeLevel);
-                if(null != alarmLevel){
-                    alarmLevelService.save(alarmLevel);
-                }
-            }
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
         }
         return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_FAIL, false);
