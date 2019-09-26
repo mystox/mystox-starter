@@ -13,6 +13,7 @@ package com.kongtrolink.framework.core.entity;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  *
@@ -46,7 +47,15 @@ public class User implements Serializable{
     private String currentRoleId;               //当前页面所属角色id
     private String currentRouteMark;            //当前页面所在服务路由标记
 
+    private List<ServiceSubVo> subVos;
 
+    public List<ServiceSubVo> getSubVos() {
+        return subVos;
+    }
+
+    public void setSubVos(List<ServiceSubVo> subVos) {
+        this.subVos = subVos;
+    }
     public String getCurrentRouteMark()
     {
         return currentRouteMark;
