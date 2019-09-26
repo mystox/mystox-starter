@@ -2,7 +2,9 @@ package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.api.impl.MqttPublish;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
+import com.kongtrolink.framework.entity.MsgResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ public class AssetManagementServerApplicationTest {
 
     @Autowired
     Neo4jDBService neo4jDBService;
+
+    @Autowired
+    MqttPublish mqttPublish;
 
     @Test
     public void testCIType() {
@@ -37,5 +42,19 @@ public class AssetManagementServerApplicationTest {
         jsonObject.put("code", "");
         JSONArray array = neo4jDBService.searchCIType(jsonObject);
         System.out.println(array);
+    }
+
+    @Test
+    public void testGetRegionCode() {
+
+        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("userId", "392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
+//        jsonObject.put("enterpriseCode", "Skongtrolink");
+//        jsonObject.put("serverCode", "");
+        jsonObject.put("structure", 0);
+
+        MsgResult msgResult = mqttPublish.getRegionCode(JSONObject.toJSONString(jsonObject));
+
+        System.out.println(JSONObject.toJSONString(msgResult));
     }
 }

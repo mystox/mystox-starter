@@ -529,8 +529,8 @@ public class Neo4jDBService implements DBService {
                     List<String> nameList = names.toJavaList(String.class);
                     String businessCode = "";
                     if (prop.containsKey("enterpriseCode") && prop.containsKey("serverCode")) {
-                        int enterpriseCode = prop.getInteger("enterpriseCode");
-                        int serverCode = prop.getInteger("serverCode");
+                        String enterpriseCode = prop.getString("enterpriseCode");
+                        String serverCode = prop.getString("serverCode");
                         businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
                     }
 
@@ -600,8 +600,8 @@ public class Neo4jDBService implements DBService {
                 try (Transaction transaction = session.beginTransaction()) {
 
                     String name = jsonObject.getString("name");
-                    int enterpriseCode = jsonObject.getInteger("enterpriseCode");
-                    int serverCode = jsonObject.getInteger("serverCode");
+                    String enterpriseCode = jsonObject.getString("enterpriseCode");
+                    String serverCode = jsonObject.getString("serverCode");
                     String businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
 
                     String cmd = "match (prop:" + Neo4jDBNodeType.CIProp + " {businessCode:{BusinessCode}}), " +
@@ -656,8 +656,8 @@ public class Neo4jDBService implements DBService {
                     List<String> nameList = names.toJavaList(String.class);
                     String businessCode = "";
                     if (prop.containsKey("enterpriseCode") && prop.containsKey("serverCode")) {
-                        int enterpriseCode = prop.getInteger("enterpriseCode");
-                        int serverCode = prop.getInteger("serverCode");
+                        String enterpriseCode = prop.getString("enterpriseCode");
+                        String serverCode = prop.getString("serverCode");
                         businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
                     }
 
@@ -717,8 +717,8 @@ public class Neo4jDBService implements DBService {
                     String name = jsonObject.getString("name");
                     String businessCode = "";
                     if (jsonObject.containsKey("enterpriseCode") && jsonObject.containsKey("serverCode")) {
-                        int enterpriseCode = jsonObject.getInteger("enterpriseCode");
-                        int serverCode = jsonObject.getInteger("serverCode");
+                        String enterpriseCode = jsonObject.getString("enterpriseCode");
+                        String serverCode = jsonObject.getString("serverCode");
                         businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
                     }
 
@@ -1270,10 +1270,10 @@ public class Neo4jDBService implements DBService {
 
         String businessCode = record.values().get(0).get("businessCode").asString();
         if (!businessCode.equals("")) {
-            List<Integer> list = Neo4jUtils.getEnterpriseCodeAndServerCode(businessCode);
+            List<String> list = Neo4jUtils.getEnterpriseCodeAndServerCode(businessCode);
             ciProp.put("businessCode", businessCode);
-            ciProp.put("enterpriseCode", Integer.valueOf(list.get(0)));
-            ciProp.put("serverCode", Integer.valueOf(list.get(1)));
+            ciProp.put("enterpriseCode", list.get(0));
+            ciProp.put("serverCode", list.get(1));
         }
 
         return ciProp;

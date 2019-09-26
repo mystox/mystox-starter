@@ -11,7 +11,7 @@ public class Neo4jUtils {
      * @param serverCode 服务编码
      * @return 业务编码
      */
-    public static String getBusinessCode(int enterpriseCode, int serverCode) {
+    public static String getBusinessCode(String enterpriseCode, String serverCode) {
         return enterpriseCode + "-" + serverCode;
     }
 
@@ -20,11 +20,11 @@ public class Neo4jUtils {
      * @param businessCode 业务编码
      * @return 第一个是企业编码，第二个是服务编码
      */
-    public static List<Integer> getEnterpriseCodeAndServerCode(String businessCode) {
+    public static List<String> getEnterpriseCodeAndServerCode(String businessCode) {
         ArrayList result = new ArrayList();
         String[] codes = businessCode.split("-");
-        result.add(Integer.valueOf(codes[0]));
-        result.add(Integer.valueOf(codes[1]));
+        result.add(codes[0]);
+        result.add(codes[1]);
         return result;
     }
 
