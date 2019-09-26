@@ -5,6 +5,7 @@ import com.kongtrolink.framework.stereotype.OperaCode;
 
 public interface Publish {
 
-    @OperaCode
     MsgResult getRegionCode(String payload);
+
+    void publishCIProps(String payload);
 }
