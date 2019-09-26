@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @Auther: liudd
  * @Date: 2019/9/24 10:31
- * @Description:附属属性
+ * @Description:附属属性。精确到企业-服务
  */
 public class Auxilary {
 

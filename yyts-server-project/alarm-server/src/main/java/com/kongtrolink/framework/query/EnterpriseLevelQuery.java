@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Paging;
+import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 
 import java.util.Date;
 
@@ -82,5 +83,16 @@ public class EnterpriseLevelQuery extends Paging{
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public static EnterpriseLevelQuery deviceLevel2EnterpriseLevel(DeviceTypeLevel deviceTypeLevel){
+        if(null == deviceTypeLevel){
+            return null;
+        }
+        EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
+        enterpriseLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
+        enterpriseLevelQuery.setService(deviceTypeLevel.getService());
+        enterpriseLevelQuery.setLevel(deviceTypeLevel.getLevel());
+        return enterpriseLevelQuery;
     }
 }

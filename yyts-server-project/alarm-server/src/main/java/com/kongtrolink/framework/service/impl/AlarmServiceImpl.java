@@ -7,6 +7,7 @@ import com.kongtrolink.framework.service.AlarmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +31,7 @@ public class AlarmServiceImpl implements AlarmService{
      */
     @Override
     public void save(Alarm alarm, String table) {
+        alarm.settReport(new Date());
         alarmDao.save(alarm, table);
     }
 
@@ -94,5 +96,29 @@ public class AlarmServiceImpl implements AlarmService{
     @Override
     public boolean updateProperties(Alarm alarm, String table) {
         return alarmDao.updateProperties(alarm, table);
+    }
+
+    /**
+     * @param alarmQuery
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:15
+     * 功能描述:获取一个告警
+     */
+    @Override
+    public Alarm getOne(AlarmQuery alarmQuery, String table) {
+        return alarmDao.getOne(alarmQuery, table);
+    }
+
+    /**
+     * @param alarm
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:29
+     * 功能描述:告警消除
+     */
+    @Override
+    public boolean resolve(Alarm alarm, String table) {
+        return alarmDao.resolve(alarm, table);
     }
 }

@@ -143,4 +143,12 @@ public class AlarmLevelDao {
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, AlarmLevel.class, table);
     }
+
+    public int deleteList(AlarmLevelQuery levelQuery) {
+        Criteria criteria = new Criteria();
+        baseCriteira(levelQuery, criteria);
+        Query query = Query.query(criteria);
+        WriteResult remove = mongoTemplate.remove(query, table);
+        return remove.getN();
+    }
 }

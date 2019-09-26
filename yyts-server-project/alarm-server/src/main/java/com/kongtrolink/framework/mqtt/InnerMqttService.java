@@ -19,7 +19,7 @@ import java.util.List;
  * @Description:
  */
 @Service
-public class MqttService {
+public class InnerMqttService {
 
     public static JSON getUniqueService(){
         ServerEntity serverEntity = new ServerEntity("智慧用电", "zhyd");

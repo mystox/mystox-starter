@@ -16,6 +16,13 @@ public class DeviceTypeLevelQuery extends Paging {
     private String deviceModel;     //设备型号
     private String level;
 
+    public DeviceTypeLevelQuery() {
+    }
+
+    public DeviceTypeLevelQuery(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }
