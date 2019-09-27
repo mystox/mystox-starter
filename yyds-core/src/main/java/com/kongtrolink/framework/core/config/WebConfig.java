@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.core.config;
 
-import com.kongtrolink.framework.interceptor.SessionTimeoutInterceptor;
+import com.kongtrolink.framework.core.interceptor.SessionTimeoutInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
