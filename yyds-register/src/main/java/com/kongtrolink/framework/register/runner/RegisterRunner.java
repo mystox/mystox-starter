@@ -131,12 +131,12 @@ public class RegisterRunner implements ApplicationRunner {
     public void setDataToRegistry(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        if (!serviceRegistry.exists("/mqtt"))
-            serviceRegistry.create("/mqtt", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists("/mqtt/sub"))
-            serviceRegistry.create("/mqtt/sub", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists("/mqtt/sub/" + serverCode))
-            serviceRegistry.create("/mqtt/sub/" + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
+            serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
+            serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX + serverCode))
+            serviceRegistry.create(TopicPrefix.SUB_PREFIX + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (!serviceRegistry.exists(nodePath))
             serviceRegistry.create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
