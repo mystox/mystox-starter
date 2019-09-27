@@ -66,7 +66,7 @@ public class Neo4jUtils {
      * @param serverCode 服务编码
      * @return CI的Id
      */
-    public static String getCIId(String ciTypeCode, String sn, int enterpriseCode, int serverCode) {
+    public static String getCIId(String ciTypeCode, String sn, String enterpriseCode, String serverCode) {
         return ciTypeCode + "-" + enterpriseCode + "-" + serverCode + "-" + sn;
     }
 }

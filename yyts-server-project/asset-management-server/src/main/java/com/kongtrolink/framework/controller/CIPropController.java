@@ -37,14 +37,18 @@ public class CIPropController {
 
         if (dbService.addCIProp(requestBody)) {
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", requestBody.getString("name"));
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", requestBody.getString("name"));
 
-            JSONArray jsonArray = new JSONArray();
-            jsonArray.add(requestBody.getJSONObject("prop"));
-            jsonObject.put("props", jsonArray);
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.add(requestBody.getJSONObject("prop"));
+                jsonObject.put("props", jsonArray);
 
-            publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+                publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+            } catch (Exception e) {
+
+            }
 
             result.put("result", 1);
             result.put("info", "添加成功");
@@ -62,21 +66,25 @@ public class CIPropController {
 
         if (dbService.deleteCIProp(requestBody)) {
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", requestBody.getString("name"));
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", requestBody.getString("name"));
 
-            JSONObject prop = new JSONObject();
-            prop.put("title", new JSONArray());
-            prop.put("name", new JSONArray());
-            prop.put("type", new JSONArray());
-            prop.put("enterpriseCode", requestBody.getString("enterpriseCode"));
-            prop.put("serverCode", requestBody.getString("serverCode"));
+                JSONObject prop = new JSONObject();
+                prop.put("title", new JSONArray());
+                prop.put("name", new JSONArray());
+                prop.put("type", new JSONArray());
+                prop.put("enterpriseCode", requestBody.getString("enterpriseCode"));
+                prop.put("serverCode", requestBody.getString("serverCode"));
 
-            JSONArray jsonArray = new JSONArray();
-            jsonArray.add(prop);
-            jsonObject.put("props", jsonArray);
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.add(prop);
+                jsonObject.put("props", jsonArray);
 
-            publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+                publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+            } catch (Exception e) {
+
+            }
 
             result.put("result", 1);
             result.put("info", "删除成功");
@@ -94,14 +102,18 @@ public class CIPropController {
 
         if (dbService.modifyCIProp(requestBody)) {
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", requestBody.getString("name"));
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("name", requestBody.getString("name"));
 
-            JSONArray jsonArray = new JSONArray();
-            jsonArray.add(requestBody.getJSONObject("prop"));
-            jsonObject.put("props", jsonArray);
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.add(requestBody.getJSONObject("prop"));
+                jsonObject.put("props", jsonArray);
 
-            publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+                publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+            } catch (Exception e) {
+
+            }
 
             result.put("result", 1);
             result.put("info", "修改成功");

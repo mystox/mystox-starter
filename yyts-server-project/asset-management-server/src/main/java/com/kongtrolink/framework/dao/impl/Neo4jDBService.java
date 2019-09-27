@@ -834,8 +834,8 @@ public class Neo4jDBService implements DBService {
 
                     String ciTypeCode = Neo4jUtils.getCITypeCode(code1, code2, code3);
                     String sn = jsonObject.getString("sn");
-                    int enterpriseCode = jsonObject.getInteger("enterpriseCode");
-                    int serverCode = jsonObject.getInteger("serverCode");
+                    String enterpriseCode = jsonObject.getString("enterpriseCode");
+                    String serverCode = jsonObject.getString("serverCode");
 
                     String ciId = Neo4jUtils.getCIId(ciTypeCode, sn, enterpriseCode, serverCode);
                     cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "})";
@@ -1245,13 +1245,16 @@ public class Neo4jDBService implements DBService {
 
                     String cmd = "match (ci:" + Neo4jDBNodeType.CI + " " +
                             "{enterpriseCode:{EnterpriseCode}, serverCode:{ServerCode}}) " +
-                            "return distinct ci.model";
+                            "return distinct  ci.type, ci.model";
                     StatementResult statementResult = transaction.run(cmd,
                             Values.parameters("EnterpriseCode", enterpriseCode, "ServerCode", serverCode));
                     List<Record> recordList = statementResult.list();
 
                     for (Record record:recordList) {
-                        result.add(record.values().get(0).get("ci.model").asString());
+                        JSONObject model = new JSONObject();
+                        model.put("type", record.values().get(0).asString());
+                        model.put("model", record.values().get(1).asString());
+                        result.add(model);
                     }
 
                     transaction.success();
