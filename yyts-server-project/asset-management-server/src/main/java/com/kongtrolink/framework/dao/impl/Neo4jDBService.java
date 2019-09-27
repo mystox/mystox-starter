@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.CICorrespondenceType;
@@ -1216,6 +1217,54 @@ public class Neo4jDBService implements DBService {
 
         return result;
     }
+
+    /**
+     * 查询CI设备型号信息
+     * @param jsonObject 业务和服务信息
+     * @return 查询结果
+     */
+    @Override
+    public JSONArray searchCIModel(JSONObject jsonObject) {
+
+        JSONArray result = new JSONArray();
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        if (driver == null) {
+            driver = openDriver();
+        }
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String enterpriseCode = jsonObject.getString("enterpriseCode");
+                    String serverCode = jsonObject.getString("serverCode");
+
+                    String cmd = "match (ci:" + Neo4jDBNodeType.CI + " " +
+                            "{enterpriseCode:{EnterpriseCode}, serverCode:{ServerCode}}) " +
+                            "return distinct ci.model";
+                    StatementResult statementResult = transaction.run(cmd,
+                            Values.parameters("EnterpriseCode", enterpriseCode, "ServerCode", serverCode));
+                    List<Record> recordList = statementResult.list();
+
+                    for (Record record:recordList) {
+                        result.add(record.values().get(0).get("ci.model").asString());
+                    }
+
+                    transaction.success();
+                }
+            }
+        } catch (Exception e) {
+            result = null;
+            System.out.println(JSONObject.toJSONString(e));
+        }
+
+        return result;
+    }
+
 
     /**
      * 打开数据库
