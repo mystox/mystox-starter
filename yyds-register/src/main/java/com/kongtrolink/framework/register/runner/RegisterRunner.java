@@ -7,6 +7,7 @@ import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
+import com.kongtrolink.framework.register.entity.ServerMsg;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
 import com.kongtrolink.framework.service.MqttSender;
@@ -60,6 +61,16 @@ public class RegisterRunner implements ApplicationRunner {
     private String devFlag;
 
 
+    @Value("server.host:127.0.0.1")
+    private String host;
+
+    @Value("server.port")
+    private int port;
+
+
+
+
+
     @Autowired
     ServiceRegistry serviceRegistry;
     @Autowired
@@ -109,6 +120,12 @@ public class RegisterRunner implements ApplicationRunner {
 
         //获取服务信息
 
+        ServerMsg serverMsg = new ServerMsg();
+        serverMsg.setServerVersion(serverVersion);
+        serverMsg.setHost(host);
+        serverMsg.setPort(port);
+        serverMsg.setServerName(serverName);
+
 
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -116,9 +133,9 @@ public class RegisterRunner implements ApplicationRunner {
         if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
             serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX +"/"+  serverCode))
-            serviceRegistry.create(TopicPrefix.SUB_PREFIX + "/" + serverCode, "注册服务1".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            serviceRegistry.create(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         else
-            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, "注册服务2".getBytes());
+            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
         //请求列表目录
         if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
             serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
