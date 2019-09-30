@@ -107,17 +107,23 @@ public class RegisterRunner implements ApplicationRunner {
     private void registerServer() throws KeeperException, InterruptedException, IOException {
         //todo
 
+        //获取服务信息
 
 
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        //订阅列表目录
         if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
             serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX + serverCode))
+        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX +"/"+  serverCode))
             serviceRegistry.create(TopicPrefix.SUB_PREFIX + "/" + serverCode, "注册服务1".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         else
             serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, "注册服务2".getBytes());
-
+        //请求列表目录
+        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
+            serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX +"/"+ serverCode))
+            serviceRegistry.create(TopicPrefix.PUB_PREFIX + "/" + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
 
         /*RegisterType registerType = registerMsg.getRegisterType();

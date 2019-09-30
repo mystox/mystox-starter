@@ -191,7 +191,6 @@ public class MqttSenderImpl implements MqttSender {
     }
 
     private boolean addPubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
-        //todo
         if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
             logger.warn("server Slogin to {} jump pubList judged...", serverCode);
             return true;
@@ -200,9 +199,15 @@ public class MqttSenderImpl implements MqttSender {
         String topicId = MqttUtils.preconditionPubTopicId(serverCode, operaCode);
         if (!serviceRegistry.exists(topicId)) {
             //不存在这个请求列表
-            logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
-            serviceRegistry.create(TopicPrefix.PUB_PREFIX + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            return false;
+            logger.warn("topicId(nodePath) [{}] didn't registered...", topicId);
+            if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX + "/"+ serverCode)) return false;
+            serviceRegistry.create(topicId, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+
+        } else {
+            String pubPath = topicId + "/" + this.serverCode; //请求列表的节点path 带上 pub的此服务serverCode做临时节点
+            if (!serviceRegistry.exists(pubPath)) {
+                serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            }
         }
         return true;
     }
@@ -211,16 +216,16 @@ public class MqttSenderImpl implements MqttSender {
     ServiceRegistry serviceRegistry;
 
     private boolean isExistsBySubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
-            if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
-                logger.warn("server Slogin to {} jump subList judged...", serverCode);
-                return true;
-            }
-            String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-            if (!serviceRegistry.exists(topicId)) {
-                logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
-                return false;
-            }
+        if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
+            logger.warn("server Slogin to {} jump subList judged...", serverCode);
             return true;
+        }
+        String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        if (!serviceRegistry.exists(topicId)) {
+            logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
+            return false;
+        }
+        return true;
     }
 
 

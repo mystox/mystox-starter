@@ -2,7 +2,6 @@ package com.kongtrolink.framework.core.config;
 
 import com.kongtrolink.framework.core.interceptor.SessionTimeoutInterceptor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -12,10 +11,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 /**
  * \* @Author: mystox
  * \* Date: 2018/10/24 9:18
- * \* Description:
+ * \* Description: 复制这个配置类到具体的模块项目中 类打上@configuration注解 具体bean做个性化配置
  * \
  */
-@Configuration
+//@Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Override
