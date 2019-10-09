@@ -16,8 +16,8 @@ public class CIConnectionController {
     @Resource(name = "Neo4jDBService")
     private DBService dbService;
 
-    @RequestMapping("/addType")
-    public String addType(@RequestBody JSONObject requestBody) {
+    @RequestMapping("/add")
+    public String add(@RequestBody JSONObject requestBody) {
 
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -31,8 +31,8 @@ public class CIConnectionController {
         return JSONObject.toJSONString(result);
     }
 
-    @RequestMapping("/searchType")
-    public String searchType() {
+    @RequestMapping("/search")
+    public String search() {
 
         JSONArray result = dbService.searchCIConnectionType();
 

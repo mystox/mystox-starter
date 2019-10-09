@@ -25,8 +25,19 @@ public class MqttService implements Service {
         return JSONObject.toJSONString(jsonArray);
     }
 
+    public String getCIIds(String payload) {
+
+        JSONObject jsonObject = JSONObject.parseObject(payload);
+        JSONArray jsonArray = dbService.searchCIIds(jsonObject);
+
+        return JSONObject.toJSONString(jsonArray);
+    }
+
     public String getCI(String payload) {
 
-        return "";
+        JSONObject jsonObject = JSONObject.parseObject(payload);
+        JSONObject result = dbService.searchCI(jsonObject);
+
+        return JSONObject.toJSONString(result);
     }
 }

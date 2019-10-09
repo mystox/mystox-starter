@@ -39,9 +39,15 @@ public interface DBService {
 
     boolean modifyCI(JSONObject jsonObject);
 
+    JSONObject searchCI(JSONObject jsonObject);
+
     boolean addCIRelationship(JSONObject jsonObject);
+
+    JSONObject searchCIRelationship(JSONObject jsonObject);
 
     boolean deleteCIRelationship(JSONObject jsonObject);
 
     JSONArray searchCIModel(JSONObject jsonObject);
+
+    JSONArray searchCIIds(JSONObject jsonObject);
 }

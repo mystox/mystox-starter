@@ -13,5 +13,8 @@ public interface Service {
     String getCIModel(String payload);
 
     @OperaCode
+    String getCIIds(String payload);
+
+    @OperaCode
     String getCI(String payload);
 }
