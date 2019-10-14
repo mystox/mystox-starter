@@ -1,0 +1,29 @@
+
+spring:
+  application:
+    name: yytd-alarm-server
+server:
+  name: ALARM_SERVER #\u670D\u52A1\u7F16\u7801
+  version: 1.0.0 #\u670D\u52A1\u7248\u672C,\u53EF\u4EE5\u6269\u5C55\u4E3A * app
+  port: 18081 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
+#jarResources:
+#  path: ./jarResources #\u53EF\u9009\u914D\u7F6E jar\u5305\u548CjarRes.yml\u8D44\u6E90\u914D\u7F6E\u6587\u4EF6\u5B58\u653E\u8DEF\u5F84 \u9ED8\u8BA4\u4E3A./jarResources
+register:
+  scanBasePackage: com.kongtrolink.framework.mqtt #\u9ED8\u8BA4\u914D\u7F6Ecom.kongtrolink.framework \u5982\u679C\u9879\u76EE\u7684\u5305\u540D\u4E0D\u4E00\u81F4\u9700\u8981\u624B\u52A8\u914D\u7F6E
+  url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #\u5F00\u53D1\u6001\u7684\u670D\u52A1\u548C\u4E91\u7BA1\u670D\u52A1\u914D\u7F6E\uFF0C\u5F00\u53D1\u6001\u670D\u52A1\u53EF\u4EE5\u4E0D\u4F9D\u8D56\u4E91\u7BA1\u8FDB\u884C\u90E8\u5206\u529F\u80FD\u670D\u52A1\u7684\u5F00\u53D1
+mqtt:
+  username: root #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  password: 123456 #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  url: tcp://172.16.5.26:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+
+mongodb:
+#  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
+  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+
+unique:
+  service:
+    levelHandle:
+      defaulg: serverCode1.operaCode1
+      opera2: serverCode2.operaCode2
+    cycleHandle:
+    deliverHandle:

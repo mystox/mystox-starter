@@ -10,4 +10,5 @@ public class ServerName {
     public final static String AUTH_PLATFORM = "AUTH_PLATFORM";
     public final static String ALARM_SERVER = "ALARM_SERVER";       //告警服务
     public final static String LOG_SERVER = "LOG_SERVER"; //日志服务
+    public final static String ASSET_MANAGEMENT_SERVER = "ASSET_MANAGEMENT_SERVER"; //资产管理服务
 }
