@@ -13,8 +13,9 @@ public class ModuleLog {
     private Date time; //产生日志时间
     private Integer stateCode; //错误日志类型与错误状态一致
     private String operaCode; //操作码
+    private String serverCode; //消息目标服务code
     private String msgId; //消息id
-    private String sourceAddress; //消息源
+    private String sourceServerCode; //消息源 产生
 
     public String getId() {
         return id;
@@ -56,11 +57,19 @@ public class ModuleLog {
         this.msgId = msgId;
     }
 
-    public String getSourceAddress() {
-        return sourceAddress;
+    public String getSourceServerCode() {
+        return sourceServerCode;
     }
 
-    public void setSourceAddress(String sourceAddress) {
-        this.sourceAddress = sourceAddress;
+    public void setSourceServerCode(String sourceServerCode) {
+        this.sourceServerCode = sourceServerCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 }

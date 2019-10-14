@@ -18,9 +18,9 @@ public class MqttResp {
     private boolean subpackage = false;
     private int packageCount;//分包总数
     private int packageNum;//分包编号
+    private int crc;//总包校验
 
-
-    public MqttResp(String msgId, byte[] bytePayload, boolean subpackage, int packageNum,int packageCount) {
+    public MqttResp(String msgId, byte[] bytePayload, boolean subpackage, int packageNum,int packageCount, int crc) {
         this.msgId = msgId;
         this.topic = topic;
         this.payloadType = PayloadType.BYTE;
@@ -28,6 +28,7 @@ public class MqttResp {
         this.packageNum = packageNum;
         this.subpackage = subpackage;
         this.packageCount = packageCount;
+        this.crc = crc;
     }
 
     public MqttResp(String msgId, byte[] bytePayload) {
@@ -46,6 +47,15 @@ public class MqttResp {
     }
 
     public MqttResp() {
+    }
+
+
+    public int getCrc() {
+        return crc;
+    }
+
+    public void setCrc(int crc) {
+        this.crc = crc;
     }
 
     public int getPackageCount() {

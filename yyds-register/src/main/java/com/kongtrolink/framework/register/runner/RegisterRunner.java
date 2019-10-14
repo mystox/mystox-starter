@@ -60,15 +60,11 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${spring.profiles.active:dev}")
     private String devFlag;
 
-
-    @Value("server.host:127.0.0.1")
+    @Value("${server.host:127.0.0.1}")
     private String host;
 
-    @Value("server.port")
+    @Value("${server.port}")
     private int port;
-
-
-
 
 
     @Autowired
@@ -116,44 +112,30 @@ public class RegisterRunner implements ApplicationRunner {
      * @throws IOException
      */
     private void registerServer() throws KeeperException, InterruptedException, IOException {
-        //todo
 
         //获取服务信息
-
         ServerMsg serverMsg = new ServerMsg();
         serverMsg.setServerVersion(serverVersion);
         serverMsg.setHost(host);
         serverMsg.setPort(port);
         serverMsg.setServerName(serverName);
 
-
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
         if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
             serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX +"/"+  serverCode))
-            serviceRegistry.create(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(subPath))
+            serviceRegistry.create(subPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         else
             serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
         //请求列表目录
         if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
             serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX +"/"+ serverCode))
-            serviceRegistry.create(TopicPrefix.PUB_PREFIX + "/" + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-
-
-        /*RegisterType registerType = registerMsg.getRegisterType();
-        if (RegisterType.ZOOKEEPER.equals(registerType)) {
-            serviceRegistry.build(registerMsg.getRegisterUrl());
-            for (RegisterSub sub : subList) {
-                setDataToRegistry(sub);
-            }
-            //往服务节点注册服务信息
-
-        } else {
-            throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
-        }*/
+        String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(pubPath))
+            serviceRegistry.create(pubPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
 
