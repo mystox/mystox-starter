@@ -8,9 +8,9 @@ import java.util.Date;
  * description:
  * update record:
  */
-public class ModuleLog {
+public class MqttLog {
     private String id;
-    private Date time; //产生日志时间
+    private Date recordTime; //产生日志时间
     private Integer stateCode; //错误日志类型与错误状态一致
     private String operaCode; //操作码
     private String serverCode; //消息目标服务code
@@ -25,12 +25,12 @@ public class ModuleLog {
         this.id = id;
     }
 
-    public Date getTime() {
-        return time;
+    public Date getRecordTime() {
+        return recordTime;
     }
 
-    public void setTime(Date time) {
-        this.time = time;
+    public void setRecordTime(Date recordTime) {
+        this.recordTime = recordTime;
     }
 
     public Integer getStateCode() {
