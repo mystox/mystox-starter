@@ -41,13 +41,14 @@ public class MqttLogUtil {
     MqttSender sender;
 
 
-    public void ERROR(String msgId,int stateCode, String operaCode, String targetServerCode) {
+    public void ERROR(String msgId, int stateCode, String operaCode, String targetServerCode) {
         String logServerCode = MqttUtils.preconditionServerCode(logServerName, logServerVersion);
         if (!logServerCode.equals(targetServerCode) && !OperaCode.SLOGIN.equals(operaCode)) { //发送至日志服务产生的错误日志不重复发送至日志服务
-            MqttLog mqttLog = logBuilder(msgId,stateCode, operaCode, targetServerCode);
-            sender.sendToMqtt(logServerCode, OperaCode.MQLOG, JSONObject.toJSONString(mqttLog));
+            MqttLog mqttLog = logBuilder(msgId, stateCode, operaCode, targetServerCode);
+            logExecutor.execute(() ->
+                    sender.sendToMqtt(logServerCode, OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
         } else {
-            //日志信息发送错误 不记录日志
+            //日志信息发送错误的错误日志 不记录日志
             logger.warn("log msg send to log server exception...");
         }
     }
