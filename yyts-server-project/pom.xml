@@ -18,6 +18,7 @@
         <module>foo-server-demo</module>
         <module>asset-management-server</module>
         <module>alarm-server</module>
+        <module>log-server</module>
     </modules>
 
 

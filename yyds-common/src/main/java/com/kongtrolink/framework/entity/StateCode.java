@@ -9,7 +9,7 @@ package com.kongtrolink.framework.entity;
 public class StateCode {
     public final static int FAILED = 0; //响应失败
     public final static int SUCCESS = 1; //请求成功
-    public final static int UNREGISTY = 2; //未注册
+    public final static int UNREGISTY = 2; // 注册错误
     public final static int CONNECT_ERROR = 3; //通信出错
     public final static int CONNECT_INTERRUPT = 4; //通讯中断
     public final static int REDIS_ERROR = 5; //redis异常
@@ -19,5 +19,6 @@ public class StateCode {
     public final static int XML_ILLEGAL = 9; //xml报文不合规
     public final static int MSG_DUPLICATE = 10; //消息重复发送
     public final static int TIMEOUT = 11; //消息超时
+    public final static int EXCEPTION = 12; //非法异常
 
 }

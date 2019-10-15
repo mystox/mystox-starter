@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
+import com.kongtrolink.framework.common.util.ByteUtil;
 import com.kongtrolink.framework.entity.MqttResp;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -49,23 +50,26 @@ public class CallBackTopic implements Callable<MqttResp> {
             for (int i = 0; i < packageCount; i++) {
                 MqttResp resp = map.get(i);
                 list.addAll(Arrays.asList(ArrayUtils.toObject(resp.getBytePayload())));
-
             }
             Byte[] bytes1 = list.toArray(new Byte[list.size()]);
 
             byte[] bytes3 = ArrayUtils.toPrimitive(bytes1);
+
             String paylaod = null;
             try {
                 paylaod = new String(bytes3, "utf-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            int crc = ByteUtil.getCRC(bytes3);
+            int msgCrc = result.getCrc();
+            if (crc != msgCrc) {
+                logger.error("[{}] stickPackage crc is wrong msgCrc: [{}] resultCrc: [{}]",this.result.getMsgId(),msgCrc,crc);
+            }
             this.result = new MqttResp(result.getMsgId(), paylaod);
-            logger.info("[{}]粘包完成 stickPackage..{},{}", this.result.getMsgId(),packageCount,packageNum);
+            logger.info("[{}] stickPackage success..{}, {}, {}", this.result.getMsgId(),packageCount,packageNum,crc);
             latch.countDown();
         }
-
-
     }
 
     @Override

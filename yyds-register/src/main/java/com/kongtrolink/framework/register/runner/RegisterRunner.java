@@ -7,6 +7,7 @@ import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
+import com.kongtrolink.framework.register.entity.ServerMsg;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
 import com.kongtrolink.framework.service.MqttSender;
@@ -59,6 +60,12 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${spring.profiles.active:dev}")
     private String devFlag;
 
+    @Value("${server.host:127.0.0.1}")
+    private String host;
+
+    @Value("${server.port}")
+    private int port;
+
 
     @Autowired
     ServiceRegistry serviceRegistry;
@@ -68,8 +75,8 @@ public class RegisterRunner implements ApplicationRunner {
     ServiceScanner jarServiceScanner;
 
 
-
     private MqttSender mqttSender;
+
     @Autowired(required = false)
     public void setMqttSender(MqttSender mqttSender) {
         this.mqttSender = mqttSender;
@@ -77,6 +84,7 @@ public class RegisterRunner implements ApplicationRunner {
 
 
     MqttHandler mqttHandler;
+
     @Autowired(required = false)
     @Qualifier("mqttHandlerImpl")
     public void setMqttHandler(MqttHandler mqttHandler) {
@@ -85,29 +93,49 @@ public class RegisterRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        List<RegisterSub> subList = scanSubList();
         RegisterMsg registerMsg = getRegisterMsg();
+        List<RegisterSub> subList = scanSubList();
         if (registerMsg == null)
             System.exit(0);
         register(registerMsg, subList);//注册操作码信息
+        registerServer(); //注册服务基本信息
         subTopic(subList);//订阅操作码对应topic
-        registerServer(registerMsg); //注册服务信息
+        //验证服务能力（pubList）
         logger.info("register successfully..." + serverCode);
     }
 
-    private void registerServer(RegisterMsg registerMsg) {
-        //todo
-       /* RegisterType registerType = registerMsg.getRegisterType();
-        if (RegisterType.ZOOKEEPER.equals(registerType)) {
-            serviceRegistry.build(registerMsg.getRegisterUrl());
-            for (RegisterSub sub : subList) {
-                setDataToRegistry(sub);
-            }
-            //往服务节点注册服务信息
+    /**
+     * 注册服务信息
+     *
+     * @throws KeeperException
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    private void registerServer() throws KeeperException, InterruptedException, IOException {
 
-        } else {
-            throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
-        }*/
+        //获取服务信息
+        ServerMsg serverMsg = new ServerMsg();
+        serverMsg.setServerVersion(serverVersion);
+        serverMsg.setHost(host);
+        serverMsg.setPort(port);
+        serverMsg.setServerName(serverName);
+
+        if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
+            serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        //订阅列表目录
+        if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
+            serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(subPath))
+            serviceRegistry.create(subPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        else
+            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
+        //请求列表目录
+        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
+            serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(pubPath))
+            serviceRegistry.create(pubPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
 
@@ -115,7 +143,7 @@ public class RegisterRunner implements ApplicationRunner {
      * 重连注册
      */
     public void multiRegister() throws InterruptedException, IOException, KeeperException {
-        List<RegisterSub> subList = scanSubList();
+        List<RegisterSub> subList = scanSubList();//重新扫描
         for (RegisterSub sub : subList) {
             setDataToRegistry(sub);
         }
@@ -131,12 +159,6 @@ public class RegisterRunner implements ApplicationRunner {
     public void setDataToRegistry(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-        if (!serviceRegistry.exists("/mqtt"))
-            serviceRegistry.create("/mqtt", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists("/mqtt/sub"))
-            serviceRegistry.create("/mqtt/sub", null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        if (!serviceRegistry.exists("/mqtt/sub/" + serverCode))
-            serviceRegistry.create("/mqtt/sub/" + serverCode, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (!serviceRegistry.exists(nodePath))
             serviceRegistry.create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
@@ -150,7 +172,7 @@ public class RegisterRunner implements ApplicationRunner {
             String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
             if (mqttHandler != null) {
                 if (!mqttHandler.isExists(topicId))
-                mqttHandler.addSubTopic(topicId, 2);
+                    mqttHandler.addSubTopic(topicId, 2);
             }
         });
 
@@ -170,7 +192,7 @@ public class RegisterRunner implements ApplicationRunner {
         if (RegisterType.ZOOKEEPER.equals(registerType)) {
             serviceRegistry.build(registerMsg.getRegisterUrl());
             for (RegisterSub sub : subList) {
-            //往服务节点注册服务信息
+                //往服务节点注册服务信息
                 setDataToRegistry(sub);
             }
 

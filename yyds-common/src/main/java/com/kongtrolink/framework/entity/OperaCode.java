@@ -8,4 +8,5 @@ package com.kongtrolink.framework.entity;
  */
 public class OperaCode {
     public final static String SLOGIN = "Slogin"; //服务注册登录
+    public final static String MQLOG = "mqLog"; //mq日志保存
 }

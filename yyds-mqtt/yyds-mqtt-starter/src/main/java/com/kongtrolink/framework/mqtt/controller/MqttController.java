@@ -39,7 +39,7 @@ public class MqttController {
     }
 
     /**
-     * 注册请求表
+     * 注册请求表 无效
      *
      * @return
      */

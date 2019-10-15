@@ -12,6 +12,9 @@ public class MqttUtils {
     public static String preconditionSubTopicId(String serverCode, String operaCode) {
         return TopicPrefix.SUB_PREFIX + "/" + serverCode + "/" + operaCode;
     }
+    public static String preconditionPubTopicId(String serverCode, String operaCode) {
+        return TopicPrefix.PUB_PREFIX + "/" + serverCode + "/" + operaCode;
+    }
 
     public static String preconditionServerCode(String serverName, String version) {
         return serverName + "_" + version;

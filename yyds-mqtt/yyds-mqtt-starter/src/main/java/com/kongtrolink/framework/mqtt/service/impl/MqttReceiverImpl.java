@@ -1,10 +1,12 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.common.util.ByteUtil;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
+import com.kongtrolink.framework.mqtt.util.MqttLog;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import org.apache.commons.lang3.ArrayUtils;
@@ -54,7 +56,8 @@ public class MqttReceiverImpl implements MqttReceiver {
 
     @Autowired
     private ServiceRegistry serviceRegistry;
-
+    @Autowired
+    private MqttLog mqttLog;
     @Override
     public MqttResp receive(String topic, MqttMsg payload) {
         logger.info("receive... ..." + JSONObject.toJSONString(payload));
@@ -69,6 +72,7 @@ public class MqttReceiverImpl implements MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
+            mqttLog.ERROR(StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
             logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
             result = new MqttResp(payload.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
@@ -210,11 +214,12 @@ public class MqttReceiverImpl implements MqttReceiver {
         List<MqttResp> result = new ArrayList<>();
         String payload = ackPayload.getPayload();
         byte[] bytes = payload.getBytes(Charset.forName("utf-8"));
+        int crc = ByteUtil.getCRC(bytes);
         int length = bytes.length;
         int count = length / MQTT_PAYLOAD_LIMIT + 1;
         for (int i = 0; i < count; i++) {
             byte[] subarray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
-            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count);
+            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count,crc);
             result.add(resp);
         }
         return result;
