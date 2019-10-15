@@ -5,7 +5,6 @@ import com.kongtrolink.framework.dao.EnterpriseLevelDao;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.query.AlarmLevelQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -43,7 +43,7 @@ public class MqttLogUtil {
 
     public void ERROR(String msgId,int stateCode, String operaCode, String targetServerCode) {
         String logServerCode = MqttUtils.preconditionServerCode(logServerName, logServerVersion);
-        if (!logServerCode.equals(targetServerCode)) { //发送至日志服务产生的错误日志不重复发送至日志服务
+        if (!logServerCode.equals(targetServerCode) && !OperaCode.SLOGIN.equals(operaCode)) { //发送至日志服务产生的错误日志不重复发送至日志服务
             MqttLog mqttLog = logBuilder(msgId,stateCode, operaCode, targetServerCode);
             sender.sendToMqtt(logServerCode, OperaCode.MQLOG, JSONObject.toJSONString(mqttLog));
         } else {

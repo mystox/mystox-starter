@@ -8,7 +8,6 @@ import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.query.AlarmCycleQuery;
 import com.kongtrolink.framework.query.AlarmQuery;
-import java.util.*;
 
 /**
  * @Auther: liudd

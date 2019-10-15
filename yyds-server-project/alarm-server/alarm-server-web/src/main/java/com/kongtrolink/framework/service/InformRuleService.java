@@ -2,6 +2,7 @@ package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.query.InformRuleQuery;
+
 import java.util.List;
 
 /**

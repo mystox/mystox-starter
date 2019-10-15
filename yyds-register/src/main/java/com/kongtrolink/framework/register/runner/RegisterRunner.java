@@ -92,17 +92,15 @@ public class RegisterRunner implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args){
-        RegisterMsg registerMsg = getRegisterMsg();
-        List<RegisterSub> subList = scanSubList();
-        if (registerMsg == null)
-            System.exit(0);
-
+    public void run(ApplicationArguments args) {
         try {
-
+            RegisterMsg registerMsg = getRegisterMsg();
+            List<RegisterSub> subList = scanSubList();
+            if (registerMsg == null)
+                System.exit(0);
             register(registerMsg, subList);//注册操作码信息
             subTopic(subList);//订阅操作码对应topic
-        } catch (KeeperException | InterruptedException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }

@@ -3,7 +3,6 @@ package com.kongtrolink.framework.service;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.enttiy.Alarm;
-import java.util.*;
 
 /**
  * @Auther: liudd
