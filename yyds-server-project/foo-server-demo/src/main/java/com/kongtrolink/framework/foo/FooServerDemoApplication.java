@@ -1,13 +1,13 @@
-package com.kongtrolink.framework.log;
+package com.kongtrolink.framework.foo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.kongtrolink.framework"})
-public class ServerDemoApplication {
+public class FooServerDemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ServerDemoApplication.class, args);
+		SpringApplication.run(FooServerDemoApplication.class, args);
 	}
 
 }

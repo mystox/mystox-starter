@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.service.impl;
+package com.kongtrolink.framework.log.impl;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;

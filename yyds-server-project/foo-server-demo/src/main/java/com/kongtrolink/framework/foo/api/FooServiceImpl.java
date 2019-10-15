@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.log.api;
+package com.kongtrolink.framework.foo.api;
 
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.log.api;
+package com.kongtrolink.framework.foo.api;
 
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;

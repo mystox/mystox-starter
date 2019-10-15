@@ -2,10 +2,10 @@ package com.kongtrolink.framework.dao.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.dao.DBService;
 import com.kongtrolink.framework.entity.CICorrespondenceType;
 import com.kongtrolink.framework.entity.Neo4jDBNodeType;
 import com.kongtrolink.framework.entity.Neo4jDBRelationshipType;
-import com.kongtrolink.framework.dao.DBService;
 import com.kongtrolink.framework.utils.Neo4jUtils;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.summary.ResultSummary;
