@@ -6,8 +6,9 @@ package com.kongtrolink.framework.core.interceptor;
  * description:
  * update record:
  */
+
 import com.kongtrolink.framework.core.entity.Const;
-import com.kongtrolink.framework.model.session.HttpStatusCode;
+import com.kongtrolink.framework.core.entity.session.HttpStatusCode;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 

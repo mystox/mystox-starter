@@ -1,4 +1,4 @@
-YYTD_MQTT_DEMO:
+YYTD_MQTT_DEMO_1.0.0:
   type: #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
   name: #权限名称 必填
   code: #权限编码 必填同级不可重复

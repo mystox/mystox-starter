@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
-	<artifactId>foo-server-demo</artifactId>
+	<artifactId>log-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>foo-server-demo</name>
+	<name>log-server</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

@@ -6,6 +6,7 @@ import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 /**

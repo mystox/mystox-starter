@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.core.utils;
+package com.kongtrolink.framework.common.util;
 
 /**
  * Created by mystoxlol on 2019/4/9, 15:12.
