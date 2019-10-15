@@ -33,7 +33,7 @@ public interface DBService {
 
     JSONObject searchCIProp(JSONObject jsonObject);
 
-    boolean addCI(JSONObject jsonObject);
+    String addCI(JSONObject jsonObject);
 
     boolean deleteCI(JSONObject jsonObject);
 

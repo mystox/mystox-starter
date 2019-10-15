@@ -22,8 +22,10 @@ public class CIController {
         result.put("result", 0);
         result.put("info", "添加失败");
 
-        if (dbService.addCI(requestBody)) {
+        String id = dbService.addCI(requestBody);
+        if (!id.equals("")) {
             result.put("result", 1);
+            result.put("id", id);
             result.put("info", "添加成功");
         }
 

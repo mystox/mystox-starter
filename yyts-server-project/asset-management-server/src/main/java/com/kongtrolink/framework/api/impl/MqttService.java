@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.Service;
 import com.kongtrolink.framework.dao.DBService;
+import com.kongtrolink.framework.utils.DeviceUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 
@@ -13,9 +15,8 @@ public class MqttService implements Service {
     @Resource(name = "Neo4jDBService")
     private DBService dbService;
 
-    public void reportCI(String payload) {
-
-    }
+    @Autowired
+    DeviceUtils deviceUtils;
 
     public String getCIModel(String payload) {
 
@@ -39,5 +40,10 @@ public class MqttService implements Service {
         JSONObject result = dbService.searchCI(jsonObject);
 
         return JSONObject.toJSONString(result);
+    }
+
+    public void deviceReport(String payload) {
+
+        deviceUtils.deviceReport(payload);
     }
 }

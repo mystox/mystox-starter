@@ -7,9 +7,6 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface Service {
 
     @OperaCode
-    void reportCI(String payload);
-
-    @OperaCode
     String getCIModel(String payload);
 
     @OperaCode
@@ -17,4 +14,7 @@ public interface Service {
 
     @OperaCode
     String getCI(String payload);
+
+    @OperaCode
+    void deviceReport(String payload);
 }
