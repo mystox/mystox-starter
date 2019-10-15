@@ -81,13 +81,13 @@ public class DeviceTypeLevelDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String uniqueCode = levelQuery.getUniqueCode();
-        if(!StringUtil.isNUll(uniqueCode)){
-            criteria.and("uniqueCode").is(uniqueCode);
+        String enterpriseCode = levelQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
         }
-        String service = levelQuery.getService();
-        if(!StringUtil.isNUll(service)){
-            criteria.and("service").is(service);
+        String serverCode = levelQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
         }
         String deviceType = levelQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){

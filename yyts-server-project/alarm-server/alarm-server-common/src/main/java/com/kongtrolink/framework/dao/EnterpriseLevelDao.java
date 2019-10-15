@@ -77,13 +77,13 @@ public class EnterpriseLevelDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String uniqueCode = levelQuery.getUniqueCode();
-        if(!StringUtil.isNUll(uniqueCode)){
-            criteria.and("uniqueCode").is(uniqueCode);
+        String enterpriseCode = levelQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
         }
-        String service = levelQuery.getService();
-        if(!StringUtil.isNUll(service)){
-            criteria.and("service").is(service);
+        String serverCode = levelQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
         }
         String level = levelQuery.getLevel();
         if(!StringUtil.isNUll(level)){
@@ -139,4 +139,19 @@ public class EnterpriseLevelDao {
         query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/12 14:33
+     * 功能描述:匹配告警
+     */
+    public EnterpriseLevel matchLevel(String enterpriseCode, String serverCode, String level){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("level").is(level);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "level"));
+        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
+    }
+
 }

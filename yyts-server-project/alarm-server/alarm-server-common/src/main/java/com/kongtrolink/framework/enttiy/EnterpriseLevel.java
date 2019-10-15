@@ -12,8 +12,8 @@ import java.util.Date;
 public class EnterpriseLevel {
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String level;
     private String levelName;
     private String color;
@@ -52,22 +52,21 @@ public class EnterpriseLevel {
         this.id = id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getEnterpriseCode() {
+        return enterpriseCode;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
-
 
     public String getLevel() {
         return level;

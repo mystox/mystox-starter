@@ -5,6 +5,7 @@ import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -71,17 +72,25 @@ public class AlarmDao {
         if(null != alarmIdList && alarmIdList.size()>0){
             criteria.and("_id").in(alarmIdList);
         }
-        String serial = alarmQuery.getSerial();
-        if(!StringUtil.isNUll(serial)){
-            criteria.and("serial").is(serial);
+        String deviceType = alarmQuery.getDeviceType();
+        if(!StringUtil.isNUll(deviceType)){
+            criteria.and("deviceType").is(deviceType);
+        }
+        String deviceModel = alarmQuery.getDeviceModel();
+        if(!StringUtil.isNUll(deviceModel)){
+            criteria.and("deviceModel").is(deviceModel);
+        }
+        String deviceId = alarmQuery.getDeviceId();
+        if(!StringUtil.isNUll(deviceId)){
+            criteria.and("deviceId").is(deviceId);
         }
         String signalId = alarmQuery.getSignalId();
         if(!StringUtil.isNUll(signalId)){
             criteria.and("signalId").is(signalId);
         }
-        String deviceId = alarmQuery.getDeviceId();
-        if(!StringUtil.isNUll(deviceId)){
-            criteria.and("deviceId").is(deviceId);
+        String serial = alarmQuery.getSerial();
+        if(!StringUtil.isNUll(serial)){
+            criteria.and("serial").is(serial);
         }
         List<String> levelList = alarmQuery.getLevelList();
         if(null != levelList && levelList.size()>0){
@@ -94,11 +103,11 @@ public class AlarmDao {
         Date beginTime = alarmQuery.getBeginTime();
         Date endTime = alarmQuery.getEndTime();
         if(null != beginTime && null == endTime){
-            criteria.and("tReport").gte(beginTime);
+            criteria.and("treport").gte(beginTime);
         }else if(null != beginTime && null != endTime){
-            criteria.and("tReport").gte(beginTime).lte(endTime);
+            criteria.and("treport").gte(beginTime).lte(endTime);
         }else if(null == beginTime && null != endTime){
-            criteria.and("tReport").lte(endTime);
+            criteria.and("treport").lte(endTime);
         }
         String targetLevel = alarmQuery.getTargetLevel();
         if(!StringUtil.isNUll(targetLevel)){
@@ -107,6 +116,11 @@ public class AlarmDao {
         String targetLevelName = alarmQuery.getTargetLevelName();
         if(!StringUtil.isNUll(targetLevelName)){
             criteria.and("targetLevelName").is(targetLevelName);
+        }
+        //片键
+        String sliceKey = alarmQuery.getSliceKey();
+        if(!StringUtil.isNUll(sliceKey)){
+            criteria.and("sliceKey").is(sliceKey);
         }
         //设备属性查询
         Map<String, String> deviceInfo = alarmQuery.getDeviceInfo();
@@ -168,19 +182,32 @@ public class AlarmDao {
     }
 
     /**
-     * @param alarm
      * @param table
      * @auther: liudd
      * @date: 2019/9/26 10:29
      * 功能描述:告警消除
      */
-    public boolean resolve(Alarm alarm, String table) {
-        Criteria criteria = Criteria.where("_id").is(alarm.getId());
+    public boolean resolve(AlarmQuery alarmQuery, String table, Date trecover) {
+        Criteria criteria = new Criteria();
+        baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("state", alarm.getState());
-        update.set("tRecover", alarm.gettRecover());
+        update.set("state", alarmQuery.getState());
+        update.set("trecover", trecover);
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/14 14:43
+     * 功能描述:获取实时告警，用于周期管理。
+     */
+    public List<Alarm> getAlarmList(String table, int size){
+        Criteria criteria = new Criteria();
+        Query query = Query.query(criteria);
+        query.limit(size);
+        query.with(new Sort(Sort.Direction.ASC, "treport"));
+        return mongoTemplate.find(query, Alarm.class, table);
     }
 }

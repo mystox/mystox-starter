@@ -13,8 +13,8 @@ import java.util.Date;
 public class AlarmLevel {
 
     private String id;                      //id
-    private String uniqueCode;              //所属企业
-    private String service;                 //服务
+    private String enterpriseCode;
+    private String serverCode;
     private String deviceType;              //设备类型名称
     private String deviceModel;              //设备型号
 //    private List<String> sourceLevelList;   //原等级列表字符串（12345），不添加“，”号等分隔符
@@ -25,6 +25,22 @@ public class AlarmLevel {
     private String generate = Contant.SYSTEM;                //产生类型
     private Date updateTime;                   //创建时间
     private FacadeView creator;             //创建者
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getGenerate() {
         return generate;
@@ -58,14 +74,6 @@ public class AlarmLevel {
         this.deviceModel = deviceModel;
     }
 
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
-
     public String getDeviceType() {
         return deviceType;
     }
@@ -88,14 +96,6 @@ public class AlarmLevel {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getUniqueCode() {
-        return uniqueCode;
-    }
-
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
     }
 
     public Date getUpdateTime() {

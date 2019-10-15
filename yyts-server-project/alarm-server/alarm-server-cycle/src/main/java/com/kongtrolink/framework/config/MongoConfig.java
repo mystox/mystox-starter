@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.base;
+package com.kongtrolink.framework.config;
 
 import com.mongodb.MongoClientURI;
 import org.springframework.beans.factory.BeanFactory;
@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.data.mongodb.core.convert.*;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+
 import java.net.UnknownHostException;
 
 /**
@@ -26,7 +27,7 @@ public class MongoConfig
     private String uri;
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter converter) throws Exception {
+    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,MappingMongoConverter converter) throws Exception {
 
         //额外连接参数设置
         return new MongoTemplate(mongoDbFactory,converter);
@@ -37,6 +38,13 @@ public class MongoConfig
         SimpleMongoDbFactory simpleMongoDbFactory = new SimpleMongoDbFactory(new MongoClientURI(this.uri));
         return simpleMongoDbFactory;
     }
+
+//    @Bean
+//    MappingMongoConverter mappingMongoConverter(MongoDbFactory factory) {
+//        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
+//        return  new MappingMongoConverter(dbRefResolver, new MongoMappingContext());
+//    }
+//
 
     @Bean
     public MongoMappingContext mappingContext() {
@@ -52,8 +60,10 @@ public class MongoConfig
         } catch (NoSuchBeanDefinitionException ignore) {
             ignore.printStackTrace();
         }
+
         // Don't save _class to mongo
         mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
+
         return mappingConverter;
     }
 

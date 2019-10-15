@@ -70,13 +70,13 @@ public class AuxilaryDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String uniqueCode = auxilaryQuery.getUniqueCode();
-        if(!StringUtil.isNUll(uniqueCode)){
-            criteria.and("uniqueCode ").is(uniqueCode );
+        String enterpriseCode = auxilaryQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode ").is(enterpriseCode );
         }
-        String service = auxilaryQuery.getService();
-        if(!StringUtil.isNUll(service)){
-            criteria.and("service").is(service);
+        String serverCode = auxilaryQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
         }
         //liuddtodo 需要做mongodb特殊字符串处理
         String proStr = auxilaryQuery.getProStr();

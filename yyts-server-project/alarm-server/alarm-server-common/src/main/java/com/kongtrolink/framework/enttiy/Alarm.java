@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.kongtrolink.framework.base.Contant;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -11,8 +13,8 @@ import java.util.Map;
 public class Alarm {
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String serial;              //告警序列号
     private String name;                //告警名称
     private float value;                //告警值
@@ -20,15 +22,43 @@ public class Alarm {
     private String targetLevel;         //目标等级
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
-    private Date tReport;               //上报时间
-    private Date tRecover;              //消除时间
+    private Date treport;               //上报时间
+    private Date trecover;              //消除时间
     private String deviceId;            //设备对应的编码，需要与资产管理对应
     private String deviceType;          //设备型号
     private String deviceModel;         //设备类型
     private String signalId;            //信号点id
     private String state;
-    private String cycleId;             //告警周期id
+    private String sliceKey;            //片键，也可以作为普通索引键
     private Map<String, String> AuxilaryMap;
+
+    public void initSliceKey(){
+        sliceKey = this.enterpriseCode + this.serverCode + deviceType + deviceModel;
+    }
+
+    public String getSliceKey() {
+        return sliceKey;
+    }
+
+    public void setSliceKey(String sliceKey) {
+        this.sliceKey = sliceKey;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getSerial() {
         return serial;
@@ -94,36 +124,12 @@ public class Alarm {
         AuxilaryMap = auxilaryMap;
     }
 
-    public String getCycleId() {
-        return cycleId;
-    }
-
-    public void setCycleId(String cycleId) {
-        this.cycleId = cycleId;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getUniqueCode() {
-        return uniqueCode;
-    }
-
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
     }
 
     public String getState() {
@@ -158,20 +164,20 @@ public class Alarm {
         this.level = level;
     }
 
-    public Date gettReport() {
-        return tReport;
+    public Date getTreport() {
+        return treport;
     }
 
-    public void settReport(Date tReport) {
-        this.tReport = tReport;
+    public void setTreport(Date treport) {
+        this.treport = treport;
     }
 
-    public Date gettRecover() {
-        return tRecover;
+    public Date getTrecover() {
+        return trecover;
     }
 
-    public void settRecover(Date tRecover) {
-        this.tRecover = tRecover;
+    public void setTrecover(Date trecover) {
+        this.trecover = trecover;
     }
 
     public String getDeviceId() {
@@ -182,26 +188,7 @@ public class Alarm {
         this.deviceId = deviceId;
     }
 
-    public String getUniqueService(){
-        return this.uniqueCode + this.service;
-    }
-
-    @Override
-    public String toString() {
-        return "Alarm{" +
-                "uniqueCode='" + uniqueCode + '\'' +
-                ", service='" + service + '\'' +
-                ", name='" + name + '\'' +
-                ", value=" + value +
-                ", level='" + level + '\'' +
-                ", targetLevel='" + targetLevel + '\'' +
-                ", targetLevelName='" + targetLevelName + '\'' +
-                ", color='" + color + '\'' +
-                ", tReport=" + tReport +
-                ", tRecover=" + tRecover +
-                ", deviceId='" + deviceId + '\'' +
-                ", deviceType='" + deviceType + '\'' +
-                ", deviceModel='" + deviceModel + '\'' +
-                '}';
+    public String getEnterpriseServer(){
+        return this.enterpriseCode + Contant.UNDERLINE + this.serverCode;
     }
 }

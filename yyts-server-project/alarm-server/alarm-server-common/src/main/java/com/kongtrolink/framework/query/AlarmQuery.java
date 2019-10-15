@@ -15,8 +15,8 @@ import java.util.Map;
 public class AlarmQuery extends Paging {
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String serial;              //告警序列号
     private String name;        //告警名称
     private float value;        //告警值
@@ -35,6 +35,15 @@ public class AlarmQuery extends Paging {
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
     private String signalId;            //信号点id
+    private String sliceKey;            //片键，也可以作为普通索引键
+
+    public String getSliceKey() {
+        return sliceKey;
+    }
+
+    public void setSliceKey(String sliceKey) {
+        this.sliceKey = sliceKey;
+    }
 
     public String getSerial() {
         return serial;
@@ -100,20 +109,20 @@ public class AlarmQuery extends Paging {
         this.deviceInfo = deviceInfo;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getEnterpriseCode() {
+        return enterpriseCode;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 
     public String getId() {
@@ -209,11 +218,14 @@ public class AlarmQuery extends Paging {
             return null;
         }
         AlarmQuery alarmQuery = new AlarmQuery();
-        alarmQuery.setUniqueCode(alarm.getUniqueCode());
-        alarmQuery.setService(alarm.getService());
+        alarmQuery.setEnterpriseCode(alarm.getEnterpriseCode());
+        alarmQuery.setServerCode(alarm.getServerCode());
+        alarmQuery.setDeviceId(alarm.getDeviceId());
         alarmQuery.setDeviceType(alarm.getDeviceType());
         alarmQuery.setDeviceModel(alarm.getDeviceModel());
+        alarmQuery.setSignalId(alarm.getSignalId());
         alarmQuery.setState(alarm.getState());
+        alarmQuery.setSliceKey(alarm.getSliceKey());
         return alarmQuery;
     }
 }

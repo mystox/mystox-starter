@@ -16,8 +16,8 @@ import java.util.Date;
 public class AlarmLevelQuery extends Paging {
 
     private String id;                 //id
-    private String uniqueCode;      //所属企业
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String deviceType;              //设备类型名称
     private String deviceModel;              //设备型号
     private String sourceLevel;     //源等级
@@ -27,6 +27,22 @@ public class AlarmLevelQuery extends Paging {
     private Date beginTime;
     private Date endTime;
     private String generate = Contant.SYSTEM;                //产生类型
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getGenerate() {
         return generate;
@@ -49,8 +65,8 @@ public class AlarmLevelQuery extends Paging {
             return null;
         }
         AlarmLevelQuery levelQuery = new AlarmLevelQuery();
-        levelQuery.setUniqueCode(alarmLevel.getUniqueCode());
-        levelQuery.setService(alarmLevel.getService());
+        levelQuery.setEnterpriseCode(alarmLevel.getEnterpriseCode());
+        levelQuery.setServerCode(alarmLevel.getServerCode());
         levelQuery.setDeviceType(alarmLevel.getDeviceType());
         levelQuery.setDeviceModel(alarmLevel.getDeviceModel());
         levelQuery.setSourceLevel(alarmLevel.getSourceLevel());
@@ -73,14 +89,6 @@ public class AlarmLevelQuery extends Paging {
 
     public void setSourceLevel(String sourceLevel) {
         this.sourceLevel = sourceLevel;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
     }
 
     public String getDeviceType() {
@@ -123,14 +131,6 @@ public class AlarmLevelQuery extends Paging {
         this.id = id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
-    }
-
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
-    }
-
     public String getTargetLevel() {
         return targetLevel;
     }
@@ -149,8 +149,8 @@ public class AlarmLevelQuery extends Paging {
             return null;
         }
         AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setUniqueCode(alarm.getUniqueCode());
-        alarmLevelQuery.setService(alarm.getService());
+        alarmLevelQuery.setEnterpriseCode(alarm.getEnterpriseCode());
+        alarmLevelQuery.setServerCode(alarm.getServerCode());
         alarmLevelQuery.setDeviceType(alarm.getDeviceType());
         alarmLevelQuery.setDeviceModel(alarm.getDeviceModel());
         alarmLevelQuery.setSourceLevel(alarm.getLevel());
@@ -162,8 +162,8 @@ public class AlarmLevelQuery extends Paging {
             return null;
         }
         AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
-        alarmLevelQuery.setService(deviceTypeLevel.getService());
+        alarmLevelQuery.setEnterpriseCode(deviceTypeLevel.getEnterpriseCode());
+        alarmLevelQuery.setServerCode(deviceTypeLevel.getServerCode());
         alarmLevelQuery.setDeviceType(deviceTypeLevel.getDeviceType());
         alarmLevelQuery.setDeviceModel(deviceTypeLevel.getDeviceModel());
         alarmLevelQuery.setSourceLevel(deviceTypeLevel.getLevel());

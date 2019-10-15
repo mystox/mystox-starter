@@ -31,7 +31,7 @@ public class AlarmServiceImpl implements AlarmService{
      */
     @Override
     public void save(Alarm alarm, String table) {
-        alarm.settReport(new Date());
+        alarm.setTreport(new Date());
         alarmDao.save(alarm, table);
     }
 
@@ -108,17 +108,5 @@ public class AlarmServiceImpl implements AlarmService{
     @Override
     public Alarm getOne(AlarmQuery alarmQuery, String table) {
         return alarmDao.getOne(alarmQuery, table);
-    }
-
-    /**
-     * @param alarm
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/26 10:29
-     * 功能描述:告警消除
-     */
-    @Override
-    public boolean resolve(Alarm alarm, String table) {
-        return alarmDao.resolve(alarm, table);
     }
 }

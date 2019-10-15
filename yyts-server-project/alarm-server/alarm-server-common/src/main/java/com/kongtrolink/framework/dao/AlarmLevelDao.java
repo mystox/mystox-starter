@@ -75,13 +75,13 @@ public class AlarmLevelDao {
         if (!StringUtil.isNUll(id)) {
             criteria.and("_id").is(id);
         }
-        String uniqueCode = levelQuery.getUniqueCode();
-        if (!StringUtil.isNUll(uniqueCode)) {
-            criteria.and("uniqueCode").is(uniqueCode);
+        String enterpriseCode = levelQuery.getEnterpriseCode();
+        if (!StringUtil.isNUll(enterpriseCode)) {
+            criteria.and("enterpriseCode").is(enterpriseCode);
         }
-        String service = levelQuery.getService();
-        if (!StringUtil.isNUll(service)) {
-            criteria.and("service").is(service);
+        String serverCode = levelQuery.getServerCode();
+        if (!StringUtil.isNUll(serverCode)) {
+            criteria.and("serverCode").is(serverCode);
         }
         String deviceType = levelQuery.getDeviceType();
         if (!StringUtil.isNUll(deviceType)) {
@@ -148,5 +148,20 @@ public class AlarmLevelDao {
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
         return remove.getN();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/12 14:31
+     * 功能描述:等级入口使用，匹配告警
+     */
+    public AlarmLevel matchLevel(String enterpriseCode, String serverCode, String deviceType, String deviceModel, String sourceLevel){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("deviceType").is(deviceType);
+        criteria.and("deviceModel").is(deviceModel);
+        criteria.and("sourceLevel").is(sourceLevel);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, AlarmLevel.class, table);
     }
 }

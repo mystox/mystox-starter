@@ -10,8 +10,8 @@ import com.kongtrolink.framework.base.Paging;
 public class AuxilaryQuery extends Paging{
 
     private String _id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String proStr;
     private String proName;
     private String proType;
@@ -24,20 +24,20 @@ public class AuxilaryQuery extends Paging{
         this._id = _id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getEnterpriseCode() {
+        return enterpriseCode;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 
     public String getProStr() {

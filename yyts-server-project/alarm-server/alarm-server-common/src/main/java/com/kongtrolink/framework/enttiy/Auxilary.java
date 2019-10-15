@@ -10,8 +10,8 @@ import java.util.List;
 public class Auxilary {
 
     private String _id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private List<String> proStrList;
     private List<String> proNameList;
     private List<String> proTypeList;
@@ -32,22 +32,6 @@ public class Auxilary {
         this._id = _id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
-    }
-
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
-
     public List<String> getProStrList() {
         return proStrList;
     }
@@ -63,5 +47,21 @@ public class Auxilary {
 
     public void setProTypeList(List<String> proTypeList) {
         this.proTypeList = proTypeList;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 }

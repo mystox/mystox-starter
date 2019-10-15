@@ -13,8 +13,8 @@ import java.util.Date;
 public class EnterpriseLevelQuery extends Paging{
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String level;
     private String color;
     private Date beginTime;
@@ -53,20 +53,20 @@ public class EnterpriseLevelQuery extends Paging{
         this.id = id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getEnterpriseCode() {
+        return enterpriseCode;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 
     public String getLevel() {
@@ -90,8 +90,8 @@ public class EnterpriseLevelQuery extends Paging{
             return null;
         }
         EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
-        enterpriseLevelQuery.setUniqueCode(deviceTypeLevel.getUniqueCode());
-        enterpriseLevelQuery.setService(deviceTypeLevel.getService());
+        enterpriseLevelQuery.setEnterpriseCode(deviceTypeLevel.getEnterpriseCode());
+        enterpriseLevelQuery.setServerCode(deviceTypeLevel.getServerCode());
         enterpriseLevelQuery.setLevel(deviceTypeLevel.getLevel());
         return enterpriseLevelQuery;
     }

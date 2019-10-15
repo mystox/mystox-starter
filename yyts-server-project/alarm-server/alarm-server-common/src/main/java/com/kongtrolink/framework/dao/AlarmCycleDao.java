@@ -28,26 +28,25 @@ public class AlarmCycleDao {
     private String table = MongTable.ALARM_CYCLE;
 
     public void save(AlarmCycle alarmCycle) {
+        alarmCycle.initEnterpirseServer();
         mongoTemplate.save(alarmCycle, table);
     }
 
     public boolean delete(String alarmCycleCycleId) {
         Criteria criteria = Criteria.where("_id").is(alarmCycleCycleId);
-//        Query query = Query.query(criteria);
-//        Update update = new Update();
-//        update.set("state", Contant.DELETED);
-//        WriteResult result = mongoTemplate.updateFirst(query, update, table);
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
         return remove.getN()>0 ? true : false;
     }
 
     public boolean update(AlarmCycle alarmCycle) {
+        alarmCycle.initEnterpirseServer();
         Criteria criteria = Criteria.where("_id").is(alarmCycle.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("diffTime", alarmCycle.getDiffTime());
         update.set("updateTime", alarmCycle.getUpdateTime());
+        update.set("enterpriseServer", alarmCycle.getEnterpriseServer());
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -80,13 +79,13 @@ public class AlarmCycleDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String uniqueCode = cycleQuery.getUniqueCode();
-        if(!StringUtil.isNUll(uniqueCode)){
-            criteria.and("uniqueCode").is(uniqueCode);
+        String enterpriseCode = cycleQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
         }
-        String service = cycleQuery.getService();
-        if(!StringUtil.isNUll(service)){
-            criteria.and("service").is(service);
+        String serverCode = cycleQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
         }
         Date beginTime = cycleQuery.getBeginTime();
         Date endTime = cycleQuery.getEndTime();
@@ -124,5 +123,16 @@ public class AlarmCycleDao {
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "updateTime"));
         return mongoTemplate.findOne(query, AlarmCycle.class, table);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/14 18:15
+     * 功能描述:根据企业服务编码，获取自定义周期规则
+     */
+    public List<AlarmCycle> getCycleList(List<String> enterpriseServerList){
+        Criteria criteria = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, AlarmCycle.class, table);
     }
 }

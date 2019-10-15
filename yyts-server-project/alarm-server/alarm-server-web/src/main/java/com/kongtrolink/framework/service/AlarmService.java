@@ -59,11 +59,4 @@ public interface AlarmService {
      * 功能描述:获取一个告警
      */
     Alarm getOne(AlarmQuery alarmQuery, String table);
-
-    /**
-     * @auther: liudd
-     * @date: 2019/9/26 10:29
-     * 功能描述:告警消除
-     */
-    boolean resolve(Alarm alarm, String table);
 }

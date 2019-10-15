@@ -14,13 +14,29 @@ import java.util.Date;
 public class AlarmCycleQuery extends Paging{
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private Integer diffTime;
     private FacadeView creator;
     private Date beginTime;
     private Date endTime;
     private String state;
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getState() {
         return state;
@@ -30,28 +46,12 @@ public class AlarmCycleQuery extends Paging{
         this.state = state;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
-    }
-
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
     }
 
     public Integer getDiffTime() {
@@ -91,8 +91,8 @@ public class AlarmCycleQuery extends Paging{
             return null;
         }
         AlarmCycleQuery alarmCycleQuery = new AlarmCycleQuery();
-        alarmCycleQuery.setUniqueCode(alarmCycle.getUniqueCode());
-        alarmCycle.setService(alarmCycle.getService());
+        alarmCycleQuery.setEnterpriseCode(alarmCycle.getEnterpriseCode());
+        alarmCycle.setServerCode(alarmCycle.getServerCode());
         alarmCycle.setState(alarmCycle.getState());
         return alarmCycleQuery;
     }

@@ -5,11 +5,11 @@ import com.kongtrolink.framework.stereotype.Register;
 
 /**
  * @Auther: liudd
- * @Date: 2019/9/26 09:21
- * @Description:外部MQTT接口
+ * @Date: 2019/10/12 15:09
+ * @Description:告警后台入口
  */
 @Register
-public interface ExternalService {
+public interface AlarmEntrance {
 
     @OperaCode
     void alarmReport(String payload);
@@ -19,4 +19,5 @@ public interface ExternalService {
 
     @OperaCode
     void updateaAuxilary(String payload);
+
 }

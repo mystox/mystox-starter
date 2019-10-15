@@ -10,8 +10,8 @@ import com.kongtrolink.framework.base.Paging;
 public class DeviceTypeLevelQuery extends Paging {
 
     private String id;
-    private String uniqueCode;
-    private String service;
+    private String enterpriseCode;
+    private String serverCode;
     private String deviceType;      //设备类型
     private String deviceModel;     //设备型号
     private String level;
@@ -31,20 +31,20 @@ public class DeviceTypeLevelQuery extends Paging {
         this.id = id;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getEnterpriseCode() {
+        return enterpriseCode;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 
     public String getDeviceModel() {
