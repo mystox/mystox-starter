@@ -92,7 +92,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
             return map;
         }
         for(AlarmCycle alarmCycle : alarmCycleList){
-            map.put(alarmCycle.getUniqueCode() + Contant.UNDERLINE + alarmCycle.getService(), alarmCycle);
+            map.put(alarmCycle.getEnterpriseCode() + Contant.UNDERLINE + alarmCycle.getServerCode(), alarmCycle);
         }
         return map;
     }

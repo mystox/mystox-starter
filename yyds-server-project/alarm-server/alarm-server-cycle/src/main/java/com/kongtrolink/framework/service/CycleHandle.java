@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.MongTable;
@@ -45,7 +44,7 @@ public class CycleHandle{
     private int currentTime = 0;
 
     public static List<Alarm> currentAlarmList = new ArrayList<>();
-    private String currentTable = MongTable.ALARM;
+    private String currentTable = MongTable.ALARM_CURRENT;
     private String historyTable = MongTable.ALARM_HISTORY;
 
     public void handle(){

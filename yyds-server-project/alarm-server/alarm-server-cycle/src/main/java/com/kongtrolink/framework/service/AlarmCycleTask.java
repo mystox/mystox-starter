@@ -4,6 +4,8 @@ import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.enttiy.Alarm;
 
+import java.util.List;
+
 /**
  * @Auther: liudd
  * @Date: 2019/9/21 11:27
@@ -13,7 +15,7 @@ public class AlarmCycleTask implements Runnable{
 
     private AlarmDao alarmDao;
     private int count;
-    private String currentAlarm = MongTable.ALARM;
+    private String currentAlarm = MongTable.ALARM_CURRENT;
 
     @Override
     public void run() {

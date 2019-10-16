@@ -93,8 +93,8 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     @Override
     public boolean isRepeat(DeviceTypeLevel typeLevel) {
         DeviceTypeLevelQuery levelQuery = new DeviceTypeLevelQuery();
-        levelQuery.setUniqueCode(typeLevel.getUniqueCode());
-        levelQuery.setService(typeLevel.getService());
+        levelQuery.setEnterpriseCode(typeLevel.getEnterpriseCode());
+        levelQuery.setServerCode(typeLevel.getServerCode());
         levelQuery.setDeviceType(typeLevel.getDeviceType());
         levelQuery.setLevel(typeLevel.getLevel());
         DeviceTypeLevel one = getOne(levelQuery);

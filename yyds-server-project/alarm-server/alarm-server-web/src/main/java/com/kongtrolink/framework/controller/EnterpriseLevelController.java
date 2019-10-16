@@ -7,14 +7,13 @@ import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.mqtt.InnerMqttService;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import com.kongtrolink.framework.service.MqttService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.List;
 
 /**
@@ -29,7 +28,7 @@ public class EnterpriseLevelController extends BaseController{
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
-    InnerMqttService mqttService;
+    MqttService mqttService;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -105,7 +104,14 @@ public class EnterpriseLevelController extends BaseController{
     @RequestMapping("/getUniqueServiceList")
     @ResponseBody
     public String getUniqueServiceList(){
-        JSON uniqueService = mqttService.getUniqueService();
+        JSON uniqueService = mqttService.getEnterpriseMsgAll();
         return uniqueService.toJSONString();
+    }
+
+    @RequestMapping("/getDeviceTypeList")
+    @ResponseBody
+    public String getDeviceTypeList(String enterpriseCode, String serverCode){
+        JSON deviceTypeList = mqttService.getDeviceTypeList(enterpriseCode, serverCode);
+        return deviceTypeList.toJSONString();
     }
 }

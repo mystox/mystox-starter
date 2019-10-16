@@ -23,7 +23,7 @@ import java.util.Date;
 @Service
 public class AlarmEntranceImpl implements AlarmEntrance {
 
-    private String currentAlarmTable = MongTable.ALARM;
+    private String currentAlarmTable = MongTable.ALARM_CURRENT;
     private String historyAlarmTable = MongTable.ALARM_HISTORY;
     Logger logger = LoggerFactory.getLogger(AlarmEntranceImpl.class);
 

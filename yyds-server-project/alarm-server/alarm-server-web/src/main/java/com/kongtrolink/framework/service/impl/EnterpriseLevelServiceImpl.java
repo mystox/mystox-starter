@@ -62,8 +62,8 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     @Override
     public boolean isRepeat(EnterpriseLevel enterpriseLevel) {
         EnterpriseLevelQuery levelQuery = new EnterpriseLevelQuery();
-        levelQuery.setUniqueCode(enterpriseLevel.getUniqueCode());
-        levelQuery.setService(enterpriseLevel.getService());
+        levelQuery.setEnterpriseCode(enterpriseLevel.getEnterpriseCode());
+        levelQuery.setServerCode(enterpriseLevel.getServerCode());
         levelQuery.setLevel(enterpriseLevel.getLevel());
         EnterpriseLevel one = getOne(levelQuery);
         if(null == one){

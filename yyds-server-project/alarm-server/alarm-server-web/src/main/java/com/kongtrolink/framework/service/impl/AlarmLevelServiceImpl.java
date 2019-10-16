@@ -91,8 +91,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
         if(null == one) {
             //没有找到匹配的等级自定义，使用系统默认等级
             EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
-            enterpriseLevelQuery.setUniqueCode(levelQuery.getUniqueCode());
-            enterpriseLevelQuery.setService(levelQuery.getService());
+            enterpriseLevelQuery.setEnterpriseCode(levelQuery.getEnterpriseCode());
+            enterpriseLevelQuery.setServerCode(levelQuery.getServerCode());
             enterpriseLevelQuery.setDefaultLevel(Contant.YES);
             EnterpriseLevel enterpriseLevel = enterpriseLevelService.getOne(enterpriseLevelQuery);
             if (null != enterpriseLevel) {
@@ -111,8 +111,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
             return null;
         }
         AlarmLevel alarmLevel = new AlarmLevel();
-        alarmLevel.setUniqueCode(enterpriseLevel.getUniqueCode());
-        alarmLevel.setService(enterpriseLevel.getService());
+        alarmLevel.setEnterpriseCode(enterpriseLevel.getEnterpriseCode());
+        alarmLevel.setServerCode(enterpriseLevel.getServerCode());
         alarmLevel.setDeviceType(deviceTypeLevel.getDeviceType());
         alarmLevel.setDeviceModel(deviceTypeLevel.getDeviceModel());
         alarmLevel.setSourceLevel(deviceTypeLevel.getLevel());
