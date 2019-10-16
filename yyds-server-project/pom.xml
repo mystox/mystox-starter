@@ -2,31 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>YYDS</artifactId>
+        <groupId>com.kongtrolink.framework</groupId>
+        <version>1.0.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kongtrolink.framework</groupId>
-    <artifactId>YYDS</artifactId>
+    <name>yyds-server-project</name>
+    <artifactId>yyds-server-project</artifactId>
     <version>1.0.0</version>
-    <modules>
-        <module>yyds-core</module>
-        <module>yyds-common</module>
-        <module>yyds-mqtt</module>
-        <module>yyds-register</module>
-        <module>yyds-server-project</module>
-    </modules>
     <packaging>pom</packaging>
 
-    <!--<parent>-->
-        <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-starter-parent</artifactId>-->
-        <!--&lt;!&ndash;<version>${spring-boot.version}</version>&ndash;&gt;-->
-        <!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
-    <!--</parent>-->
+    <modules>
+        <module>foo-server-demo</module>
+        <module>asset-management-server</module>
+        <module>alarm-server</module>
+        <module>log-server</module>
+        <module>gateway-project</module>
+    </modules>
 
-    <properties>
+
+    <!--<properties>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
-        <!--解决格式提示问题-->
+        &lt;!&ndash;解决格式提示问题&ndash;&gt;
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skipTest>true</skipTest>
     </properties>
@@ -43,5 +43,6 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
+
 </project>

@@ -6,7 +6,7 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttReceiver;
-import com.kongtrolink.framework.mqtt.util.MqttLog;
+import com.kongtrolink.framework.mqtt.util.MqttLogUtil;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import org.apache.commons.lang3.ArrayUtils;
@@ -57,7 +57,7 @@ public class MqttReceiverImpl implements MqttReceiver {
     @Autowired
     private ServiceRegistry serviceRegistry;
     @Autowired
-    private MqttLog mqttLog;
+    private MqttLogUtil mqttLogUtil;
     @Override
     public MqttResp receive(String topic, MqttMsg payload) {
         logger.info("receive... ..." + JSONObject.toJSONString(payload));
@@ -72,7 +72,7 @@ public class MqttReceiverImpl implements MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLog.ERROR(StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
+            mqttLogUtil.ERROR(result.getMsgId(),StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
             logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
             result = new MqttResp(payload.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);

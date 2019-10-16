@@ -92,16 +92,20 @@ public class RegisterRunner implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        RegisterMsg registerMsg = getRegisterMsg();
-        List<RegisterSub> subList = scanSubList();
-        if (registerMsg == null)
+    public void run(ApplicationArguments args) {
+        try {
+            RegisterMsg registerMsg = getRegisterMsg();
+            List<RegisterSub> subList = scanSubList();
+            if (registerMsg == null)
+                System.exit(0);
+            register(registerMsg, subList);//注册操作码信息
+            subTopic(subList);//订阅操作码对应topic
+        } catch (Exception e) {
+            e.printStackTrace();
             System.exit(0);
-        register(registerMsg, subList);//注册操作码信息
-        registerServer(); //注册服务基本信息
-        subTopic(subList);//订阅操作码对应topic
+        }
         //验证服务能力（pubList）
-        logger.info("register successfully..." + serverCode);
+        logger.info("register successfully...serverCode[{}]", serverCode);
     }
 
     /**
@@ -191,6 +195,7 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterType registerType = registerMsg.getRegisterType();
         if (RegisterType.ZOOKEEPER.equals(registerType)) {
             serviceRegistry.build(registerMsg.getRegisterUrl());
+            registerServer(); //注册服务基本信息
             for (RegisterSub sub : subList) {
                 //往服务节点注册服务信息
                 setDataToRegistry(sub);
