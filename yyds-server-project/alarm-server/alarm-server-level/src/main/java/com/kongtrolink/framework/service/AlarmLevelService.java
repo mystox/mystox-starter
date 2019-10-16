@@ -28,15 +28,15 @@ public class AlarmLevelService {
         String deviceModel = alarm.getDeviceModel();
         String level = alarm.getLevel();
         AlarmLevel alarmLevel = levelDao.matchLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
-        if(null == alarmLevel) {
-            EnterpriseLevel enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
-            if (null != enterpriseLevel) {
-                alarmLevel = new AlarmLevel();
-                alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
-                alarmLevel.setTargetLevelName(enterpriseLevel.getLevelName());
-                alarmLevel.setColor(enterpriseLevel.getColor());
-            }
-        }
+//        if(null == alarmLevel) {
+//            EnterpriseLevel enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
+//            if (null != enterpriseLevel) {
+//                alarmLevel = new AlarmLevel();
+//                alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
+//                alarmLevel.setTargetLevelName(enterpriseLevel.getLevelName());
+//                alarmLevel.setColor(enterpriseLevel.getColor());
+//            }
+//        }
         return alarmLevel;
     }
 }

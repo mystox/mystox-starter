@@ -4,6 +4,9 @@ import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
@@ -15,6 +18,8 @@ import java.util.List;
 public interface AlarmLevelService {
 
     boolean save(AlarmLevel alarmLevel);
+
+    boolean save(List<AlarmLevel> alarmLevelList);
 
     boolean delete(String alarmLevelId);
 
@@ -39,6 +44,13 @@ public interface AlarmLevelService {
 
     AlarmLevel createAlarmLevel(EnterpriseLevel enterpriseLevel, DeviceTypeLevel deviceTypeLevel);
 
-    int deleteList(AlarmLevelQuery levelQuery);
+    /**
+     * @auther: liudd
+     * @date: 2019/10/16 15:41
+     * 功能描述:根据设备类型信息删除告警等级
+     */
+    int deleteList(String enterpriseCode, String serverCode, String deviceType, String deviceModel);
 
+
+    List<AlarmLevel> getByEntDevCodeList(List<String> entDevCodeList);
 }

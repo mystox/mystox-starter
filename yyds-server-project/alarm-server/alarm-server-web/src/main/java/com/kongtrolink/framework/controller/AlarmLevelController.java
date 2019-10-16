@@ -1,16 +1,19 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
+import org.apache.avro.data.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,7 +23,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/alarmLevelController/")
-public class AlarmLevelController extends BaseController{
+public class AlarmLevelController extends BaseController {
 
     @Autowired
     AlarmLevelService levelService;
@@ -69,5 +72,12 @@ public class AlarmLevelController extends BaseController{
         int count = levelService.count(levelQuery);
         ListResult<AlarmLevel> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
+    }
+
+    @RequestMapping("/getByEntDevCodeList")
+    @ResponseBody
+    public JsonResult getByEntDevCodeList(AlarmLevelQuery alarmLevelQuery){
+        List<AlarmLevel> byEntDevCodeList = levelService.getByEntDevCodeList(Arrays.asList(alarmLevelQuery.getEntDevCode()));
+        return new JsonResult(byEntDevCodeList);
     }
 }

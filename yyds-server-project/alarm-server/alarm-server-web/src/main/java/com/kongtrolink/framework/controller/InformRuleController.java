@@ -2,6 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.User;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/deliverController")
-public class InformRuleController extends BaseController{
+public class InformRuleController extends BaseController {
 
     @Autowired
     InformRuleService ruleService;
@@ -45,7 +46,7 @@ public class InformRuleController extends BaseController{
         if(null != byName){
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
-        User user = getUser(request);
+        com.kongtrolink.framework.core.entity.User user = getUser(request);
         Date curDate = new Date();
         informRule.setCreator(new FacadeView(user.getId(), user.getName()));
         informRule.setUpdateTime(curDate);

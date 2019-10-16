@@ -2,12 +2,15 @@ package com.kongtrolink.framework.service.impl;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.dao.EnterpriseLevelDao;
+import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
+import com.kongtrolink.framework.service.AlarmLevelService;
+import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +23,10 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
 
     @Autowired
     EnterpriseLevelDao enterpriseLevelDao;
+    @Autowired
+    AlarmLevelService alarmLevelService;
+    @Autowired
+    DeviceTypeLevelService typeLevelService;
 
     @Override
     public void add(EnterpriseLevel enterpriseLevel) {
@@ -28,14 +35,35 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
 
     @Override
     public boolean delete(String enterpriseLevelId) {
-        //liuddtodo  需要处理原等级颜色等问题
+        //如果当前企业等级是启用状态，需要根据默认企业等级生成新得告警等级
+        EnterpriseLevel enterpriseLevel = get(enterpriseLevelId);
+        if(Contant.USEING.equals(enterpriseLevel.getState())){
+            alarmLevelService.deleteList(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), null, null);
+            addAlarmLevelByEnterpriseInfo(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode());
+        }
         return enterpriseLevelDao.delete(enterpriseLevelId);
     }
 
     @Override
+    public boolean deleteByCode(String code) {
+        return enterpriseLevelDao.deleteByCode(code);
+    }
+
+    @Override
     public boolean update(EnterpriseLevel enterpriseLevel) {
-        //liuddtodo  需要处理原等级颜色等问题,以及等级重复冲突
+        enterpriseLevel.setUpdateTime(new Date());
+        //如果该企业等级属于启用状态，需要重新生成告警等级
+        String state = enterpriseLevel.getState();
+        if(Contant.USEING.equals(state)){
+            alarmLevelService.deleteList(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), null, null);
+            addAlarmLevelByEnterpriseInfo(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode());
+        }
         return enterpriseLevelDao.update(enterpriseLevel);
+    }
+
+    @Override
+    public EnterpriseLevel get(String enterpriseLevelId) {
+        return enterpriseLevelDao.get(enterpriseLevelId);
     }
 
     @Override
@@ -53,69 +81,67 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         return enterpriseLevelDao.getOne(levelQuery);
     }
 
-    /**
-     * @param enterpriseLevel
-     * @auther: liudd
-     * @date: 2019/9/20 11:17
-     * 功能描述:判定原告警是否重复
-     */
-    @Override
-    public boolean isRepeat(EnterpriseLevel enterpriseLevel) {
-        EnterpriseLevelQuery levelQuery = new EnterpriseLevelQuery();
-        levelQuery.setEnterpriseCode(enterpriseLevel.getEnterpriseCode());
-        levelQuery.setServerCode(enterpriseLevel.getServerCode());
-        levelQuery.setLevel(enterpriseLevel.getLevel());
-        EnterpriseLevel one = getOne(levelQuery);
-        if(null == one){
-            return false;
-        }
-        if(enterpriseLevel.getId().equals(one.getId())){
-            return false;
-        }
-        return true;
-    }
 
     /**
      * @auther: liudd
-     * @date: 2019/9/21 10:04
-     * 功能描述:设置默认告警等级，一个企业只有一个默认告警等级
+     * @date: 2019/10/16 15:54
+     * 功能描述:修改状态
      */
     @Override
-    public boolean updateDefault(EnterpriseLevelQuery enterpriseLevelQuery) {
-        String defaultLevel = enterpriseLevelQuery.getDefaultLevel();
-        //如果是取消默认等级
-        if(Contant.NO.equals(defaultLevel)){
-            enterpriseLevelQuery.setDefaultLevel(Contant.YES);
-            return enterpriseLevelDao.updateDefault(enterpriseLevelQuery, defaultLevel);
+    public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
+        Date curTime = new Date();
+        String state = enterpriseLevelQuery.getState();
+        String enterpriseCode = enterpriseLevelQuery.getEnterpriseCode();
+        String serverCode = enterpriseLevelQuery.getServerCode();
+        if(Contant.FORBIT.equals(state)){
+            //如果禁用，需要删除原来的告警等级，然后使用默认企业等级生成告警等级
+            alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
+        }else {
+            //先禁用原来的企业等级
+            boolean result = forbitBefor(enterpriseCode, serverCode, curTime);
+            if(!result){
+                return false;
+            }
+            alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
         }
-        //设置默认等级
-        //1，先去除原来的默认等级
-        String targetId = enterpriseLevelQuery.getId();
-        enterpriseLevelQuery.setId(null);
-        enterpriseLevelDao.updateDefault(enterpriseLevelQuery, Contant.NO);
-        //保存新的默认等级
-        enterpriseLevelQuery.setId(targetId);
-        return enterpriseLevelDao.updateDefault(enterpriseLevelQuery, Contant.YES);
+        addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
+        return enterpriseLevelDao.updateState(enterpriseLevelQuery);
     }
 
     /**
+     * @param enterpriseCode
+     * @param serverCode
      * @auther: liudd
-     * @date: 2019/9/25 15:02
-     * 功能描述:获取最大告警等级
+     * @date: 2019/10/16 15:02
+     * 功能描述:获取最后一次启用的企业告警，如果没有，则获取默认企业告警
      */
     @Override
-    public EnterpriseLevel getMaxLevelSinceLevel(EnterpriseLevelQuery enterpriseLevelQuery) {
-        return enterpriseLevelDao.getMaxLevel(enterpriseLevelQuery);
+    public List<EnterpriseLevel> getLastUse(String enterpriseCode, String serverCode) {
+        return enterpriseLevelDao.getLastUse(enterpriseCode, serverCode);
     }
 
     @Override
-    public void redifineDefault(EnterpriseLevelQuery enterpriseLevelQuery) {
-        enterpriseLevelQuery.setLevel(null);
-        EnterpriseLevel maxLevelSinceLevel = getMaxLevelSinceLevel(enterpriseLevelQuery);
-        if(null != maxLevelSinceLevel) {
-            enterpriseLevelQuery.setLevel(maxLevelSinceLevel.getLevel());
-            enterpriseLevelQuery.setDefaultLevel(Contant.YES);
-            updateDefault(enterpriseLevelQuery);
+    public List<EnterpriseLevel> getDefault() {
+        return enterpriseLevelDao.getDefault();
+    }
+
+    @Override
+    public void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode) {
+        List<DeviceTypeLevel> deviceTypeLevels = typeLevelService.listByEnterpriseInfo(enterpriseCode, serverCode);
+        for(DeviceTypeLevel deviceTypeLevel : deviceTypeLevels){
+            typeLevelService.addAlarmLevelByDeviceLevel(deviceTypeLevel);
         }
+    }
+
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/10/16 20:18
+     * 功能描述:禁用原来的告警等级
+     */
+    @Override
+    public boolean forbitBefor(String enterpriseCode, String serverCode, Date updateTime) {
+        return enterpriseLevelDao.forbitBefor(enterpriseCode, serverCode, updateTime);
     }
 }

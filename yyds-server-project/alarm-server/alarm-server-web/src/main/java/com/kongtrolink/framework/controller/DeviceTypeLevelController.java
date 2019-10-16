@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
@@ -10,8 +12,11 @@ import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,12 +26,10 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/deviceTypeLevelController")
-public class DeviceTypeLevelController extends BaseController{
+public class DeviceTypeLevelController extends BaseController {
 
     @Autowired
     DeviceTypeLevelService typeLevelService;
-//    @Autowired
-//    InnerMqttService mqttService;
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
@@ -34,10 +37,10 @@ public class DeviceTypeLevelController extends BaseController{
 
     @RequestMapping("/add")
     @ResponseBody
-    public JsonResult add(DeviceTypeLevel deviceTypeLevel){
+    public JsonResult add(@RequestBody DeviceTypeLevel deviceTypeLevel){
         boolean reprat = typeLevelService.isRepeat(deviceTypeLevel);
         if(reprat){
-            return new JsonResult("设备等级以存在!", false);
+            return new JsonResult("设备等级已经存在!", false);
         }
         typeLevelService.add(deviceTypeLevel);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
@@ -45,7 +48,7 @@ public class DeviceTypeLevelController extends BaseController{
 
     @RequestMapping("/delete")
     @ResponseBody
-    public JsonResult delete(DeviceTypeLevelQuery typeLevelQuery){
+    public JsonResult delete(@RequestBody DeviceTypeLevelQuery typeLevelQuery){
         boolean delete = typeLevelService.delete(typeLevelQuery.getId());
         if(delete){
             return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, true);
@@ -55,11 +58,7 @@ public class DeviceTypeLevelController extends BaseController{
 
     @RequestMapping("/update")
     @ResponseBody
-    public JsonResult update(DeviceTypeLevel deviceTypeLevel){
-        boolean reprat = typeLevelService.isRepeat(deviceTypeLevel);
-        if(reprat){
-            return new JsonResult("设备等级已存在!", false);
-        }
+    public JsonResult update(@RequestBody DeviceTypeLevel deviceTypeLevel){
         boolean update = typeLevelService.update(deviceTypeLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -69,24 +68,10 @@ public class DeviceTypeLevelController extends BaseController{
 
     @RequestMapping("/list")
     @ResponseBody
-    public JsonResult list(DeviceTypeLevelQuery deviceTypeLevelQuery){
+    public JsonResult list(@RequestBody DeviceTypeLevelQuery deviceTypeLevelQuery){
         List<DeviceTypeLevel> list = typeLevelService.list(deviceTypeLevelQuery);
         int count = typeLevelService.count(deviceTypeLevelQuery);
         ListResult<DeviceTypeLevel> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/9/25 14:03
-     * 功能描述:获取设备信号信息
-     * 参数：uniqueCode, service
-     */
-    @RequestMapping("/getDeviceTypeList")
-    @ResponseBody
-    public String getDeviceTypeList(DeviceTypeLevelQuery deviceTypeLevelQuery){
-//        JSON deviceType = mqttService.getDeviceType(deviceTypeLevelQuery.getUniqueCode(), deviceTypeLevelQuery.getService());
-//        return deviceType.toJSONString();
-        return null;
     }
 }

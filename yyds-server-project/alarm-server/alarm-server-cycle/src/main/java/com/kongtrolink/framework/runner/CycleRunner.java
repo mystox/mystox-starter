@@ -38,6 +38,8 @@ public class CycleRunner implements ApplicationRunner {
     private int time;
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger(CycleRunner.class);
+    @Autowired
+    CycleHandle cycleHandle;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -45,5 +47,6 @@ public class CycleRunner implements ApplicationRunner {
         ScheduledExecutorService taskScheduler = Executors.newSingleThreadScheduledExecutor();
         taskScheduler.scheduleAtFixedRate(new AlarmCycleTask(alarmDao, count), 10 * 1000, 10 * 1000,
                 TimeUnit.MILLISECONDS);
+        cycleHandle.handle();
     }
 }

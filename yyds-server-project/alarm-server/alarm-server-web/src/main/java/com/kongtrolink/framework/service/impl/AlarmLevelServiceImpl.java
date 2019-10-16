@@ -11,6 +11,9 @@ import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -36,6 +39,11 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
             return true ;
         }
         return false;
+    }
+
+    @Override
+    public boolean save(List<AlarmLevel> alarmLevelList) {
+        return alarmLevelDao.save(alarmLevelList);
     }
 
     @Override
@@ -98,8 +106,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
             if (null != enterpriseLevel) {
                 one = new AlarmLevel();
                 one.setSourceLevel(levelQuery.getSourceLevel());
-                one.setTargetLevel(enterpriseLevel.getLevel());
-                one.setColor(enterpriseLevel.getColor());
+//                one.setTargetLevel(enterpriseLevel.getLevel());
+//                one.setColor(enterpriseLevel.getColor());
             }
         }
         return one;
@@ -115,15 +123,28 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
         alarmLevel.setServerCode(enterpriseLevel.getServerCode());
         alarmLevel.setDeviceType(deviceTypeLevel.getDeviceType());
         alarmLevel.setDeviceModel(deviceTypeLevel.getDeviceModel());
-        alarmLevel.setSourceLevel(deviceTypeLevel.getLevel());
-        alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
-        alarmLevel.setColor(enterpriseLevel.getColor());
+//        alarmLevel.setSourceLevel(deviceTypeLevel.getLevel());
+//        alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
+//        alarmLevel.setColor(enterpriseLevel.getColor());
         alarmLevel.setGenerate(Contant.SYSTEM);
         return alarmLevel;
     }
 
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @param deviceType
+     * @param deviceModel
+     * @auther: liudd
+     * @date: 2019/10/16 15:41
+     * 功能描述:根据设备类型信息删除告警等级
+     */
     @Override
-    public int deleteList(AlarmLevelQuery levelQuery) {
-        return alarmLevelDao.deleteList(levelQuery);
+    public int deleteList(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        return alarmLevelDao.deleteList(enterpriseCode, serverCode, deviceType, deviceModel);
+    }
+
+    public List<AlarmLevel> getByEntDevCodeList(List<String> entDevCodeList){
+        return alarmLevelDao.getByEntDevCodeList(entDevCodeList);
     }
 }

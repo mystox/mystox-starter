@@ -27,6 +27,15 @@ public class AlarmLevelQuery extends Paging {
     private Date beginTime;
     private Date endTime;
     private String generate = Contant.SYSTEM;                //产生类型
+    private String entDevCode;                  //企业，设备等级
+
+    public String getEntDevCode() {
+        return entDevCode;
+    }
+
+    public void setEntDevCode(String entDevCode) {
+        this.entDevCode = entDevCode;
+    }
 
     public String getEnterpriseCode() {
         return enterpriseCode;
@@ -137,36 +146,5 @@ public class AlarmLevelQuery extends Paging {
 
     public void setTargetLevel(String targetLevel) {
         this.targetLevel = targetLevel;
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/9/26 9:47
-     * 功能描述:根据告警对象，直接生成告警等级查询实例，用于告警上报时，生成告警自定义等级
-     */
-    public static AlarmLevelQuery alarm2AlarmLevelQuery(Alarm alarm){
-        if(null == alarm){
-            return null;
-        }
-        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setEnterpriseCode(alarm.getEnterpriseCode());
-        alarmLevelQuery.setServerCode(alarm.getServerCode());
-        alarmLevelQuery.setDeviceType(alarm.getDeviceType());
-        alarmLevelQuery.setDeviceModel(alarm.getDeviceModel());
-        alarmLevelQuery.setSourceLevel(alarm.getLevel());
-        return alarmLevelQuery;
-    }
-
-    public static AlarmLevelQuery deviceTypeLevel2AlarmLevelQuery(DeviceTypeLevel deviceTypeLevel){
-        if(null == deviceTypeLevel){
-            return null;
-        }
-        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setEnterpriseCode(deviceTypeLevel.getEnterpriseCode());
-        alarmLevelQuery.setServerCode(deviceTypeLevel.getServerCode());
-        alarmLevelQuery.setDeviceType(deviceTypeLevel.getDeviceType());
-        alarmLevelQuery.setDeviceModel(deviceTypeLevel.getDeviceModel());
-        alarmLevelQuery.setSourceLevel(deviceTypeLevel.getLevel());
-        return alarmLevelQuery;
     }
 }

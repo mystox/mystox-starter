@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/auxilaryController")
-public class AuxilaryController extends BaseController{
+public class AuxilaryController extends BaseController {
 
     @Autowired
     AuxilaryService auxilaryService;
