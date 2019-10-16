@@ -19,8 +19,6 @@ public interface AlarmService {
      */
     void save(Alarm alarm, String table);
 
-    boolean delete(String alarmId, String table);
-
     boolean update(Alarm alarm, String table);
 
     /**
@@ -36,13 +34,6 @@ public interface AlarmService {
      * 功能描述:统计
      */
     int count(AlarmQuery alarmQuery, String table);
-
-    /**
-     * @auther: liudd
-     * @date: 2019/9/24 9:08
-     * 功能描述:批量删除
-     */
-    int deleteList(AlarmQuery alarmQuery, String table);
 
     void addList(List<Alarm> alarmList, String table);
 

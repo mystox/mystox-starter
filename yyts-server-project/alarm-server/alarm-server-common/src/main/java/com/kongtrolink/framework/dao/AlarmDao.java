@@ -133,9 +133,8 @@ public class AlarmDao {
         return criteria;
     }
 
-    public int deleteList(AlarmQuery alarmQuery, String table){
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, alarmQuery);
+    public int deleteByIdList(String table, List<String> alarmIdList){
+        Criteria criteria = Criteria.where("_id").in(alarmIdList);
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
         return remove.getN();

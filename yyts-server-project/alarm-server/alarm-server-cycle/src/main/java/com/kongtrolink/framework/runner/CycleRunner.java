@@ -45,8 +45,5 @@ public class CycleRunner implements ApplicationRunner {
         ScheduledExecutorService taskScheduler = Executors.newSingleThreadScheduledExecutor();
         taskScheduler.scheduleAtFixedRate(new AlarmCycleTask(alarmDao, count), 10 * 1000, 10 * 1000,
                 TimeUnit.MILLISECONDS);
-        ScheduledExecutorService handleScheduler = Executors.newSingleThreadScheduledExecutor();
-        handleScheduler.scheduleWithFixedDelay(new CycleHandle(alarmDao, alarmCycleDao, count, time), 10 * 1000, 10 * 1000,
-                TimeUnit.MILLISECONDS);
     }
 }

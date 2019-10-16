@@ -32,6 +32,16 @@ public class Alarm {
     private String sliceKey;            //片键，也可以作为普通索引键
     private Map<String, String> AuxilaryMap;
 
+    private Map<String, String> deviceInfos;
+
+    public Map<String, String> getDeviceInfos() {
+        return deviceInfos;
+    }
+
+    public void setDeviceInfos(Map<String, String> deviceInfos) {
+        this.deviceInfos = deviceInfos;
+    }
+
     public void initSliceKey(){
         sliceKey = this.enterpriseCode + this.serverCode + deviceType + deviceModel;
     }
