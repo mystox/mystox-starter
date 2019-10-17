@@ -26,7 +26,7 @@ public class AlarmTransverter extends TransverterHandler {
 
     @Override
     protected void transferExecute(ParseProtocol parseProtocol) {
-
+        String payLoad = parseProtocol.getPayload();//
         //TODO
 
         String jsonResult = "";

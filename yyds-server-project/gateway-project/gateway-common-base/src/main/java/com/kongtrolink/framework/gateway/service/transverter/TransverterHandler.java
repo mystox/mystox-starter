@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.service.transverter;
 
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.service.MqttSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,6 @@ public abstract class TransverterHandler implements TransverterService {
     MqttSender mqttSender;
 
 
-
-
-
     public void transfer(ParseProtocol parseProtocol){
         transferExecute(parseProtocol);
     }
@@ -36,6 +34,9 @@ public abstract class TransverterHandler implements TransverterService {
         mqttSender.sendToMqtt(serverCode,operaCode,payload);
     }
 
+    protected MsgResult reportMsgSyn(String serverCode, String operaCode, String payload) {
+        return mqttSender.sendToMqttSyn(serverCode,operaCode,payload);
+    }
 
     public String getDeviceType() {
         return deviceType;

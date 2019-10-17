@@ -66,7 +66,7 @@ public class GatewayMqttConfig {
     /**
      * 订阅的bean名称
      */
-     static final String CHANNEL_NAME_IN = "gatewayMqttInboundChannel";
+    public static final String CHANNEL_NAME_IN = "gatewayMqttInboundChannel";
     /**
      * 发布的bean名称
      */
@@ -166,7 +166,7 @@ public class GatewayMqttConfig {
     }
 
     /**
-     * iaiot/edge/yy/+/packetName/version/
+     * iaiot/edge/yy/+/packetName/version
      */
     private String[] getTopic() {
         MqttSubTopic[] subTopics = MqttSubTopic.values();

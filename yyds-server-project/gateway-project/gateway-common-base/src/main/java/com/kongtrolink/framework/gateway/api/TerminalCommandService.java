@@ -13,7 +13,10 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface TerminalCommandService {
 
     @OperaCode(code = "deviceGet")
-    void deviceGet(String foo);
+    String deviceGet(String message);
 
+
+    @OperaCode(code = "setData")
+    String setData(String message);
 
 }

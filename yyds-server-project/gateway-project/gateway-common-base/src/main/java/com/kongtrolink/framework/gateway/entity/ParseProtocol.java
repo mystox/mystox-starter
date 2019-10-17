@@ -12,6 +12,16 @@ public class ParseProtocol {
     String uuid;
     String payload;
 
+    public ParseProtocol() {
+    }
+
+    public ParseProtocol(String msgType, String sn, String uuid, String payload) {
+        this.msgType = msgType;
+        this.sn = sn;
+        this.uuid = uuid;
+        this.payload = payload;
+    }
+
     public String getMsgType() {
         return msgType;
     }
@@ -42,5 +52,15 @@ public class ParseProtocol {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    @Override
+    public String toString() {
+        return "ParseProtocol{" +
+                "msgType='" + msgType + '\'' +
+                ", sn='" + sn + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", payload='" + payload + '\'' +
+                '}';
     }
 }

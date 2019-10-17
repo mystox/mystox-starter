@@ -7,7 +7,7 @@ package com.kongtrolink.framework.gateway.tower.entity.send;
 public class RegisterAck {
 
     private int result;//	number	否	注册结果（0失败，1 成功，2 未注册）
-    private int time;//	number	否	注册结果成功时附带，用于同步时间
+    private long time;//	number	否	注册结果成功时附带，用于同步时间
     private int delay;//	number	否	注册结果失败时附带，用于指定下一次注册间隔延时（单位s）
     private int heartbeatInterval;//	number	否	注册成功附带心跳间隔时间（单位s）
 
@@ -19,11 +19,11 @@ public class RegisterAck {
         this.result = result;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
