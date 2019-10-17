@@ -15,6 +15,15 @@ public class DeviceTypeLevelQuery extends Paging {
     private String deviceType;      //设备类型
     private String deviceModel;     //设备型号
     private String level;
+    private String operatorName;        //操作用户姓名
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
 
     public DeviceTypeLevelQuery() {
     }

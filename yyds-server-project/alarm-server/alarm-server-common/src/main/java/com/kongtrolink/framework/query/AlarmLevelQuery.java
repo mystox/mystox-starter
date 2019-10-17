@@ -15,7 +15,9 @@ public class AlarmLevelQuery extends Paging {
 
     private String id;                 //id
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private String deviceType;              //设备类型名称
     private String deviceModel;              //设备型号
     private String sourceLevel;     //源等级
@@ -24,8 +26,33 @@ public class AlarmLevelQuery extends Paging {
     private String color;           //目标等级对应的颜色
     private Date beginTime;
     private Date endTime;
-    private String generate = Contant.SYSTEM;                //产生类型
+    private String generate;                //产生类型
     private String entDevCode;                  //企业，设备等级
+    private String operatorName;        //操作用户姓名
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
 
     public String getEntDevCode() {
         return entDevCode;

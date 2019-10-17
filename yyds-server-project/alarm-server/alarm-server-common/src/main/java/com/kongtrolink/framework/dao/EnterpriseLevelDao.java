@@ -216,11 +216,13 @@ public class EnterpriseLevelDao {
     }
 
     public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
-        Criteria criteria = Criteria.where("_id").is(enterpriseLevelQuery.getId());
+        String code = enterpriseLevelQuery.getCode();
+        Criteria criteria = Criteria.where("code").is(code);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", enterpriseLevelQuery.getState());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        update.set("updateTime", new Date());
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
 

@@ -142,6 +142,8 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
             EnterpriseLevel match = getMatch(lastUse, level);
             AlarmLevel alarmLevel = new AlarmLevel(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
                     deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
+            alarmLevel.setEnterpriseName(deviceTypeLevel.getEnterpriseName());
+            alarmLevel.setServerName(deviceTypeLevel.getServerName());
             alarmLevel.setSourceLevel(level);
             alarmLevel.setTargetLevel(match.getLevel());
             alarmLevel.setTargetLevelName(match.getLevelName());

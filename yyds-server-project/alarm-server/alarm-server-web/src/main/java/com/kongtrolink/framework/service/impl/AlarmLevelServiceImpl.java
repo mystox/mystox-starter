@@ -30,7 +30,6 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
 
     @Override
     public boolean save(AlarmLevel alarmLevel) {
-        alarmLevel.setUpdateTime(new Date());
         alarmLevelDao.save(alarmLevel);
         if(!StringUtil.isNUll(alarmLevel.getId())){
             return true ;
@@ -50,8 +49,28 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
 
     @Override
     public boolean update(AlarmLevel alarmLevel) {
-        alarmLevel.setUpdateTime(alarmLevel.getUpdateTime());
-        return alarmLevelDao.update(alarmLevel);
+        //删除原有告警等级
+        int resNum = deleteList(alarmLevel.getEnterpriseCode(), alarmLevel.getServerCode(), alarmLevel.getDeviceType(), alarmLevel.getDeviceModel());
+        boolean result = resNum > 0 ? true : false;
+        if(result){
+            List<String> sourceLevelList = alarmLevel.getSourceLevelList();
+            List<String> targetLevelList = alarmLevel.getTargetLevelList();
+            List<String> targetLevelNameList = alarmLevel.getTargetLevelNameList();
+            List<String> colorList = alarmLevel.getColorList();
+            alarmLevel.setSourceLevelList(null);
+            alarmLevel.setTargetLevelList(null);
+            alarmLevel.setTargetLevelNameList(null);
+            alarmLevel.setColorList(null);
+            for(int i=0; i<sourceLevelList.size(); i++){
+                alarmLevel.setId(null);
+                alarmLevel.setSourceLevel(sourceLevelList.get(i));
+                alarmLevel.setTargetLevel(targetLevelList.get(i));
+                alarmLevel.setTargetLevelName(targetLevelNameList.get(i));
+                alarmLevel.setColor(colorList.get(i));
+                save(alarmLevel);
+            }
+        }
+        return result;
     }
 
     @Override

@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.*;
+
 /**
  * @Auther: liudd
  * @Date: 2019/9/11 15:05
@@ -82,15 +84,19 @@ public class AlarmLevelDao {
             String entDevCode = alarmLevel.getEntDevCode();
             AlarmLevel firEnter = codeEnterpriseMap.get(entDevCode);
             if(null == firEnter){
-                alarmLevel.setSourLevelList(new ArrayList<>());
+                alarmLevel.setSourceLevelList(new ArrayList<>());
+                alarmLevel.getSourceLevelList().add(alarmLevel.getSourceLevel());
                 alarmLevel.setTargetLevelList(new ArrayList<>());
+                alarmLevel.getTargetLevelList().add(alarmLevel.getTargetLevel());
                 alarmLevel.setTargetLevelNameList(new ArrayList<>());
+                alarmLevel.getTargetLevelNameList().add(alarmLevel.getTargetLevelName());
                 alarmLevel.setColorList(new ArrayList<>());
+                alarmLevel.getColorList().add(alarmLevel.getColor());
                 codeEnterpriseMap.put(entDevCode, alarmLevel);
                 resuList.add(alarmLevel);
                 continue;
             }
-            firEnter.getSourLevelList().add(alarmLevel.getSourceLevel());
+            firEnter.getSourceLevelList().add(alarmLevel.getSourceLevel());
             firEnter.getTargetLevelList().add(alarmLevel.getTargetLevel());
             firEnter.getTargetLevelNameList().add(alarmLevel.getTargetLevelName());
             firEnter.getColorList().add(alarmLevel.getColor());
@@ -119,17 +125,34 @@ public class AlarmLevelDao {
         if (!StringUtil.isNUll(enterpriseCode)) {
             criteria.and("enterpriseCode").is(enterpriseCode);
         }
+        String enterpriseName = levelQuery.getEnterpriseName();
+        if(!StringUtil.isNUll(enterpriseName)){
+            enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
+            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+        }
         String serverCode = levelQuery.getServerCode();
         if (!StringUtil.isNUll(serverCode)) {
             criteria.and("serverCode").is(serverCode);
         }
+        String serverName = levelQuery.getServerName();
+        if(!StringUtil.isNUll(serverName)){
+            serverName = MongoUtil.escapeExprSpecialWord(serverName);
+            criteria.and("serverName").regex(".*?" + serverName + ".*?");
+        }
+        String operatorName = levelQuery.getOperatorName();
+        if(!StringUtil.isNUll(operatorName)){
+            operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
+            criteria.and("operator.name").regex(".*?" + operatorName + ".*?");
+        }
         String deviceType = levelQuery.getDeviceType();
         if (!StringUtil.isNUll(deviceType)) {
-            criteria.and("deviceType").is(deviceType);
+            deviceType = MongoUtil.escapeExprSpecialWord(deviceType);
+            criteria.and("deviceType").regex(".*?" + deviceType + ".*?");
         }
         String deviceModel = levelQuery.getDeviceModel();
         if (!StringUtil.isNUll(deviceModel)) {
-            criteria.and("deviceModel").is(deviceModel);
+            deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
+            criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
         }
         String sourceLevel = levelQuery.getSourceLevel();
         if (!StringUtil.isNUll(sourceLevel)) {

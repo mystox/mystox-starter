@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.dao;
 
 import com.kongtrolink.framework.base.MongTable;
+import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
@@ -61,6 +62,7 @@ public class DeviceTypeLevelDao {
 
     public List<DeviceTypeLevel> list(DeviceTypeLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
+        baseCriteria(criteria, levelQuery);
         Query query = Query.query(criteria);
         int currentPage = levelQuery.getCurrentPage();
         int pageSize = levelQuery.getPageSize();
@@ -90,15 +92,22 @@ public class DeviceTypeLevelDao {
         }
         String deviceType = levelQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){
-            criteria.and("deviceType").is(deviceType);
+            deviceType = MongoUtil.escapeExprSpecialWord(deviceType);
+            criteria.and("deviceType").regex(".*?" + deviceType + ".*?");
         }
         String deviceModel = levelQuery.getDeviceModel();
         if(!StringUtil.isNUll(deviceModel)){
-            criteria.and("deviceModel").is(deviceModel);
+            deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
+            criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
         }
         String level = levelQuery.getLevel();
         if(!StringUtil.isNUll(level)){
             criteria.and("levels").is(level);
+        }
+        String operatorName = levelQuery.getOperatorName();
+        if(!StringUtil.isNUll(operatorName)){
+            operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
+            criteria.and("operator.name").regex(".*?" + operatorName + ".*?");
         }
         return criteria;
     }

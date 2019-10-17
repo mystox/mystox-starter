@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.Date;
 import java.util.List;
 
@@ -109,5 +108,17 @@ public class EnterpriseLevelController extends BaseController {
     public String getDeviceTypeList(String enterpriseCode, String serverCode){
         JSON deviceTypeList = mqttService.getDeviceTypeList(enterpriseCode, serverCode);
         return deviceTypeList.toJSONString();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/17 13:56
+     * 功能描述:获取最后启用的企业告警
+     */
+    @RequestMapping("/getLastUse")
+    @ResponseBody
+    public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        return new JsonResult(lastUse);
     }
 }

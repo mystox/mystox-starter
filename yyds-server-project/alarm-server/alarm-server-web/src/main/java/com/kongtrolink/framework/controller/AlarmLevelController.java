@@ -5,14 +5,18 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
+import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +33,7 @@ public class AlarmLevelController extends BaseController {
 
     @RequestMapping("add")
     @ResponseBody
-    public JsonResult add(AlarmLevel alarmLevel){
+    public JsonResult add(@RequestBody  AlarmLevel alarmLevel){
         alarmLevel.setGenerate(Contant.MANUAL);
         boolean repeat = levelService.isRepeat(alarmLevel);
         if(repeat){
@@ -41,7 +45,7 @@ public class AlarmLevelController extends BaseController {
 
     @RequestMapping("delete")
     @ResponseBody
-    public JsonResult delete(AlarmLevelQuery alarmLevelQuery){
+    public JsonResult delete(@RequestBody  AlarmLevelQuery alarmLevelQuery){
         boolean delete = levelService.delete(alarmLevelQuery.getId());
         if(delete){
             return new JsonResult("删除成功", true);
@@ -51,12 +55,13 @@ public class AlarmLevelController extends BaseController {
 
     @RequestMapping("update")
     @ResponseBody
-    public JsonResult update(AlarmLevel alarmLevel){
+    public JsonResult update(@RequestBody  AlarmLevel alarmLevel){
         alarmLevel.setGenerate(Contant.MANUAL);
-        boolean repeat = levelService.isRepeat(alarmLevel);
-        if(repeat){
-            return new JsonResult("告警等级已定义!", false);
-        }
+//        boolean repeat = levelService.isRepeat(alarmLevel);
+//        if(repeat){
+//            return new JsonResult("告警等级已定义!", false);
+//        }
+        alarmLevel.setUpdateTime(new Date());
         boolean update = levelService.update(alarmLevel);
         if(update){
             return new JsonResult("修改成功", true);
@@ -66,7 +71,7 @@ public class AlarmLevelController extends BaseController {
 
     @RequestMapping("list")
     @ResponseBody
-    public JsonResult list(AlarmLevelQuery levelQuery){
+    public JsonResult list(@RequestBody AlarmLevelQuery levelQuery){
         List<AlarmLevel> list = levelService.list(levelQuery);
         int count = levelService.count(levelQuery);
         ListResult<AlarmLevel> listResult = new ListResult<>(list, count);
@@ -75,7 +80,7 @@ public class AlarmLevelController extends BaseController {
 
     @RequestMapping("/getByEntDevCodeList")
     @ResponseBody
-    public JsonResult getByEntDevCodeList(AlarmLevelQuery alarmLevelQuery){
+    public JsonResult getByEntDevCodeList(@RequestBody AlarmLevelQuery alarmLevelQuery){
         List<AlarmLevel> byEntDevCodeList = levelService.getByEntDevCodeList(Arrays.asList(alarmLevelQuery.getEntDevCode()));
         return new JsonResult(byEntDevCodeList);
     }

@@ -16,7 +16,9 @@ public class AlarmLevel {
     private String id;                          //id
     private String entDevCode;                  //企业，设备等级
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private String deviceType;                  //设备类型名称
     private String deviceModel;                 //设备型号
     private String sourceLevel;                 //源等级
@@ -25,19 +27,28 @@ public class AlarmLevel {
     private String color;                       //告警颜色，在确定目标等级时，确定颜色
     private String generate = Contant.SYSTEM;   //产生类型
     private Date updateTime;                    //创建时间
-    private FacadeView creator;                 //创建者
+    private FacadeView operator;                //操作人员
 
-    private List<String> sourLevelList;
+    //前端展示列表
+    private List<String> sourceLevelList;
     private List<String> targetLevelList;
     private List<String> targetLevelNameList;
     private List<String> colorList;
 
-    public List<String> getSourLevelList() {
-        return sourLevelList;
+    public FacadeView getOperator() {
+        return operator;
     }
 
-    public void setSourLevelList(List<String> sourLevelList) {
-        this.sourLevelList = sourLevelList;
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
+    }
+
+    public List<String> getSourceLevelList() {
+        return sourceLevelList;
+    }
+
+    public void setSourceLevelList(List<String> sourceLevelList) {
+        this.sourceLevelList = sourceLevelList;
     }
 
     public List<String> getTargetLevelList() {
@@ -54,6 +65,22 @@ public class AlarmLevel {
 
     public void setTargetLevelNameList(List<String> targetLevelNameList) {
         this.targetLevelNameList = targetLevelNameList;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 
     public List<String> getColorList() {
@@ -164,14 +191,6 @@ public class AlarmLevel {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public FacadeView getCreator() {
-        return creator;
-    }
-
-    public void setCreator(FacadeView creator) {
-        this.creator = creator;
     }
 
     public String getTargetLevel() {
