@@ -23,7 +23,7 @@ public class AlarmServerWebApplicationTests {
 
 		EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
 		enterpriseLevel.setName("默认企业告警等级");
-		enterpriseLevel.setLevels(Arrays.asList("一", "二", "三", "四", "五", "六", "七", "八"));
+//		enterpriseLevel.setLevels(Arrays.asList(1, 2, "三", "四", "五", "六", "七", "八"));
 		enterpriseLevel.setLevelNames(Arrays.asList("一级告警", "二级告警", "三级告警", "四级告警", "五级告警", "六级告警", "七级告警", "八级告警"));
 		enterpriseLevel.setColors(Arrays.asList("#993838", "#993838", "#993838", "#993838", "#993838", "#993838", "#993838", "#993838"));
 		enterpriseLevel.setDefaultLevel(Contant.YES);

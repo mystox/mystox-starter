@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,6 +37,7 @@ public class DeviceTypeLevelController extends BaseController {
     @RequestMapping("/add")
     @ResponseBody
     public JsonResult add(@RequestBody DeviceTypeLevel deviceTypeLevel){
+        deviceTypeLevel.setUpdateTime(new Date());
         boolean reprat = typeLevelService.isRepeat(deviceTypeLevel);
         if(reprat){
             return new JsonResult("设备等级已经存在!", false);
@@ -57,6 +59,7 @@ public class DeviceTypeLevelController extends BaseController {
     @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(@RequestBody DeviceTypeLevel deviceTypeLevel){
+        deviceTypeLevel.setUpdateTime(new Date());
         boolean update = typeLevelService.update(deviceTypeLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
