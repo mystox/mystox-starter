@@ -11,8 +11,6 @@ import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +45,8 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         boolean delete = typeLevelDao.delete(deviceTypeLevelId);
         if(delete){
             //删除设备对应的等级关系
-            int result = deleteAlarmLevels(deviceTypeLevel);
+            int result = alarmLevelService.deleteList(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
+                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
             if(result >0 ){
                 delete = true;
             }else {
@@ -59,11 +58,11 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
 
     @Override
     public boolean update(DeviceTypeLevel deviceTypeLevel) {
-        DeviceTypeLevel sourceDeviceLevel = get(deviceTypeLevel.getId());
         boolean update = typeLevelDao.update(deviceTypeLevel);
         if(update){
             //删除之前设备型号等级对应的告警等级
-            deleteAlarmLevels(sourceDeviceLevel);
+            alarmLevelService.deleteList(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
+                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
             //添加告警等级
             addAlarmLevelByDeviceLevel(deviceTypeLevel);
         }
@@ -114,21 +113,6 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     }
 
     /**
-     * @auther: liudd
-     * @date: 2019/9/26 13:18
-     * 功能描述:根据设备型号告警等级，删除对应的自定义告警等级
-     */
-    @Override
-    public int deleteAlarmLevels(DeviceTypeLevel deviceTypeLevel) {
-        if(null != deviceTypeLevel){
-            //删除该设备型号原来对应的告警等级
-            return alarmLevelService.deleteList(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
-                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
-        }
-        return 0;
-    }
-
-    /**
      * @param deviceTypeLevel
      * @auther: liudd
      * @date: 2019/9/26 13:33
@@ -136,9 +120,8 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      */
     @Override
     public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel) {
-        List<AlarmLevel> alarmLevelList = new ArrayList<>();
         List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode());
-        for(String level : deviceTypeLevel.getLevels()){
+        for(Integer level : deviceTypeLevel.getLevels()){
             EnterpriseLevel match = getMatch(lastUse, level);
             AlarmLevel alarmLevel = new AlarmLevel(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
                     deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
@@ -149,17 +132,15 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
             alarmLevel.setTargetLevelName(match.getLevelName());
             alarmLevel.setColor(match.getColor());
             alarmLevel.setUpdateTime(new Date());
-            alarmLevelList.add(alarmLevel);
+            alarmLevelService.save(alarmLevel);
         }
-        return alarmLevelService.save(alarmLevelList);
+        return true;
     }
 
-    private EnterpriseLevel getMatch( List<EnterpriseLevel> enterpriseLevels, String level){
-        int intVal = StringUtil.getIntVal(level);
+    private EnterpriseLevel getMatch( List<EnterpriseLevel> enterpriseLevels, Integer level){
         EnterpriseLevel resultEnter = null;
         for(EnterpriseLevel enterpriseLevel : enterpriseLevels){
-            int enterVal = StringUtil.getIntVal(enterpriseLevel.getLevel());
-            if(enterVal > intVal){
+            if(enterpriseLevel.getLevel() > level){
                 continue;
             }
             resultEnter = enterpriseLevel;

@@ -31,36 +31,10 @@ public class AlarmLevelController extends BaseController {
     @Autowired
     AlarmLevelService levelService;
 
-    @RequestMapping("add")
-    @ResponseBody
-    public JsonResult add(@RequestBody  AlarmLevel alarmLevel){
-        alarmLevel.setGenerate(Contant.MANUAL);
-        boolean repeat = levelService.isRepeat(alarmLevel);
-        if(repeat){
-            return new JsonResult("告警等级已定义!", false);
-        }
-        levelService.save(alarmLevel);
-        return new JsonResult("添加成功", true);
-    }
-
-    @RequestMapping("delete")
-    @ResponseBody
-    public JsonResult delete(@RequestBody  AlarmLevelQuery alarmLevelQuery){
-        boolean delete = levelService.delete(alarmLevelQuery.getId());
-        if(delete){
-            return new JsonResult("删除成功", true);
-        }
-        return new JsonResult("删除失败", false);
-    }
-
     @RequestMapping("update")
     @ResponseBody
     public JsonResult update(@RequestBody  AlarmLevel alarmLevel){
         alarmLevel.setGenerate(Contant.MANUAL);
-//        boolean repeat = levelService.isRepeat(alarmLevel);
-//        if(repeat){
-//            return new JsonResult("告警等级已定义!", false);
-//        }
         alarmLevel.setUpdateTime(new Date());
         boolean update = levelService.update(alarmLevel);
         if(update){

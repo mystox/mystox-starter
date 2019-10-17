@@ -184,37 +184,6 @@ public class EnterpriseLevelDao {
         return result.getN()>0 ? true : false;
     }
 
-    /**
-     * @auther: liudd
-     * @date: 2019/9/25 15:02
-     * 功能描述:获取最大告警等级。如果指明告警等级，则获取小于该
-     */
-    public EnterpriseLevel getMaxLevel(EnterpriseLevelQuery enterpriseLevelQuery) {
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, enterpriseLevelQuery);
-        String level = enterpriseLevelQuery.getLevel();
-        if(!StringUtil.isNUll(level)){
-            criteria.and("level").lte(level);
-        }
-        Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "level"));
-        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/10/12 14:33
-     * 功能描述:匹配告警
-     */
-    public EnterpriseLevel matchLevel(String enterpriseCode, String serverCode, String level){
-        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
-        criteria.and("serverCode").is(serverCode);
-        criteria.and("level").is(level);
-        Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "level"));
-        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
-    }
-
     public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
         String code = enterpriseLevelQuery.getCode();
         Criteria criteria = Criteria.where("code").is(code);
@@ -238,7 +207,7 @@ public class EnterpriseLevelDao {
         criteria.and("serverCode").is(serverCode);
         criteria.and("state").is(Contant.USEING);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "updateTime"));
+        query.with(new Sort(Sort.Direction.ASC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
         if(enterpriseLevelList == null || enterpriseLevelList.size() == 0){
             enterpriseLevelList = getDefault();
@@ -273,7 +242,7 @@ public class EnterpriseLevelDao {
         Update update = new Update();
         update.set("state", Contant.FORBIT);
         update.set("updateTime", updateTime);
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
 }

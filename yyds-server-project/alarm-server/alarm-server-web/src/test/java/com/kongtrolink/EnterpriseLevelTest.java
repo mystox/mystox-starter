@@ -49,7 +49,7 @@ public class EnterpriseLevelTest {
         enterpriseLevel.setUpdateTime(new Date());
         enterpriseLevel.setState(Contant.FORBIT);
         String level = "二";
-        enterpriseLevel.setLevel(level);
+        enterpriseLevel.setLevel(2);
         enterpriseLevel.setLevelName(level + "级告警");
         enterpriseLevel.setColor("#993838");
         enterpriseLevelService.add(enterpriseLevel);

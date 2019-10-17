@@ -34,20 +34,6 @@ public class AlarmLevelDao {
         mongoTemplate.save(alarmLevel, table);
     }
 
-    public boolean save(List<AlarmLevel> alarmLevelList) {
-        for(AlarmLevel alarmLevel : alarmLevelList){
-            save(alarmLevel);
-        }
-        return true;
-    }
-
-    public boolean delete(String alarmLevelId) {
-        Criteria criteria = Criteria.where("_id").is(alarmLevelId);
-        Query query = Query.query(criteria);
-        WriteResult remove = mongoTemplate.remove(query, table);
-        return remove.getN()>0 ? true : false;
-    }
-
     public boolean update(AlarmLevel alarmLevel) {
         alarmLevel.initEntDevCode();
         Criteria criteria = Criteria.where("_id").is(alarmLevel.getId());
@@ -63,10 +49,10 @@ public class AlarmLevelDao {
     public List<AlarmLevel> list(AlarmLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteira(levelQuery, criteria);
-        Sort sort = new Sort(Sort.Direction.DESC, "updateTime");
+        Sort sort = new Sort(Sort.Direction.DESC, "entDevCode");
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),  //查询条件
-                Aggregation.group("entDevCode", "updateTime"),
+                Aggregation.group("entDevCode"),
                 Aggregation.sort(sort),
                 Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
                 Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
@@ -154,44 +140,11 @@ public class AlarmLevelDao {
             deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
             criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
         }
-        String sourceLevel = levelQuery.getSourceLevel();
-        if (!StringUtil.isNUll(sourceLevel)) {
-            criteria.and("sourceLevel").is(sourceLevel);
-        }
-        String targetLevel = levelQuery.getTargetLevel();
-        if (!StringUtil.isNUll(targetLevel)) {
-            targetLevel = MongoUtil.escapeExprSpecialWord(targetLevel);
-            criteria.and("targetLevel").is(targetLevel);
-        }
-        String targetLevelName = levelQuery.getTargetLevelName();
-        if(!StringUtil.isNUll(targetLevelName)){
-            criteria.and("targetLevelName").regex(".*?" + targetLevelName + ".*?");
-        }
-        String color = levelQuery.getColor();
-        if (!StringUtil.isNUll(color)) {
-            criteria.and("color").is(color);
-        }
         String generate = levelQuery.getGenerate();
         if(!StringUtil.isNUll(generate)){
             criteria.and("generate").is(generate);
         }
-        Date beginTime = levelQuery.getBeginTime();
-        Date endTime = levelQuery.getEndTime();
-        if (null != beginTime && null == endTime) {
-            criteria.and("updateTime").gte(beginTime);
-        } else if (null != beginTime && null != endTime) {
-            criteria.and("updateTime").gte(beginTime).lte(endTime);
-        } else if (null == beginTime && null != endTime) {
-            criteria.and("updateTime").lte(endTime);
-        }
         return criteria;
-    }
-
-    public AlarmLevel getOne(AlarmLevelQuery alarmLevelQuery) {
-        Criteria criteria = new Criteria();
-        baseCriteira(alarmLevelQuery, criteria);
-        Query query = Query.query(criteria);
-        return mongoTemplate.findOne(query, AlarmLevel.class, table);
     }
 
     /**

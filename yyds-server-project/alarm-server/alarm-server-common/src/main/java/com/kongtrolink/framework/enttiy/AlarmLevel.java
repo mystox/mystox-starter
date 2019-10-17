@@ -21,8 +21,8 @@ public class AlarmLevel {
     private String serverName;
     private String deviceType;                  //设备类型名称
     private String deviceModel;                 //设备型号
-    private String sourceLevel;                 //源等级
-    private String targetLevel;                 //目标等级，一条自定义只包含一个目标等级，否则不好判定目标等级重复定义
+    private Integer sourceLevel;                 //源等级
+    private Integer targetLevel;                 //目标等级，一条自定义只包含一个目标等级，否则不好判定目标等级重复定义
     private String targetLevelName;             //目标等级名称
     private String color;                       //告警颜色，在确定目标等级时，确定颜色
     private String generate = Contant.SYSTEM;   //产生类型
@@ -30,8 +30,8 @@ public class AlarmLevel {
     private FacadeView operator;                //操作人员
 
     //前端展示列表
-    private List<String> sourceLevelList;
-    private List<String> targetLevelList;
+    private List<Integer> sourceLevelList;
+    private List<Integer> targetLevelList;
     private List<String> targetLevelNameList;
     private List<String> colorList;
 
@@ -41,22 +41,6 @@ public class AlarmLevel {
 
     public void setOperator(FacadeView operator) {
         this.operator = operator;
-    }
-
-    public List<String> getSourceLevelList() {
-        return sourceLevelList;
-    }
-
-    public void setSourceLevelList(List<String> sourceLevelList) {
-        this.sourceLevelList = sourceLevelList;
-    }
-
-    public List<String> getTargetLevelList() {
-        return targetLevelList;
-    }
-
-    public void setTargetLevelList(List<String> targetLevelList) {
-        this.targetLevelList = targetLevelList;
     }
 
     public List<String> getTargetLevelNameList() {
@@ -145,14 +129,6 @@ public class AlarmLevel {
         this.targetLevelName = targetLevelName;
     }
 
-    public String getSourceLevel() {
-        return sourceLevel;
-    }
-
-    public void setSourceLevel(String sourceLevel) {
-        this.sourceLevel = sourceLevel;
-    }
-
     public String getDeviceModel() {
         return deviceModel;
     }
@@ -193,11 +169,35 @@ public class AlarmLevel {
         this.updateTime = updateTime;
     }
 
-    public String getTargetLevel() {
+    public Integer getSourceLevel() {
+        return sourceLevel;
+    }
+
+    public void setSourceLevel(Integer sourceLevel) {
+        this.sourceLevel = sourceLevel;
+    }
+
+    public Integer getTargetLevel() {
         return targetLevel;
     }
 
-    public void setTargetLevel(String targetLevel) {
+    public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    public List<Integer> getSourceLevelList() {
+        return sourceLevelList;
+    }
+
+    public void setSourceLevelList(List<Integer> sourceLevelList) {
+        this.sourceLevelList = sourceLevelList;
+    }
+
+    public List<Integer> getTargetLevelList() {
+        return targetLevelList;
+    }
+
+    public void setTargetLevelList(List<Integer> targetLevelList) {
+        this.targetLevelList = targetLevelList;
     }
 }

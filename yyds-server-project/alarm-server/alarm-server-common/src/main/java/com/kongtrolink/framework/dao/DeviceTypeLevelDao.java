@@ -100,10 +100,6 @@ public class DeviceTypeLevelDao {
             deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
             criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
         }
-        String level = levelQuery.getLevel();
-        if(!StringUtil.isNUll(level)){
-            criteria.and("levels").is(level);
-        }
         String operatorName = levelQuery.getOperatorName();
         if(!StringUtil.isNUll(operatorName)){
             operatorName = MongoUtil.escapeExprSpecialWord(operatorName);

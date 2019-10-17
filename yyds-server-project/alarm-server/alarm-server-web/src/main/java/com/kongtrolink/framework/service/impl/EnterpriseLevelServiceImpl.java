@@ -31,7 +31,7 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
 
     @Override
     public void add(EnterpriseLevel enterpriseLevel) {
-        List<String> levels = enterpriseLevel.getLevels();
+        List<Integer> levels = enterpriseLevel.getLevels();
         List<String> levelNames = enterpriseLevel.getLevelNames();
         List<String> colors = enterpriseLevel.getColors();
         enterpriseLevel.setLevels(null);
@@ -130,8 +130,9 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
             }
             alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
         }
+        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery);
         addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
-        return enterpriseLevelDao.updateState(enterpriseLevelQuery);
+        return result;
     }
 
     /**

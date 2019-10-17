@@ -21,7 +21,7 @@ public class EnterpriseLevelQuery extends Paging{
     private String enterpriseName;
     private String serverCode;
     private String serverName;
-    private String level;
+    private Integer level;
     private String color;
     private Date beginTime;
     private Date endTime;
@@ -133,11 +133,11 @@ public class EnterpriseLevelQuery extends Paging{
         this.serverCode = serverCode;
     }
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 

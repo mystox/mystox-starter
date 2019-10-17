@@ -20,7 +20,7 @@ public class EnterpriseLevel {
     private String enterpriseName;
     private String serverCode;
     private String serverName;
-    private String level;
+    private Integer level;
     private String levelName;
     private String color;
     private Date updateTime;
@@ -28,16 +28,24 @@ public class EnterpriseLevel {
     private String defaultLevel = Contant.NO;       //默认告警等级
     private String state;                           //启用，禁用
     //前端展示字段
-    private List<String> levels;        //等级列表
+    private List<Integer> levels;        //等级列表
     private List<String> levelNames;     //等级名称列表
     private List<String> colors;        //颜色列表
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public List<Integer> getLevels() {
+        return levels;
+    }
+
+    public void setLevels(List<Integer> levels) {
+        this.levels = levels;
     }
 
     public String getLevelName() {
@@ -78,14 +86,6 @@ public class EnterpriseLevel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<String> getLevels() {
-        return levels;
-    }
-
-    public void setLevels(List<String> levels) {
-        this.levels = levels;
     }
 
     public List<String> getLevelNames() {
