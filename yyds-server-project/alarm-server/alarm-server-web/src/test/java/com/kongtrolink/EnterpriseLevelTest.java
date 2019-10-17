@@ -4,6 +4,7 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
+import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +65,14 @@ public class EnterpriseLevelTest {
         List<EnterpriseLevel> mappedResults = aggregate.getMappedResults();
         for(EnterpriseLevel enterpriseLevel : mappedResults){
             System.out.println(enterpriseLevel.getCode() +":" + enterpriseLevel.getUpdateTime().toString());
+        }
+    }
+
+    @Test
+    public void nullMap(){
+        List<EnterpriseLevel> list = enterpriseLevelService.list(new EnterpriseLevelQuery());
+        for(EnterpriseLevel enterpriseLevel : list){
+            System.out.println(enterpriseLevel.getCode()+";"+enterpriseLevel.getLevels());
         }
     }
 }
