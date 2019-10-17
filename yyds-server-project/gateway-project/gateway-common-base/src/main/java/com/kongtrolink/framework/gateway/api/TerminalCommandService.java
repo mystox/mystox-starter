@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.log.api;
+package com.kongtrolink.framework.gateway.api;
 
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
@@ -10,12 +10,10 @@ import com.kongtrolink.framework.stereotype.Register;
  * update record:
  */
 @Register
-public interface FooService {
+public interface TerminalCommandService {
 
-    @OperaCode(code = "fooo")
-    void foo(String foo);
+    @OperaCode(code = "deviceGet")
+    void deviceGet(String foo);
 
-    @OperaCode
-    String boo(String boo);
 
 }

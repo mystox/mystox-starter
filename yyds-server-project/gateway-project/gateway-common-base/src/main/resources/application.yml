@@ -9,13 +9,13 @@ spring:
     database: 2
 ###########消息框架相关配置#############
 server:
-  name: FOO_SERVER_DEMO #服务编码
+  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
   version: 1.0.0 #服务版本
   port: 52002 #服务占用web端口
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
-  scanBasePackage: com.kongtrolink.framework.demo.api #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
+  scanBasePackage: com.kongtrolink.framework #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
 mqtt:
   username: root #可选配置 mqtt配置相关
@@ -33,3 +33,10 @@ logging:
   pattern:
     console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+#########网关相关配置##############
+gateway:
+  businessCode: TOWER_SERVER
+  enterpriseCode: yytd
+  deviceType: FSU #可选
+  deviceModel: MUU100 #可选
+  regionCode: 000000 #可选
