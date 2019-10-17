@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
-	<artifactId>core-yytd-base</artifactId>
+	<artifactId>gateway-common</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>foo-server-demo</name>
+	<name>tower-mqtt-common</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -27,16 +27,13 @@
 			<artifactId>yyds-mqtt-starter</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.kongtrolink.framework</groupId>
-			<artifactId>yyds-core</artifactId>
-			<version>1.0.0</version>
-		</dependency>-->
 		<dependency>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-test</artifactId>
-		<scope>test</scope>
-	</dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

@@ -8,7 +8,8 @@
     <artifactId>gateway-project</artifactId>
     <version>1.0.0</version>
     <modules>
-        <module>foo-server-demo</module>
+        <module>gateway-common</module>
+        <module>core-yytd-base</module>
     </modules>
     
 </project>
