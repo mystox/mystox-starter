@@ -73,7 +73,7 @@ public class EnterpriseLevelDao {
     public List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, levelQuery);
-        Sort sort = new Sort(Sort.Direction.DESC, "updateTime");
+        Sort sort = new Sort(Sort.Direction.DESC, "code");
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),  //查询条件
                 Aggregation.group("code", "updateTime"),
@@ -94,15 +94,18 @@ public class EnterpriseLevelDao {
             EnterpriseLevel firEnter = codeEnterpriseMap.get(enterpriseLevel.getCode());
             if(null == firEnter){
                 enterpriseLevel.setLevels(new ArrayList<>());
+                enterpriseLevel.getLevels().add(enterpriseLevel.getLevel());
                 enterpriseLevel.setLevelNames(new ArrayList<>());
+                enterpriseLevel.getLevelNames().add(enterpriseLevel.getLevelName());
                 enterpriseLevel.setColors(new ArrayList<>());
+                enterpriseLevel.getColors().add(enterpriseLevel.getColor());
                 codeEnterpriseMap.put(enterpriseLevel.getCode(), enterpriseLevel);
                 resuList.add(enterpriseLevel);
                 continue;
             }
             firEnter.getLevels().add(enterpriseLevel.getLevel());
             firEnter.getLevelNames().add(enterpriseLevel.getLevelName());
-            firEnter.getColors().add(enterpriseLevel.getCode());
+            firEnter.getColors().add(enterpriseLevel.getColor());
         }
         return resuList;
     }
@@ -123,13 +126,28 @@ public class EnterpriseLevelDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
+        String name = levelQuery.getName();
+        if(!StringUtil.isNUll(name)){
+            name = MongoUtil.escapeExprSpecialWord(name);
+            criteria.and("name").regex(".*?" + name + ".*?");
+        }
         String enterpriseCode = levelQuery.getEnterpriseCode();
         if(!StringUtil.isNUll(enterpriseCode)){
             criteria.and("enterpriseCode").is(enterpriseCode);
         }
+        String enterpriseName = levelQuery.getEnterpriseName();
+        if(!StringUtil.isNUll(enterpriseName)){
+            enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
+            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+        }
         String serverCode = levelQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
             criteria.and("serverCode").is(serverCode);
+        }
+        String serverName = levelQuery.getServerName();
+        if(!StringUtil.isNUll(serverName)){
+            serverName = MongoUtil.escapeExprSpecialWord(serverName);
+            criteria.and("serverName").regex(".*?" + serverName + ".*?");
         }
         String defaultLevel = levelQuery.getDefaultLevel();
         if(!StringUtil.isNUll(defaultLevel)){
@@ -235,7 +253,6 @@ public class EnterpriseLevelDao {
     List<EnterpriseLevel> getByCodes(List<String> codeList){
         Criteria criteria = Criteria.where("code").in(codeList);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.ASC, "code"));
         query.with(new Sort(Sort.Direction.ASC, "level"));
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
