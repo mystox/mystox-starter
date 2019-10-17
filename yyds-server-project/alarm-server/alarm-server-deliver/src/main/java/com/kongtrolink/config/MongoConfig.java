@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-import org.springframework.data.mongodb.core.convert.*;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
 import java.net.UnknownHostException;

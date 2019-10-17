@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
-import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
 
 import java.util.List;

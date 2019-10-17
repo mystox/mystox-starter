@@ -5,7 +5,6 @@ import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
-import com.sun.org.apache.bcel.internal.generic.MONITORENTER;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.Field;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

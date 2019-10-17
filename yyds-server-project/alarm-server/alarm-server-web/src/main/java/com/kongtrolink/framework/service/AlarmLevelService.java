@@ -4,9 +4,6 @@ import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
