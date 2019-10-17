@@ -14,6 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public abstract class TransverterHandler implements TransverterService {
 
+    @Value("${gateway.businessCode}")
+    private String businessCode; //必须配置
+    @Value("${gateway.enterpriseCode}")
+    private String enterpriseCode; //必须配置
     @Value("${gateway.deviceType:null}")
     private String deviceType;
     @Value("${gateway.deviceModel:null}")
@@ -36,6 +40,22 @@ public abstract class TransverterHandler implements TransverterService {
 
     protected MsgResult reportMsgSyn(String serverCode, String operaCode, String payload) {
         return mqttSender.sendToMqttSyn(serverCode,operaCode,payload);
+    }
+
+    public String getBusinessCode() {
+        return businessCode;
+    }
+
+    public void setBusinessCode(String businessCode) {
+        this.businessCode = businessCode;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
     }
 
     public String getDeviceType() {
@@ -61,5 +81,4 @@ public abstract class TransverterHandler implements TransverterService {
     public void setRegionCode(String regionCode) {
         this.regionCode = regionCode;
     }
-
 }
