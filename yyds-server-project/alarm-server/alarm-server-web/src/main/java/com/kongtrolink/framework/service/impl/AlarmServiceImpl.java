@@ -36,11 +36,6 @@ public class AlarmServiceImpl implements AlarmService{
     }
 
     @Override
-    public boolean delete(String alarmId, String table) {
-        return alarmDao.delete(alarmId, table);
-    }
-
-    @Override
     public boolean update(Alarm alarm, String table) {
         return alarmDao.update(alarm, table);
     }
@@ -67,18 +62,6 @@ public class AlarmServiceImpl implements AlarmService{
     @Override
     public int count(AlarmQuery alarmQuery, String table) {
         return alarmDao.count(alarmQuery, table);
-    }
-
-    /**
-     * @param alarmQuery
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/24 9:08
-     * 功能描述:批量删除
-     */
-    @Override
-    public int deleteList(AlarmQuery alarmQuery, String table) {
-        return alarmDao.deleteList(alarmQuery, table);
     }
 
     @Override

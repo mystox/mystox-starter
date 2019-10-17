@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.core.config;
+package com.kongtrolink.framework.config;
 
 import com.kongtrolink.framework.core.interceptor.SessionTimeoutInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry interceptorRegistry) {
         interceptorRegistry.addInterceptor(new SessionTimeoutInterceptor()).addPathPatterns("/**","/res/page/back/center.html")
-                .excludePathPatterns("/system/login*").excludePathPatterns("/commonFunc/logout",
+                .excludePathPatterns("/**").excludePathPatterns("/commonFunc/logout",
                 "/httpInterface/*", "/commonInterface/*", "/app/v2/user/**", "/phoneFunc/**", "/redirect", "/testMain",
                 "/index.html").excludePathPatterns("/error");//"error"的拦截是为了异常的抛出不会重定向
 

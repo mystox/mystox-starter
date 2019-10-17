@@ -1,11 +1,13 @@
-package com.kongtrolink.framework.mqtt.mqttEntity;
+package com.kongtrolink.framework.mqtt;
+
+import com.kongtrolink.framework.mqtt.DeviceTypeResult;
 
 import java.util.List;
 
 /**
  * @Auther: liudd
- * @Date: 2019/9/25 18:23
- * @Description:获取设备信号mqtt返回结果封装类
+ * @Date: 2019/10/16 09:32
+ * @Description:
  */
 public class DeviceTypeMqttResult {
 

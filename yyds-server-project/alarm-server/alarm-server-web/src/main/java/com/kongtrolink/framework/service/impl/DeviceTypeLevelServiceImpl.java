@@ -5,15 +5,15 @@ import com.kongtrolink.framework.dao.DeviceTypeLevelDao;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
-import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,7 +46,13 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         DeviceTypeLevel deviceTypeLevel = get(deviceTypeLevelId);
         boolean delete = typeLevelDao.delete(deviceTypeLevelId);
         if(delete){
-            deleteAlarmLevels(deviceTypeLevel);
+            //删除设备对应的等级关系
+            int result = deleteAlarmLevels(deviceTypeLevel);
+            if(result >0 ){
+                delete = true;
+            }else {
+                delete = false;
+            }
         }
         return delete;
     }
@@ -58,7 +64,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         if(update){
             //删除之前设备型号等级对应的告警等级
             deleteAlarmLevels(sourceDeviceLevel);
-            //修改成功后，生成新的告警自定义等级
+            //添加告警等级
             addAlarmLevelByDeviceLevel(deviceTypeLevel);
         }
         return update;
@@ -93,10 +99,10 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     @Override
     public boolean isRepeat(DeviceTypeLevel typeLevel) {
         DeviceTypeLevelQuery levelQuery = new DeviceTypeLevelQuery();
-        levelQuery.setUniqueCode(typeLevel.getUniqueCode());
-        levelQuery.setService(typeLevel.getService());
+        levelQuery.setEnterpriseCode(typeLevel.getEnterpriseCode());
+        levelQuery.setServerCode(typeLevel.getServerCode());
         levelQuery.setDeviceType(typeLevel.getDeviceType());
-        levelQuery.setLevel(typeLevel.getLevel());
+        levelQuery.setDeviceModel(typeLevel.getDeviceModel());
         DeviceTypeLevel one = getOne(levelQuery);
         if(null == one){
             return false;
@@ -116,8 +122,8 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     public int deleteAlarmLevels(DeviceTypeLevel deviceTypeLevel) {
         if(null != deviceTypeLevel){
             //删除该设备型号原来对应的告警等级
-            AlarmLevelQuery alarmLevelQuery = AlarmLevelQuery.deviceTypeLevel2AlarmLevelQuery(deviceTypeLevel);
-            return alarmLevelService.deleteList(alarmLevelQuery);
+            return alarmLevelService.deleteList(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
+                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
         }
         return 0;
     }
@@ -130,14 +136,45 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      */
     @Override
     public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel) {
-        EnterpriseLevelQuery enterpriseLevelQuery = EnterpriseLevelQuery.deviceLevel2EnterpriseLevel(deviceTypeLevel);
-        EnterpriseLevel maxLevelSinceLevel = enterpriseLevelService.getMaxLevelSinceLevel(enterpriseLevelQuery);
-        if(null != maxLevelSinceLevel){
-            AlarmLevel alarmLevel = alarmLevelService.createAlarmLevel(maxLevelSinceLevel, deviceTypeLevel);
-            if(null != alarmLevel){
-                return alarmLevelService.save(alarmLevel);
-            }
+        List<AlarmLevel> alarmLevelList = new ArrayList<>();
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode());
+        for(String level : deviceTypeLevel.getLevels()){
+            EnterpriseLevel match = getMatch(lastUse, level);
+            AlarmLevel alarmLevel = new AlarmLevel(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
+                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
+            alarmLevel.setSourceLevel(level);
+            alarmLevel.setTargetLevel(match.getLevel());
+            alarmLevel.setTargetLevelName(match.getLevelName());
+            alarmLevel.setColor(match.getColor());
+            alarmLevel.setUpdateTime(new Date());
+            alarmLevelList.add(alarmLevel);
         }
-        return false;
+        return alarmLevelService.save(alarmLevelList);
+    }
+
+    private EnterpriseLevel getMatch( List<EnterpriseLevel> enterpriseLevels, String level){
+        int intVal = StringUtil.getIntVal(level);
+        EnterpriseLevel resultEnter = null;
+        for(EnterpriseLevel enterpriseLevel : enterpriseLevels){
+            int enterVal = StringUtil.getIntVal(enterpriseLevel.getLevel());
+            if(enterVal > intVal){
+                continue;
+            }
+            resultEnter = enterpriseLevel;
+            break;
+        }
+        return resultEnter;
+    }
+
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/10/16 16:13
+     * 功能描述:根据企业信息获取所有设备等级
+     */
+    @Override
+    public List<DeviceTypeLevel> listByEnterpriseInfo(String enterpriseCode, String serverCode) {
+        return typeLevelDao.listByEnterpriseInfo(enterpriseCode, serverCode);
     }
 }

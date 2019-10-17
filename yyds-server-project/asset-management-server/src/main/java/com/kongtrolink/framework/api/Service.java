@@ -7,5 +7,14 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface Service {
 
     @OperaCode
-    String getRegionCode(String payload);
+    String getCIModel(String payload);
+
+    @OperaCode
+    String getCIIds(String payload);
+
+    @OperaCode
+    String getCI(String payload);
+
+    @OperaCode
+    void deviceReport(String payload);
 }

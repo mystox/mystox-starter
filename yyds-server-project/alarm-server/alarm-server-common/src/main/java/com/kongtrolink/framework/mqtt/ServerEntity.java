@@ -1,9 +1,9 @@
-package com.kongtrolink.framework.mqtt.mqttEntity;
+package com.kongtrolink.framework.mqtt;
 
 /**
  * @Auther: liudd
- * @Date: 2019/9/25 18:16
- * @Description:服务封装类
+ * @Date: 2019/10/16 09:29
+ * @Description:
  */
 public class ServerEntity {
 

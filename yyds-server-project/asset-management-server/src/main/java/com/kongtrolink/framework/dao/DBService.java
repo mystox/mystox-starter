@@ -33,13 +33,21 @@ public interface DBService {
 
     JSONObject searchCIProp(JSONObject jsonObject);
 
-    boolean addCI(JSONObject jsonObject);
+    String addCI(JSONObject jsonObject);
 
     boolean deleteCI(JSONObject jsonObject);
 
     boolean modifyCI(JSONObject jsonObject);
 
+    JSONObject searchCI(JSONObject jsonObject);
+
     boolean addCIRelationship(JSONObject jsonObject);
 
+    JSONObject searchCIRelationship(JSONObject jsonObject);
+
     boolean deleteCIRelationship(JSONObject jsonObject);
+
+    JSONArray searchCIModel(JSONObject jsonObject);
+
+    JSONArray searchCIIds(JSONObject jsonObject);
 }

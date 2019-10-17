@@ -15,6 +15,9 @@ public class FacadeView {
         this.name = name;
     }
 
+    public FacadeView() {
+    }
+
     public String getStrId() {
         return strId;
     }

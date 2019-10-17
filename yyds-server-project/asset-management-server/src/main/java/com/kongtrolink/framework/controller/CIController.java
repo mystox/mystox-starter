@@ -22,8 +22,10 @@ public class CIController {
         result.put("result", 0);
         result.put("info", "添加失败");
 
-        if (dbService.addCI(requestBody)) {
+        String id = dbService.addCI(requestBody);
+        if (!id.equals("")) {
             result.put("result", 1);
+            result.put("id", id);
             result.put("info", "添加成功");
         }
 
@@ -60,8 +62,16 @@ public class CIController {
         return JSONObject.toJSONString(result);
     }
 
-    @RequestMapping("/addCIRelationship")
-    public String addCIRelationship(@RequestBody JSONObject requestBody) {
+    @RequestMapping("/search")
+    public String search(@RequestBody JSONObject requestBody) {
+
+        JSONObject result = dbService.searchCI(requestBody);
+
+        return JSONObject.toJSONString(result);
+    }
+
+    @RequestMapping("/addRelationship")
+    public String addRelationship(@RequestBody JSONObject requestBody) {
 
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -75,8 +85,8 @@ public class CIController {
         return JSONObject.toJSONString(result);
     }
 
-    @RequestMapping("/deleteCIRelationship")
-    public String deleteCIRelationship(@RequestBody JSONObject requestBody) {
+    @RequestMapping("/deleteRelationship")
+    public String deleteRelationship(@RequestBody JSONObject requestBody) {
 
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -86,6 +96,14 @@ public class CIController {
             result.put("result", 1);
             result.put("info", "删除成功");
         }
+
+        return JSONObject.toJSONString(result);
+    }
+
+    @RequestMapping("/searchRelationship")
+    public String searchRelationship(@RequestBody JSONObject requestBody) {
+
+        JSONObject result = dbService.searchCIRelationship(requestBody);
 
         return JSONObject.toJSONString(result);
     }

@@ -3,18 +3,22 @@ package com.kongtrolink.framework.dao;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -29,7 +33,15 @@ public class AlarmLevelDao {
     private String table = MongTable.ALARM_LEVEL;
 
     public void save(AlarmLevel alarmLevel) {
+        alarmLevel.initEntDevCode();
         mongoTemplate.save(alarmLevel, table);
+    }
+
+    public boolean save(List<AlarmLevel> alarmLevelList) {
+        for(AlarmLevel alarmLevel : alarmLevelList){
+            save(alarmLevel);
+        }
+        return true;
     }
 
     public boolean delete(String alarmLevelId) {
@@ -40,34 +52,67 @@ public class AlarmLevelDao {
     }
 
     public boolean update(AlarmLevel alarmLevel) {
+        alarmLevel.initEntDevCode();
         Criteria criteria = Criteria.where("_id").is(alarmLevel.getId());
         Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("sourceLevel", alarmLevel.getSourceLevel());
-        update.set("targetLevel", alarmLevel.getTargetLevel());
-        update.set("targetLevelName", alarmLevel.getTargetLevelName());
-        update.set("color", alarmLevel.getColor());
-        update.set("generate", alarmLevel.getGenerate());
-        update.set("updateTime", alarmLevel.getUpdateTime());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
-        return result.getN()>0 ? true : false;
+        WriteResult remove = mongoTemplate.remove(query, table);
+        boolean result = remove.getN() > 0 ? true : false;
+        if(result){
+            mongoTemplate.save(alarmLevel, table);
+        }
+        return result;
     }
 
     public List<AlarmLevel> list(AlarmLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteira(levelQuery, criteria);
-        Query query = Query.query(criteria);
-        int currentPage = levelQuery.getCurrentPage();
-        int pageSize = levelQuery.getPageSize();
-        query.skip( (currentPage-1)*pageSize ).limit(pageSize);
-        return mongoTemplate.find(query, AlarmLevel.class, table);
+        Sort sort = new Sort(Sort.Direction.DESC, "updateTime");
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),  //查询条件
+                Aggregation.group("entDevCode", "updateTime"),
+                Aggregation.sort(sort),
+                Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
+                Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
+        );
+        AggregationResults<AlarmLevel> aggResult = mongoTemplate.aggregate(agg, table, AlarmLevel.class);
+        List<AlarmLevel> mappedResults = aggResult.getMappedResults();
+        List<String> entDevCodeList = new ArrayList<>();
+        for(AlarmLevel alarmLevel : mappedResults){
+            entDevCodeList.add(alarmLevel.getEntDevCode());
+        }
+        List<AlarmLevel> byCodes = getByEntDevCodeList(entDevCodeList);
+        List<AlarmLevel> resuList = new ArrayList<>();
+        Map<String, AlarmLevel> codeEnterpriseMap = new HashMap<>();
+        for(AlarmLevel alarmLevel : byCodes){
+            String entDevCode = alarmLevel.getEntDevCode();
+            AlarmLevel firEnter = codeEnterpriseMap.get(entDevCode);
+            if(null == firEnter){
+                alarmLevel.setSourLevelList(new ArrayList<>());
+                alarmLevel.setTargetLevelList(new ArrayList<>());
+                alarmLevel.setTargetLevelNameList(new ArrayList<>());
+                alarmLevel.setColorList(new ArrayList<>());
+                codeEnterpriseMap.put(entDevCode, alarmLevel);
+                resuList.add(alarmLevel);
+                continue;
+            }
+            firEnter.getSourLevelList().add(alarmLevel.getSourceLevel());
+            firEnter.getTargetLevelList().add(alarmLevel.getTargetLevel());
+            firEnter.getTargetLevelNameList().add(alarmLevel.getTargetLevelName());
+            firEnter.getColorList().add(alarmLevel.getColor());
+        }
+        return resuList;
     }
 
     public int count(AlarmLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteira(levelQuery, criteria);
-        Query query = Query.query(criteria);
-        return (int)mongoTemplate.count(query, table);
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),  //查询条件
+                Aggregation.group("entDevCode")
+        );
+        AggregationResults<AlarmLevel> aggResult = mongoTemplate.aggregate(agg, table, AlarmLevel.class);
+        List<AlarmLevel> mappedResults = aggResult.getMappedResults();
+        return mappedResults.size();
     }
 
     private Criteria baseCriteira(AlarmLevelQuery levelQuery, Criteria criteria) {
@@ -88,20 +133,9 @@ public class AlarmLevelDao {
             criteria.and("deviceType").is(deviceType);
         }
         String deviceModel = levelQuery.getDeviceModel();
-        //liuddtodo 特殊字符处理，模糊查询处理
         if (!StringUtil.isNUll(deviceModel)) {
             criteria.and("deviceModel").is(deviceModel);
         }
-//        List<String> sourceLevelList = levelQuery.getSourceLevelList();
-//        if(null != sourceLevelList){
-//            StringBuilder stringBuilder = new StringBuilder();
-//            for(String sourceLevel : sourceLevelList) {
-//                sourceLevel = MongoUtil.escapeExprSpecialWord(sourceLevel);
-//                stringBuilder.append("[1-9]{0,}").append(sourceLevel);
-//            }
-//            stringBuilder.append("[1-9]{0,}");
-//            criteria.and("sourceLevelList").regex(stringBuilder.toString());
-//        }
         String sourceLevel = levelQuery.getSourceLevel();
         if (!StringUtil.isNUll(sourceLevel)) {
             criteria.and("sourceLevel").is(sourceLevel);
@@ -142,9 +176,24 @@ public class AlarmLevelDao {
         return mongoTemplate.findOne(query, AlarmLevel.class, table);
     }
 
-    public int deleteList(AlarmLevelQuery levelQuery) {
-        Criteria criteria = new Criteria();
-        baseCriteira(levelQuery, criteria);
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @param deviceType
+     * @param deviceModel
+     * @auther: liudd
+     * @date: 2019/10/16 15:41
+     * 功能描述:根据设备类型信息删除告警等级
+     */
+    public int deleteList(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        if(!StringUtil.isNUll(deviceType)) {
+            criteria.and("deviceType").is(deviceType);
+        }
+        if(!StringUtil.isNUll(deviceModel)) {
+            criteria.and("deviceModel").is(deviceModel);
+        }
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
         return remove.getN();
@@ -163,5 +212,12 @@ public class AlarmLevelDao {
         criteria.and("sourceLevel").is(sourceLevel);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, AlarmLevel.class, table);
+    }
+
+    public List<AlarmLevel> getByEntDevCodeList(List<String> entDevCodeList){
+        Criteria criteria = Criteria.where("entDevCode").in(entDevCodeList);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.ASC, "level"));
+        return mongoTemplate.find(query, AlarmLevel.class, table);
     }
 }

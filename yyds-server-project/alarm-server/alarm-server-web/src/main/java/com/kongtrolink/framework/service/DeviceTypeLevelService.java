@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
 
 import java.util.List;
@@ -46,4 +47,11 @@ public interface DeviceTypeLevelService {
      * 功能描述:根据设备型号告警，生成新告警自定义等级
      */
     boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/16 16:13
+     * 功能描述:根据企业信息获取所有设备等级
+     */
+    List<DeviceTypeLevel> listByEnterpriseInfo(String enterpriseCode, String serverCode);
 }

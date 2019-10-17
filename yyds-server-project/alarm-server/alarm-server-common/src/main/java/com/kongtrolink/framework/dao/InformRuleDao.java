@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
@@ -122,5 +123,20 @@ public class InformRuleDao {
         update.set("updateTime", new Date());
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
+
+
+
+    public List<InformRule> matchInformMsg(String enterpriseCode, String serverCode, String level, Date treport){
+        Criteria criteria = Criteria.where("msgEnable").is(Contant.USEING);
+//        criteria.and("msgBeginTimeInt").lte(tReportInt);
+//        criteria.and("msgEndTimeInt").gte(tReportInt);
+//        criteria.and("msgDayList").is(week);
+//        Criteria levelCriteria = Criteria.where("msgLevelList").is(level);
+//        Criteria levelSignalCri = new Criteria();
+//        levelSignalCri.orOperator(levelCriteria, signalCriteria);
+//        criteria.andOperator(levelSignalCri);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, InformRule.class, table);
     }
 }

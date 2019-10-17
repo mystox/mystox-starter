@@ -3,8 +3,11 @@ package com.kongtrolink.framework;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.impl.MqttPublish;
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.entity.ServerName;
+import com.kongtrolink.framework.service.MqttSender;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ public class AssetManagementServerApplicationTest {
 
     @Autowired
     MqttPublish mqttPublish;
+
+    @Autowired
+    MqttSender mqttSender;
 
     @Test
     public void testCIType() {
@@ -56,5 +62,20 @@ public class AssetManagementServerApplicationTest {
         MsgResult msgResult = mqttPublish.getRegionCode(JSONObject.toJSONString(jsonObject));
 
         System.out.println(JSONObject.toJSONString(msgResult));
+    }
+
+    @Test
+    public void testGetCIModel() {
+
+        String serverCode = MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER, "1.0.0");
+        String operaCode = "getCIModel";
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("enterpriseCode", "Skongtrolink");
+        jsonObject.put("serverCode", "AUTH_PLATFORM");
+
+        MsgResult result = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
+
+        System.out.println(JSONObject.toJSONString(result));
     }
 }

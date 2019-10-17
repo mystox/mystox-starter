@@ -18,7 +18,8 @@ mqtt:
 
 mongodb:
 #  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
-  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+#  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+  uri: mongodb://172.16.6.9:27017/alarm_server
 
 unique:
   service:

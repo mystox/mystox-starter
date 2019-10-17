@@ -1,22 +1,22 @@
-package com.kongtrolink.framework.mqtt.mqttEntity;
+package com.kongtrolink.framework.mqtt;
 
 /**
  * @Auther: liudd
- * @Date: 2019/9/25 18:23
- * @Description:设备型号封装类
+ * @Date: 2019/10/16 09:29
+ * @Description:
  */
 public class DeviceTypeResult {
 
     private String deviceType;
     private String model;
     private String enterpriseCode;
-    private String service;
+    private String serverCode;
 
-    public DeviceTypeResult(String enterpriseCode, String service, String deviceType, String model) {
+    public DeviceTypeResult(String enterpriseCode, String serverCode, String deviceType, String model) {
         this.deviceType = deviceType;
         this.model = model;
         this.enterpriseCode = enterpriseCode;
-        this.service = service;
+        this.serverCode = serverCode;
     }
 
     public String getDeviceType() {
@@ -43,11 +43,11 @@ public class DeviceTypeResult {
         this.enterpriseCode = enterpriseCode;
     }
 
-    public String getService() {
-        return service;
+    public String getServerCode() {
+        return serverCode;
     }
 
-    public void setService(String service) {
-        this.service = service;
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 }

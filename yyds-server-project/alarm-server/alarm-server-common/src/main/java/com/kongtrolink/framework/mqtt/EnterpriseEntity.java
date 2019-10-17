@@ -1,19 +1,19 @@
-package com.kongtrolink.framework.mqtt.mqttEntity;
+package com.kongtrolink.framework.mqtt;
 
 import java.util.List;
 
 /**
  * @Auther: liudd
- * @Date: 2019/9/25 18:16
- * @Description:企业封装类
+ * @Date: 2019/10/16 09:30
+ * @Description:
  */
-public class UniqueServiceEntity {
+public class EnterpriseEntity {
 
-    private String title;
+    private String title;       //企业名称
     private String enterpriseCode;
     private List<ServerEntity> serverCodes;
 
-    public UniqueServiceEntity(String title, String enterpriseCode) {
+    public EnterpriseEntity(String title, String enterpriseCode) {
         this.title = title;
         this.enterpriseCode = enterpriseCode;
     }
