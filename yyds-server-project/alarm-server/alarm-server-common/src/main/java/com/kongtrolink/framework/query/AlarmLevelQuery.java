@@ -2,9 +2,7 @@ package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.Paging;
-import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
-import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 
 import java.util.Date;
 
