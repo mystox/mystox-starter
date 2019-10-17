@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>gateway-common-base</module>
+        <module>gateway-tower-common</module>
     </modules>
     
 </project>

@@ -18,7 +18,6 @@ public abstract class ReceiveHandler implements ReceiveService {
     @Value("${gateway.port:9999}")
     private int port; //接收器端口
 
-
     @Value("${gateway.deviceType:null}")
     private String deviceType;
     @Value("${gateway.deviceModel:null}")
@@ -26,17 +25,9 @@ public abstract class ReceiveHandler implements ReceiveService {
     @Value("${gateway.regionCode:null}")
     private String regionCode;
 
-
     @Autowired
     ParseService parseService;
 
-//    private String businessCode; //必须配置
-//    private String enterpriseCode; //必须配置
-//    private int port; //接收器端口
-//
-//    private String deviceType;
-//    private String deviceModel;
-//    private String regionCode;
 
     public ReceiveHandler port(int port) {
         setPort(port);
