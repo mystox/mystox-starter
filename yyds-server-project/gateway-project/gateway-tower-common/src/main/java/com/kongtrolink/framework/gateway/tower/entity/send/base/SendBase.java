@@ -15,9 +15,8 @@ public class SendBase implements Serializable{
     public SendBase() {
     }
 
-    public SendBase(String msgId, String moduleId, Object payload) {
+    public SendBase(String msgId, Object payload) {
         this.msgId = msgId;
-        this.moduleId = moduleId;
         this.payload = payload;
     }
 

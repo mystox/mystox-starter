@@ -29,6 +29,7 @@ public abstract class ReceiveHandler implements ReceiveService {
     ParseService parseService;
 
 
+
     public ReceiveHandler port(int port) {
         setPort(port);
         return this;
@@ -44,8 +45,7 @@ public abstract class ReceiveHandler implements ReceiveService {
      * 接收方法案例，使用parseService调用解析器对报文进行非标协议解析
      */
     void receive() {
-        String payload;
-        parseService.execute("");
+
     }
     public String getBusinessCode() {
         return businessCode;

@@ -28,7 +28,7 @@ public class GatewayMqttSenderNative{
     @Autowired
     private GatewayMqttSender gatewayMqttSender;
 
-    public void sendToMqtt(String payload,String topic) {
+    public void sendToMqtt(String payload, String topic) {
         try {
             gatewayMqttSender.sendToMqtt(topic, payload);
         } catch (Exception e) {

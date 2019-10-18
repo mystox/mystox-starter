@@ -14,7 +14,8 @@ public enum MqttSubTopic {
     SetDataAck("SetDataAck"), //设置数据点数据
     GetAlarmParamAck("GetAlarmParamAck"), //获取告警参数
     SetAlarmParamAck("SetAlarmParamAck"), //设置告警参数
-    GetDeviceAlarmModelAck("GetDeviceAlarmModelAck"); // 获取设备告警模型信息
+    GetDeviceAlarmModelAck("GetDeviceAlarmModelAck"),
+    GatewaySystemSetDevType("GatewaySystemSetDevType"); // 刷新资管设备类型映射表
 
     MqttSubTopic(String topic) {
         this.topic = topic;

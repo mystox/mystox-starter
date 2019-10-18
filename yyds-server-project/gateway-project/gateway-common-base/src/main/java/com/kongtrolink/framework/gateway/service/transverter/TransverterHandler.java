@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.service.transverter;
 
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.service.MqttSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +14,24 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public abstract class TransverterHandler implements TransverterService {
 
+    @Value("${gateway.businessCode}")
+    private String businessCode; //必须配置
+    @Value("${gateway.enterpriseCode}")
+    private String enterpriseCode; //必须配置
     @Value("${gateway.deviceType:null}")
     private String deviceType;
     @Value("${gateway.deviceModel:null}")
     private String deviceModel;
     @Value("${gateway.regionCode:null}")
     private String regionCode;
+    @Value("${gateway.fsuType:2019}")
+    private String fsuType;
+    @Value("${server.name}")
+    private String serverName;
+    @Value("${server.version}")
+    private String serverVersion;
     @Autowired
     MqttSender mqttSender;
-
-
-
 
 
     public void transfer(ParseProtocol parseProtocol){
@@ -36,6 +44,25 @@ public abstract class TransverterHandler implements TransverterService {
         mqttSender.sendToMqtt(serverCode,operaCode,payload);
     }
 
+    protected MsgResult reportMsgSyn(String serverCode, String operaCode, String payload) {
+        return mqttSender.sendToMqttSyn(serverCode,operaCode,payload);
+    }
+
+    public String getBusinessCode() {
+        return businessCode;
+    }
+
+    public void setBusinessCode(String businessCode) {
+        this.businessCode = businessCode;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
 
     public String getDeviceType() {
         return deviceType;
@@ -61,4 +88,27 @@ public abstract class TransverterHandler implements TransverterService {
         this.regionCode = regionCode;
     }
 
+    public String getFsuType() {
+        return fsuType;
+    }
+
+    public void setFsuType(String fsuType) {
+        this.fsuType = fsuType;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getServerVersion() {
+        return serverVersion;
+    }
+
+    public void setServerVersion(String serverVersion) {
+        this.serverVersion = serverVersion;
+    }
 }
