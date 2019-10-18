@@ -14,6 +14,7 @@ gateway:
   deviceType: FSU #可选
   deviceModel: MUU100 #可选
   regionCode: 000000 #可选
+  fsuType: 2019
   assetReport:
     version: 1.0.0
   alarm:

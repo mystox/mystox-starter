@@ -7,13 +7,13 @@ package com.kongtrolink.framework.gateway.tower.entity.rec.info;
 public class PushAlarmInfo {
 
     private int serialNo;//	number	否	告警序列号
-    private int  deviceId;//	number	否	告警所属设备的ID
-    private int  id;//	number	否	告警点的ID
-    private int  time;//	number	否	告警时间
+    private String  deviceId;//	number	否	告警所属设备的ID
+    private String  id;//	number	否	告警点的ID
+    private long  time;//	number	否	告警时间
     private int  level;//	number	否	告警等级
     private int  flag;//	number	否	告警标志（0：结束，1：开始）
     private String  desc;//	string	否	告警描述
-    private int  eventValue;//	number	否	告警触发值
+    private double  eventValue;//	number	否	告警触发值
 
     public int getSerialNo() {
         return serialNo;
@@ -23,27 +23,27 @@ public class PushAlarmInfo {
         this.serialNo = serialNo;
     }
 
-    public int getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
@@ -71,11 +71,11 @@ public class PushAlarmInfo {
         this.desc = desc;
     }
 
-    public int getEventValue() {
+    public double getEventValue() {
         return eventValue;
     }
 
-    public void setEventValue(int eventValue) {
+    public void setEventValue(double eventValue) {
         this.eventValue = eventValue;
     }
 }

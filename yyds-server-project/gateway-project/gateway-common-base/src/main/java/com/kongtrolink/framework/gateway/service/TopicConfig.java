@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TopicConfig {
 
+
+
     @Value("${gatewayMqtt.version}")
     private String version;
 
@@ -20,4 +22,7 @@ public class TopicConfig {
     public String getFsuTopic(String sn, MqttPubTopic mqttPubTopic){
         return "iaiot/cloud/yy/"+sn+"/"+mqttPubTopic.getTopicName()+"/"+version;
     }
+
+
+
 }

@@ -8,6 +8,7 @@ import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
+import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.rec.Register;
@@ -41,6 +42,8 @@ public class BusinessTransverter extends TransverterHandler {
     private String scloudServerVersion;
     @Autowired
     private TopicConfig topicConfig;
+    @Autowired
+    private DeviceTypeConfig deviceTypeConfig;
 
     @Override
     protected void transferExecute(ParseProtocol parseProtocol) {
@@ -59,6 +62,10 @@ public class BusinessTransverter extends TransverterHandler {
             case "GetAlarmParamAck":break;
             case "SetAlarmParamAck":break;
             case "GetDeviceAlarmModelAck":break;
+            case "GatewaySystemSetDevType": //刷新redis中 资管设备类型映射表
+                deviceTypeConfig.reFlashRedisDeviceType();
+                break;
+
         }
     }
 
