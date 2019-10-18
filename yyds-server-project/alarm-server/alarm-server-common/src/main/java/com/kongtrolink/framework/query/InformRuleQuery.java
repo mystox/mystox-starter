@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Paging;
-
 import java.util.List;
 
 /**
@@ -11,13 +10,47 @@ import java.util.List;
  */
 public class InformRuleQuery extends Paging {
     private String _id;
-    private String enterpirseName;
-    private String serviceName;
+    private String enterpriseCode;
+    private String enterpriseName;
+    private String serverCode;
+    private String serverName;
     private String name;
     private String status;
-    private String creatorName;
+    private String operatorName;
     private List<String> userIds;
     private List<String> usernames;
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public List<String> getUserIds() {
         return userIds;
@@ -35,28 +68,12 @@ public class InformRuleQuery extends Paging {
         this.usernames = usernames;
     }
 
-    public String getCreatorName() {
-        return creatorName;
+    public String getOperatorName() {
+        return operatorName;
     }
 
-    public void setCreatorName(String creatorName) {
-        this.creatorName = creatorName;
-    }
-
-    public String getEnterpirseName() {
-        return enterpirseName;
-    }
-
-    public void setEnterpirseName(String enterpirseName) {
-        this.enterpirseName = enterpirseName;
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
     }
 
     public String get_id() {

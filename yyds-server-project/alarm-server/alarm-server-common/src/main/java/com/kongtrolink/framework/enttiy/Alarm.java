@@ -18,8 +18,8 @@ public class Alarm {
     private String serial;              //告警序列号
     private String name;                //告警名称
     private float value;                //告警值
-    private String level;               //告警等级
-    private String targetLevel;         //目标等级
+    private Integer level;               //告警等级
+    private Integer targetLevel;         //目标等级
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
     private Date treport;               //上报时间
@@ -94,14 +94,6 @@ public class Alarm {
         this.color = color;
     }
 
-    public String getTargetLevel() {
-        return targetLevel;
-    }
-
-    public void setTargetLevel(String targetLevel) {
-        this.targetLevel = targetLevel;
-    }
-
     public String getTargetLevelName() {
         return targetLevelName;
     }
@@ -166,14 +158,6 @@ public class Alarm {
         this.value = value;
     }
 
-    public String getLevel() {
-        return level;
-    }
-
-    public void setLevel(String level) {
-        this.level = level;
-    }
-
     public Date getTreport() {
         return treport;
     }
@@ -200,5 +184,21 @@ public class Alarm {
 
     public String getEnterpriseServer(){
         return this.enterpriseCode + Contant.UNDERLINE + this.serverCode;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Integer getTargetLevel() {
+        return targetLevel;
+    }
+
+    public void setTargetLevel(Integer targetLevel) {
+        this.targetLevel = targetLevel;
     }
 }

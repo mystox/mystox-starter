@@ -13,13 +13,33 @@ import java.util.Date;
 public class AlarmCycle {
 
     private String id;
+    private String name;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
     private Date updateTime;
-    private FacadeView creator;
-    private String state = Contant.FORBIT;
+    private FacadeView operator;
+    private String state ;
     private String enterpriseServer;    //企业和服务合体
+    private String defaultCycle;
+
+    public String getDefaultCycle() {
+        return defaultCycle;
+    }
+
+    public void setDefaultCycle(String defaultCycle) {
+        this.defaultCycle = defaultCycle;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public void initEnterpirseServer(){
         this.enterpriseServer = this.enterpriseCode + Contant.UNDERLINE + this.serverCode;
@@ -80,12 +100,28 @@ public class AlarmCycle {
         this.updateTime = updateTime;
     }
 
-    public FacadeView getCreator() {
-        return creator;
+    public String getEnterpriseName() {
+        return enterpriseName;
     }
 
-    public void setCreator(FacadeView creator) {
-        this.creator = creator;
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
     }
 
     /**

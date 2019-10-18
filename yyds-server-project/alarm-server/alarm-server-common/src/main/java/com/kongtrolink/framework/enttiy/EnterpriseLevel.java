@@ -25,7 +25,7 @@ public class EnterpriseLevel {
     private String color;
     private Date updateTime;
     private FacadeView operator;                    //最后操作用户
-    private String defaultLevel = Contant.NO;       //默认告警等级
+    private String defaultLevel;                    //默认告警等级
     private String state;                           //启用，禁用
     //前端展示字段
     private List<Integer> levels;        //等级列表

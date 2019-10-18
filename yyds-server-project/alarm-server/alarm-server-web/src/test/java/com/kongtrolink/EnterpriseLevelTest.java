@@ -75,4 +75,8 @@ public class EnterpriseLevelTest {
             System.out.println(enterpriseLevel.getCode()+";"+enterpriseLevel.getLevels());
         }
     }
+
+    public static void main(String[] a){
+
+    }
 }
