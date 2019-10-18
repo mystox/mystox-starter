@@ -1,5 +1,8 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.kongtrolink.framework.base.FacadeView;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,7 +18,25 @@ public class DeviceTypeLevel {
     private String serverName;
     private String deviceType;      //设备类型
     private String deviceModel;     //设备型号
-    private List<String> levels;    //设备等级列表
+    private List<Integer> levels;    //设备等级列表
+    private Date updateTime;
+    private FacadeView operator;                    //最后操作用户
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
+    }
 
     public String getEnterpriseName() {
         return enterpriseName;
@@ -73,11 +94,11 @@ public class DeviceTypeLevel {
         this.deviceType = deviceType;
     }
 
-    public List<String> getLevels() {
+    public List<Integer> getLevels() {
         return levels;
     }
 
-    public void setLevels(List<String> levels) {
+    public void setLevels(List<Integer> levels) {
         this.levels = levels;
     }
 }

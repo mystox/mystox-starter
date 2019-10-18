@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.Date;
 import java.util.List;
 
@@ -41,23 +40,14 @@ public class EnterpriseLevelController extends BaseController {
         enterpriseLevel.setUpdateTime(curTime);
         enterpriseLevel.setCode(code);
         enterpriseLevel.setState(Contant.FORBIT);
-        List<String> levels = enterpriseLevel.getLevels();
-        List<String> levelNames = enterpriseLevel.getLevelNames();
-        List<String> colors = enterpriseLevel.getColors();
-        for(int i=0; i< levels.size(); i++){
-            enterpriseLevel.setId(null);
-            enterpriseLevel.setLevel(levels.get(i));
-            enterpriseLevel.setLevelName(levelNames.get(i));
-            enterpriseLevel.setCode(colors.get(i));
-            enterpriseLevelService.add(enterpriseLevel);
-        }
+        enterpriseLevelService.add(enterpriseLevel);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
 
     @RequestMapping("/delete")
     @ResponseBody
     public JsonResult delete(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
-        boolean delete = enterpriseLevelService.deleteByCode(enterpriseLevelQuery.getCode());
+        boolean delete = enterpriseLevelService.delete(enterpriseLevelQuery.getId());
         if(delete){
             return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, true);
         }
@@ -67,6 +57,7 @@ public class EnterpriseLevelController extends BaseController {
     @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(@RequestBody EnterpriseLevel enterpriseLevel){
+        enterpriseLevel.setUpdateTime(new Date());
         boolean update = enterpriseLevelService.update(enterpriseLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -117,5 +108,17 @@ public class EnterpriseLevelController extends BaseController {
     public String getDeviceTypeList(String enterpriseCode, String serverCode){
         JSON deviceTypeList = mqttService.getDeviceTypeList(enterpriseCode, serverCode);
         return deviceTypeList.toJSONString();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/17 13:56
+     * 功能描述:获取最后启用的企业告警
+     */
+    @RequestMapping("/getLastUse")
+    @ResponseBody
+    public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        return new JsonResult(lastUse);
     }
 }

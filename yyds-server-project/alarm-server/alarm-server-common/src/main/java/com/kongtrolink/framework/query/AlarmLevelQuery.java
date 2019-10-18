@@ -15,17 +15,44 @@ public class AlarmLevelQuery extends Paging {
 
     private String id;                 //id
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private String deviceType;              //设备类型名称
     private String deviceModel;              //设备型号
-    private String sourceLevel;     //源等级
-    private String targetLevel;    //目标等级
+    private Integer sourceLevel;     //源等级
+    private Integer targetLevel;    //目标等级
     private String targetLevelName;         //目标等级名称
     private String color;           //目标等级对应的颜色
     private Date beginTime;
     private Date endTime;
-    private String generate = Contant.SYSTEM;                //产生类型
+    private String generate;                //产生类型
     private String entDevCode;                  //企业，设备等级
+    private String operatorName;        //操作用户姓名
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
 
     public String getEntDevCode() {
         return entDevCode;
@@ -82,20 +109,28 @@ public class AlarmLevelQuery extends Paging {
         return levelQuery;
     }
 
+    public Integer getSourceLevel() {
+        return sourceLevel;
+    }
+
+    public void setSourceLevel(Integer sourceLevel) {
+        this.sourceLevel = sourceLevel;
+    }
+
+    public Integer getTargetLevel() {
+        return targetLevel;
+    }
+
+    public void setTargetLevel(Integer targetLevel) {
+        this.targetLevel = targetLevel;
+    }
+
     public String getColor() {
         return color;
     }
 
     public void setColor(String color) {
         this.color = color;
-    }
-
-    public String getSourceLevel() {
-        return sourceLevel;
-    }
-
-    public void setSourceLevel(String sourceLevel) {
-        this.sourceLevel = sourceLevel;
     }
 
     public String getDeviceType() {
@@ -136,13 +171,5 @@ public class AlarmLevelQuery extends Paging {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getTargetLevel() {
-        return targetLevel;
-    }
-
-    public void setTargetLevel(String targetLevel) {
-        this.targetLevel = targetLevel;
     }
 }

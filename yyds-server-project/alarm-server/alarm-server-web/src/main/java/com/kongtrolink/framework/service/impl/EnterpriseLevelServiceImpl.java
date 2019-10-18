@@ -31,35 +31,60 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
 
     @Override
     public void add(EnterpriseLevel enterpriseLevel) {
-        enterpriseLevelDao.add(enterpriseLevel);
+        List<Integer> levels = enterpriseLevel.getLevels();
+        List<String> levelNames = enterpriseLevel.getLevelNames();
+        List<String> colors = enterpriseLevel.getColors();
+        enterpriseLevel.setLevels(null);
+        enterpriseLevel.setLevelNames(null);
+        enterpriseLevel.setColors(null);
+        for(int i=0; i< levels.size(); i++){
+            enterpriseLevel.setId(null);
+            enterpriseLevel.setLevel(levels.get(i));
+            enterpriseLevel.setLevelName(levelNames.get(i));
+            enterpriseLevel.setColor(colors.get(i));
+            enterpriseLevelDao.add(enterpriseLevel);
+        }
     }
 
     @Override
     public boolean delete(String enterpriseLevelId) {
         //如果当前企业等级是启用状态，需要根据默认企业等级生成新得告警等级
         EnterpriseLevel enterpriseLevel = get(enterpriseLevelId);
-        if(Contant.USEING.equals(enterpriseLevel.getState())){
-            alarmLevelService.deleteList(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), null, null);
-            addAlarmLevelByEnterpriseInfo(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode());
+        if(null == enterpriseLevel){
+            return false;
         }
-        return enterpriseLevelDao.delete(enterpriseLevelId);
+        boolean result = deleteByCode(enterpriseLevel.getCode());
+        if(result) {
+            if (Contant.USEING.equals(enterpriseLevel.getState())) {
+                alarmLevelService.deleteList(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), null, null);
+                addAlarmLevelByEnterpriseInfo(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode());
+            }
+        }
+        return result;
     }
 
     @Override
     public boolean deleteByCode(String code) {
-        return enterpriseLevelDao.deleteByCode(code);
+        boolean result = enterpriseLevelDao.deleteByCode(code);
+        return result;
     }
 
     @Override
     public boolean update(EnterpriseLevel enterpriseLevel) {
         enterpriseLevel.setUpdateTime(new Date());
+        //根据code删除
+        boolean delRes = deleteByCode(enterpriseLevel.getCode());
+        if(delRes){
+            add(enterpriseLevel);
+        }
         //如果该企业等级属于启用状态，需要重新生成告警等级
         String state = enterpriseLevel.getState();
         if(Contant.USEING.equals(state)){
             alarmLevelService.deleteList(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), null, null);
             addAlarmLevelByEnterpriseInfo(enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode());
         }
-        return enterpriseLevelDao.update(enterpriseLevel);
+
+        return delRes;
     }
 
     @Override
@@ -105,8 +130,9 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
             }
             alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
         }
+        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery);
         addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
-        return enterpriseLevelDao.updateState(enterpriseLevelQuery);
+        return result;
     }
 
     /**
@@ -129,6 +155,9 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     @Override
     public void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode) {
         List<DeviceTypeLevel> deviceTypeLevels = typeLevelService.listByEnterpriseInfo(enterpriseCode, serverCode);
+        if(null == deviceTypeLevels || deviceTypeLevels.size() == 0){
+            return ;
+        }
         for(DeviceTypeLevel deviceTypeLevel : deviceTypeLevels){
             typeLevelService.addAlarmLevelByDeviceLevel(deviceTypeLevel);
         }

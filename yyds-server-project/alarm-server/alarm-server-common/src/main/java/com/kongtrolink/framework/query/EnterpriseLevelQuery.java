@@ -15,18 +15,27 @@ public class EnterpriseLevelQuery extends Paging{
 
     private String id;
     private String code;
+    private String name;
     private List<String> codeList;
     private String enterpriseCode;
     private String enterpriseName;
     private String serverCode;
-    private String serverNaem;
-    private String level;
+    private String serverName;
+    private Integer level;
     private String color;
     private Date beginTime;
     private Date endTime;
     private String operatorName;        //操作用户姓名
     private String defaultLevel;       //默认告警等级
     private String state;                           //启用，禁用
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getCode() {
         return code;
@@ -60,12 +69,12 @@ public class EnterpriseLevelQuery extends Paging{
         this.enterpriseName = enterpriseName;
     }
 
-    public String getServerNaem() {
-        return serverNaem;
+    public String getServerName() {
+        return serverName;
     }
 
-    public void setServerNaem(String serverNaem) {
-        this.serverNaem = serverNaem;
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
     }
 
     public String getOperatorName() {
@@ -124,11 +133,11 @@ public class EnterpriseLevelQuery extends Paging{
         this.serverCode = serverCode;
     }
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 

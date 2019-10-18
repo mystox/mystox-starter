@@ -73,7 +73,7 @@ public class EnterpriseLevelDao {
     public List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, levelQuery);
-        Sort sort = new Sort(Sort.Direction.DESC, "updateTime");
+        Sort sort = new Sort(Sort.Direction.DESC, "code");
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),  //查询条件
                 Aggregation.group("code", "updateTime"),
@@ -94,15 +94,18 @@ public class EnterpriseLevelDao {
             EnterpriseLevel firEnter = codeEnterpriseMap.get(enterpriseLevel.getCode());
             if(null == firEnter){
                 enterpriseLevel.setLevels(new ArrayList<>());
+                enterpriseLevel.getLevels().add(enterpriseLevel.getLevel());
                 enterpriseLevel.setLevelNames(new ArrayList<>());
+                enterpriseLevel.getLevelNames().add(enterpriseLevel.getLevelName());
                 enterpriseLevel.setColors(new ArrayList<>());
+                enterpriseLevel.getColors().add(enterpriseLevel.getColor());
                 codeEnterpriseMap.put(enterpriseLevel.getCode(), enterpriseLevel);
                 resuList.add(enterpriseLevel);
                 continue;
             }
             firEnter.getLevels().add(enterpriseLevel.getLevel());
             firEnter.getLevelNames().add(enterpriseLevel.getLevelName());
-            firEnter.getColors().add(enterpriseLevel.getCode());
+            firEnter.getColors().add(enterpriseLevel.getColor());
         }
         return resuList;
     }
@@ -123,13 +126,28 @@ public class EnterpriseLevelDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
+        String name = levelQuery.getName();
+        if(!StringUtil.isNUll(name)){
+            name = MongoUtil.escapeExprSpecialWord(name);
+            criteria.and("name").regex(".*?" + name + ".*?");
+        }
         String enterpriseCode = levelQuery.getEnterpriseCode();
         if(!StringUtil.isNUll(enterpriseCode)){
             criteria.and("enterpriseCode").is(enterpriseCode);
         }
+        String enterpriseName = levelQuery.getEnterpriseName();
+        if(!StringUtil.isNUll(enterpriseName)){
+            enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
+            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+        }
         String serverCode = levelQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
             criteria.and("serverCode").is(serverCode);
+        }
+        String serverName = levelQuery.getServerName();
+        if(!StringUtil.isNUll(serverName)){
+            serverName = MongoUtil.escapeExprSpecialWord(serverName);
+            criteria.and("serverName").regex(".*?" + serverName + ".*?");
         }
         String defaultLevel = levelQuery.getDefaultLevel();
         if(!StringUtil.isNUll(defaultLevel)){
@@ -166,43 +184,14 @@ public class EnterpriseLevelDao {
         return result.getN()>0 ? true : false;
     }
 
-    /**
-     * @auther: liudd
-     * @date: 2019/9/25 15:02
-     * 功能描述:获取最大告警等级。如果指明告警等级，则获取小于该
-     */
-    public EnterpriseLevel getMaxLevel(EnterpriseLevelQuery enterpriseLevelQuery) {
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, enterpriseLevelQuery);
-        String level = enterpriseLevelQuery.getLevel();
-        if(!StringUtil.isNUll(level)){
-            criteria.and("level").lte(level);
-        }
-        Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "level"));
-        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/10/12 14:33
-     * 功能描述:匹配告警
-     */
-    public EnterpriseLevel matchLevel(String enterpriseCode, String serverCode, String level){
-        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
-        criteria.and("serverCode").is(serverCode);
-        criteria.and("level").is(level);
-        Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "level"));
-        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
-    }
-
     public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
-        Criteria criteria = Criteria.where("_id").is(enterpriseLevelQuery.getId());
+        String code = enterpriseLevelQuery.getCode();
+        Criteria criteria = Criteria.where("code").is(code);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", enterpriseLevelQuery.getState());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        update.set("updateTime", new Date());
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
 
@@ -218,7 +207,7 @@ public class EnterpriseLevelDao {
         criteria.and("serverCode").is(serverCode);
         criteria.and("state").is(Contant.USEING);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "updateTime"));
+        query.with(new Sort(Sort.Direction.ASC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
         if(enterpriseLevelList == null || enterpriseLevelList.size() == 0){
             enterpriseLevelList = getDefault();
@@ -235,7 +224,6 @@ public class EnterpriseLevelDao {
     List<EnterpriseLevel> getByCodes(List<String> codeList){
         Criteria criteria = Criteria.where("code").in(codeList);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.ASC, "code"));
         query.with(new Sort(Sort.Direction.ASC, "level"));
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
@@ -254,7 +242,7 @@ public class EnterpriseLevelDao {
         Update update = new Update();
         update.set("state", Contant.FORBIT);
         update.set("updateTime", updateTime);
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
 }
