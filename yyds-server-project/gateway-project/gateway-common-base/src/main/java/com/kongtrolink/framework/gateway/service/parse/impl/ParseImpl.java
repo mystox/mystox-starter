@@ -26,7 +26,9 @@ public class ParseImpl extends ParseHandler {
         //todo 服务解析流程
 
         //根据消息类型获取协议转换器执行
-        redisUtils.get("");
+        Object o = redisUtils.getString(payload);
+        System.out.println(o);
+
         new ParseProtocol();
     }
 
