@@ -4,6 +4,7 @@ import com.kongtrolink.framework.dao.AlarmLevelDao;
 import com.kongtrolink.framework.dao.EnterpriseLevelDao;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,17 +26,17 @@ public class AlarmLevelService {
         String serverCode = alarm.getServerCode();
         String deviceType = alarm.getDeviceType();
         String deviceModel = alarm.getDeviceModel();
-        String level = alarm.getLevel();
+        Integer level = alarm.getLevel();
         AlarmLevel alarmLevel = levelDao.matchLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
-//        if(null == alarmLevel) {
-//            EnterpriseLevel enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
-//            if (null != enterpriseLevel) {
-//                alarmLevel = new AlarmLevel();
-//                alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
-//                alarmLevel.setTargetLevelName(enterpriseLevel.getLevelName());
-//                alarmLevel.setColor(enterpriseLevel.getColor());
-//            }
-//        }
+        if(null == alarmLevel) {
+            EnterpriseLevel enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
+            if (null != enterpriseLevel) {
+                alarmLevel = new AlarmLevel();
+                alarmLevel.setTargetLevel(enterpriseLevel.getLevel());
+                alarmLevel.setTargetLevelName(enterpriseLevel.getLevelName());
+                alarmLevel.setColor(enterpriseLevel.getColor());
+            }
+        }
         return alarmLevel;
     }
 }

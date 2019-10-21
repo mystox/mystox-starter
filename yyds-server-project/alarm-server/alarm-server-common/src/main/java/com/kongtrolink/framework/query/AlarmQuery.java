@@ -29,13 +29,22 @@ public class AlarmQuery extends Paging {
     private Date endTime;
     private List<String> levelList;
     private List<String> alarmIdList;
-    private String state;
+    private String state;           //告警状态
     Map<String, String> deviceInfo; //设备信息作为查询条件
     private String targetLevel;     //目标等级
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
     private String signalId;            //信号点id
     private String sliceKey;            //片键，也可以作为普通索引键
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getSliceKey() {
         return sliceKey;

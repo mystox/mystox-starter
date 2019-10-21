@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.dao;
 
-import com.kongtrolink.framework.base.MongTable;
-import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.base.*;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.query.AlarmCycleQuery;
 import com.mongodb.WriteResult;
@@ -44,12 +43,12 @@ public class AlarmCycleDao {
         alarmCycle.initEnterpirseServer();
         Criteria criteria = Criteria.where("_id").is(alarmCycle.getId());
         Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("diffTime", alarmCycle.getDiffTime());
-        update.set("updateTime", alarmCycle.getUpdateTime());
-        update.set("enterpriseServer", alarmCycle.getEnterpriseServer());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
-        return result.getN()>0 ? true : false;
+        WriteResult remove = mongoTemplate.remove(query, table);
+        boolean result = remove.getN() > 0 ? true : false;
+        if(result){
+            mongoTemplate.save(alarmCycle, table);
+        }
+        return result;
     }
 
     public AlarmCycle get(String alarmCycleId) {
@@ -80,13 +79,33 @@ public class AlarmCycleDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
+        String name = cycleQuery.getName();
+        if(!StringUtil.isNUll(name)){
+            name = MongoUtil.escapeExprSpecialWord(name);
+            criteria.and("name").regex(".*?" + name + ".*?");
+        }
         String enterpriseCode = cycleQuery.getEnterpriseCode();
         if(!StringUtil.isNUll(enterpriseCode)){
             criteria.and("enterpriseCode").is(enterpriseCode);
         }
+        String enterpriseName = cycleQuery.getEnterpriseName();
+        if(!StringUtil.isNUll(enterpriseName)){
+            enterpriseCode = MongoUtil.escapeExprSpecialWord(enterpriseName);
+            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+        }
         String serverCode = cycleQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
             criteria.and("serverCode").is(serverCode);
+        }
+        String serverName = cycleQuery.getServerName();
+        if(!StringUtil.isNUll(serverName)){
+            serverName = MongoUtil.escapeExprSpecialWord(serverName);
+            criteria.and("serverName").regex(".*?" + serverName + ".*?");
+        }
+        String operatorName = cycleQuery.getOperatorName();
+        if(!StringUtil.isNUll(operatorName)){
+            operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
+            criteria.and("operator.name").regex(".*?" + operatorName + ".*?");
         }
         Date beginTime = cycleQuery.getBeginTime();
         Date endTime = cycleQuery.getEndTime();
@@ -107,13 +126,16 @@ public class AlarmCycleDao {
         return mongoTemplate.findOne(query, AlarmCycle.class, table);
     }
 
-    public boolean updateState(AlarmCycleQuery cycleQuery) {
-        String state = cycleQuery.getState();
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, cycleQuery);
+    public boolean updateState(String enterpriseCode, String serverCode, String id,
+                               String state, Date curTime, FacadeView operator) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("_id").is(id);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", state);
+        update.set("updateTime", curTime);
+        update.set("operator", operator);
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -136,4 +158,24 @@ public class AlarmCycleDao {
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, AlarmCycle.class, table);
     }
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/10/18 15:41
+     * 功能描述:禁用以前的规则
+     */
+    public boolean forbitBefor(String enterpriseCode, String serverCode, Date curTime, FacadeView operator) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("state").is(Contant.USEING);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", Contant.FORBIT);
+        update.set("updateTime", curTime);
+        update.set("operator", operator);
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
+
 }

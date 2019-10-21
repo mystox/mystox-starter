@@ -9,6 +9,7 @@ import com.kongtrolink.framework.service.AlarmCycleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,6 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     public boolean save(AlarmCycle alarmCycle) {
         cycleDao.save(alarmCycle);
         if(!StringUtil.isNUll(alarmCycle.getId())){
-            //添加的都默认为启用状态
-            AlarmCycleQuery cycleQuery = new AlarmCycleQuery();
-            cycleQuery.setId(alarmCycle.getId());
-            cycleQuery.setState(Contant.USEING);
-            updateState(cycleQuery);
             return true;
         }
         return false;
@@ -101,17 +97,13 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     public boolean updateState(AlarmCycleQuery cycleQuery) {
         //如果是禁用，直接禁用；如果是启用，需要先禁用当前启用的规则
         String state = cycleQuery.getState();
-        if(Contant.FORBIT.equals(state)){
-            cycleDao.updateState(cycleQuery);
+        String enterpriseCode = cycleQuery.getEnterpriseCode();
+        String serverCode = cycleQuery.getServerCode();
+        Date curTime = new Date();
+        if(Contant.USEING.equals(state)){
+            cycleDao.forbitBefor(enterpriseCode, serverCode, curTime, cycleQuery.getOperator());
         }
-        String sourceId = cycleQuery.getId();
-        cycleQuery.setId(null);
-        cycleQuery.setState(Contant.FORBIT);
-        cycleDao.updateState(cycleQuery);
-        //启用新规则
-        cycleQuery.setId(sourceId);
-        cycleQuery.setState(Contant.USEING);
-        boolean result = cycleDao.updateState(cycleQuery);
+        boolean result = cycleDao.updateState(enterpriseCode, serverCode, cycleQuery.getId(), state, curTime, cycleQuery.getOperator());
         return result;
     }
 

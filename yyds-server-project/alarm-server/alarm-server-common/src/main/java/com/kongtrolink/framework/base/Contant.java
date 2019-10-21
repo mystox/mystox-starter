@@ -40,4 +40,10 @@ public class Contant {
 
     public static String SYSTEM = "系统";
     public static String MANUAL = "手动";
+
+    public static String CURR_ALARM = "实时告警";
+    public static String HIST_ALARM = "历史告警";
+
+    public static String ZERO = "0";
+    public static String ONE = "1";
 }

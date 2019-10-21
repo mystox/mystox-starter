@@ -45,7 +45,8 @@ public class BaseReceiver extends ReceiveHandler {
             //iaiot/edge/yy/+/packetName/version
             String sn = topics.split("/")[3];
             String packetName = topics.split("/")[4];
-            ParseProtocol parseProtocol = new ParseProtocol(packetName,sn,null,payload);
+            String uuid  = topics;
+            ParseProtocol parseProtocol = new ParseProtocol(packetName,sn,uuid,payload);
             parseService.execute(JSONObject.toJSONString(parseProtocol));
         }catch (Exception e){
             e.printStackTrace();

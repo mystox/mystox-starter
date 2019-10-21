@@ -25,11 +25,6 @@ public class InformRuleUserServiceImpl implements InformRuleUserService {
     }
 
     @Override
-    public boolean save(List<InformRuleUser> ruleUserList) {
-        return ruleUserDao.save(ruleUserList);
-    }
-
-    @Override
     public boolean delete(String id) {
         return ruleUserDao.delete(id);
     }

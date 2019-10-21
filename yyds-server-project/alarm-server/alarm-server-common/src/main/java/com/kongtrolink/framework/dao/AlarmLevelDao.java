@@ -61,7 +61,7 @@ public class AlarmLevelDao {
         List<AlarmLevel> mappedResults = aggResult.getMappedResults();
         List<String> entDevCodeList = new ArrayList<>();
         for(AlarmLevel alarmLevel : mappedResults){
-            entDevCodeList.add(alarmLevel.getEntDevCode());
+            entDevCodeList.add(alarmLevel.getId());
         }
         List<AlarmLevel> byCodes = getByEntDevCodeList(entDevCodeList);
         List<AlarmLevel> resuList = new ArrayList<>();
@@ -175,7 +175,7 @@ public class AlarmLevelDao {
      * @date: 2019/10/12 14:31
      * 功能描述:等级入口使用，匹配告警
      */
-    public AlarmLevel matchLevel(String enterpriseCode, String serverCode, String deviceType, String deviceModel, String sourceLevel){
+    public AlarmLevel matchLevel(String enterpriseCode, String serverCode, String deviceType, String deviceModel, Integer sourceLevel){
         Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
         criteria.and("serverCode").is(serverCode);
         criteria.and("deviceType").is(deviceType);

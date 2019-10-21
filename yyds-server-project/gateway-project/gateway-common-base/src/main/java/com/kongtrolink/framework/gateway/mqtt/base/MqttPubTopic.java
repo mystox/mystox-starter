@@ -6,7 +6,8 @@ package com.kongtrolink.framework.gateway.mqtt.base;
 public enum MqttPubTopic {
     RegisterAck("RegisterAck"),     //  注册
     HeartbeatAck("HeartbeatAck"), // 发送心跳
-    PushDeviceAsset("PushDeviceAssetAck"), //推送设备资产信息
+    PushDeviceAssetAck("PushDeviceAssetAck"),//推送设备资产信息,
+    GetDeviceAsset("GetDeviceAsset"), //获取设备资产信息
     GetDeviceDataModel("GetDeviceDataModel"), //获取设备数据模型信息
     PushRealtimeDataAck("PushRealtimeDataAck"), //上报变化数据
     PushAlarmAck("PushAlarmAck"),                 //上报告警

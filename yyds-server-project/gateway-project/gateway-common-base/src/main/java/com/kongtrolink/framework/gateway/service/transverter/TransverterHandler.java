@@ -24,6 +24,12 @@ public abstract class TransverterHandler implements TransverterService {
     private String deviceModel;
     @Value("${gateway.regionCode:null}")
     private String regionCode;
+    @Value("${gateway.fsuType:2019}")
+    private String fsuType;
+    @Value("${server.name}")
+    private String serverName;
+    @Value("${server.version}")
+    private String serverVersion;
     @Autowired
     MqttSender mqttSender;
 
@@ -80,5 +86,29 @@ public abstract class TransverterHandler implements TransverterService {
 
     public void setRegionCode(String regionCode) {
         this.regionCode = regionCode;
+    }
+
+    public String getFsuType() {
+        return fsuType;
+    }
+
+    public void setFsuType(String fsuType) {
+        this.fsuType = fsuType;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getServerVersion() {
+        return serverVersion;
+    }
+
+    public void setServerVersion(String serverVersion) {
+        this.serverVersion = serverVersion;
     }
 }

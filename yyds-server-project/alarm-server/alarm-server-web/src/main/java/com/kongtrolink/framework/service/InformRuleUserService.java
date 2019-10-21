@@ -13,8 +13,6 @@ public interface InformRuleUserService {
 
     boolean save(InformRuleUser ruleUser);
 
-    boolean save(List<InformRuleUser> ruleUserList);
-
     boolean delete(String id);
 
     boolean deleteByRuleId(String ruleId);

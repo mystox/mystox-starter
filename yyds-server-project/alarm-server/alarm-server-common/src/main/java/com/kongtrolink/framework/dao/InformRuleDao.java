@@ -78,19 +78,37 @@ public class InformRuleDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String enterpirseName = deliverQuery.getEnterpirseName();
+        String name = deliverQuery.getName();
+        if(!StringUtil.isNUll(name)){
+            name = MongoUtil.escapeExprSpecialWord(name);
+            criteria.and("name").regex(name);
+        }
+        String enterpriseCode = deliverQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
+        }
+        String enterpirseName = deliverQuery.getEnterpriseName();
         if(!StringUtil.isNUll(enterpirseName)){
             enterpirseName = MongoUtil.escapeExprSpecialWord(enterpirseName);
-            criteria.and("enterprise.name").regex(".*?" + enterpirseName + ".*?");
+            criteria.and("enterpriseName").regex(".*?" + enterpirseName + ".*?");
         }
-        String serviceName = deliverQuery.getServiceName();
-        if(!StringUtil.isNUll(serviceName)){
-            serviceName = MongoUtil.escapeExprSpecialWord(serviceName);
-            criteria.and("service.name").regex(".*?" + serviceName + ".*?");
+        String serverCode = deliverQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
+        }
+        String serverName = deliverQuery.getServerName();
+        if(!StringUtil.isNUll(serverName)){
+            serverName = MongoUtil.escapeExprSpecialWord(serverName);
+            criteria.and("serverName").regex(".*?" + serverName + ".*?");
         }
         String status = deliverQuery.getStatus();
         if(!StringUtil.isNUll(status)){
             criteria.and("status").is(status);
+        }
+        String operatorName = deliverQuery.getOperatorName();
+        if(!StringUtil.isNUll(operatorName)){
+            operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
+            criteria.and("operator.name").regex(".*?" + operatorName + ".*?");
         }
 
         return criteria;

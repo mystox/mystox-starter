@@ -9,13 +9,13 @@ import java.util.List;
  */
 public class PushDeviceAssetDeviceList {
 
-    private List<PushDeviceAssetDeviceList> devices;//设备信息
+    private List<PushDeviceAssetDevice> devices;//设备信息
 
-    public List<PushDeviceAssetDeviceList> getDevices() {
+    public List<PushDeviceAssetDevice> getDevices() {
         return devices;
     }
 
-    public void setDevices(List<PushDeviceAssetDeviceList> devices) {
+    public void setDevices(List<PushDeviceAssetDevice> devices) {
         this.devices = devices;
     }
 }

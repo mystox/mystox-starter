@@ -207,7 +207,7 @@ public class EnterpriseLevelDao {
         criteria.and("serverCode").is(serverCode);
         criteria.and("state").is(Contant.USEING);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.ASC, "level"));
+        query.with(new Sort(Sort.Direction.DESC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
         if(enterpriseLevelList == null || enterpriseLevelList.size() == 0){
             enterpriseLevelList = getDefault();
@@ -245,4 +245,20 @@ public class EnterpriseLevelDao {
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/18 8:46
+     * 功能描述:匹配企业告警最小值
+     */
+    public EnterpriseLevel matchLevel(String enterpriseCode, String serverCode, Integer level){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("state").is(Contant.USEING);
+        criteria.and("level").lte(level);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "level"));
+        return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
+    }
+
 }
