@@ -6,5 +6,4 @@ transverter:
   businessCode:
     - Register
     - PushRealtimeData
-    - SetDataAck
-
+    - GatewaySystemSetDevType
