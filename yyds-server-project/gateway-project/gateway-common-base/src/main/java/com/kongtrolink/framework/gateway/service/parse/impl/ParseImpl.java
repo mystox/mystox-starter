@@ -41,10 +41,11 @@ public class ParseImpl extends ParseHandler {
         String packetName = parseProtocol.getMsgType();
         switch (packetName){
             case "Register":
-                logger.info("SN:{} 注册",parseProtocol.getSn());
                 businessTransverter.transfer(parseProtocol);
                 break;
-            case "Heartbeat":break;
+            case "Heartbeat":
+                businessTransverter.transfer(parseProtocol);
+                break;
             case "PushDeviceAsset":
                 assetTransverter.transfer(parseProtocol);
                 break;

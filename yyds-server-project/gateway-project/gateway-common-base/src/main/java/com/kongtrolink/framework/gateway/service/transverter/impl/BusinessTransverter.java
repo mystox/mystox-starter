@@ -1,10 +1,6 @@
 package com.kongtrolink.framework.gateway.service.transverter.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.common.util.MqttUtils;
-import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.entity.OperaCode;
-import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
@@ -52,11 +48,11 @@ public class BusinessTransverter extends TransverterHandler {
         String packetName = parseProtocol.getMsgType();
         switch (packetName){
             case "Register":
-                logger.info("SN:{} 注册");
+                logger.info("SN:{} 注册",parseProtocol.getSn());
                 registerAck(parseProtocol.getSn(),parseProtocol.getPayload());
                 break;
             case "Heartbeat":
-                logger.info("SN:{} 心跳");
+                logger.info("SN:{} 心跳",parseProtocol.getSn());
                 heartAck(parseProtocol.getSn(),parseProtocol.getPayload());
                 break;
             case "GetDeviceDataModelAck":break;
@@ -74,8 +70,8 @@ public class BusinessTransverter extends TransverterHandler {
 
 
     private void registerAck(String sn,String json){
-        MsgResult result = reportMsgSyn(MqttUtils.preconditionServerCode(ServerName.SCLOUD_SERVER,scloudServerVersion),
-                OperaCode.Register,json);
+//        MsgResult result = reportMsgSyn(MqttUtils.preconditionServerCode(ServerName.SCLOUD_SERVER,scloudServerVersion),
+//                OperaCode.Register,json);
         Register register = JSONObject.parseObject(json,Register.class);
         RegisterAck registerAck =  new RegisterAck();
         registerAck.setResult(1);
@@ -92,6 +88,5 @@ public class BusinessTransverter extends TransverterHandler {
         AckBase ackBase = new AckBase(heartbeat.getMsgId());
         String messageAck = JSONObject.toJSONString(ackBase);
         gatewayMqttSenderNative.sendToMqtt(messageAck,topicConfig.getFsuTopic(sn, MqttPubTopic.HeartbeatAck));
-
     }
 }

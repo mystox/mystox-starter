@@ -12,15 +12,15 @@ gateway:
   businessCode: TOWER_SERVER
   enterpriseCode: yytd
   deviceType: FSU #可选
-  deviceModel: MUU100 #可选
-  regionCode: 000000 #可选
+  deviceModel: "MUU100" #可选
+  regionCode: "000000" #可选
   fsuType: 2019
   assetReport:
-    version: 1.0.0
+    version: "1.0.0"
   alarm:
-      version: 1.0.0
+      version: "1.0.0"
   scloud:
-      version: 1.0.0
+      version: "1.0.0"
 ###########消息框架相关配置#############
 
 server:
