@@ -1,10 +1,14 @@
 package com.kongtrolink.framework.gateway.tower.entity.rec.info;
 
+import java.io.Serializable;
+
 /**
  * 设备信息
  * Created by Mag on 2019/10/14.
  */
-public class PushDeviceAssetDevice {
+public class PushDeviceAssetDevice implements Serializable{
+
+    private static final long serialVersionUID = 2402617556839497284L;
 
     private String id;//设备ID
     private String name	;//	设备名称

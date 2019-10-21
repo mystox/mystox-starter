@@ -1,18 +1,16 @@
 package com.kongtrolink.framework.gateway.service.transverter.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.common.util.MqttUtils;
-import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.entity.OperaCode;
-import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
+import com.kongtrolink.framework.gateway.tower.entity.rec.Heartbeat;
 import com.kongtrolink.framework.gateway.tower.entity.rec.Register;
 import com.kongtrolink.framework.gateway.tower.entity.send.RegisterAck;
+import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.SendBase;
 import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
@@ -50,14 +48,15 @@ public class BusinessTransverter extends TransverterHandler {
         String packetName = parseProtocol.getMsgType();
         switch (packetName){
             case "Register":
-                logger.info("SN:{} 注册");
+                logger.info("SN:{} 注册",parseProtocol.getSn());
                 registerAck(parseProtocol.getSn(),parseProtocol.getPayload());
                 break;
-            case "Heartbeat":break;
-            case "PushDeviceAsset":break;
+            case "Heartbeat":
+                logger.info("SN:{} 心跳",parseProtocol.getSn());
+                heartAck(parseProtocol.getSn(),parseProtocol.getPayload());
+                break;
             case "GetDeviceDataModelAck":break;
             case "PushRealtimeData":break;
-            case "PushAlarm":break;
             case "SetDataAck":break;
             case "GetAlarmParamAck":break;
             case "SetAlarmParamAck":break;
@@ -71,8 +70,8 @@ public class BusinessTransverter extends TransverterHandler {
 
 
     private void registerAck(String sn,String json){
-        MsgResult result = reportMsgSyn(MqttUtils.preconditionServerCode(ServerName.SCLOUD_SERVER,scloudServerVersion),
-                OperaCode.Register,json);
+//        MsgResult result = reportMsgSyn(MqttUtils.preconditionServerCode(ServerName.SCLOUD_SERVER,scloudServerVersion),
+//                OperaCode.Register,json);
         Register register = JSONObject.parseObject(json,Register.class);
         RegisterAck registerAck =  new RegisterAck();
         registerAck.setResult(1);
@@ -84,5 +83,10 @@ public class BusinessTransverter extends TransverterHandler {
 
     }
 
-
+    private void heartAck(String sn,String json){
+        Heartbeat heartbeat = JSONObject.parseObject(json,Heartbeat.class);
+        AckBase ackBase = new AckBase(heartbeat.getMsgId());
+        String messageAck = JSONObject.toJSONString(ackBase);
+        gatewayMqttSenderNative.sendToMqtt(messageAck,topicConfig.getFsuTopic(sn, MqttPubTopic.HeartbeatAck));
+    }
 }

@@ -5,6 +5,8 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.service.parse.ParseHandler;
+import com.kongtrolink.framework.gateway.service.transverter.impl.AlarmTransverter;
+import com.kongtrolink.framework.gateway.service.transverter.impl.AssetTransverter;
 import com.kongtrolink.framework.gateway.service.transverter.impl.BusinessTransverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,10 @@ public class ParseImpl extends ParseHandler {
     @Autowired
     RedisUtils redisUtils;
     @Autowired
+    AlarmTransverter alarmTransverter;
+    @Autowired
+    AssetTransverter assetTransverter;
+    @Autowired
     BusinessTransverter businessTransverter;
     @Autowired
     GatewayMqttSenderNative gatewayMqttSenderNative;
@@ -35,14 +41,19 @@ public class ParseImpl extends ParseHandler {
         String packetName = parseProtocol.getMsgType();
         switch (packetName){
             case "Register":
-                logger.info("SN:{} 注册",parseProtocol.getSn());
                 businessTransverter.transfer(parseProtocol);
                 break;
-            case "Heartbeat":break;
-            case "PushDeviceAsset":break;
+            case "Heartbeat":
+                businessTransverter.transfer(parseProtocol);
+                break;
+            case "PushDeviceAsset":
+                assetTransverter.transfer(parseProtocol);
+                break;
             case "GetDeviceDataModelAck":break;
             case "PushRealtimeData":break;
-            case "PushAlarm":break;
+            case "PushAlarm":
+                alarmTransverter.transfer(parseProtocol);
+                break;
             case "SetDataAck":break;
             case "GetAlarmParamAck":break;
             case "SetAlarmParamAck":break;

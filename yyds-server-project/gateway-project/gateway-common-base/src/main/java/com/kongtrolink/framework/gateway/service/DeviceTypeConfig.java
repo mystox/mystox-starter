@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.gateway.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import org.slf4j.Logger;
@@ -57,7 +59,7 @@ public class DeviceTypeConfig {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("read errors :" + e);
+            logger.error("read errors :" + e);
         }finally {
             if(inputStream!=null){
                 try {
@@ -106,15 +108,17 @@ public class DeviceTypeConfig {
             return null;
         }
         String redisKey = getDeviceRedisKey();
-        Object o = redisUtils.hget(redisKey,sn);
-        if(o==null){
+        Object redisValue = redisUtils.hget(redisKey,sn);
+        if(redisValue==null){
             return null;
         }
         try{
-            return (PushDeviceAssetDevice)o;
+            JSONObject jsonObject = (JSONObject)redisValue;
+            return  JSON.toJavaObject(jsonObject,PushDeviceAssetDevice.class);
         }catch (Exception e){
-            return null;
+            e.printStackTrace();
         }
+        return null;
     }
 
 
@@ -129,7 +133,9 @@ public class DeviceTypeConfig {
     public String getDeviceTypeRedisKey(){
         return "gw_"+businessCode+"_"+enterpriseCode+"_devType";
     }
+
     public String getDeviceRedisKey(){
         return "gw_"+businessCode+"_"+enterpriseCode+"_device";
     }
+
 }
