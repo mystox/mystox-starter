@@ -72,6 +72,14 @@ public class AlarmDao {
         if(null != alarmIdList && alarmIdList.size()>0){
             criteria.and("_id").in(alarmIdList);
         }
+        String enterpriseCode = alarmQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
+        }
+        String serverCode = alarmQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
+        }
         String deviceType = alarmQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){
             criteria.and("deviceType").is(deviceType);

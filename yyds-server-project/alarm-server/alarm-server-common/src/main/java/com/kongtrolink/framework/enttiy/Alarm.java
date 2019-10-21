@@ -28,11 +28,20 @@ public class Alarm {
     private String deviceType;          //设备型号
     private String deviceModel;         //设备类型
     private String signalId;            //信号点id
-    private String state;
+    private String state;               //告警状态
     private String sliceKey;            //片键，也可以作为普通索引键
-    private Map<String, String> AuxilaryMap;
+    private Map<String, String> AuxilaryMap;    //附加属性列map
 
-    private Map<String, String> deviceInfos;
+    private Map<String, String> deviceInfos;    //设备信息map
+    private String type;                //告警类型（实时/历史）
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Map<String, String> getDeviceInfos() {
         return deviceInfos;
