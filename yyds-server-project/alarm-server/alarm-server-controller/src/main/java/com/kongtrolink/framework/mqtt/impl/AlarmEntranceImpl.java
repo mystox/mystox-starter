@@ -64,12 +64,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 recoverAndAuxilaryAlarmQueue.add(alarm);
                 taskExecutor.execute(()->handleRecoverAndAuxilary());
             }
-
-            //保存实时
-            if(reportAlarmList.size() != 0) {
-                //liuddtodo 按照配置文件，调用各个服务
-                alarmDao.save(reportAlarmList, currentAlarmTable);
-            }
+        }
+        //保存实时
+        if(reportAlarmList.size() != 0) {
+            //liuddtodo 按照配置文件，调用各个服务
+            alarmDao.save(reportAlarmList, currentAlarmTable);
         }
         return ;
     }

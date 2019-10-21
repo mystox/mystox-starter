@@ -135,7 +135,7 @@ public class AlarmCycle {
             return false;
         }
         if(null == alarmCycle){
-            //如果告警周期为空，这已消除告警为历史告警
+            //如果告警周期为空，则默认已消除告警为历史告警
             if(null != alarm.getTrecover()){
                 return true;
             }

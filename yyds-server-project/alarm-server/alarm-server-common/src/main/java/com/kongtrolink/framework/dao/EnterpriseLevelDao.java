@@ -260,5 +260,4 @@ public class EnterpriseLevelDao {
         query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
     }
-
 }
