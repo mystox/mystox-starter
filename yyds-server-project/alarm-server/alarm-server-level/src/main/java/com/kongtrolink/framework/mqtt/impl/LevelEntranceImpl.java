@@ -25,7 +25,7 @@ public class LevelEntranceImpl implements LevelEntrance{
         Alarm alarm = JSONObject.parseObject(alarmStr, Alarm.class);
         AlarmLevel level = alarmLevelService.getLevelByAlarm(alarm);
         if(null != level){
-//            alarm.setTargetLevel(level.getTargetLevel());
+            alarm.setTargetLevel(level.getTargetLevel());
             alarm.setTargetLevelName(level.getTargetLevelName());
             alarm.setColor(level.getColor());
         }
