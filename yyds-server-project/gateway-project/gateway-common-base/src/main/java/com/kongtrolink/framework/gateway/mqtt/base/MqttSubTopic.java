@@ -8,6 +8,7 @@ public enum MqttSubTopic {
     Register("Register"),                                   // 注册
     Heartbeat("Heartbeat"), // 发送心跳
     PushDeviceAsset("PushDeviceAsset"),                       // 推送设备资产信息
+    GetDeviceAssetAck("GetDeviceAssetAck"),                      //获取设备资产信息
     GetDeviceDataModelAck("GetDeviceDataModelAck"),                   //获取设备数据模型信息
     PushRealtimeData("PushRealtimeData"), //上报变化数据
     PushAlarm("PushAlarm"),                 //上报告警

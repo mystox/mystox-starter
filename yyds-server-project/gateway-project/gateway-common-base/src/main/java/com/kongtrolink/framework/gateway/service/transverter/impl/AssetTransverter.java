@@ -6,12 +6,16 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
+import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
+import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.assent.DeviceReport;
 import com.kongtrolink.framework.gateway.tower.entity.rec.PushDeviceAsset;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDeviceList;
+import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
 import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +40,11 @@ public class AssetTransverter extends TransverterHandler {
     @Autowired
     private DeviceTypeConfig deviceTypeConfig;
     @Autowired
+    private TopicConfig topicConfig;
+    @Autowired
     RedisUtils redisUtils;
-
+    @Autowired
+    GatewayMqttSenderNative gatewayMqttSenderNative;
     private static final Logger logger = LoggerFactory.getLogger(AssetTransverter.class);
 
     @Override
@@ -46,10 +53,35 @@ public class AssetTransverter extends TransverterHandler {
             String payLoad = parseProtocol.getPayload();//
             String sn = parseProtocol.getSn();
             PushDeviceAsset alarmReport = JSONObject.parseObject(payLoad,PushDeviceAsset.class);
+            String jsonResult = getAssetServerResult(alarmReport,sn);
+            if(jsonResult==null){
+                return;
+            }
+            reportMsg(MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER,assetServerVersion),
+                    OperaCode.DEVICE_REPORT,jsonResult);
+            assentAck(sn,alarmReport.getMsgId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 返回FSU 响应消息体
+     * @param sn sn
+     * @param msgId 消息唯一标识
+     */
+    private void assentAck(String sn,String msgId){
+        AckBase ackBase = new AckBase(msgId);
+        String messageAck = JSONObject.toJSONString(ackBase);
+        gatewayMqttSenderNative.sendToMqtt(messageAck,topicConfig.getFsuTopic(sn, MqttPubTopic.PushDeviceAssetAck));
+
+    }
+    public String getAssetServerResult(PushDeviceAsset alarmReport,String sn){
+        try{
             PushDeviceAssetDeviceList deviceAssetDeviceList = alarmReport.getPayload();
             if(deviceAssetDeviceList==null || deviceAssetDeviceList.getDevices()==null || deviceAssetDeviceList.getDevices().size()==0){
-                logger.info("推送设备资产信息为空 payLoad:{} ",payLoad);
-                return;
+                logger.info("推送设备资产信息为空 ");
+                return null;
             }
             DeviceReport deviceReport = new DeviceReport();
             deviceReport.setSn(sn);
@@ -74,11 +106,13 @@ public class AssetTransverter extends TransverterHandler {
                 redisUtils.hset(redisKey,sn +"_" + device.getId(),device);
             }
             deviceReport.setChildDevices(childDevices);
-            String jsonResult = JSONObject.toJSONString(deviceReport);
-            reportMsg(MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER,assetServerVersion),
-                    OperaCode.DEVICE_REPORT,jsonResult);
+            logger.debug("上报资管的 数据: \n");
+            logger.debug(JSONObject.toJSONString(deviceReport));
+            logger.debug("\n");
+            return JSONObject.toJSONString(deviceReport);
         }catch (Exception e){
             e.printStackTrace();
         }
+        return null;
     }
 }

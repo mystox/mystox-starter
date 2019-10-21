@@ -11,8 +11,10 @@ import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
+import com.kongtrolink.framework.gateway.tower.entity.rec.Heartbeat;
 import com.kongtrolink.framework.gateway.tower.entity.rec.Register;
 import com.kongtrolink.framework.gateway.tower.entity.send.RegisterAck;
+import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.SendBase;
 import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
@@ -53,11 +55,12 @@ public class BusinessTransverter extends TransverterHandler {
                 logger.info("SN:{} 注册");
                 registerAck(parseProtocol.getSn(),parseProtocol.getPayload());
                 break;
-            case "Heartbeat":break;
-            case "PushDeviceAsset":break;
+            case "Heartbeat":
+                logger.info("SN:{} 心跳");
+                heartAck(parseProtocol.getSn(),parseProtocol.getPayload());
+                break;
             case "GetDeviceDataModelAck":break;
             case "PushRealtimeData":break;
-            case "PushAlarm":break;
             case "SetDataAck":break;
             case "GetAlarmParamAck":break;
             case "SetAlarmParamAck":break;
@@ -84,5 +87,11 @@ public class BusinessTransverter extends TransverterHandler {
 
     }
 
+    private void heartAck(String sn,String json){
+        Heartbeat heartbeat = JSONObject.parseObject(json,Heartbeat.class);
+        AckBase ackBase = new AckBase(heartbeat.getMsgId());
+        String messageAck = JSONObject.toJSONString(ackBase);
+        gatewayMqttSenderNative.sendToMqtt(messageAck,topicConfig.getFsuTopic(sn, MqttPubTopic.HeartbeatAck));
 
+    }
 }

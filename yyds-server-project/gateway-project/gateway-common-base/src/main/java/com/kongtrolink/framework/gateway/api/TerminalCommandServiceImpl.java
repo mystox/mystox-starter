@@ -3,9 +3,12 @@ package com.kongtrolink.framework.gateway.api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
+import com.kongtrolink.framework.gateway.service.transverter.impl.AssetTransverter;
+import com.kongtrolink.framework.gateway.tower.entity.rec.PushDeviceAsset;
 import com.kongtrolink.framework.gateway.tower.entity.rec.base.RecServerBase;
 import com.kongtrolink.framework.gateway.tower.entity.send.GetDeviceDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +29,13 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     GatewayMqttSenderNative gatewayMqttSenderNative;
     @Autowired
     private TopicConfig topicConfig;
-
+    @Autowired
+    private AssetTransverter assetTransverter;
+    /**
+     * 资管主动下发 下发设备获取设备信息
+     * @param message 消息体
+     * @return 结果
+     */
     @Override
     public String deviceGet(String message) {
         RecServerBase recServerBase = JSONObject.parseObject(message,RecServerBase.class);
@@ -34,13 +43,19 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         GetDeviceDataModel getDeviceDataModel = new GetDeviceDataModel();
         String s = JSONObject.toJSONString(getDeviceDataModel);
         String msgId = 1+""+new Date().getTime();
-        MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,s,topicConfig.getFsuTopic(sn, MqttPubTopic.SetData));
-        if(result==null){
-            return null;
+        MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,s,topicConfig.getFsuTopic(sn, MqttPubTopic.GetDeviceAsset));
+        if(StateCode.FAILED == result.getStateCode()){
+            return JSONObject.toJSONString(result);
         }
-        return result.getMsg();
+        PushDeviceAsset alarmReport = JSONObject.parseObject(result.getMsg(),PushDeviceAsset.class);
+        return assetTransverter.getAssetServerResult(alarmReport,sn);
     }
 
+    /**
+     * 业务平台 设置数值
+     * @param message 消息体
+     * @return  结果
+     */
     @Override
     public String setData(String message) {
         try {
