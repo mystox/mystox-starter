@@ -2,6 +2,7 @@ package com.kongtrolink.framework.gateway.service.transverter.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
@@ -12,12 +13,10 @@ import com.kongtrolink.framework.gateway.tower.entity.rec.Register;
 import com.kongtrolink.framework.gateway.tower.entity.send.RegisterAck;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.SendBase;
-import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
@@ -27,8 +26,7 @@ import java.util.Date;
  * description: 其他业务转换器
  * update record:
  */
-@Service
-@Transverter(name = "businessCode")
+@Transverter("businessTransverter")
 public class BusinessTransverter extends TransverterHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessTransverter.class);

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.runner;
 
+import com.kongtrolink.framework.gateway.service.parse.ParseService;
 import com.kongtrolink.framework.gateway.service.receiver.ReceiveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -18,10 +19,17 @@ public class ReceiverInit implements ApplicationRunner {
     @Autowired
     ReceiveService receiveService;
 
+    @Autowired
+    ParseService parseService;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         receiveService.start();
         //启动接收器
+
+
+        parseService.init();
+        //扫描协议转换器
     }
 
 }

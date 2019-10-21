@@ -10,18 +10,17 @@ import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
+import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.assent.DeviceReport;
 import com.kongtrolink.framework.gateway.tower.entity.rec.PushDeviceAsset;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDeviceList;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
-import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +31,7 @@ import java.util.List;
  * description: 资产协议转换器
  * update record:
  */
-@Service
-@Transverter(name = "asset")
+@Transverter("asset")
 public class AssetTransverter extends TransverterHandler {
     @Value("gateway.assetReport.version:1.0.0")
     private String assetServerVersion;

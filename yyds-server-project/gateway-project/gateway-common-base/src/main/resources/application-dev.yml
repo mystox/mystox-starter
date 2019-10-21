@@ -1,8 +1,6 @@
 spring:
   application:
     name: gateway-common-base
-  profiles:
-    active: dev
   redis:
     ## Redis数据库索引(默认为0)
     database: 1
@@ -29,15 +27,14 @@ gateway:
   businessCode: TTYD_SERVER
   enterpriseCode: yytd
   deviceType: FSU #可选
-  deviceModel: "MUU100" #可选
-  regionCode: "000000" #可选
-  fsuType: 2019
+  deviceModel: MUU100 #可选
+  regionCode: 000000 #可选
   assetReport:
-    version: "1.0.0"
+    version: 1.0.0
   alarm:
-      version: "1.0.0"
+      version: 1.0.0
   scloud:
-      version: "1.0.0"
+      version: 1.0.0
 ###########消息框架相关配置#############
 server:
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码

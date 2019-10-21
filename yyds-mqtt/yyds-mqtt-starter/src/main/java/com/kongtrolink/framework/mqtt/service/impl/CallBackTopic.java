@@ -36,15 +36,14 @@ public class CallBackTopic implements Callable<MqttResp> {
 
     /**
      * 组包
+     * 如果出现并发问题，则方法添加synchronized 关键字 性能妥协
      *
      * @param result
      */
     public void callbackSubPackage(MqttResp result) {
         int packageNum = result.getPackageNum();
-
         int packageCount = result.getPackageCount();
         map.put(packageNum, result);
-
         if (map.size() == packageCount) {
             List<Byte> list = new ArrayList<>();
             for (int i = 0; i < packageCount; i++) {
@@ -55,19 +54,19 @@ public class CallBackTopic implements Callable<MqttResp> {
 
             byte[] bytes3 = ArrayUtils.toPrimitive(bytes1);
 
-            String paylaod = null;
+            String payload = null;
             try {
-                paylaod = new String(bytes3, "utf-8");
+                payload = new String(bytes3, "utf-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
             int crc = ByteUtil.getCRC(bytes3);
             int msgCrc = result.getCrc();
             if (crc != msgCrc) {
-                logger.error("[{}] stickPackage crc is wrong msgCrc: [{}] resultCrc: [{}]",this.result.getMsgId(),msgCrc,crc);
+                logger.error("[{}] stickPackage crc is wrong msgCrc: [{}] resultCrc: [{}]", this.result.getMsgId(), msgCrc, crc);
             }
-            this.result = new MqttResp(result.getMsgId(), paylaod);
-            logger.info("[{}] stickPackage success..{}, {}, {}", this.result.getMsgId(),packageCount,packageNum,crc);
+            this.result = new MqttResp(result.getMsgId(), payload);
+            logger.info("[{}] stickPackage success..{}, {}, {}", this.result.getMsgId(), packageCount, packageNum, crc);
             latch.countDown();
         }
     }
