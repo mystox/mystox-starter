@@ -5,17 +5,16 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.alarm.AlarmReport;
 import com.kongtrolink.framework.gateway.tower.entity.alarm.AlarmReportInfo;
 import com.kongtrolink.framework.gateway.tower.entity.rec.PushAlarm;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushAlarmInfo;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushAlarmList;
-import com.kongtrolink.framework.stereotype.Transverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,7 @@ import java.util.List;
  * description: 告警转换器
  * update record:
  */
-@Service
-@Transverter(name = "alarm")
+@Transverter("alarmTransverter")
 public class AlarmTransverter extends TransverterHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmTransverter.class);

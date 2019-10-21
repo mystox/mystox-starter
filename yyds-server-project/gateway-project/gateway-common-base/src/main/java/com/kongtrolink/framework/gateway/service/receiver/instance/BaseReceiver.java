@@ -2,6 +2,7 @@ package com.kongtrolink.framework.gateway.service.receiver.instance;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.entity.TransverterConfig;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.service.parse.ParseService;
 import com.kongtrolink.framework.gateway.service.receiver.ReceiveHandler;
@@ -51,9 +52,12 @@ public class BaseReceiver extends ReceiveHandler {
         }
     }
 
+
+    @Autowired
+    TransverterConfig transverterConfig;
     @Override
     public void start() {
-        System.out.println(JSONObject.toJSONString(this));
+
     }
 
     @Override

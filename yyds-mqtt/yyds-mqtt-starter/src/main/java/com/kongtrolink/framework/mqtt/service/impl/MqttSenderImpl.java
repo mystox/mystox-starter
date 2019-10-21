@@ -268,20 +268,26 @@ public class MqttSenderImpl implements MqttSender {
      */
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        String payload = message.getPayload();
-        MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
-        String msgId = resp.getMsgId();
 
-        logger.debug("[{}]message ack is [{}]", msgId, payload);
-        CallBackTopic callBackTopic = CALLBACKS.get(msgId);
-        if (callBackTopic != null) {
-            boolean subpackage = resp.isSubpackage();
-            if (subpackage)
-                callBackTopic.callbackSubPackage(resp);
-            else
-                callBackTopic.callback(resp);
-        } else {
-            logger.warn("[{}]message ack [{}] is Invalidation...", msgId);
+        try {
+            String payload = message.getPayload();
+            MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
+            String msgId = resp.getMsgId();
+
+            logger.debug("[{}]message ack is [{}]", msgId, payload);
+            CallBackTopic callBackTopic = CALLBACKS.get(msgId);
+            if (callBackTopic != null) {
+                boolean subpackage = resp.isSubpackage();
+                if (subpackage)
+                    callBackTopic.callbackSubPackage(resp);
+                else
+                    callBackTopic.callback(resp);
+            } else {
+                logger.warn("[{}]message ack [{}] is Invalidation...", msgId);
+            }
+        } catch (Exception e) {
+            logger.warn("message ack receive error[{}] is Invalidation...",e.toString());
+            e.printStackTrace();
         }
     }
 }

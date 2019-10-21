@@ -11,7 +11,9 @@ public interface ParseService {
 
     public void execute(String payload);
 
-//    public void parse();
+    //    public void parse();
+    public void init();
 
+    public void configTransverterInit();
 
 }

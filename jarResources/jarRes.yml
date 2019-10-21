@@ -3,5 +3,4 @@ YYTD_MQTT_DEMO_1.0.0:
   fooHi: jarName.jar/**.*.*/foo
   addHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/addHello:NA
 
-zcgl_*:
-  a: ex
+

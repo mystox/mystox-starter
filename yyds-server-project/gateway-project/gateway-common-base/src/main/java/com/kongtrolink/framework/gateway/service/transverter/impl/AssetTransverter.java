@@ -4,10 +4,9 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
-import com.kongtrolink.framework.stereotype.Transverter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by mystoxlol on 2019/10/16, 15:28.
@@ -15,8 +14,7 @@ import org.springframework.stereotype.Service;
  * description: 资产协议转换器
  * update record:
  */
-@Service
-@Transverter(name = "asset")
+@Transverter("asset")
 public class AssetTransverter extends TransverterHandler {
     @Value("gateway.assetReport.version:1.0.0")
     private String assetServerVersion;
