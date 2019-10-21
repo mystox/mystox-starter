@@ -12,12 +12,5 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface AlarmEntrance {
 
     @OperaCode
-    void alarmReport(String payload);
-
-    @OperaCode
-    void alarmRecover(String payload);
-
-    @OperaCode
-    void updateaAuxilary(String payload);
-
+    void alarmHandle(String payload);
 }

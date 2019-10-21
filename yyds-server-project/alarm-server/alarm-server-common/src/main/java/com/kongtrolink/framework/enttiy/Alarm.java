@@ -19,21 +19,29 @@ public class Alarm {
     private String name;                //告警名称
     private float value;                //告警值
     private Integer level;               //告警等级
+    private String deviceType;          //设备型号，设备类型，与资管一致
+    private String deviceModel;         //设备类型，设备型号，如果没有与deviceType一致
+    private String deviceId;            //设备对应的编码，需要与资产管理对应，设备id，即SN
+    private String signalId;            //信号点id，信号点id必须有，如果消息报文不包含信号点，则需要根据业务定义相关信号点
+    private String flag;                //告警标志（0-结束；1-上报）
     private Integer targetLevel;         //目标等级
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
-    private String deviceId;            //设备对应的编码，需要与资产管理对应
-    private String deviceType;          //设备型号
-    private String deviceModel;         //设备类型
-    private String signalId;            //信号点id
     private String state;               //告警状态
     private String sliceKey;            //片键，也可以作为普通索引键
     private Map<String, String> AuxilaryMap;    //附加属性列map
-
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
+
+    public String getFlag() {
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
 
     public String getType() {
         return type;

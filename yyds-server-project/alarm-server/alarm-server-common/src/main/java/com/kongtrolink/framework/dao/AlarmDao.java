@@ -217,4 +217,51 @@ public class AlarmDao {
         query.with(new Sort(Sort.Direction.ASC, "treport"));
         return mongoTemplate.find(query, Alarm.class, table);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/21 9:45
+     * 功能描述:获取已存在告警。
+     */
+    public Alarm getExistAlarm(String sliceKey, String signalId, String serial, String state, String table){
+        Criteria criteria = Criteria.where("sliceKey").is(sliceKey);
+        if(!StringUtil.isNUll(signalId)) {
+            criteria.and("signalId").is(signalId);
+        }
+        if(!StringUtil.isNUll(serial)){
+            criteria.and("serial").is(serial);
+        }
+        if(!StringUtil.isNUll(state)){
+            criteria.and("state").is(state);
+        }
+        Query query = Query.query(criteria);
+         return mongoTemplate.findOne(query, Alarm.class, table);
+    }
+
+    public void save(List<Alarm> alarmList, String table){
+        if(null != alarmList){
+            for(Alarm alarm : alarmList){
+                save(alarm, table);
+            }
+        }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/21 11:25
+     * 功能描述:消除告警
+     * 可能是实时告警，也可能是历史告警
+     */
+    public boolean resolve(String sliceKey, String signalId, String serial, String state, Date curDate, String table){
+        Criteria criteria = Criteria.where("sliceKey");
+        criteria.and("sliceKey").is(sliceKey);
+        criteria.and("signalId").is(signalId);
+        criteria.and("serial").is(serial);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", state);
+        update.set("curDate", curDate);
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
 }
