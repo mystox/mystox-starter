@@ -1,9 +1,6 @@
 package com.kongtrolink.framework.dao;
 
-import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.MongTable;
-import com.kongtrolink.framework.base.MongoUtil;
-import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.base.*;
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.mongodb.WriteResult;
@@ -14,6 +11,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +27,17 @@ public class InformRuleDao {
     @Autowired
     MongoTemplate mongoTemplate;
     private String table = MongTable.INFORM_RULE;
+    private String msgEnable = "msgEnable";
+    private String msgBeginTimeInt = "msgBeginTimeInt";
+    private String msgEndTimeInt = "msgEndTimeInt";
+    private String msgDayList = "msgDayList";
+    private String msgLevelList = "msgLevelList";
+
+    private String appEndTimeInt = "appEndTimeInt";
+    private String appDayList = "appDayList";
+    private String appLevelList = "appLevelList";
+
+
 
     public boolean save(InformRule deliver) {
         mongoTemplate.save(deliver, table);
@@ -143,18 +153,41 @@ public class InformRuleDao {
         return result.getN()>0 ? true : false;
     }
 
-
-
-    public List<InformRule> matchInformMsg(String enterpriseCode, String serverCode, String level, Date treport){
-        Criteria criteria = Criteria.where("msgEnable").is(Contant.USEING);
-//        criteria.and("msgBeginTimeInt").lte(tReportInt);
-//        criteria.and("msgEndTimeInt").gte(tReportInt);
-//        criteria.and("msgDayList").is(week);
-//        Criteria levelCriteria = Criteria.where("msgLevelList").is(level);
-//        Criteria levelSignalCri = new Criteria();
-//        levelSignalCri.orOperator(levelCriteria, signalCriteria);
-//        criteria.andOperator(levelSignalCri);
+    /**
+     * @auther: liudd
+     * @date: 2019/10/22 9:35
+     * 功能描述:匹配告警通知规则
+     */
+    public List<InformRule> matchInform(String enterpriseCode, String serverCode, Integer level, Date treport, String type){
+        if(!StringUtil.isNUll(type)){
+            return new ArrayList<>();
+        }
+        int tReportInt = DateUtil.timeToInt(treport);
+        int week = DateUtil.getWeek(treport);
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        if(Contant.INFORM_TYPE_MSG.equals(type)) {
+            criteria.and("msgEnable").is(Contant.USEING);
+            criteria.and("msgBeginTimeInt").lte(tReportInt);
+            criteria.and("msgEndTimeInt").gte(tReportInt);
+            criteria.and("msgDayList").is(week);
+            criteria.and("msgLevelList").is(level);
+        }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
+            criteria.and("emailEnable").is(Contant.USEING);
+            criteria.and("emailBeginTimeInt").lte(tReportInt);
+            criteria.and("emailEndTimeInt").gte(tReportInt);
+            criteria.and("emailDayList").is(week);
+            criteria.and("emailLevelList").is(level);
+        }else {
+            criteria.and("appEnable").is(Contant.USEING);
+            criteria.and("appBeginTimeInt").lte(tReportInt);
+            criteria.and("appEndTimeInt").gte(tReportInt);
+            criteria.and("appDayList").is(week);
+            criteria.and("appLevelList").is(level);
+        }
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, InformRule.class, table);
     }
+
+
 }

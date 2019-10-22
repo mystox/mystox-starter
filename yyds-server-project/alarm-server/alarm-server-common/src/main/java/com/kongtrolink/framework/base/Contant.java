@@ -46,4 +46,9 @@ public class Contant {
 
     public static String ZERO = "0";
     public static String ONE = "1";
+
+    public static String INFORM_TYPE_MSG = "msg";
+    public static String INFORM_TYPE_EMAL = "email";
+    public static String INFORM_TYPE_APP = "app";
+
 }

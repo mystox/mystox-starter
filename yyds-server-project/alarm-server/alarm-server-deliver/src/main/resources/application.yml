@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: alarm-server-deliver
+
+server:
+  name: ALARM-SERVER-DELIVER   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
+  version: 1.0.0                  #\u7248\u672C\u53F7
+  port: 19003                      #\u7AEF\u53E3\u53F7
+
+register:
+  scanBasePackage: com.kongtrolink.framework #\u9ED8\u8BA4\u914D\u7F6Ecom.kongtrolink.framework \u5982\u679C\u9879\u76EE\u7684\u5305\u540D\u4E0D\u4E00\u81F4\u9700\u8981\u624B\u52A8\u914D\u7F6E
+  url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #\u5F00\u53D1\u6001\u7684\u670D\u52A1\u548C\u4E91\u7BA1\u670D\u52A1\u914D\u7F6E\uFF0C\u5F00\u53D1\u6001\u670D\u52A1\u53EF\u4EE5\u4E0D\u4F9D\u8D56\u4E91\u7BA1\u8FDB\u884C\u90E8\u5206\u529F\u80FD\u670D\u52A1\u7684\u5F00\u53D1
+
+mqtt:
+  username: root #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  password: 123456 #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  url: tcp://172.16.5.26:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+
+mongodb:
+  uri: mongodb://172.16.6.9:27017/alarm_server
+
+
+executor:
+  threadPool:
+    corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
+    maxPoolSize: 1000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
+
+deliver:
+  count: 200    #\u544A\u8B66\u6295\u9012\u6570\u91CF
+  time: 4       #\u544A\u8B66\u6295\u9012\u8F6E\u8BE2\u6B21\u6570
+cycle:
+  assets: http://localhost:8888/
+  getCI: getCI

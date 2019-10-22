@@ -32,6 +32,7 @@ public class InformRule {
     private List<Integer> msgDayList ;      //告警短信星期数组
     private List<Integer> msgLevelList;     //告警等级列表
     private String msgServerURL;
+    private int count = 1;                  //重复次数，默认不重复
 
     private String emailEnable;               //告警邮件是否启用
     private String emailBeginTime;            //告警邮件开始时间
@@ -54,6 +55,14 @@ public class InformRule {
     private Date updateTime;                //修改时间
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public FacadeView getOperator() {
         return operator;

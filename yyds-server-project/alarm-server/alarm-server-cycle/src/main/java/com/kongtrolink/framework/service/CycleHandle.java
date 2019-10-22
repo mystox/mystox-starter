@@ -54,11 +54,13 @@ public class CycleHandle{
      * @date: 2019/10/21 18:18
      * 功能描述:静态方法同步锁作用在当前类的字节码上
      */
-    public static synchronized void handleCurrentAlarmList(List<Alarm> alarmList, String type){
+    public synchronized void handleCurrentAlarmList(List<Alarm> alarmList, String type){
         if(Contant.ONE.equals(type)){
             currentAlarmList.addAll(alarmList);
         }else if(Contant.ZERO.equals(type)){
             currentAlarmList.clear();
+            //清空列表，复位计数
+            currentTime = 0;
         }
     }
 
@@ -72,18 +74,23 @@ public class CycleHandle{
                 TimeUnit.MILLISECONDS);
     }
 
+    public synchronized List<Alarm> beforHandle(){
+        if(currentAlarmList.size() < count && currentTime < time){
+            currentTime ++ ;
+            return null;
+        }
+        List<Alarm> handleAlarmList = new ArrayList<>();
+        handleAlarmList.addAll(currentAlarmList);
+        handleCurrentAlarmList(null, Contant.ZERO);
+        return handleAlarmList;
+    }
 
     class handleTask implements Runnable{
         public void run() {
-            if(currentAlarmList.size() < count && currentTime < time){
-                currentTime ++ ;
-                return;
+            List<Alarm> handleAlarmList = beforHandle();
+            if(null == handleAlarmList || handleAlarmList.size() == 0){
+                return ;
             }
-            List<Alarm> handleAlarmList = new ArrayList<>();
-            handleAlarmList.addAll(currentAlarmList);
-            //清空列表，复位计数
-            currentTime = 0;
-            handleCurrentAlarmList(null, Contant.ZERO);
             Map<String, List<Alarm>> enterpirseServer_alarmListMap = new HashMap<>();
             List<String> enterpriseServerCodeList = new ArrayList<>();
             for(Alarm alarm : handleAlarmList){
