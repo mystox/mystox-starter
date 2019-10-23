@@ -17,4 +17,5 @@ public class MongTable {
     public static final String INFORM_RULE = "inform_rule";                  //告警投递表
     public static final String INFORM_RULE_USER = "inform_rule_user";       //通知规则，用户对应表
     public static final String INFORM_MSG = "inform_msg";                   //通知内容
+    public static final String MSG_TEMPLATE = "msg_template";               //通知消息模板
 }

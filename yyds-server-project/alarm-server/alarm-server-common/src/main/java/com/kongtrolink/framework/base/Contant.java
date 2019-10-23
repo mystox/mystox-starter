@@ -61,4 +61,7 @@ public class Contant {
     public static String SERIAL = "serial";
     public static String FLAG = "flag";
 
+    public static String TEMPLATE_MSG = "短信";
+    public static String TEMPLATE_EMAIL = "邮件";
+    public static String TEMPLATE_APP = "APP";
 }
