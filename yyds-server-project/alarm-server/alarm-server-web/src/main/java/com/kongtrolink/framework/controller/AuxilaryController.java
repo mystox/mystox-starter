@@ -9,6 +9,7 @@ import com.kongtrolink.framework.query.AuxilaryQuery;
 import com.kongtrolink.framework.service.AuxilaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -29,7 +30,7 @@ public class AuxilaryController extends BaseController {
 
     @RequestMapping("/add")
     @ResponseBody
-    public JsonResult add(AuxilaryQuery auxilaryQuery){
+    public JsonResult add(@RequestBody AuxilaryQuery auxilaryQuery){
         String enterpriseCode = auxilaryQuery.getEnterpriseCode();
         String serverCode = auxilaryQuery.getServerCode();
         Auxilary sourceAuxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
@@ -38,8 +39,18 @@ public class AuxilaryController extends BaseController {
             sourceAuxilary.setEnterpriseCode(enterpriseCode);
             sourceAuxilary.setServerCode(serverCode);
         }
-        Map<String, String> proMap = sourceAuxilary.getProMap();
-        proMap.put(auxilaryQuery.getProStr(), auxilaryQuery.getProName());
+        String proStr = auxilaryQuery.getProStr();
+        String proName = auxilaryQuery.getProName();
+        List<String> proStrList = sourceAuxilary.getProStrList();
+        List<String> proNameList = sourceAuxilary.getProNameList();
+        if(proStrList.contains(proStr)){
+            return new JsonResult(Contant.OPE_ADD + Contant.RESULT_FAIL + "，属性：" + proStr + "已存在!", false);
+        }
+        if(proNameList.contains(proName)){
+            return new JsonResult(Contant.OPE_ADD + Contant.RESULT_FAIL + "，属性名称：" + proName + "已存在!", false);
+        }
+        proStrList.add(proStr);
+        proNameList.add(proName);
         auxilaryService.delete(sourceAuxilary.get_id());
         auxilaryService.save(sourceAuxilary);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
@@ -47,17 +58,26 @@ public class AuxilaryController extends BaseController {
 
     @RequestMapping("/delete")
     @ResponseBody
-    public JsonResult delete(AuxilaryQuery auxilaryQuery){
+    public JsonResult delete(@RequestBody AuxilaryQuery auxilaryQuery){
         String enterpriseCode = auxilaryQuery.getEnterpriseCode();
         String serverCode = auxilaryQuery.getServerCode();
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         if(null == auxilary){
             return new JsonResult(Contant.DELETED + Contant.RESULT_FAIL, false);
         }
-        Map<String, String> proMap = auxilary.getProMap();
-        proMap.remove(auxilaryQuery.getProStr());
+        String proStr = auxilaryQuery.getProStr();
+        String proName = auxilaryQuery.getProName();
+        List<String> proStrList = auxilary.getProStrList();
+        List<String> proNameList = auxilary.getProNameList();
+        for(int i=0; i<proStrList.size(); i++){
+            String sourceStr = proStrList.get(i);
+            if(sourceStr.equals(proStr)){
+                proStrList.remove(i);
+                proNameList.remove(i);
+            }
+        }
         boolean result;
-        if(proMap.isEmpty()){
+        if(proStrList.isEmpty()){
             //如果没有任何附加属性，则直接删除该记录
             result = auxilaryService.delete(auxilary.get_id());
         }else{
@@ -71,14 +91,14 @@ public class AuxilaryController extends BaseController {
 
     @RequestMapping("/get")
     @ResponseBody
-    public JsonResult get(AuxilaryQuery auxilaryQuery){
+    public JsonResult get(@RequestBody AuxilaryQuery auxilaryQuery){
         Auxilary auxilary = auxilaryService.getByEnterServerCode(auxilaryQuery.getEnterpriseCode(), auxilaryQuery.getServerCode());
         return new JsonResult(auxilary);
     }
 
     @RequestMapping("/update")
     @ResponseBody
-    public JsonResult update(Auxilary auxilary){
+    public JsonResult update(@RequestBody Auxilary auxilary){
         boolean update = auxilaryService.update(auxilary);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -88,7 +108,7 @@ public class AuxilaryController extends BaseController {
 
     @RequestMapping("/list")
     @ResponseBody
-    public JsonResult list(AuxilaryQuery auxilaryQuery){
+    public JsonResult list(@RequestBody AuxilaryQuery auxilaryQuery){
         List<Auxilary> list = auxilaryService.list(auxilaryQuery);
         int count = auxilaryService.count(auxilaryQuery);
         ListResult<Auxilary> listResult = new ListResult<>(list, count);
