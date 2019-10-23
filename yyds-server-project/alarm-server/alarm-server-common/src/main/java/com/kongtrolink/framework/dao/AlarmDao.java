@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao;
 
+import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
@@ -73,20 +74,22 @@ public class AlarmDao {
             criteria.and("_id").in(alarmIdList);
         }
         String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(!StringUtil.isNUll(enterpriseCode)){
-            criteria.and("enterpriseCode").is(enterpriseCode);
-        }
-        String serverCode = alarmQuery.getServerCode();
-        if(!StringUtil.isNUll(serverCode)){
-            criteria.and("serverCode").is(serverCode);
-        }
+//        if(!StringUtil.isNUll(enterpriseCode)){
+//            criteria.and("enterpriseCode").is(enterpriseCode);
+//        }
+//        String serverCode = alarmQuery.getServerCode();
+//        if(!StringUtil.isNUll(serverCode)){
+//            criteria.and("serverCode").is(serverCode);
+//        }
         String deviceType = alarmQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){
-            criteria.and("deviceType").is(deviceType);
+            deviceType = MongoUtil.escapeExprSpecialWord(deviceType);
+            criteria.and("deviceType").regex(".*?" + deviceType + ".*?");
         }
         String deviceModel = alarmQuery.getDeviceModel();
         if(!StringUtil.isNUll(deviceModel)){
-            criteria.and("deviceModel").is(deviceModel);
+            deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
+            criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
         }
         String deviceId = alarmQuery.getDeviceId();
         if(!StringUtil.isNUll(deviceId)){
@@ -263,5 +266,22 @@ public class AlarmDao {
         update.set("curDate", curDate);
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
+
+    public boolean updateAuxilary(String deviceType, String deviceModel, String deviceId,
+                                  String signalId, String serial, Map<String, String> updateMap, String table){
+        Criteria criteria = Criteria.where("deviceType").is(deviceType);
+        criteria.and("deviceModel").is(deviceModel);
+        criteria.and("deviceId").is(deviceId);
+        criteria.and("signalId").is(signalId);
+        criteria.and("serial").is(serial);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        for(String key : updateMap.keySet()){
+            update.set(key, updateMap.get(key));
+        }
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        return result.getN()>0 ? true : false;
+
     }
 }

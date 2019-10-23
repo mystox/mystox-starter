@@ -10,6 +10,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.mqtt.CIRequestEntity;
+import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -143,19 +144,24 @@ public class CycleHandle{
             CIRequestEntity requestEntity = new CIRequestEntity();
             requestEntity.setIds(deviceIdList);
             MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
+            //liuddtodo 需要判定返回失败的结果
             int stateCode = msgResult.getStateCode();
             String msg = msgResult.getMsg();
-            List<JSONObject> jsonObjectList = JSONArray.parseArray(msg, JSONObject.class);
-            //假设返回
-            Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
-            for(JSONObject jsonObject : jsonObjectList){
-                deviceId_jsonObjMap.put(jsonObject.getString("id"), jsonObject);
-            }
-            //根据diviceid，填充告警信息
-            for(Alarm alarm : historyAlarmList){
-                JSONObject jsonObject = deviceId_jsonObjMap.get(alarm.getDeviceId());
-                if(null != jsonObject){
-                    alarm.setDeviceInfos((Map)jsonObject);
+            CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
+            int count = ciResponseEntity.getCount();
+            if(0 != count) {
+                //假设返回
+                Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
+                for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
+                    deviceId_jsonObjMap.put(jsonObject.getString("id"), jsonObject);
+                }
+
+                //根据diviceid，填充告警信息
+                for(Alarm alarm : historyAlarmList){
+                    JSONObject jsonObject = deviceId_jsonObjMap.get(alarm.getDeviceId());
+                    if(null != jsonObject){
+                        alarm.setDeviceInfos((Map)jsonObject);
+                    }
                 }
             }
 

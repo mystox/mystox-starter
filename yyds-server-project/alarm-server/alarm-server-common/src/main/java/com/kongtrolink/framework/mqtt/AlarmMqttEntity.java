@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.enttiy.Alarm;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class AlarmMqttEntity {
     private String enterpriseCode;
     private String serverCode;
-    private List<Alarm> alarms;
+    private List<JSONObject> alarms;
 
     public String getEnterpriseCode() {
         return enterpriseCode;
@@ -30,11 +31,11 @@ public class AlarmMqttEntity {
         this.serverCode = serverCode;
     }
 
-    public List<Alarm> getAlarms() {
+    public List<JSONObject> getAlarms() {
         return alarms;
     }
 
-    public void setAlarms(List<Alarm> alarms) {
+    public void setAlarms(List<JSONObject> alarms) {
         this.alarms = alarms;
     }
 }

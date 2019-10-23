@@ -44,4 +44,9 @@ public class AuxilaryServiceImpl implements AuxilaryService {
     public int count(AuxilaryQuery auxilaryQuery) {
         return auxilaryDao.count(auxilaryQuery);
     }
+
+    @Override
+    public Auxilary getByEnterServerCode(String enterpriseCode, String serverCode) {
+        return auxilaryDao.getByEnterServerCode(enterpriseCode, serverCode);
+    }
 }

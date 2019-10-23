@@ -40,12 +40,11 @@ public class AuxilaryDao {
     public boolean update(Auxilary auxilary) {
         Criteria criteria = Criteria.where("_id").is(auxilary.get_id());
         Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("proStrList", auxilary.getProStrList());
-        update.set("proNameList", auxilary.getProNameList());
-        update.set("proTypeList", auxilary.getProTypeList());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
-        return result.getN()>0 ? true : false;
+        mongoTemplate.remove(query, table);
+
+        mongoTemplate.save(auxilary);
+
+        return true;
     }
 
     public List<Auxilary> list(AuxilaryQuery auxilaryQuery) {
@@ -92,5 +91,12 @@ public class AuxilaryDao {
             criteria.and("proTypeList").regex(".*?" + proType + ".*?");
         }
         return criteria;
+    }
+
+    public Auxilary getByEnterServerCode(String enterpriseCode, String serverCode) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, Auxilary.class, table);
     }
 }

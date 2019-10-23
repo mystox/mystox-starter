@@ -46,9 +46,19 @@ public class Contant {
 
     public static String ZERO = "0";
     public static String ONE = "1";
+    public static String TWO = "2";     //其他操作（修改附加属性）
 
     public static String INFORM_TYPE_MSG = "msg";
     public static String INFORM_TYPE_EMAL = "email";
     public static String INFORM_TYPE_APP = "app";
+
+    public static String ENTERPRISECODE = "enterpriseCode";
+    public static String SERVERCODE = "serverCode";
+    public static String DEVICEID = "deviceId";
+    public static String DEVICETYPE = "deviceType";
+    public static String DEVICEMODEL = "deviceModel";
+    public static String SIGNALID = "signalId";
+    public static String SERIAL = "serial";
+    public static String FLAG = "flag";
 
 }

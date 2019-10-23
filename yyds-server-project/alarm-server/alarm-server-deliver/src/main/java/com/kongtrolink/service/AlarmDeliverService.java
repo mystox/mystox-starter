@@ -5,6 +5,7 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIRequestEntity;
+import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import com.kongtrolink.framework.service.MqttSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,11 +95,19 @@ public class AlarmDeliverService {
                 msgList.add(informMsg);
                 deviceId_InformMsgListMap.put(deviceId, msgList);
             }
-            //liuddtodo 向资产管理获取设备信息
             CIRequestEntity requestEntity = new CIRequestEntity();
             requestEntity.setIds(deviceIdList);
             MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
             //liuddtodo 根据返回值，填充消息中字段，最后执行发送
+            String msg = msgResult.getMsg();
+            CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
+            //liuddtodo 需要判定失败的返回结果
+            Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
+            for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
+                //告警上报中的deviceId，等于资产的sn，业务+服务内唯一
+                deviceId_jsonObjMap.put(jsonObject.getString("sn"), jsonObject);
+            }
+            //liuddtodo 还需要从云管获取区域信息
 
         }
     }

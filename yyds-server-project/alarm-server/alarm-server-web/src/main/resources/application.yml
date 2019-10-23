@@ -5,7 +5,7 @@ spring:
 server:
   name: ALARM_SERVER #\u670D\u52A1\u7F16\u7801
   version: 1.0.0 #\u670D\u52A1\u7248\u672C,\u53EF\u4EE5\u6269\u5C55\u4E3A * app
-  port: 18081 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
+  port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #jarResources:
 #  path: ./jarResources #\u53EF\u9009\u914D\u7F6E jar\u5305\u548CjarRes.yml\u8D44\u6E90\u914D\u7F6E\u6587\u4EF6\u5B58\u653E\u8DEF\u5F84 \u9ED8\u8BA4\u4E3A./jarResources
 register:
@@ -26,5 +26,6 @@ unique:
     levelHandle:
       defaulg: serverCode1.operaCode1
       opera2: serverCode2.operaCode2
-    cycleHandle:
-    deliverHandle:
+
+# resources:
+#      static-locations:["/templates/","/static/"]

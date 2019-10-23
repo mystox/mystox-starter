@@ -3,9 +3,11 @@ package com.kongtrolink;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import com.mongodb.WriteResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -76,7 +83,16 @@ public class EnterpriseLevelTest {
         }
     }
 
-    public static void main(String[] a){
+    @Test
+    public void auxilary(){
+
+        Criteria criteria = Criteria.where("enterpriseCode").is("auxilary001");
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("aaa", "第一个添加的属性");
+        WriteResult result = mongoTemplate.updateFirst(query, update, MongTable.ALARM_CYCLE);
+        int n = result.getN();
+        System.out.printf("修改了 %s 条记录 %n", n);
 
     }
 }

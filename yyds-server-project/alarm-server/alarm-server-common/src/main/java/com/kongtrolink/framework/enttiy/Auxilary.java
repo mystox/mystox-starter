@@ -1,6 +1,10 @@
 package com.kongtrolink.framework.enttiy;
 
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.base.StringUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -12,17 +16,7 @@ public class Auxilary {
     private String _id;
     private String enterpriseCode;
     private String serverCode;
-    private List<String> proStrList;
-    private List<String> proNameList;
-    private List<String> proTypeList;
-
-    public List<String> getProNameList() {
-        return proNameList;
-    }
-
-    public void setProNameList(List<String> proNameList) {
-        this.proNameList = proNameList;
-    }
+    private Map<String, String> proMap = new HashMap<>();
 
     public String get_id() {
         return _id;
@@ -32,21 +26,12 @@ public class Auxilary {
         this._id = _id;
     }
 
-    public List<String> getProStrList() {
-        return proStrList;
+    public Map<String, String> getProMap() {
+        return proMap;
     }
 
-    public void setProStrList(List<String> proStrList) {
-        this.proStrList = proStrList;
-    }
-
-
-    public List<String> getProTypeList() {
-        return proTypeList;
-    }
-
-    public void setProTypeList(List<String> proTypeList) {
-        this.proTypeList = proTypeList;
+    public void setProMap(Map<String, String> proMap) {
+        this.proMap = proMap;
     }
 
     public String getEnterpriseCode() {
@@ -63,5 +48,19 @@ public class Auxilary {
 
     public void setServerCode(String serverCode) {
         this.serverCode = serverCode;
+    }
+
+    public static void main(String[] args){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", "id001");
+        jsonObject.put("username", "liudd");
+        jsonObject.put("name", "大东哥");
+        jsonObject.put("pwd", "123456");
+        System.out.println(jsonObject);
+        String id = jsonObject.getString("id");
+        jsonObject.remove("id");
+        System.out.println(jsonObject);
+        System.out.println("id:" + id);
+
     }
 }
