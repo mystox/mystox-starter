@@ -125,7 +125,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
             boolean result = alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), currentAlarmTable);
             if (!result) {
-                result = alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), historyAlarmTable);
+                String enterpriseCode = alarm.getEnterpriseCode();
+                String serverCode = alarm.getServerCode();
+                result = alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(),
+                        enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
             }
             if(result){
                 //liuddtodo 调用告警消除发送推送
@@ -142,29 +145,29 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 String deviceId = jsonObject.getString(Contant.DEVICEID);
                 String signalId = jsonObject.getString(Contant.SIGNALID);
                 String serial = jsonObject.getString(Contant.SERIAL);
-                jsonObject.remove(Contant.ENTERPRISECODE);
-                jsonObject.remove(Contant.SERVERCODE);
-                jsonObject.remove(Contant.DEVICETYPE);
-                jsonObject.remove(Contant.DEVICEMODEL);
-                jsonObject.remove(Contant.DEVICEID);
-                jsonObject.remove(Contant.SIGNALID);
-                jsonObject.remove(Contant.SERIAL);
-                jsonObject.remove(Contant.FLAG);
+//                jsonObject.remove(Contant.ENTERPRISECODE);
+//                jsonObject.remove(Contant.SERVERCODE);
+//                jsonObject.remove(Contant.DEVICETYPE);
+//                jsonObject.remove(Contant.DEVICEMODEL);
+//                jsonObject.remove(Contant.DEVICEID);
+//                jsonObject.remove(Contant.SIGNALID);
+//                jsonObject.remove(Contant.SERIAL);
+//                jsonObject.remove(Contant.FLAG);
                 Set<String> keys = jsonObject.keySet();
                 if(null != keys && keys.size()>0) {
-                    Map<String, String> proMap = auxilary.getProMap();
+                    List<String> proStrList = auxilary.getProStrList();
                     Map<String, String> updateMap = new HashMap<>();
                     for(String key : keys){
-                        if(proMap.containsKey(key)){
+                        if(proStrList.contains(key)){
                             updateMap.put(key, jsonObject.getString(key));
                         }
                     }
                     if(updateMap.size()>0){
                         boolean result = alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
-                                serial, updateMap, enterpriseCode + serverCode + currentAlarmTable);
+                                serial, updateMap, currentAlarmTable);
                         if(!result){
                             alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
-                                    serial, updateMap, enterpriseCode + serverCode + historyAlarmTable);
+                                    serial, updateMap, enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
                         }
                     }
                 }

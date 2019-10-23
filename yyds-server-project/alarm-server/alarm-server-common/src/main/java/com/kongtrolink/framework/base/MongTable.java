@@ -14,7 +14,7 @@ public class MongTable {
     public static final String ALARM_HISTORY = "alarm_history";
     public static final String ALARM_CYCLE = "alarm_cycle";
     public static final String AUXILARY = "auxilary";                       //告警附属属性表
-    public static final String INFORM_RULE = "informRule";                  //告警投递表
+    public static final String INFORM_RULE = "inform_rule";                  //告警投递表
     public static final String INFORM_RULE_USER = "inform_rule_user";       //通知规则，用户对应表
     public static final String INFORM_MSG = "inform_msg";                   //通知内容
 }

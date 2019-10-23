@@ -10,6 +10,7 @@ import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.kongtrolink.framework.service.AuxilaryService;
+import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * @Auther: liudd
  * @Date: 2019/9/11 14:42
- * @Description:
+ * @Description:实时表不分表，历史表分表
  */
 @Controller
 @RequestMapping("/alarmController/")
@@ -38,13 +39,13 @@ public class AlarmController extends BaseController {
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
         String type = alarmQuery.getType();
-        String table = enterpriseCode + serverCode + MongTable.ALARM_CURRENT;
+        String table = MongTable.ALARM_CURRENT;
         if(Contant.HIST_ALARM.equals(type)) {
-            table = enterpriseCode + serverCode + MongTable.ALARM_HISTORY;
+            table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + MongTable.ALARM_HISTORY;
         }
-        List<Alarm> list = alarmService.list(alarmQuery, table);
+        List<DBObject> list = alarmService.list(alarmQuery, table);
         int count = alarmService.count(alarmQuery, table);
-        ListResult<Alarm> listResult = new ListResult<>(list, count);
+        ListResult<DBObject> listResult = new ListResult<>(list, count);
         JsonResult jsonResult = new JsonResult(listResult);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         jsonResult.setOtherInfo(auxilary);
