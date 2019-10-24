@@ -6,13 +6,15 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
-import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.assent.DeviceReport;
+import com.kongtrolink.framework.gateway.tower.entity.assent.DeviceReportExtend;
+import com.kongtrolink.framework.gateway.tower.entity.assent.DeviceReportExtendInfo;
 import com.kongtrolink.framework.gateway.tower.entity.rec.PushDeviceAsset;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDeviceList;
@@ -87,7 +89,10 @@ public class AssetTransverter extends TransverterHandler {
             deviceReport.setServerCode(getBusinessCode());
             deviceReport.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
             deviceReport.setRegionCode(getRegionCode());
-            deviceReport.setDeviceType(deviceTypeConfig.getAssentDeviceType(getFsuType()));
+            deviceReport.setType(deviceTypeConfig.getAssentDeviceType(getFsuType()));
+            DeviceReportExtend extend= new DeviceReportExtend();
+            extend.setModel(deviceReport.getType());
+            deviceReport.setExtend(extend);
             List<DeviceReport> childDevices = new ArrayList<>();
             String redisKey = deviceTypeConfig.getDeviceRedisKey(); //获取设备存储的redisKey
             for(PushDeviceAssetDevice device:deviceAssetDeviceList.getDevices()){
@@ -97,8 +102,9 @@ public class AssetTransverter extends TransverterHandler {
                 deviceReportChild.setServerCode(getBusinessCode());
                 deviceReportChild.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
                 deviceReportChild.setRegionCode(getRegionCode());
-                deviceReportChild.setDeviceType(deviceTypeConfig.getAssentDeviceType(device.getType()));
-                deviceReportChild.setExtend(device);
+                deviceReportChild.setType(deviceTypeConfig.getAssentDeviceType(device.getType()));
+                DeviceReportExtendInfo extendInfo = new DeviceReportExtendInfo(device);
+                deviceReportChild.setExtend(extendInfo);
                 childDevices.add(deviceReportChild);
                 //将上报的设备保持到redis中 key是 sn_deviceId
                 redisUtils.hset(redisKey,sn +"_" + device.getId(),device);
@@ -113,4 +119,5 @@ public class AssetTransverter extends TransverterHandler {
         }
         return null;
     }
+
 }

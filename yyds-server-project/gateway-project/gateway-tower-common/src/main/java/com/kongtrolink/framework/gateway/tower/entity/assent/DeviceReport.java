@@ -18,8 +18,8 @@ public class DeviceReport implements Serializable {
     private String serverCode;//对应该接入sn所属的业务服务的code，businessCode
     private String gatewayServerCode;//接入网关的服务code，提供设备向请求使用
     private String regionCode; //区域code默认值为 000000 其获取的顺序为 1.设备报文获取生成 2.服务配置文件获取 3.后期配置
-    private String deviceType;//需要一张类型映射的类型映射表，实现实际设备类型 -- 资管设备类型映射表
-    private Object extend; //以必须的方式存在将扩展属性中，如果终端消息不存在，则默认deviceType
+    private String type;//需要一张类型映射的类型映射表，实现实际设备类型 -- 资管设备类型映射表
+    private DeviceReportExtend extend; //以必须的方式存在将扩展属性中，如果终端消息不存在，则默认deviceType
     private List<DeviceReport> childDevices;//子设备信息
 
     public String getSn() {
@@ -62,19 +62,19 @@ public class DeviceReport implements Serializable {
         this.regionCode = regionCode;
     }
 
-    public String getDeviceType() {
-        return deviceType;
+    public String getType() {
+        return type;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public Object getExtend() {
+    public DeviceReportExtend getExtend() {
         return extend;
     }
 
-    public void setExtend(Object extend) {
+    public void setExtend(DeviceReportExtend extend) {
         this.extend = extend;
     }
 
