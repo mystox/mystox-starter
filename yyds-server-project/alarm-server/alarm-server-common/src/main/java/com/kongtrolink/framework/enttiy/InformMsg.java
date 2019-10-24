@@ -14,7 +14,7 @@ public class InformMsg {
     private String _id;
     private String enterpriseCode;
     private String serverCode;
-    private String type;
+    private String type;                //类型（短信，邮件，APP）
     private String url;
     private String username;
     private String levelName;
@@ -22,10 +22,40 @@ public class InformMsg {
     private float value;                //告警值
     private Date treport;
     private String deviceId;
-    private String msg;
+    private String tempCode;            //模板编码（短信通知中产生）
+    private String template;            //消息模板
+    private String operaCode;           //调用投递模块的操作码
+
+    private String msg;                 //投递内容，在最终的投递动作模块生成
     private Date date;
-    private int count;          //重复次数
-    private int currentTime;    //当前次数
+    private int count;                  //重复次数
+    private int currentTime;            //当前次数
+    private String alarmStateType;           //告警类型（告警产生，告警消除，FSU离线告警）
+
+
+    public String getTempCode() {
+        return tempCode;
+    }
+
+    public void setTempCode(String tempCode) {
+        this.tempCode = tempCode;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
+    }
+
+    public String getAlarmStateType() {
+        return alarmStateType;
+    }
+
+    public void setAlarmStateType(String alarmStateType) {
+        this.alarmStateType = alarmStateType;
+    }
 
     public int getCount() {
         return count;
@@ -151,14 +181,48 @@ public class InformMsg {
         this.setEnterpriseCode(informRule.getEnterpriseCode());
         this.setServerCode(informRule.getServerCode());
         this.setType(type);
-        String url = informRule.getMsgServerURL();
-        if(Contant.INFORM_TYPE_EMAL.equals(type)){
-            url = informRule.getEmailServerURL();
-        }else if(Contant.INFORM_TYPE_APP.equals(type)){
-            url = informRule.getAppServerURL();
+        //保存模板编码和模板
+        String flag = alarm.getFlag();
+        if(Contant.ONE.equals(flag)){
+            this.alarmStateType = Contant.ALARM_STATE_REPORT;
+        }else if(Contant.ZERO.equals(flag)){
+            this.alarmStateType = Contant.ALARM_STATE_RECOVER;
+        }else {
+            this.alarmStateType = Contant.ALARM_STATE_FSUOFFLINE;
         }
-        this.setUrl(url);
-        //liuddtodo 这里可能需要保存信息模板
+        if(Contant.INFORM_TYPE_MSG.equals(type)){
+            this.url = informRule.getMsgServerURL();
+            this.operaCode = informRule.getMsgOperaCode();
+            if(Contant.ONE.equals(flag)){
+                this.tempCode = informRule.getMsgReportCode();
+                this.template = informRule.getMsgReportModel();
+            }else if(Contant.ZERO.equals(flag)){
+                this.alarmStateType = Contant.ALARM_STATE_RECOVER;
+                this.tempCode = informRule.getMsgRecoverCode();
+                this.tempCode = informRule.getMsgRecoverModel();
+            }else {
+                this.alarmStateType = Contant.ALARM_STATE_FSUOFFLINE;
+                this.tempCode = informRule.getFsuOfflineCode();
+                this.template = informRule.getFsuOfflineModel();
+            }
+        }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
+            this.url = informRule.getEmailServerURL();
+            this.operaCode = informRule.getEmailOperaCode();
+            if(Contant.ONE.equals(flag)){
+                this.template = informRule.getEmailReportModel();
+            }else{
+                this.template = informRule.getEmailRecoverModel();
+            }
+        }else if(Contant.INFORM_TYPE_APP.equals(type)){
+            this.url = informRule.getAppServerURL();
+            this.operaCode = informRule.getAppOperaCode();
+            if(Contant.ONE.equals(flag)){
+                this.template = informRule.getAppReportModel();
+            }else{
+                this.template = informRule.getAppRecoverModel();
+            }
+        }
+
         this.setUsername(ruleUser.getUser().getStrId());
         this.setLevelName(alarm.getTargetLevelName());
         this.setAlarmName(alarm.getTargetLevelName());
@@ -166,6 +230,7 @@ public class InformMsg {
         this.setTreport(alarm.getTreport());
         this.setDeviceId(alarm.getDeviceId());
         this.setCount(informRule.getCount());
+        this.date = date;
         return this;
     }
 

@@ -64,4 +64,8 @@ public class Contant {
     public static String TEMPLATE_MSG = "短信";
     public static String TEMPLATE_EMAIL = "邮件";
     public static String TEMPLATE_APP = "APP";
+
+    public static String ALARM_STATE_REPORT = "告警上报";
+    public static String ALARM_STATE_RECOVER = "告警消除";
+    public static String ALARM_STATE_FSUOFFLINE = "FSU离线告警";
 }

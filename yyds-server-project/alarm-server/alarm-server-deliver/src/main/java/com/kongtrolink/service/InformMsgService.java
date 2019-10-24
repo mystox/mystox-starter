@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * @Auther: liudd
  * @Date: 2019/10/22 10:11
- * @Description:生成通知内容service
+ * @Description:获取对应的告警通知规则，并填充投递规则信息
  */
 @Service
 public class InformMsgService {

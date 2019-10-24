@@ -21,6 +21,9 @@ import java.util.List;
  * @Auther: liudd
  * @Date: 2019/10/21 18:56
  * @Description:
+ * 1，获取对应的告警通知规则，并填充投递规则信息
+ * 2，轮询获取对应的设备信息和区域信息
+ * 3，根据投递规则中，标注的投递动作木块代码，调用投递动作发送推送
  */
 @Service
 public class DeliverEntranceImpl implements DeliverEntrance{
@@ -29,8 +32,6 @@ public class DeliverEntranceImpl implements DeliverEntrance{
     InformMsgService msgService;
     @Override
     public String handleDeliver(String alarmListJsonStr) {
-
-        //liuddtodo 投递不影响告警其他流程，这里应该直接丢入新线程，然后返回。不同规则，使用的服务器可能不同
         List<Alarm> alarmList = JSON.parseArray(alarmListJsonStr, Alarm.class);
         msgService.handleInformAlarmList(alarmList, Contant.ONE);
         return null;

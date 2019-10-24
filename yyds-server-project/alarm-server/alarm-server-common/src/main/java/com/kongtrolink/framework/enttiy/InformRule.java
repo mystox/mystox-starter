@@ -33,6 +33,14 @@ public class InformRule {
     private List<Integer> msgLevelList;     //告警等级列表
     private String msgServerURL;
     private int count = 1;                  //重复次数，默认不重复
+    private FacadeView msgTemplate;
+    private String msgReportCode;
+    private String msgReportModel;
+    private String msgResolveCode;
+    private String msgResolveModel;
+    private String fsuOfflineCode;
+    private String fsuOfflineModel;
+    private String MsgOperaCode;
 
     private String emailEnable;               //告警邮件是否启用
     private String emailBeginTime;            //告警邮件开始时间
@@ -41,7 +49,11 @@ public class InformRule {
     private int emailEndTimeInt;              //告警邮件结束时间数值
     private List<Integer> emailDayList ;      //告警邮件星期数组
     private List<Integer> emailLevelList;     //告警邮件等级列表
+    private FacadeView emailTemplate;
     private String emailServerURL;
+    private String emailReportModel;
+    private String emailResolveModel;
+    private String emailOperaCode;
 
     private String appEnable;               //告警邮件是否启用
     private String appBeginTime;            //告警邮件开始时间
@@ -50,11 +62,110 @@ public class InformRule {
     private int appEndTimeInt;              //告警邮件结束时间数值
     private List<Integer> appDayList ;      //告警邮件星期数组
     private List<Integer> appLevelList;      //告警邮件等级列表
+    private FacadeView appTemplate;
     private String appServerURL;
-
+    private String appReportModel;
+    private String appResolveModel;
+    private String appOperaCode;
     private Date updateTime;                //修改时间
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
+
+    public FacadeView getMsgTemplate() {
+        return msgTemplate;
+    }
+
+    public void setMsgTemplate(FacadeView msgTemplate) {
+        this.msgTemplate = msgTemplate;
+    }
+
+    public FacadeView getEmailTemplate() {
+        return emailTemplate;
+    }
+
+    public void setEmailTemplate(FacadeView emailTemplate) {
+        this.emailTemplate = emailTemplate;
+    }
+
+    public FacadeView getAppTemplate() {
+        return appTemplate;
+    }
+
+    public void setAppTemplate(FacadeView appTemplate) {
+        this.appTemplate = appTemplate;
+    }
+
+    public String getMsgOperaCode() {
+        return MsgOperaCode;
+    }
+
+    public void setMsgOperaCode(String msgOperaCode) {
+        MsgOperaCode = msgOperaCode;
+    }
+
+    public String getEmailOperaCode() {
+        return emailOperaCode;
+    }
+
+    public void setEmailOperaCode(String emailOperaCode) {
+        this.emailOperaCode = emailOperaCode;
+    }
+
+    public String getAppOperaCode() {
+        return appOperaCode;
+    }
+
+    public void setAppOperaCode(String appOperaCode) {
+        this.appOperaCode = appOperaCode;
+    }
+
+    public String getMsgReportCode() {
+        return msgReportCode;
+    }
+
+    public void setMsgReportCode(String msgReportCode) {
+        this.msgReportCode = msgReportCode;
+    }
+
+    public String getMsgReportModel() {
+        return msgReportModel;
+    }
+
+    public void setMsgReportModel(String msgReportModel) {
+        this.msgReportModel = msgReportModel;
+    }
+
+    public String getFsuOfflineCode() {
+        return fsuOfflineCode;
+    }
+
+    public void setFsuOfflineCode(String fsuOfflineCode) {
+        this.fsuOfflineCode = fsuOfflineCode;
+    }
+
+    public String getFsuOfflineModel() {
+        return fsuOfflineModel;
+    }
+
+    public void setFsuOfflineModel(String fsuOfflineModel) {
+        this.fsuOfflineModel = fsuOfflineModel;
+    }
+
+    public String getEmailReportModel() {
+        return emailReportModel;
+    }
+
+    public void setEmailReportModel(String emailReportModel) {
+        this.emailReportModel = emailReportModel;
+    }
+
+    public String getAppReportModel() {
+        return appReportModel;
+    }
+
+    public void setAppReportModel(String appReportModel) {
+        this.appReportModel = appReportModel;
+    }
 
     public int getCount() {
         return count;
@@ -350,6 +461,38 @@ public class InformRule {
 
     public void set_id(String _id) {
         this._id = _id;
+    }
+
+    public String getMsgResolveCode() {
+        return msgResolveCode;
+    }
+
+    public void setMsgResolveCode(String msgResolveCode) {
+        this.msgResolveCode = msgResolveCode;
+    }
+
+    public String getMsgResolveModel() {
+        return msgResolveModel;
+    }
+
+    public void setMsgResolveModel(String msgResolveModel) {
+        this.msgResolveModel = msgResolveModel;
+    }
+
+    public String getEmailResolveModel() {
+        return emailResolveModel;
+    }
+
+    public void setEmailResolveModel(String emailResolveModel) {
+        this.emailResolveModel = emailResolveModel;
+    }
+
+    public String getAppResolveModel() {
+        return appResolveModel;
+    }
+
+    public void setAppResolveModel(String appResolveModel) {
+        this.appResolveModel = appResolveModel;
     }
 
     /**

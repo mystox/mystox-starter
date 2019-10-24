@@ -34,6 +34,11 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
     }
 
     @Override
+    public MsgTemplate get(String msgTemplateId) {
+        return msgTemplateDao.get(msgTemplateId);
+    }
+
+    @Override
     public List<MsgTemplate> list(MsgTemplateQuery msgTemplateQuery) {
         return msgTemplateDao.list(msgTemplateQuery);
     }

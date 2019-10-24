@@ -18,6 +18,8 @@ public interface MsgTemplateService {
 
     boolean update(MsgTemplate msgTemplate);
 
+    MsgTemplate get(String msgTemplateId);
+
     List<MsgTemplate> list(MsgTemplateQuery msgTemplateQuery);
 
     int count(MsgTemplateQuery msgTemplateQuery);

@@ -121,7 +121,7 @@ public class AlarmDao {
         }
         String serverCode = alarmQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
-            criteria.and("enterpriseCode").is(serverCode);
+            criteria.and("serverCode").is(serverCode);
         }
         return criteria;
     }

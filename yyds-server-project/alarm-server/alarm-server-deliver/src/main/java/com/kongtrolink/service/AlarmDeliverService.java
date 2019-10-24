@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Auther: liudd
  * @Date: 2019/10/22 08:58
- * @Description:告警投递模块service
+ * @Description:轮询获取对应的设备信息和区域信息，并调用对应的投递动作模块
  */
 @Service
 public class AlarmDeliverService {

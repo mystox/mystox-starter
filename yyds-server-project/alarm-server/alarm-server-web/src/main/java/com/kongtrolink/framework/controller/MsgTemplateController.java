@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,7 @@ public class MsgTemplateController {
     @RequestMapping("/add")
     @ResponseBody
     public JsonResult add(@RequestBody MsgTemplate msgTemplate){
+        msgTemplate.setUpdateTime(new Date());
         String name = msgTemplate.getName();
         MsgTemplate byName = templateService.getByName(msgTemplate.getEnterpriseCode(), msgTemplate.getServerCode(), name);
         if(null != byName){
@@ -61,6 +63,7 @@ public class MsgTemplateController {
         if(null != byName && !byName.get_id().equals(msgTemplate.get_id())){
             return new JsonResult(Contant.OPE_UPDATE  + Contant.RESULT_FAIL+", 模板名称：" + msgTemplate.getName() + "已存在", false);
         }
+        msgTemplate.setUpdateTime(new Date());
         boolean result = templateService.update(msgTemplate);
         if(result){
             return new JsonResult(Contant.OPE_UPDATE  + Contant.RESULT_SUC, true);

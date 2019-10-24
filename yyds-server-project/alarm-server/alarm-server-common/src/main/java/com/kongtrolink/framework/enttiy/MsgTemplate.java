@@ -1,5 +1,9 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.kongtrolink.framework.base.FacadeView;
+
+import java.util.Date;
+
 /**
  * @Auther: liudd
  * @Date: 2019/10/23 14:25
@@ -20,7 +24,24 @@ public class MsgTemplate {
     private String resolveModel;        //告警消除模板
     private String offlineCode;         //fsu离线编码
     private String offlineModel;        //fsu离线模板
+    private FacadeView operator;
+    private Date updateTime;
 
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
+    }
     public String get_id() {
         return _id;
     }

@@ -52,6 +52,12 @@ public class MsgTemplateDao {
         return result;
     }
 
+    public MsgTemplate get(String msgTemplateId) {
+        Criteria criteria = Criteria.where("_id").is(msgTemplateId);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, MsgTemplate.class, table);
+    }
+
     public List<MsgTemplate> list(MsgTemplateQuery msgTemplateQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, msgTemplateQuery);
