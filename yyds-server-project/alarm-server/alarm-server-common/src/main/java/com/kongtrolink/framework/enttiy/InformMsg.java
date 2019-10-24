@@ -198,8 +198,8 @@ public class InformMsg {
                 this.template = informRule.getMsgReportModel();
             }else if(Contant.ZERO.equals(flag)){
                 this.alarmStateType = Contant.ALARM_STATE_RECOVER;
-                this.tempCode = informRule.getMsgRecoverCode();
-                this.tempCode = informRule.getMsgRecoverModel();
+                this.tempCode = informRule.getMsgResolveCode();
+                this.tempCode = informRule.getMsgResolveModel();
             }else {
                 this.alarmStateType = Contant.ALARM_STATE_FSUOFFLINE;
                 this.tempCode = informRule.getFsuOfflineCode();
@@ -211,7 +211,7 @@ public class InformMsg {
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getEmailReportModel();
             }else{
-                this.template = informRule.getEmailRecoverModel();
+                this.template = informRule.getEmailResolveModel();
             }
         }else if(Contant.INFORM_TYPE_APP.equals(type)){
             this.url = informRule.getAppServerURL();
@@ -219,7 +219,7 @@ public class InformMsg {
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getAppReportModel();
             }else{
-                this.template = informRule.getAppRecoverModel();
+                this.template = informRule.getAppResolveModel();
             }
         }
 

@@ -189,5 +189,15 @@ public class InformRuleDao {
         return mongoTemplate.find(query, InformRule.class, table);
     }
 
-
+    public List<InformRule> getByTemplateIdAndType(String templateId, String type) {
+        String pro = "msgTemplate.strId";
+        if(Contant.TEMPLATE_EMAIL.equals(type)){
+            pro = "emailTemplate.strId";
+        }else if(Contant.TEMPLATE_APP.equals(type)){
+            pro = "appTemplate.strId";
+        }
+        Criteria criteria = Criteria.where(pro).is(templateId);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, InformRule.class, table);
+    }
 }

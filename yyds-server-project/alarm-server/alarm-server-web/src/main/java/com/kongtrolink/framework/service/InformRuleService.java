@@ -29,4 +29,6 @@ public interface InformRuleService {
     InformRule getByName(String name);
 
     boolean updateStatus(String ruleId, String status);
+
+    List<InformRule> getByTemplateIdAndType(String templateId, String type);
 }

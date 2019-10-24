@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.StringUtil;
+import sun.nio.cs.ext.MS874;
 
 import java.util.Date;
 import java.util.List;
@@ -518,6 +520,24 @@ public class InformRule {
         }
         if(!StringUtil.isNUll(this.appEndTime)){
             this.setAppEndTimeInt(DateUtil.HHMMSSToInt(this.appEndTime));
+        }
+    }
+
+    public void initTemplate(MsgTemplate msgTemplate){
+        String type = msgTemplate.getType();
+        if(Contant.TEMPLATE_MSG.equals(type)){
+            this.setMsgReportCode(msgTemplate.getReportCode());
+            this.setMsgReportModel(msgTemplate.getReportModel());
+            this.setMsgResolveCode(msgTemplate.getResolveCode());
+            this.setMsgResolveModel(msgTemplate.getResolveModel());
+            this.setFsuOfflineCode(msgTemplate.getOfflineCode());
+            this.setFsuOfflineModel(msgTemplate.getOfflineModel());
+        }else if(Contant.TEMPLATE_EMAIL.equals(type)){
+            this.setEmailReportModel(msgTemplate.getReportModel());
+            this.setEmailResolveModel(msgTemplate.getResolveModel());
+        }else{
+            this.setAppReportModel(msgTemplate.getReportModel());
+            this.setAppResolveModel(msgTemplate.getResolveModel());
         }
     }
 }

@@ -213,17 +213,12 @@ public class InformRuleController extends BaseController {
         return new JsonResult(userList);
     }
 
-    private void initTemplate(InformRule informRule){
+    public void initTemplate(InformRule informRule){
         FacadeView msgTemp = informRule.getMsgTemplate();
         if(null != msgTemp){
             MsgTemplate msgTemplate = msgTemplateService.get(msgTemp.getStrId());
             if(null != msgTemplate){
-                informRule.setMsgReportCode(msgTemplate.getReportCode());
-                informRule.setMsgReportModel(msgTemplate.getReportModel());
-                informRule.setMsgResolveCode(msgTemplate.getResolveCode());
-                informRule.setMsgResolveModel(msgTemplate.getResolveModel());
-                informRule.setFsuOfflineCode(msgTemplate.getOfflineCode());
-                informRule.setFsuOfflineModel(msgTemplate.getOfflineModel());
+                informRule.initTemplate(msgTemplate);
             }
         }
 
@@ -231,16 +226,14 @@ public class InformRuleController extends BaseController {
         if(null != emailTemp){
             MsgTemplate msgTemplate = msgTemplateService.get(emailTemp.getStrId());
             if(null != msgTemplate){
-                informRule.setEmailReportModel(msgTemplate.getReportModel());
-                informRule.setEmailResolveModel(msgTemplate.getResolveModel());
+                informRule.initTemplate(msgTemplate);
             }
         }
         FacadeView appTemp = informRule.getAppTemplate();
         if(null != appTemp){
             MsgTemplate msgTemplate = msgTemplateService.get(appTemp.getStrId());
             if(null != msgTemplate){
-                informRule.setAppReportModel(msgTemplate.getReportModel());
-                informRule.setAppResolveModel(msgTemplate.getResolveModel());
+                informRule.initTemplate(msgTemplate);
             }
         }
     }

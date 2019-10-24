@@ -1,9 +1,12 @@
 package com.kongtrolink.framework.service.impl;
 
+import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.dao.InformRuleDao;
 import com.kongtrolink.framework.enttiy.InformRule;
+import com.kongtrolink.framework.enttiy.MsgTemplate;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
+import com.kongtrolink.framework.service.MsgTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,8 @@ public class InformRuleServiceImpl implements InformRuleService {
 
     @Autowired
     InformRuleDao ruleDao;
+    @Autowired
+    MsgTemplateService msgTemplateService;
 
     @Override
     public boolean save(InformRule deliver) {
@@ -63,5 +68,10 @@ public class InformRuleServiceImpl implements InformRuleService {
     @Override
     public boolean updateStatus(String ruleId, String status) {
         return ruleDao.updateStatus(ruleId, status);
+    }
+
+    @Override
+    public List<InformRule> getByTemplateIdAndType(String templateId, String type) {
+        return ruleDao.getByTemplateIdAndType(templateId, type);
     }
 }

@@ -5,8 +5,10 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.MsgTemplate;
 import com.kongtrolink.framework.query.MsgTemplateQuery;
+import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.MsgTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +30,8 @@ public class MsgTemplateController {
 
     @Autowired
     MsgTemplateService templateService;
+    @Autowired
+    InformRuleService ruleService;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -49,6 +53,14 @@ public class MsgTemplateController {
     @ResponseBody
     public JsonResult delete(@RequestBody MsgTemplateQuery msgTemplateQuery){
         String id = msgTemplateQuery.get_id();
+        MsgTemplate msgTemplate = templateService.get(id);
+        if(null != msgTemplate){
+            List<InformRule> informRuleList = ruleService.getByTemplateIdAndType(id, msgTemplate.getType());
+            int size = informRuleList.size();
+            if(size >0 ){
+                return new JsonResult(Contant.OPE_DELETE  + Contant.RESULT_FAIL+", 还有 " + size + "条通知规则使用该模板", false);
+            }
+        }
         boolean delete = templateService.delete(id);
         if(delete){
             return new JsonResult(Contant.OPE_DELETE  + Contant.RESULT_SUC, true);
@@ -66,6 +78,12 @@ public class MsgTemplateController {
         msgTemplate.setUpdateTime(new Date());
         boolean result = templateService.update(msgTemplate);
         if(result){
+            //修改所有启用该模板的告警通知规则
+            List<InformRule> informRuleList = ruleService.getByTemplateIdAndType(msgTemplate.get_id(), msgTemplate.getType());
+            for(InformRule informRule : informRuleList){
+                informRule.initTemplate(msgTemplate);
+                ruleService.update(informRule);
+            }
             return new JsonResult(Contant.OPE_UPDATE  + Contant.RESULT_SUC, true);
         }
         return new JsonResult(Contant.OPE_UPDATE  + Contant.RESULT_FAIL, false);
