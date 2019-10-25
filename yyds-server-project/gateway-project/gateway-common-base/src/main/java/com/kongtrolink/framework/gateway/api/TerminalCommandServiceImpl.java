@@ -52,7 +52,6 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         if(StateCode.FAILED == result.getStateCode()){
             return JSONObject.toJSONString(result);
         }
-        logger.info("返回结果:{}",result.getMsg());
         PushDeviceAssetDeviceList deviceList = JSONObject.parseObject(result.getMsg(),PushDeviceAssetDeviceList.class);
         return assetTransverter.getAssetServerResult(deviceList,sn);
     }
