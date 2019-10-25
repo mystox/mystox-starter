@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.mqtt;
 
+import com.kongtrolink.framework.gateway.mqtt.base.MqttSubAckTopic;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttSubTopic;
 import com.kongtrolink.framework.mqtt.config.YamlPropertySourceFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -144,6 +145,27 @@ public class GatewayMqttConfig {
     }
 
     /**
+     * MQTT消息订阅回复消息
+     *
+     * @return {@link org.springframework.integration.core.MessageProducer}
+     */
+    @Bean("gatewayReplyProducer")
+    public MessageProducer replyProducer() {
+        String[] topic = getAckTopic();
+        // 可以同时消费（订阅）多个Topic
+        MqttPahoMessageDrivenChannelAdapter adapter =
+                new MqttPahoMessageDrivenChannelAdapter(
+                        producerClientId+"_reply", mqttClientFactory(),
+                        topic);
+        adapter.setCompletionTimeout(completionTimeout);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        // 设置订阅通道
+        adapter.setOutputChannel(mqttReplyChannel());
+        return adapter;
+    }
+
+    /**
      * MQTT消息订阅绑定（消费者）
      *
      * @return {@link MessageProducer}
@@ -165,6 +187,7 @@ public class GatewayMqttConfig {
         return adapter;
     }
 
+
     /**
      * iaiot/edge/yy/+/packetName/version
      */
@@ -178,24 +201,16 @@ public class GatewayMqttConfig {
         }
         return topics;
     }
-    /**
-     * MQTT消息订阅回复消息
-     *
-     * @return {@link MessageProducer}
-     */
-    @Bean("gatewayReplyProducer")
-    public MessageProducer replyProducer() {
-        // 可以同时消费（订阅）多个Topic
-        MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(
-                        producerClientId+"_reply", mqttClientFactory(),
-                        StringUtils.split("topic_ack1", ","));
-        adapter.setCompletionTimeout(completionTimeout);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        // 设置订阅通道
-        adapter.setOutputChannel(mqttReplyChannel());
-        return adapter;
+
+    private String[] getAckTopic() {
+        MqttSubAckTopic[] subAckTopics = MqttSubAckTopic.values();
+        String[] topics = new String[subAckTopics.length];
+        for (int i = 0; i < subAckTopics.length; i++) {
+            String topicStr = subAckTopics[i].getTopicName();
+            topics[i] = "iaiot/edge/yy/+/"+topicStr+"/"+version;
+            logger.info("Gateway sub Ack topic:{}" ,topics[i]);
+        }
+        return topics;
     }
 
     /**

@@ -35,7 +35,7 @@ import java.util.List;
  */
 @Transverter("asset")
 public class AssetTransverter extends TransverterHandler {
-    @Value("gateway.assetReport.version:1.0.0")
+    @Value("${gateway.assetReport.version:1.0.0}")
     private String assetServerVersion;
     @Autowired
     private DeviceTypeConfig deviceTypeConfig;
@@ -53,10 +53,11 @@ public class AssetTransverter extends TransverterHandler {
             String payLoad = parseProtocol.getPayload();//
             String sn = parseProtocol.getSn();
             PushDeviceAsset alarmReport = JSONObject.parseObject(payLoad,PushDeviceAsset.class);
-            String jsonResult = getAssetServerResult(alarmReport,sn);
+            String jsonResult = getAssetServerResult(alarmReport.getPayload(),sn);
             if(jsonResult==null){
                 return;
             }
+            logger.info(jsonResult);
             reportMsg(MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER,assetServerVersion),
                     OperaCode.DEVICE_REPORT,jsonResult);
             assentAck(sn,alarmReport.getMsgId());
@@ -76,9 +77,8 @@ public class AssetTransverter extends TransverterHandler {
         gatewayMqttSenderNative.sendToMqtt(messageAck,topicConfig.getFsuTopic(sn, MqttPubTopic.PushDeviceAssetAck));
 
     }
-    public String getAssetServerResult(PushDeviceAsset alarmReport,String sn){
+    public String getAssetServerResult(PushDeviceAssetDeviceList deviceAssetDeviceList,String sn){
         try{
-            PushDeviceAssetDeviceList deviceAssetDeviceList = alarmReport.getPayload();
             if(deviceAssetDeviceList==null || deviceAssetDeviceList.getDevices()==null || deviceAssetDeviceList.getDevices().size()==0){
                 logger.info("推送设备资产信息为空 ");
                 return null;
@@ -102,7 +102,12 @@ public class AssetTransverter extends TransverterHandler {
                 deviceReportChild.setServerCode(getBusinessCode());
                 deviceReportChild.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
                 deviceReportChild.setRegionCode(getRegionCode());
-                deviceReportChild.setType(deviceTypeConfig.getAssentDeviceType(device.getType()));
+                String type = deviceTypeConfig.getAssentDeviceType(device.getType());
+                if(type==null){
+                    deviceReportChild.setType(String.valueOf(device.getType()));
+                }else{
+                    deviceReportChild.setType(type);
+                }
                 DeviceReportExtendInfo extendInfo = new DeviceReportExtendInfo(device);
                 deviceReportChild.setExtend(extendInfo);
                 childDevices.add(deviceReportChild);

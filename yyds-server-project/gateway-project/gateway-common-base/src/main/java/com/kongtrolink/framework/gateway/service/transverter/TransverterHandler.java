@@ -24,7 +24,7 @@ public abstract class TransverterHandler implements TransverterService {
     private String deviceModel;
     @Value("${gateway.regionCode:null}")
     private String regionCode;
-    @Value("${gateway.fsuType:2019}")
+    @Value("${gateway.fsuType:38}")
     private String fsuType;
     @Value("${server.name}")
     private String serverName;

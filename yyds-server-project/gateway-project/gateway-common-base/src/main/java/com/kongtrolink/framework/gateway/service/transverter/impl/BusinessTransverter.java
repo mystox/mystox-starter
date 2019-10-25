@@ -34,7 +34,7 @@ public class BusinessTransverter extends TransverterHandler {
     @Autowired
     GatewayMqttSenderNative gatewayMqttSenderNative;
 
-    @Value("gateway.scloud.version:1.0.0")
+    @Value("${gateway.scloud.version:1.0.0}")
     private String scloudServerVersion;
     @Autowired
     private TopicConfig topicConfig;
