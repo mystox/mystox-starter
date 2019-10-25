@@ -3,7 +3,7 @@ spring:
     name: gateway-common-base
   redis:
     ## Redis数据库索引(默认为0)
-    database: 1
+    database: 2
     ## 连接超时时间（毫秒）
     timeout: 60000
     ## 连接池最大连接数（使用负值表示没有限制）
@@ -24,11 +24,13 @@ management:
     enabled: false
 #########网关相关配置##############
 gateway:
-  businessCode: TTYD_SERVER
+  businessCode: TOWER_SERVER
   enterpriseCode: yytd
   deviceType: FSU #可选
   deviceModel: MUU100 #可选
-  regionCode: 000000 #可选
+  regionCode: "000000" #可选
+  fsuType: 38
+  user: "root"
   assetReport:
     version: 1.0.0
   alarm:
