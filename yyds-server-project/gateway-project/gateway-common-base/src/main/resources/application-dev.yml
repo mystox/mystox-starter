@@ -30,6 +30,7 @@ gateway:
   deviceModel: MUU100 #可选
   regionCode: "000000" #可选
   fsuType: 38
+  user: "root"
   assetReport:
     version: 1.0.0
   alarm:

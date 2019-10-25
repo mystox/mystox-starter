@@ -85,6 +85,7 @@ public class AssetTransverter extends TransverterHandler {
             }
             DeviceReport deviceReport = new DeviceReport();
             deviceReport.setSn(sn);
+            deviceReport.setUser(getUser());
             deviceReport.setEnterpriseCode(getEnterpriseCode());
             deviceReport.setServerCode(getBusinessCode());
             deviceReport.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
@@ -99,6 +100,7 @@ public class AssetTransverter extends TransverterHandler {
                 DeviceReport deviceReportChild = new DeviceReport();
                 deviceReportChild.setSn(sn +"_" + device.getId());
                 deviceReportChild.setEnterpriseCode(getEnterpriseCode());
+                deviceReportChild.setUser(getUser());
                 deviceReportChild.setServerCode(getBusinessCode());
                 deviceReportChild.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
                 deviceReportChild.setRegionCode(getRegionCode());
