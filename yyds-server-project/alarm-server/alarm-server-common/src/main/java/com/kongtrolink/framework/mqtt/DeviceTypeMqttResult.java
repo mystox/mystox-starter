@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.mqtt;
 
-import com.kongtrolink.framework.mqtt.DeviceTypeResult;
-
 import java.util.List;
 
 /**

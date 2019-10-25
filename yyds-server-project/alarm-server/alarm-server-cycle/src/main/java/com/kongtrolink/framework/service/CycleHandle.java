@@ -44,7 +44,7 @@ public class CycleHandle{
     @Value("${cycle.getCI:getCI}")
     private String getCI;
 
-    private int currentTime = 0;
+    private static int currentTime = 0;
 
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
@@ -55,7 +55,7 @@ public class CycleHandle{
      * @date: 2019/10/21 18:18
      * 功能描述:静态方法同步锁作用在当前类的字节码上
      */
-    public synchronized void handleCurrentAlarmList(List<Alarm> alarmList, String type){
+    public static synchronized void handleCurrentAlarmList(List<Alarm> alarmList, String type){
         if(Contant.ONE.equals(type)){
             currentAlarmList.addAll(alarmList);
         }else if(Contant.ZERO.equals(type)){
@@ -153,7 +153,7 @@ public class CycleHandle{
                 //假设返回
                 Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
                 for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
-                    deviceId_jsonObjMap.put(jsonObject.getString("id"), jsonObject);
+                    deviceId_jsonObjMap.put(jsonObject.getString("sn"), jsonObject);
                 }
 
                 //根据diviceid，填充告警信息

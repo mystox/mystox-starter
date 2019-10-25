@@ -35,7 +35,7 @@ public class InformMsgService {
 
     private List<Alarm> informAlarmList = new ArrayList<>();
 
-    public synchronized void handleInformAlarmList(List<Alarm> alarmList, String type){
+    public void handleInformAlarmList(List<Alarm> alarmList, String type){
         if(Contant.ZERO.equals(type)){
             informAlarmList.clear();
         }else if(Contant.ONE.equals(type)){
@@ -46,7 +46,7 @@ public class InformMsgService {
         }
     }
 
-    public synchronized List<Alarm> beforeHandle(){
+    public List<Alarm> beforeHandle(){
         if(informAlarmList.size() == 0){
             return null;
         }
@@ -76,7 +76,9 @@ public class InformMsgService {
             List<InformMsg> appEmailMsgList = createMsg(alarm, Contant.INFORM_TYPE_APP, date);
             informMsgList.addAll(appEmailMsgList);
         }
-        deliverService.handleInformMsgList(informMsgList, Contant.ONE);
+        if(informMsgList.size() > 0){
+            deliverService.handleInformMsgList(informMsgList, Contant.ONE);
+        }
         handle();
     }
 
@@ -88,8 +90,12 @@ public class InformMsgService {
         Date treport = alarm.getTreport();
         //获取匹配的短信通知
         List<InformRule> informRuleList = informRuleDao.matchInform(enterpriseCode, serverCode, targetLevel, treport, type);
+        if(null == informRuleList || informRuleList.size() == 0){
+            return msgList;
+        }
         List<String> ruleIdList = inform2IdList(informRuleList);
         List<InformRuleUser> ruleUserList = ruleUserDao.getByRuleIdList(ruleIdList);
+        //分别得到两个以informRule ID为键的map
         Map<String, List<InformRuleUser>> msg_ruleId_ruleUserListMap = ruleUser2InformIdAlarmListMap(ruleUserList);
         Map<String, InformRule> informId_entityMap = inform2IdEntityMap(informRuleList);
         for(String ruleId : informId_entityMap.keySet()){
