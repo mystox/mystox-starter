@@ -16,15 +16,20 @@ public class InformMsg {
     private String serverCode;
     private String type;                //类型（短信，邮件，APP）
     private String url;
-    private String username;
     private String levelName;
     private String alarmName;
     private float value;                //告警值
     private Date treport;
     private String deviceId;
+    private String deviceName;
+    private String address;
+    private String addressName;
+    private String userId;
+    private String username;
+
     private String tempCode;            //模板编码（短信通知中产生）
     private String template;            //消息模板
-    private String operaCode;           //调用投递模块的操作码
+    private String operaCode;           //调用投递模块的操作码（服务#操作码）
 
     private String msg;                 //投递内容，在最终的投递动作模块生成
     private Date date;
@@ -32,6 +37,45 @@ public class InformMsg {
     private int currentTime;            //当前次数
     private String alarmStateType;           //告警类型（告警产生，告警消除，FSU离线告警）
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAddressName() {
+        return addressName;
+    }
+
+    public void setAddressName(String addressName) {
+        this.addressName = addressName;
+    }
+
+    public String getOperaCode() {
+        return operaCode;
+    }
+
+    public void setOperaCode(String operaCode) {
+        this.operaCode = operaCode;
+    }
 
     public String getTempCode() {
         return tempCode;
@@ -222,30 +266,15 @@ public class InformMsg {
                 this.template = informRule.getAppResolveModel();
             }
         }
-
-        this.setUsername(ruleUser.getUser().getStrId());
+        this.userId = ruleUser.getUser().getStrId();
+        this.setUsername(ruleUser.getUser().getName());
         this.setLevelName(alarm.getTargetLevelName());
-        this.setAlarmName(alarm.getTargetLevelName());
+        this.setAlarmName(alarm.getName());
         this.setValue(alarm.getValue());
         this.setTreport(alarm.getTreport());
         this.setDeviceId(alarm.getDeviceId());
         this.setCount(informRule.getCount());
         this.date = date;
         return this;
-    }
-
-    private String createMsg(InformRule informRule, InformRuleUser ruleUser, Date date){
-
-        return null;
-    }
-
-    private String createEmail(InformRule informRule, InformRuleUser ruleUser, Date date){
-
-        return null;
-    }
-
-    private String createAPP(InformRule informRule, InformRuleUser ruleUser, Date date){
-
-        return null;
     }
 }

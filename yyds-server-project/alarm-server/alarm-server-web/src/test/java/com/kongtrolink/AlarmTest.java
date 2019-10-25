@@ -1,5 +1,6 @@
 package com.kongtrolink;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
@@ -11,6 +12,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
@@ -78,5 +82,31 @@ public class AlarmTest {
         alarmQuery.setServerCode(serverCode);
         List<DBObject> list = alarmDao.list(alarmQuery, currentTable);
         System.out.println(list);
+    }
+
+    @Test
+    public void saveDeviceInfo(){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("deviceId", "deviceId001");
+        jsonObject.put("deviceName", "设备001");
+        jsonObject.put("enterprise", "服务001");
+        Criteria criteria = Criteria.where("_id").is("5dafc66c7ac75110500250fd");
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("deviceInfos", jsonObject);
+        mongoTemplate.updateFirst(query, update, currentTable);
+    }
+
+    @Test
+    public void get(){
+        Criteria criteria = Criteria.where("_id").is("5dafc66c7ac75110500250fd");
+        Query query = Query.query(criteria);
+        Alarm alarm = mongoTemplate.findOne(query, Alarm.class, currentTable);
+
+        System.out.println(alarm.getDeviceInfos());
+        Map<String, String> deviceInfos = alarm.getDeviceInfos();
+        for(String key : deviceInfos.keySet()){
+            System.out.println(key + ":" + deviceInfos.get(key));
+        }
     }
 }

@@ -25,6 +25,7 @@
 		<module>alarm-server-controller</module>
 		<module>alarm-server-cycle</module>
 		<module>alarm-server-deliver</module>
+		<module>alarm-server-sender</module>
 		<module>alarm-server-level</module>
 		<module>alarm-server-web</module>
 	</modules>
