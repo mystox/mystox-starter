@@ -20,7 +20,6 @@ mqtt:
 mongodb:
   uri: mongodb://172.16.6.9:27017/alarm_server
 
-
 executor:
   threadPool:
     corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
@@ -35,7 +34,9 @@ cycle:
 
 #sms短信相关配置
 sms:
-  enable: ture;
+  enable: ture
+  url: http://sendcloud.sohu.com/smsapi/send
+  urlN: http://sendcloud.sohu.com/smsapi/sendn
   sms_user: KONGTROLINK
   sms_key: BrTgrtdfTIkqdTLbp0mzxu7wc7FRHErV
   register_template_id: 483
@@ -48,6 +49,7 @@ sms:
 
 #邮件相关配置
 email:
+  url: http://api.sendcloud.net/apiv2/mail/sendtemplate
   api_user: Kongtrolink_test_Fnwqd9
   api_key: h3AGMVPe7ir8siUw
   from_address: zhouj@kongtrolink.com
@@ -56,3 +58,10 @@ email:
       reportTemplateId: power_alarm_templetId
   #消除告警邮件模板
       recoverTemplateId: power_alarm_clearId
+#APP推送相关配置
+jpush:
+  appKey: 6d050a833fa17919b719d02c
+#jpush.masterSecret.yiyi=185e690a9858c0b580e7f0c0
+  masterSecret:  59dbddde70bf61d9e03b2c21
+  # JPush 配置证书版本（开发为 false，产品为 true）
+  production: true

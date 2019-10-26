@@ -323,8 +323,10 @@ public class InformMsg {
             this.operateCode = informRule.getEmailOperaCode();
             this.informAccount = ruleUser.getEmail();
             if(Contant.ONE.equals(flag)){
+                this.tempCode = informRule.getEmailReportCode();
                 this.template = informRule.getEmailReportModel();
             }else{
+                this.tempCode = informRule.getEmailResolveCode();
                 this.template = informRule.getEmailResolveModel();
             }
         }else if(Contant.INFORM_TYPE_APP.equals(type)){
@@ -333,8 +335,10 @@ public class InformMsg {
             this.operateCode = informRule.getAppOperaCode();
             this.informAccount = ruleUser.getAppId();
             if(Contant.ONE.equals(flag)){
+                this.tempCode = informRule.getAppReportCode();
                 this.template = informRule.getAppReportModel();
             }else{
+                this.tempCode = informRule.getAppResolveCode();
                 this.template = informRule.getAppResolveModel();
             }
         }

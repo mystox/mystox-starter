@@ -10,6 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 public class ReqMultipleMessage extends ReqBaseMessage {
 
     private JSONObject tos;
+    public ReqMultipleMessage(String sms_user, String sms_key){
+        super(sms_user, sms_key);
+    }
 
     public JSONObject getTos() {
         return tos;

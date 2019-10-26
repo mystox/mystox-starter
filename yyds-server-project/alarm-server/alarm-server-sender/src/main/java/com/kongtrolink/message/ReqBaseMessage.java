@@ -6,19 +6,19 @@ import com.kongtrolink.utils.CommonUtil;
 /**
  * @auther: liudd
  * @date: 2019/10/26 10:51
- * 功能描述:发送短信实体
+ * 功能描述:
  */
 public class ReqBaseMessage {
-    private String smsUser;
-    private String smsKey;
-    private Integer templateId;
-    private String signature;
-    private String timestamp;
+    protected String smsUser;
+    protected String smsKey;
+    protected Integer templateId;
+    protected String signature;
+    protected String timestamp;
 
 
-    public ReqBaseMessage() {
-        ConfUtil confUtil = ConfUtil.getInstance();
-        smsUser = confUtil.getSmsUser();
+    public ReqBaseMessage(String smsUser, String smsKey) {
+        this.smsUser = smsUser;
+        this.smsKey = smsKey;
         timestamp = CommonUtil.getTimestamp();
     }
 

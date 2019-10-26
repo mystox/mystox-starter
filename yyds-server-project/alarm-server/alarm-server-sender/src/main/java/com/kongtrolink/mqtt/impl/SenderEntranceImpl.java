@@ -1,7 +1,7 @@
 package com.kongtrolink.mqtt.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.app.AppService;
+import com.kongtrolink.service.JpushService;
 import com.kongtrolink.service.EmailService;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.enttiy.InformMsg;
@@ -32,7 +32,7 @@ public class SenderEntranceImpl implements SenderEntrance {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private AppService appService;
+    private JpushService jpushService;
 
     ConcurrentLinkedQueue<InformMsg> informMsgQueue = new ConcurrentLinkedQueue<>();
 
@@ -61,7 +61,7 @@ public class SenderEntranceImpl implements SenderEntrance {
         }else if(Contant.TEMPLATE_EMAIL.equals(type)){
             emailService.sendEmail(informMsg);
         }else{
-            appService.sendApp(informMsg);
+            jpushService.pushApp(informMsg);
         }
         handleInformMsg();
     }

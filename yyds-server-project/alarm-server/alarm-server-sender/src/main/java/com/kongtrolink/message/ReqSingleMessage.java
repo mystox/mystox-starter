@@ -12,6 +12,9 @@ public class ReqSingleMessage extends ReqBaseMessage {
     private String phone;
     private JSONObject vars;//替换变量的json串
 
+    public ReqSingleMessage(String sms_user, String sms_key){
+        super(sms_user, sms_key);
+    }
 
     public String getPhone() {
         return phone;

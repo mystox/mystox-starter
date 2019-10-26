@@ -54,7 +54,9 @@ public class InformRule {
     private List<Integer> emailLevelList;     //告警邮件等级列表
     private FacadeView emailTemplate;
     private String emailServerURL;
+    private String emailReportCode;
     private String emailReportModel;
+    private String emailResolveCode;
     private String emailResolveModel;
     private String emailServerVerson;        //服务和版本
     private String emailOperaCode;           //服务操作码(服务码#操作码)
@@ -68,13 +70,47 @@ public class InformRule {
     private List<Integer> appLevelList;      //告警邮件等级列表
     private FacadeView appTemplate;
     private String appServerURL;
+    private String appReportCode;
     private String appReportModel;
+    private String appResolveCode;
     private String appResolveModel;
     private String appServerVerson;        //服务和版本
     private String appOperaCode;
     private Date updateTime;                //修改时间
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
+
+    public String getEmailReportCode() {
+        return emailReportCode;
+    }
+
+    public void setEmailReportCode(String emailReportCode) {
+        this.emailReportCode = emailReportCode;
+    }
+
+    public String getEmailResolveCode() {
+        return emailResolveCode;
+    }
+
+    public void setEmailResolveCode(String emailResolveCode) {
+        this.emailResolveCode = emailResolveCode;
+    }
+
+    public String getAppReportCode() {
+        return appReportCode;
+    }
+
+    public void setAppReportCode(String appReportCode) {
+        this.appReportCode = appReportCode;
+    }
+
+    public String getAppResolveCode() {
+        return appResolveCode;
+    }
+
+    public void setAppResolveCode(String appResolveCode) {
+        this.appResolveCode = appResolveCode;
+    }
 
     public String getAppServerVerson() {
         return appServerVerson;

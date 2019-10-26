@@ -5,7 +5,6 @@ package com.kongtrolink.message;
  */
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.email.ConfUtil;
 import com.kongtrolink.utils.CommonUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -23,10 +22,8 @@ public class SmsUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmsUtil.class);
 
     public static <T extends ReqBaseMessage> String createSignature(T reqMessage) {
-
         try {
-            ConfUtil confUtil = ConfUtil.getInstance();
-            String smsKey = confUtil.getSmsKey();
+            String smsKey = reqMessage.getSmsKey();
             Class cls = Class.forName(reqMessage.toString().split("@")[0]);//加载类
             Field[] fields = cls.getDeclaredFields();
             HashMap<String, String> map = new HashMap<>();

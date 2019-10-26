@@ -45,24 +45,15 @@ public class EmailService {
         ApiMailInfo apiMailInfo = new ApiMailInfo(email_api_user, email_api_key, email_from_address, email_from_name);
         apiMailInfo.setSubject(enterpriseServer  + typeName + Contant.INFORM);
         apiMailInfo.setXsmtpapi(xsmtpapi);
-        String url = informMsg.getUrl();
-        if(!StringUtil.isNUll(url)){
-            url = "http://api.sendcloud.net/apiv2/mail/sendtemplate";
-        }
-        apiMailInfo.setUrl(url);
+        apiMailInfo.setUrl(informMsg.getUrl());
         String tempCode = informMsg.getTempCode();
         apiMailInfo.setTemplateInvokeName(tempCode);
-//        if(Contant.ALARM_STATE_REPORT.equals(typeName)){
-//            apiMailInfo.setTemplateInvokeName(EMAIL_ALARM_REPORT_TEMPLATE_ID);
-//        }else{
-//            apiMailInfo.setTemplateInvokeName(EMAIL_ALARM_RECOVER_TEMPLATE_ID);
-//        }
         apiMailInfo.setFrom_name(enterpriseServer);
         Boolean result = false;
         LOGGER.info(apiMailInfo.toString());
         try {
-            result = SendMail.sendByJavaWebApi(apiMailInfo);
             LOGGER.info("email sending result {}", result);
+            result = SendMail.sendByJavaWebApi(apiMailInfo);
         } catch (IOException ex) {
             LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
         }
@@ -78,13 +69,6 @@ public class EmailService {
         JSONArray tier = new JSONArray();
         tier.add(informMsg.getAddressName());
 
-//        JSONArray site = new JSONArray();
-//        String siteNaem = enterprise.getName();
-//        if(null != alarm.getSite()){
-//            siteNaem = alarm.getSite().getName();
-//        }
-//        site.add(siteNaem);
-
         JSONArray device = new JSONArray();
         device.add(informMsg.getDeviceName());
 
@@ -93,10 +77,7 @@ public class EmailService {
 
         JSONObject sub = new JSONObject();
         sub.put("%tier%", tier);
-//        sub.put("%site%", site);
-        sub.put("%device%", device);
         sub.put("%alarmName%", alarmName);
-
         JSONObject ret = new JSONObject();
         ret.put("to", sendTo);
         ret.put("sub", sub);
