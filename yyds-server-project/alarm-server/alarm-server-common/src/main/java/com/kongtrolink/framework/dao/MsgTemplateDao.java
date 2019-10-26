@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
@@ -7,6 +8,7 @@ import com.kongtrolink.framework.enttiy.MsgTemplate;
 import com.kongtrolink.framework.query.MsgTemplateQuery;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -65,6 +67,8 @@ public class MsgTemplateDao {
         int currentPage = msgTemplateQuery.getCurrentPage();
         int pageSize = msgTemplateQuery.getPageSize();
         query.skip( (currentPage-1)*pageSize ).limit(pageSize);
+        query.with(new Sort(Sort.Direction.ASC, "enterpriseCode"));
+        query.with(new Sort(Sort.Direction.DESC, "updateTime"));
         return mongoTemplate.find(query, MsgTemplate.class, table);
     }
 
@@ -123,5 +127,17 @@ public class MsgTemplateDao {
         criteria.and("name").is(name);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, MsgTemplate.class, table);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/26 16:03
+     * 功能描述:获取系统默认模板
+     */
+    public MsgTemplate getSystemTemplate(String type){
+        Criteria criteria = Criteria.where("templateType").is(Contant.SYSTEM);
+        criteria.and("type").is(type);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, MsgTemplate.class, MongTable.MSG_TEMPLATE);
     }
 }

@@ -19,8 +19,8 @@ public class ExecutorConfig
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "sendExecutor")
-    public ThreadPoolTaskExecutor taskExecutor(){
+    @Bean(name = "deliverExecutor")
+    public ThreadPoolTaskExecutor deliverExecutor(){
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);

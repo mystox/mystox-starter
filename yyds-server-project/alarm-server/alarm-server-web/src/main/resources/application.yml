@@ -27,5 +27,37 @@ unique:
       defaulg: serverCode1.operaCode1
       opera2: serverCode2.operaCode2
 
-# resources:
-#      static-locations:["/templates/","/static/"]
+#默认sms短信相关配置
+sms:
+  enable: ture
+  url: http://sendcloud.sohu.com/smsapi/send
+  urlN: http://sendcloud.sohu.com/smsapi/sendn
+  sms_user: KONGTROLINK
+  sms_key: BrTgrtdfTIkqdTLbp0mzxu7wc7FRHErV
+  alarm:
+    reportTemplateId: 1144
+  # 告警消除提示模板 id
+    recoverTemplateId: 2573
+
+##默认相关配置
+email:
+  url: http://api.sendcloud.net/apiv2/mail/sendtemplate
+  api_user: Kongtrolink_test_Fnwqd9
+  api_key: h3AGMVPe7ir8siUw
+  from_address: zhouj@kongtrolink.com
+  from_name: yytd
+  alarm:
+      reportTemplateId: power_alarm_templetId
+  #消除告警邮件模板
+      recoverTemplateId: power_alarm_clearId
+
+#默认APP推送相关配置
+jpush:
+  appKey: 6d050a833fa17919b719d02c
+#jpush.masterSecret.yiyi=185e690a9858c0b580e7f0c0
+  masterSecret:  59dbddde70bf61d9e03b2c21
+  # JPush 配置证书版本（开发为 false，产品为 true）
+  production: true
+  alarm:
+    reportTemplateId: 101
+    recoverTemplateId: 102

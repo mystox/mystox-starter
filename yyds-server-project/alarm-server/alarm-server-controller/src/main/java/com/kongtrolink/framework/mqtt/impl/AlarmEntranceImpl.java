@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -28,7 +29,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     private String currentAlarmTable = MongTable.ALARM_CURRENT;
     private String historyAlarmTable = MongTable.ALARM_HISTORY;
     private static ConcurrentLinkedQueue<JSONObject> recoverAndAuxilaryAlarmQueue = new ConcurrentLinkedQueue<>();
-    @Autowired
+    @Resource(name = "controllerExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired

@@ -186,8 +186,7 @@ public class MsgTemplate {
     @Override
     public String toString() {
         return "MsgTemplate{" +
-                "_id='" + _id + '\'' +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", enterpriseCode='" + enterpriseCode + '\'' +
                 ", enterpriseName='" + enterpriseName + '\'' +
                 ", serverCode='" + serverCode + '\'' +
@@ -198,13 +197,9 @@ public class MsgTemplate {
                 ", serverVerson='" + serverVerson + '\'' +
                 ", operaCode='" + operaCode + '\'' +
                 ", reportCode='" + reportCode + '\'' +
-                ", reportModel='" + reportModel + '\'' +
                 ", resolveCode='" + resolveCode + '\'' +
-                ", resolveModel='" + resolveModel + '\'' +
                 ", offlineCode='" + offlineCode + '\'' +
-                ", offlineModel='" + offlineModel + '\'' +
                 ", operator=" + operator +
-                ", updateTime=" + updateTime +
                 '}';
     }
 }

@@ -25,4 +25,11 @@ public interface MsgTemplateService {
     int count(MsgTemplateQuery msgTemplateQuery);
 
     MsgTemplate getByName(String enterpriseCode, String serverCode, String name);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/26 16:23
+     * 功能描述:系统启动时初始化默认模板
+     */
+    void initMsgTemplate();
 }

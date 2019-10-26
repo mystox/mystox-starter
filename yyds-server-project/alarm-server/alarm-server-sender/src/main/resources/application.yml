@@ -34,7 +34,6 @@ cycle:
 
 #sms短信相关配置
 sms:
-  enable: ture
   url: http://sendcloud.sohu.com/smsapi/send
   urlN: http://sendcloud.sohu.com/smsapi/sendn
   sms_user: KONGTROLINK
@@ -42,10 +41,9 @@ sms:
   register_template_id: 483
   findpsw_template_id: 482
   alarm:
-    reportTemplateId: 1144
+      reportTemplateId: 1144
   # 告警消除提示模板 id
-  alarm:
-    recoverTemplateId: 2573
+      recoverTemplateId: 2573
 
 #邮件相关配置
 email:
