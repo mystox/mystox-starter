@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
+import com.kongtrolink.framework.base.StringUtil;
 
 import java.util.Date;
 
@@ -16,8 +18,10 @@ public class MsgTemplate {
     private String enterpriseName;      //企业名称
     private String serverCode;          //服务编码
     private String serverName;          //服务名称
+    private String templateType;        //模板类型（系统/手动）
     private String type;                //消息类型（短信，邮件，APP）
     private String url;                 //接口地址
+    private String serverVerson;        //服务和版本
     private String operaCode;           //服务操作码(服务码#操作码)
     private String reportCode;          //告警上报编码
     private String reportModel;         //告警上报模板
@@ -27,6 +31,22 @@ public class MsgTemplate {
     private String offlineModel;        //fsu离线模板
     private FacadeView operator;
     private Date updateTime;
+
+    public String getServerVerson() {
+        return serverVerson;
+    }
+
+    public void setServerVerson(String serverVerson) {
+        this.serverVerson = serverVerson;
+    }
+
+    public String getTemplateType() {
+        return templateType;
+    }
+
+    public void setTemplateType(String templateType) {
+        this.templateType = templateType;
+    }
 
     public String getOperaCode() {
         return operaCode;
@@ -161,5 +181,30 @@ public class MsgTemplate {
 
     public void setOfflineModel(String offlineModel) {
         this.offlineModel = offlineModel;
+    }
+
+    @Override
+    public String toString() {
+        return "MsgTemplate{" +
+                "_id='" + _id + '\'' +
+                ", name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", templateType='" + templateType + '\'' +
+                ", type='" + type + '\'' +
+                ", url='" + url + '\'' +
+                ", serverVerson='" + serverVerson + '\'' +
+                ", operaCode='" + operaCode + '\'' +
+                ", reportCode='" + reportCode + '\'' +
+                ", reportModel='" + reportModel + '\'' +
+                ", resolveCode='" + resolveCode + '\'' +
+                ", resolveModel='" + resolveModel + '\'' +
+                ", offlineCode='" + offlineCode + '\'' +
+                ", offlineModel='" + offlineModel + '\'' +
+                ", operator=" + operator +
+                ", updateTime=" + updateTime +
+                '}';
     }
 }

@@ -1,8 +1,6 @@
 package com.kongtrolink.framework.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.InformRule;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +35,7 @@ public class MsgTemplateController {
     public JsonResult add(@RequestBody MsgTemplate msgTemplate){
         msgTemplate.setUpdateTime(new Date());
         String name = msgTemplate.getName();
+        msgTemplate.setTemplateType(Contant.MANUAL);
         MsgTemplate byName = templateService.getByName(msgTemplate.getEnterpriseCode(), msgTemplate.getServerCode(), name);
         if(null != byName){
             return new JsonResult(Contant.OPE_ADD  + Contant.RESULT_FAIL+", 模板名称：" + name + "已存在", false);
@@ -71,6 +69,7 @@ public class MsgTemplateController {
     @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(@RequestBody MsgTemplate msgTemplate){
+        msgTemplate.setTemplateType(Contant.MANUAL);
         MsgTemplate byName = templateService.getByName(msgTemplate.getEnterpriseCode(), msgTemplate.getServerCode(), msgTemplate.getName());
         if(null != byName && !byName.get_id().equals(msgTemplate.get_id())){
             return new JsonResult(Contant.OPE_UPDATE  + Contant.RESULT_FAIL+", 模板名称：" + msgTemplate.getName() + "已存在", false);

@@ -58,6 +58,10 @@ public class DateUtil {
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    public static String format(Date date){
+        return simpleDateFormat.format(date);
+    }
+
     public static void main(String[] a){
         Date curTime = new Date();
         String format = simpleDateFormat.format(curTime);

@@ -76,38 +76,44 @@ public class MsgTemplateDao {
     }
 
     private Criteria baseCriteria(Criteria criteria , MsgTemplateQuery msgTemplateQuery){
+
+        Criteria enterpriseCri = new Criteria();
+
         String id = msgTemplateQuery.get_id();
         if(!StringUtil.isNUll(id)){
-            criteria.and("_id").is(id);
+            enterpriseCri.and("_id").is(id);
         }
         String name = msgTemplateQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoUtil.escapeExprSpecialWord(name);
-            criteria.and("name").regex(".*?" + name + ".*?");
+            enterpriseCri.and("name").regex(".*?" + name + ".*?");
         }
         String enterpriseCode = msgTemplateQuery.getEnterpriseCode();
         if(!StringUtil.isNUll(enterpriseCode)){
-            criteria.and("enterpriseCode").is(enterpriseCode);
+            enterpriseCri.and("enterpriseCode").is(enterpriseCode);
         }
         String enterpriseName = msgTemplateQuery.getEnterpriseName();
         if(!StringUtil.isNUll(enterpriseName)){
             enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
-            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+            enterpriseCri.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
         }
         String serverCode = msgTemplateQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
-            criteria.and("serverCode").is(serverCode);
+            enterpriseCri.and("serverCode").is(serverCode);
         }
         String serverName = msgTemplateQuery.getServerName();
         if(!StringUtil.isNUll(serverName)){
             serverName = MongoUtil.escapeExprSpecialWord(serverName);
-            criteria.and("serverName").regex(".*?" + serverName + ".*?");
+            enterpriseCri.and("serverName").regex(".*?" + serverName + ".*?");
         }
         String type = msgTemplateQuery.getType();
         if(!StringUtil.isNUll(type)){
-            criteria.and("type").is(type);
+            enterpriseCri.and("type").is(type);
         }
         //liuddtodo 可能需要根据一个编码，同时对上报告警，告警消除，离线的编码做模糊查询
+        //兼容默认规则
+        Criteria defalutCri = Criteria.where("enterpriseCode").exists(false);
+        criteria.orOperator(enterpriseCri, defalutCri);
         return criteria;
     }
 

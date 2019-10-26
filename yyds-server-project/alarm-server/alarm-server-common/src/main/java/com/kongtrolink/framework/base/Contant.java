@@ -68,4 +68,5 @@ public class Contant {
     public static String ALARM_STATE_REPORT = "告警上报";
     public static String ALARM_STATE_RECOVER = "告警消除";
     public static String ALARM_STATE_FSUOFFLINE = "FSU离线告警";
+    public static String INFORM = "通知";
 }

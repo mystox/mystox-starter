@@ -14,7 +14,9 @@ public class InformMsg {
 
     private String _id;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private String type;                //类型（短信，邮件，APP）
     private String url;
     private String levelName;
@@ -40,6 +42,40 @@ public class InformMsg {
     private int count;                  //重复次数
     private int currentTime;            //当前次数
     private String alarmStateType;           //告警类型（告警产生，告警消除，FSU离线告警）
+    private String informAccount;       //通知账号（电话号码/邮件/APP账号）
+    private boolean result;             //发送结果
+
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getInformAccount() {
+        return informAccount;
+    }
+
+    public void setInformAccount(String informAccount) {
+        this.informAccount = informAccount;
+    }
 
     public String getSignalId() {
         return signalId;
@@ -251,7 +287,9 @@ public class InformMsg {
 
     public InformMsg initAlarmInfo(Alarm alarm, InformRule informRule, InformRuleUser ruleUser, String type, Date date){
         this.setEnterpriseCode(informRule.getEnterpriseCode());
+        this.enterpriseName = informRule.getEnterpriseName();
         this.setServerCode(informRule.getServerCode());
+        this.serverName = informRule.getServerName();
         this.setType(type);
         //保存模板编码和模板
         String flag = alarm.getFlag();
@@ -264,12 +302,9 @@ public class InformMsg {
         }
         if(Contant.INFORM_TYPE_MSG.equals(type)){
             this.url = informRule.getMsgServerURL();
-            String msgOperaCode = informRule.getMsgOperaCode();
-            if(!StringUtil.isNUll(msgOperaCode)){
-                this.uniqueCode = msgOperaCode.split(Contant.UNDERLINE)[0];
-                this.operateCode = msgOperaCode.split(Contant.UNDERLINE)[1];
-            }
-
+            this.uniqueCode = informRule.getMsgServerVerson();
+            this.operateCode = informRule.getMsgOperaCode();
+            this.informAccount = ruleUser.getPhone();
             if(Contant.ONE.equals(flag)){
                 this.tempCode = informRule.getMsgReportCode();
                 this.template = informRule.getMsgReportModel();
@@ -284,12 +319,9 @@ public class InformMsg {
             }
         }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
             this.url = informRule.getEmailServerURL();
-
-            String emailOperaCode = informRule.getEmailOperaCode();
-            if(!StringUtil.isNUll(emailOperaCode)){
-                this.uniqueCode = emailOperaCode.split(Contant.UNDERLINE)[0];
-                this.operateCode = emailOperaCode.split(Contant.UNDERLINE)[1];
-            }
+            this.uniqueCode = informRule.getEmailServerVerson();
+            this.operateCode = informRule.getEmailOperaCode();
+            this.informAccount = ruleUser.getEmail();
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getEmailReportModel();
             }else{
@@ -297,11 +329,9 @@ public class InformMsg {
             }
         }else if(Contant.INFORM_TYPE_APP.equals(type)){
             this.url = informRule.getAppServerURL();
-            String appOperaCode = informRule.getAppOperaCode();
-            if(!StringUtil.isNUll(appOperaCode)){
-                this.uniqueCode = appOperaCode.split(Contant.UNDERLINE)[0];
-                this.operateCode = appOperaCode.split(Contant.UNDERLINE)[1];
-            }
+            this.uniqueCode = informRule.getAppServerVerson();
+            this.operateCode = informRule.getAppOperaCode();
+            this.informAccount = ruleUser.getAppId();
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getAppReportModel();
             }else{

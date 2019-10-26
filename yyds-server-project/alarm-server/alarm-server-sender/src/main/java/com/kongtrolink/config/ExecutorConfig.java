@@ -19,7 +19,7 @@ public class ExecutorConfig
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "controllerExecutor")
+    @Bean(name = "senderExecutor")
     public ThreadPoolTaskExecutor taskExecutor(){
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量

@@ -42,7 +42,8 @@ public class InformRule {
     private String msgResolveModel;
     private String fsuOfflineCode;
     private String fsuOfflineModel;
-    private String MsgOperaCode;
+    private String msgServerVerson;        //服务和版本
+    private String msgOperaCode;           //服务操作码(服务码#操作码)
 
     private String emailEnable;               //告警邮件是否启用
     private String emailBeginTime;            //告警邮件开始时间
@@ -55,7 +56,8 @@ public class InformRule {
     private String emailServerURL;
     private String emailReportModel;
     private String emailResolveModel;
-    private String emailOperaCode;
+    private String emailServerVerson;        //服务和版本
+    private String emailOperaCode;           //服务操作码(服务码#操作码)
 
     private String appEnable;               //告警邮件是否启用
     private String appBeginTime;            //告警邮件开始时间
@@ -68,10 +70,19 @@ public class InformRule {
     private String appServerURL;
     private String appReportModel;
     private String appResolveModel;
+    private String appServerVerson;        //服务和版本
     private String appOperaCode;
     private Date updateTime;                //修改时间
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
+
+    public String getAppServerVerson() {
+        return appServerVerson;
+    }
+
+    public void setAppServerVerson(String appServerVerson) {
+        this.appServerVerson = appServerVerson;
+    }
 
     public FacadeView getMsgTemplate() {
         return msgTemplate;
@@ -95,14 +106,6 @@ public class InformRule {
 
     public void setAppTemplate(FacadeView appTemplate) {
         this.appTemplate = appTemplate;
-    }
-
-    public String getMsgOperaCode() {
-        return MsgOperaCode;
-    }
-
-    public void setMsgOperaCode(String msgOperaCode) {
-        MsgOperaCode = msgOperaCode;
     }
 
     public String getEmailOperaCode() {
@@ -497,6 +500,30 @@ public class InformRule {
         this.appResolveModel = appResolveModel;
     }
 
+    public String getMsgServerVerson() {
+        return msgServerVerson;
+    }
+
+    public void setMsgServerVerson(String msgServerVerson) {
+        this.msgServerVerson = msgServerVerson;
+    }
+
+    public String getMsgOperaCode() {
+        return msgOperaCode;
+    }
+
+    public void setMsgOperaCode(String msgOperaCode) {
+        this.msgOperaCode = msgOperaCode;
+    }
+
+    public String getEmailServerVerson() {
+        return emailServerVerson;
+    }
+
+    public void setEmailServerVerson(String emailServerVerson) {
+        this.emailServerVerson = emailServerVerson;
+    }
+
     /**
      * @auther: liudd
      * @date: 2018/7/3 18:42
@@ -532,14 +559,17 @@ public class InformRule {
             this.setMsgResolveModel(msgTemplate.getResolveModel());
             this.setFsuOfflineCode(msgTemplate.getOfflineCode());
             this.setFsuOfflineModel(msgTemplate.getOfflineModel());
+            this.msgServerVerson = msgTemplate.getServerVerson();
             this.setMsgOperaCode(msgTemplate.getOperaCode());
         }else if(Contant.TEMPLATE_EMAIL.equals(type)){
             this.setEmailReportModel(msgTemplate.getReportModel());
             this.setEmailResolveModel(msgTemplate.getResolveModel());
+            this.emailServerVerson = msgTemplate.getServerVerson();
             this.setEmailOperaCode(msgTemplate.getOperaCode());
         }else{
             this.setAppReportModel(msgTemplate.getReportModel());
             this.setAppResolveModel(msgTemplate.getResolveModel());
+            this.appServerVerson = msgTemplate.getServerVerson();
             this.setAppOperaCode(msgTemplate.getOperaCode());
         }
     }
