@@ -532,12 +532,15 @@ public class InformRule {
             this.setMsgResolveModel(msgTemplate.getResolveModel());
             this.setFsuOfflineCode(msgTemplate.getOfflineCode());
             this.setFsuOfflineModel(msgTemplate.getOfflineModel());
+            this.setMsgOperaCode(msgTemplate.getOperaCode());
         }else if(Contant.TEMPLATE_EMAIL.equals(type)){
             this.setEmailReportModel(msgTemplate.getReportModel());
             this.setEmailResolveModel(msgTemplate.getResolveModel());
+            this.setEmailOperaCode(msgTemplate.getOperaCode());
         }else{
             this.setAppReportModel(msgTemplate.getReportModel());
             this.setAppResolveModel(msgTemplate.getResolveModel());
+            this.setAppOperaCode(msgTemplate.getOperaCode());
         }
     }
 }

@@ -3,6 +3,7 @@ package com.kongtrolink.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.dao.InformMsgDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.AddressInfoRequest;
@@ -36,7 +37,7 @@ public class AlarmDeliverService {
     @Autowired
     MqttSender mqttSender;
     @Autowired
-    SendService sendService;
+    InformMsgDao informMsgDao;
 
     @Value("${deliver.count:300}")
     private int count;
@@ -96,61 +97,99 @@ public class AlarmDeliverService {
             if(null == informMsgList){
                 return ;
             }
-            //1，根据设备id，将通知信息分类，获取设备名称和地区编码
-            Map<String, List<InformMsg>> deviceId_InformMsgListMap = new HashMap<>();
-            List<String> deviceIdList = new ArrayList<>();
-            for(InformMsg informMsg : informMsgList){
-                String deviceId = informMsg.getDeviceId();
-                if(!deviceIdList.contains(deviceId)){
-                    deviceIdList.add(deviceId);
-                }
-                List<InformMsg> msgList = deviceId_InformMsgListMap.get(deviceId);
-                if(null == msgList){
-                    msgList = new ArrayList<>();
-                }
-                msgList.add(informMsg);
-                deviceId_InformMsgListMap.put(deviceId, msgList);
-            }
-            CIRequestEntity requestEntity = new CIRequestEntity();
-            requestEntity.setIds(deviceIdList);
-            //liuddtodo 需要捕捉超时异常
-            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
-            String msg = msgResult.getMsg();
-            CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
-            Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
+            List<InformMsg> fullInformList = new ArrayList<>();
             List<String> addressList = new ArrayList<>();
-            for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
-                //告警上报中的deviceId，等于资产的sn，业务+服务内唯一
-                deviceId_jsonObjMap.put(jsonObject.getString("sn"), jsonObject);
-                String address = jsonObject.getString("address");
-                if(!addressList.contains(address)){
-                    addressList.add(address);
-                }
+            fullDeviceInfo(informMsgList, fullInformList, addressList);
+            informMsgList = null;
+            if(fullInformList.size() == 0){
+                return ;
             }
-            //填充设备编码信息
-            for(InformMsg informMsg : informMsgList){
-                String deviceId = informMsg.getDeviceId();
-                JSONObject jsonObject = deviceId_jsonObjMap.get(deviceId);
-                if(null == jsonObject){
-                    //该设备没有获取到设备信息，记录异常，不发送消息
-                    continue;
-                }
-                informMsg.setDeviceName(jsonObject.getString("name"));
-                informMsg.setAddress(jsonObject.getString("address"));
 
+            //填充地区名称，以及判定用户权限
+            List<InformMsg> realInformList = new ArrayList<>();     //最终实际需要发送的通知
+            initAddressInfo(fullInformList, realInformList, addressList);
 
+            //调用投递动作接口。
+            for(InformMsg informMsg : realInformList){
+                mqttSender.sendToMqtt(informMsg.getUniqueCode(), informMsg.getOperateCode(), JSONObject.toJSONString(informMsg));
             }
-            //2，从云管获取设备信息
-            AddressInfoRequest addressInfoRequest = new AddressInfoRequest();
-            addressInfoRequest.setAddressList(addressList);
-            MsgResult addInfoResult = mqttSender.sendToMqttSyn(yunguanServer, getAddressInfo, JSONObject.toJSONString(addressInfoRequest));
-            String addInfoResultMsg = addInfoResult.getMsg();
-            //liuddtodo 需要判定是否成功，并捕捉超时异常
-            List<JSONObject> jsonObjectList = JSON.parseArray(addInfoResultMsg, JSONObject.class);
-
-
         }
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/10/25 14:51
+     * 功能描述:填充设备地址信息或其他设备信息
+     */
+    private void fullDeviceInfo(List<InformMsg> informMsgList, List<InformMsg> fullInformList, List<String> addressList){
+        //未获取到设备信息的通知规则
+        List<InformMsg> noFullInformList = new ArrayList<>();
+        //1，根据设备id，将通知信息分类，获取设备名称和地区编码
+        Map<String, List<InformMsg>> deviceId_InformMsgListMap = new HashMap<>();
+        List<String> deviceIdList = new ArrayList<>();
+        for(InformMsg informMsg : informMsgList){
+            String enterpriseCode = informMsg.getEnterpriseCode();
+            String serverCode = informMsg.getServerCode();
+            String deviceId = informMsg.getDeviceId();
+            String key = enterpriseCode + serverCode + deviceId;
+            if(!deviceIdList.contains(deviceId)){
+                deviceIdList.add(deviceId);
+            }
 
+            List<InformMsg> msgList = deviceId_InformMsgListMap.get(key);
+            if(null == msgList){
+                msgList = new ArrayList<>();
+            }
+            msgList.add(informMsg);
+            deviceId_InformMsgListMap.put(key, msgList);
+        }
+
+        //从资产管理获取设备信息
+        CIRequestEntity requestEntity = new CIRequestEntity();
+        requestEntity.setIds(deviceIdList);
+        //liuddtodo 需要捕捉超时异常
+        MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
+        String msg = msgResult.getMsg();
+        CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
+        for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
+            //告警上报中的deviceId，等于资产的sn，业务+服务内唯一
+            String enterpriseCode = jsonObject.getString("enterpriseCode");
+            String serverCode = jsonObject.getString("serverCode");
+            String sn = jsonObject.getString("sn");
+            String key = enterpriseCode + serverCode + sn;
+            String address = jsonObject.getString("address");
+            if(!addressList.contains(address)){
+                addressList.add(address);
+            }
+            List<InformMsg> informMsgs = deviceId_InformMsgListMap.get(key);
+            if(null != informMsgs) {
+                for (InformMsg informMsg : informMsgs) {
+                    informMsg.setAddress(address);
+                }
+            }
+            fullInformList.addAll(informMsgs);
+            deviceId_InformMsgListMap.remove(key);
+        }
+        for(String key : deviceId_InformMsgListMap.keySet()){
+            noFullInformList.addAll(deviceId_InformMsgListMap.get(key));
+        }
+        //保存
+        informMsgDao.save(noFullInformList);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/25 15:36
+     * 功能描述:从云管获取地区名称和用户权限
+     * 这里可能有两个接口，分别获取地区名称和管理权限用户id列表
+     */
+    private void initAddressInfo(List<InformMsg> fullInformList, List<InformMsg> realInformList,List<String> addressList){
+        AddressInfoRequest addressInfoRequest = new AddressInfoRequest();
+        addressInfoRequest.setAddressList(addressList);
+        MsgResult addInfoResult = mqttSender.sendToMqttSyn(yunguanServer, getAddressInfo, JSONObject.toJSONString(addressInfoRequest));
+        String addInfoResultMsg = addInfoResult.getMsg();
+        //liuddtodo 需要判定是否成功，并捕捉超时异常
+        List<JSONObject> jsonObjectList = JSON.parseArray(addInfoResultMsg, JSONObject.class);
+
+    }
 }

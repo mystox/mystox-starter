@@ -18,6 +18,7 @@ public class MsgTemplate {
     private String serverName;          //服务名称
     private String type;                //消息类型（短信，邮件，APP）
     private String url;                 //接口地址
+    private String operaCode;           //服务操作码(服务码#操作码)
     private String reportCode;          //告警上报编码
     private String reportModel;         //告警上报模板
     private String resolveCode;         //告警消除编码
@@ -26,6 +27,14 @@ public class MsgTemplate {
     private String offlineModel;        //fsu离线模板
     private FacadeView operator;
     private Date updateTime;
+
+    public String getOperaCode() {
+        return operaCode;
+    }
+
+    public void setOperaCode(String operaCode) {
+        this.operaCode = operaCode;
+    }
 
     public Date getUpdateTime() {
         return updateTime;

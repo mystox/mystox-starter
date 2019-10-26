@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.StringUtil;
 
 import java.util.Date;
 
@@ -26,16 +27,35 @@ public class InformMsg {
     private String addressName;
     private String userId;
     private String username;
+    private String signalId;            //信号点id
+    private String serial;              //告警id
 
     private String tempCode;            //模板编码（短信通知中产生）
     private String template;            //消息模板
-    private String operaCode;           //调用投递模块的操作码（服务#操作码）
+    private String uniqueCode;      //调用投递模块服务编码
+    private String operateCode;          //调用投递模块的操作码
 
     private String msg;                 //投递内容，在最终的投递动作模块生成
     private Date date;
     private int count;                  //重复次数
     private int currentTime;            //当前次数
     private String alarmStateType;           //告警类型（告警产生，告警消除，FSU离线告警）
+
+    public String getSignalId() {
+        return signalId;
+    }
+
+    public void setSignalId(String signalId) {
+        this.signalId = signalId;
+    }
+
+    public String getSerial() {
+        return serial;
+    }
+
+    public void setSerial(String serial) {
+        this.serial = serial;
+    }
 
     public String getUserId() {
         return userId;
@@ -69,12 +89,12 @@ public class InformMsg {
         this.addressName = addressName;
     }
 
-    public String getOperaCode() {
-        return operaCode;
+    public String getOperateCode() {
+        return operateCode;
     }
 
-    public void setOperaCode(String operaCode) {
-        this.operaCode = operaCode;
+    public void setOperateCode(String operateCode) {
+        this.operateCode = operateCode;
     }
 
     public String getTempCode() {
@@ -221,6 +241,14 @@ public class InformMsg {
         this.msg = msg;
     }
 
+    public String getUniqueCode() {
+        return uniqueCode;
+    }
+
+    public void setUniqueCode(String uniqueCode) {
+        this.uniqueCode = uniqueCode;
+    }
+
     public InformMsg initAlarmInfo(Alarm alarm, InformRule informRule, InformRuleUser ruleUser, String type, Date date){
         this.setEnterpriseCode(informRule.getEnterpriseCode());
         this.setServerCode(informRule.getServerCode());
@@ -236,7 +264,12 @@ public class InformMsg {
         }
         if(Contant.INFORM_TYPE_MSG.equals(type)){
             this.url = informRule.getMsgServerURL();
-            this.operaCode = informRule.getMsgOperaCode();
+            String msgOperaCode = informRule.getMsgOperaCode();
+            if(!StringUtil.isNUll(msgOperaCode)){
+                this.uniqueCode = msgOperaCode.split(Contant.UNDERLINE)[0];
+                this.operateCode = msgOperaCode.split(Contant.UNDERLINE)[1];
+            }
+
             if(Contant.ONE.equals(flag)){
                 this.tempCode = informRule.getMsgReportCode();
                 this.template = informRule.getMsgReportModel();
@@ -251,7 +284,12 @@ public class InformMsg {
             }
         }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
             this.url = informRule.getEmailServerURL();
-            this.operaCode = informRule.getEmailOperaCode();
+
+            String emailOperaCode = informRule.getEmailOperaCode();
+            if(!StringUtil.isNUll(emailOperaCode)){
+                this.uniqueCode = emailOperaCode.split(Contant.UNDERLINE)[0];
+                this.operateCode = emailOperaCode.split(Contant.UNDERLINE)[1];
+            }
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getEmailReportModel();
             }else{
@@ -259,7 +297,11 @@ public class InformMsg {
             }
         }else if(Contant.INFORM_TYPE_APP.equals(type)){
             this.url = informRule.getAppServerURL();
-            this.operaCode = informRule.getAppOperaCode();
+            String appOperaCode = informRule.getAppOperaCode();
+            if(!StringUtil.isNUll(appOperaCode)){
+                this.uniqueCode = appOperaCode.split(Contant.UNDERLINE)[0];
+                this.operateCode = appOperaCode.split(Contant.UNDERLINE)[1];
+            }
             if(Contant.ONE.equals(flag)){
                 this.template = informRule.getAppReportModel();
             }else{
@@ -275,6 +317,8 @@ public class InformMsg {
         this.setDeviceId(alarm.getDeviceId());
         this.setCount(informRule.getCount());
         this.date = date;
+        this.signalId = alarm.getSignalId();
+        this.serial = alarm.getSerial();
         return this;
     }
 }
