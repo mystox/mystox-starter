@@ -27,9 +27,6 @@ public interface EnterpriseLevelService {
 
     int count(EnterpriseLevelQuery levelQuery);
 
-    EnterpriseLevel getOne(EnterpriseLevelQuery levelQuery);
-
-
     boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery);
 
     /**
@@ -39,8 +36,6 @@ public interface EnterpriseLevelService {
      */
     List<EnterpriseLevel> getLastUse(String enterpriseCode, String serverCode);
 
-    List<EnterpriseLevel> getDefault();
-
     void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode);
 
     /**
@@ -49,4 +44,11 @@ public interface EnterpriseLevelService {
      * 功能描述:禁用原来的告警等级
      */
     boolean forbitBefor(String enterpriseCode, String serverCode, Date updateTime);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/28 14:27
+     * 功能描述:初始化默认企业告警等级
+     */
+    void initEnterpriseLevel();
 }

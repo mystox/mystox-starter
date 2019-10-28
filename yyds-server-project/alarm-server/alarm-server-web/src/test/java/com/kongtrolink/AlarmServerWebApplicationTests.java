@@ -1,8 +1,10 @@
 package com.kongtrolink;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
+import jdk.nashorn.internal.ir.EmptyNode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
+import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -20,13 +23,17 @@ public class AlarmServerWebApplicationTests {
 	MongoTemplate mongoTemplate;
 	@Test
 	public void contextLoads() {
-
+		Date curDate = new Date();
 		EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
-		enterpriseLevel.setName("默认企业告警等级");
-//		enterpriseLevel.setLevels(Arrays.asList(1, 2, "三", "四", "五", "六", "七", "八"));
-		enterpriseLevel.setLevelNames(Arrays.asList("一级告警", "二级告警", "三级告警", "四级告警", "五级告警", "六级告警", "七级告警", "八级告警"));
-		enterpriseLevel.setColors(Arrays.asList("#993838", "#993838", "#993838", "#993838", "#993838", "#993838", "#993838", "#993838"));
-		enterpriseLevel.setDefaultLevel(Contant.YES);
+		enterpriseLevel.setId(null);
+		enterpriseLevel.setCode("system_code");
+		enterpriseLevel.setName("系统默认告警等级");
+		int level = 1;
+		enterpriseLevel.setLevel(level);
+		enterpriseLevel.setLevelName(EnumLevelName.getNameByLevel(level));
+		enterpriseLevel.setColor("#DB001B");
+		enterpriseLevel.setUpdateTime(curDate);
+		enterpriseLevel.setState(Contant.USEING);
 		mongoTemplate.save(enterpriseLevel, MongTable.ENTERPRISE_LEVEL);
 	}
 

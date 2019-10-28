@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service.impl;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.dao.EnterpriseLevelDao;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
@@ -8,9 +9,11 @@ import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +31,7 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     AlarmLevelService alarmLevelService;
     @Autowired
     DeviceTypeLevelService typeLevelService;
-
+    private static final Logger logger = LoggerFactory.getLogger(EnterpriseLevelServiceImpl.class);
     @Override
     public void add(EnterpriseLevel enterpriseLevel) {
         List<Integer> levels = enterpriseLevel.getLevels();
@@ -102,11 +105,6 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         return enterpriseLevelDao.count(levelQuery);
     }
 
-    @Override
-    public EnterpriseLevel getOne(EnterpriseLevelQuery levelQuery) {
-        return enterpriseLevelDao.getOne(levelQuery);
-    }
-
 
     /**
      * @auther: liudd
@@ -148,11 +146,6 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     }
 
     @Override
-    public List<EnterpriseLevel> getDefault() {
-        return enterpriseLevelDao.getDefault();
-    }
-
-    @Override
     public void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode) {
         List<DeviceTypeLevel> deviceTypeLevels = typeLevelService.listByEnterpriseInfo(enterpriseCode, serverCode);
         if(null == deviceTypeLevels || deviceTypeLevels.size() == 0){
@@ -173,5 +166,40 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     @Override
     public boolean forbitBefor(String enterpriseCode, String serverCode, Date updateTime) {
         return enterpriseLevelDao.forbitBefor(enterpriseCode, serverCode, updateTime);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/28 14:27
+     * 功能描述:初始化默认企业告警等级
+     */
+    @Override
+    public void initEnterpriseLevel() {
+        //1，获取所有默认告警
+        List<EnterpriseLevel> systemLevel = enterpriseLevelDao.getSystemLevel();
+        if(null == systemLevel || systemLevel.size()<8){
+            logger.info("准备初始化系统默认告警...");
+            //删除所有当前不完整默认告警
+            enterpriseLevelDao.deleteSystemLevel();
+        }else{
+            logger.info("企业告警等级不需要初始化");
+            return ;
+        }
+        Date curDate = new Date();
+        List<EnterpriseLevel> enterpriseLevelList = new ArrayList<>();
+        for(int i=1; i<=8; i++) {
+            EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
+            enterpriseLevel.setId(null);
+            enterpriseLevel.setCode("system_code");
+            enterpriseLevel.setName("系统默认告警等级");
+            enterpriseLevel.setLevel(i);
+            enterpriseLevel.setLevelName(EnumLevelName.getNameByLevel(i));
+            enterpriseLevel.setColor("#DB001B");
+            enterpriseLevel.setUpdateTime(curDate);
+            enterpriseLevelList.add(enterpriseLevel);
+            enterpriseLevel.setLevelType(Contant.SYSTEM);
+            logger.info("默认等级：{}", enterpriseLevel.toString());
+        }
+        enterpriseLevelDao.add(enterpriseLevelList);
     }
 }

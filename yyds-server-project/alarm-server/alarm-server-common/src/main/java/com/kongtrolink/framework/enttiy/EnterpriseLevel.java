@@ -25,7 +25,7 @@ public class EnterpriseLevel {
     private String color;
     private Date updateTime;
     private FacadeView operator;                    //最后操作用户
-    private String defaultLevel;                    //默认告警等级
+    private String levelType;                       //企业告警等级类型（系统/手动）
     private String state;                           //启用，禁用
     //前端展示字段
     private List<Integer> levels;        //等级列表
@@ -128,14 +128,6 @@ public class EnterpriseLevel {
         this.operator = operator;
     }
 
-    public String getDefaultLevel() {
-        return defaultLevel;
-    }
-
-    public void setDefaultLevel(String defaultLevel) {
-        this.defaultLevel = defaultLevel;
-    }
-
     public Date getUpdateTime() {
         return updateTime;
     }
@@ -166,5 +158,31 @@ public class EnterpriseLevel {
 
     public void setServerCode(String serverCode) {
         this.serverCode = serverCode;
+    }
+
+    public String getLevelType() {
+        return levelType;
+    }
+
+    public void setLevelType(String levelType) {
+        this.levelType = levelType;
+    }
+
+    @Override
+    public String toString() {
+        return "EnterpriseLevel{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", level=" + level +
+                ", levelName='" + levelName + '\'' +
+                ", color='" + color + '\'' +
+                ", operator=" + operator +
+                ", levelType='" + levelType + '\'' +
+                ", state='" + state + '\'' +
+                '}';
     }
 }

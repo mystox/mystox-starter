@@ -26,7 +26,6 @@ public class EnterpriseLevelQuery extends Paging{
     private Date beginTime;
     private Date endTime;
     private String operatorName;        //操作用户姓名
-    private String defaultLevel;       //默认告警等级
     private String state;                           //启用，禁用
 
     public String getName() {
@@ -83,14 +82,6 @@ public class EnterpriseLevelQuery extends Paging{
 
     public void setOperatorName(String operatorName) {
         this.operatorName = operatorName;
-    }
-
-    public String getDefaultLevel() {
-        return defaultLevel;
-    }
-
-    public void setDefaultLevel(String defaultLevel) {
-        this.defaultLevel = defaultLevel;
     }
 
     public Date getBeginTime() {
