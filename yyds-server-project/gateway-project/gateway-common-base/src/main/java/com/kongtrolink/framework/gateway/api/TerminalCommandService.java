@@ -19,4 +19,16 @@ public interface TerminalCommandService {
     @OperaCode(code = "setData")
     String setData(String message);
 
+    @OperaCode(code="getDeviceDataModel")
+    String getDeviceDataModel(String message);
+
+    @OperaCode(code="getAlarmParam")
+    String getAlarmParam(String message);
+
+    @OperaCode(code="setAlarmParam")
+    String setAlarmParam(String message);
+
+    @OperaCode(code="getDeviceAlarmModel")
+    String getDeviceAlarmModel(String message);
+
 }
