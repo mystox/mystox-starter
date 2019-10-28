@@ -105,6 +105,9 @@ public class AlarmDeliverService {
                 return ;
             }
 
+            //liuddtodo 从资管根据设备id列表，获取地区编码
+            //liuddtodo 根据地区编码列表，从云管获取各个地区名称
+            //liuddtodo 根据地区编码列表，从云管获取各个地区用户列表（userid,username, phone, email）
             //填充地区名称，以及判定用户权限
             List<InformMsg> realInformList = new ArrayList<>();     //最终实际需要发送的通知
             initAddressInfo(fullInformList, realInformList, addressList);

@@ -96,13 +96,14 @@ public class InformMsgService {
             return msgList;
         }
         List<String> ruleIdList = inform2IdList(informRuleList);
+        //获取对应的用户id
         List<InformRuleUser> ruleUserList = ruleUserDao.getByRuleIdList(ruleIdList);
         //分别得到两个以informRule ID为键的map
-        Map<String, List<InformRuleUser>> msg_ruleId_ruleUserListMap = ruleUser2InformIdAlarmListMap(ruleUserList);
+        Map<String, List<InformRuleUser>> ruleId_ruleUserListMap = ruleUser2InformIdAlarmListMap(ruleUserList);
         Map<String, InformRule> informId_entityMap = inform2IdEntityMap(informRuleList);
         for(String ruleId : informId_entityMap.keySet()){
             InformRule informRule = informId_entityMap.get(ruleId);
-            List<InformRuleUser> userList = msg_ruleId_ruleUserListMap.get(ruleId);
+            List<InformRuleUser> userList = ruleId_ruleUserListMap.get(ruleId);
             for(InformRuleUser ruleUser : userList){
                 InformMsg msg = new InformMsg();
                 msg.initAlarmInfo(alarm, informRule, ruleUser, type, date);
