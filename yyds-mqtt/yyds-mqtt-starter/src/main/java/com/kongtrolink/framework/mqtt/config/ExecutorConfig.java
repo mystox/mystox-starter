@@ -32,7 +32,7 @@ public class ExecutorConfig
         return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,200,10000);
     }
 
-    ThreadPoolTaskExecutor builder(int corePoolSize,int maxPoolSize,int queueCapacity,int aliveSecondis) {
+    protected ThreadPoolTaskExecutor builder(int corePoolSize,int maxPoolSize,int queueCapacity,int aliveSecondis) {
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);

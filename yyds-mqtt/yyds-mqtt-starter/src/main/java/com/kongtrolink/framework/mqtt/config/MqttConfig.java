@@ -138,7 +138,8 @@ public class MqttConfig {
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
                 producerClientId,
                 mqttClientFactory());
-        messageHandler.setAsync(false); //异步
+        messageHandler.setAsync(true); //异步
+        messageHandler.setAsyncEvents(true);
         messageHandler.setDefaultTopic(producerDefaultTopic);
         messageHandler.setCompletionTimeout(1000);
         return messageHandler;
