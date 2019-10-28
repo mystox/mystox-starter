@@ -174,8 +174,6 @@ public class MqttReceiverImpl implements MqttReceiver {
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-            System.out.println(message);
-            System.out.println(mqtt_duplicate);
             if (mqtt_duplicate) {
                 logger.warn("message receive duplicate [{}]", message);
                 return;
