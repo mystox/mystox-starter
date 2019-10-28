@@ -46,4 +46,29 @@ public class Contant {
 
     public static String ZERO = "0";
     public static String ONE = "1";
+    public static String TWO = "2";     //其他操作（修改附加属性）
+
+    public static String INFORM_TYPE_MSG = "msg";
+    public static String INFORM_TYPE_EMAL = "email";
+    public static String INFORM_TYPE_APP = "app";
+
+    public static String ENTERPRISECODE = "enterpriseCode";
+    public static String SERVERCODE = "serverCode";
+    public static String DEVICEID = "deviceId";
+    public static String DEVICETYPE = "deviceType";
+    public static String DEVICEMODEL = "deviceModel";
+    public static String SIGNALID = "signalId";
+    public static String SERIAL = "serial";
+    public static String FLAG = "flag";
+
+    public static String TEMPLATE_MSG = "短信";
+    public static String TEMPLATE_EMAIL = "邮件";
+    public static String TEMPLATE_APP = "APP";
+
+    public static String ALARM_STATE_REPORT = "告警上报";
+    public static String ALARM_STATE_RECOVER = "告警消除";
+    public static String ALARM_STATE_FSUOFFLINE = "FSU离线告警";
+    public static String INFORM = "通知";
+    //推送使用字段
+    public static final String TYPE = "type";
 }

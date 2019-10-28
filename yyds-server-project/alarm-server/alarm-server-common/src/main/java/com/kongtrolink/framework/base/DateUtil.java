@@ -2,6 +2,7 @@ package com.kongtrolink.framework.base;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @Auther: liudd
@@ -11,14 +12,10 @@ import java.util.Calendar;
 public class DateUtil {
 
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static Calendar calendar = Calendar.getInstance();
+    public static Calendar calendar = Calendar.getInstance();
 
     public static SimpleDateFormat getSimpleDateFormat() {
         return simpleDateFormat;
-    }
-
-    public static Calendar getCalendar() {
-        return calendar;
     }
 
     /**
@@ -43,5 +40,34 @@ public class DateUtil {
         }catch (Exception e){
             return -3;
         }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2018/7/5 14:30
+     * 功能描述:根据时间获取HH:mm:ss的数值型
+     */
+    public static int timeToInt(Date date){
+        String format = simpleDateFormat.format(date);
+        String substring = format.substring(11);
+        return HHMMSSToInt(substring);
+    }
+
+    public static int getWeek(Date date){
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    public static String format(Date date){
+        return simpleDateFormat.format(date);
+    }
+
+    public static void main(String[] a){
+        Date curTime = new Date();
+        String format = simpleDateFormat.format(curTime);
+        System.out.println("format:" + format);
+
+        int result = timeToInt(curTime);
+        System.out.println("result:" + result);
     }
 }

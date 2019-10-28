@@ -2,6 +2,7 @@ package com.kongtrolink.framework.dao;
 
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.InformRuleUser;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,12 @@ public class InformRuleUserDao {
 
     public List<InformRuleUser> getByRuleId(String ruleId) {
         Criteria criteria = Criteria.where("informRule.strId").is(ruleId);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, InformRuleUser.class, table);
+    }
+
+    public List<InformRuleUser> getByRuleIdList(List<String> ruleIdList){
+        Criteria criteria = Criteria.where("informRule.strId").in(ruleIdList);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, InformRuleUser.class, table);
     }

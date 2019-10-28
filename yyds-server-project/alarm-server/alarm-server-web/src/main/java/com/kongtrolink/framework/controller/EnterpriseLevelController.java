@@ -41,7 +41,7 @@ public class EnterpriseLevelController extends BaseController {
         enterpriseLevel.setUpdateTime(curTime);
         enterpriseLevel.setCode(code);
         enterpriseLevel.setState(Contant.FORBIT);
-        enterpriseLevel.setDefaultLevel(Contant.NO);
+        enterpriseLevel.setLevelType(Contant.MANUAL);
         enterpriseLevelService.add(enterpriseLevel);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
@@ -60,7 +60,7 @@ public class EnterpriseLevelController extends BaseController {
     @ResponseBody
     public JsonResult update(@RequestBody EnterpriseLevel enterpriseLevel){
         enterpriseLevel.setUpdateTime(new Date());
-        enterpriseLevel.setDefaultLevel(Contant.NO);
+        enterpriseLevel.setLevelType(Contant.MANUAL);
         boolean update = enterpriseLevelService.update(enterpriseLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);

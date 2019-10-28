@@ -5,10 +5,13 @@ import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
+import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
+import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -33,6 +36,18 @@ public class EnterpriseLevelDao {
 
     public void add(EnterpriseLevel enterpriseLevel) {
         mongoTemplate.save(enterpriseLevel, table);
+    }
+
+    public boolean add(List<EnterpriseLevel> enterpriseLevelList){
+        // BulkMode.UNORDERED:表示并行处理，遇到错误时能继续执行不影响其他操作；BulkMode.ORDERED：表示顺序执行，遇到错误时会停止所有执行
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, table);
+        for(EnterpriseLevel enterpriseLevel : enterpriseLevelList) {
+            ops.insert(enterpriseLevel);
+        }
+        // 执行操作
+        BulkWriteResult execute = ops.execute();
+        int insertedCount = execute.getInsertedCount();
+        return insertedCount>0 ? true : false;
     }
 
     public boolean delete(String enterpriseLevelId) {
@@ -150,10 +165,6 @@ public class EnterpriseLevelDao {
             serverName = MongoUtil.escapeExprSpecialWord(serverName);
             criteria.and("serverName").regex(".*?" + serverName + ".*?");
         }
-        String defaultLevel = levelQuery.getDefaultLevel();
-        if(!StringUtil.isNUll(defaultLevel)){
-            criteria.and("defaultLevel").is(defaultLevel);
-        }
         String operatorName = levelQuery.getOperatorName();
         if(!StringUtil.isNUll(operatorName)){
             operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
@@ -173,16 +184,6 @@ public class EnterpriseLevelDao {
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "updateTime"));
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
-    }
-
-    public boolean updateDefault(EnterpriseLevelQuery enterpriseLevelQuery, String defaultStr){
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, enterpriseLevelQuery);
-        Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("defaultLevel", defaultStr);
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
-        return result.getN()>0 ? true : false;
     }
 
     public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
@@ -211,15 +212,22 @@ public class EnterpriseLevelDao {
         query.with(new Sort(Sort.Direction.DESC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
         if(enterpriseLevelList == null || enterpriseLevelList.size() == 0){
-            enterpriseLevelList = getDefault();
+            enterpriseLevelList = getSystemLevel();
         }
         return enterpriseLevelList;
     }
 
-    public List<EnterpriseLevel> getDefault() {
-        Criteria criteria = Criteria.where("defaultLevel").is(Contant.YES);
+    public List<EnterpriseLevel> getSystemLevel() {
+        Criteria criteria = Criteria.where("levelType").is(Contant.SYSTEM);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
+    }
+
+    public boolean deleteSystemLevel(){
+        Criteria criteria = Criteria.where("levelType").is(Contant.SYSTEM);
+        Query query = Query.query(criteria);
+        WriteResult remove = mongoTemplate.remove(query, table);
+        return remove.getN()>0 ? true : false;
     }
 
     List<EnterpriseLevel> getByCodes(List<String> codeList){
@@ -261,5 +269,4 @@ public class EnterpriseLevelDao {
         query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
     }
-
 }

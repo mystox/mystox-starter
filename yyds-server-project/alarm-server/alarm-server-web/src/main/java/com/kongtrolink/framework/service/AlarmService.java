@@ -2,6 +2,7 @@ package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.mongodb.DBObject;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface AlarmService {
      * @date: 2019/9/11 14:48
      * 功能描述:列表
      */
-    List<Alarm> list(AlarmQuery alarmQuery, String table);
+    List<DBObject> list(AlarmQuery alarmQuery, String table);
 
     /**
      * @auther: liudd

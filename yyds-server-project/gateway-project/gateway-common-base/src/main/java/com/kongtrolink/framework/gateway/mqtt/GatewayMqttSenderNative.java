@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.mqtt;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
@@ -7,10 +8,15 @@ import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.concurrent.*;
+
+import static com.kongtrolink.framework.gateway.mqtt.GatewayMqttConfig.CHANNEL_REPLY;
+
 
 /**
  * Created by mystoxlol on 2019/8/19, 8:28.
@@ -67,6 +73,7 @@ public class GatewayMqttSenderNative{
             FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
             es.submit(mqttMsgFutureTask);
             CALLBACKS.put(msgId, callBackTopic);
+            logger.info("put msgId:{}" ,msgId );
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
@@ -84,4 +91,31 @@ public class GatewayMqttSenderNative{
         return sendToMqttSyn(msgId, payload, topic,2, 30000L, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * 回复通道
+     *
+     * @param message
+     */
+    @ServiceActivator(inputChannel = CHANNEL_REPLY)
+    public void messageReceiver(Message<String> message) {
+        try {
+            String payload = message.getPayload();
+            MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
+            String msgId = resp.getMsgId();
+            logger.debug("[{}] message  ack is [{}]", msgId, payload);
+            CallBackTopic callBackTopic = CALLBACKS.get(msgId);
+            if (callBackTopic != null) {
+                boolean subpackage = resp.isSubpackage();
+                if (subpackage)
+                    callBackTopic.callbackSubPackage(resp);
+                else
+                    callBackTopic.callback(resp);
+            } else {
+                logger.warn("[{}] message ack [{}] is Invalidation...", msgId);
+            }
+        } catch (Exception e) {
+            logger.warn("message ack receive error[{}] is Invalidation...",e.toString());
+            e.printStackTrace();
+        }
+    }
 }

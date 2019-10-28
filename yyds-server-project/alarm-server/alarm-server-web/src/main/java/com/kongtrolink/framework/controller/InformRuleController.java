@@ -8,9 +8,11 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.InformRuleUser;
+import com.kongtrolink.framework.enttiy.MsgTemplate;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
+import com.kongtrolink.framework.service.MsgTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +38,8 @@ public class InformRuleController extends BaseController {
     InformRuleService ruleService;
     @Autowired
     InformRuleUserService ruleUserService;
+    @Autowired
+    MsgTemplateService msgTemplateService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public @ResponseBody
@@ -46,7 +50,6 @@ public class InformRuleController extends BaseController {
         if(null != byName){
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
-
         User user = new User();
         user.setId("admin");
         user.setName("超级管理员");
@@ -55,6 +58,9 @@ public class InformRuleController extends BaseController {
         informRule.setUpdateTime(curDate);
         informRule.initDateInt();
         informRule.setType(Contant.MANUAL);
+
+        initTemplate(informRule);
+
         boolean result = ruleService.save(informRule);
         if(result){
             return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
@@ -90,6 +96,7 @@ public class InformRuleController extends BaseController {
             return new JsonResult("默认规则不允许修改", false);
         }
         informRule.setUpdateTime(new Date());
+        initTemplate(informRule);
         boolean result = ruleService.update(informRule);
         if (result) {
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -161,7 +168,7 @@ public class InformRuleController extends BaseController {
     public @ResponseBody JsonResult authUser(@RequestBody InformRuleQuery ruleQuery){
         List<String> userIds = ruleQuery.getUserIds();
         if(null != userIds && userIds.size()>0){
-            //删除原来数据
+            //删除原来数据，保证一个用户只有一条启用的通知规则
             ruleUserService.deleteByRuleId(ruleQuery.get_id());
             ruleUserService.deleteByUserIds(userIds);
             List<String> usernames = ruleQuery.getUsernames();
@@ -204,5 +211,30 @@ public class InformRuleController extends BaseController {
         user2.setEmail("152222QQ.com");
         userList.add(user2);
         return new JsonResult(userList);
+    }
+
+    public void initTemplate(InformRule informRule){
+        FacadeView msgTemp = informRule.getMsgTemplate();
+        if(null != msgTemp){
+            MsgTemplate msgTemplate = msgTemplateService.get(msgTemp.getStrId());
+            if(null != msgTemplate){
+                informRule.initTemplate(msgTemplate);
+            }
+        }
+
+        FacadeView emailTemp = informRule.getEmailTemplate();
+        if(null != emailTemp){
+            MsgTemplate msgTemplate = msgTemplateService.get(emailTemp.getStrId());
+            if(null != msgTemplate){
+                informRule.initTemplate(msgTemplate);
+            }
+        }
+        FacadeView appTemp = informRule.getAppTemplate();
+        if(null != appTemp){
+            MsgTemplate msgTemplate = msgTemplateService.get(appTemp.getStrId());
+            if(null != msgTemplate){
+                informRule.initTemplate(msgTemplate);
+            }
+        }
     }
 }

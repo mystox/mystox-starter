@@ -1,6 +1,12 @@
 package com.kongtrolink.framework.enttiy;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.base.StringUtil;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -12,17 +18,8 @@ public class Auxilary {
     private String _id;
     private String enterpriseCode;
     private String serverCode;
-    private List<String> proStrList;
-    private List<String> proNameList;
-    private List<String> proTypeList;
-
-    public List<String> getProNameList() {
-        return proNameList;
-    }
-
-    public void setProNameList(List<String> proNameList) {
-        this.proNameList = proNameList;
-    }
+    private List<String> proStrList = new ArrayList<>();
+    private List<String> proNameList = new ArrayList<>();
 
     public String get_id() {
         return _id;
@@ -40,13 +37,12 @@ public class Auxilary {
         this.proStrList = proStrList;
     }
 
-
-    public List<String> getProTypeList() {
-        return proTypeList;
+    public List<String> getProNameList() {
+        return proNameList;
     }
 
-    public void setProTypeList(List<String> proTypeList) {
-        this.proTypeList = proTypeList;
+    public void setProNameList(List<String> proNameList) {
+        this.proNameList = proNameList;
     }
 
     public String getEnterpriseCode() {

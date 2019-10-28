@@ -24,7 +24,9 @@ public abstract class TransverterHandler implements TransverterService {
     private String deviceModel;
     @Value("${gateway.regionCode:null}")
     private String regionCode;
-    @Value("${gateway.fsuType:2019}")
+    @Value("${gateway.user:null}")
+    private String user;
+    @Value("${gateway.fsuType:38}")
     private String fsuType;
     @Value("${server.name}")
     private String serverName;
@@ -110,5 +112,13 @@ public abstract class TransverterHandler implements TransverterService {
 
     public void setServerVersion(String serverVersion) {
         this.serverVersion = serverVersion;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 }

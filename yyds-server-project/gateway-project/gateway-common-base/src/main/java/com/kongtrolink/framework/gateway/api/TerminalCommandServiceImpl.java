@@ -8,9 +8,11 @@ import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.impl.AssetTransverter;
-import com.kongtrolink.framework.gateway.tower.entity.rec.PushDeviceAsset;
 import com.kongtrolink.framework.gateway.tower.entity.rec.base.RecServerBase;
-import com.kongtrolink.framework.gateway.tower.entity.send.GetDeviceDataModel;
+import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDeviceList;
+import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import java.util.Date;
  */
 @Service
 public class TerminalCommandServiceImpl implements TerminalCommandService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TerminalCommandServiceImpl.class);
 
     @Autowired
     GatewayMqttSenderNative gatewayMqttSenderNative;
@@ -40,15 +44,16 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     public String deviceGet(String message) {
         RecServerBase recServerBase = JSONObject.parseObject(message,RecServerBase.class);
         String sn = recServerBase.getSn();
-        GetDeviceDataModel getDeviceDataModel = new GetDeviceDataModel();
-        String s = JSONObject.toJSONString(getDeviceDataModel);
+        AckBase ackBase = new AckBase();
         String msgId = 1+""+new Date().getTime();
+        ackBase.setMsgId(msgId);
+        String s = JSONObject.toJSONString(ackBase);
         MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,s,topicConfig.getFsuTopic(sn, MqttPubTopic.GetDeviceAsset));
         if(StateCode.FAILED == result.getStateCode()){
             return JSONObject.toJSONString(result);
         }
-        PushDeviceAsset alarmReport = JSONObject.parseObject(result.getMsg(),PushDeviceAsset.class);
-        return assetTransverter.getAssetServerResult(alarmReport,sn);
+        PushDeviceAssetDeviceList deviceList = JSONObject.parseObject(result.getMsg(),PushDeviceAssetDeviceList.class);
+        return assetTransverter.getAssetServerResult(deviceList,sn);
     }
 
     /**

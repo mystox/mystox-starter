@@ -5,16 +5,17 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
+import com.kongtrolink.framework.dao.AuxilaryDao;
 import com.kongtrolink.framework.enttiy.Alarm;
+import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.mqtt.AlarmEntrance;
 import com.kongtrolink.framework.mqtt.AlarmMqttEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import javax.annotation.Resource;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -27,12 +28,15 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 
     private String currentAlarmTable = MongTable.ALARM_CURRENT;
     private String historyAlarmTable = MongTable.ALARM_HISTORY;
-    private static ConcurrentLinkedQueue<Alarm> recoverAndAuxilaryAlarmQueue = new ConcurrentLinkedQueue<>();
-    @Autowired
+    private static ConcurrentLinkedQueue<JSONObject> recoverAndAuxilaryAlarmQueue = new ConcurrentLinkedQueue<>();
+    @Resource(name = "controllerExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     AlarmDao alarmDao;
+    @Autowired
+    AuxilaryDao auxilaryDao;
+
     /**
      * @auther: liudd
      * @date: 2019/10/14 8:50
@@ -44,33 +48,37 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     @Override
     public void alarmHandle(String payload) {
         AlarmMqttEntity mqttEntity = JSONObject.parseObject(payload, AlarmMqttEntity.class);
-        List<Alarm> alarmList = mqttEntity.getAlarms();
+        String enterpriseCode = mqttEntity.getEnterpriseCode();
+        String serverCode = mqttEntity.getServerCode();
+        List<JSONObject> alarmJsonList = mqttEntity.getAlarms();
         List<Alarm> reportAlarmList = new ArrayList<>();
-        if(null == alarmList || alarmList.size() == 0){
+        if(null == alarmJsonList || alarmJsonList.size() == 0){
             System.out.printf("产生告警为空: %s %n ", payload);
             return ;
         }
-        for(Alarm alarm : alarmList) {
+        for(JSONObject jsonObject : alarmJsonList) {
+            String flag = jsonObject.getString("flag");
             //初始化片键
-            alarm.initSliceKey();
-            alarm.setEnterpriseCode(mqttEntity.getEnterpriseCode());
-            alarm.setServerCode(mqttEntity.getServerCode());
-            String flag = alarm.getFlag();
             if(Contant.ONE.equals(flag)){   //告警上报
+                Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
+                alarm.initSliceKey();
+                alarm.setEnterpriseCode(enterpriseCode);
+                alarm.setServerCode(serverCode);
                 Alarm report = report(alarm);
                 if(null != report){
                     reportAlarmList.add(alarm);
                 }
             }else {
-                recoverAndAuxilaryAlarmQueue.add(alarm);
+                jsonObject.put("enterpriseCode", enterpriseCode);
+                jsonObject.put("serverCode", serverCode);
+                recoverAndAuxilaryAlarmQueue.add(jsonObject);
                 taskExecutor.execute(()->handleRecoverAndAuxilary());
             }
-
-            //保存实时
-            if(reportAlarmList.size() != 0) {
-                //liuddtodo 按照配置文件，调用各个服务
-                alarmDao.save(reportAlarmList, currentAlarmTable);
-            }
+        }
+        //保存实时
+        if(reportAlarmList.size() != 0) {
+            //liuddtodo 按照配置文件，调用各个服务
+            alarmDao.save(reportAlarmList, enterpriseCode + serverCode + currentAlarmTable);
         }
         return ;
     }
@@ -83,7 +91,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      * --如果存在，作为重复告警不予处理
      * --如果不存在，继续其他流程
      */
-    private Alarm report( Alarm alarm){
+    private Alarm report(Alarm alarm){
         //判断实时表是否存在未消除
         Alarm sourceAlarm = alarmDao.getExistAlarm(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), null, currentAlarmTable);
         if (null == sourceAlarm) {
@@ -112,14 +120,61 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         if(recoverAndAuxilaryAlarmQueue.size() == 0){
             return ;
         }
-        Alarm alarm = recoverAndAuxilaryAlarmQueue.poll();
-        if(Contant.ZERO.equals(alarm.getFlag())) {
+        JSONObject jsonObject = recoverAndAuxilaryAlarmQueue.poll();
+        String flag = jsonObject.getString("flag");
+        if(Contant.ZERO.equals(flag)) {
+            Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
             boolean result = alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), currentAlarmTable);
             if (!result) {
-                alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), historyAlarmTable);
+                String enterpriseCode = alarm.getEnterpriseCode();
+                String serverCode = alarm.getServerCode();
+                result = alarmDao.resolve(alarm.getSliceKey(), alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(),
+                        enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
+            }
+            if(result){
+                //liuddtodo 调用告警消除发送推送
+
             }
         }else{
-            System.out.printf("修改告警属性: %s %n", alarm);
+            //name, value,level,flag, deviceId,deviceType,deviceModel,signalId,serial
+            String enterpriseCode = jsonObject.getString(Contant.ENTERPRISECODE);
+            String serverCode = jsonObject.getString(Contant.SERVERCODE);
+            Auxilary auxilary = auxilaryDao.getByEnterServerCode(enterpriseCode, serverCode);
+            if(null != auxilary){
+                String deviceType = jsonObject.getString(Contant.DEVICETYPE);
+                String deviceModel = jsonObject.getString(Contant.DEVICEMODEL);
+                String deviceId = jsonObject.getString(Contant.DEVICEID);
+                String signalId = jsonObject.getString(Contant.SIGNALID);
+                String serial = jsonObject.getString(Contant.SERIAL);
+//                jsonObject.remove(Contant.ENTERPRISECODE);
+//                jsonObject.remove(Contant.SERVERCODE);
+//                jsonObject.remove(Contant.DEVICETYPE);
+//                jsonObject.remove(Contant.DEVICEMODEL);
+//                jsonObject.remove(Contant.DEVICEID);
+//                jsonObject.remove(Contant.SIGNALID);
+//                jsonObject.remove(Contant.SERIAL);
+//                jsonObject.remove(Contant.FLAG);
+                Set<String> keys = jsonObject.keySet();
+                if(null != keys && keys.size()>0) {
+                    List<String> proStrList = auxilary.getProStrList();
+                    Map<String, String> updateMap = new HashMap<>();
+                    for(String key : keys){
+                        if(proStrList.contains(key)){
+                            updateMap.put(key, jsonObject.getString(key));
+                        }
+                    }
+                    if(updateMap.size()>0){
+                        boolean result = alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
+                                serial, updateMap, currentAlarmTable);
+                        if(!result){
+                            alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
+                                    serial, updateMap, enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
+                        }
+                    }
+                }
+
+            }
+            System.out.printf("修改告警属性: %s %n", jsonObject.toJSONString());
         }
         handleRecoverAndAuxilary();
     }

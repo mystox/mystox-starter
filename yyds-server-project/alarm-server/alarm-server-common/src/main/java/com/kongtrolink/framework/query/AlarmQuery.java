@@ -15,107 +15,25 @@ import java.util.Map;
 public class AlarmQuery extends Paging {
 
     private String id;
-    private String enterpriseCode;
-    private String serverCode;
-    private String serial;              //告警序列号
-    private String name;        //告警名称
-    private float value;        //告警值
-    private Date tReport;       //上报时间
-    private Date tRecover;      //消除时间
-    private String deviceId;       //设备对应的编码，需要与资产管理对应
-    private String deviceType;  //设备型号
-    private String deviceModel; //设备类型
-    private Date beginTime;
-    private Date endTime;
-    private List<String> levelList;
-    private List<String> alarmIdList;
-    private String state;           //告警状态
-    Map<String, String> deviceInfo; //设备信息作为查询条件
-    private String targetLevel;     //目标等级
-    private String targetLevelName;     //目标等级名称
-    private String color;               //告警颜色
-    private String signalId;            //信号点id
-    private String sliceKey;            //片键，也可以作为普通索引键
-    private String type;
+    private String enterpriseCode;              //企业编码
+    private String serverCode;                  //服务编码
+    private String name;                        //告警名称
+    private String deviceType;                  //设备型号
+    private String deviceModel;                 //设备类型
+    private String state;                       //告警状态
+    private String targetLevelName;             //目标等级名称
+    private String type;                        //告警类型（实时告警/历史告警）
+    private Date startBeginTime;                //发生开始时间
+    private Date startEndTime;                  //发生结束时间
+    private Date clearBeginTime;                //清除开始时间
+    private Date clearEndTime;                  //清除结束时间
 
-    public String getType() {
-        return type;
+    public String getId() {
+        return id;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getSliceKey() {
-        return sliceKey;
-    }
-
-    public void setSliceKey(String sliceKey) {
-        this.sliceKey = sliceKey;
-    }
-
-    public String getSerial() {
-        return serial;
-    }
-
-    public void setSerial(String serial) {
-        this.serial = serial;
-    }
-
-    public String getSignalId() {
-        return signalId;
-    }
-
-    public void setSignalId(String signalId) {
-        this.signalId = signalId;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getTargetLevel() {
-        return targetLevel;
-    }
-
-    public void setTargetLevel(String targetLevel) {
-        this.targetLevel = targetLevel;
-    }
-
-    public String getTargetLevelName() {
-        return targetLevelName;
-    }
-
-    public void setTargetLevelName(String targetLevelName) {
-        this.targetLevelName = targetLevelName;
-    }
-
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
-
-    public String getDeviceModel() {
-        return deviceModel;
-    }
-
-    public void setDeviceModel(String deviceModel) {
-        this.deviceModel = deviceModel;
-    }
-
-    public Map<String, String> getDeviceInfo() {
-        return deviceInfo;
-    }
-
-    public void setDeviceInfo(Map<String, String> deviceInfo) {
-        this.deviceInfo = deviceInfo;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getEnterpriseCode() {
@@ -134,14 +52,6 @@ public class AlarmQuery extends Paging {
         this.serverCode = serverCode;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -150,68 +60,20 @@ public class AlarmQuery extends Paging {
         this.name = name;
     }
 
-    public float getValue() {
-        return value;
+    public String getDeviceType() {
+        return deviceType;
     }
 
-    public void setValue(float value) {
-        this.value = value;
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
-    public List<String> getLevelList() {
-        return levelList;
+    public String getDeviceModel() {
+        return deviceModel;
     }
 
-    public void setLevelList(List<String> levelList) {
-        this.levelList = levelList;
-    }
-
-    public Date gettReport() {
-        return tReport;
-    }
-
-    public void settReport(Date tReport) {
-        this.tReport = tReport;
-    }
-
-    public Date gettRecover() {
-        return tRecover;
-    }
-
-    public void settRecover(Date tRecover) {
-        this.tRecover = tRecover;
-    }
-
-    public List<String> getAlarmIdList() {
-        return alarmIdList;
-    }
-
-    public void setAlarmIdList(List<String> alarmIdList) {
-        this.alarmIdList = alarmIdList;
-    }
-
-    public Date getBeginTime() {
-        return beginTime;
-    }
-
-    public void setBeginTime(Date beginTime) {
-        this.beginTime = beginTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceModel(String deviceModel) {
+        this.deviceModel = deviceModel;
     }
 
     public String getState() {
@@ -222,19 +84,51 @@ public class AlarmQuery extends Paging {
         this.state = state;
     }
 
-    public static AlarmQuery alarm2AlarmQuery(Alarm alarm){
-        if(null == alarm){
-            return null;
-        }
-        AlarmQuery alarmQuery = new AlarmQuery();
-        alarmQuery.setEnterpriseCode(alarm.getEnterpriseCode());
-        alarmQuery.setServerCode(alarm.getServerCode());
-        alarmQuery.setDeviceId(alarm.getDeviceId());
-        alarmQuery.setDeviceType(alarm.getDeviceType());
-        alarmQuery.setDeviceModel(alarm.getDeviceModel());
-        alarmQuery.setSignalId(alarm.getSignalId());
-        alarmQuery.setState(alarm.getState());
-        alarmQuery.setSliceKey(alarm.getSliceKey());
-        return alarmQuery;
+    public String getTargetLevelName() {
+        return targetLevelName;
+    }
+
+    public void setTargetLevelName(String targetLevelName) {
+        this.targetLevelName = targetLevelName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Date getStartBeginTime() {
+        return startBeginTime;
+    }
+
+    public void setStartBeginTime(Date startBeginTime) {
+        this.startBeginTime = startBeginTime;
+    }
+
+    public Date getStartEndTime() {
+        return startEndTime;
+    }
+
+    public void setStartEndTime(Date startEndTime) {
+        this.startEndTime = startEndTime;
+    }
+
+    public Date getClearBeginTime() {
+        return clearBeginTime;
+    }
+
+    public void setClearBeginTime(Date clearBeginTime) {
+        this.clearBeginTime = clearBeginTime;
+    }
+
+    public Date getClearEndTime() {
+        return clearEndTime;
+    }
+
+    public void setClearEndTime(Date clearEndTime) {
+        this.clearEndTime = clearEndTime;
     }
 }

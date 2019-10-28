@@ -34,6 +34,15 @@ public class Alarm {
     private Map<String, String> AuxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
+    private String status;              //告警状态（待处理，已消除）
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getFlag() {
         return flag;
