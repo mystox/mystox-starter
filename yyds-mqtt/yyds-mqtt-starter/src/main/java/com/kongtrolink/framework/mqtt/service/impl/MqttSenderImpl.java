@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.mqtt.util.MqttLog;
+import com.kongtrolink.framework.mqtt.util.MqttLogUtil;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
 import com.kongtrolink.framework.service.MqttSender;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -59,40 +60,42 @@ public class MqttSenderImpl implements MqttSender {
     private MqttHandler mqttHandlerAck;
 
     @Autowired
-    private MqttLog mqttLog;
-
+    private MqttLogUtil mqttLogUtil;
+    @Autowired
+    ThreadPoolTaskExecutor mqttExecutor;
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
         String localServerCode = this.serverName + "_" + this.serverVersion;
+        //组建topicid
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        String msgId = mqttMsg.getMsgId();
+        //获取目标topic列表，判断sub_list是否有人订阅处理
         try {
-            boolean existsByPubList = addPubList(localServerCode, operaCode);
-            if (existsByPubList) {
-                //获取目标topic列表，判断sub_list是否有人订阅处理
 
-                if (isExistsBySubList(serverCode, operaCode)) {
-                    //组建topicid
-                    String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-                    //组建消息体
-                    MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
-                    logger.info("message send...topic[{}]", topic, JSONObject.toJSONString(mqttMsg));
+            if (isExistsBySubList(serverCode, operaCode)) {
+                boolean existsByPubList = addPubList(serverCode, operaCode);
+                if (existsByPubList) {
+                    logger.info("[{}]message send...topic[{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
                     mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
                 } else {
-                    mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                    logger.error("message send error[{}] sub operaCode is not exists...", StateCode.UNREGISTY);
+                    mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                    logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
                 }
-
             } else {
-                mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                logger.error("message send error[{}]... pub operaCode is not exists", StateCode.UNREGISTY);
+                mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
             }
+
         } catch (KeeperException e) {
-            mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.UNREGISTY, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTY, e.toString());
             e.printStackTrace();
         } catch (InterruptedException e) {
-            mqttLog.ERROR(StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.CONNECT_INTERRUPT, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
         }
     }
@@ -102,72 +105,74 @@ public class MqttSenderImpl implements MqttSender {
     public void sendToMqtt(String serverCode, String operaCode,
                            int qos, String payload) {
         String localServerCode = this.serverName + "_" + this.serverVersion;
-        boolean existsByPubList = false;
+        //组建topicid
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        String msgId = mqttMsg.getMsgId();
         try {
-            existsByPubList = addPubList(localServerCode, operaCode);
-
-            if (existsByPubList) {
-                //获取目标topic列表，判断sub_list是否有人订阅处理
-                if (isExistsBySubList(serverCode, operaCode)) {
-                    //组建topicid
-                    String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-                    //组建消息体
-                    MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+            //获取目标topic列表，判断sub_list是否有人订阅处理
+            if (isExistsBySubList(serverCode, operaCode)) {
+                boolean existsByPubList = addPubList(serverCode, operaCode);
+                if (existsByPubList) {
                     mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
                 } else {
-                    mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                    logger.error("message send error[{}] sub operaCode is not exists...", StateCode.UNREGISTY);
+                    mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                    logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
                 }
             } else {
-                mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                logger.error("message send error[{}]... pub operaCode is not exists", StateCode.UNREGISTY);
+                mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
             }
         } catch (KeeperException e) {
-            mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.UNREGISTY, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTY, e.toString());
             e.printStackTrace();
         } catch (InterruptedException e) {
-            mqttLog.ERROR(StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.CONNECT_INTERRUPT, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
         }
     }
 
-    public boolean sendToMqtt(String serverCode, String operaCode,
-                              int qos, MqttMsg mqttMsg) {
+    public boolean sendToMqttBoolean(String serverCode, String operaCode,
+                                     int qos, MqttMsg mqttMsg) {
 //        String localServerCode = this.serverName + "_" + this.serverVersion;
-        boolean existsByPubList = false;
+        String msgId = mqttMsg.getMsgId();
         try {
-            existsByPubList = addPubList(serverCode, operaCode); //将此请求注册至请求列表，
-            if (existsByPubList) {
-                //获取目标topic列表，判断sub_list是否有人订阅处理
-                if (isExistsBySubList(serverCode, operaCode)) {
+            //获取目标topic列表，判断sub_list是否有人订阅处理
+            if (isExistsBySubList(serverCode, operaCode)) {
+                boolean existsByPubList = addPubList(serverCode, operaCode); //将此请求注册至请求列表，
+                if (existsByPubList) {
                     //组建topicid
                     String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
                     mqttMsg.setOperaCode(operaCode);
                     String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
-                    logger.debug("message [{}] send...", mqttMsgJson);
+                    logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
                     mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
                     return true;
                 } else {
-                    mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                    logger.error("message send error[{}] sub operaCode is not exists...", StateCode.UNREGISTY);
+                    mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                    logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
                 }
             } else {
-                mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-                logger.error("message send error[{}]... pub operaCode is not exists", StateCode.UNREGISTY);
+                mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+                logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTY, serverCode, operaCode);
+                return false;
             }
         } catch (KeeperException e) {
-            mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.UNREGISTY, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTY, e.toString());
             e.printStackTrace();
+            return false;
         } catch (InterruptedException e) {
-            mqttLog.ERROR(StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("message send error[{}]...[{}]", StateCode.CONNECT_INTERRUPT, e.toString());
+            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
+            return false;
         }
-        mqttLog.ERROR(StateCode.UNREGISTY, operaCode, serverCode);
-        logger.error("message send error[{}]...", StateCode.UNREGISTY);
+        mqttLogUtil.ERROR(msgId, StateCode.UNREGISTY, operaCode, serverCode);
+        logger.error("[{}]message send error[{}]...", msgId, StateCode.UNREGISTY);
         return false;
     }
 
@@ -182,25 +187,26 @@ public class MqttSenderImpl implements MqttSender {
             mqttHandlerAck.addSubTopic(topicAck);
         //组建消息体
         MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload);
-        boolean sendResult = sendToMqtt(serverCode, operaCode, qos, mqttMsg);
+        String msgId = mqttMsg.getMsgId();
+        boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
         if (sendResult) {
             ExecutorService es = Executors.newSingleThreadExecutor();
             CallBackTopic callBackTopic = new CallBackTopic();
             FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
             es.submit(mqttMsgFutureTask);
-            CALLBACKS.put(mqttMsg.getMsgId(), callBackTopic);
+            CALLBACKS.put(msgId, callBackTopic);
             try {
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                mqttLog.ERROR(StateCode.TIMEOUT, operaCode, serverCode);
-                logger.error("msgId: [{}], request timeout: [{}]", mqttMsg.getMsgId(), e.toString());
+                mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
+                logger.error("[{}]message, request timeout: [{}]", msgId, e.toString());
                 return new MsgResult(StateCode.TIMEOUT, e.toString());
             } finally {
-                CALLBACKS.remove(mqttMsg.getMsgId());
+                CALLBACKS.remove(msgId);
             }
         }
-        mqttLog.ERROR(StateCode.FAILED, operaCode, serverCode);
+//        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
         return new MsgResult(StateCode.FAILED, "请求失败");
     }
 
@@ -210,24 +216,25 @@ public class MqttSenderImpl implements MqttSender {
     }
 
     private boolean addPubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
-        if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
+        if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) { //注册登录时跳过注册请求列表，因为注册服务客户端还未初始化
             logger.warn("server Slogin to {} jump pubList judged...", serverCode);
             return true;
         }
+        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX + "/" + serverCode)) return false;
         //是否已经发布,没有发布则往注册中心注册请求列表
         String topicId = MqttUtils.preconditionPubTopicId(serverCode, operaCode);
         if (!serviceRegistry.exists(topicId)) {
             //不存在这个请求列表
             logger.warn("topicId(nodePath) [{}] didn't registered...", topicId);
-            if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX + "/" + serverCode)) return false;
             serviceRegistry.create(topicId, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
-        } else {
-            String pubPath = topicId + "/" + this.serverCode; //请求列表的节点path 带上 pub的此服务serverCode做临时节点
-            if (!serviceRegistry.exists(pubPath)) {
-                serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-            }
         }
+        String pubPath = topicId + "/" + this.serverCode; //请求列表的节点path 带上 pub的此服务serverCode做临时节点
+        if (!serviceRegistry.exists(pubPath)) {
+            logger.warn("pubPath(nodePath) [{}] didn't registered...", pubPath);
+            serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        }
+
         return true;
     }
 
@@ -241,7 +248,7 @@ public class MqttSenderImpl implements MqttSender {
         }
         String topicId = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         if (!serviceRegistry.exists(topicId)) {
-            logger.error("topicId(nodePath) [{}] didn't registered...", topicId);
+            logger.warn("topicId(nodePath) [{}] didn't registered...", topicId);
             return false;
         }
         return true;
@@ -264,20 +271,28 @@ public class MqttSenderImpl implements MqttSender {
      */
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        String payload = message.getPayload();
-        MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
-        String msgId = resp.getMsgId();
+        mqttExecutor.execute(() -> {
+            try {
+                String payload = message.getPayload();
+                MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
+                String msgId = resp.getMsgId();
 
-        logger.debug("message [{}] ack is [{}]", msgId, payload);
-        CallBackTopic callBackTopic = CALLBACKS.get(msgId);
-        if (callBackTopic != null) {
-            boolean subpackage = resp.isSubpackage();
-            if (subpackage)
-                callBackTopic.callbackSubPackage(resp);
-            else
-                callBackTopic.callback(resp);
-        } else {
-            logger.warn("message [{}] ack [{}] is Invalidation...");
-        }
+                logger.debug("[{}]message ack is [{}]", msgId, payload);
+                CallBackTopic callBackTopic = CALLBACKS.get(msgId);
+                if (callBackTopic != null) {
+                    boolean subpackage = resp.isSubpackage();
+                    if (subpackage)
+                        callBackTopic.callbackSubPackage(resp);
+                    else
+                        callBackTopic.callback(resp);
+                } else {
+                    logger.warn("[{}]message ack [{}] is Invalidation...", msgId);
+                }
+            } catch (Exception e) {
+                logger.warn("message ack receive error[{}] is Invalidation...", e.toString());
+                e.printStackTrace();
+            }
+        });
+
     }
 }

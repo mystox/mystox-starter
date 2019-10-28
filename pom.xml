@@ -12,7 +12,7 @@
         <module>yyds-common</module>
         <module>yyds-mqtt</module>
         <module>yyds-register</module>
-        <module>yyts-server-project</module>
+        <module>yyds-server-project</module>
     </modules>
     <packaging>pom</packaging>
 

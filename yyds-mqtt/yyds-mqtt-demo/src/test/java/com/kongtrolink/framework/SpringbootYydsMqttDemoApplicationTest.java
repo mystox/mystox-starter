@@ -1,7 +1,10 @@
 package com.kongtrolink.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.TransverterConfig;
 import com.kongtrolink.framework.mqtt.config.MqttConfig;
+import com.kongtrolink.framework.mqtt.service.impl.MqttReceiverImpl;
+import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.service.MqttSender;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -15,6 +18,9 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +38,14 @@ public class SpringbootYydsMqttDemoApplicationTest {
     @MockBean
     private MqttSender mqttSender;
 
+    @MockBean
+    MqttReceiverImpl mqttReceiverImpl;
+
+
+    @MockBean
+    RegisterRunner registerRunner;
+
+
     @Test
     public void testYaml() {
         DumperOptions dumperOptions = new DumperOptions();
@@ -41,10 +55,17 @@ public class SpringbootYydsMqttDemoApplicationTest {
         Yaml yaml = new Yaml(dumperOptions);
 
         try {
-            File file = FileUtils.getFile("classpath:jarResources/jarRes.yml");
+            File file = FileUtils.getFile("E:\\IdeaProjects\\YYDS\\configResources\\gateway-transverterRelation.yml");
             System.out.println(file.getAbsolutePath());
-            Map load = (Map) yaml.load(new FileInputStream(file));
-            load.put("opera3", "abcddd");
+            TransverterConfig load = yaml.loadAs(new FileInputStream(file),TransverterConfig.class);
+
+            Map<String, List<String>> values = new HashMap<>();
+
+            List<String> valueList = new ArrayList<>();
+            valueList.add("abc");
+            valueList.add("123");
+            values.put("alarm", valueList);
+//            load.put("transverter", values);
             System.out.println(JSONObject.toJSONString(load));
 
             yaml.dump(load,new FileWriter(file));

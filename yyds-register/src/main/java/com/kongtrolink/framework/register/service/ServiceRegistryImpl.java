@@ -54,10 +54,12 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
 
     }
 
-    public String create(final String path, byte data[], List<ACL> acl,
+    public synchronized String create(final String path, byte data[], List<ACL> acl,
                          CreateMode createMode)
             throws KeeperException, InterruptedException {
+        if (!exists(path))
         return zk.create(path, data, acl, createMode);
+        else return null;
     }
 
     @Override
