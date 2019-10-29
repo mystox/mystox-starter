@@ -32,4 +32,8 @@ public interface AlarmCycleService {
     boolean updateState(AlarmCycleQuery cycleQuery);
 
     AlarmCycle getLastUpdateOne(AlarmCycleQuery alarmCycleQuery);
+
+    AlarmCycle getSystemCycle();
+
+    void initAlarmCycle();
 }

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class AlarmCycleController extends BaseController {
     public JsonResult add(@RequestBody AlarmCycle alarmCycle){
         alarmCycle.setUpdateTime(new Date());
         alarmCycle.setState(Contant.FORBIT);
-        alarmCycle.setDefaultCycle(Contant.NO);
+        alarmCycle.setCycleType(Contant.MANUAL);
         cycleService.save(alarmCycle);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
@@ -53,7 +52,7 @@ public class AlarmCycleController extends BaseController {
     @ResponseBody
     public JsonResult update(@RequestBody AlarmCycle alarmCycle){
         alarmCycle.setUpdateTime(new Date());
-        alarmCycle.setDefaultCycle(Contant.NO);
+        alarmCycle.setCycleType(Contant.MANUAL);
         alarmCycle.setUpdateTime(new Date());
         boolean update = cycleService.update(alarmCycle);
         if(update){
