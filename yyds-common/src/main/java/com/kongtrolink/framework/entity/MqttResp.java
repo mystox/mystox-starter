@@ -14,13 +14,13 @@ public class MqttResp {
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
-    private int stateCode = StateCode.SUCCESS;
+    private Integer stateCode = StateCode.SUCCESS;
     private boolean subpackage = false;
-    private int packageCount;//分包总数
-    private int packageNum;//分包编号
-    private int crc;//总包校验
+    private Integer packageCount;//分包总数
+    private Integer packageNum;//分包编号
+    private Integer crc;//总包校验
 
-    public MqttResp(String msgId, byte[] bytePayload, boolean subpackage, int packageNum,int packageCount, int crc) {
+    public MqttResp(String msgId, byte[] bytePayload, boolean subpackage, Integer packageNum,Integer packageCount, Integer crc) {
         this.msgId = msgId;
         this.topic = topic;
         this.payloadType = PayloadType.BYTE;
@@ -49,29 +49,12 @@ public class MqttResp {
     public MqttResp() {
     }
 
-
-    public int getCrc() {
-        return crc;
+    public Integer getStateCode() {
+        return stateCode;
     }
 
-    public void setCrc(int crc) {
-        this.crc = crc;
-    }
-
-    public int getPackageCount() {
-        return packageCount;
-    }
-
-    public void setPackageCount(int packageCount) {
-        this.packageCount = packageCount;
-    }
-
-    public int getPackageNum() {
-        return packageNum;
-    }
-
-    public void setPackageNum(int packageNum) {
-        this.packageNum = packageNum;
+    public void setStateCode(Integer stateCode) {
+        this.stateCode = stateCode;
     }
 
     public boolean isSubpackage() {
@@ -82,12 +65,28 @@ public class MqttResp {
         this.subpackage = subpackage;
     }
 
-    public int getStateCode() {
-        return stateCode;
+    public Integer getPackageCount() {
+        return packageCount;
     }
 
-    public void setStateCode(int stateCode) {
-        this.stateCode = stateCode;
+    public void setPackageCount(Integer packageCount) {
+        this.packageCount = packageCount;
+    }
+
+    public Integer getPackageNum() {
+        return packageNum;
+    }
+
+    public void setPackageNum(Integer packageNum) {
+        this.packageNum = packageNum;
+    }
+
+    public Integer getCrc() {
+        return crc;
+    }
+
+    public void setCrc(Integer crc) {
+        this.crc = crc;
     }
 
     public String getMsgId() {

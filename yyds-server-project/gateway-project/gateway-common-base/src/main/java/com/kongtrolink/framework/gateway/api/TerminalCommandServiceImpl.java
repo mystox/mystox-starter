@@ -63,13 +63,39 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String setData(String message) {
-        try {
+        return getMsgResult(message,MqttPubTopic.SetData);
+    }
+
+    @Override
+    public String getDeviceDataModel(String message) {
+        return getMsgResult(message,MqttPubTopic.GetDeviceDataModel);
+    }
+
+    @Override
+    public String getAlarmParam(String message) {
+        return getMsgResult(message,MqttPubTopic.GetAlarmParam);
+    }
+
+    @Override
+    public String setAlarmParam(String message) {
+        return getMsgResult(message,MqttPubTopic.SetAlarmParam);
+    }
+
+    @Override
+    public String getDeviceAlarmModel(String message) {
+        return getMsgResult(message,MqttPubTopic.GetDeviceAlarmModel);
+    }
+
+
+
+    private String getMsgResult(String message, MqttPubTopic topic){
+        try{
             RecServerBase recServerBase = JSONObject.parseObject(message,RecServerBase.class);
             String sn = recServerBase.getSn();
             String payload = recServerBase.getPayload();
             JSONObject json = (JSONObject) JSON.toJSON(payload);
             String msgId = json.getString("msgId");
-            MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,payload,topicConfig.getFsuTopic(sn, MqttPubTopic.SetData));
+            MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,payload,topicConfig.getFsuTopic(sn, topic));
             if(result==null){
                 return null;
             }

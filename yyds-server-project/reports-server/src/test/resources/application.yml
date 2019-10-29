@@ -13,13 +13,13 @@ spring:
   application:
     name: yytd-mqtt-demo
 server:
-  name: YYTD_MQTT_DEMO
+  name: FOO_SERVER_DEMO_2
   version: 1.0.0
-  port: 58000
-jarResources:
-  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
+  port: 52003
+#jarResources:
+#  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
-  scanBasePackage1: com.kongtrolink.framework.api
+  scanBasePackage1: com.kongtrolink.framework.demo.api
 mqtt:
   username: root
   password: 123456

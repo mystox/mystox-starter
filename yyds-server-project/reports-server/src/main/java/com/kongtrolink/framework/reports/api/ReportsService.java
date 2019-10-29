@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.foo.api;
+package com.kongtrolink.framework.reports.api;
 
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
@@ -10,16 +10,14 @@ import com.kongtrolink.framework.stereotype.Register;
  * update record:
  */
 @Register
-public interface FooService {
-
-    @OperaCode(code = "fooo")
-    void foo(String foo);
-
-    @OperaCode
-    String boo(String boo);
+public interface ReportsService  {
 
 
     @OperaCode
-    String coo(String coo);
+    public String reportConfig(String reportConfigStr);
+
+
+
+
 
 }

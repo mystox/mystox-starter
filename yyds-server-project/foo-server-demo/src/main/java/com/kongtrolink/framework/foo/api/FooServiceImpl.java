@@ -34,4 +34,16 @@ public class FooServiceImpl implements FooService {
 
         return buffer.toString();
     }
+
+    @Override
+    public String coo(String coo) {
+        System.out.println("执行coo" + coo);
+        try {
+            Thread.sleep(Long.valueOf(coo));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("end"+coo);
+        return "end";
+    }
 }

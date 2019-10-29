@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.config;
+package com.kongtrolink.framework.reports.config;
 
 import com.mongodb.MongoClientURI;
 import org.springframework.beans.factory.BeanFactory;
@@ -21,16 +21,15 @@ import java.net.UnknownHostException;
  * update record:
  */
 @Configuration
-public class MongoConfig
-{
+public class MongoConfig {
     @Value("${mongodb.uri}")
     private String uri;
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,MappingMongoConverter converter) throws Exception {
+    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter converter) throws Exception {
 
         //额外连接参数设置
-        return new MongoTemplate(mongoDbFactory,converter);
+        return new MongoTemplate(mongoDbFactory, converter);
     }
 
     @Bean
@@ -57,13 +56,10 @@ public class MongoConfig
         MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, mappingContext);
         try {
             mappingConverter.setCustomConversions(beanFactory.getBean(CustomConversions.class));
+            mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
         } catch (NoSuchBeanDefinitionException ignore) {
             ignore.printStackTrace();
         }
-
-        // Don't save _class to mongo
-        mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
-
         return mappingConverter;
     }
 
