@@ -50,15 +50,17 @@ public class InformRuleController extends BaseController {
         if(null != byName){
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
-        User user = new User();
+        User user = getUser(request);
+        if(null == user){
+            user = new User();
+        }
         user.setId("admin");
         user.setName("超级管理员");
         Date curDate = new Date();
         informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         informRule.setUpdateTime(curDate);
         informRule.initDateInt();
-        informRule.setType(Contant.MANUAL);
-
+        informRule.setRuleType(Contant.MANUAL);
         initTemplate(informRule);
 
         boolean result = ruleService.save(informRule);
@@ -71,7 +73,7 @@ public class InformRuleController extends BaseController {
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public @ResponseBody JsonResult delete(@RequestBody InformRule informRule) {
         InformRule sourceRule = ruleService.get(informRule.get_id());
-        if(null != sourceRule && Contant.SYSTEM.equals(sourceRule.getType())){
+        if(null != sourceRule && Contant.SYSTEM.equals(sourceRule.getRuleType())){
             return new JsonResult("默认规则不允许删除", false);
         }
         boolean result = ruleService.delete(informRule.get_id());
@@ -92,9 +94,10 @@ public class InformRuleController extends BaseController {
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public @ResponseBody JsonResult update(@RequestBody InformRule informRule) {
         informRule.initDateInt();
-        if(null != informRule && Contant.SYSTEM.equals(informRule.getType())){
+        if(null != informRule && Contant.SYSTEM.equals(informRule.getRuleType())){
             return new JsonResult("默认规则不允许修改", false);
         }
+        informRule.setRuleType(Contant.MANUAL);
         informRule.setUpdateTime(new Date());
         initTemplate(informRule);
         boolean result = ruleService.update(informRule);

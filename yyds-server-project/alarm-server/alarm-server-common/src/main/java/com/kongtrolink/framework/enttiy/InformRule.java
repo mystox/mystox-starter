@@ -20,7 +20,6 @@ public class InformRule {
     private String name;                    //名称
     private List<String> content;           //规则内容
     private String describe;                //备注
-    private String type;                    //通知规则类型（auto-默认规则，manual-手动）.默认规则不允许修改和删除
     private String enterpriseCode;
     private String enterpriseName;
     private String serverCode;
@@ -79,6 +78,15 @@ public class InformRule {
     private Date updateTime;                //修改时间
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
+    private String ruleType;                //通知规则类型（系统/手动）,默认规则不允许修改和删除
+
+    public String getRuleType() {
+        return ruleType;
+    }
+
+    public void setRuleType(String ruleType) {
+        this.ruleType = ruleType;
+    }
 
     public String getEmailReportCode() {
         return emailReportCode;
@@ -318,14 +326,6 @@ public class InformRule {
 
     public void setDescribe(String describe) {
         this.describe = describe;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getMsgEnable() {
