@@ -198,6 +198,7 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
             enterpriseLevel.setUpdateTime(curDate);
             enterpriseLevelList.add(enterpriseLevel);
             enterpriseLevel.setLevelType(Contant.SYSTEM);
+            enterpriseLevel.setState(Contant.USEING);
             logger.info("默认等级：{}", enterpriseLevel.toString());
         }
         enterpriseLevelDao.add(enterpriseLevelList);

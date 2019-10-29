@@ -26,8 +26,6 @@ public class CycleRunner implements ApplicationRunner {
 
 
     @Autowired
-    private AlarmCycleDao alarmCycleDao;
-    @Autowired
     private AlarmDao alarmDao;
     @Value("${cycle.count:300}")
     private int count;

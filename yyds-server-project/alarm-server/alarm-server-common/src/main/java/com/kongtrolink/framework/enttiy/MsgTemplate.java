@@ -1,9 +1,6 @@
 package com.kongtrolink.framework.enttiy;
 
-import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
-import com.kongtrolink.framework.base.StringUtil;
-
 import java.util.Date;
 
 /**

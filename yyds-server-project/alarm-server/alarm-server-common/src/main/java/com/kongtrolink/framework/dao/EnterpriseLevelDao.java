@@ -89,11 +89,11 @@ public class EnterpriseLevelDao {
     public List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, levelQuery);
-        Sort sort = new Sort(Sort.Direction.DESC, "code");
+//        Sort sort = new Sort(Sort.Direction.ASC, "updateTime");
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),  //查询条件
                 Aggregation.group("code", "updateTime"),
-                Aggregation.sort(sort),
+//                Aggregation.sort(sort),
                 Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
                 Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
         );
@@ -233,6 +233,7 @@ public class EnterpriseLevelDao {
     List<EnterpriseLevel> getByCodes(List<String> codeList){
         Criteria criteria = Criteria.where("code").in(codeList);
         Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "code"));
         query.with(new Sort(Sort.Direction.ASC, "level"));
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }

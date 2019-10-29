@@ -90,7 +90,7 @@ public class AlarmCycleDao {
         }
         String enterpriseName = cycleQuery.getEnterpriseName();
         if(!StringUtil.isNUll(enterpriseName)){
-            enterpriseCode = MongoUtil.escapeExprSpecialWord(enterpriseName);
+            enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
             criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
         }
         String serverCode = cycleQuery.getServerCode();
@@ -177,5 +177,12 @@ public class AlarmCycleDao {
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
+
+    public AlarmCycle getSystemCycle() {
+        Criteria criteria = Criteria.where("cycleType").is(Contant.SYSTEM);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, AlarmCycle.class, table);
+    }
+
 
 }

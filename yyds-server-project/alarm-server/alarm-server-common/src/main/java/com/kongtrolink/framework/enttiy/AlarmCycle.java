@@ -2,7 +2,6 @@ package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
-
 import java.util.Date;
 
 /**
@@ -23,14 +22,14 @@ public class AlarmCycle {
     private FacadeView operator;
     private String state ;
     private String enterpriseServer;    //企业和服务合体
-    private String defaultCycle;
+    private String cycleType;           //周期类型（系统/手动）
 
-    public String getDefaultCycle() {
-        return defaultCycle;
+    public String getCycleType() {
+        return cycleType;
     }
 
-    public void setDefaultCycle(String defaultCycle) {
-        this.defaultCycle = defaultCycle;
+    public void setCycleType(String cycleType) {
+        this.cycleType = cycleType;
     }
 
     public String getName() {
@@ -153,5 +152,21 @@ public class AlarmCycle {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "AlarmCycle{" +
+                "name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", diffTime=" + diffTime +
+                ", updateTime=" + updateTime +
+                ", operator=" + operator +
+                ", state='" + state + '\'' +
+                ", cycleType='" + cycleType + '\'' +
+                '}';
     }
 }
