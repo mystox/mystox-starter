@@ -16,6 +16,10 @@ server:
   name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000
+  title: 消息框架DEMO
+#  serverUri: /home #首页名
+  pageRoute: proxy_mqtt_demo
+  routeMark: proxy_mqtt_demo
 jarResources:
   path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
