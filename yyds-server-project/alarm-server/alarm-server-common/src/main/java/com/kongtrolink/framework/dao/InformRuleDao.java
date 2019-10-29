@@ -200,4 +200,15 @@ public class InformRuleDao {
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, InformRule.class, table);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/29 9:59
+     * 功能描述:火球系统默认告警投递规则
+     */
+    public InformRule getSystemRule() {
+        Criteria criteria = Criteria.where("ruleType").is(Contant.SYSTEM);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, InformRule.class, table);
+    }
 }

@@ -307,15 +307,11 @@ public class InformMsg {
             this.informAccount = ruleUser.getPhone();
             if(Contant.ONE.equals(flag)){
                 this.tempCode = informRule.getMsgReportCode();
-                this.template = informRule.getMsgReportModel();
             }else if(Contant.ZERO.equals(flag)){
                 this.alarmStateType = Contant.ALARM_STATE_RECOVER;
                 this.tempCode = informRule.getMsgResolveCode();
-                this.tempCode = informRule.getMsgResolveModel();
             }else {
                 this.alarmStateType = Contant.ALARM_STATE_FSUOFFLINE;
-                this.tempCode = informRule.getFsuOfflineCode();
-                this.template = informRule.getFsuOfflineModel();
             }
         }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
             this.url = informRule.getEmailServerURL();
@@ -324,10 +320,8 @@ public class InformMsg {
             this.informAccount = ruleUser.getEmail();
             if(Contant.ONE.equals(flag)){
                 this.tempCode = informRule.getEmailReportCode();
-                this.template = informRule.getEmailReportModel();
             }else{
                 this.tempCode = informRule.getEmailResolveCode();
-                this.template = informRule.getEmailResolveModel();
             }
         }else if(Contant.INFORM_TYPE_APP.equals(type)){
             this.url = informRule.getAppServerURL();
@@ -336,10 +330,8 @@ public class InformMsg {
             this.informAccount = ruleUser.getAppId();
             if(Contant.ONE.equals(flag)){
                 this.tempCode = informRule.getAppReportCode();
-                this.template = informRule.getAppReportModel();
             }else{
                 this.tempCode = informRule.getAppResolveCode();
-                this.template = informRule.getAppResolveModel();
             }
         }
         this.userId = ruleUser.getUser().getStrId();
@@ -349,7 +341,7 @@ public class InformMsg {
         this.setValue(alarm.getValue());
         this.setTreport(alarm.getTreport());
         this.setDeviceId(alarm.getDeviceId());
-        this.setCount(informRule.getCount());
+        this.setCount(informRule.getRepeat());
         this.date = date;
         this.signalId = alarm.getSignalId();
         this.serial = alarm.getSerial();

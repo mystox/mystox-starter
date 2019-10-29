@@ -24,6 +24,10 @@ public class InformRule {
     private String enterpriseName;
     private String serverCode;
     private String serverName;
+    private String ruleType;                //通知规则类型（系统/手动）,默认规则不允许修改和删除
+    private Date updateTime;                //修改时间
+    private String status;                  //启用状态（启用，禁用）
+    private FacadeView operator;            //操作用户
 
     private String msgEnable;               //告警短信是否启用
     private String msgBeginTime;            //告警短信开始时间
@@ -32,17 +36,13 @@ public class InformRule {
     private int msgEndTimeInt;              //告警短信结束时间数值
     private List<Integer> msgDayList ;      //告警短信星期数组
     private List<Integer> msgLevelList;     //告警等级列表
-    private String msgServerURL;
-    private int count = 1;                  //重复次数，默认不重复
+    private int repeat = 1;                  //重复次数，默认不重复
     private FacadeView msgTemplate;
-    private String msgReportCode;
-    private String msgReportModel;
-    private String msgResolveCode;
-    private String msgResolveModel;
-    private String fsuOfflineCode;
-    private String fsuOfflineModel;
     private String msgServerVerson;        //服务和版本
     private String msgOperaCode;           //服务操作码(服务码#操作码)
+    private String msgServerURL;
+    private String msgReportCode;
+    private String msgResolveCode;
 
     private String emailEnable;               //告警邮件是否启用
     private String emailBeginTime;            //告警邮件开始时间
@@ -52,13 +52,12 @@ public class InformRule {
     private List<Integer> emailDayList ;      //告警邮件星期数组
     private List<Integer> emailLevelList;     //告警邮件等级列表
     private FacadeView emailTemplate;
-    private String emailServerURL;
-    private String emailReportCode;
-    private String emailReportModel;
-    private String emailResolveCode;
-    private String emailResolveModel;
     private String emailServerVerson;        //服务和版本
     private String emailOperaCode;           //服务操作码(服务码#操作码)
+    private String emailServerURL;
+    private String emailReportCode;
+    private String emailResolveCode;
+
 
     private String appEnable;               //告警邮件是否启用
     private String appBeginTime;            //告警邮件开始时间
@@ -68,17 +67,14 @@ public class InformRule {
     private List<Integer> appDayList ;      //告警邮件星期数组
     private List<Integer> appLevelList;      //告警邮件等级列表
     private FacadeView appTemplate;
-    private String appServerURL;
-    private String appReportCode;
-    private String appReportModel;
-    private String appResolveCode;
-    private String appResolveModel;
     private String appServerVerson;        //服务和版本
     private String appOperaCode;
-    private Date updateTime;                //修改时间
-    private String status;                  //启用状态（启用，禁用）
-    private FacadeView operator;            //操作用户
-    private String ruleType;                //通知规则类型（系统/手动）,默认规则不允许修改和删除
+    private String appServerURL;
+    private String appReportCode;
+    private String appResolveCode;
+
+
+
 
     public String getRuleType() {
         return ruleType;
@@ -174,54 +170,6 @@ public class InformRule {
 
     public void setMsgReportCode(String msgReportCode) {
         this.msgReportCode = msgReportCode;
-    }
-
-    public String getMsgReportModel() {
-        return msgReportModel;
-    }
-
-    public void setMsgReportModel(String msgReportModel) {
-        this.msgReportModel = msgReportModel;
-    }
-
-    public String getFsuOfflineCode() {
-        return fsuOfflineCode;
-    }
-
-    public void setFsuOfflineCode(String fsuOfflineCode) {
-        this.fsuOfflineCode = fsuOfflineCode;
-    }
-
-    public String getFsuOfflineModel() {
-        return fsuOfflineModel;
-    }
-
-    public void setFsuOfflineModel(String fsuOfflineModel) {
-        this.fsuOfflineModel = fsuOfflineModel;
-    }
-
-    public String getEmailReportModel() {
-        return emailReportModel;
-    }
-
-    public void setEmailReportModel(String emailReportModel) {
-        this.emailReportModel = emailReportModel;
-    }
-
-    public String getAppReportModel() {
-        return appReportModel;
-    }
-
-    public void setAppReportModel(String appReportModel) {
-        this.appReportModel = appReportModel;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public FacadeView getOperator() {
@@ -512,30 +460,6 @@ public class InformRule {
         this.msgResolveCode = msgResolveCode;
     }
 
-    public String getMsgResolveModel() {
-        return msgResolveModel;
-    }
-
-    public void setMsgResolveModel(String msgResolveModel) {
-        this.msgResolveModel = msgResolveModel;
-    }
-
-    public String getEmailResolveModel() {
-        return emailResolveModel;
-    }
-
-    public void setEmailResolveModel(String emailResolveModel) {
-        this.emailResolveModel = emailResolveModel;
-    }
-
-    public String getAppResolveModel() {
-        return appResolveModel;
-    }
-
-    public void setAppResolveModel(String appResolveModel) {
-        this.appResolveModel = appResolveModel;
-    }
-
     public String getMsgServerVerson() {
         return msgServerVerson;
     }
@@ -558,6 +482,72 @@ public class InformRule {
 
     public void setEmailServerVerson(String emailServerVerson) {
         this.emailServerVerson = emailServerVerson;
+    }
+
+    public int getRepeat() {
+        return repeat;
+    }
+
+    public void setRepeat(int repeat) {
+        this.repeat = repeat;
+    }
+
+    @Override
+    public String toString() {
+        return "InformRule{" +
+                "_id='" + _id + '\'' +
+                ", name='" + name + '\'' +
+                ", content=" + content +
+                ", describe='" + describe + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", ruleType='" + ruleType + '\'' +
+                ", updateTime=" + updateTime +
+                ", status='" + status + '\'' +
+                ", operator=" + operator +
+                ", msgEnable='" + msgEnable + '\'' +
+                ", msgBeginTime='" + msgBeginTime + '\'' +
+                ", msgEndTime='" + msgEndTime + '\'' +
+                ", msgBeginTimeInt=" + msgBeginTimeInt +
+                ", msgEndTimeInt=" + msgEndTimeInt +
+                ", msgDayList=" + msgDayList +
+                ", msgLevelList=" + msgLevelList +
+                ", repeat=" + repeat +
+                ", msgTemplate=" + msgTemplate +
+                ", msgServerVerson='" + msgServerVerson + '\'' +
+                ", msgOperaCode='" + msgOperaCode + '\'' +
+                ", msgServerURL='" + msgServerURL + '\'' +
+                ", msgReportCode='" + msgReportCode + '\'' +
+                ", msgResolveCode='" + msgResolveCode + '\'' +
+                ", emailEnable='" + emailEnable + '\'' +
+                ", emailBeginTime='" + emailBeginTime + '\'' +
+                ", emailEndTime='" + emailEndTime + '\'' +
+                ", emailBeginTimeInt=" + emailBeginTimeInt +
+                ", emailEndTimeInt=" + emailEndTimeInt +
+                ", emailDayList=" + emailDayList +
+                ", emailLevelList=" + emailLevelList +
+                ", emailTemplate=" + emailTemplate +
+                ", emailServerVerson='" + emailServerVerson + '\'' +
+                ", emailOperaCode='" + emailOperaCode + '\'' +
+                ", emailServerURL='" + emailServerURL + '\'' +
+                ", emailReportCode='" + emailReportCode + '\'' +
+                ", emailResolveCode='" + emailResolveCode + '\'' +
+                ", appEnable='" + appEnable + '\'' +
+                ", appBeginTime='" + appBeginTime + '\'' +
+                ", appEndTime='" + appEndTime + '\'' +
+                ", appBeginTimeInt=" + appBeginTimeInt +
+                ", appEndTimeInt=" + appEndTimeInt +
+                ", appDayList=" + appDayList +
+                ", appLevelList=" + appLevelList +
+                ", appTemplate=" + appTemplate +
+                ", appServerVerson='" + appServerVerson + '\'' +
+                ", appOperaCode='" + appOperaCode + '\'' +
+                ", appServerURL='" + appServerURL + '\'' +
+                ", appReportCode='" + appReportCode + '\'' +
+                ", appResolveCode='" + appResolveCode + '\'' +
+                '}';
     }
 
     /**
@@ -589,24 +579,23 @@ public class InformRule {
     public void initTemplate(MsgTemplate msgTemplate){
         String type = msgTemplate.getType();
         if(Contant.TEMPLATE_MSG.equals(type)){
-            this.setMsgReportCode(msgTemplate.getReportCode());
-            this.setMsgReportModel(msgTemplate.getReportModel());
-            this.setMsgResolveCode(msgTemplate.getResolveCode());
-            this.setMsgResolveModel(msgTemplate.getResolveModel());
-            this.setFsuOfflineCode(msgTemplate.getOfflineCode());
-            this.setFsuOfflineModel(msgTemplate.getOfflineModel());
             this.msgServerVerson = msgTemplate.getServerVerson();
             this.setMsgOperaCode(msgTemplate.getOperaCode());
+            this.msgServerURL = msgTemplate.getUrl();
+            this.setMsgReportCode(msgTemplate.getReportCode());
+            this.setMsgResolveCode(msgTemplate.getResolveCode());
         }else if(Contant.TEMPLATE_EMAIL.equals(type)){
-            this.setEmailReportModel(msgTemplate.getReportModel());
-            this.setEmailResolveModel(msgTemplate.getResolveModel());
             this.emailServerVerson = msgTemplate.getServerVerson();
             this.setEmailOperaCode(msgTemplate.getOperaCode());
+            this.emailServerURL = msgTemplate.getUrl();
+            this.emailReportCode = msgTemplate.getReportCode();
+            this.emailResolveCode = msgTemplate.getResolveCode();
         }else{
-            this.setAppReportModel(msgTemplate.getReportModel());
-            this.setAppResolveModel(msgTemplate.getResolveModel());
             this.appServerVerson = msgTemplate.getServerVerson();
             this.setAppOperaCode(msgTemplate.getOperaCode());
+            this.appServerURL = msgTemplate.getUrl();
+            this.appReportCode = msgTemplate.getReportCode();
+            this.appResolveCode = msgTemplate.getResolveCode();
         }
     }
 }
