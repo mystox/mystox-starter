@@ -66,15 +66,15 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${server.port}")
     private int port;
 
-    @Value("${server.title:null}")
+    @Value("${server.title:}")
     private String title;
-    @Value("${server.serverUri:null}")
+    @Value("${server.serverUri:}")
     private String serverUri;
 
-    @Value("${server.pageRoute:null}")
+    @Value("${server.pageRoute:}")
     private String pageRoute;
 
-    @Value("${server.routeMark:null}")
+    @Value("${server.routeMark:}")
     private String routeMark;
 
 
