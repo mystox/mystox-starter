@@ -3,12 +3,20 @@ package com.kongtrolink.framework.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.dao.DBService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 @Component
 public class DeviceUtils {
+
+    private Logger logger = LoggerFactory.getLogger(DeviceUtils.class);
+
+    @Value("${server.name}_${server.version}")
+    private String selfServerCode;
 
     @Resource(name = "Neo4jDBService")
     private DBService dbService;
@@ -17,8 +25,8 @@ public class DeviceUtils {
 
         JSONObject jsonObject = JSONObject.parseObject(payload);
 
-        JSONArray deviceList = jsonObject.getJSONArray("deviceList");
-        jsonObject.remove("deviceList");
+        JSONArray deviceList = jsonObject.getJSONArray("childDevices");
+        jsonObject.remove("childDevices");
 
         String id = mergeDevice(jsonObject);
         if (id.equals("")) {
@@ -38,7 +46,7 @@ public class DeviceUtils {
             relationship.put("id2", childId);
             relationship.put("type", "Logical");
             if (!dbService.addCIRelationship(relationship)) {
-                //todo add log
+                logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed", selfServerCode);
             }
         }
 
@@ -48,8 +56,8 @@ public class DeviceUtils {
 
         JSONObject jsonObject = JSONObject.parseObject(payload);
 
-        JSONArray deviceList = jsonObject.getJSONArray("deviceList");
-        jsonObject.remove("deviceList");
+        JSONArray deviceList = jsonObject.getJSONArray("childDevices");
+        jsonObject.remove("childDevices");
 
         String id = mergeDevice(jsonObject);
         if (id.equals("")) {
@@ -108,7 +116,7 @@ public class DeviceUtils {
             relationship.put("id2", childId);
             relationship.put("type", type);
             if (!dbService.addCIRelationship(relationship)) {
-                //todo add log
+                logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed", selfServerCode);
             }
         }
     }
@@ -131,7 +139,7 @@ public class DeviceUtils {
                 request.put("id2", response.getString("id"));
                 request.put("type", type);
                 if (!dbService.deleteCIRelationship(request)) {
-                    //todo log
+                    logger.error(JSONObject.toJSONString(request) + " deleteCIRelationship failed", selfServerCode);
                 }
             }
         }
@@ -149,9 +157,12 @@ public class DeviceUtils {
         jsonObject.remove("extend");
         jsonObject.putAll(extend);
 
+        jsonObject.put("address", jsonObject.getString("regionCode"));
+        jsonObject.remove("regionCode");
+
         String id;
         if (response.getInteger("count") == 1) {
-            id = response.getJSONArray("info").getJSONObject(0).getString("id");
+            id = response.getJSONArray("infos").getJSONObject(0).getString("id");
             jsonObject.put("id", id);
             if (!dbService.modifyCI(jsonObject)) {
                 id = "";

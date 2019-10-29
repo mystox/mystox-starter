@@ -47,7 +47,33 @@ public class CITypeController {
         result.put("info", "删除失败");
 
         String name = requestBody.getString("name");
-        //todo 删除前需判断该类型或该类型下的子类型是否存在对应CI信息
+
+        JSONObject request = new JSONObject();
+        request.put("title", "");
+        request.put("name", name);
+        request.put("code", "");
+        JSONArray ciTypeList = dbService.searchCIType(request);
+        if (ciTypeList.size() != 1) {
+            result.put("info", "删除失败，类型有误");
+            return JSONObject.toJSONString(result);
+        }
+
+        request = new JSONObject();
+        JSONObject ciType = ciTypeList.getJSONObject(0);
+        int level = ciType.getInteger("level");
+        String code = ciType.getString("code");
+        if (level == 1) {
+            request.put("id", code + "-.*-.*-.*-.*-.*");
+        } else if (level == 2) {
+            request.put("id", ".*-" + code + "-.*-.*-.*-.*");
+        } else if (level == 3) {
+            request.put("id", ".*-.*-" + code + "-.*-.*-.*");
+        }
+        JSONObject ciList = dbService.searchCI(request);
+        if (ciList.getInteger("count") > 0) {
+            result.put("info", "删除失败，该类型下存在设备信息，无法删除");
+            return JSONObject.toJSONString(result);
+        }
 
         if (dbService.deleteCIType(name)) {
             result.put("result", 1);

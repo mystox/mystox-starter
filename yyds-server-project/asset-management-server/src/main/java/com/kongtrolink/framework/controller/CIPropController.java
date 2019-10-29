@@ -37,18 +37,7 @@ public class CIPropController {
 
         if (dbService.addCIProp(requestBody)) {
 
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name", requestBody.getString("name"));
-
-                JSONArray jsonArray = new JSONArray();
-                jsonArray.add(requestBody.getJSONObject("prop"));
-                jsonObject.put("props", jsonArray);
-
-                publish.publishCIProps(JSONObject.toJSONString(jsonObject));
-            } catch (Exception e) {
-
-            }
+            publishCIProps(requestBody.getString("name"), requestBody.getJSONObject("prop"));
 
             result.put("result", 1);
             result.put("info", "添加成功");
@@ -102,23 +91,28 @@ public class CIPropController {
 
         if (dbService.modifyCIProp(requestBody)) {
 
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name", requestBody.getString("name"));
-
-                JSONArray jsonArray = new JSONArray();
-                jsonArray.add(requestBody.getJSONObject("prop"));
-                jsonObject.put("props", jsonArray);
-
-                publish.publishCIProps(JSONObject.toJSONString(jsonObject));
-            } catch (Exception e) {
-
-            }
+            publishCIProps(requestBody.getString("name"), requestBody.getJSONObject("prop"));
 
             result.put("result", 1);
             result.put("info", "修改成功");
         }
 
         return JSONObject.toJSONString(result);
+    }
+
+    private void publishCIProps(String name, JSONObject prop) {
+
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", name);
+
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.add(prop);
+            jsonObject.put("props", jsonArray);
+
+            publish.publishCIProps(JSONObject.toJSONString(jsonObject));
+        } catch (Exception e) {
+
+        }
     }
 }
