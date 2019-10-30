@@ -4,7 +4,7 @@ spring:
 
 server:
   name: ALARM-SERVER-DELIVER   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
-  version: 1.0.0                  #\u7248\u672C\u53F7
+  version: V1.0.0                  #\u7248\u672C\u53F7
   port: 19003                      #\u7AEF\u53E3\u53F7
 
 register:

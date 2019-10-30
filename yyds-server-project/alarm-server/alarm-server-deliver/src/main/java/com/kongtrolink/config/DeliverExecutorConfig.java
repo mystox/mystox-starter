@@ -12,15 +12,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * update record:
  */
 @Configuration
-public class ExecutorConfig
+public class DeliverExecutorConfig
 {
     @Value("${executor.threadPool.corePoolSize}")
     private int CORE_POOL_SIZE;
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "senderExecutor")
-    public ThreadPoolTaskExecutor senderExecutor(){
+    @Bean(name = "deliverExecutor")
+    public ThreadPoolTaskExecutor deliverExecutor(){
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);

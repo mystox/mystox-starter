@@ -29,6 +29,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     private String currentAlarmTable = MongTable.ALARM_CURRENT;
     private String historyAlarmTable = MongTable.ALARM_HISTORY;
     private static ConcurrentLinkedQueue<JSONObject> recoverAndAuxilaryAlarmQueue = new ConcurrentLinkedQueue<>();
+
     @Resource(name = "controllerExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 

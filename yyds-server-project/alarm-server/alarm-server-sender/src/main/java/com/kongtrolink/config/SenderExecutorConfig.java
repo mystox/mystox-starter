@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.config;
+package com.kongtrolink.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,15 +12,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * update record:
  */
 @Configuration
-public class ExecutorConfig
+public class SenderExecutorConfig
 {
     @Value("${executor.threadPool.corePoolSize}")
     private int CORE_POOL_SIZE;
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "controllerExecutor")
-    public ThreadPoolTaskExecutor controllerExecutor(){
+    @Bean(name = "senderExecutor")
+    public ThreadPoolTaskExecutor senderExecutor(){
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);

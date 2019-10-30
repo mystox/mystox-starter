@@ -1,17 +1,22 @@
 package com.kongtrolink.framework.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
+import com.kongtrolink.framework.config.OperateConfig;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.InformRuleUser;
 import com.kongtrolink.framework.enttiy.MsgTemplate;
+import com.kongtrolink.framework.enttiy.Operate;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
+import com.kongtrolink.framework.service.MqttSender;
 import com.kongtrolink.framework.service.MsgTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,6 +45,8 @@ public class InformRuleController extends BaseController {
     InformRuleUserService ruleUserService;
     @Autowired
     MsgTemplateService msgTemplateService;
+    @Autowired
+    MqttSender mqttSender;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public @ResponseBody
@@ -239,5 +246,54 @@ public class InformRuleController extends BaseController {
                 informRule.initTemplate(msgTemplate);
             }
         }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/29 14:00
+     * 功能描述:测试其他模块接口
+     */
+    @RequestMapping("/testServer")
+    @ResponseBody
+    public JsonResult testServer(@RequestBody InformRule informRule){
+
+        String msgServerVerson = informRule.getMsgServerVerson();
+        String msgOperaCode = informRule.getMsgOperaCode();
+        String describe = informRule.getDescribe();
+        String msgEntity = null;
+        if("1".equals(describe)) {
+            //获取区域下用户列表：AUTH_PLATFORM_1.0.0/getUserListByRegionCodes
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("serverCode", "AUTH_PLATFORM");
+            List<String> regionCodes = new ArrayList<>();
+            regionCodes.add("220281");
+            jsonObject.put("regionCodes", regionCodes);
+            msgEntity = jsonObject.toJSONString();
+            System.out.println("获取区域下用户列表jsonObject:" + jsonObject);
+            /*
+            1;[{"classes":"企业用户","companyId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgName":"zuzhi1","currentOrgType":"DEPARTMENT","currentPositionName":"mystoxlol","currentPostId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleName":"mystoxlol","department":"zuzhi1","email":"mystox@163.com","errorCode":"","id":"5a12a0504817ea147350dbe1","job":"mystoxlol","message":"","name":"jxyd","password":"fcea920f7412b5da7be0cf42b8c93759","phone":"15067455667","receiveAlarmEmail":"0","receiveAlarmMsg":"1","receiveAlarmPush":"0","receiveWorkPush":"0","success":false,"type":"mystoxlol","uniqueCode":"zuzhi1","userGroup":"mystoxlol","userId":"5a12a0504817ea147350dbe1","username":"jxyd"}]
+             */
+        }else if("2".equals(describe)){
+            //根据地区编码列表获取地区名称 getRegionCodeEntity
+            JSONObject jsonObject = new JSONObject();
+            List<String> regionCodes = new ArrayList<>();
+            regionCodes.add("220281");
+            regionCodes.add("330301");
+            jsonObject.put("regionCodes", regionCodes);
+            System.out.println("根据地区编码列表获取地区名称json:" + jsonObject.toJSONString());
+            msgEntity = jsonObject.toJSONString();
+            System.out.println("数组字符串：" + regionCodes.toString());
+            msgEntity = "[220281, 330301]";
+            /*
+            [{"code":"220281","id":"220281","latitude":43.716756,"longitude":127.351742,"name":"[\"吉林省\",\"吉林市\",\"蛟河市\"]"},{"code":"330301","id":"330301","latitude":28.002838,"longitude":120.690635,"name":"[\"浙江省\",\"温州市\",\"市辖区\"]"}]
+             */
+        }else if("3".equals(describe)){
+//            List<Operate> operateList = operateConfig.getOperate();
+//            System.out.println("list;" + operateList);
+            return new JsonResult("测试成功");
+        }
+        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, msgEntity);
+        System.out.println(msgResult.getStateCode() + ";" + msgResult.getMsg());
+        return new JsonResult("测试成功");
     }
 }
