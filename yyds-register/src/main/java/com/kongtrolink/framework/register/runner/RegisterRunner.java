@@ -25,6 +25,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -78,9 +79,6 @@ public class RegisterRunner implements ApplicationRunner {
     private String routeMark;
 
 
-
-
-
     @Autowired
     ServiceRegistry serviceRegistry;
     @Autowired
@@ -132,7 +130,7 @@ public class RegisterRunner implements ApplicationRunner {
     private void registerServer() throws KeeperException, InterruptedException, IOException {
 
         //获取服务信息
-        ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
+        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
 
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -144,12 +142,18 @@ public class RegisterRunner implements ApplicationRunner {
             serviceRegistry.create(subPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         else
             serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
+        //在线标志
+        String onlineStatus = subPath + "/" + OperaCode.ONLINE;
+        if (serviceRegistry.exists(onlineStatus))
+            throw new InterruptedIOException();
+        else
+            serviceRegistry.create(onlineStatus, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         //请求列表目录
         if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
             serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
         if (!serviceRegistry.exists(pubPath))
-            serviceRegistry.create(pubPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
 
@@ -210,7 +214,6 @@ public class RegisterRunner implements ApplicationRunner {
                 //往服务节点注册服务信息
                 setDataToRegistry(sub);
             }
-
         } else {
             throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
         }
@@ -253,7 +256,7 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
 //            JSONObject server = new JSONObject();
-            ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
+            ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
 //            server.put("serverName", serverName);
 //            server.put("serverVersion", serverVersion);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
