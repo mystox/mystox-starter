@@ -1,16 +1,16 @@
 package com.kongtrolink.framework.dao.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.CICorrespondenceType;
 import com.kongtrolink.framework.entity.Neo4jDBNodeType;
 import com.kongtrolink.framework.entity.Neo4jDBRelationshipType;
 import com.kongtrolink.framework.dao.DBService;
-import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.utils.Neo4jUtils;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.summary.ResultSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,11 @@ import java.util.List;
 
 @Service("Neo4jDBService")
 public class Neo4jDBService implements DBService {
+
+    private Logger logger = LoggerFactory.getLogger(Neo4jDBService.class);
+
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
 
     @Value("${neo4j.username}")
     private String username;
@@ -45,9 +50,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -99,7 +102,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -115,9 +118,7 @@ public class Neo4jDBService implements DBService {
 
         boolean result = false;
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -140,7 +141,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -159,9 +160,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -185,7 +184,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -204,9 +203,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -259,7 +256,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -279,9 +276,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -303,7 +298,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -318,9 +313,7 @@ public class Neo4jDBService implements DBService {
 
         JSONArray result = new JSONArray();
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -339,7 +332,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -358,9 +351,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -401,7 +392,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -416,9 +407,7 @@ public class Neo4jDBService implements DBService {
     public boolean deleteCITypeConnectionRelationship(JSONObject jsonObject) {
         boolean result = false;
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -446,7 +435,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -466,9 +455,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -503,7 +490,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -523,9 +510,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -579,7 +564,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -599,9 +584,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -630,7 +613,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -650,9 +633,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -694,7 +675,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -714,9 +695,7 @@ public class Neo4jDBService implements DBService {
             return null;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -754,7 +733,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -774,9 +753,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -790,7 +767,8 @@ public class Neo4jDBService implements DBService {
                     jsonObject.put("createTime", System.currentTimeMillis());
                     jsonObject.put("modifyTime", System.currentTimeMillis());
 
-                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3})<-[*1..3]-" +
+                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3})" +
+                            "<-[:" + Neo4jDBRelationshipType.INCLUDE + " *1..3]-" +
                             "(parent:" + Neo4jDBNodeType.CIType + ") return item, parent";
                     StatementResult statementResult = transaction.run(cmd, Values.parameters("Name", name));
                     List<Record> recordList = statementResult.list();
@@ -818,7 +796,7 @@ public class Neo4jDBService implements DBService {
                     }
 
                     cmd = "match (type:"+ Neo4jDBNodeType.CIType + " {name:{Name}, level:3}), " +
-                            "(prop:" + Neo4jDBNodeType.CIProp + " {businessCode:''}) " +
+                            "(prop:" + Neo4jDBNodeType.CIProp + ") " +
                             "where (prop)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(type) and " +
                             "(prop.businessCode = '' or prop.businessCode = '" + businessCode + "')" +
                             "return prop";
@@ -854,7 +832,7 @@ public class Neo4jDBService implements DBService {
 
                         if (!prop.containsKey("businessCode")) {
                             propStr = tmp;
-                            if (!jsonObject.containsKey("addressCode")) {
+                            if (!jsonObject.containsKey("address")) {
                                 propStr += ",address:'000000'";
                             }
                         } else {
@@ -869,7 +847,7 @@ public class Neo4jDBService implements DBService {
                     cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "}) ";
                     if (!attachPropStr.equals("")) {
                         cmd += "create (attach:" + Neo4jDBNodeType.CI + " {businessCode:{BusinessCode}" + attachPropStr + "}) " +
-                                "create (attach)-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]->(ci) ";
+                                "create (attach)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(ci) ";
                     }
                     cmd += "return ci.id";
 
@@ -897,7 +875,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = "";
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -917,9 +895,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -947,7 +923,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -967,9 +943,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1007,6 +981,13 @@ public class Neo4jDBService implements DBService {
                         for (int i = 0; i < nameArray.size(); ++i) {
                             String propName = nameArray.getString(i);
                             String propType = typeArray.getString(i);
+
+                            if (propName.equals("createTime") || propName.equals("id") ||
+                                    propName.equals("enterpriseCode")  || propName.equals("serverCode") ||
+                                    propName.equals("sn")  || propName.equals("user") ||
+                                    propName.equals("gatewayServerCode") || propName.equals("type")) {
+                                continue;
+                            }
 
                             if (jsonObject.containsKey(propName)) {
                                 count++;
@@ -1056,7 +1037,7 @@ public class Neo4jDBService implements DBService {
                         }
 
                         if (count == 0) {
-                            transaction.failure();
+                            transaction.success();
                             return result;
                         }
 
@@ -1096,11 +1077,13 @@ public class Neo4jDBService implements DBService {
                             return false;
                         }
                     }
+
+                    transaction.success();
                 }
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1120,9 +1103,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1161,7 +1142,7 @@ public class Neo4jDBService implements DBService {
                         conditionList.add("ci.address in " + JSONObject.toJSONString(jsonObject.getJSONArray("addressCodes")));
                     }
                     if (jsonObject.containsKey("status")) {
-                        conditionList.add("ci.status = " + jsonObject.getInteger("status"));
+                        conditionList.add("ci.status = " + jsonObject.getBoolean("status"));
                     }
                     if (jsonObject.containsKey("startCreateTime")) {
                         conditionList.add("ci.createTime > " + jsonObject.getLong("startCreateTime"));
@@ -1260,7 +1241,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1281,9 +1262,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1336,10 +1315,22 @@ public class Neo4jDBService implements DBService {
                         return false;
                     }
 
+                    cmd = "match (ci1:" + Neo4jDBNodeType.CI + " {id:{Id1}})" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:true}]->" +
+                            "(ci2:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
+                            "return r";
+                    statementResult = transaction.run(cmd,
+                            Values.parameters("Type", relationshipType, "Id1", id1, "Id2", id2));
+                    recordList = statementResult.list();
+                    if (recordList.size() > 0) {
+                        transaction.failure();
+                        return false;
+                    }
+
                     CICorrespondenceType ciCorrespondenceType = CICorrespondenceType.values()[relationship.getInteger("correspondence")];
                     if (ciCorrespondenceType == CICorrespondenceType.One_To_One) {
                         cmd = "match (ci1:" + Neo4jDBNodeType.CI + " )" +
-                                "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:1}]->" +
+                                "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:true}]->" +
                                 "(ci2:" + Neo4jDBNodeType.CI + ") " +
                                 "where ci1.id = '" + id1 + "' or ci2.id = '" + id2 + "' " +
                                 "return r";
@@ -1355,7 +1346,7 @@ public class Neo4jDBService implements DBService {
 
                     cmd = "match (ci1:" + Neo4jDBNodeType.CI + " {id:{Id1}}), " +
                             "(ci2:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
-                            "create (ci1)-[:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:1}]->(ci2)";
+                            "create (ci1)-[:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:true}]->(ci2)";
                     statementResult = transaction.run(cmd,
                             Values.parameters("Id1", id1, "Id2", id2, "Type", relationshipType));
                     ResultSummary summary = statementResult.summary();
@@ -1366,9 +1357,12 @@ public class Neo4jDBService implements DBService {
                     }
 
                     cmd = "match (ci1:" + Neo4jDBNodeType.CI + " {id:{Id1}})" +
-                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:0}]->" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:false}]->" +
                             "(ci2:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
                             "delete r";
+                    transaction.run(cmd, Values.parameters("Id1", id1,
+                            "Type", relationshipType,
+                            "Id2", id2));
 
                     transaction.success();
                     result = true;
@@ -1376,7 +1370,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1396,9 +1390,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1409,7 +1401,7 @@ public class Neo4jDBService implements DBService {
                     String serverCode = jsonObject.getString("serverCode");
 
                     String cmd = "match (ci:" + Neo4jDBNodeType.CI + " {id:{Id},enterpriseCode:{EnterpriseCode},serverCode:{ServerCode}})" +
-                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {status:1}]->" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {status:true}]->" +
                             "(children:" + Neo4jDBNodeType.CI + " {enterpriseCode:{EnterpriseCode},serverCode:{ServerCode}})";
                     if (jsonObject.containsKey("addressCodes")) {
                         cmd += " where ci.address in " + JSONObject.toJSONString(jsonObject.getJSONArray("addressCodes")) + " " +
@@ -1428,7 +1420,7 @@ public class Neo4jDBService implements DBService {
                     }
 
                     cmd = "match (ci:" + Neo4jDBNodeType.CI + " {id:{Id},enterpriseCode:{EnterpriseCode},serverCode:{ServerCode}})" +
-                            "<-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {status:1}]-" +
+                            "<-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {status:true}]-" +
                             "(children:" + Neo4jDBNodeType.CI + " {enterpriseCode:{EnterpriseCode},serverCode:{ServerCode}})";
                     if (jsonObject.containsKey("addressCodes")) {
                         cmd += " where ci.address in " + JSONObject.toJSONString(jsonObject.getJSONArray("addressCodes")) + " " +
@@ -1455,7 +1447,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1475,9 +1467,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1490,7 +1480,7 @@ public class Neo4jDBService implements DBService {
                     String cmd = "match (:" + Neo4jDBNodeType.CI + " {id:{Id1}})" +
                             "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}}]-" +
                             "(:" + Neo4jDBNodeType.CI + " {id:{Id2}}) " +
-                            "set r.status = 0";
+                            "set r.status = false";
                     StatementResult statementResult = transaction.run(cmd,
                             Values.parameters("Id1", id1, "Id2", id2, "Type", relationshipType));
                     ResultSummary summary = statementResult.summary();
@@ -1506,7 +1496,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = false;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1526,9 +1516,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1556,7 +1544,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1576,9 +1564,7 @@ public class Neo4jDBService implements DBService {
             return result;
         }
 
-        if (driver == null) {
-            driver = openDriver();
-        }
+        openDriver();
 
         try {
             try (Session session = driver.session()) {
@@ -1604,7 +1590,7 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
-            System.out.println(JSONObject.toJSONString(e));
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
         return result;
@@ -1614,8 +1600,10 @@ public class Neo4jDBService implements DBService {
      * 打开数据库
      * @return 数据库链接
      */
-    private Driver openDriver() {
-        return GraphDatabase.driver(uri, AuthTokens.basic(username, password));
+    private void openDriver() {
+        if (driver == null) {
+            driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password));
+        }
     }
 
     /**

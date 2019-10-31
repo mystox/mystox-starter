@@ -8,12 +8,14 @@ import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.service.MqttSender;
 import com.kongtrolink.framework.utils.DeviceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service("MqttPublish")
 public class MqttPublish implements Publish {
 
     @Autowired
+    @Lazy
     MqttSender mqttSender;
 
     @Autowired

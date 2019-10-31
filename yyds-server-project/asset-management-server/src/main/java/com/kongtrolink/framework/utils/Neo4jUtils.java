@@ -21,7 +21,7 @@ public class Neo4jUtils {
      * @return 第一个是企业编码，第二个是服务编码
      */
     public static List<String> getEnterpriseCodeAndServerCode(String businessCode) {
-        ArrayList result = new ArrayList();
+        List<String> result = new ArrayList();
         String[] codes = businessCode.split("-");
         result.add(codes[0]);
         result.add(codes[1]);
