@@ -796,7 +796,7 @@ public class Neo4jDBService implements DBService {
                     }
 
                     cmd = "match (type:"+ Neo4jDBNodeType.CIType + " {name:{Name}, level:3}), " +
-                            "(prop:" + Neo4jDBNodeType.CIProp + " {businessCode:''}) " +
+                            "(prop:" + Neo4jDBNodeType.CIProp + ") " +
                             "where (prop)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(type) and " +
                             "(prop.businessCode = '' or prop.businessCode = '" + businessCode + "')" +
                             "return prop";
@@ -832,7 +832,7 @@ public class Neo4jDBService implements DBService {
 
                         if (!prop.containsKey("businessCode")) {
                             propStr = tmp;
-                            if (!jsonObject.containsKey("addressCode")) {
+                            if (!jsonObject.containsKey("address")) {
                                 propStr += ",address:'000000'";
                             }
                         } else {
@@ -847,7 +847,7 @@ public class Neo4jDBService implements DBService {
                     cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "}) ";
                     if (!attachPropStr.equals("")) {
                         cmd += "create (attach:" + Neo4jDBNodeType.CI + " {businessCode:{BusinessCode}" + attachPropStr + "}) " +
-                                "create (attach)-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]->(ci) ";
+                                "create (attach)-[:" + Neo4jDBRelationshipType.ATTACH + "]->(ci) ";
                     }
                     cmd += "return ci.id";
 
