@@ -22,7 +22,7 @@ import java.util.*;
  * @Description:获取对应的告警通知规则，并填充投递规则信息
  */
 @Service
-public class InformMsgService {
+public class CreateInformMsgService {
 
     @Autowired
     InformMsgDao informMsgDao;
@@ -30,14 +30,14 @@ public class InformMsgService {
     InformRuleDao informRuleDao;
     @Autowired
     InformRuleUserDao ruleUserDao;
-    @Resource(name = "deliverExecutor")
+    @Resource(name = "sendExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
     @Autowired
-    AlarmDeliverService deliverService;
+    CreateDeviceInfoService deliverService;
 
     private List<Alarm> informAlarmList = new ArrayList<>();
 
-    public void handleInformAlarmList(List<Alarm> alarmList, String type){
+    public synchronized void handleInformAlarmList(List<Alarm> alarmList, String type){
         if(Contant.ZERO.equals(type)){
             informAlarmList.clear();
         }else if(Contant.ONE.equals(type)){
@@ -48,7 +48,7 @@ public class InformMsgService {
         }
     }
 
-    public List<Alarm> beforeHandle(){
+    public synchronized List<Alarm> beforeHandle(){
         if(informAlarmList.size() == 0){
             return null;
         }
@@ -81,7 +81,6 @@ public class InformMsgService {
         if(informMsgList.size() > 0){
             deliverService.handleInformMsgList(informMsgList, Contant.ONE);
         }
-        handle();
     }
 
     private List<InformMsg> createMsg(Alarm alarm, String type, Date date){
@@ -99,7 +98,7 @@ public class InformMsgService {
         //获取对应的用户id
         List<InformRuleUser> ruleUserList = ruleUserDao.getByRuleIdList(ruleIdList);
         //分别得到两个以informRule ID为键的map
-        Map<String, List<InformRuleUser>> ruleId_ruleUserListMap = ruleUser2InformIdAlarmListMap(ruleUserList);
+        Map<String, List<InformRuleUser>> ruleId_ruleUserListMap = ruleUser2InformIdUserListMap(ruleUserList);
         Map<String, InformRule> informId_entityMap = inform2IdEntityMap(informRuleList);
         for(String ruleId : informId_entityMap.keySet()){
             InformRule informRule = informId_entityMap.get(ruleId);
@@ -133,7 +132,7 @@ public class InformMsgService {
         return map;
     }
 
-    private Map<String, List<InformRuleUser>> ruleUser2InformIdAlarmListMap(List<InformRuleUser> informRuleUserList){
+    private Map<String, List<InformRuleUser>> ruleUser2InformIdUserListMap(List<InformRuleUser> informRuleUserList){
         Map<String, List<InformRuleUser>> map = new HashMap<>();
         if(null != informRuleUserList){
             for(InformRuleUser informRuleUser : informRuleUserList){

@@ -195,8 +195,9 @@ public class AlarmDao {
      * @date: 2019/10/14 14:43
      * 功能描述:获取实时告警，用于周期管理。
      */
-    public List<Alarm> getAlarmList(String table, int size){
-        Criteria criteria = new Criteria();
+    public List<Alarm> getCurrentAlarmList(String table, int size){
+        //获取未标志的实时告警
+        Criteria criteria = Criteria.where("hc").ne(true);
         Query query = Query.query(criteria);
         query.limit(size);
         query.with(new Sort(Sort.Direction.ASC, "treport"));
@@ -208,8 +209,12 @@ public class AlarmDao {
      * @date: 2019/10/21 9:45
      * 功能描述:获取已存在告警。
      */
-    public Alarm getExistAlarm(String sliceKey, String signalId, String serial, String state, String table){
-        Criteria criteria = Criteria.where("sliceKey").is(sliceKey);
+    public Alarm getExistAlarm(String enterpriseCode, String serverCode, String deviceId, String signalId, String serial, String state, String table){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        if(!StringUtil.isNUll(deviceId)){
+            criteria.and("deviceId").is(deviceId);
+        }
         if(!StringUtil.isNUll(signalId)) {
             criteria.and("signalId").is(signalId);
         }
@@ -237,9 +242,10 @@ public class AlarmDao {
      * 功能描述:消除告警
      * 可能是实时告警，也可能是历史告警
      */
-    public boolean resolve(String sliceKey, String signalId, String serial, String state, Date curDate, String table){
-        Criteria criteria = Criteria.where("sliceKey");
-        criteria.and("sliceKey").is(sliceKey);
+    public boolean resolve(String enterpriseCode, String serverCode, String deviceId, String signalId, String serial, String state, Date curDate, String table){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("deviceId").is(deviceId);
         criteria.and("signalId").is(signalId);
         criteria.and("serial").is(serial);
         Query query = Query.query(criteria);
@@ -264,6 +270,18 @@ public class AlarmDao {
         }
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/10/30 17:35
+     * 功能描述:修改告警表中一个属性值
+     */
+    public void updateHC(List<String> alarmIdList, boolean val, String table){
+        Criteria criteria = Criteria.where("_id").in(alarmIdList);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("hc", val);
+        mongoTemplate.updateMulti(query, update, table);
     }
 }

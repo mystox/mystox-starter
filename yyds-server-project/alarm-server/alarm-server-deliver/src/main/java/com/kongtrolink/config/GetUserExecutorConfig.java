@@ -6,20 +6,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * Created by mystoxlol on 2018/12/6, 15:23.
- * company: kongtrolink
- * description:
- * update record:
+ * @Auther: liudd
+ * @Date: 2019/10/31 16:03
+ * @Description:投递模块，获取用户信息线程池
  */
 @Configuration
-public class DeliverExecutorConfig
-{
+public class GetUserExecutorConfig {
+
     @Value("${executor.threadPool.corePoolSize}")
     private int CORE_POOL_SIZE;
     @Value("${executor.threadPool.maxPoolSize}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "sendExecutor")
+    @Bean(name = "getUserExecutor")
     public ThreadPoolTaskExecutor sendExecutor(){
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量

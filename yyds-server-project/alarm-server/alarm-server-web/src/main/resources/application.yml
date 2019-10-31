@@ -68,15 +68,3 @@ jpush:
   alarm:
     reportTemplateId: 101
     recoverTemplateId: 102
-
-#userServices:
-#  operate:
-#    enterpriseCode: meitainuo
-#    serverCode: zhyd
-#    serverVerson: ALARM_SERVER_LEVEL_V1.0.0
-#    operaCode: handleLevel
-#  operate[1]:
-#    enterpriseCode: meitainuo
-#    serverCode: zhyd
-#    serverVerson: ALARM-SERVER-DELIVER _V1.0.0
-#    operaCode: handleDeliver

@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
-import com.kongtrolink.framework.config.OperateConfig;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
@@ -12,7 +12,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.InformRuleUser;
 import com.kongtrolink.framework.enttiy.MsgTemplate;
-import com.kongtrolink.framework.enttiy.Operate;
+import com.kongtrolink.framework.mqtt.Region;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -267,6 +266,7 @@ public class InformRuleController extends BaseController {
             jsonObject.put("serverCode", "AUTH_PLATFORM");
             List<String> regionCodes = new ArrayList<>();
             regionCodes.add("220281");
+            regionCodes.add("220282");
             jsonObject.put("regionCodes", regionCodes);
             msgEntity = jsonObject.toJSONString();
             System.out.println("获取区域下用户列表jsonObject:" + jsonObject);
@@ -281,9 +281,8 @@ public class InformRuleController extends BaseController {
             regionCodes.add("330301");
             jsonObject.put("regionCodes", regionCodes);
             System.out.println("根据地区编码列表获取地区名称json:" + jsonObject.toJSONString());
-            msgEntity = jsonObject.toJSONString();
             System.out.println("数组字符串：" + regionCodes.toString());
-            msgEntity = "[220281, 330301]";
+            msgEntity = regionCodes.toString();
             /*
             [{"code":"220281","id":"220281","latitude":43.716756,"longitude":127.351742,"name":"[\"吉林省\",\"吉林市\",\"蛟河市\"]"},{"code":"330301","id":"330301","latitude":28.002838,"longitude":120.690635,"name":"[\"浙江省\",\"温州市\",\"市辖区\"]"}]
              */
@@ -293,7 +292,12 @@ public class InformRuleController extends BaseController {
             return new JsonResult("测试成功");
         }
         MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, msgEntity);
-        System.out.println(msgResult.getStateCode() + ";" + msgResult.getMsg());
-        return new JsonResult("测试成功");
+        String msg = msgResult.getMsg();
+        List<Region> regionList = JSONArray.parseArray(msg, Region.class);
+        for(Region region :regionList){
+            System.out.println(region);
+        }
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+        return new JsonResult(msgResult);
     }
 }

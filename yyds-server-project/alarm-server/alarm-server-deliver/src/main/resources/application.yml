@@ -28,6 +28,8 @@ executor:
 deliver:
   count: 200    #\u544A\u8B66\u6295\u9012\u6570\u91CF
   time: 4       #\u544A\u8B66\u6295\u9012\u8F6E\u8BE2\u6B21\u6570
-cycle:
-  assets: http://localhost:8888/
-  getCI: getCI
+yunguan:
+  serverVersoin: AUTH_PLATFORM_1.0.0    #服务名和版本号
+  getUserListByRegionCodes: getUserListByRegionCodes #获取地区下用户
+  getRegionCodeEntity: getRegionCodeEntity            #获取地区名称
+

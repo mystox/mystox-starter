@@ -71,4 +71,11 @@ public class Contant {
     public static String INFORM = "通知";
     //推送使用字段
     public static final String TYPE = "type";
+
+    public static final String MQTT_RES_TIMEOUT = "消息超时";
+    public static final String MQTT_RES_NOSERVER = "未注册";
+    public static final String MQTT_RES_SUCC = "请求成功";
+    public static final String MQTT_RES_NODATA = "无数据";
+    public static final String MQTT_RES_FAIL = "请求失败";
+    public static final String MQTT_RES_NOADDRESS = "地区不存在";
 }
