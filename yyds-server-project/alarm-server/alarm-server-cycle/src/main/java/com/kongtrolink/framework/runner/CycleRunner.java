@@ -26,8 +26,6 @@ public class CycleRunner implements ApplicationRunner {
 
 
     @Autowired
-    private AlarmCycleDao alarmCycleDao;
-    @Autowired
     private AlarmDao alarmDao;
     @Value("${cycle.count:300}")
     private int count;
@@ -38,6 +36,8 @@ public class CycleRunner implements ApplicationRunner {
     private int time;
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger(CycleRunner.class);
+    @Autowired
+    CycleHandle cycleHandle;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -45,8 +45,6 @@ public class CycleRunner implements ApplicationRunner {
         ScheduledExecutorService taskScheduler = Executors.newSingleThreadScheduledExecutor();
         taskScheduler.scheduleAtFixedRate(new AlarmCycleTask(alarmDao, count), 10 * 1000, 10 * 1000,
                 TimeUnit.MILLISECONDS);
-        ScheduledExecutorService handleScheduler = Executors.newSingleThreadScheduledExecutor();
-        handleScheduler.scheduleWithFixedDelay(new CycleHandle(alarmDao, alarmCycleDao, count, time), 10 * 1000, 10 * 1000,
-                TimeUnit.MILLISECONDS);
+        cycleHandle.handle();
     }
 }

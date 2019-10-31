@@ -4,6 +4,7 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
+import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +37,6 @@ public class AlarmServiceImpl implements AlarmService{
     }
 
     @Override
-    public boolean delete(String alarmId, String table) {
-        return alarmDao.delete(alarmId, table);
-    }
-
-    @Override
     public boolean update(Alarm alarm, String table) {
         return alarmDao.update(alarm, table);
     }
@@ -53,7 +49,7 @@ public class AlarmServiceImpl implements AlarmService{
      * 功能描述:列表
      */
     @Override
-    public List<Alarm> list(AlarmQuery alarmQuery, String table) {
+    public List<DBObject> list(AlarmQuery alarmQuery, String table) {
         return alarmDao.list(alarmQuery, table);
     }
 
@@ -67,18 +63,6 @@ public class AlarmServiceImpl implements AlarmService{
     @Override
     public int count(AlarmQuery alarmQuery, String table) {
         return alarmDao.count(alarmQuery, table);
-    }
-
-    /**
-     * @param alarmQuery
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/24 9:08
-     * 功能描述:批量删除
-     */
-    @Override
-    public int deleteList(AlarmQuery alarmQuery, String table) {
-        return alarmDao.deleteList(alarmQuery, table);
     }
 
     @Override

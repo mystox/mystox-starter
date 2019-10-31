@@ -2,19 +2,21 @@ package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.StringUtil;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.mqtt.InnerMqttService;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import com.kongtrolink.framework.service.MqttService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,33 +26,29 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/enterpriseLevelController")
-public class EnterpriseLevelController extends BaseController{
+public class EnterpriseLevelController extends BaseController {
 
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
-    InnerMqttService mqttService;
+    MqttService mqttService;
 
     @RequestMapping("/add")
     @ResponseBody
-    public JsonResult add(EnterpriseLevel enterpriseLevel){
-        //判定告警等级是否重复
-        boolean repeat = enterpriseLevelService.isRepeat(enterpriseLevel);
-        if(repeat){
-            return new JsonResult("该等级已存在!", false);
-        }
-        String levelName = enterpriseLevel.getLevelName();
-        if(StringUtil.isNUll(levelName)){
-            levelName = EnumLevelName.getNameByLevel(enterpriseLevel.getLevel());
-        }
-        enterpriseLevel.setLevelName(levelName);
+    public JsonResult add(@RequestBody EnterpriseLevel enterpriseLevel){
+        Date curTime = new Date();
+        String code = StringUtil.getCode(curTime);
+        enterpriseLevel.setUpdateTime(curTime);
+        enterpriseLevel.setCode(code);
+        enterpriseLevel.setState(Contant.FORBIT);
+        enterpriseLevel.setLevelType(Contant.MANUAL);
         enterpriseLevelService.add(enterpriseLevel);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
 
     @RequestMapping("/delete")
     @ResponseBody
-    public JsonResult delete(EnterpriseLevelQuery enterpriseLevelQuery){
+    public JsonResult delete(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
         boolean delete = enterpriseLevelService.delete(enterpriseLevelQuery.getId());
         if(delete){
             return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, true);
@@ -60,17 +58,9 @@ public class EnterpriseLevelController extends BaseController{
 
     @RequestMapping("/update")
     @ResponseBody
-    public JsonResult update(EnterpriseLevel enterpriseLevel){
-        //判定告警等级是否重复
-        boolean repeat = enterpriseLevelService.isRepeat(enterpriseLevel);
-        if(repeat){
-            return new JsonResult("该等级已存在!", false);
-        }
-        String levelName = enterpriseLevel.getLevelName();
-        if(StringUtil.isNUll(levelName)){
-            levelName = EnumLevelName.getNameByLevel(enterpriseLevel.getLevel());
-        }
-        enterpriseLevel.setLevelName(levelName);
+    public JsonResult update(@RequestBody EnterpriseLevel enterpriseLevel){
+        enterpriseLevel.setUpdateTime(new Date());
+        enterpriseLevel.setLevelType(Contant.MANUAL);
         boolean update = enterpriseLevelService.update(enterpriseLevel);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -80,21 +70,28 @@ public class EnterpriseLevelController extends BaseController{
 
     @RequestMapping("/list")
     @ResponseBody
-    public JsonResult list(EnterpriseLevelQuery levelQuery){
+    public JsonResult list(@RequestBody EnterpriseLevelQuery levelQuery){
         List<EnterpriseLevel> list = enterpriseLevelService.list(levelQuery);
         int count = enterpriseLevelService.count(levelQuery);
         ListResult<EnterpriseLevel> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
     }
 
-    @RequestMapping("/updateDefault")
+    /**
+     * @auther: liudd
+     * @date: 2019/10/16 14:46
+     * 功能描述:修改状态
+     * 需要修改该企业等级相关的告警等级状态
+     */
+    @RequestMapping("/updateState")
     @ResponseBody
-    public JsonResult updateDefault(EnterpriseLevelQuery enterpriseLevelQuery){
-        boolean result = enterpriseLevelService.updateDefault(enterpriseLevelQuery);
+    public JsonResult updateState(@RequestBody EnterpriseLevelQuery levelQuery){
+        String state = levelQuery.getState();
+        boolean result = enterpriseLevelService.updateState(levelQuery);
         if(result){
-            return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
+            return new JsonResult(state + Contant.RESULT_SUC, true);
         }
-        return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_FAIL, true);
+        return new JsonResult(state + Contant.RESULT_FAIL, false);
     }
 
     /**
@@ -105,7 +102,26 @@ public class EnterpriseLevelController extends BaseController{
     @RequestMapping("/getUniqueServiceList")
     @ResponseBody
     public String getUniqueServiceList(){
-        JSON uniqueService = mqttService.getUniqueService();
+        JSON uniqueService = mqttService.getEnterpriseMsgAll();
         return uniqueService.toJSONString();
+    }
+
+    @RequestMapping("/getDeviceTypeList")
+    @ResponseBody
+    public String getDeviceTypeList(String enterpriseCode, String serverCode){
+        JSON deviceTypeList = mqttService.getDeviceTypeList(enterpriseCode, serverCode);
+        return deviceTypeList.toJSONString();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/17 13:56
+     * 功能描述:获取最后启用的企业告警
+     */
+    @RequestMapping("/getLastUse")
+    @ResponseBody
+    public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        return new JsonResult(lastUse);
     }
 }

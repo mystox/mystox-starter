@@ -11,4 +11,5 @@ public class ServerName {
     public final static String ALARM_SERVER = "ALARM_SERVER";       //告警服务
     public final static String LOG_SERVER = "LOG_SERVER"; //日志服务
     public final static String ASSET_MANAGEMENT_SERVER = "ASSET_MANAGEMENT_SERVER"; //资产管理服务
+    public final static String SCLOUD_SERVER = "SCLOUD_SERVER"; //资产管理服务
 }

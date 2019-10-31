@@ -123,8 +123,6 @@ public class MqttRestServiceImpl implements MqttRestService {
         }
 //        String unitHead = body.getString("unitHead");
 
-        //删除注册
-        //删除订阅
 
 
         return new JsonResult();

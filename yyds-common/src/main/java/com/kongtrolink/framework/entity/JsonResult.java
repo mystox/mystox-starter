@@ -15,6 +15,7 @@ public class JsonResult {
     private String info = "请求成功！";
     private Boolean success = true;
     private Object data;
+    private Object otherInfo;
 
     public JsonResult() {
         printResult();
@@ -29,6 +30,18 @@ public class JsonResult {
         this.info = info;
         this.success = success;
         printResult();
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public Object getOtherInfo() {
+        return otherInfo;
+    }
+
+    public void setOtherInfo(Object otherInfo) {
+        this.otherInfo = otherInfo;
     }
 
     public String getInfo() {

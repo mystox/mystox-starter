@@ -11,7 +11,11 @@ spring:
 server:
   name: LOG_SERVER #服务编码
   version: 1.0.0 #服务版本
-  port: 53000 #服务占用web端口
+  port: 54000 #服务占用web端口
+  title: 日志服务
+  serverUri:  #首页名
+  pageRoute: proxy_log
+  routeMark: proxy_log
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:

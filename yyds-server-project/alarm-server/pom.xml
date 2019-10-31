@@ -9,7 +9,7 @@
 		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	<!--</parent>-->
 	<parent>
-		<artifactId>yyts-server-project</artifactId>
+		<artifactId>yyds-server-project</artifactId>
 		<groupId>com.kongtrolink.framework</groupId>
 		<version>1.0.0</version>
 	</parent>
@@ -18,18 +18,23 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>alarm-server</name>
 	<description>Demo project for Spring Boot</description>
+	<packaging>pom</packaging>
 
+	<modules>
+		<module>alarm-server-common</module>
+		<module>alarm-server-controller</module>
+		<module>alarm-server-cycle</module>
+		<module>alarm-server-deliver</module>
+		<module>alarm-server-sender</module>
+		<module>alarm-server-level</module>
+		<module>alarm-server-web</module>
+	</modules>
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-boot.version>1.5.14.RELEASE</spring-boot.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb</artifactId>
-			<version>${spring-boot.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -58,6 +63,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot.version}</version>
 			</plugin>
 		</plugins>
 	</build>

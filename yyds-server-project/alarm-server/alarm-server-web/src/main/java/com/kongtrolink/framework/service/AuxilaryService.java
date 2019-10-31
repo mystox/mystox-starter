@@ -21,4 +21,6 @@ public interface AuxilaryService {
     List<Auxilary> list(AuxilaryQuery auxilaryQuery);
 
     int count(AuxilaryQuery auxilaryQuery);
+
+    Auxilary getByEnterServerCode(String enterpriseCode, String serverCode);
 }

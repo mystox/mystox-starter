@@ -35,15 +35,15 @@ public interface DeviceTypeLevelService {
 
     /**
      * @auther: liudd
-     * @date: 2019/9/26 13:18
-     * 功能描述:根据设备型号告警等级，删除对应的自定义告警等级
-     */
-    int deleteAlarmLevels(DeviceTypeLevel deviceTypeLevel);
-
-    /**
-     * @auther: liudd
      * @date: 2019/9/26 13:33
      * 功能描述:根据设备型号告警，生成新告警自定义等级
      */
     boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/16 16:13
+     * 功能描述:根据企业信息获取所有设备等级
+     */
+    List<DeviceTypeLevel> listByEnterpriseInfo(String enterpriseCode, String serverCode);
 }

@@ -2,7 +2,6 @@ package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
-
 import java.util.Date;
 
 /**
@@ -13,13 +12,33 @@ import java.util.Date;
 public class AlarmCycle {
 
     private String id;
+    private String name;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
     private Date updateTime;
-    private FacadeView creator;
-    private String state = Contant.FORBIT;
+    private FacadeView operator;
+    private String state ;
     private String enterpriseServer;    //企业和服务合体
+    private String cycleType;           //周期类型（系统/手动）
+
+    public String getCycleType() {
+        return cycleType;
+    }
+
+    public void setCycleType(String cycleType) {
+        this.cycleType = cycleType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public void initEnterpirseServer(){
         this.enterpriseServer = this.enterpriseCode + Contant.UNDERLINE + this.serverCode;
@@ -80,12 +99,28 @@ public class AlarmCycle {
         this.updateTime = updateTime;
     }
 
-    public FacadeView getCreator() {
-        return creator;
+    public String getEnterpriseName() {
+        return enterpriseName;
     }
 
-    public void setCreator(FacadeView creator) {
-        this.creator = creator;
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
     }
 
     /**
@@ -99,7 +134,7 @@ public class AlarmCycle {
             return false;
         }
         if(null == alarmCycle){
-            //如果告警周期为空，这已消除告警为历史告警
+            //如果告警周期为空，则默认已消除告警为历史告警
             if(null != alarm.getTrecover()){
                 return true;
             }
@@ -117,5 +152,21 @@ public class AlarmCycle {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "AlarmCycle{" +
+                "name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", diffTime=" + diffTime +
+                ", updateTime=" + updateTime +
+                ", operator=" + operator +
+                ", state='" + state + '\'' +
+                ", cycleType='" + cycleType + '\'' +
+                '}';
     }
 }

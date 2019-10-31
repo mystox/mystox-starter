@@ -14,7 +14,16 @@ public class DeviceTypeLevelQuery extends Paging {
     private String serverCode;
     private String deviceType;      //设备类型
     private String deviceModel;     //设备型号
-    private String level;
+    private Integer level;
+    private String operatorName;        //操作用户姓名
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
 
     public DeviceTypeLevelQuery() {
     }
@@ -63,11 +72,11 @@ public class DeviceTypeLevelQuery extends Paging {
         this.deviceType = deviceType;
     }
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 }

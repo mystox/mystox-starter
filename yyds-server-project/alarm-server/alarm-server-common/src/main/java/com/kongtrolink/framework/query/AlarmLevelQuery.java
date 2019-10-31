@@ -2,9 +2,7 @@ package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.Paging;
-import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
-import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 
 import java.util.Date;
 
@@ -17,16 +15,52 @@ public class AlarmLevelQuery extends Paging {
 
     private String id;                 //id
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private String deviceType;              //设备类型名称
     private String deviceModel;              //设备型号
-    private String sourceLevel;     //源等级
-    private String targetLevel;    //目标等级
+    private Integer sourceLevel;     //源等级
+    private Integer targetLevel;    //目标等级
     private String targetLevelName;         //目标等级名称
     private String color;           //目标等级对应的颜色
     private Date beginTime;
     private Date endTime;
-    private String generate = Contant.SYSTEM;                //产生类型
+    private String generate;                //产生类型
+    private String entDevCode;                  //企业，设备等级
+    private String operatorName;        //操作用户姓名
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getEntDevCode() {
+        return entDevCode;
+    }
+
+    public void setEntDevCode(String entDevCode) {
+        this.entDevCode = entDevCode;
+    }
 
     public String getEnterpriseCode() {
         return enterpriseCode;
@@ -75,20 +109,28 @@ public class AlarmLevelQuery extends Paging {
         return levelQuery;
     }
 
+    public Integer getSourceLevel() {
+        return sourceLevel;
+    }
+
+    public void setSourceLevel(Integer sourceLevel) {
+        this.sourceLevel = sourceLevel;
+    }
+
+    public Integer getTargetLevel() {
+        return targetLevel;
+    }
+
+    public void setTargetLevel(Integer targetLevel) {
+        this.targetLevel = targetLevel;
+    }
+
     public String getColor() {
         return color;
     }
 
     public void setColor(String color) {
         this.color = color;
-    }
-
-    public String getSourceLevel() {
-        return sourceLevel;
-    }
-
-    public void setSourceLevel(String sourceLevel) {
-        this.sourceLevel = sourceLevel;
     }
 
     public String getDeviceType() {
@@ -129,44 +171,5 @@ public class AlarmLevelQuery extends Paging {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getTargetLevel() {
-        return targetLevel;
-    }
-
-    public void setTargetLevel(String targetLevel) {
-        this.targetLevel = targetLevel;
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2019/9/26 9:47
-     * 功能描述:根据告警对象，直接生成告警等级查询实例，用于告警上报时，生成告警自定义等级
-     */
-    public static AlarmLevelQuery alarm2AlarmLevelQuery(Alarm alarm){
-        if(null == alarm){
-            return null;
-        }
-        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setEnterpriseCode(alarm.getEnterpriseCode());
-        alarmLevelQuery.setServerCode(alarm.getServerCode());
-        alarmLevelQuery.setDeviceType(alarm.getDeviceType());
-        alarmLevelQuery.setDeviceModel(alarm.getDeviceModel());
-        alarmLevelQuery.setSourceLevel(alarm.getLevel());
-        return alarmLevelQuery;
-    }
-
-    public static AlarmLevelQuery deviceTypeLevel2AlarmLevelQuery(DeviceTypeLevel deviceTypeLevel){
-        if(null == deviceTypeLevel){
-            return null;
-        }
-        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setEnterpriseCode(deviceTypeLevel.getEnterpriseCode());
-        alarmLevelQuery.setServerCode(deviceTypeLevel.getServerCode());
-        alarmLevelQuery.setDeviceType(deviceTypeLevel.getDeviceType());
-        alarmLevelQuery.setDeviceModel(deviceTypeLevel.getDeviceModel());
-        alarmLevelQuery.setSourceLevel(deviceTypeLevel.getLevel());
-        return alarmLevelQuery;
     }
 }

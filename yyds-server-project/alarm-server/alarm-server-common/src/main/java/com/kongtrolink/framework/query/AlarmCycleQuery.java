@@ -14,13 +14,57 @@ import java.util.Date;
 public class AlarmCycleQuery extends Paging{
 
     private String id;
+    private String name;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
+    private String serverName;
     private Integer diffTime;
-    private FacadeView creator;
     private Date beginTime;
     private Date endTime;
     private String state;
+    private String operatorName;
+    private FacadeView operator;
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getEnterpriseCode() {
         return enterpriseCode;
@@ -60,14 +104,6 @@ public class AlarmCycleQuery extends Paging{
 
     public void setDiffTime(Integer diffTime) {
         this.diffTime = diffTime;
-    }
-
-    public FacadeView getCreator() {
-        return creator;
-    }
-
-    public void setCreator(FacadeView creator) {
-        this.creator = creator;
     }
 
     public Date getBeginTime() {

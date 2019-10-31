@@ -4,6 +4,7 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: liudd
@@ -12,19 +13,89 @@ import java.util.Date;
  */
 public class AlarmLevel {
 
-    private String id;                      //id
+    private String id;                          //id
+    private String entDevCode;                  //企业，设备等级
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
-    private String deviceType;              //设备类型名称
-    private String deviceModel;              //设备型号
-//    private List<String> sourceLevelList;   //原等级列表字符串（12345），不添加“，”号等分隔符
-    private String sourceLevel;             //源等级
-    private String targetLevel;             //目标等级，一条自定义只包含一个目标等级，否则不好判定目标等级重复定义
-    private String targetLevelName;         //目标等级名称
-    private String color;                   //告警颜色，在确定目标等级时，确定颜色
-    private String generate = Contant.SYSTEM;                //产生类型
-    private Date updateTime;                   //创建时间
-    private FacadeView creator;             //创建者
+    private String serverName;
+    private String deviceType;                  //设备类型名称
+    private String deviceModel;                 //设备型号
+    private Integer sourceLevel;                 //源等级
+    private Integer targetLevel;                 //目标等级，一条自定义只包含一个目标等级，否则不好判定目标等级重复定义
+    private String targetLevelName;             //目标等级名称
+    private String color;                       //告警颜色，在确定目标等级时，确定颜色
+    private String generate = Contant.SYSTEM;   //产生类型
+    private Date updateTime;                    //创建时间
+    private FacadeView operator;                //操作人员
+
+    //前端展示列表
+    private List<Integer> sourceLevelList;
+    private List<Integer> targetLevelList;
+    private List<String> targetLevelNameList;
+    private List<String> colorList;
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
+    }
+
+    public List<String> getTargetLevelNameList() {
+        return targetLevelNameList;
+    }
+
+    public void setTargetLevelNameList(List<String> targetLevelNameList) {
+        this.targetLevelNameList = targetLevelNameList;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public List<String> getColorList() {
+        return colorList;
+    }
+
+    public void setColorList(List<String> colorList) {
+        this.colorList = colorList;
+    }
+
+    public String getEntDevCode() {
+        return entDevCode;
+    }
+
+    public void setEntDevCode(String entDevCode) {
+        this.entDevCode = entDevCode;
+    }
+
+    public void initEntDevCode(){
+        this.entDevCode = enterpriseCode + serverCode + deviceType + deviceModel;
+    }
+
+    public AlarmLevel() {
+    }
+
+    public AlarmLevel(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        this.enterpriseCode = enterpriseCode;
+        this.serverCode = serverCode;
+        this.deviceType = deviceType;
+        this.deviceModel = deviceModel;
+    }
 
     public String getEnterpriseCode() {
         return enterpriseCode;
@@ -56,14 +127,6 @@ public class AlarmLevel {
 
     public void setTargetLevelName(String targetLevelName) {
         this.targetLevelName = targetLevelName;
-    }
-
-    public String getSourceLevel() {
-        return sourceLevel;
-    }
-
-    public void setSourceLevel(String sourceLevel) {
-        this.sourceLevel = sourceLevel;
     }
 
     public String getDeviceModel() {
@@ -106,19 +169,35 @@ public class AlarmLevel {
         this.updateTime = updateTime;
     }
 
-    public FacadeView getCreator() {
-        return creator;
+    public Integer getSourceLevel() {
+        return sourceLevel;
     }
 
-    public void setCreator(FacadeView creator) {
-        this.creator = creator;
+    public void setSourceLevel(Integer sourceLevel) {
+        this.sourceLevel = sourceLevel;
     }
 
-    public String getTargetLevel() {
+    public Integer getTargetLevel() {
         return targetLevel;
     }
 
-    public void setTargetLevel(String targetLevel) {
+    public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    public List<Integer> getSourceLevelList() {
+        return sourceLevelList;
+    }
+
+    public void setSourceLevelList(List<Integer> sourceLevelList) {
+        this.sourceLevelList = sourceLevelList;
+    }
+
+    public List<Integer> getTargetLevelList() {
+        return targetLevelList;
+    }
+
+    public void setTargetLevelList(List<Integer> targetLevelList) {
+        this.targetLevelList = targetLevelList;
     }
 }

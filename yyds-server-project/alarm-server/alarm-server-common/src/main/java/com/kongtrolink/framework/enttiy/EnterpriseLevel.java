@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.FacadeView;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: liudd
@@ -12,13 +14,39 @@ import java.util.Date;
 public class EnterpriseLevel {
 
     private String id;
+    private String code;                //告警规则编码
+    private String name;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
-    private String level;
+    private String serverName;
+    private Integer level;
     private String levelName;
     private String color;
     private Date updateTime;
-    private String defaultLevel = Contant.NO;       //默认告警等级
+    private FacadeView operator;                    //最后操作用户
+    private String levelType;                       //企业告警等级类型（系统/手动）
+    private String state;                           //启用，禁用
+    //前端展示字段
+    private List<Integer> levels;        //等级列表
+    private List<String> levelNames;     //等级名称列表
+    private List<String> colors;        //颜色列表
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public List<Integer> getLevels() {
+        return levels;
+    }
+
+    public void setLevels(List<Integer> levels) {
+        this.levels = levels;
+    }
 
     public String getLevelName() {
         return levelName;
@@ -28,12 +56,76 @@ public class EnterpriseLevel {
         this.levelName = levelName;
     }
 
-    public String getDefaultLevel() {
-        return defaultLevel;
+    public String getColor() {
+        return color;
     }
 
-    public void setDefaultLevel(String defaultLevel) {
-        this.defaultLevel = defaultLevel;
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getLevelNames() {
+        return levelNames;
+    }
+
+    public void setLevelNames(List<String> levelNames) {
+        this.levelNames = levelNames;
+    }
+
+    public List<String> getColors() {
+        return colors;
+    }
+
+    public void setColors(List<String> colors) {
+        this.colors = colors;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public FacadeView getOperator() {
+        return operator;
+    }
+
+    public void setOperator(FacadeView operator) {
+        this.operator = operator;
     }
 
     public Date getUpdateTime() {
@@ -68,19 +160,29 @@ public class EnterpriseLevel {
         this.serverCode = serverCode;
     }
 
-    public String getLevel() {
-        return level;
+    public String getLevelType() {
+        return levelType;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setLevelType(String levelType) {
+        this.levelType = levelType;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
+    @Override
+    public String toString() {
+        return "EnterpriseLevel{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", level=" + level +
+                ", levelName='" + levelName + '\'' +
+                ", color='" + color + '\'' +
+                ", operator=" + operator +
+                ", levelType='" + levelType + '\'' +
+                ", state='" + state + '\'' +
+                '}';
     }
 }

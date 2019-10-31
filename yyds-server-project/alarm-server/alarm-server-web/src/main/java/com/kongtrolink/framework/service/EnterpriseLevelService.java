@@ -3,6 +3,7 @@ package com.kongtrolink.framework.service;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,34 +17,38 @@ public interface EnterpriseLevelService {
 
     boolean delete(String enterpriseLevelId);
 
+    boolean deleteByCode(String code);
+
     boolean update(EnterpriseLevel enterpriseLevel);
+
+    EnterpriseLevel get(String enterpriseLevelId);
 
     List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery);
 
     int count(EnterpriseLevelQuery levelQuery);
 
-    EnterpriseLevel getOne(EnterpriseLevelQuery levelQuery);
+    boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery);
 
     /**
      * @auther: liudd
-     * @date: 2019/9/20 11:17
-     * 功能描述:判定原告警是否重复
+     * @date: 2019/10/16 15:02
+     * 功能描述:获取最后一次启用的企业告警
      */
-    boolean isRepeat(EnterpriseLevel enterpriseLevel);
+    List<EnterpriseLevel> getLastUse(String enterpriseCode, String serverCode);
+
+    void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode);
 
     /**
      * @auther: liudd
-     * @date: 2019/9/21 10:04
-     * 功能描述:设置默认告警等级，一个企业只有一个默认告警等级
+     * @date: 2019/10/16 20:18
+     * 功能描述:禁用原来的告警等级
      */
-    boolean updateDefault(EnterpriseLevelQuery enterpriseLevelQuery);
+    boolean forbitBefor(String enterpriseCode, String serverCode, Date updateTime);
 
     /**
      * @auther: liudd
-     * @date: 2019/9/25 15:02
-     * 功能描述:获取最大告警等级
+     * @date: 2019/10/28 14:27
+     * 功能描述:初始化默认企业告警等级
      */
-    EnterpriseLevel getMaxLevelSinceLevel(EnterpriseLevelQuery enterpriseLevelQuery);
-
-    void redifineDefault(EnterpriseLevelQuery enterpriseLevelQuery);
+    void initEnterpriseLevel();
 }

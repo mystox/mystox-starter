@@ -1,11 +1,18 @@
 
 spring:
   application:
-    name: yytd-alarm-server
+    name: alarm-server_web
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
+
 server:
-  name: ALARM_SERVER #\u670D\u52A1\u7F16\u7801
-  version: 1.0.0 #\u670D\u52A1\u7248\u672C,\u53EF\u4EE5\u6269\u5C55\u4E3A * app
-  port: 18081 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
+  name: ALARM-SERVER_WEB #\u670D\u52A1\u7F16\u7801
+  version: V1.0.0 #\u670D\u52A1\u7248\u672C,\u53EF\u4EE5\u6269\u5C55\u4E3A * app
+  port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #jarResources:
 #  path: ./jarResources #\u53EF\u9009\u914D\u7F6E jar\u5305\u548CjarRes.yml\u8D44\u6E90\u914D\u7F6E\u6587\u4EF6\u5B58\u653E\u8DEF\u5F84 \u9ED8\u8BA4\u4E3A./jarResources
 register:
@@ -18,12 +25,58 @@ mqtt:
 
 mongodb:
 #  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
-  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+#  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+  uri: mongodb://172.16.6.9:27017/alarm_server
 
 unique:
   service:
     levelHandle:
       defaulg: serverCode1.operaCode1
       opera2: serverCode2.operaCode2
-    cycleHandle:
-    deliverHandle:
+
+#默认sms短信相关配置
+sms:
+  enable: ture
+  url: http://sendcloud.sohu.com/smsapi/send
+  urlN: http://sendcloud.sohu.com/smsapi/sendn
+  sms_user: KONGTROLINK
+  sms_key: BrTgrtdfTIkqdTLbp0mzxu7wc7FRHErV
+  alarm:
+    reportTemplateId: 1144
+  # 告警消除提示模板 id
+    recoverTemplateId: 2573
+
+##默认相关配置
+email:
+  url: http://api.sendcloud.net/apiv2/mail/sendtemplate
+  api_user: Kongtrolink_test_Fnwqd9
+  api_key: h3AGMVPe7ir8siUw
+  from_address: zhouj@kongtrolink.com
+  from_name: yytd
+  alarm:
+      reportTemplateId: power_alarm_templetId
+  #消除告警邮件模板
+      recoverTemplateId: power_alarm_clearId
+
+#默认APP推送相关配置
+jpush:
+  appKey: 6d050a833fa17919b719d02c
+#jpush.masterSecret.yiyi=185e690a9858c0b580e7f0c0
+  masterSecret:  59dbddde70bf61d9e03b2c21
+  # JPush 配置证书版本（开发为 false，产品为 true）
+  production: true
+  alarm:
+    reportTemplateId: 101
+    recoverTemplateId: 102
+
+#userServices:
+#  operate:
+#    enterpriseCode: meitainuo
+#    serverCode: zhyd
+#    serverVerson: ALARM_SERVER_LEVEL_V1.0.0
+#    operaCode: handleLevel
+#  operate[1]:
+#    enterpriseCode: meitainuo
+#    serverCode: zhyd
+#    serverVerson: ALARM-SERVER-DELIVER _V1.0.0
+#    operaCode: handleDeliver

@@ -4,6 +4,7 @@ import com.kongtrolink.framework.base.Paging;
 import com.kongtrolink.framework.enttiy.DeviceTypeLevel;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: liudd
@@ -13,20 +14,74 @@ import java.util.Date;
 public class EnterpriseLevelQuery extends Paging{
 
     private String id;
+    private String code;
+    private String name;
+    private List<String> codeList;
     private String enterpriseCode;
+    private String enterpriseName;
     private String serverCode;
-    private String level;
+    private String serverName;
+    private Integer level;
     private String color;
     private Date beginTime;
     private Date endTime;
-    private String defaultLevel;       //默认告警等级
+    private String operatorName;        //操作用户姓名
+    private String state;                           //启用，禁用
 
-    public String getDefaultLevel() {
-        return defaultLevel;
+    public String getName() {
+        return name;
     }
 
-    public void setDefaultLevel(String defaultLevel) {
-        this.defaultLevel = defaultLevel;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public List<String> getCodeList() {
+        return codeList;
+    }
+
+    public void setCodeList(List<String> codeList) {
+        this.codeList = codeList;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
     }
 
     public Date getBeginTime() {
@@ -69,11 +124,11 @@ public class EnterpriseLevelQuery extends Paging{
         this.serverCode = serverCode;
     }
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
@@ -92,7 +147,7 @@ public class EnterpriseLevelQuery extends Paging{
         EnterpriseLevelQuery enterpriseLevelQuery = new EnterpriseLevelQuery();
         enterpriseLevelQuery.setEnterpriseCode(deviceTypeLevel.getEnterpriseCode());
         enterpriseLevelQuery.setServerCode(deviceTypeLevel.getServerCode());
-        enterpriseLevelQuery.setLevel(deviceTypeLevel.getLevel());
+//        enterpriseLevelQuery.setLevel(deviceTypeLevel.getLevel());
         return enterpriseLevelQuery;
     }
 }

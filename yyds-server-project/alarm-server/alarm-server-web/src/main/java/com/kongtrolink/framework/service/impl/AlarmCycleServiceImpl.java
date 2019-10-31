@@ -6,9 +6,12 @@ import com.kongtrolink.framework.dao.AlarmCycleDao;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.query.AlarmCycleQuery;
 import com.kongtrolink.framework.service.AlarmCycleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +26,12 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
 
     @Autowired
     AlarmCycleDao cycleDao;
+    private static final Logger logger = LoggerFactory.getLogger(AlarmCycleServiceImpl.class);
 
     @Override
     public boolean save(AlarmCycle alarmCycle) {
         cycleDao.save(alarmCycle);
         if(!StringUtil.isNUll(alarmCycle.getId())){
-            //添加的都默认为启用状态
-            AlarmCycleQuery cycleQuery = new AlarmCycleQuery();
-            cycleQuery.setId(alarmCycle.getId());
-            cycleQuery.setState(Contant.USEING);
-            updateState(cycleQuery);
             return true;
         }
         return false;
@@ -92,7 +91,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
             return map;
         }
         for(AlarmCycle alarmCycle : alarmCycleList){
-            map.put(alarmCycle.getUniqueCode() + Contant.UNDERLINE + alarmCycle.getService(), alarmCycle);
+            map.put(alarmCycle.getEnterpriseCode() + Contant.UNDERLINE + alarmCycle.getServerCode(), alarmCycle);
         }
         return map;
     }
@@ -101,22 +100,45 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     public boolean updateState(AlarmCycleQuery cycleQuery) {
         //如果是禁用，直接禁用；如果是启用，需要先禁用当前启用的规则
         String state = cycleQuery.getState();
-        if(Contant.FORBIT.equals(state)){
-            cycleDao.updateState(cycleQuery);
+        String enterpriseCode = cycleQuery.getEnterpriseCode();
+        String serverCode = cycleQuery.getServerCode();
+        Date curTime = new Date();
+        if(Contant.USEING.equals(state)){
+            cycleDao.forbitBefor(enterpriseCode, serverCode, curTime, cycleQuery.getOperator());
         }
-        String sourceId = cycleQuery.getId();
-        cycleQuery.setId(null);
-        cycleQuery.setState(Contant.FORBIT);
-        cycleDao.updateState(cycleQuery);
-        //启用新规则
-        cycleQuery.setId(sourceId);
-        cycleQuery.setState(Contant.USEING);
-        boolean result = cycleDao.updateState(cycleQuery);
+        boolean result = cycleDao.updateState(enterpriseCode, serverCode, cycleQuery.getId(), state, curTime, cycleQuery.getOperator());
         return result;
     }
 
     @Override
     public AlarmCycle getLastUpdateOne(AlarmCycleQuery alarmCycleQuery) {
         return cycleDao.getLastUpdateOne(alarmCycleQuery);
+    }
+
+    @Override
+    public AlarmCycle getSystemCycle() {
+        return cycleDao.getSystemCycle();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/28 16:57
+     * 功能描述:初始化默认告警周期
+     */
+    @Override
+    public void initAlarmCycle() {
+        //获取系统默认告警周期
+        AlarmCycle systemCycle = getSystemCycle();
+        if(null == systemCycle){
+            logger.info("默认告警周期不存在，准备初始化");
+            systemCycle = new AlarmCycle();
+            systemCycle.setName("系统默认告警周期");
+            systemCycle.setDiffTime(24);
+            systemCycle.setUpdateTime(new Date());
+            systemCycle.setState(Contant.USEING);
+            systemCycle.setCycleType(Contant.SYSTEM);
+        }
+        logger.info("默认告警周期：{}", systemCycle.toString());
+        cycleDao.save(systemCycle);
     }
 }

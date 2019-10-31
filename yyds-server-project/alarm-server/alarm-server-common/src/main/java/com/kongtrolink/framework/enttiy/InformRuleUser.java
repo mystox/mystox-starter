@@ -15,6 +15,33 @@ public class InformRuleUser {
     private FacadeView informRule;
     private FacadeView user;
     private Date updateTime;
+    private String phone;
+    private String email;
+    private String appId;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
 
     public String get_id() {
         return _id;

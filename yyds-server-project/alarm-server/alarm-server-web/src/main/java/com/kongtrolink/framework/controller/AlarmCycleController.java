@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
@@ -8,9 +9,10 @@ import com.kongtrolink.framework.query.AlarmCycleQuery;
 import com.kongtrolink.framework.service.AlarmCycleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,21 +23,24 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/alarmCycleController")
-public class AlarmCycleController extends BaseController{
+public class AlarmCycleController extends BaseController {
 
     @Autowired
     AlarmCycleService cycleService;
 
     @RequestMapping("/add")
     @ResponseBody
-    public JsonResult add(AlarmCycle alarmCycle){
+    public JsonResult add(@RequestBody AlarmCycle alarmCycle){
+        alarmCycle.setUpdateTime(new Date());
+        alarmCycle.setState(Contant.FORBIT);
+        alarmCycle.setCycleType(Contant.MANUAL);
         cycleService.save(alarmCycle);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
 
     @RequestMapping("/delete")
     @ResponseBody
-    public JsonResult delete(AlarmCycleQuery cycleQuery){
+    public JsonResult delete(@RequestBody AlarmCycleQuery cycleQuery){
         boolean delete = cycleService.delete(cycleQuery.getId());
         if(delete){
             return new JsonResult(Contant.OPE_DELETE + Contant.RESULT_SUC, true);
@@ -45,7 +50,10 @@ public class AlarmCycleController extends BaseController{
 
     @RequestMapping("/update")
     @ResponseBody
-    public JsonResult update(AlarmCycle alarmCycle){
+    public JsonResult update(@RequestBody AlarmCycle alarmCycle){
+        alarmCycle.setUpdateTime(new Date());
+        alarmCycle.setCycleType(Contant.MANUAL);
+        alarmCycle.setUpdateTime(new Date());
         boolean update = cycleService.update(alarmCycle);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -55,7 +63,7 @@ public class AlarmCycleController extends BaseController{
 
     @RequestMapping("/list")
     @ResponseBody
-    public JsonResult list(AlarmCycleQuery alarmCycleQuery){
+    public JsonResult list(@RequestBody AlarmCycleQuery alarmCycleQuery){
         List<AlarmCycle> list = cycleService.list(alarmCycleQuery);
         int count = cycleService.count(alarmCycleQuery);
         ListResult<AlarmCycle> listResult = new ListResult<>(list, count);
@@ -64,7 +72,7 @@ public class AlarmCycleController extends BaseController{
 
     @RequestMapping("/updateState")
     @ResponseBody
-    public JsonResult updateState(AlarmCycleQuery cycleQuery){
+    public JsonResult updateState(@RequestBody AlarmCycleQuery cycleQuery){
         boolean result = cycleService.updateState(cycleQuery);
         String state = cycleQuery.getState();
         if(result){

@@ -26,7 +26,7 @@ public class AlarmLevelService {
         String serverCode = alarm.getServerCode();
         String deviceType = alarm.getDeviceType();
         String deviceModel = alarm.getDeviceModel();
-        String level = alarm.getLevel();
+        Integer level = alarm.getLevel();
         AlarmLevel alarmLevel = levelDao.matchLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
         if(null == alarmLevel) {
             EnterpriseLevel enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);

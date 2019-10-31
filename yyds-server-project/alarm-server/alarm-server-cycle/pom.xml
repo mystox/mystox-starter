@@ -40,6 +40,11 @@
 			<version>${spring-boot.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.kongtrolink.framework</groupId>
+			<artifactId>yyds-mqtt-starter</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -47,6 +52,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot.version}</version>
 			</plugin>
 		</plugins>
 	</build>

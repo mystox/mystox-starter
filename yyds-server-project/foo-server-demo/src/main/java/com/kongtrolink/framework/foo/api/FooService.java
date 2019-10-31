@@ -18,4 +18,8 @@ public interface FooService {
     @OperaCode
     String boo(String boo);
 
+
+    @OperaCode
+    String coo(String coo);
+
 }

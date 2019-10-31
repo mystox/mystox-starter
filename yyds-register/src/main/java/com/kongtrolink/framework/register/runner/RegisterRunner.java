@@ -66,6 +66,20 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${server.port}")
     private int port;
 
+    @Value("${server.title:}")
+    private String title;
+    @Value("${server.serverUri:}")
+    private String serverUri;
+
+    @Value("${server.pageRoute:}")
+    private String pageRoute;
+
+    @Value("${server.routeMark:}")
+    private String routeMark;
+
+
+
+
 
     @Autowired
     ServiceRegistry serviceRegistry;
@@ -118,11 +132,7 @@ public class RegisterRunner implements ApplicationRunner {
     private void registerServer() throws KeeperException, InterruptedException, IOException {
 
         //获取服务信息
-        ServerMsg serverMsg = new ServerMsg();
-        serverMsg.setServerVersion(serverVersion);
-        serverMsg.setHost(host);
-        serverMsg.setPort(port);
-        serverMsg.setServerName(serverName);
+        ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
 
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -242,10 +252,11 @@ public class RegisterRunner implements ApplicationRunner {
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
-            JSONObject server = new JSONObject();
-            server.put("serverName", serverName);
-            server.put("serverVersion", serverVersion);
-            String sLoginPayload = server.toJSONString();
+//            JSONObject server = new JSONObject();
+            ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
+//            server.put("serverName", serverName);
+//            server.put("serverVersion", serverVersion);
+            String sLoginPayload = JSONObject.toJSONString(serverMsg);
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
                     OperaCode.SLOGIN, 2, sLoginPayload, 30000L, TimeUnit.MILLISECONDS);
