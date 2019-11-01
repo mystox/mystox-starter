@@ -6,6 +6,7 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.config.ReportOperateConfig;
+import com.kongtrolink.framework.config.ResloverOperateConfig;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.dao.AuxilaryDao;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -42,7 +43,9 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     @Autowired
     AuxilaryDao auxilaryDao;
     @Autowired
-    ReportOperateConfig operateConfig;
+    ReportOperateConfig reportOperateConfig;
+    @Autowired
+    ResloverOperateConfig resloverOperateConfig;
     @Autowired
     MqttSender mqttSender;
     private static final Logger logger = LoggerFactory.getLogger(AlarmEntranceImpl.class);
@@ -58,6 +61,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      */
     @Override
     public void alarmHandle(String payload) {
+        logger.info("alarmHandle - payload:{}", payload);
         AlarmMqttEntity mqttEntity = JSONObject.parseObject(payload, AlarmMqttEntity.class);
         String enterpriseCode = mqttEntity.getEnterpriseCode();
         String serverCode = mqttEntity.getServerCode();
@@ -79,6 +83,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     reportAlarmList.add(alarm);
                 }
             }else {
+                jsonObject.put("enterServerCode", enterServerCode);
                 jsonObject.put("enterpriseCode", enterpriseCode);
                 jsonObject.put("serverCode", serverCode);
                 recoverAndAuxilaryAlarmQueue.add(jsonObject);
@@ -87,8 +92,9 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         }
         //保存实时
         if(reportAlarmList.size() != 0) {
+            logger.info("reportAlarmList:{}", reportAlarmList);
             //liuddtodo 按照配置文件，调用各个服务
-            Map<String, List<OperateEntity>> enterServeOperaListMap = operateConfig.getEnterServeOperaListMap();
+            Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
             List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
             if(null != operateEntityList){
                 String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
@@ -132,7 +138,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     alarm.getSignalId(), alarm.getSerial(), null, historyAlarmTable);
         }
         if (null != sourceAlarm) {
-            System.out.printf("告警已存在: %s %n", sourceAlarm);
+            logger.info("告警已存在:{}", sourceAlarm);
             return null;
         }
         //设置默认告警等级和颜色
@@ -154,55 +160,79 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             return ;
         }
         JSONObject jsonObject = recoverAndAuxilaryAlarmQueue.poll();
+        logger.info("handleRecoverAndAuxilary:{}", jsonObject.toJSONString());
         String flag = jsonObject.getString("flag");
         if(Contant.ZERO.equals(flag)) {
             Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
+            String enterServerCode = jsonObject.getString("enterServerCode");
+            String enterpriseCode = alarm.getEnterpriseCode();
+            String serverCode = alarm.getServerCode();
             boolean result = alarmDao.resolve(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
                     alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), currentAlarmTable);
             if (!result) {
-                String enterpriseCode = alarm.getEnterpriseCode();
-                String serverCode = alarm.getServerCode();
+
                 result = alarmDao.resolve(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
                         alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(),
                         enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
             }
             if(result){
                 //liuddtodo 调用告警消除发送推送
-
-            }
-        }else{
-            //name, value,level,flag, deviceId,deviceType,deviceModel,signalId,serial
-            String enterpriseCode = jsonObject.getString(Contant.ENTERPRISECODE);
-            String serverCode = jsonObject.getString(Contant.SERVERCODE);
-            Auxilary auxilary = auxilaryDao.getByEnterServerCode(enterpriseCode, serverCode);
-            if(null != auxilary){
-                String deviceType = jsonObject.getString(Contant.DEVICETYPE);
-                String deviceModel = jsonObject.getString(Contant.DEVICEMODEL);
-                String deviceId = jsonObject.getString(Contant.DEVICEID);
-                String signalId = jsonObject.getString(Contant.SIGNALID);
-                String serial = jsonObject.getString(Contant.SERIAL);
-                Set<String> keys = jsonObject.keySet();
-                if(null != keys && keys.size()>0) {
-                    List<String> proStrList = auxilary.getProStrList();
-                    Map<String, String> updateMap = new HashMap<>();
-                    for(String key : keys){
-                        if(proStrList.contains(key)){
-                            updateMap.put(key, jsonObject.getString(key));
-                        }
-                    }
-                    if(updateMap.size()>0){
-                        boolean result = alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
-                                serial, updateMap, currentAlarmTable);
-                        if(!result){
-                            alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
-                                    serial, updateMap, enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
+                Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
+                List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
+                String reportAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
+                if(null != operateEntityList){
+                    for(OperateEntity operateEntity : operateEntityList){
+                        String serverVerson = operateEntity.getServerVerson();
+                        String operaCode = operateEntity.getOperaCode();
+                        try {
+                            logger.info("reslover serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, reportAlarmListJson);
+                            //所有其他模块，都返回告警列表json字符串
+                            MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
+                            reportAlarmListJson = msgResult.getMsg();
+                        }catch (Exception e){
+                            //打印调用失败消息
+                            logger.info("reote call error, serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, reportAlarmListJson);
+                            continue;
                         }
                     }
                 }
-
             }
-            System.out.printf("修改告警属性: %s %n", jsonObject.toJSONString());
+        }else{
+            handleAuxilary(jsonObject);
         }
         handleRecoverAndAuxilary();
+    }
+    private void handleAuxilary(JSONObject jsonObject){
+        //name, value,level,flag, deviceId,deviceType,deviceModel,signalId,serial
+        String enterpriseCode = jsonObject.getString(Contant.ENTERPRISECODE);
+        String serverCode = jsonObject.getString(Contant.SERVERCODE);
+        Auxilary auxilary = auxilaryDao.getByEnterServerCode(enterpriseCode, serverCode);
+        if(null != auxilary){
+            String deviceType = jsonObject.getString(Contant.DEVICETYPE);
+            String deviceModel = jsonObject.getString(Contant.DEVICEMODEL);
+            String deviceId = jsonObject.getString(Contant.DEVICEID);
+            String signalId = jsonObject.getString(Contant.SIGNALID);
+            String serial = jsonObject.getString(Contant.SERIAL);
+            Set<String> keys = jsonObject.keySet();
+            if(null != keys && keys.size()>0) {
+                List<String> proStrList = auxilary.getProStrList();
+                Map<String, String> updateMap = new HashMap<>();
+                for(String key : keys){
+                    if(proStrList.contains(key)){
+                        updateMap.put(key, jsonObject.getString(key));
+                    }
+                }
+                if(updateMap.size()>0){
+                    boolean result = alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
+                            serial, updateMap, currentAlarmTable);
+                    if(!result){
+                        alarmDao.updateAuxilary(deviceType, deviceModel, deviceId, signalId,
+                                serial, updateMap, enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
+                    }
+                }
+            }
+
+        }
+        logger.info("修改告警属性: {}", jsonObject.toJSONString());
     }
 }

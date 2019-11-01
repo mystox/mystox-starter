@@ -259,45 +259,47 @@ public class InformRuleController extends BaseController {
         String msgServerVerson = informRule.getMsgServerVerson();
         String msgOperaCode = informRule.getMsgOperaCode();
         String describe = informRule.getDescribe();
-        String msgEntity = null;
+        JSONObject jsonObject = new JSONObject();
         if("1".equals(describe)) {
             //获取区域下用户列表：AUTH_PLATFORM_1.0.0/getUserListByRegionCodes
-            JSONObject jsonObject = new JSONObject();
             jsonObject.put("serverCode", "AUTH_PLATFORM");
             List<String> regionCodes = new ArrayList<>();
             regionCodes.add("220281");
             regionCodes.add("220282");
             jsonObject.put("regionCodes", regionCodes);
-            msgEntity = jsonObject.toJSONString();
             System.out.println("获取区域下用户列表jsonObject:" + jsonObject);
             /*
             1;[{"classes":"企业用户","companyId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgName":"zuzhi1","currentOrgType":"DEPARTMENT","currentPositionName":"mystoxlol","currentPostId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleName":"mystoxlol","department":"zuzhi1","email":"mystox@163.com","errorCode":"","id":"5a12a0504817ea147350dbe1","job":"mystoxlol","message":"","name":"jxyd","password":"fcea920f7412b5da7be0cf42b8c93759","phone":"15067455667","receiveAlarmEmail":"0","receiveAlarmMsg":"1","receiveAlarmPush":"0","receiveWorkPush":"0","success":false,"type":"mystoxlol","uniqueCode":"zuzhi1","userGroup":"mystoxlol","userId":"5a12a0504817ea147350dbe1","username":"jxyd"}]
              */
         }else if("2".equals(describe)){
             //根据地区编码列表获取地区名称 getRegionCodeEntity
-            JSONObject jsonObject = new JSONObject();
             List<String> regionCodes = new ArrayList<>();
             regionCodes.add("220281");
             regionCodes.add("330301");
             jsonObject.put("regionCodes", regionCodes);
             System.out.println("根据地区编码列表获取地区名称json:" + jsonObject.toJSONString());
             System.out.println("数组字符串：" + regionCodes.toString());
-            msgEntity = regionCodes.toString();
             /*
             [{"code":"220281","id":"220281","latitude":43.716756,"longitude":127.351742,"name":"[\"吉林省\",\"吉林市\",\"蛟河市\"]"},{"code":"330301","id":"330301","latitude":28.002838,"longitude":120.690635,"name":"[\"浙江省\",\"温州市\",\"市辖区\"]"}]
              */
         }else if("3".equals(describe)){
-//            List<Operate> operateList = operateConfig.getOperate();
-//            System.out.println("list;" + operateList);
-            return new JsonResult("测试成功");
+            //资产管理根据企业编码，服务编码获取所有设备类型 ASSET_MANAGEMENT_SERVER_1.0.0/getCIProp
+            jsonObject.put("enterpriseCode", "1");
+            jsonObject.put("serverCode", "1");
+            jsonObject.put("name", "");
+        }else if("4".equals(describe)){
+            //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI
+            List<String> sns = new ArrayList<>();
+            sns.add("43813778");
+            sns.add("43813777");
+            sns.add("40613775");
+            sns.add("43813776");
+            sns.add("41800002");
+            jsonObject.put("sns", sns);
         }
-        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, msgEntity);
-        String msg = msgResult.getMsg();
-        List<Region> regionList = JSONArray.parseArray(msg, Region.class);
-        for(Region region :regionList){
-            System.out.println(region);
-        }
-        System.out.println(msgResult.getStateCode() + ";" + msg);
+        System.out.println("jsonObject:" + jsonObject);
+        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
+        System.out.println(msgResult.getStateCode() + ";" + msgResult.getMsg());
         return new JsonResult(msgResult);
     }
 }

@@ -26,8 +26,8 @@ public class ServerEntity {
         this.title = title;
     }
 
-    public ServerEntity(String code, String title) {
-        this.code = code;
+    public ServerEntity(String title, String code) {
         this.title = title;
+        this.code = code;
     }
 }

@@ -153,10 +153,10 @@ public class CreateDeviceInfoService {
             enterServerDeviceIdInformMsgListMap.put(key, msgList);
         }
         //从资产管理获取设备信息
-        CIRequestEntity requestEntity = new CIRequestEntity();
-        requestEntity.setSns(deviceIdList);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("sns", deviceIdList);
         try {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
+            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, jsonObject.toJSONString());
             logger.info("获取设备信息返回结果：{}", msgResult.toString());
             if(1 == msgResult.getStateCode()) {
                 String msg = msgResult.getMsg();

@@ -68,3 +68,11 @@ jpush:
   alarm:
     reportTemplateId: 101
     recoverTemplateId: 102
+
+#web端需要用得远程接口
+webOperate:
+    operate[0]:
+        enterServerCode:
+        serverVerson: ASSET_MANAGEMENT_SERVER_1.0.0
+        operaCode: getCIModel
+        desc: 根据enterpriseCode, serverCode获取所有设备类型，设备型号

@@ -6,6 +6,7 @@ import com.kongtrolink.framework.mqtt.DeviceTypeMqttResult;
 import com.kongtrolink.framework.mqtt.DeviceTypeResult;
 import com.kongtrolink.framework.mqtt.EnterpriseEntity;
 import com.kongtrolink.framework.mqtt.ServerEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,12 +28,18 @@ public class MqttService {
      */
 
     public JSON getEnterpriseMsgAll(){
-        ServerEntity serverEntity = new ServerEntity("zhyd", "智慧用电");
+
         EnterpriseEntity uniqueServiceEntity = new EnterpriseEntity("梅泰诺", "meitainuo");
+        ServerEntity serverEntity = new ServerEntity("智慧用电", "zhyd");
         uniqueServiceEntity.setServerCodes(Arrays.asList(serverEntity));
+
+        EnterpriseEntity testEnterprise = new EnterpriseEntity("测试企业01", "1");
+        ServerEntity testServer = new ServerEntity("测试服务01", "1");
+        testEnterprise.setServerCodes(Arrays.asList(testServer));
 
         List<EnterpriseEntity> uniqueServiceEntityList = new ArrayList<>();
         uniqueServiceEntityList.add(uniqueServiceEntity);
+        uniqueServiceEntityList.add(testEnterprise);
         JSON json = (JSON) JSONObject.toJSON(uniqueServiceEntityList);
         return json;
     }

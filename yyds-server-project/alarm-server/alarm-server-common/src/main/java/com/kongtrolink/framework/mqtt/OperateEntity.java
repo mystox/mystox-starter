@@ -10,6 +10,15 @@ public class OperateEntity {
     private String enterServerCode;
     private String serverVerson;
     private String operaCode;
+    private String desc;
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
     public String getEnterServerCode() {
         return enterServerCode;

@@ -1,9 +1,6 @@
-package com.kongtrolink.framework.config;
+package com.kongtrolink.framework.base;
 
 import com.kongtrolink.framework.mqtt.OperateEntity;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,27 +9,25 @@ import java.util.Map;
 
 /**
  * @Auther: liudd
- * @Date: 2019/10/31 19:11
- * @Description:告警消除操作
+ * @Date: 2019/11/1 10:43
+ * @Description:yml配置文件操作实体类
  */
-@Configuration
-@ConfigurationProperties("resloveOperate")
-@RefreshScope
-public class RecoverOperateConfig {
+public class OperateConfig {
 
-    private Map<String, List<OperateEntity>> enterServeOperaListMap = new HashMap<>();
-    private List<OperateEntity> resloveOperate;
+    Map<String, List<OperateEntity>> enterServeOperaListMap = new HashMap<>();
+    List<OperateEntity> operate;
 
     public Map<String, List<OperateEntity>> getEnterServeOperaListMap() {
+        initConfigMap();
         return enterServeOperaListMap;
     }
 
-    public List<OperateEntity> getResloveOperate() {
-        return resloveOperate;
+    public List<OperateEntity> getOperate() {
+        return operate;
     }
 
-    public void setResloveOperate(List<OperateEntity> resloveOperate) {
-        this.resloveOperate = resloveOperate;
+    public void setOperate(List<OperateEntity> operate) {
+        this.operate = operate;
     }
 
     /**
@@ -41,9 +36,12 @@ public class RecoverOperateConfig {
      * 功能描述:初始化
      */
     public void initConfigMap(){
-        if(null != resloveOperate && resloveOperate.size() >0){
-            for(OperateEntity operateEntity : resloveOperate){
+        if(null != operate && operate.size() >0){
+            for(OperateEntity operateEntity : operate){
                 String enterServerCode = operateEntity.getEnterServerCode();
+                if(StringUtil.isNUll(enterServerCode)){
+                    continue;
+                }
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
                 if(null == operateEntity){
                     operateEntityList = new ArrayList<>();
