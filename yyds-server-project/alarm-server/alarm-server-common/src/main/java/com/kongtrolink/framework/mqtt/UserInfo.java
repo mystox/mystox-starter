@@ -13,14 +13,14 @@ public class UserInfo {
     private String username;
     private String phone;
     private String email;
-    List<String> regions;
+    List<String> region;
 
-    public List<String> getRegions() {
-        return regions;
+    public List<String> getRegion() {
+        return region;
     }
 
-    public void setRegions(List<String> regions) {
-        this.regions = regions;
+    public void setRegion(List<String> region) {
+        this.region = region;
     }
 
     public String getId() {

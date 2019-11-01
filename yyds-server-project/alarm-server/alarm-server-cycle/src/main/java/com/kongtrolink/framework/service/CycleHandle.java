@@ -8,7 +8,6 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
-import com.kongtrolink.framework.mqtt.CIRequestEntity;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,11 +173,16 @@ public class CycleHandle{
         return enterpirseServer_alarmListMap;
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/11/1 15:51
+     * 功能描述:获取用户信息，如果获取不到，暂时先放回实时表，并修改获取次数
+     */
     public void initDeviceInfo(List<String> deviceIdList, Map<String, List<Alarm>> enterServerHistoryAlarmListMap){
         //liuddtodo 从第三方获取设备信息并填充到告警对象中。将结果转换成json对象列表
-        CIRequestEntity requestEntity = new CIRequestEntity();
-        requestEntity.setIds(deviceIdList);
-        MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, JSONObject.toJSONString(requestEntity));
+        JSONObject requJsonObject = new JSONObject();
+        requJsonObject.put("sns", deviceIdList);
+        MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, requJsonObject.toJSONString());
         //liuddtodo 需要判定返回失败的结果
         int stateCode = msgResult.getStateCode();
         String msg = msgResult.getMsg();

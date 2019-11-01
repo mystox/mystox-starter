@@ -25,9 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -296,10 +294,32 @@ public class InformRuleController extends BaseController {
             sns.add("43813776");
             sns.add("41800002");
             jsonObject.put("sns", sns);
+        }else if("5".equals(describe)){
+            //根据用户id，获取用户管理权限以及用户信息AUTH_PLATFORM_1.0.0/getRegionListByUsers
+            jsonObject.put("serverCode", "AUTH_PLATFORM_1.0.0");
+            List<String> userIdList = new ArrayList<>();
+            userIdList.add("392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
+            userIdList.add("94132e81-1602-4036-8b15-6bb2f8dff089");
+            jsonObject.put("userIds", userIdList);
         }
         System.out.println("jsonObject:" + jsonObject);
         MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
-        System.out.println(msgResult.getStateCode() + ";" + msgResult.getMsg());
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+        JSONObject o = JSONObject.parseObject(msg,JSONObject.class);
+        for(String key : o.keySet()){
+            JSONObject user = (JSONObject)o.get(key);
+            Object region = user.get("region");
+            System.out.println("region:" + region);
+            System.out.println("userId:" + key + "; userInfo:" + user);
+        }
+        List<String> userIds = (List<String>)jsonObject.get("userIds");
+        System.out.println("userIds:" + userIds + "; class:" + userIds.getClass().getName());
+        if(userIds.contains("94132e81-1602-4036-8b15-6bb2f8dff089")){
+            System.out.println("contains：94132e81-1602-4036-8b15-6bb2f8dff089" );
+        }else {
+            System.out.println("不包括");
+        }
         return new JsonResult(msgResult);
     }
 }

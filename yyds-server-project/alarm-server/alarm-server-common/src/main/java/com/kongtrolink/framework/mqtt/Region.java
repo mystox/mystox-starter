@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.mqtt;
 
-import java.util.List;
-
 /**
  * @Auther: liudd
  * @Date: 2019/10/31 14:12
