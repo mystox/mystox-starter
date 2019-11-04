@@ -81,7 +81,7 @@ public class AlarmTransverter extends TransverterHandler {
             logger.debug(JSONObject.toJSONString(report));
             logger.debug("\n");
             String jsonResult = JSONObject.toJSONString(report);
-            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER,alarmServerVersion),
+            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER_CONTROLLER,alarmServerVersion),
                     OperaCode.ALARM_REPORT,jsonResult);
         }catch (Exception e){
             e.printStackTrace();
