@@ -34,7 +34,7 @@ public class AlarmTransverter extends TransverterHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmTransverter.class);
 
-    @Value("${gateway.alarmReport.version:1.0.0}")
+    @Value("${gateway.alarmReport.version:V1.0.0}")
     private String alarmServerVersion;
     @Autowired
     private DeviceTypeConfig deviceTypeConfig;
