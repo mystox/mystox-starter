@@ -29,7 +29,7 @@ public class InformRule {
     private String status;                  //启用状态（启用，禁用）
     private FacadeView operator;            //操作用户
 
-    private String msgEnable;               //告警短信是否启用
+    private String msgEnable;               //告警短信是否启用(是/否)
     private String msgBeginTime;            //告警短信开始时间
     private String msgEndTime;              //告警短信结束时间
     private int msgBeginTimeInt;            //告警短信开始时间数值
@@ -44,7 +44,7 @@ public class InformRule {
     private String msgReportCode;
     private String msgResolveCode;
 
-    private String emailEnable;               //告警邮件是否启用
+    private String emailEnable;               //告警邮件是否启用(是/否)
     private String emailBeginTime;            //告警邮件开始时间
     private String emailEndTime;              //告警邮件结束时间
     private int emailBeginTimeInt;            //告警邮件开始时间数值
@@ -59,7 +59,7 @@ public class InformRule {
     private String emailResolveCode;
 
 
-    private String appEnable;               //告警邮件是否启用
+    private String appEnable;               //告警邮件是否启用(是/否)
     private String appBeginTime;            //告警邮件开始时间
     private String appEndTime;              //告警邮件结束时间
     private int appBeginTimeInt;            //告警邮件开始时间数值

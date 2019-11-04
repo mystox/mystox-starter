@@ -64,3 +64,6 @@ jpush:
   masterSecret:  59dbddde70bf61d9e03b2c21
   # JPush 配置证书版本（开发为 false，产品为 true）
   production: true
+  alarm:
+    report: 101
+    recover: 102

@@ -5,6 +5,8 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.mqtt.DeliverEntrance;
 import com.kongtrolink.service.CreateInformMsgService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +25,10 @@ public class DeliverEntranceImpl implements DeliverEntrance{
 
     @Autowired
     CreateInformMsgService msgService;
+    private static final Logger logger = LoggerFactory.getLogger(DeliverEntranceImpl.class);
     @Override
     public String handleDeliver(String alarmListJsonStr) {
+        logger.info("receive msg:{}", alarmListJsonStr);
         List<Alarm> alarmList = JSON.parseArray(alarmListJsonStr, Alarm.class);
         msgService.handleInformAlarmList(alarmList, Contant.ONE);
         return alarmListJsonStr;

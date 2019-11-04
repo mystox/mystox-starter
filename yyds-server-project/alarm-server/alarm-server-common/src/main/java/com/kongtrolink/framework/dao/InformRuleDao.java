@@ -159,7 +159,7 @@ public class InformRuleDao {
      * 功能描述:匹配告警通知规则
      */
     public List<InformRule> matchInform(String enterpriseCode, String serverCode, Integer level, Date treport, String type){
-        if(!StringUtil.isNUll(type)){
+        if(StringUtil.isNUll(type)){
             return new ArrayList<>();
         }
         int tReportInt = DateUtil.timeToInt(treport);
@@ -167,19 +167,19 @@ public class InformRuleDao {
         Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
         criteria.and("serverCode").is(serverCode);
         if(Contant.INFORM_TYPE_MSG.equals(type)) {
-            criteria.and("msgEnable").is(Contant.USEING);
+            criteria.and("msgEnable").is(Contant.YES);
             criteria.and("msgBeginTimeInt").lte(tReportInt);
             criteria.and("msgEndTimeInt").gte(tReportInt);
             criteria.and("msgDayList").is(week);
             criteria.and("msgLevelList").is(level);
         }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
-            criteria.and("emailEnable").is(Contant.USEING);
+            criteria.and("emailEnable").is(Contant.YES);
             criteria.and("emailBeginTimeInt").lte(tReportInt);
             criteria.and("emailEndTimeInt").gte(tReportInt);
             criteria.and("emailDayList").is(week);
             criteria.and("emailLevelList").is(level);
         }else {
-            criteria.and("appEnable").is(Contant.USEING);
+            criteria.and("appEnable").is(Contant.YES);
             criteria.and("appBeginTimeInt").lte(tReportInt);
             criteria.and("appEndTimeInt").gte(tReportInt);
             criteria.and("appDayList").is(week);

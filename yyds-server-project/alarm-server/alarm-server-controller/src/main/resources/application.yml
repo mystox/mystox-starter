@@ -32,7 +32,7 @@ reportOperate:
     operaCode: handleLevel
   operate[1]:
     enterServerCode: yytd_TOWER_SERVER
-    serverVerson: ALARM-SERVER-DELIVER _V1.0.0
+    serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver
 #告警消除操作流程
 resloveOperate:

@@ -99,6 +99,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             if(null != operateEntityList){
                 String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
                 for(OperateEntity operateEntity : operateEntityList){
+                    logger.info("----operate:{}", operateEntity);
                     String serverVerson = operateEntity.getServerVerson();
                     String operaCode = operateEntity.getOperaCode();
                     try {
@@ -181,6 +182,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             }
             if(result){
                 //liuddtodo 调用告警消除发送推送
+                alarm.setTrecover(new Date());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
                 String reportAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));

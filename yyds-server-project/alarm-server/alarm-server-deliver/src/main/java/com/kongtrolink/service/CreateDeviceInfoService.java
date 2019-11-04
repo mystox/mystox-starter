@@ -1,5 +1,6 @@
 package com.kongtrolink.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
@@ -77,6 +78,9 @@ public class CreateDeviceInfoService {
 
     private synchronized List<InformMsg> beformHandle(){
         int size = informMsgList.size();
+        if(size == 0){
+            return null;
+        }
         if(size < count && currentTime<time){
             currentTime ++;
             return null;
@@ -102,7 +106,7 @@ public class CreateDeviceInfoService {
         @Override
         public void run(){
             List<InformMsg> handleInformMsgList = beformHandle();
-            if(null == handleInformMsgList){
+            if(null == handleInformMsgList || handleInformMsgList.size() == 0){
                 return ;
             }
             //从资管根据设备id列表，获取地区编码
@@ -157,7 +161,7 @@ public class CreateDeviceInfoService {
         jsonObject.put("sns", deviceIdList);
         try {
             MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, jsonObject.toJSONString());
-            logger.info("获取设备信息返回结果：{}", msgResult.toString());
+            logger.info("获取设备信息返回结果：{}", JSON.toJSON(msgResult));
             if(1 == msgResult.getStateCode()) {
                 String msg = msgResult.getMsg();
                 return getDeviceSucc(msg, handleInformMsgList, enterServerDeviceIdInformMsgListMap);
