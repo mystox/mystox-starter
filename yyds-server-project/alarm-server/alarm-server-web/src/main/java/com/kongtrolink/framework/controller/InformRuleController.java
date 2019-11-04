@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
@@ -9,6 +10,7 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.enttiy.InformRule;
 import com.kongtrolink.framework.enttiy.InformRuleUser;
 import com.kongtrolink.framework.enttiy.MsgTemplate;
@@ -320,6 +322,56 @@ public class InformRuleController extends BaseController {
         }else {
             System.out.println("不包括");
         }
+        return new JsonResult(msgResult);
+    }
+
+    private InformMsg createInformMsg(String account, String tempCode, String type){
+        InformMsg informMsg = new InformMsg();
+        informMsg.setEnterpriseName("义益钛迪");
+        informMsg.setServerName("铁塔服务");
+        informMsg.setUrl("http://api.sendcloud.net/apiv2/mail/sendtemplate");
+        informMsg.setAlarmStateType(Contant.ALARM_STATE_REPORT);
+        informMsg.setInformAccount(account);
+        informMsg.setTempCode(tempCode);
+        informMsg.setType(type);
+        informMsg.setAddressName("浙江省杭州市江干区九堡国家大学科技园");
+        informMsg.setAlarmName("总电流过低告警");
+        return informMsg;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/4 14:40
+     * 功能描述:测试发送接口
+     */
+    @RequestMapping("/testSend")
+    @ResponseBody
+    public JsonResult testSend(@RequestBody InformMsg informMsg){
+
+        /*
+            短信：
+        {"serverVerson":"ALARM_SERVER_SENDER_V1.0.0", "operateCode":"handleSender",
+         "type":"短信", "url":"http://sendcloud.sohu.com/smsapi/send", "tempCode":"1144", "informAccount":"15267071976",
+           "enterpriseName":"义益钛迪", "serverName":"铁塔服务", "addressName":"浙江省杭州市江干区九堡国家大学科技园", "alarmName":"整流模块01故障告警",
+           "alarmStateType":"告警产生"
+           }
+         */
+        //发送短信 tempCode = "1144", account=15267071976, type = Contant.TEMPLATE_MSG
+        //ALARM_SERVER-SENDER_DEFAULT_V1.0.0/handleSender;emailOperaCode = account, emailReportCode = tempCode, emailResolveCode = type
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(informMsg);
+
+        /*
+        邮件：
+        {"serverVerson":"ALARM_SERVER_SENDER_V1.0.0", "operateCode":"handleSender",
+         "type":"邮件", "url":"http://api.sendcloud.net/apiv2/mail/sendtemplate", "tempCode":"power_alarm_templetId", "informAccount":"3243095682@qq.com",
+           "enterpriseName":"义益钛迪", "serverName":"铁塔服务", "addressName":"浙江省杭州市江干区九堡国家大学科技园", "alarmName":"总电流过低告警",
+           "alarmStateType":"告警产生"
+           }
+         */
+        MsgResult msgResult = mqttSender.sendToMqttSyn(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+
         return new JsonResult(msgResult);
     }
 }

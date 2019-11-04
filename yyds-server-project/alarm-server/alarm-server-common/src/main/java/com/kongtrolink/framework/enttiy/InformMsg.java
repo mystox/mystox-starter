@@ -19,6 +19,7 @@ public class InformMsg {
     private String serverName;
 
     private String url;
+    private String alarmId;
     private String alarmName;
     private String deviceId;
     private String address;
@@ -36,7 +37,7 @@ public class InformMsg {
     private Date date;
     private int count;                  //重复次数
     private int currentTime;            //当前次数
-    private String alarmStateType;      //告警类型（告警产生，告警消除，FSU离线告警）
+    private String alarmStateType;      //告警类型（告警产生，告警消除）
     private String result;             //发送结果
 
     @Override
@@ -267,6 +268,14 @@ public class InformMsg {
 
     public void setAlarmStateType(String alarmStateType) {
         this.alarmStateType = alarmStateType;
+    }
+
+    public String getAlarmId() {
+        return alarmId;
+    }
+
+    public void setAlarmId(String alarmId) {
+        this.alarmId = alarmId;
     }
 
     public InformMsg initAlarmInfo(Alarm alarm, InformRule informRule, InformRuleUser ruleUser, String type, Date date){

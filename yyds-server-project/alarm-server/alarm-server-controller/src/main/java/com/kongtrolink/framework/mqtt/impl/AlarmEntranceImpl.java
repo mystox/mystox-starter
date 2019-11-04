@@ -105,7 +105,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                         logger.info("serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, alarmJsonList);
                         //所有其他模块，都返回告警列表json字符串
                         MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
-                        reportAlarmListJson = msgResult.getMsg();
+                        int stateCode = msgResult.getStateCode();
+                        if(1 == stateCode){
+                            reportAlarmListJson = msgResult.getMsg();
+                        }
                     }catch (Exception e){
                         //打印调用失败消息
                         logger.info("reote call error, serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, alarmJsonList);
@@ -114,8 +117,8 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 }
                 reportAlarmList = JSONArray.parseArray(reportAlarmListJson, Alarm.class);
             }
-
-            alarmDao.save(reportAlarmList, enterpriseCode + serverCode + currentAlarmTable);
+            //实时告警不分表
+            alarmDao.save(reportAlarmList, currentAlarmTable);
         }
         return ;
     }
@@ -147,6 +150,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         alarm.setTargetLevelName(alarmLevelName);
         alarm.setColor(Contant.COLOR_BLACK);
         alarm.setTreport(new Date());
+        alarm.setState(Contant.PENDING);
         return alarm;
     }
 
