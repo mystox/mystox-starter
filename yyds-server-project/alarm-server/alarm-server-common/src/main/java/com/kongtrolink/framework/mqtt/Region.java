@@ -61,4 +61,14 @@ public class Region {
                 ", longitude='" + longitude + '\'' +
                 ", name=" + name ;
     }
+
+    public static void main(String[] args){
+        String name = "[\"北京市\",\"市辖区\",\"海淀区\"]";
+        System.out.println("name:" + name);
+        name = name.replaceAll("\"", "");
+        System.out.println("name:" + name);
+        name = name.replaceAll(",", "-");
+        System.out.println("name:" + name);
+    }
+
 }

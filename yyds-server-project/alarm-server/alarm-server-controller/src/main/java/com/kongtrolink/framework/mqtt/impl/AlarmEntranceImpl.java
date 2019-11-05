@@ -92,27 +92,26 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         }
         //保存实时
         if(reportAlarmList.size() != 0) {
-            logger.info("reportAlarmList:{}", reportAlarmList);
             //liuddtodo 按照配置文件，调用各个服务
             Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
             List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
             if(null != operateEntityList){
                 String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
                 for(OperateEntity operateEntity : operateEntityList){
-                    logger.info("----operate:{}", operateEntity);
                     String serverVerson = operateEntity.getServerVerson();
                     String operaCode = operateEntity.getOperaCode();
                     try {
-                        logger.info("serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, alarmJsonList);
                         //所有其他模块，都返回告警列表json字符串
                         MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
+                        //打印请求相关信息
+                        logger.info("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);
                         int stateCode = msgResult.getStateCode();
                         if(1 == stateCode){
                             reportAlarmListJson = msgResult.getMsg();
                         }
                     }catch (Exception e){
                         //打印调用失败消息
-                        logger.info("reote call error, serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, alarmJsonList);
+                        logger.info("---report: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, e.getMessage());
                         continue;
                     }
                 }
@@ -165,7 +164,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             return ;
         }
         JSONObject jsonObject = recoverAndAuxilaryAlarmQueue.poll();
-        logger.info("handleRecoverAndAuxilary:{}", jsonObject.toJSONString());
         String flag = jsonObject.getString("flag");
         if(Contant.ZERO.equals(flag)) {
             Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
@@ -175,7 +173,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             boolean result = alarmDao.resolve(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
                     alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(), currentAlarmTable);
             if (!result) {
-
                 result = alarmDao.resolve(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
                         alarm.getSignalId(), alarm.getSerial(), Contant.RESOLVE, new Date(),
                         enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + historyAlarmTable);
@@ -185,19 +182,19 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 alarm.setTrecover(new Date());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-                String reportAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
+                String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
                 if(null != operateEntityList){
                     for(OperateEntity operateEntity : operateEntityList){
                         String serverVerson = operateEntity.getServerVerson();
                         String operaCode = operateEntity.getOperaCode();
                         try {
-                            logger.info("reslover serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, reportAlarmListJson);
                             //所有其他模块，都返回告警列表json字符串
-                            MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
-                            reportAlarmListJson = msgResult.getMsg();
+                            MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, resolveAlarmListJson);
+                            logger.info("***resolve : msg:{}, operate:{}, result:{}", JSONObject.toJSON(resolveAlarmListJson), operateEntity, msgResult);
+                            resolveAlarmListJson = msgResult.getMsg();
                         }catch (Exception e){
                             //打印调用失败消息
-                            logger.info("reote call error, serverCode:{}, operaCode:{}, msg:{}", serverVerson, operaCode, reportAlarmListJson);
+                            logger.info("***resolve: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(resolveAlarmListJson), operateEntity, e.getMessage());
                             continue;
                         }
                     }

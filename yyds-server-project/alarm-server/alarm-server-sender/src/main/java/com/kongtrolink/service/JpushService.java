@@ -42,6 +42,8 @@ public class JpushService {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpushService.class);
 
     public boolean pushApp(InformMsg informMsg) {
+        //liuddtodo 先写发给智慧用电李元明
+        informMsg.setInformAccount("5ab45064fef5e1514ffd4581");
         boolean pushSuccess = true;
         Set<String> userIds = new HashSet<>();
         userIds.add(informMsg.getInformAccount());

@@ -1,6 +1,5 @@
 package com.kongtrolink.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
@@ -9,7 +8,6 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.*;
 import com.kongtrolink.framework.service.MqttSender;
-import org.aspectj.weaver.Dump;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +51,12 @@ public class CreateDeviceInfoService {
     private String assetsServer;
     @Value("${deliver.getCI:getCI}")
     private String getCI;
-    @Value("${yunguan.serverVersoin:AUTH_PLATFORM_1.0.0}")
+    @Value("${yunguan.serverVersoin:yunguan}")
     private String yunguanServerVersion;
     @Value("${yunguan.getRegionCodeEntity:getRegionCodeEntity}")
     private String getRegionCodeEntity;
-    @Value("${yunguan.getUserListByRegionCodes:getUserListByRegionCodes}")
-    private String getUserListByRegionCodes;
+    @Value("${yunguan.getRegionListByUsers:getRegionListByUsers}")
+    private String getRegionListByUsers;
     @Resource(name = "getUserExecutor")
     ThreadPoolTaskExecutor getUserExecutor;
 
@@ -123,12 +121,14 @@ public class CreateDeviceInfoService {
             //服务分类将投递对象分类
             Map<String, List<InformMsg>> serverInformListMap = new HashMap<>();
             for(InformMsg informMsg : handleInformMsgList){
-//                String key = informMsg.getEnterpriseCode() + Contant.UNDERLINE + informMsg.getServerCode();
+                //liuddtodo 为了测试云管，暂时写死serverCode = AUTH_PLATFORM_1.0.0
+                informMsg.setServerCode("AUTH_PLATFORM");
                 String key = informMsg.getServerCode();
                 List<InformMsg> informMsgList = serverInformListMap.get(key);
                 if(null == informMsgList){
                     informMsgList = new ArrayList<>();
                 }
+                informMsgList.add(informMsg);
                 serverInformListMap.put(key, informMsgList);
             }
             for(String key : serverInformListMap.keySet()){
@@ -161,24 +161,25 @@ public class CreateDeviceInfoService {
         jsonObject.put("sns", deviceIdList);
         try {
             MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, jsonObject.toJSONString());
-            logger.info("获取设备信息返回结果：{}", JSON.toJSON(msgResult));
+            logger.info("---getCI : msg:{}, operate:{}, result:{}", JSONObject.toJSON(deviceIdList),
+                    assetsServer+Contant.UNDERLINE+getCI, msgResult);
             if(1 == msgResult.getStateCode()) {
                 String msg = msgResult.getMsg();
-                return getDeviceSucc(msg, handleInformMsgList, enterServerDeviceIdInformMsgListMap);
+                return getDeviceSucc(msg, handleInformMsgList, enterServerDeviceIdInformMsgListMap, assetsServer, getCI);
             }else{
-                handleMqttFail(handleInformMsgList);
+                handleMqttFail(handleInformMsgList, assetsServer, getCI);
                 return false;
             }
         }catch (Exception e){
-            //连接超时，已经到达投递重复次数的消息则当做未获取到设备信息处理
-            logger.info("MQTT服务连接超时");
-            handleMqttFail(handleInformMsgList);
+            logger.info("---getCI: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(deviceIdList),
+                    assetsServer+Contant.UNDERLINE+getCI, e.getMessage());
+            handleMqttFail(handleInformMsgList, assetsServer, getCI);
             return false;
         }
     }
 
     private boolean getDeviceSucc(String msg, List<InformMsg> handleInformMsgList,
-                               Map<String, List<InformMsg>> enterServerDeviceIdInformMsgListMap){
+                               Map<String, List<InformMsg>> enterServerDeviceIdInformMsgListMap, String serverVersion, String operaCode){
         CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
         for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
             String enterpriseCode = jsonObject.getString("enterpriseCode");
@@ -200,14 +201,15 @@ public class CreateDeviceInfoService {
             for (String key : enterServerDeviceIdInformMsgListMap.keySet()) {
                 List<InformMsg> noDeviceInformList = enterServerDeviceIdInformMsgListMap.get(key);
                 for (InformMsg informMsg : noDeviceInformList) {
-                    informMsg.setResult(Contant.MQTT_RES_NODATA);
+                    informMsg.setResult(Contant.MQTT_RES_NODATA+Contant.UNDERLINE+key);
+                    informMsg.updateOperate(serverVersion, operaCode);
                 }
                 noFullInformList.addAll(noDeviceInformList);
             }
             //保存没有设备信息的投递信息
             informMsgDao.save(noFullInformList);
             //移除没有设备信息的投递对象
-            handleInformMsgList.retainAll(noFullInformList);
+            handleInformMsgList.removeAll(noFullInformList);
             if (handleInformMsgList.size() == 0) {
                 return false;
             }
@@ -220,13 +222,14 @@ public class CreateDeviceInfoService {
      * @date: 2019/10/31 11:20
      * 功能描述:mqtt消息失败
      */
-    public void handleMqttFail(List<InformMsg> handleInformMsgList){
+    public void handleMqttFail(List<InformMsg> handleInformMsgList, String serverVersion, String operaCode){
         List<InformMsg> saveInformList = new ArrayList<>();
         for(InformMsg informMsg : handleInformMsgList){
             int currentTime = informMsg.getCurrentTime() + 1;
             //如果当前消息重发次数等于规定次数，则不再重发，按照没有设备信息处理
             if(currentTime >= informMsg.getCount()){
                 informMsg.setResult(Contant.MQTT_RES_FAIL);
+                informMsg.updateOperate(serverVersion, operaCode);
                 saveInformList.add(informMsg);
             }else{
                 informMsg.setCurrentTime(currentTime+1);
@@ -247,6 +250,8 @@ public class CreateDeviceInfoService {
         Map<String, List<InformMsg>> addressInformListMap = new HashMap<>();
         List<String> addressList = new ArrayList<>();
         for(InformMsg informMsg : handleInformMsgList){
+            //liuddtodo 20191105暂时强制将地区写死220281
+            informMsg.setAddress("220281");
             addressList.add(informMsg.getAddress());
             List<InformMsg> addInformList = addressInformListMap.get(informMsg.getAddress());
             if(null == addInformList){
@@ -257,29 +262,37 @@ public class CreateDeviceInfoService {
         }
         try{
             MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getRegionCodeEntity, addressList.toString());
+            logger.info("---getAddressName : msg:{}, operate:{}, result:{}", JSONObject.toJSON(addressList),
+                    yunguanServerVersion+Contant.UNDERLINE+getRegionCodeEntity, msgResult);
             int stateCode = msgResult.getStateCode();
             if(1 == stateCode){
                 String msg = msgResult.getMsg();
-                return getAddressSucc(msg, addressInformListMap, handleInformMsgList);
+                return getAddressSucc(msg, addressInformListMap, handleInformMsgList, yunguanServerVersion, getRegionCodeEntity);
             }else{
-                handleMqttFail(handleInformMsgList);
+                handleMqttFail(handleInformMsgList, yunguanServerVersion, getRegionCodeEntity);
                 return false;
             }
         }catch (Exception e){
-            handleMqttFail(handleInformMsgList);
+            logger.info("---getAddressName: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(addressList),
+                    yunguanServerVersion+Contant.UNDERLINE+getRegionCodeEntity, e.getMessage());
+            handleMqttFail(handleInformMsgList, yunguanServerVersion, getRegionCodeEntity);
             return false;
         }
 
     }
 
-    private boolean getAddressSucc(String msg, Map<String, List<InformMsg>> addressInformListMap, List<InformMsg> handleInformMsgList){
+    private boolean getAddressSucc(String msg, Map<String, List<InformMsg>> addressInformListMap,
+                                   List<InformMsg> handleInformMsgList, String yunguanServerVersion, String getRegionCodeEntity){
         List<Region> regionList = JSONArray.parseArray(msg, Region.class);
         for (Region region : regionList){
             String code = region.getCode();
             List<InformMsg> informMsgList = addressInformListMap.get(code);
             if(null != informMsgList){
                 for (InformMsg informMsg : informMsgList){
-                    informMsg.setAddressName(region.getName());
+                    String name = region.getName();
+                    name = name.replaceAll("\"", "");
+                    name = name.replaceAll(",", "-");
+                    informMsg.setAddressName(name);
                 }
             }
             addressInformListMap.remove(code);
@@ -290,12 +303,13 @@ public class CreateDeviceInfoService {
             for(String code : addressInformListMap.keySet()){
                 List<InformMsg> msgs = addressInformListMap.get(code);
                 for(InformMsg informMsg : msgs){
-                    informMsg.setResult(Contant.MQTT_RES_NOADDRESS);
+                    informMsg.setResult(Contant.MQTT_RES_NOADDRESS + Contant.UNDERLINE + code);
+                    informMsg.updateOperate(yunguanServerVersion, getRegionCodeEntity);
                     noAddressInformList.add(informMsg);
                 }
             }
             informMsgDao.save(noAddressInformList);     //云管没有地区的投递对象，直接持久化，不在做投递处理
-            handleInformMsgList.retainAll(noAddressInformList);
+            handleInformMsgList.removeAll(noAddressInformList);
             if(handleInformMsgList.size() == 0){
                 return false;
             }
@@ -307,7 +321,9 @@ public class CreateDeviceInfoService {
         List<String> userIds = new ArrayList<>();
         Map<String, List<InformMsg>> userIdInformListMap =new HashMap<>();
         for(InformMsg informMsg : informMsgList){
-            userIds.add(informMsg.getUserId());
+            if(!userIds.contains(informMsg.getUserId())) {
+                userIds.add(informMsg.getUserId());
+            }
             List<InformMsg> userIdInformList = userIdInformListMap.get(informMsg.getUserId());
             if(null == userIdInformList){
                 userIdInformList = new ArrayList<>();
@@ -320,14 +336,27 @@ public class CreateDeviceInfoService {
         jsonObject.put("serverCode", key);
         jsonObject.put("userIds", userIds);
         try {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getUserListByRegionCodes, jsonObject.toJSONString());
+            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getRegionListByUsers, jsonObject.toJSONString());
+            logger.info("---getUserInfo : msg:{}, operate:{}, result:{}", jsonObject.toString(),
+                    yunguanServerVersion+Contant.UNDERLINE+ getRegionListByUsers, msgResult);
+            if(msgResult.getStateCode() != 1){
+                //20191105有可能是消息框架问题
+                handleMqttFail(informMsgList, yunguanServerVersion, getRegionCodeEntity);
+                return ;
+            }
             //填充用户信息
             initUserInfo(msgResult.getMsg(), informMsgList, userIdInformListMap);
             for(InformMsg informMsg : informMsgList){
-                mqttSender.sendToMqtt(informMsg.getServerVerson(), informMsg.getOperateCode(), JSONObject.toJSONString(informMsg));
+                String serverVerson = informMsg.getServerVerson();
+                String operateCode = informMsg.getOperateCode();
+                logger.info("---send : msg:{}, operate:{}, result:{}", JSONObject.toJSONString(informMsg),
+                        serverVerson+Contant.UNDERLINE+operateCode, "");
+                mqttSender.sendToMqtt(serverVerson, operateCode, JSONObject.toJSONString(informMsg));
             }
         }catch (Exception e){
-            handleMqttFail(informMsgList);
+            logger.info("---getUserInfo: remote call error, msg:{}, operate:{}, result:{}", jsonObject.toString(),
+                    yunguanServerVersion+Contant.UNDERLINE+ getRegionListByUsers, e.getMessage());
+            handleMqttFail(informMsgList, yunguanServerVersion, getRegionCodeEntity);
         }
     }
 
@@ -341,7 +370,7 @@ public class CreateDeviceInfoService {
             }
             JSONObject userInfo = (JSONObject)jsonObject.get(userId);
             for(InformMsg informMsg : userIdInformList){
-                List<String> regions = (List<String>)jsonObject.get("region");
+                List<String> regions = (List<String>)userInfo.get("region");
                 if(!regions.contains(informMsg.getAddress())){
                     noRegionInformList.add(informMsg);
                     continue;

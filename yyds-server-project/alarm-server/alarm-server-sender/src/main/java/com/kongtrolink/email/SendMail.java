@@ -45,7 +45,6 @@ public class SendMail {
             String responseStr;
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 responseStr = EntityUtils.toString(response.getEntity());
-                System.out.println(responseStr);
                 if (responseStr.contains("成功")) {
                     return true;
                 }

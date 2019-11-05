@@ -201,7 +201,7 @@ public class InformRuleController extends BaseController {
         String serverCode = informRuleQuery.getServerCode();
         List<User> userList = new ArrayList<>();
         User user1 = new User();
-        user1.setId("user0001");
+        user1.setId("392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
         user1.setUsername("dadd");
         user1.setName("大冬冬");
         user1.setPhone("15267071111");
@@ -209,7 +209,7 @@ public class InformRuleController extends BaseController {
         userList.add(user1);
 
         User user2 = new User();
-        user2.setId("user0002");
+        user2.setId("94132e81-1602-4036-8b15-6bb2f8dff089");
         user2.setUsername("dagg");
         user2.setName("大刚哥");
         user2.setPhone("15267072222");
@@ -250,13 +250,14 @@ public class InformRuleController extends BaseController {
      */
     @RequestMapping("/testServer")
     @ResponseBody
-    public JsonResult testServer(@RequestBody InformRule informRule){
+    public JsonResult testServer(@RequestBody InformMsg informMsg){
 
-        String msgServerVerson = informRule.getMsgServerVerson();
-        String msgOperaCode = informRule.getMsgOperaCode();
-        String describe = informRule.getDescribe();
+        String serverVerson = informMsg.getServerVerson();
+        String operateCode = informMsg.getOperateCode();
+        String tempCode = informMsg.getTempCode();
         JSONObject jsonObject = new JSONObject();
-        if("1".equals(describe)) {
+        String msgStr = null;
+        if("1".equals(tempCode)) {
             //获取区域下用户列表：AUTH_PLATFORM_1.0.0/getUserListByRegionCodes
             jsonObject.put("serverCode", "AUTH_PLATFORM");
             List<String> regionCodes = new ArrayList<>();
@@ -267,52 +268,41 @@ public class InformRuleController extends BaseController {
             /*
             1;[{"classes":"企业用户","companyId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgId":"c40e5fd6-2d94-47a2-8110-5084fd782ae6","currentOrgName":"zuzhi1","currentOrgType":"DEPARTMENT","currentPositionName":"mystoxlol","currentPostId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleId":"b1978b5e-052a-4de7-882d-54a0cb3ccd62","currentRoleName":"mystoxlol","department":"zuzhi1","email":"mystox@163.com","errorCode":"","id":"5a12a0504817ea147350dbe1","job":"mystoxlol","message":"","name":"jxyd","password":"fcea920f7412b5da7be0cf42b8c93759","phone":"15067455667","receiveAlarmEmail":"0","receiveAlarmMsg":"1","receiveAlarmPush":"0","receiveWorkPush":"0","success":false,"type":"mystoxlol","uniqueCode":"zuzhi1","userGroup":"mystoxlol","userId":"5a12a0504817ea147350dbe1","username":"jxyd"}]
              */
-        }else if("2".equals(describe)){
+        }else if("2".equals(tempCode)){
+           /* {"serverVerson":"AUTH_PLATFORM_1.0.0", "operateCode":"getRegionCodeEntity", "tempCode":"2"}*/
             //根据地区编码列表获取地区名称 getRegionCodeEntity
             List<String> regionCodes = new ArrayList<>();
             regionCodes.add("220281");
             regionCodes.add("330301");
-            jsonObject.put("regionCodes", regionCodes);
-            System.out.println("根据地区编码列表获取地区名称json:" + jsonObject.toJSONString());
-            System.out.println("数组字符串：" + regionCodes.toString());
+            regionCodes.add("000000");
+            msgStr = regionCodes.toString();
             /*
             [{"code":"220281","id":"220281","latitude":43.716756,"longitude":127.351742,"name":"[\"吉林省\",\"吉林市\",\"蛟河市\"]"},{"code":"330301","id":"330301","latitude":28.002838,"longitude":120.690635,"name":"[\"浙江省\",\"温州市\",\"市辖区\"]"}]
              */
-        }else if("3".equals(describe)){
-            //资产管理根据企业编码，服务编码获取所有设备类型 ASSET_MANAGEMENT_SERVER_1.0.0/getCIProp
-            jsonObject.put("enterpriseCode", "1");
-            jsonObject.put("serverCode", "1");
-            jsonObject.put("name", "");
-        }else if("4".equals(describe)){
-            //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI
-            List<String> sns = new ArrayList<>();
-            sns.add("10010_1021006");
-            jsonObject.put("sns", sns);
-        }else if("5".equals(describe)){
-            //根据用户id，获取用户管理权限以及用户信息AUTH_PLATFORM_1.0.0/getRegionListByUsers
-            jsonObject.put("serverCode", "AUTH_PLATFORM_1.0.0");
+        }else if("5".equals(tempCode)){
+            /* {"serverVerson":"AUTH_PLATFORM_1.0.0", "operateCode":"getRegionListByUsers", "tempCode":"5", "serverCode":"AUTH_PLATFORM_1.0.0"}*/
+            //根据用户id，获取用户管理权限以及用户信息AUTH_PLATFORM_1.0.0/getRegionListByUsers;;TOWER_SERVER
+            jsonObject.put("serverCode", informMsg.getServerCode());
             List<String> userIdList = new ArrayList<>();
             userIdList.add("392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
             userIdList.add("94132e81-1602-4036-8b15-6bb2f8dff089");
             jsonObject.put("userIds", userIdList);
+            msgStr = jsonObject.toJSONString();
         }
-        System.out.println("jsonObject:" + jsonObject.toJSONString());
-        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
-        String msg = msgResult.getMsg();
-        System.out.println(msgResult.getStateCode() + ";" + msg);
-        JSONObject o = JSONObject.parseObject(msg,JSONObject.class);
-        for(String key : o.keySet()){
-            JSONObject user = (JSONObject)o.get(key);
-            Object region = user.get("region");
-            System.out.println("region:" + region);
-            System.out.println("userId:" + key + "; userInfo:" + user);
-        }
-        List<String> userIds = (List<String>)jsonObject.get("userIds");
-        System.out.println("userIds:" + userIds + "; class:" + userIds.getClass().getName());
-        if(userIds.contains("94132e81-1602-4036-8b15-6bb2f8dff089")){
-            System.out.println("contains：94132e81-1602-4036-8b15-6bb2f8dff089" );
-        }else {
-            System.out.println("不包括");
+        System.out.println("serverVerson:" + serverVerson +"; operateCode: "+operateCode+";msgStr:" + msgStr);
+        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operateCode, msgStr);
+        if("5".equals(tempCode)){
+            JSONObject resultObject = JSONObject.parseObject(msgResult.getMsg(), JSONObject.class);
+            for(String userId : resultObject.keySet()){
+                JSONObject userInfo = (JSONObject)resultObject.get(userId);
+                System.out.println("userInfo:" + userInfo.toJSONString());
+                String phone = userInfo.getString("phone");
+                String email = userInfo.getString("email");
+                List<String> regions = (List<String>)userInfo.get("region");
+                System.out.println("regions:" + regions);
+
+            }
+
         }
         return new JsonResult(msgResult);
     }
@@ -322,9 +312,10 @@ public class InformRuleController extends BaseController {
     public JsonResult testAsset(@RequestBody InformRule informRule){
         String msgServerVerson = informRule.getMsgServerVerson();
         String msgOperaCode = informRule.getMsgOperaCode();
-        //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI
+        String describe = informRule.getDescribe();
+        //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI, describe表示设备id
         List<String> sns = new ArrayList<>();
-        sns.add("10010_1021006");
+        sns.add(describe);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sns", sns);
         System.out.println("jsonObject:" + jsonObject.toJSONString());

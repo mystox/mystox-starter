@@ -308,7 +308,7 @@ public class InformMsg {
         }else if(Contant.ZERO.equals(flag)){
             this.alarmStateType = Contant.ALARM_STATE_RECOVER;
         }
-        if(Contant.INFORM_TYPE_MSG.equals(type)){
+        if(Contant.TEMPLATE_MSG.equals(type)){
             this.url = informRule.getMsgServerURL();
             this.serverVerson = informRule.getMsgServerVerson();
             this.operateCode = informRule.getMsgOperaCode();
@@ -317,7 +317,7 @@ public class InformMsg {
             }else if(Contant.ZERO.equals(flag)){
                 this.tempCode = informRule.getMsgResolveCode();
             }
-        }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
+        }else if(Contant.TEMPLATE_EMAIL.equals(type)){
             this.url = informRule.getEmailServerURL();
             this.serverVerson = informRule.getEmailServerVerson();
             this.operateCode = informRule.getEmailOperaCode();
@@ -326,7 +326,7 @@ public class InformMsg {
             }else{
                 this.tempCode = informRule.getEmailResolveCode();
             }
-        }else if(Contant.INFORM_TYPE_APP.equals(type)){
+        }else if(Contant.TEMPLATE_APP.equals(type)){
             this.url = informRule.getAppServerURL();
             this.serverVerson = informRule.getAppServerVerson();
             this.operateCode = informRule.getAppOperaCode();
@@ -336,5 +336,10 @@ public class InformMsg {
                 this.tempCode = informRule.getAppResolveCode();
             }
         }
+    }
+
+    public void updateOperate(String enterpriseCode, String serverCode){
+        this.serverVerson = enterpriseCode;
+        this.operateCode = serverCode;
     }
 }
