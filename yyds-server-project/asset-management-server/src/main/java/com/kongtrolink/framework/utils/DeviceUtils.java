@@ -148,7 +148,10 @@ public class DeviceUtils {
     private String mergeDevice(JSONObject jsonObject) {
 
         JSONObject request = new JSONObject();
-        request.put("sn", jsonObject.getString("sn"));
+        JSONArray array = new JSONArray();
+
+        array.add(jsonObject.getString("sn"));
+        request.put("sns", array);
         request.put("enterpriseCode", jsonObject.getString("enterpriseCode"));
         request.put("serverCode", jsonObject.getString("serverCode"));
         JSONObject response = dbService.searchCI(request);
