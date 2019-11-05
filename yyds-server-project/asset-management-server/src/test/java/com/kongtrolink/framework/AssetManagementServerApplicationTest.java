@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Date;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class AssetManagementServerApplicationTest {
@@ -83,8 +85,7 @@ public class AssetManagementServerApplicationTest {
     private String serverCode = "1";
 
     @Test
-    public void testCreateCI()
-    {
+    public void testCreateCI() {
         JSONObject jsonObjectFsu = new JSONObject();
         jsonObjectFsu.put("enterpriseCode", enterpriseCode);
         jsonObjectFsu.put("serverCode", serverCode);
@@ -151,6 +152,31 @@ public class AssetManagementServerApplicationTest {
             relationship.put("id2", envId);
             neo4jDBService.addCIRelationship(relationship);
 
+        }
+    }
+
+    @Test
+    public void testMsg() {
+
+        JSONObject request = new JSONObject();
+        request.put("sn", "38");
+        request.put("enterpriseCode", "1");
+        request.put("serverCode", "1");
+        request.put("curPage", 1);
+        request.put("pageNum", 20);
+
+        String serverCode = MqttUtils.preconditionServerCode("ASSET_MANAGEMENT_SERVER", "1.0.0");
+        String operaCode = "getCI";
+
+
+        request(0, request, serverCode, operaCode);
+    }
+
+    private void request(int threadIndex, JSONObject request, String serverCode, String operaCode) {
+
+        for (int i = 0; i < 100; ++i) {
+            MsgResult msgResult = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(request));
+            System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());
         }
     }
 }
