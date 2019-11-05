@@ -89,10 +89,16 @@ public class CreateInformMsgService {
         String serverCode = alarm.getServerCode();
         Integer targetLevel = alarm.getTargetLevel();
         Date treport = alarm.getTreport();
+        List<InformRule> informRuleList = null;
         //获取匹配的短信通知
-        List<InformRule> informRuleList = informRuleDao.matchInform(enterpriseCode, serverCode, targetLevel, treport, type);
-        if(null == informRuleList || informRuleList.size() == 0){
-            return msgList;
+        try {
+            informRuleList = informRuleDao.matchInform(enterpriseCode, serverCode, targetLevel, treport, type);
+            if (null == informRuleList || informRuleList.size() == 0) {
+                return msgList;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
         }
         List<String> ruleIdList = inform2IdList(informRuleList);
         //获取对应的用户id

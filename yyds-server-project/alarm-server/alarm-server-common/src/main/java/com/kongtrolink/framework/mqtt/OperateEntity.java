@@ -43,4 +43,14 @@ public class OperateEntity {
     public void setOperaCode(String operaCode) {
         this.operaCode = operaCode;
     }
+
+    @Override
+    public String toString() {
+        return "OperateEntity{" +
+                "enterServerCode='" + enterServerCode + '\'' +
+                ", serverVerson='" + serverVerson + '\'' +
+                ", operaCode='" + operaCode + '\'' +
+                ", desc='" + desc + '\'' +
+                '}';
+    }
 }

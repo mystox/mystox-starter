@@ -13,9 +13,11 @@ import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.dao.InformMsgDao;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
@@ -29,6 +31,8 @@ import java.util.Set;
 @Service
 public class JpushService {
 
+    @Autowired
+    InformMsgDao informMsgDao;
     @Value("${jpush.appKey}")
     String APP_KEY;
     @Value("${jpush.masterSecret}")
@@ -49,6 +53,9 @@ public class JpushService {
                 pushSuccess = false;
             }
         }
+        String resultStr = pushSuccess ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
+        informMsg.setResult(resultStr);
+        informMsgDao.save(informMsg);
         LOGGER.info("AlarmId: {}, yiyiUserIds: {}, pushSuccess: {}", informMsg.getAlarmName(), userIds, pushSuccess);
         return true;
     }
@@ -60,7 +67,7 @@ public class JpushService {
             title = "[新告警提醒]";
         }
         StringBuilder builder = new StringBuilder();
-        String titleInfo = informMsg.getAddress() + "-" + informMsg.getAlarmName();
+        String titleInfo = informMsg.getAddressName() + "-" + informMsg.getAlarmName();
         builder.append(title).append(titleInfo);
         // 是否向产品环境推送
         boolean apnsProduction = Boolean.parseBoolean(APNS_PRODUCTION);

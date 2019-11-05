@@ -1,12 +1,15 @@
 package com.kongtrolink.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.dao.InformMsgDao;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.message.ReqSingleMessage;
 import com.kongtrolink.message.RespMessage;
 import com.kongtrolink.message.SmsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
@@ -21,6 +24,8 @@ import java.util.List;
 @Service
 public class MessageService {
 
+    @Autowired
+    InformMsgDao informMsgDao;
     @Value("${sms.enable}")
     String SMS_ENABLE;
     @Value("${sms.sms_user}")
@@ -36,27 +41,36 @@ public class MessageService {
      * 功能描述:发送告警短信
      */
     public void doSendMessage(InformMsg informMsg){
-
         ReqSingleMessage reqSingleMessage = buildMessage(informMsg);
-        LOGGER.info("AlarmId: {}, phones: {}", informMsg.getAlarmName(), informMsg.getInformAccount());
+        LOGGER.info("AlarmName: {}, phones: {}", informMsg.getAlarmName(), informMsg.getInformAccount());
+        boolean result = false;
         try{
-            System.out.println(reqSingleMessage);
-            sendMessage(reqSingleMessage);
+            RespMessage msg = SmsUtil.sendMessage(reqSingleMessage);
+            LOGGER.info("SMS Message sent. Msg: {}, result:{}", JSONObject.toJSONString(reqSingleMessage), JSONObject.toJSONString(msg));
+            if(msg.getStatusCode() == 200){
+                result = true;
+            }else{
+                throw new Exception(String.valueOf(msg.getStatusCode())+","+ msg.getMessage() + ";" + msg.getInfo());
+            }
         }catch (Exception e){
+            e.printStackTrace();
             LOGGER.info("发送告警短信失败,AlarmId: {}, phones: {}, isReport: {}", informMsg.getAlarmName(),
                     informMsg.getInformAccount(), informMsg.getAlarmStateType());
         }
+        String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
+        informMsg.setResult(resultStr);
+        informMsgDao.save(informMsg);
     }
 
     private ReqSingleMessage buildMessage(InformMsg informMsg) {
         ReqSingleMessage reqSingleMessage = new ReqSingleMessage(sms_user, sms_key);
         reqSingleMessage.setPhone(informMsg.getInformAccount());
         String tempCode = informMsg.getTempCode();
-        reqSingleMessage.setTemplateId(Integer.valueOf(tempCode));
+        reqSingleMessage.setTemplateId(Integer.parseInt(tempCode));
         JSONObject vars = new JSONObject();
         vars.put("%tier%", informMsg.getAddressName());
-//        vars.put("%site%", enterprise.getName());
-//        vars.put("%device%",informMsg.getDeviceName());
+        //20191114当前服务没有站点信息
+//        vars.put("%site%", "站点名称");
         vars.put("%alarm%", informMsg.getAlarmName());
         reqSingleMessage.setVars(vars);
         reqSingleMessage.setSignature(SmsUtil.createSignature(reqSingleMessage));
@@ -64,11 +78,6 @@ public class MessageService {
     }
 
     public void sendMessage(ReqSingleMessage reqSingleMessage) throws Exception {
-        // 根据配置开启关闭短信提醒功能
-        if(Boolean.parseBoolean(SMS_ENABLE) == false){
-            LOGGER.info("sms.enable 短信功能关闭");
-            return;
-        }
         try {
             RespMessage msg = SmsUtil.sendMessage(reqSingleMessage);
             LOGGER.info("SMS Message sent. Msg: {}", JSONObject.toJSONString(reqSingleMessage));
@@ -77,7 +86,6 @@ public class MessageService {
             }
         } catch (IllegalAccessException | UnsupportedEncodingException e) {
             LOGGER.error(e.getMessage());
-            return;
         }
     }
 }

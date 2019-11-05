@@ -57,7 +57,8 @@ public class EmailService {
         } catch (IOException ex) {
             LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
         }
-        informMsg.setResult(result);
+        String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
+        informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);
     }
 
@@ -68,9 +69,9 @@ public class EmailService {
 
         JSONArray tier = new JSONArray();
         tier.add(informMsg.getAddressName());
-
-        JSONArray device = new JSONArray();
-        device.add(informMsg.getDeviceName());
+        //20191114%site%-%device%当前没有实际值
+//        JSONArray device = new JSONArray();
+//        device.add(informMsg.getDeviceName());
 
         JSONArray alarmName = new JSONArray();
         alarmName.add(informMsg.getAlarmName());

@@ -12,6 +12,7 @@ public class Contant {
     public static String OPE_UPDATE ="修改";
     public static String OPE_LIST ="查询";
     public static String OPE_AUTH = "授权";
+    public static String OPE_SEND = "发送";
 
     public static String RESULT_SUC = "成功";
     public static String RESULT_FAIL = "失败";

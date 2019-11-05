@@ -1,5 +1,6 @@
 package com.kongtrolink.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
@@ -77,6 +78,9 @@ public class CreateDeviceInfoService {
 
     private synchronized List<InformMsg> beformHandle(){
         int size = informMsgList.size();
+        if(size == 0){
+            return null;
+        }
         if(size < count && currentTime<time){
             currentTime ++;
             return null;
@@ -102,7 +106,7 @@ public class CreateDeviceInfoService {
         @Override
         public void run(){
             List<InformMsg> handleInformMsgList = beformHandle();
-            if(null == handleInformMsgList){
+            if(null == handleInformMsgList || handleInformMsgList.size() == 0){
                 return ;
             }
             //从资管根据设备id列表，获取地区编码
@@ -157,7 +161,7 @@ public class CreateDeviceInfoService {
         jsonObject.put("sns", deviceIdList);
         try {
             MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, jsonObject.toJSONString());
-            logger.info("获取设备信息返回结果：{}", msgResult.toString());
+            logger.info("获取设备信息返回结果：{}", JSON.toJSON(msgResult));
             if(1 == msgResult.getStateCode()) {
                 String msg = msgResult.getMsg();
                 return getDeviceSucc(msg, handleInformMsgList, enterServerDeviceIdInformMsgListMap);
@@ -311,11 +315,12 @@ public class CreateDeviceInfoService {
             userIdInformList.add(informMsg);
             userIdInformListMap.put(informMsg.getUserId(), userIdInformList);
         }
-        GetAddressUsersRequest getAddressUsersRequest = new GetAddressUsersRequest();
-        getAddressUsersRequest.setServerCode(key);
-        getAddressUsersRequest.setUserIds(userIds);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("serverCode", key);
+        jsonObject.put("userIds", userIds);
         try {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getUserListByRegionCodes, JSONObject.toJSONString(getAddressUsersRequest));
+            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getUserListByRegionCodes, jsonObject.toJSONString());
             //填充用户信息
             initUserInfo(msgResult.getMsg(), informMsgList, userIdInformListMap);
             for(InformMsg informMsg : informMsgList){
@@ -327,29 +332,30 @@ public class CreateDeviceInfoService {
     }
 
     private void initUserInfo(String msg, List<InformMsg> informMsgList, Map<String, List<InformMsg>> userIdInformListMap){
-        List<UserInfo> userInfoList = JSONArray.parseArray(msg, UserInfo.class);
         List<InformMsg> noRegionInformList = new ArrayList<>();
-        for(UserInfo userInfo : userInfoList){
-            List<InformMsg> userIdInformList = userIdInformListMap.get(userInfo.getId());
+        JSONObject jsonObject = JSONObject.parseObject(msg, JSONObject.class);
+        for(String userId : jsonObject.keySet()){
+            List<InformMsg> userIdInformList = userIdInformListMap.get(userId);
             if(null == userIdInformList){
                 continue;
             }
+            JSONObject userInfo = (JSONObject)jsonObject.get(userId);
             for(InformMsg informMsg : userIdInformList){
-                List<String> regions = userInfo.getRegions();
+                List<String> regions = (List<String>)jsonObject.get("region");
                 if(!regions.contains(informMsg.getAddress())){
                     noRegionInformList.add(informMsg);
                     continue;
                 }
                 String type = informMsg.getType();
                 if(Contant.TEMPLATE_MSG.equals(type)){
-                    informMsg.setInformAccount(userInfo.getPhone());
+                    informMsg.setInformAccount(userInfo.getString("phone"));
                 }else if(Contant.TEMPLATE_EMAIL.equals(type)){
-                    informMsg.setInformAccount(userInfo.getEmail());
+                    informMsg.setInformAccount(userInfo.getString("email"));
                 }else{//如果是APP推送，则直接使用userID
-                    informMsg.setInformAccount(userInfo.getId());
+                    informMsg.setInformAccount(userId);
                 }
             }
-            userIdInformListMap.remove(userInfo.getId());
+            userIdInformListMap.remove(userId);
         }
         //排除没有地区权限的消息投递对象
         informMsgList.removeAll(noRegionInformList);

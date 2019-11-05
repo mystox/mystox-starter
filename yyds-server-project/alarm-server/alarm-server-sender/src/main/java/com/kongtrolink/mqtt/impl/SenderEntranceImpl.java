@@ -7,6 +7,8 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.service.MessageService;
 import com.kongtrolink.mqtt.SenderEntrance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -35,9 +37,10 @@ public class SenderEntranceImpl implements SenderEntrance {
     private JpushService jpushService;
 
     ConcurrentLinkedQueue<InformMsg> informMsgQueue = new ConcurrentLinkedQueue<>();
-
+    private static final Logger logger = LoggerFactory.getLogger(SenderEntranceImpl.class);
     @Override
     public void handleSender(String informMsgStr) {
+        logger.info("receive msg:{}", informMsgStr);
         //加入队列，直接返回
         InformMsg informMsg = JSONObject.parseObject(informMsgStr, InformMsg.class);
         informMsgQueue.add(informMsg);

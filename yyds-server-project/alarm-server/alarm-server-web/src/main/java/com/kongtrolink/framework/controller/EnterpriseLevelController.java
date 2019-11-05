@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
@@ -14,7 +13,6 @@ import com.kongtrolink.framework.mqtt.OperateEntity;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import com.kongtrolink.framework.service.MqttSender;
-import com.kongtrolink.framework.service.MqttService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,8 +34,6 @@ public class EnterpriseLevelController extends BaseController {
 
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
-    @Autowired
-    MqttService mqttService;
     @Autowired
     MqttSender mqttSender;
     @Autowired
@@ -104,18 +100,6 @@ public class EnterpriseLevelController extends BaseController {
         return new JsonResult(state + Contant.RESULT_FAIL, false);
     }
 
-    /**
-     * @auther: liudd
-     * @date: 2019/9/25 14:02
-     * 功能描述:获取企业和服务信息
-     */
-    @RequestMapping("/getUniqueServiceList")
-    @ResponseBody
-    public String getUniqueServiceList(){
-        JSON uniqueService = mqttService.getEnterpriseMsgAll();
-        return uniqueService.toJSONString();
-    }
-
     @RequestMapping("/getDeviceTypeList")
     @ResponseBody
     public String getDeviceTypeList(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
@@ -132,7 +116,6 @@ public class EnterpriseLevelController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseLevelQuery.getEnterpriseCode());
         jsonObject.put("serverCode", enterpriseLevelQuery.getServerCode());
-
         MsgResult msgResult = mqttSender.sendToMqttSyn(mqttServerCode, operaCode, jsonObject.toJSONString());
         System.out.println(msgResult);
         return msgResult.getMsg();

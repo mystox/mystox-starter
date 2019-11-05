@@ -1,5 +1,6 @@
 package com.kongtrolink.mqtt;
 
+import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
 /**
@@ -10,5 +11,6 @@ import com.kongtrolink.framework.stereotype.Register;
 @Register
 public interface SenderEntrance {
 
+    @OperaCode
     void handleSender(String informMsgStr);
 }

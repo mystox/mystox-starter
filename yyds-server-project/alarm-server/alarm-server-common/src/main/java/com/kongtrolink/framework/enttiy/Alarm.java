@@ -223,4 +223,27 @@ public class Alarm {
     public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
     }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "enterpriseCode='" + enterpriseCode + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serial='" + serial + '\'' +
+                ", name='" + name + '\'' +
+                ", value=" + value +
+                ", level=" + level +
+                ", deviceType='" + deviceType + '\'' +
+                ", deviceModel='" + deviceModel + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", signalId='" + signalId + '\'' +
+                ", flag='" + flag + '\'' +
+                ", targetLevel=" + targetLevel +
+                ", targetLevelName='" + targetLevelName + '\'' +
+                ", color='" + color + '\'' +
+                ", state='" + state + '\'' +
+                ", type='" + type + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

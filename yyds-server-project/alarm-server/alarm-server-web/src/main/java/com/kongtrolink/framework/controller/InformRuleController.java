@@ -1,18 +1,16 @@
 package com.kongtrolink.framework.controller;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.enttiy.InformRule;
-import com.kongtrolink.framework.enttiy.InformRuleUser;
-import com.kongtrolink.framework.enttiy.MsgTemplate;
-import com.kongtrolink.framework.mqtt.Region;
+import com.kongtrolink.framework.enttiy.*;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
@@ -25,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -290,16 +286,117 @@ public class InformRuleController extends BaseController {
         }else if("4".equals(describe)){
             //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI
             List<String> sns = new ArrayList<>();
-            sns.add("43813778");
-            sns.add("43813777");
-            sns.add("40613775");
-            sns.add("43813776");
-            sns.add("41800002");
+            sns.add("10010_1021006");
             jsonObject.put("sns", sns);
+        }else if("5".equals(describe)){
+            //根据用户id，获取用户管理权限以及用户信息AUTH_PLATFORM_1.0.0/getRegionListByUsers
+            jsonObject.put("serverCode", "AUTH_PLATFORM_1.0.0");
+            List<String> userIdList = new ArrayList<>();
+            userIdList.add("392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
+            userIdList.add("94132e81-1602-4036-8b15-6bb2f8dff089");
+            jsonObject.put("userIds", userIdList);
         }
-        System.out.println("jsonObject:" + jsonObject);
+        System.out.println("jsonObject:" + jsonObject.toJSONString());
         MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
-        System.out.println(msgResult.getStateCode() + ";" + msgResult.getMsg());
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+        JSONObject o = JSONObject.parseObject(msg,JSONObject.class);
+        for(String key : o.keySet()){
+            JSONObject user = (JSONObject)o.get(key);
+            Object region = user.get("region");
+            System.out.println("region:" + region);
+            System.out.println("userId:" + key + "; userInfo:" + user);
+        }
+        List<String> userIds = (List<String>)jsonObject.get("userIds");
+        System.out.println("userIds:" + userIds + "; class:" + userIds.getClass().getName());
+        if(userIds.contains("94132e81-1602-4036-8b15-6bb2f8dff089")){
+            System.out.println("contains：94132e81-1602-4036-8b15-6bb2f8dff089" );
+        }else {
+            System.out.println("不包括");
+        }
+        return new JsonResult(msgResult);
+    }
+
+    @RequestMapping("/testAsset")
+    @ResponseBody
+    public JsonResult testAsset(@RequestBody InformRule informRule){
+        String msgServerVerson = informRule.getMsgServerVerson();
+        String msgOperaCode = informRule.getMsgOperaCode();
+        //根据sns，从资产管理获取设备信息（包含address）ASSET_MANAGEMENT_SERVER_1.0.0/getCI
+        List<String> sns = new ArrayList<>();
+        sns.add("10010_1021006");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("sns", sns);
+        System.out.println("jsonObject:" + jsonObject.toJSONString());
+        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+        return new JsonResult(msgResult);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/4 14:40
+     * 功能描述:测试发送接口
+     */
+    @RequestMapping("/testSend")
+    @ResponseBody
+    public JsonResult testSend(@RequestBody InformMsg informMsg){
+
+        /*
+            短信：
+        {"serverVerson":"ALARM_SERVER_SENDER_V1.0.0", "operateCode":"handleSender",
+         "type":"短信", "url":"http://sendcloud.sohu.com/smsapi/send", "tempCode":"1144", "informAccount":"15267071976",
+           "enterpriseName":"义益钛迪", "serverName":"铁塔服务", "addressName":"浙江省杭州市江干区九堡国家大学科技园", "alarmName":"整流模块01故障告警",
+           "alarmStateType":"告警产生"
+           }
+         */
+        //发送短信 tempCode = "1144", account=15267071976, type = Contant.TEMPLATE_MSG
+        //ALARM_SERVER-SENDER_DEFAULT_V1.0.0/handleSender;emailOperaCode = account, emailReportCode = tempCode, emailResolveCode = type
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(informMsg);
+
+        /*
+        邮件：
+        {"serverVerson":"ALARM_SERVER_SENDER_V1.0.0", "operateCode":"handleSender",
+         "type":"邮件", "url":"http://api.sendcloud.net/apiv2/mail/sendtemplate", "tempCode":"power_alarm_templetId", "informAccount":"3243095682@qq.com",
+           "enterpriseName":"义益钛迪", "serverName":"铁塔服务", "addressName":"浙江省杭州市江干区九堡国家大学科技园", "alarmName":"总电流过低告警",
+           "alarmStateType":"告警产生"
+           }
+         */
+
+        /*
+        APP：
+        {"serverVerson":"ALARM_SERVER_SENDER_V1.0.0", "operateCode":"handleSender",
+         "type":"APP", "url":"http://api.sendcloud.net/apiv2/mail/sendtemplate", "tempCode":"101", "informAccount":"5ab45064fef5e1514ffd4581",
+           "enterpriseName":"义益钛迪", "serverName":"铁塔服务", "addressName":"浙江省杭州市江干区九堡国家大学科技园", "alarmName":"总电流过低告警APP",
+           "alarmStateType":"告警产生"
+           }
+         */
+        MsgResult msgResult = mqttSender.sendToMqttSyn(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+
+        return new JsonResult(msgResult);
+    }
+
+    @RequestMapping("/testDeliver")
+    @ResponseBody
+    public JsonResult testDeliver(@RequestBody Alarm alarm){
+        alarm.setTreport(new Date());
+        alarm.setTrecover(new Date());
+        alarm.setTargetLevel(alarm.getLevel());
+        alarm.setTargetLevelName(EnumLevelName.getNameByLevel(alarm.getLevel()));
+        String serverVersion = "ALARM_SERVER_DELIVER_V1.0.0";
+        String operateCode = "handleDeliver";
+        List<Alarm> alarms = new ArrayList<>();
+        alarms.add(alarm);
+        String reportAlarmListJson = JSONObject.toJSONString(alarms);
+        System.out.println(reportAlarmListJson);
+        //{"enterpriseServer":"yytd","enterpriseCode":"yytd","serverCode":"TOWER_SERVER", "deviceId":"10010_1021006","deviceModel":"YY006","deviceType":"yy6","flag":1,"level":"1","name":"整流模块01故障告警","serial":"12","signalId":"024001"}
+        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVersion, operateCode, reportAlarmListJson);
+        String msg = msgResult.getMsg();
+        System.out.println(msgResult.getStateCode() + ";" + msg);
+
         return new JsonResult(msgResult);
     }
 }

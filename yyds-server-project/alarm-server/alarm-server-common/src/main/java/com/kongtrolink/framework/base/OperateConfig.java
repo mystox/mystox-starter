@@ -37,13 +37,14 @@ public class OperateConfig {
      */
     public void initConfigMap(){
         if(null != operate && operate.size() >0){
+            enterServeOperaListMap.clear();
             for(OperateEntity operateEntity : operate){
                 String enterServerCode = operateEntity.getEnterServerCode();
                 if(StringUtil.isNUll(enterServerCode)){
                     continue;
                 }
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-                if(null == operateEntity){
+                if(null == operateEntityList){
                     operateEntityList = new ArrayList<>();
                 }
                 operateEntityList.add(operateEntity);
