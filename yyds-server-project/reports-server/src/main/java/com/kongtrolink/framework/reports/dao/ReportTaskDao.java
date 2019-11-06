@@ -44,6 +44,10 @@ public class ReportTaskDao extends MongoBaseDao {
         if (StringUtils.isNotBlank(operaCode)) {
             criteria = criteria.and("operaCode").regex(operaCode);
         }
+        Integer taskStatus = query.getInteger("taskStatus");
+        if (taskStatus != null) {
+            criteria = criteria.and("taskStatus").is(taskStatus);
+        }
         String taskType = query.getString("taskType");
         if (StringUtils.isNotBlank(taskType)) {
             criteria = criteria.and("taskType").is(taskType);
