@@ -1,0 +1,27 @@
+package com.kongtrolink.framework.reports.stereotype;
+
+/**
+ * Created by mystoxlol on 2019/10/31, 12:53.
+ * company: kongtrolink
+ * description:
+ * update record:
+ */
+public @interface ReportExtend {
+
+    enum FieldType {DATE, STRING, NUMBER,DISTRICT}
+
+
+    enum DateType {HOUR, DAY, WEEK, MONTH, YEAR}
+
+
+
+
+
+
+    String field() default "";
+
+    String name() default "";
+
+    FieldType type() default FieldType.STRING;
+
+}

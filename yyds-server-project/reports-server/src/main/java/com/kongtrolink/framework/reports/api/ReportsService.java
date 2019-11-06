@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.reports.api;
 
+import com.kongtrolink.framework.reports.entity.ReportData;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -13,8 +14,8 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface ReportsService  {
 
 
-    @OperaCode
-    public String reportConfig(String reportConfigStr);
+    @OperaCode(code = "report_test")
+    public ReportData reportConfig(String reportConfigStr);
 
 
 
