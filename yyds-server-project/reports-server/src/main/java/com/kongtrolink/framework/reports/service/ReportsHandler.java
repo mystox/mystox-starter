@@ -183,10 +183,11 @@ public class ReportsHandler implements ApplicationRunner {
         ReportTask task = reportTaskDao.findByByUniqueCondition(
                 reportTask.getServerCode(), reportTask.getEnterpriseCode(),
                 reportTask.getOperaCode(), MqttUtils.preconditionServerCode(serverName, serverVersion));
+        String reportTaskId = reportTask.getId();
         int taskStatus = task.getTaskStatus();
         if (TaskStatus.INVALID.getStatus() == taskStatus) {
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
-            logger.warn("[{}]task use to be invalid...", reportTask.getId());
+            logger.warn("[{}]task use to be invalid...", reportTaskId);
         } else {
             reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
         }
@@ -199,19 +200,19 @@ public class ReportsHandler implements ApplicationRunner {
                 //如果下一次执行时间为空，则设置节拍周期为下一次开始时间
                 reportTask.setStartTime(new Date(System.currentTimeMillis() + (rhythm == 0 ? 1 : rhythm) * 1000));
             }
-            logger.debug("[{}]next task start time is [{}]", task.getId(), task.getStartTime());
+            logger.debug("[{}]next task start time is [{}]", reportTaskId, reportTask.getStartTime());
         } else {//如果结果为空或者结果类型为ERROR，说明任务执行失败，则以定时器三倍执行周期都为错误为超时
             logger.error("[{}]task result[{}] is wrong", task.getId(), JSONObject.toJSONString(reportData));
             Date startTime = reportTask.getStartTime();
             if (rhythm != null)
                 if (System.currentTimeMillis() - startTime.getTime() > 1000 * 3 * (rhythm == 0 ? 1 : rhythm)) {
-                    logger.error("task time out... set invalid...");
+                    logger.error("[{}]task time out... set invalid...", reportTaskId);
                     reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
                 }
         }
         if (TaskType.singleTask.name().equals(reportTask.getTaskType())) //如果为单次任务，则在任务完成后设置任务为无效
         {
-            logger.warn("task is singleTask,set invalid when task ending...");
+            logger.warn("[{}]task is singleTask,set invalid when task ending...", reportTaskId);
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
 
@@ -220,7 +221,7 @@ public class ReportsHandler implements ApplicationRunner {
         reportTaskResult.setRecordTime(recordTime);
         reportTaskResult.setRunId(System.currentTimeMillis() + "");
         reportTaskResult.setStartTime(reportTask.getStartTime());
-        reportTaskResult.setTaskId(reportTask.getId());
+        reportTaskResult.setTaskId(reportTaskId);
         if (reportData != null)
             reportTaskResult.setResult(JSONObject.parseObject(JSONObject.toJSONString(reportData), ReportData.class));
         reportTaskResultDao.save(reportTaskResult);
@@ -238,7 +239,7 @@ public class ReportsHandler implements ApplicationRunner {
         boolean isTaskExists = reportTaskDao.isExistsByOperaCode(serverCode, enterpriseCode, operaCode, MqttUtils.preconditionServerCode(serverName, serverVersion));
         if (!isTaskExists) {
             //生成任务
-            logger.info("add task...");
+//            logger.info("add task...");
             reportTask.setOperaCode(operaCode);
             reportTask.setServerCode(serverCode);
             reportTask.setEnterpriseCode(enterpriseCode);
@@ -257,7 +258,7 @@ public class ReportsHandler implements ApplicationRunner {
 
         } else {
 
-            logger.info("modify task");
+//            logger.info("modify task");
             reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode,
                     MqttUtils.preconditionServerCode(serverName, serverVersion));
             int taskStatus = reportTask.getTaskStatus();
@@ -391,12 +392,13 @@ public class ReportsHandler implements ApplicationRunner {
         try {
             ReportTask reportTask = reportTaskDao.findExecuteReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
             if (reportTask == null) return;
-            logger.info("[{}]task executor..", reportTask.getId());
+            String reportTaskId = reportTask.getId();
+            logger.info("[{}]task executor..", reportTaskId);
             Integer rhythm = reportTask.getRhythm();
             Long operaValidity = reportTask.getOperaValidity();
             // 超时或设置无效
             if (!taskInvalid(operaValidity)) {
-                logger.warn("task invalidity...");
+                logger.warn("[{}]task invalidity...", reportTaskId);
                 reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
                 reportTask.setEndTime(new Date());
                 reportTaskDao.save(reportTask);
@@ -406,8 +408,6 @@ public class ReportsHandler implements ApplicationRunner {
                 ReportData result = null;
                 ReportConfig reportConfig = buildScheduledReportConfig(reportTask);
                 String operaCode = reportConfig.getOperaCode();
-                //                    registerRunner.getRegisterMsg();
-
                 String data = serviceRegistry.getData(
                         MqttUtils.preconditionSubTopicId(
                                 MqttUtils.preconditionServerCode(this.serverName, this.serverVersion),
@@ -465,11 +465,12 @@ public class ReportsHandler implements ApplicationRunner {
         for (ReportTask reportTask : reportTasks) {
             Date startTime = reportTask.getStartTime();
             Integer rhythm = reportTask.getRhythm();
+            String reportTaskId = reportTask.getId();
             if (System.currentTimeMillis() - startTime.getTime() > rhythm * 1000 * 3) { //如果任务三个周期内为改变运行状态，则该任务超时失效
-                logger.warn("[{}]task timeout 3 rhythm[{}]", reportTask.getId(), rhythm);
+                logger.warn("[{}]task timeout 3 rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
             } else if (System.currentTimeMillis() - startTime.getTime() > rhythm * 1000) { //如果任务一个周期内，未改变任务状态，则该任务为一个周期超时，将任务状态置为有效，但不改变任务开始时间
-                logger.warn("[{}]task timeout 1 rhythm[{}]", reportTask.getId(), rhythm);
+                logger.warn("[{}]task timeout 1 rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
                 reportTask.setStartTime(new Date());
             }

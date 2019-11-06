@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.reports.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.entity.TopicPrefix;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -11,7 +12,6 @@ import com.kongtrolink.framework.reports.entity.ReportTask;
 import com.kongtrolink.framework.reports.entity.ReportTaskResult;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 import com.kongtrolink.framework.reports.service.ReportsControllerService;
-import com.kongtrolink.framework.reports.stereotype.ReportOperaCode;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,20 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.ClassMetadata;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,6 +120,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
 //                String data = serviceRegistry.getData(TopicPrefix.SUB_PREFIX + "/" + c);
                     List<String> operaChildren = serviceRegistry.getChildren(serverPath);
                     for (String operaPath : operaChildren) {
+                        if (!operaPath.startsWith(OperaCodePrefix.REPORTS)) continue; //约定前缀不为报表的忽略
                         JSONObject operaMsg = new JSONObject();
                         operaMsg.put("operaCode", operaPath);
                         operaMsg.put("serverCode", c);
@@ -149,7 +138,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     }
 
 
-    private List<String> getReportsCode() {
+    /*private List<String> getReportsCode() {
         List<String> reportsCodeList = new ArrayList<>();
         String basePackagePath = ClassUtils.convertClassNameToResourcePath(getEnvironment().resolveRequiredPlaceholders(basePackage));
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
@@ -187,7 +176,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
             e.printStackTrace();
         }
         return reportsCodeList;
-    }
+    }*/
 
     @Override
     public void saveConfigData(JSONObject data) {

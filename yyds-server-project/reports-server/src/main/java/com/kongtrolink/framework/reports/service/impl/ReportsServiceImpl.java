@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.reports.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.reports.api.ReportsService;
 import com.kongtrolink.framework.reports.entity.DataType;
 import com.kongtrolink.framework.reports.entity.ExecutorType;
@@ -22,7 +23,7 @@ public class ReportsServiceImpl extends ReportsHandlerAdapter implements Reports
 
 
     @Override
-    @ReportOperaCode(code = "report_config",rhythm = 20,resultType={DataType.JSON}, extend =
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "config", rhythm = 20, resultType = {DataType.JSON}, extend =
             {
                     @ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
                     @ReportExtend(field = "region", name = "区域", type = ReportExtend.FieldType.DISTRICT)
