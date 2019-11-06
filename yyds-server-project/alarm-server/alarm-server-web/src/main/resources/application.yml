@@ -75,9 +75,16 @@ jpush:
     recoverTemplateId: 102
 
 #web端需要用得远程接口
-webOperate:
-    operate[0]:
-        enterServerCode:
-        serverVerson: ASSET_MANAGEMENT_SERVER_1.0.0
-        operaCode: getCIModel
-        desc: 根据enterpriseCode, serverCode获取所有设备类型，设备型号
+asset:
+  serverVerson: ASSET_MANAGEMENT_SERVER_1.0.0
+  getCIModel: getCIModel
+
+#是否启用内存保存企业告警等级和告警等级，需要和告警等级模块保持一致
+level:
+  useEnterpriseLevel: true
+  serverVersion: ALARM_SERVER_LEVEL_V1.0.0
+  updateEnterpriseLevelMap: updateEnterpriseLevelMap
+  useAlarmLevel: false
+
+
+

@@ -2,6 +2,7 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmCycleDao;
 import com.kongtrolink.framework.dao.AlarmDao;
@@ -44,6 +45,8 @@ public class CycleHandle{
     private String assetsServer;
     @Value("${assets.operaCode:getCI}")
     private String getCI;
+    @Value("${hcOverTime: 5}")
+    private int hcOverTime;
     private static int currentTime = 0;
 
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
@@ -61,12 +64,16 @@ public class CycleHandle{
             //从数据库获取实时告警，并加入到当前队列
             int size = currentAlarmList.size();
             if(size<count) {
+                Date curTime = new Date();
+                long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 int diff = count - size;
-                List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff);
-
+                List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff, curTime);
+                if(alarmList.size() == 0){
+                    return null;
+                }
                 //修改获取到的实时告警属性，防止再次获取到
                 List<String> idList = alarmDao.entity2IdList(alarmList);
-                alarmDao.updateHC(idList, true, currentTable);
+                alarmDao.updateHcTime(idList, new Date(overTimeLong), currentTable);
                 currentAlarmList.addAll(alarmList);
                 logger.info("size:{}, diff:{}, alarmList.size:{}, currentAlarmList.size:{}", size, diff, alarmList.size(), currentAlarmList.size());
             }
@@ -148,7 +155,7 @@ public class CycleHandle{
 
         //修改实时告警中hc字段值，以便下次再进入告警周期
         logger.info("update current alarm, size:{}", currentAlarmIdList.size());
-        alarmDao.updateHC(currentAlarmIdList, false, currentTable);
+        alarmDao.updateHcTime(currentAlarmIdList, null, currentTable);
         if(historyAlarmIdList.size() == 0){
             return ;
         }
@@ -159,7 +166,7 @@ public class CycleHandle{
             logger.info("initDeviceInfo fail");
             //如果获取设备信息失败，所有实时告警重新存入实时告警表
             historyAlarmIdList.addAll(currentAlarmIdList);
-            alarmDao.updateHC(historyAlarmIdList, false, currentTable);
+            alarmDao.updateHcTime(historyAlarmIdList, null, currentTable);
             return ;
         }
 

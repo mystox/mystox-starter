@@ -207,9 +207,10 @@ public class AlarmDao {
      * @date: 2019/10/14 14:43
      * 功能描述:获取实时告警，用于周期管理。
      */
-    public List<Alarm> getCurrentAlarmList(String table, int size){
+    public List<Alarm> getCurrentAlarmList(String table, int size, Date overTime){
         //获取未标志的实时告警
-        Criteria criteria = Criteria.where("hc").ne(true);
+        Criteria criteria = new Criteria();
+        criteria.orOperator(Criteria.where("hcTime").exists(false), Criteria.where("hcTime").lte(overTime));
         Query query = Query.query(criteria);
         query.limit(size);
         query.with(new Sort(Sort.Direction.ASC, "treport"));
@@ -299,11 +300,15 @@ public class AlarmDao {
      * @date: 2019/10/30 17:35
      * 功能描述:修改告警表中一个属性值
      */
-    public void updateHC(List<String> alarmIdList, boolean val, String table){
+    public void updateHcTime(List<String> alarmIdList, Date overTime, String table){
         Criteria criteria = Criteria.where("_id").in(alarmIdList);
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("hc", val);
+        if(null == overTime) {
+            update.unset("hcTime");
+        }else{
+            update.set("hcTime", overTime);
+        }
         mongoTemplate.updateMulti(query, update, table);
     }
 }

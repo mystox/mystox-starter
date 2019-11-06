@@ -16,6 +16,9 @@ import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
 import com.kongtrolink.framework.service.MqttSender;
 import com.kongtrolink.framework.service.MsgTemplateService;
+import com.kongtrolink.framework.service.impl.EnterpriseLevelServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +45,7 @@ public class InformRuleController extends BaseController {
     MsgTemplateService msgTemplateService;
     @Autowired
     MqttSender mqttSender;
+    private static final Logger logger = LoggerFactory.getLogger(InformRuleController.class);
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public @ResponseBody
@@ -389,5 +393,45 @@ public class InformRuleController extends BaseController {
         System.out.println(msgResult.getStateCode() + ";" + msg);
 
         return new JsonResult(msgResult);
+    }
+
+    @RequestMapping("/testMyServer")
+    @ResponseBody
+    public JsonResult testMyServer(@RequestBody InformMsg informMsg){
+        //访问controller : serverVerson= ALARM_SERVER_CONTROLLER_V1.0.0 ;operateCode =alarmHandle
+        //访问level:serverVersion = ALARM_SERVER_LEVEL, operateCode=handleLevel
+        String serverVerson = informMsg.getServerVerson();
+        String operateCode = informMsg.getOperateCode();
+        String alarmMqttJson = createAlarmMqttJson();
+        logger.info("serverVerson:{}, operateCode:{}, msg:{}", serverVerson, operateCode, alarmMqttJson);
+        mqttSender.sendToMqtt(serverVerson, operateCode, alarmMqttJson);
+        return new JsonResult("成功");
+    }
+
+    private String createAlarmMqttJson(){
+        String enterpriseCode = "yytd";
+        String serverCode = "TOWER_SERVER";
+        List<Alarm> alarms = new ArrayList<>();
+        alarms.add(getRandomAlarm());
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("enterpriseCode", enterpriseCode);
+        jsonObject.put("serverCode", serverCode);
+        jsonObject.put("alarms", alarms);
+        return jsonObject.toJSONString();
+    }
+
+    private Alarm getRandomAlarm(){
+        Alarm alarm = new Alarm();
+        alarm.setDeviceType("yy6");
+        alarm.setDeviceModel("YY006");
+        alarm.setDeviceId("10010_1021006");
+        alarm.setSignalId("024001");
+        alarm.setName("测试高温告警");
+        int serial = (int) (1 + Math.random() * (100000 - 1 + 1));
+        alarm.setSerial(""+serial);
+        alarm.setFlag("1");
+        alarm.setLevel(3);
+        alarm.setValue(666);
+        return alarm;
     }
 }

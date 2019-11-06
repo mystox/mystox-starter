@@ -34,14 +34,14 @@ public class Alarm {
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
-    private boolean hc;                 //是否正在处理周期
+    private Date hcTime;                //被周期处理时间
 
-    public boolean isHc() {
-        return hc;
+    public Date getHcTime() {
+        return hcTime;
     }
 
-    public void setHc(boolean hc) {
-        this.hc = hc;
+    public void setHcTime(Date hcTime) {
+        this.hcTime = hcTime;
     }
 
     public String getStatus() {

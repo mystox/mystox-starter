@@ -93,7 +93,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         //保存实时
         if(reportAlarmList.size() != 0) {
             //liuddtodo 按照配置文件，调用各个服务
+            Map<String, List<OperateEntity>> enterServeOperaListMap1 = resloverOperateConfig.getEnterServeOperaListMap();
+            System.out.println("enterServeOperaListMap1:" + enterServeOperaListMap1);
             Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
+            System.out.println("enterServeOperaListMap:" + enterServeOperaListMap);
             List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
             if(null != operateEntityList){
                 String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
