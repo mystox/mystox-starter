@@ -148,10 +148,12 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
                 return false;
             }
             alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
+        }
+        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery);
+        if(result && Contant.USEING.equals(state)){
             //删除告警等级模块中企业告警
             updateEnterpriseLevelMap(enterpriseCode, serverCode, enterpriseLevelQuery.getCode(), Contant.ONE);
         }
-        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery);
         addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
         return result;
     }
@@ -248,10 +250,10 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         jsonObject.put("key", key);
         int resultCode = 0;
         if (Contant.ZERO.equals(type)) {
-            //删除告警等级模块的企业告警等级
+            //删除告警等级模块的企业告警等级-
         }else if(Contant.ONE.equals(type)){
             //先根据企业编码和服务编码获取企业告警等级
-            List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelDao.getByCodes(Arrays.asList(enterpriseCode));
+            List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelDao.getByCodes(Arrays.asList(enterpriseLevelCode));
             jsonObject.put("enterpriseLevelList", enterpriseLevelList);
         }
         try {

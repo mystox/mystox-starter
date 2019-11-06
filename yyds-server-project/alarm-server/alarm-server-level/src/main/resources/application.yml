@@ -34,4 +34,4 @@ logging:
 
 dataLevel:
   enterpriseLevel: true
-  alarmLevel: true
+  alarmLevel: false

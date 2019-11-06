@@ -278,7 +278,7 @@ public class EnterpriseLevelDao {
      * 功能描述:获取企业告警等级所有编码
      */
     public List<String> getCodes(){
-        Criteria criteria = new Criteria();
+        Criteria criteria = Criteria.where("state").is(Contant.USEING);
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),  //查询条件
                 Aggregation.group("code", "updateTime")

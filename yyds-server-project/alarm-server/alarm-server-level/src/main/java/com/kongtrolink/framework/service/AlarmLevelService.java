@@ -98,7 +98,7 @@ public class AlarmLevelService {
      * 功能描述:修改内存中企业告警等级
      */
     public void updateEnterpriseLevelMap(String jsonStr){
-        JSONObject jsonObject = (JSONObject)JSONObject.toJSON(jsonStr);
+        JSONObject jsonObject = JSONObject.parseObject(jsonStr, JSONObject.class);
         String type = jsonObject.getString(Contant.TYPE);
         String key = jsonObject.getString("key");
         if(Contant.ONE.equals(type)){
@@ -136,7 +136,7 @@ public class AlarmLevelService {
         String key = enterpriseCode + Contant.UNDERLINE + serverCode;
         List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelMap.get(key);
         if(null == enterpriseLevelList){
-            logger.info("enterpriseCode：{}，serverCode:{}对应的企业告警等级不存在，将使用默认告警等级 ", enterpriseCode, serverCode);
+            logger.info("enterpriseCode：{}，serverCode:{} 对应的企业告警等级不存在，将使用默认告警等级 ", enterpriseCode, serverCode);
             enterpriseLevelList = enterpriseLevelMap.get("system_code");
         }
         if(null == enterpriseLevelList || enterpriseLevelList.size() == 0){
