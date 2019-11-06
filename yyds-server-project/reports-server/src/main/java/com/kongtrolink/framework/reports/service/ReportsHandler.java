@@ -112,6 +112,7 @@ public class ReportsHandler implements ApplicationRunner {
             e.setName(name);
             ReportExtend.FieldType type = reportExtend.type();
             e.setType(type.name());
+            e.setBelongs(reportExtend.belong().name());
             extendPropertiesList.add(e);
         }
 
@@ -280,7 +281,7 @@ public class ReportsHandler implements ApplicationRunner {
         }
         if (validity != null && validity) {
             int taskStatus = reportTask.getTaskStatus();
-            if (TaskStatus.RUNNING.getStatus() != taskStatus) {
+            if (TaskStatus.RUNNING.getStatus() == taskStatus) {
                 logger.warn("[{}]running task stay running", reportTask.getId());
             } else {
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
@@ -393,12 +394,11 @@ public class ReportsHandler implements ApplicationRunner {
 
 
     void task() {
-//        logger.debug("report task executor...");
         try {
             ReportTask reportTask = reportTaskDao.findExecuteReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
             if (reportTask == null) return;
             String reportTaskId = reportTask.getId();
-            logger.info("[{}]task executor..", reportTaskId);
+            logger.debug("[{}]task executor..", reportTaskId);
             Integer rhythm = reportTask.getRhythm();
             Long operaValidity = reportTask.getOperaValidity();
             // 超时或设置无效

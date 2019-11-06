@@ -27,7 +27,7 @@ public class ReportTaskResultDao extends MongoBaseDao{
     public ReportTaskResult findNewByTaskId(String taskId) {
         Query query = Query.query(Criteria.where("taskId").is(taskId));
         query.limit(1);
-        query.with(new Sort(Sort.Direction.ASC, "recordTime"));
+        query.with(new Sort(Sort.Direction.DESC, "recordTime"));
         return mongoTemplate.findOne(query, ReportTaskResult.class, MongoDocName.REPORT_TASK_RESULT);
     }
 

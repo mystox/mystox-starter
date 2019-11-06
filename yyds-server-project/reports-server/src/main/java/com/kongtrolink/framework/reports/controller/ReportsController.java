@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.reports.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -63,14 +64,15 @@ public class ReportsController {
         String reportServerCode = body.getString("reportServerCode");
         MsgResult msgResult = mqttSender.sendToMqttSyn(
                 reportServerCode, operaCode, body.toJSONString());
-        return new JsonResult(msgResult);
+        String msg = msgResult.getMsg();
+        return new JsonResult(JSON.parseObject(msg));
 
     }
 
     @RequestMapping("/configDataSave")
     JsonResult configDataSave(@RequestBody(required = false) JSONObject body) {
         reportsControllerService.saveConfigData(body);
-        return new JsonResult();
+        return new JsonResult("保存成功",true);
     }
     @RequestMapping("/configDataGet")
     JsonResult configDataGet(@RequestBody(required = false) JSONObject body) {

@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.reports.stereotype;
 
+import com.kongtrolink.framework.reports.entity.ExecutorType;
+
 /**
  * Created by mystoxlol on 2019/10/31, 12:53.
  * company: kongtrolink
@@ -23,5 +25,7 @@ public @interface ReportExtend {
     String name() default "";
 
     FieldType type() default FieldType.STRING;
+
+    ExecutorType belong() default ExecutorType.execute;
 
 }

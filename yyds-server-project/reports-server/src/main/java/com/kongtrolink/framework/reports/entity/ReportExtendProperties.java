@@ -10,7 +10,16 @@ public class ReportExtendProperties {
     private String field;
     private String name;
     private String type;
+    private String belongs;
 
+
+    public String getBelongs() {
+        return belongs;
+    }
+
+    public void setBelongs(String belongs) {
+        this.belongs = belongs;
+    }
 
     public String getField() {
         return field;
