@@ -48,13 +48,13 @@ public class JpushService {
         Set<String> userIds = new HashSet<>();
         userIds.add(informMsg.getInformAccount());
         // 推送至义益云监控
-        if (userIds != null && userIds.size() > 0) {
-            PushPayload payload = buildPayload(informMsg, userIds);
-            PushResult result = sendPush(payload);
-            if (result == null || result.isResultOK() == false) {
-                pushSuccess = false;
-            }
-        }
+//        if (userIds != null && userIds.size() > 0) {
+//            PushPayload payload = buildPayload(informMsg, userIds);
+//            PushResult result = sendPush(payload);
+//            if (result == null || result.isResultOK() == false) {
+//                pushSuccess = false;
+//            }
+//        }
         String resultStr = pushSuccess ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
         informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);

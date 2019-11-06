@@ -8,6 +8,7 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
+import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +35,17 @@ public class CycleHandle{
     AlarmCycleDao alarmCycleDao;
     @Autowired
     MqttSender mqttSender;
+
     @Value("${cycle.count:300}")
     private int count;
     @Value("${cycle.time:5}")
     private int time;
-    @Value("${cycle.assets:theAssets}")
+    @Value("${assets.serverVersion:theAssets}")
     private String assetsServer;
-    @Value("${cycle.getCI:getCI}")
+    @Value("${assets.operaCode:getCI}")
     private String getCI;
-
     private static int currentTime = 0;
+
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
@@ -54,108 +56,138 @@ public class CycleHandle{
      * @date: 2019/10/21 18:18
      * 功能描述:静态方法同步锁作用在当前类的字节码上
      */
-    public static synchronized void handleCurrentAlarmList(List<Alarm> alarmList, String type){
+    public synchronized List<Alarm> handleCurrentAlarmList(String type){
         if(Contant.ONE.equals(type)){
-            currentAlarmList.addAll(alarmList);
-        }else if(Contant.ZERO.equals(type)){
+            //从数据库获取实时告警，并加入到当前队列
+            int size = currentAlarmList.size();
+            if(size<count) {
+                int diff = count - size;
+                List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff);
+
+                //修改获取到的实时告警属性，防止再次获取到
+                List<String> idList = alarmDao.entity2IdList(alarmList);
+                alarmDao.updateHC(idList, true, currentTable);
+                currentAlarmList.addAll(alarmList);
+                logger.info("size:{}, diff:{}, alarmList.size:{}, currentAlarmList.size:{}", size, diff, alarmList.size(), currentAlarmList.size());
+            }
+            return null;
+        }else{
+            if(currentAlarmList.size() < count && currentTime < time){
+                currentTime ++ ;
+                return null;
+            }
+            List<Alarm> handleAlarmList = new ArrayList<>();
+            handleAlarmList.addAll(currentAlarmList);
             currentAlarmList.clear();
             //清空列表，复位计数
             currentTime = 0;
+            logger.info("handleAlarmList.currentTime:{}, currentAlarmList.size:{}", handleAlarmList.size(), currentTime, currentAlarmList.size());
+            return handleAlarmList;
         }
     }
 
-    public static synchronized int getCurrentAlarmSize(){
-        return currentAlarmList.size();
-    }
-
+    /**
+     * @auther: liudd
+     * @date: 2019/11/5 18:32
+     * 功能描述:处理实时告警
+     */
     public void handle(){
-        ScheduledExecutorService handleScheduler = Executors.newSingleThreadScheduledExecutor();
-        handleScheduler.scheduleWithFixedDelay(new handleTask(), 10 * 1000, 10 * 1000,
-                TimeUnit.MILLISECONDS);
-    }
-
-    public synchronized List<Alarm> beforHandle(){
-        if(currentAlarmList.size() < count && currentTime < time){
-            currentTime ++ ;
-            return null;
+        List<Alarm> handleAlarmList = handleCurrentAlarmList(Contant.ZERO);
+        if(null == handleAlarmList || handleAlarmList.size() == 0){
+            return ;
         }
-        List<Alarm> handleAlarmList = new ArrayList<>();
-        handleAlarmList.addAll(currentAlarmList);
-        handleCurrentAlarmList(null, Contant.ZERO);
-        return handleAlarmList;
-    }
+        logger.info("handleAlarmList.size:{}", handleAlarmList.size());
+        //初始化备用map
+        Map<String, AlarmCycle> enterpriseServer_cycleMap = new HashMap<>();
+        Map<String, List<Alarm>> enterpirseServer_alarmListMap = readyMap(handleAlarmList, enterpriseServer_cycleMap);
 
-    class handleTask implements Runnable{
-        public void run() {
-            List<Alarm> handleAlarmList = beforHandle();
-            if(null == handleAlarmList || handleAlarmList.size() == 0){
+        Map<String, List<Alarm>> enterServerHistoryAlarmListMap = new HashMap<>();
+        List<String> historyAlarmIdList = new ArrayList<>();    // 历史告警id列表
+        List<String> currentAlarmIdList = new ArrayList<>();    //实时告警id列表
+        List<String> deviceIdList = new ArrayList<>();          // 设备id列表
+        Map<String, List<Alarm>> enterServerDeviceId_alarmListMap = new HashMap<>();   //enterServerDeviceId—历史告警列表map
+        Date curTime = new Date();
+        for(String enterpirseServer : enterpirseServer_alarmListMap.keySet()){
+            AlarmCycle alarmCycle = getAlarmCycle(enterpriseServer_cycleMap, enterpirseServer);
+            if(null == alarmCycle){
+                logger.info("{} alarmCycle is null!", enterpirseServer);
                 return ;
             }
-            logger.info("handleAlarmList.size:{}", handleAlarmList.size());
-
-            //初始化备用map
-            Map<String, AlarmCycle> enterpriseServer_cycleMap = new HashMap<>();
-            Map<String, List<Alarm>> enterpirseServer_alarmListMap = readyMap(handleAlarmList, enterpriseServer_cycleMap);
-
-            //判定各个告警是否过期
-            //liuddtodo 需要考虑多个服务同时修改情况，后期再处理
-            Map<String, List<Alarm>> enterServerHistoryAlarmListMap = new HashMap<>();
-            List<String> historyAlarmIdList = new ArrayList<>();    // 历史告警id列表
-            List<String> currentAlarmIdList = new ArrayList<>();    //实时告警id列表
-            List<String> deviceIdList = new ArrayList<>();          // 设备id列表
-            Map<String, List<Alarm>> deviceId_alarmListMap = new HashMap<>();   //设备id—历史告警列表map
-            Date curTime = new Date();
-            for(String enterpirseServer : enterpirseServer_alarmListMap.keySet()){
-                AlarmCycle alarmCycle = enterpriseServer_cycleMap.get(enterpirseServer);
-                List<Alarm> alarmList = enterpirseServer_alarmListMap.get(enterpirseServer);
-                for(Alarm alarm : alarmList){
-                    boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
-                    if(history){
-                        historyAlarmIdList.add(alarm.getId());
-                        //保存设备信息
-                        deviceIdList.add(alarm.getDeviceId());
-
-                        List<Alarm> alarms = enterServerHistoryAlarmListMap.get(enterpirseServer);
-                        if(null == alarm){
-                            alarms = new ArrayList<>();
-                        }
-                        alarms.add(alarm);
-                        enterServerHistoryAlarmListMap.put(enterpirseServer, alarms);
-
-                        List<Alarm> deviceId_alarmList = deviceId_alarmListMap.get(alarm.getDeviceId());
-                        if(null == deviceId_alarmList){
-                            deviceId_alarmList = new ArrayList<>();
-                        }
-                        deviceId_alarmList.add(alarm);
-                        deviceId_alarmListMap.put(alarm.getDeviceId(), deviceId_alarmList);
-                    }else{
-                        currentAlarmIdList.add(alarm.getId());
+            List<Alarm> alarmList = enterpirseServer_alarmListMap.get(enterpirseServer);
+            for(Alarm alarm : alarmList){
+                boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
+                if(history){
+                    //以enterpriseCode_serverCode为键，保存历史告警列表，为后面批量存储做准备
+                    List<Alarm> enterServerHistoryAlarmList = enterServerHistoryAlarmListMap.get(enterpirseServer);
+                    if(null == enterServerHistoryAlarmList){
+                        enterServerHistoryAlarmList = new ArrayList<>();
                     }
+                    enterServerHistoryAlarmList.add(alarm);
+                    enterServerHistoryAlarmListMap.put(enterpirseServer, enterServerHistoryAlarmList);
+
+                    historyAlarmIdList.add(alarm.getId());
+                    //保存设备id信息
+                    String deviceId = alarm.getDeviceId();
+                    if(!deviceIdList.contains(deviceId)) {
+                        deviceIdList.add(deviceId);
+                    }
+
+                    //以enterServerDeviceId为键，保存历史告警列表，为后期填充设备信息做准备
+                    String key = enterpirseServer + Contant.UNDERLINE + deviceId;
+                    List<Alarm> enterServerDeviceId_alarmList = enterServerDeviceId_alarmListMap.get(key);
+                    if(enterServerDeviceId_alarmList == null){
+                        enterServerDeviceId_alarmList = new ArrayList<>();
+                    }
+                    enterServerDeviceId_alarmList.add(alarm);
+                    enterServerDeviceId_alarmListMap.put(key, enterServerDeviceId_alarmList);
+                }else{
+                    currentAlarmIdList.add(alarm.getId());
                 }
             }
-
-            //从资产管理获取设备信息并填充到告警对象
-            initDeviceInfo(deviceIdList, enterServerHistoryAlarmListMap);
-
-            //删除实时告警
-            alarmDao.deleteByIdList(currentTable, historyAlarmIdList);
-
-            //保存历史告警到对应的历史告警表
-            for(String enterServer : enterServerHistoryAlarmListMap.keySet()) {
-                List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);
-                alarmDao.addList(historyAlarmList, enterServer + Contant.UNDERLINE+ historyTable);
-            }
-            //修改实时告警中hc字段值，以便下次再进入告警周期
-            alarmDao.updateHC(currentAlarmIdList, false, currentTable);
         }
+
+        //修改实时告警中hc字段值，以便下次再进入告警周期
+        logger.info("update current alarm, size:{}", currentAlarmIdList.size());
+        alarmDao.updateHC(currentAlarmIdList, false, currentTable);
+        if(historyAlarmIdList.size() == 0){
+            return ;
+        }
+
+        //从资产管理获取设备信息并填充到告警对象
+        boolean result = initDeviceInfo(deviceIdList, enterServerDeviceId_alarmListMap);
+        if(!result){
+            logger.info("initDeviceInfo fail");
+            //如果获取设备信息失败，所有实时告警重新存入实时告警表
+            historyAlarmIdList.addAll(currentAlarmIdList);
+            alarmDao.updateHC(historyAlarmIdList, false, currentTable);
+            return ;
+        }
+
+
+        //保存历史告警到对应的历史告警表
+        for(String enterServer : enterServerHistoryAlarmListMap.keySet()) {
+            List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);
+            logger.info("save history alarm, enterServer:{}, size:{}", enterServer, historyAlarmIdList.size());
+            alarmDao.addList(historyAlarmList, enterServer + Contant.UNDERLINE+ historyTable);
+        }
+        //删除实时告警
+        logger.info("delete history alarm from current table, size:{}", historyAlarmIdList.size());
+        alarmDao.deleteByIdList(currentTable, historyAlarmIdList);
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/11/5 18:39
+     * 功能描述:获取enterpriseServerCode-cycle 对应map和enterpriseServerCode-List<alarm>对应map
+     */
     public Map<String, List<Alarm>> readyMap(List<Alarm> handleAlarmList, Map<String, AlarmCycle> enterpriseServer_cycleMap){
-        Map<String, List<Alarm>> enterpirseServer_alarmListMap = new HashMap<>();
         List<String> enterpriseServerCodeList = new ArrayList<>();
+        Map<String, List<Alarm>> enterpirseServer_alarmListMap = new HashMap<>();
         for(Alarm alarm : handleAlarmList){
             String enterpriseServer = alarm.getEnterpriseServer();
-            enterpriseServerCodeList.add(enterpriseServer);
+            if(!enterpriseServerCodeList.contains(enterpriseServer)) {
+                enterpriseServerCodeList.add(enterpriseServer);
+            }
             List<Alarm> alarms = enterpirseServer_alarmListMap.get(enterpriseServer);
             if(null == alarms){
                 alarms = new ArrayList<>();
@@ -167,10 +199,17 @@ public class CycleHandle{
         //获取企业对应的自定义周期
         List<AlarmCycle> cycleList = alarmCycleDao.getCycleList(enterpriseServerCodeList);
         for(AlarmCycle alarmCycle : cycleList){
-            alarmCycle.initEnterpirseServer();
             enterpriseServer_cycleMap.put(alarmCycle.getEnterpriseServer(), alarmCycle);
         }
         return enterpirseServer_alarmListMap;
+    }
+
+    private AlarmCycle getAlarmCycle(Map<String, AlarmCycle> enterpriseServer_cycleMap, String enterpirseServer){
+        AlarmCycle alarmCycle = enterpriseServer_cycleMap.get(enterpirseServer);
+        if(null == alarmCycle){
+            alarmCycle = enterpriseServer_cycleMap.get(Contant.SYSTEM);
+        }
+        return alarmCycle;
     }
 
     /**
@@ -178,31 +217,32 @@ public class CycleHandle{
      * @date: 2019/11/1 15:51
      * 功能描述:获取用户信息，如果获取不到，暂时先放回实时表，并修改获取次数
      */
-    public void initDeviceInfo(List<String> deviceIdList, Map<String, List<Alarm>> enterServerHistoryAlarmListMap){
-        //liuddtodo 从第三方获取设备信息并填充到告警对象中。将结果转换成json对象列表
-        JSONObject requJsonObject = new JSONObject();
-        requJsonObject.put("sns", deviceIdList);
-        MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, requJsonObject.toJSONString());
-        //liuddtodo 需要判定返回失败的结果
-        int stateCode = msgResult.getStateCode();
-        String msg = msgResult.getMsg();
-        CIResponseEntity ciResponseEntity = JSONObject.parseObject(msg, CIResponseEntity.class);
-        int count = ciResponseEntity.getCount();
-        //假设返回
-        Map<String, JSONObject> deviceId_jsonObjMap = new HashMap<>();
-        for (JSONObject jsonObject : ciResponseEntity.getInfos()) {
-            deviceId_jsonObjMap.put(jsonObject.getString("sn"), jsonObject);
-        }
-
-        //根据diviceid，填充告警信息
-        for (String enterServer : enterServerHistoryAlarmListMap.keySet()) {
-            List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);
-            for (Alarm alarm : historyAlarmList) {
-                JSONObject jsonObject = deviceId_jsonObjMap.get(alarm.getDeviceId());
-                if (null != jsonObject) {
-                    alarm.setDeviceInfos((Map) jsonObject);
+    public boolean initDeviceInfo(List<String> deviceIdList, Map<String, List<Alarm>> enterServerDeviceId_alarmListMap){
+        JSONObject resJsonObject = new JSONObject();
+        resJsonObject.put("sns", deviceIdList);
+        try {
+            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, resJsonObject.toJSONString());
+            logger.info("---getCI : msg:{}, operate:{}, result:{}", deviceIdList.toString(), assetsServer+Contant.UNDERLINE+getCI, msgResult);
+            if(1 == msgResult.getStateCode()) {
+                CIResponseEntity ciResponseEntity = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                for (JSONObject deviceJson : ciResponseEntity.getInfos()) {
+                    String enterpriseCode = deviceJson.getString("enterpriseCode");
+                    String serverCode = deviceJson.getString("serverCode");
+                    String sn = deviceJson.getString("sn");
+                    String key = enterpriseCode+ Contant.UNDERLINE + serverCode + Contant.UNDERLINE + sn;
+                    List<Alarm> enterServerDeviceId_alarmList = enterServerDeviceId_alarmListMap.get(key);
+                    for(Alarm alarm : enterServerDeviceId_alarmList){
+                        alarm.setDeviceInfos((Map) deviceJson);
+                    }
                 }
+                return true;
+            }else{
+                return false;
             }
+        }catch (Exception e){
+            logger.info("---getCI: remote call error, msgSize:{}, operate:{}, result:{}",deviceIdList.size(),
+                    assetsServer+Contant.UNDERLINE+getCI, e.getMessage());
+            return false;
         }
     }
 }

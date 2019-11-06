@@ -137,6 +137,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
             systemCycle.setUpdateTime(new Date());
             systemCycle.setState(Contant.USEING);
             systemCycle.setCycleType(Contant.SYSTEM);
+            systemCycle.setEnterpriseServer(Contant.SYSTEM);
         }
         logger.info("默认告警周期：{}", systemCycle.toString());
         cycleDao.save(systemCycle);

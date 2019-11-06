@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FacadeView;
 import java.util.Date;
 
@@ -133,13 +134,6 @@ public class AlarmCycle {
         if(null == alarm){
             return false;
         }
-        if(null == alarmCycle){
-            //如果告警周期为空，则默认已消除告警为历史告警
-            if(null != alarm.getTrecover()){
-                return true;
-            }
-            return false;
-        }
         if(alarmCycle.diffTime < 0){
             if(null != alarm.getTrecover()){
                 return true;
@@ -147,8 +141,12 @@ public class AlarmCycle {
             return false;
         }
         Date tReport = alarm.getTreport();
+        String treportFormat = DateUtil.format(tReport);
+        String curTimeFormat = DateUtil.format(curDate);
+        int pastTime = alarmCycle.diffTime * 60 * 60 * 1000;
         long time = curDate.getTime() - tReport.getTime();
-        if(time >= (alarmCycle.diffTime * 60 * 1000)){
+        System.out.println("treportFormat:" + treportFormat + "; curTimeFormat:" + curTimeFormat + "; time:" + time + "; pastTime:" + pastTime);
+        if(time >= pastTime){
             return true;
         }
         return false;
@@ -157,7 +155,8 @@ public class AlarmCycle {
     @Override
     public String toString() {
         return "AlarmCycle{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", enterpriseCode='" + enterpriseCode + '\'' +
                 ", enterpriseName='" + enterpriseName + '\'' +
                 ", serverCode='" + serverCode + '\'' +
@@ -166,6 +165,7 @@ public class AlarmCycle {
                 ", updateTime=" + updateTime +
                 ", operator=" + operator +
                 ", state='" + state + '\'' +
+                ", enterpriseServer='" + enterpriseServer + '\'' +
                 ", cycleType='" + cycleType + '\'' +
                 '}';
     }

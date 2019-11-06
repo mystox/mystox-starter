@@ -3,17 +3,21 @@ package com.kongtrolink.framework.dao;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.Alarm;
+import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.mongodb.BulkWriteResult;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,8 +137,16 @@ public class AlarmDao {
         return remove.getN();
     }
 
-    public void addList(List<Alarm> alarmList, String table) {
-        mongoTemplate.save(alarmList, table);
+    public boolean addList(List<Alarm> alarmList, String table) {
+        // BulkMode.UNORDERED:表示并行处理，遇到错误时能继续执行不影响其他操作；BulkMode.ORDERED：表示顺序执行，遇到错误时会停止所有执行
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, table);
+        for(Alarm alarm : alarmList) {
+            ops.insert(alarm);
+        }
+        // 执行操作
+        BulkWriteResult execute = ops.execute();
+        int insertedCount = execute.getInsertedCount();
+        return insertedCount>0 ? true : false;
     }
 
     /**
@@ -270,6 +282,16 @@ public class AlarmDao {
         }
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
+
+    public List<String> entity2IdList(List<Alarm> alarmList){
+        List<String> alarmIdList = new ArrayList<>();
+        if(null != alarmIdList){
+            for(Alarm alarm : alarmList){
+                alarmIdList.add(alarm.getId());
+            }
+        }
+        return alarmIdList;
     }
 
     /**
