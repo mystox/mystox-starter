@@ -10,6 +10,7 @@ import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,9 +47,17 @@ public class MqttHandlerImpl implements MqttHandler {
     }
 
     @Override
-    public void addSubTopic(String... topics) {
+    public synchronized void addSubTopic(String... topics) {
+        logger.info("add addSubTopic topics: {}", topics);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
-        messageProducer.addTopic(topics);
+        List<String> topicAdd = new ArrayList<>();
+        for (String topic: topics)
+        {
+            if (!isExists(topic)){
+                topicAdd.add(topic);
+            }
+        }
+        messageProducer.addTopic(topicAdd.toArray(new String[topicAdd.size()]));
     }
 
     @Override
