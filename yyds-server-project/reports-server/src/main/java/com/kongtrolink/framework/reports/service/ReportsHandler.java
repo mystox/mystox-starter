@@ -429,7 +429,6 @@ public class ReportsHandler implements ApplicationRunner {
             try {
                 reportsExecutor.execute(futureTask);
                 result = futureTask.get(rhythm * 3, TimeUnit.SECONDS);
-                System.out.println("future get ");
             } catch (InterruptedException e) {
                 result = new ReportData("error", "execute invalidity" + e.toString());
                 e.printStackTrace();
