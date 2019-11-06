@@ -4,19 +4,37 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.Publish;
 import com.kongtrolink.framework.dao.DBService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-@Service
+@Lazy
+@Component
+@EnableScheduling
 public class AssetManagementTask {
+
+    private Logger logger = LoggerFactory.getLogger(AssetManagementTask.class);
+
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
 
     @Resource(name = "Neo4jDBService")
     private DBService dbService;
 
-    @Resource(name = "MqttPublish")
+    @Autowired
+    @Qualifier(value = "MqttPublish")
     private Publish publish;
 
+    @Scheduled(fixedRate=60000)
     private void deviceGet() {
 
         JSONObject request = new JSONObject();
@@ -24,13 +42,13 @@ public class AssetManagementTask {
         request.put("pageNum", 0);
 
         JSONObject response = dbService.searchCI(request);
-        if (response == null || request.getInteger("count") <= 0) {
+        if (response == null || response.getInteger("count") <= 0) {
             return;
         }
 
         int pageNum = 100;
         request.put("pageNum", pageNum);
-        int count = request.getInteger("count");
+        int count = response.getInteger("count");
         for (int curPage = 0; curPage * pageNum < count; ++curPage) {
             request.put("curPage", curPage + 1);
             response = dbService.searchCI(request);
@@ -40,7 +58,7 @@ public class AssetManagementTask {
                 String sn = ciList.getJSONObject(i).getString("sn");
                 String gatewayServerCode = ciList.getJSONObject(i).getString("gatewayServerCode");
 
-                if (!gatewayServerCode.equals("")) {
+                if (gatewayServerCode != null && !gatewayServerCode.equals("")) {
                     publish.deviceGet(sn, gatewayServerCode);
                 }
             }

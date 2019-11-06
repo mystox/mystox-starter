@@ -220,6 +220,7 @@ public class EnterpriseLevelDao {
     public List<EnterpriseLevel> getSystemLevel() {
         Criteria criteria = Criteria.where("levelType").is(Contant.SYSTEM);
         Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
 

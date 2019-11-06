@@ -30,11 +30,19 @@ public class Alarm {
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
     private String state;               //告警状态
-    private String sliceKey;            //片键，也可以作为普通索引键
     private Map<String, String> AuxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
+    private boolean hc;                 //是否正在处理周期
+
+    public boolean isHc() {
+        return hc;
+    }
+
+    public void setHc(boolean hc) {
+        this.hc = hc;
+    }
 
     public String getStatus() {
         return status;
@@ -66,18 +74,6 @@ public class Alarm {
 
     public void setDeviceInfos(Map<String, String> deviceInfos) {
         this.deviceInfos = deviceInfos;
-    }
-
-    public void initSliceKey(){
-        sliceKey = this.enterpriseCode + this.serverCode + deviceType + deviceModel;
-    }
-
-    public String getSliceKey() {
-        return sliceKey;
-    }
-
-    public void setSliceKey(String sliceKey) {
-        this.sliceKey = sliceKey;
     }
 
     public String getEnterpriseCode() {
@@ -226,5 +222,28 @@ public class Alarm {
 
     public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "enterpriseCode='" + enterpriseCode + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serial='" + serial + '\'' +
+                ", name='" + name + '\'' +
+                ", value=" + value +
+                ", level=" + level +
+                ", deviceType='" + deviceType + '\'' +
+                ", deviceModel='" + deviceModel + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", signalId='" + signalId + '\'' +
+                ", flag='" + flag + '\'' +
+                ", targetLevel=" + targetLevel +
+                ", targetLevelName='" + targetLevelName + '\'' +
+                ", color='" + color + '\'' +
+                ", state='" + state + '\'' +
+                ", type='" + type + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

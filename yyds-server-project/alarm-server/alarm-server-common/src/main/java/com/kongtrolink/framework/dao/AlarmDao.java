@@ -3,17 +3,21 @@ package com.kongtrolink.framework.dao;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.Alarm;
+import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.mongodb.BulkWriteResult;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,8 +137,16 @@ public class AlarmDao {
         return remove.getN();
     }
 
-    public void addList(List<Alarm> alarmList, String table) {
-        mongoTemplate.save(alarmList, table);
+    public boolean addList(List<Alarm> alarmList, String table) {
+        // BulkMode.UNORDERED:表示并行处理，遇到错误时能继续执行不影响其他操作；BulkMode.ORDERED：表示顺序执行，遇到错误时会停止所有执行
+        BulkOperations ops = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, table);
+        for(Alarm alarm : alarmList) {
+            ops.insert(alarm);
+        }
+        // 执行操作
+        BulkWriteResult execute = ops.execute();
+        int insertedCount = execute.getInsertedCount();
+        return insertedCount>0 ? true : false;
     }
 
     /**
@@ -195,8 +207,9 @@ public class AlarmDao {
      * @date: 2019/10/14 14:43
      * 功能描述:获取实时告警，用于周期管理。
      */
-    public List<Alarm> getAlarmList(String table, int size){
-        Criteria criteria = new Criteria();
+    public List<Alarm> getCurrentAlarmList(String table, int size){
+        //获取未标志的实时告警
+        Criteria criteria = Criteria.where("hc").ne(true);
         Query query = Query.query(criteria);
         query.limit(size);
         query.with(new Sort(Sort.Direction.ASC, "treport"));
@@ -208,8 +221,12 @@ public class AlarmDao {
      * @date: 2019/10/21 9:45
      * 功能描述:获取已存在告警。
      */
-    public Alarm getExistAlarm(String sliceKey, String signalId, String serial, String state, String table){
-        Criteria criteria = Criteria.where("sliceKey").is(sliceKey);
+    public Alarm getExistAlarm(String enterpriseCode, String serverCode, String deviceId, String signalId, String serial, String state, String table){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        if(!StringUtil.isNUll(deviceId)){
+            criteria.and("deviceId").is(deviceId);
+        }
         if(!StringUtil.isNUll(signalId)) {
             criteria.and("signalId").is(signalId);
         }
@@ -237,9 +254,10 @@ public class AlarmDao {
      * 功能描述:消除告警
      * 可能是实时告警，也可能是历史告警
      */
-    public boolean resolve(String sliceKey, String signalId, String serial, String state, Date curDate, String table){
-        Criteria criteria = Criteria.where("sliceKey");
-        criteria.and("sliceKey").is(sliceKey);
+    public boolean resolve(String enterpriseCode, String serverCode, String deviceId, String signalId, String serial, String state, Date curDate, String table){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("deviceId").is(deviceId);
         criteria.and("signalId").is(signalId);
         criteria.and("serial").is(serial);
         Query query = Query.query(criteria);
@@ -264,6 +282,28 @@ public class AlarmDao {
         }
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
 
+    public List<String> entity2IdList(List<Alarm> alarmList){
+        List<String> alarmIdList = new ArrayList<>();
+        if(null != alarmIdList){
+            for(Alarm alarm : alarmList){
+                alarmIdList.add(alarm.getId());
+            }
+        }
+        return alarmIdList;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/30 17:35
+     * 功能描述:修改告警表中一个属性值
+     */
+    public void updateHC(List<String> alarmIdList, boolean val, String table){
+        Criteria criteria = Criteria.where("_id").in(alarmIdList);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("hc", val);
+        mongoTemplate.updateMulti(query, update, table);
     }
 }

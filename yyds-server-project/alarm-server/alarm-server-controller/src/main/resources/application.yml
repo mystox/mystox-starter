@@ -3,8 +3,8 @@ spring:
     name: alarm-server-controller
 
 server:
-  name: ALARM-SERVER-CONTROLLER   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
-  version: 1.0.0                  #\u7248\u672C\u53F7
+  name: ALARM_SERVER_CONTROLLER #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
+  version: V1.0.0                  #\u7248\u672C\u53F7
   port: 19001                      #\u7AEF\u53E3\u53F7
 
 register:
@@ -23,3 +23,20 @@ executor:
   threadPool:
     corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
     maxPoolSize: 1000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
+
+#告警产生操作流程
+reportOperate:
+  operate[0]:
+    enterServerCode: yytd_TOWER_SERVER
+    serverVerson: ALARM_SERVER_LEVEL_V1.0.0
+    operaCode: handleLevel
+  operate[1]:
+    enterServerCode: yytd_TOWER_SERVER
+    serverVerson: ALARM_SERVER_DELIVER_V1.0.0
+    operaCode: handleDeliver
+#告警消除操作流程
+resloveOperate:
+  operate[0]:
+      enterServerCode: meitainuo_zhyd
+      serverVerson: ALARM_SERVER_LEVEL_V1.0.0
+      operaCode: handleLevel

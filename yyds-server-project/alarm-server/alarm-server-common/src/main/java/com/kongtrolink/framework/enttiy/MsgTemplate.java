@@ -21,11 +21,7 @@ public class MsgTemplate {
     private String serverVerson;        //服务和版本
     private String operaCode;           //服务操作码(服务码#操作码)
     private String reportCode;          //告警上报编码
-    private String reportModel;         //告警上报模板
     private String resolveCode;         //告警消除编码
-    private String resolveModel;        //告警消除模板
-    private String offlineCode;         //fsu离线编码
-    private String offlineModel;        //fsu离线模板
     private FacadeView operator;
     private Date updateTime;
 
@@ -140,44 +136,12 @@ public class MsgTemplate {
         this.reportCode = reportCode;
     }
 
-    public String getReportModel() {
-        return reportModel;
-    }
-
-    public void setReportModel(String reportModel) {
-        this.reportModel = reportModel;
-    }
-
     public String getResolveCode() {
         return resolveCode;
     }
 
     public void setResolveCode(String resolveCode) {
         this.resolveCode = resolveCode;
-    }
-
-    public String getResolveModel() {
-        return resolveModel;
-    }
-
-    public void setResolveModel(String resolveModel) {
-        this.resolveModel = resolveModel;
-    }
-
-    public String getOfflineCode() {
-        return offlineCode;
-    }
-
-    public void setOfflineCode(String offlineCode) {
-        this.offlineCode = offlineCode;
-    }
-
-    public String getOfflineModel() {
-        return offlineModel;
-    }
-
-    public void setOfflineModel(String offlineModel) {
-        this.offlineModel = offlineModel;
     }
 
     @Override
@@ -195,7 +159,6 @@ public class MsgTemplate {
                 ", operaCode='" + operaCode + '\'' +
                 ", reportCode='" + reportCode + '\'' +
                 ", resolveCode='" + resolveCode + '\'' +
-                ", offlineCode='" + offlineCode + '\'' +
                 ", operator=" + operator +
                 '}';
     }

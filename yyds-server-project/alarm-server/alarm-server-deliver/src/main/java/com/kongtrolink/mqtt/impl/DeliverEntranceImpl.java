@@ -2,19 +2,14 @@ package com.kongtrolink.mqtt.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.dao.InformRuleDao;
-import com.kongtrolink.framework.dao.InformRuleUserDao;
 import com.kongtrolink.framework.enttiy.Alarm;
-import com.kongtrolink.framework.enttiy.InformRule;
-import com.kongtrolink.framework.enttiy.InformRuleUser;
 import com.kongtrolink.mqtt.DeliverEntrance;
-import com.kongtrolink.service.AlarmDeliverService;
-import com.kongtrolink.service.InformMsgService;
+import com.kongtrolink.service.CreateInformMsgService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,11 +24,13 @@ import java.util.List;
 public class DeliverEntranceImpl implements DeliverEntrance{
 
     @Autowired
-    InformMsgService msgService;
+    CreateInformMsgService msgService;
+    private static final Logger logger = LoggerFactory.getLogger(DeliverEntranceImpl.class);
     @Override
     public String handleDeliver(String alarmListJsonStr) {
+        logger.info("receive msg:{}", alarmListJsonStr);
         List<Alarm> alarmList = JSON.parseArray(alarmListJsonStr, Alarm.class);
         msgService.handleInformAlarmList(alarmList, Contant.ONE);
-        return null;
+        return alarmListJsonStr;
     }
 }

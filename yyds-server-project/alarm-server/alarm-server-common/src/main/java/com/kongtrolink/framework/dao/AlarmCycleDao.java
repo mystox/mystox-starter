@@ -28,7 +28,6 @@ public class AlarmCycleDao {
     private String table = MongTable.ALARM_CYCLE;
 
     public void save(AlarmCycle alarmCycle) {
-        alarmCycle.initEnterpirseServer();
         mongoTemplate.save(alarmCycle, table);
     }
 
@@ -40,7 +39,6 @@ public class AlarmCycleDao {
     }
 
     public boolean update(AlarmCycle alarmCycle) {
-        alarmCycle.initEnterpirseServer();
         Criteria criteria = Criteria.where("_id").is(alarmCycle.getId());
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
@@ -64,6 +62,7 @@ public class AlarmCycleDao {
         int currentPage = cycleQuery.getCurrentPage();
         int pageSize = cycleQuery.getPageSize();
         query.skip( (currentPage-1)*pageSize ).limit(pageSize);
+
         return mongoTemplate.find(query, AlarmCycle.class, table);
     }
 
@@ -75,47 +74,50 @@ public class AlarmCycleDao {
     }
 
     Criteria baseCriteria(Criteria criteria, AlarmCycleQuery cycleQuery){
+        Criteria baseCri = new Criteria();
         String id = cycleQuery.getId();
         if(!StringUtil.isNUll(id)){
-            criteria.and("_id").is(id);
+            baseCri.and("_id").is(id);
         }
         String name = cycleQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoUtil.escapeExprSpecialWord(name);
-            criteria.and("name").regex(".*?" + name + ".*?");
+            baseCri.and("name").regex(".*?" + name + ".*?");
         }
         String enterpriseCode = cycleQuery.getEnterpriseCode();
         if(!StringUtil.isNUll(enterpriseCode)){
-            criteria.and("enterpriseCode").is(enterpriseCode);
+            baseCri.and("enterpriseCode").is(enterpriseCode);
         }
         String enterpriseName = cycleQuery.getEnterpriseName();
         if(!StringUtil.isNUll(enterpriseName)){
             enterpriseName = MongoUtil.escapeExprSpecialWord(enterpriseName);
-            criteria.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
+            baseCri.and("enterpriseName").regex(".*?" + enterpriseName + ".*?");
         }
         String serverCode = cycleQuery.getServerCode();
         if(!StringUtil.isNUll(serverCode)){
-            criteria.and("serverCode").is(serverCode);
+            baseCri.and("serverCode").is(serverCode);
         }
         String serverName = cycleQuery.getServerName();
         if(!StringUtil.isNUll(serverName)){
             serverName = MongoUtil.escapeExprSpecialWord(serverName);
-            criteria.and("serverName").regex(".*?" + serverName + ".*?");
+            baseCri.and("serverName").regex(".*?" + serverName + ".*?");
         }
         String operatorName = cycleQuery.getOperatorName();
         if(!StringUtil.isNUll(operatorName)){
             operatorName = MongoUtil.escapeExprSpecialWord(operatorName);
-            criteria.and("operator.name").regex(".*?" + operatorName + ".*?");
+            baseCri.and("operator.name").regex(".*?" + operatorName + ".*?");
         }
         Date beginTime = cycleQuery.getBeginTime();
         Date endTime = cycleQuery.getEndTime();
         if(null != beginTime && null == endTime){
-            criteria.and("updateTime").gte(beginTime);
+            baseCri.and("updateTime").gte(beginTime);
         }else if(null != beginTime && null != endTime){
-            criteria.and("updateTime").gte(beginTime).lte(endTime);
+            baseCri.and("updateTime").gte(beginTime).lte(endTime);
         }else if(null == beginTime && null != endTime){
-            criteria.and("updateTime").lte(endTime);
+            baseCri.and("updateTime").lte(endTime);
         }
+        Criteria defalutCri = Criteria.where("enterpriseCode").exists(false);
+        criteria.orOperator(baseCri, defalutCri);
         return criteria;
     }
 
@@ -154,7 +156,11 @@ public class AlarmCycleDao {
      * 功能描述:根据企业服务编码，获取自定义周期规则
      */
     public List<AlarmCycle> getCycleList(List<String> enterpriseServerList){
-        Criteria criteria = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        Criteria criteria = new Criteria();
+        Criteria enterCri = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        //获取默认周期规则
+        Criteria systemCri = Criteria.where("enterpriseCode").exists(false);
+        criteria.orOperator(enterCri, systemCri);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, AlarmCycle.class, table);
     }

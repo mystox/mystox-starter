@@ -30,4 +30,12 @@ public class MsgResult {
         this.msg = msg;
         this.stateCode = stateCode;
     }
+
+    @Override
+    public String toString() {
+        return "MsgResult{" +
+                "stateCode=" + stateCode +
+                ", msg='" + msg + '\'' +
+                '}';
+    }
 }

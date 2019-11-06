@@ -34,7 +34,7 @@ public class AlarmTransverter extends TransverterHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmTransverter.class);
 
-    @Value("${gateway.alarmReport.version:1.0.0}")
+    @Value("${gateway.alarmReport.version:V1.0.0}")
     private String alarmServerVersion;
     @Autowired
     private DeviceTypeConfig deviceTypeConfig;
@@ -77,11 +77,9 @@ public class AlarmTransverter extends TransverterHandler {
             report.setEnterpriseCode(getEnterpriseCode());
             report.setServerCode(getBusinessCode());
             report.setAlarms(alarmInfoList);
-            logger.debug("上报告警的 数据: \n");
-            logger.debug(JSONObject.toJSONString(report));
-            logger.debug("\n");
+            logger.debug("上报告警的 数据: {} " ,JSONObject.toJSONString(report));
             String jsonResult = JSONObject.toJSONString(report);
-            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER,alarmServerVersion),
+            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER_CONTROLLER,alarmServerVersion),
                     OperaCode.ALARM_REPORT,jsonResult);
         }catch (Exception e){
             e.printStackTrace();

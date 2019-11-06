@@ -28,6 +28,13 @@ public interface MsgTemplateService {
 
     /**
      * @auther: liudd
+     * @date: 2019/10/29 10:48
+     * 功能描述:获取默认模板
+     */
+    MsgTemplate getSystemTemplate(String type);
+
+    /**
+     * @auther: liudd
      * @date: 2019/10/26 16:23
      * 功能描述:系统启动时初始化默认模板
      */

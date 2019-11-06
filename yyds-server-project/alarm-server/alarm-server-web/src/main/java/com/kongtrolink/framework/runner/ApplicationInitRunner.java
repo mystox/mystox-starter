@@ -6,6 +6,7 @@ import com.kongtrolink.framework.dao.MsgTemplateDao;
 import com.kongtrolink.framework.enttiy.MsgTemplate;
 import com.kongtrolink.framework.service.AlarmCycleService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.MsgTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,15 @@ public class ApplicationInitRunner implements ApplicationRunner {
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
     AlarmCycleService cycleService;
+    @Autowired
+    InformRuleService ruleService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         msgTemplateService.initMsgTemplate();
         enterpriseLevelService.initEnterpriseLevel();
         cycleService.initAlarmCycle();
+        ruleService.initInformRule();
     }
 
 }
