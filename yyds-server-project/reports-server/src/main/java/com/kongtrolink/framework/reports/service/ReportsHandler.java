@@ -261,14 +261,14 @@ public class ReportsHandler implements ApplicationRunner {
 //            logger.info("modify task");
             reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode,
                     MqttUtils.preconditionServerCode(serverName, serverVersion));
-            int taskStatus = reportTask.getTaskStatus();
-            if (validity != null && validity)
+//            int taskStatus = reportTask.getTaskStatus();
+            /*if (validity != null && validity) {
                 if (TaskStatus.RUNNING.getStatus() == taskStatus) { //正在运行的报表任务不能被修改
                     logger.warn("[{}]running task can not modify", reportTask.getId());
                     return null;
                 }
+            }*/
             ExecutorType executorType = reportConfig.getExecutorType();
-//            Boolean asyn = executorType;
             if (executorType != null) reportTask.setExecutorType(executorType);
             Long operaValidity = reportConfig.getOperaValidity();
             if (operaValidity != null) reportTask.setOperaValidity(operaValidity);
@@ -278,8 +278,14 @@ public class ReportsHandler implements ApplicationRunner {
             reportTask.setStartTime(new Date(startTime));
 
         }
-        if (validity != null && validity)
-            reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
+        if (validity != null && validity) {
+            int taskStatus = reportTask.getTaskStatus();
+            if (TaskStatus.RUNNING.getStatus() != taskStatus) {
+                logger.warn("[{}]running task stay running", reportTask.getId());
+            } else {
+                reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
+            }
+        }
         else {
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
@@ -288,7 +294,6 @@ public class ReportsHandler implements ApplicationRunner {
         reportTask.setResultTypes(new ArrayList<>(Arrays.asList(resultTypes)));
         reportTask.setRhythm(rhythm);
         reportTaskDao.save(reportTask);
-
         return reportTask;
 
 
