@@ -26,6 +26,8 @@ public class ReportsServiceImpl extends ReportsHandlerAdapter implements Reports
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "config", rhythm = 20, resultType = {DataType.JSON}, extend =
             {
                     @ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
+                    @ReportExtend(field = "startTime", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要(查询用)
+                    @ReportExtend(field = "endTime", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要（查询用）
                     @ReportExtend(field = "region", name = "区域", type = ReportExtend.FieldType.DISTRICT)
             })
     public ReportData reportConfig(String reportConfigStr) {
