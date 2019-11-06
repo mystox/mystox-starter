@@ -1,6 +1,9 @@
 package com.kongtrolink.framework.reports.entity;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by mystoxlol on 2019/10/23, 9:41.
@@ -30,12 +33,59 @@ public class ReportTask {
 
     private Long operaValidity = -1L; //报表有效期
 
-    private String reportServerVersion;
+    private String reportServerCode;
+    private ExecutorType executorType; //查询|执行
 
-    private Boolean asyn = false;
+    private List<String> resultTypes;
+    private JSONObject condition;
 
+    private List<ReportExtendProperties> extendProperties;//扩展纬度属性：包括 报表筛选条件，报表执行纬度 具体的格式应该为
+
+    private Integer rhythm = 1;
 
     public ReportTask() {
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
+    }
+
+    public List<ReportExtendProperties> getExtendProperties() {
+        return extendProperties;
+    }
+
+    public void setExtendProperties(List<ReportExtendProperties> extendProperties) {
+        this.extendProperties = extendProperties;
+    }
+
+    public JSONObject getCondition() {
+        return condition;
+    }
+
+    public void setCondition(JSONObject condition) {
+        this.condition = condition;
+    }
+
+
+    public Integer getRhythm() {
+        return rhythm;
+    }
+
+    public void setRhythm(Integer rhythm) {
+        this.rhythm = rhythm;
+    }
+
+
+    public List<String> getResultTypes() {
+        return resultTypes;
+    }
+
+    public void setResultTypes(List<String> resultTypes) {
+        this.resultTypes = resultTypes;
     }
 
     public String getId() {
@@ -119,19 +169,13 @@ public class ReportTask {
     }
 
 
-    public String getReportServerVersion() {
-        return reportServerVersion;
+    public String getReportServerCode() {
+        return reportServerCode;
     }
 
-    public void setReportServerVersion(String reportServerVersion) {
-        this.reportServerVersion = reportServerVersion;
+    public void setReportServerCode(String reportServerCode) {
+        this.reportServerCode = reportServerCode;
     }
 
-    public Boolean getAsyn() {
-        return asyn;
-    }
 
-    public void setAsyn(Boolean asyn) {
-        this.asyn = asyn;
-    }
 }

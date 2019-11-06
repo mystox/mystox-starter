@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Created by mystoxlol on 2018/12/6, 15:23.
  * company: kongtrolink
@@ -26,6 +29,10 @@ public class ReportsExecutorConfig extends ExecutorConfig
         return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,200,10000);
     }
 
+    @Bean(name = "reportsScheduled")
+    ScheduledExecutorService reportsScheduled() {
+        return Executors.newScheduledThreadPool(10);
+    }
 
 
 }

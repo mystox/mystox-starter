@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 @Component
+@Order(1)
 public class RegisterRunner implements ApplicationRunner {
     private Logger logger = LoggerFactory.getLogger(RegisterRunner.class);
 
@@ -76,9 +79,6 @@ public class RegisterRunner implements ApplicationRunner {
 
     @Value("${server.routeMark:}")
     private String routeMark;
-
-
-
 
 
     @Autowired
@@ -132,24 +132,33 @@ public class RegisterRunner implements ApplicationRunner {
     private void registerServer() throws KeeperException, InterruptedException, IOException {
 
         //获取服务信息
-        ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
+//        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
 
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
         if (!serviceRegistry.exists(TopicPrefix.SUB_PREFIX))
             serviceRegistry.create(TopicPrefix.SUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
+       /* String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
         if (!serviceRegistry.exists(subPath))
             serviceRegistry.create(subPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         else
-            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
+            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));*/
+        //在线标志
+        if (!serviceRegistry.exists(TopicPrefix.SERVER_STATUS))
+            serviceRegistry.create(TopicPrefix.SERVER_STATUS, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        /*String onlineStatus = TopicPrefix.SERVER_STATUS + "/" + OperaCode.ONLINE;
+        if (serviceRegistry.exists(onlineStatus))
+            throw new InterruptedIOException();
+        else
+            serviceRegistry.create(onlineStatus, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);*/
+
         //请求列表目录
         if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
             serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
         if (!serviceRegistry.exists(pubPath))
-            serviceRegistry.create(pubPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
 
@@ -161,6 +170,8 @@ public class RegisterRunner implements ApplicationRunner {
         for (RegisterSub sub : subList) {
             setDataToRegistry(sub);
         }
+        registerServerMsg();
+
     }
 
     /**
@@ -210,11 +221,31 @@ public class RegisterRunner implements ApplicationRunner {
                 //往服务节点注册服务信息
                 setDataToRegistry(sub);
             }
-
+            registerServerMsg();
         } else {
             throw new RegisterAnalyseException(registerMsg.getRegisterUrl());
         }
     }
+
+    private void registerServerMsg() throws KeeperException, InterruptedException, InterruptedIOException {
+
+        //获取服务信息并注册
+        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
+        String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(subPath))
+            serviceRegistry.create(subPath, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        else
+            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
+
+
+        //在线状态
+        String onlineStatus = TopicPrefix.SERVER_STATUS + "/" + MqttUtils.preconditionServerCode(serverName, serverVersion);
+        if (serviceRegistry.exists(onlineStatus))
+            throw new InterruptedIOException();
+        else
+            serviceRegistry.create(onlineStatus, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+    }
+
 
     /**
      * 扫描服务能力
@@ -252,10 +283,7 @@ public class RegisterRunner implements ApplicationRunner {
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
-//            JSONObject server = new JSONObject();
-            ServerMsg serverMsg = new ServerMsg(host,port,serverName,serverVersion,routeMark,pageRoute,serverUri,title);
-//            server.put("serverName", serverName);
-//            server.put("serverVersion", serverVersion);
+            ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),

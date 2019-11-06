@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.ByteUtil;
 import com.kongtrolink.framework.common.util.MqttUtils;
@@ -98,7 +99,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             Object bean = SpringContextUtil.getBean(clazz);
             Method method = clazz.getDeclaredMethod(methodName, String.class);
             Object invoke = method.invoke(bean, mqttMsg.getPayload());
-            result = invoke instanceof String ? (String) invoke : JSONObject.toJSONString(invoke);
+            result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
 //            logger.info("local result: {}", result);
             return resp;
@@ -123,7 +124,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             Class<?> clazz = classLoader.loadClass(className);// 使用loadClass方法加载class,这个class是在urls参数指定的classpath下边。
             Method taskMethod = clazz.getMethod(methodName, String.class);
             Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
-            result = invoke instanceof String ? (String) invoke : JSONObject.toJSONString(invoke);
+            result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
             logger.info("jar result: {}", result);
             return resp;
