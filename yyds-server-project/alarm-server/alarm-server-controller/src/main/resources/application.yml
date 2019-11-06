@@ -37,6 +37,6 @@ reportOperate:
 #告警消除操作流程
 resloveOperate:
   operate[0]:
-      enterServerCode: meitainuo_zhyd
-      serverVerson: ALARM_SERVER_LEVEL_V1.0.0
-      operaCode: handleLevel
+    enterServerCode: yytd_TOWER_SERVER
+    serverVerson: ALARM_SERVER_DELIVER_V1.0.0
+    operaCode: handleDeliver

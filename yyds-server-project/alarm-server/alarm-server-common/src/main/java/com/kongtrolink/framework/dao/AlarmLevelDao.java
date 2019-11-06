@@ -194,4 +194,8 @@ public class AlarmLevelDao {
         query.with(new Sort(Sort.Direction.ASC, "level"));
         return mongoTemplate.find(query, AlarmLevel.class, table);
     }
+
+    public List<AlarmLevel> getAll(){
+        return mongoTemplate.findAll(AlarmLevel.class, table);
+    }
 }

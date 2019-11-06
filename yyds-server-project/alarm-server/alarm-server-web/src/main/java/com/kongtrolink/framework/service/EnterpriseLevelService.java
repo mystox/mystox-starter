@@ -51,4 +51,11 @@ public interface EnterpriseLevelService {
      * 功能描述:初始化默认企业告警等级
      */
     void initEnterpriseLevel();
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/6 16:23
+     * 功能描述:调用远程接口修改告警等级模块中企业等级
+     */
+    void updateEnterpriseLevelMap(String enterpriseCode, String serverCode, String enterpriseLevelCode, String type);
 }

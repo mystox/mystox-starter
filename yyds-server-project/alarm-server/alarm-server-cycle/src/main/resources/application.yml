@@ -28,3 +28,6 @@ executor:
 assets:
   serverVersion: ASSET_MANAGEMENT_SERVER_1.0.0
   operaCode: getCI
+
+#周期处理过期时间
+hcOverTime: 3
