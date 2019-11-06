@@ -24,7 +24,7 @@ public class ReportTaskDao extends MongoBaseDao {
 
 
     public void save(ReportTask reportTask) {
-        mongoTemplate.save(reportTask,MongoDocName.REPORT_TASK);
+        mongoTemplate.save(reportTask, MongoDocName.REPORT_TASK);
     }
 
     public List<ReportTask> findReportTask(JSONObject query) {
@@ -80,6 +80,10 @@ public class ReportTaskDao extends MongoBaseDao {
         if (StringUtils.isNotBlank(taskType)) {
             criteria = criteria.and("taskType").is(taskType);
         }
+        Integer taskStatus = query.getInteger("taskStatus");
+        if (taskStatus != null) {
+            criteria = criteria.and("taskStatus").is(taskStatus);
+        }
         String reportServerCode = query.getString("reportServerCode");
         if (StringUtils.isNotBlank(reportServerCode)) {
             criteria = criteria.and("reportServerCode").regex(reportServerCode);
@@ -92,13 +96,13 @@ public class ReportTaskDao extends MongoBaseDao {
     }
 
 
-    public boolean isExistsByOperaCode(String serverCode, String enterpriseCode, String operaCode,String reportServerCode) {
+    public boolean isExistsByOperaCode(String serverCode, String enterpriseCode, String operaCode, String reportServerCode) {
 
         return mongoTemplate.exists(Query.query(
                 Criteria.where("serverCode").is(serverCode)
                         .and("enterpriseCode").is(enterpriseCode)
                         .and("operaCode").is(operaCode)
-                .and("reportServerCode").is(reportServerCode)
+                        .and("reportServerCode").is(reportServerCode)
         ), MongoDocName.REPORT_TASK);
     }
 
@@ -107,17 +111,19 @@ public class ReportTaskDao extends MongoBaseDao {
                         .and("reportServerCode").is(reportServerCode)
 //                        .and("taskType").is(TaskType.schecduled)
                         .and("startTime").lte(new Date())
-                        ), Update.update("taskStatus", TaskStatus.RUNNING.getStatus()),
+                ), Update.update("taskStatus", TaskStatus.RUNNING.getStatus()),
                 ReportTask.class, MongoDocName.REPORT_TASK);
     }
+
     /**
      * 任务组合查询唯一条件
+     *
      * @param serverCode
      * @param enterpriseCode
      * @param operaCode
      * @return
      */
-    public ReportTask findByByUniqueCondition(String serverCode, String enterpriseCode, String operaCode,String reportServerCode) {
+    public ReportTask findByByUniqueCondition(String serverCode, String enterpriseCode, String operaCode, String reportServerCode) {
 
         return mongoTemplate.findOne(Query.query(
                 Criteria.where("serverCode").is(serverCode)
