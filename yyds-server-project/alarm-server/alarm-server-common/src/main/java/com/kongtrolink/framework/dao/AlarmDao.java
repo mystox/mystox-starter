@@ -241,14 +241,6 @@ public class AlarmDao {
          return mongoTemplate.findOne(query, Alarm.class, table);
     }
 
-    public void save(List<Alarm> alarmList, String table){
-        if(null != alarmList){
-            for(Alarm alarm : alarmList){
-                save(alarm, table);
-            }
-        }
-    }
-
     /**
      * @auther: liudd
      * @date: 2019/10/21 11:25

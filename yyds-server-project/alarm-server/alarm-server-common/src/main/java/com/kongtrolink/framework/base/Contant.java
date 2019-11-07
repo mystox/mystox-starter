@@ -38,6 +38,7 @@ public class Contant {
     public static String DELETED = "已删除";
 
     public static String UNDERLINE = "_";
+    public static String COLON = ":";
 
     public static String SYSTEM = "系统";
     public static String MANUAL = "手动";

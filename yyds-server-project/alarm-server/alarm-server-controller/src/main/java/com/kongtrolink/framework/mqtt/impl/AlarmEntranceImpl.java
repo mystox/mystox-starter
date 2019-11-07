@@ -16,9 +16,11 @@ import com.kongtrolink.framework.mqtt.OperateEntity;
 import com.kongtrolink.framework.mqtt.AlarmEntrance;
 import com.kongtrolink.framework.mqtt.AlarmMqttEntity;
 import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.utils.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
@@ -48,6 +50,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     ResloverOperateConfig resloverOperateConfig;
     @Autowired
     MqttSender mqttSender;
+    //redis存储待消除的告警和所在表信息
+    @Autowired
+    RedisUtils redisUtils;
+    @Value("${spring.redis.pendingAlarm:pendingAlarm}")
+    private String pendingAlarm;
     private static final Logger logger = LoggerFactory.getLogger(AlarmEntranceImpl.class);
 
 
@@ -67,19 +74,28 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         String serverCode = mqttEntity.getServerCode();
         List<JSONObject> alarmJsonList = mqttEntity.getAlarms();
         List<Alarm> reportAlarmList = new ArrayList<>();
+        //需要存储到redis中告警表
+        Map<String, String> pendingAlarmMap = new HashMap<>();
+        Map<String, String> allAlarmMap = new HashMap<>();
         if(null == alarmJsonList || alarmJsonList.size() == 0){
             System.out.printf("产生告警为空: %s %n ", payload);
             return ;
         }
         String enterServerCode = enterpriseCode + Contant.UNDERLINE + serverCode;
         for(JSONObject jsonObject : alarmJsonList) {
+            String deviceId = jsonObject.getString("deviceId");
+            String serial = jsonObject.getString("serial");
             String flag = jsonObject.getString("flag");
+            String key = "allAlarm:" +enterpriseCode + "_" + serverCode + "_" + flag + ":"  + deviceId + "_" + serial;
+            allAlarmMap.put(key, flag);
             if(Contant.ONE.equals(flag)){   //告警上报
                 Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
                 alarm.setEnterpriseCode(enterpriseCode);
                 alarm.setServerCode(serverCode);
+                alarm.initKey();
                 Alarm report = report(alarm);
                 if(null != report){
+                    pendingAlarmMap.put(pendingAlarm+Contant.COLON+alarm.getKey(), Contant.ONE);
                     reportAlarmList.add(alarm);
                 }
             }else {
@@ -89,14 +105,12 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 recoverAndAuxilaryAlarmQueue.add(jsonObject);
                 taskExecutor.execute(()->handleRecoverAndAuxilary());
             }
+            redisUtils.mset(allAlarmMap);
         }
         //保存实时
         if(reportAlarmList.size() != 0) {
             //liuddtodo 按照配置文件，调用各个服务
-            Map<String, List<OperateEntity>> enterServeOperaListMap1 = resloverOperateConfig.getEnterServeOperaListMap();
-            System.out.println("enterServeOperaListMap1:" + enterServeOperaListMap1);
             Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
-            System.out.println("enterServeOperaListMap:" + enterServeOperaListMap);
             List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
             if(null != operateEntityList){
                 String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
@@ -121,7 +135,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 reportAlarmList = JSONArray.parseArray(reportAlarmListJson, Alarm.class);
             }
             //实时告警不分表
-            alarmDao.save(reportAlarmList, currentAlarmTable);
+            boolean result = alarmDao.addList(reportAlarmList, currentAlarmTable);
+            if(result){
+                redisUtils.mset(pendingAlarmMap);
+            }
+
         }
         return ;
     }
@@ -135,16 +153,21 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      * --如果不存在，继续其他流程
      */
     private Alarm report(Alarm alarm){
-        //判断实时表是否存在未消除
-        Alarm sourceAlarm = alarmDao.getExistAlarm(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
-                alarm.getSignalId(), alarm.getSerial(), null, currentAlarmTable);
-        if (null == sourceAlarm) {
-            //判断历史表是否存在该告警
-            sourceAlarm = alarmDao.getExistAlarm(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
-                    alarm.getSignalId(), alarm.getSerial(), null, historyAlarmTable);
-        }
-        if (null != sourceAlarm) {
-            logger.info("告警已存在:{}", sourceAlarm);
+        boolean exist = true;
+//        //判断实时表是否存在未消除
+//        Alarm sourceAlarm = alarmDao.getExistAlarm(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
+//                alarm.getSignalId(), alarm.getSerial(), null, currentAlarmTable);
+//        if (null == sourceAlarm) {
+//            //判断历史表是否存在该告警
+//            sourceAlarm = alarmDao.getExistAlarm(alarm.getEnterpriseCode(), alarm.getServerCode(), alarm.getDeviceId(),
+//                    alarm.getSignalId(), alarm.getSerial(), null, historyAlarmTable);
+//        }
+//        exist = null != sourceAlarm ? true : false;
+
+        //20191107从redis中判断告警是否存在;key:
+        exist = redisUtils.hasKey(alarm.getKey());
+        if (exist) {
+            logger.info("告警已存在:{}", alarm);
             return null;
         }
         //设置默认告警等级和颜色
@@ -156,6 +179,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         alarm.setState(Contant.PENDING);
         return alarm;
     }
+
 
     /**
      * @auther: liudd
