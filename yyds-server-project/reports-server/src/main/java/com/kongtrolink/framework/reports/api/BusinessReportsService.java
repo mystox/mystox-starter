@@ -12,7 +12,7 @@ import com.kongtrolink.framework.stereotype.Register;
  * update record:
  */
 @Register
-public interface ReportsService  {
+public interface BusinessReportsService {
 
 
     @OperaCode(code = OperaCodePrefix.REPORTS+"config") //属于报表逻辑的operaCode约定前缀为report_
@@ -21,6 +21,8 @@ public interface ReportsService  {
     @OperaCode(code = OperaCodePrefix.REPORTS+"report1") //属于报表逻辑的operaCode约定前缀为report_
     public ReportData report1(String reportConfigStr);
 
+    @OperaCode(code = OperaCodePrefix.REPORTS+"report3") //属于报表逻辑的operaCode约定前缀为report_
+    public ReportData report3(String reportConfigStr);
 
 
 

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
+import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
 import com.kongtrolink.framework.register.entity.ServerMsg;
@@ -89,6 +90,13 @@ public class RegisterRunner implements ApplicationRunner {
     ServiceScanner jarServiceScanner;
 
 
+    PrivFuncEntity privFuncEntity;
+
+    @Autowired
+    public void setPrivFuncEntity(PrivFuncEntity privFuncEntity) {
+        this.privFuncEntity = privFuncEntity;
+    }
+
     private MqttSender mqttSender;
 
     @Autowired(required = false)
@@ -114,12 +122,20 @@ public class RegisterRunner implements ApplicationRunner {
                 System.exit(0);
             register(registerMsg, subList);//注册操作码信息
             subTopic(subList);//订阅操作码对应topic
+            registerWebPriv();
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
         //验证服务能力（pubList）
         logger.info("register successfully...serverCode[{}]", serverCode);
+    }
+
+    /**
+     * 注册web 功能权限
+     */
+    private void registerWebPriv() {
     }
 
     /**

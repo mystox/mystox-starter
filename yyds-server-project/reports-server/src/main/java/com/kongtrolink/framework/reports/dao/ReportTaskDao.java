@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.reports.dao;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.ReportTask;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +37,10 @@ public class ReportTaskDao extends MongoBaseDao {
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
             criteria = criteria.and("serverCode").is(serverCode);
+        }
+        JSONArray taskIds = query.getJSONArray("taskIds");
+        if (!CollectionUtils.isEmpty(taskIds)) {
+            criteria = criteria.and("id").in(taskIds);
         }
         String enterpriseCode = query.getString("enterpriseCode");
         if (StringUtils.isNotBlank(enterpriseCode)) {
@@ -71,6 +77,10 @@ public class ReportTaskDao extends MongoBaseDao {
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
             criteria = criteria.and("serverCode").is(serverCode);
+        }
+        JSONArray taskIds = query.getJSONArray("taskIds");
+        if (!CollectionUtils.isEmpty(taskIds)) {
+            criteria = criteria.and("id").in(taskIds);
         }
         String enterpriseCode = query.getString("enterpriseCode");
         if (StringUtils.isNotBlank(enterpriseCode)) {

@@ -12,6 +12,9 @@ logging:
 spring:
   application:
     name: yytd-mqtt-demo
+management:
+  security:
+    enabled: false
 server:
   name: YYTD_MQTT_DEMO
   version: 1.0.0
