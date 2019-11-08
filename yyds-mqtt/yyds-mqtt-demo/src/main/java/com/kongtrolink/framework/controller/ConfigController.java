@@ -2,6 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -21,10 +22,10 @@ public class ConfigController {
 
 
     @Autowired
-    PrivFuncEntity privFuncEntity;
+    WebPrivFuncConfig webPrivFuncConfig;
     @RequestMapping("/getWebPrivFuncTest")
     public JsonResult getWebPrivFuncTest() {
-//        PrivFuncEntity privFuncEntity = webPrivFuncConfig.getPrivFunc();
+        PrivFuncEntity privFuncEntity = webPrivFuncConfig.getPrivFunc();
         return new JsonResult(JSONObject.parseObject(JSONObject.toJSONString(privFuncEntity)));
     }
 }

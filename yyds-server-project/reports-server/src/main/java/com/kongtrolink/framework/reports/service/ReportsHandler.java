@@ -27,7 +27,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -47,9 +46,7 @@ import java.util.concurrent.*;
  * update record:
  */
 @Aspect
-//@Lazy
 @Component
-@EnableScheduling
 @DependsOn(value = "registerRunner")
 @Order
 public class ReportsHandler implements ApplicationRunner {
@@ -286,8 +283,7 @@ public class ReportsHandler implements ApplicationRunner {
             } else {
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
             }
-        }
-        else {
+        } else {
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
         reportTask.setCondition(reportConfig.getCondition());
@@ -453,9 +449,12 @@ public class ReportsHandler implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        //启动任务执行器
         for (int i = 0; i < 9; i++)
             reportsScheduled.scheduleWithFixedDelay(() -> task()
                     , 1, 1, TimeUnit.SECONDS);
+        //启动任务扫描器
         reportsScheduled.scheduleWithFixedDelay(() -> checkRunning()
                 , 1, 3, TimeUnit.SECONDS);
 

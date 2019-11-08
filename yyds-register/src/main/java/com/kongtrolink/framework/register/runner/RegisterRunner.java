@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
+import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
 import com.kongtrolink.framework.register.entity.RegisterType;
@@ -90,11 +91,11 @@ public class RegisterRunner implements ApplicationRunner {
     ServiceScanner jarServiceScanner;
 
 
-    PrivFuncEntity privFuncEntity;
+    WebPrivFuncConfig webPrivFuncConfig;
 
     @Autowired
-    public void setPrivFuncEntity(PrivFuncEntity privFuncEntity) {
-        this.privFuncEntity = privFuncEntity;
+    public void setWebPrivFuncConfig(WebPrivFuncConfig webPrivFuncConfig) {
+        this.webPrivFuncConfig = webPrivFuncConfig;
     }
 
     private MqttSender mqttSender;
@@ -136,6 +137,20 @@ public class RegisterRunner implements ApplicationRunner {
      * 注册web 功能权限
      */
     private void registerWebPriv() {
+        PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
+        if (privFunc != null) {
+            //往云管注册功能权限
+            JSONObject registerMsg = new JSONObject();
+//            String privFuncJson = JSONObject.toJSONString(privFunc);
+            registerMsg.put("serverCode", serverCode);
+            registerMsg.put("webPrivFunc", privFunc);
+            MsgResult registerWeb = mqttSender.sendToMqttSyn(
+                    MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
+                    OperaCode.REGISTER_WEB_PRIV_FUNC, 2, registerMsg.toJSONString(), 30000L, TimeUnit.MILLISECONDS);
+            logger.info("register web privilege function result:{}",JSONObject.toJSONString(registerWeb));
+        } else {
+            logger.warn("web privilege function config is null...");
+        }
     }
 
     /**
