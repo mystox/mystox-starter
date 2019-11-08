@@ -11,6 +11,7 @@ import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
+import com.kongtrolink.framework.util.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ public class CycleHandle{
     AlarmCycleDao alarmCycleDao;
     @Autowired
     MqttSender mqttSender;
+    @Autowired
+    RedisUtils redisUtils;
 
     @Value("${cycle.count:300}")
     private int count;
@@ -47,6 +50,9 @@ public class CycleHandle{
     private String getCI;
     @Value("${hcOverTime: 5}")
     private int hcOverTime;
+    @Value("${spring.redis.pendingAlarm}")
+    private String pendingAlarm;
+
     private static int currentTime = 0;
 
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
@@ -113,6 +119,7 @@ public class CycleHandle{
         List<String> currentAlarmIdList = new ArrayList<>();    //实时告警id列表
         List<String> deviceIdList = new ArrayList<>();          // 设备id列表
         Map<String, List<Alarm>> enterServerDeviceId_alarmListMap = new HashMap<>();   //enterServerDeviceId—历史告警列表map
+        Map<String, JSONObject> redisAlarmMap = new HashMap<>();
         Date curTime = new Date();
         for(String enterpirseServer : enterpirseServer_alarmListMap.keySet()){
             AlarmCycle alarmCycle = getAlarmCycle(enterpriseServer_cycleMap, enterpirseServer);
@@ -133,6 +140,13 @@ public class CycleHandle{
                     enterServerHistoryAlarmListMap.put(enterpirseServer, enterServerHistoryAlarmList);
 
                     historyAlarmIdList.add(alarm.getId());
+                    //修改redis中所在表
+                    String redisKey = pendingAlarm + Contant.COLON + alarm.getKey();
+                    JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
+                    if(null != redisJson){
+                        redisJson.put("flag", Contant.ZERO);
+                        redisAlarmMap.put(redisKey, redisJson);
+                    }
                     //保存设备id信息
                     String deviceId = alarm.getDeviceId();
                     if(!deviceIdList.contains(deviceId)) {
@@ -169,8 +183,8 @@ public class CycleHandle{
             alarmDao.updateHcTime(historyAlarmIdList, null, currentTable);
             return ;
         }
-
-
+        //批量修改redis上告警flag
+        redisUtils.mset(redisAlarmMap);
         //保存历史告警到对应的历史告警表
         for(String enterServer : enterServerHistoryAlarmListMap.keySet()) {
             List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);

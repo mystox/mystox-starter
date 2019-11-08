@@ -241,32 +241,26 @@ public class AlarmDao {
          return mongoTemplate.findOne(query, Alarm.class, table);
     }
 
-    public void save(List<Alarm> alarmList, String table){
-        if(null != alarmList){
-            for(Alarm alarm : alarmList){
-                save(alarm, table);
-            }
-        }
-    }
-
     /**
      * @auther: liudd
      * @date: 2019/10/21 11:25
      * 功能描述:消除告警
      * 可能是实时告警，也可能是历史告警
      */
-    public boolean resolve(String enterpriseCode, String serverCode, String deviceId, String signalId, String serial, String state, Date curDate, String table){
-        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
-        criteria.and("serverCode").is(serverCode);
-        criteria.and("deviceId").is(deviceId);
-        criteria.and("signalId").is(signalId);
-        criteria.and("serial").is(serial);
+    public boolean resolveByKey(String key, String state, Date curDate, String table){
+        Criteria criteria = Criteria.where("key").is(key);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", state);
         update.set("curDate", curDate);
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
+    }
+
+    public Alarm getByKey(String key, String table){
+        Criteria criteria = Criteria.where("key").is(key);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, Alarm.class, table);
     }
 
     public boolean updateAuxilary(String deviceType, String deviceModel, String deviceId,
