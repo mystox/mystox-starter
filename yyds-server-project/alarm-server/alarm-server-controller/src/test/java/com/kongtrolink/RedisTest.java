@@ -1,6 +1,9 @@
 package com.kongtrolink;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.utils.RedisUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,19 +42,29 @@ public class RedisTest {
 
     @Test
     public void testGet(){
-        String key = "yytd" + Contant.UNDERLINE + "zhyd" + Contant.COLON + "10010_1021006" + Contant.UNDERLINE + "863111";
-        Object obj = redisUtils.get(key);
-        System.out.println("obj class:" + obj.getClass().getName());
-        String value  = (String) obj ;
-        System.out.println(value);
 
-        boolean exist = redisUtils.hasKey(key);
-        System.out.println("exist:" + exist);
+        String key = "yytd" + Contant.UNDERLINE + "zhydJson2269966";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("flag", "1");
+        jsonObject.put("targetLevel", "2");
+        jsonObject.put("treport", new Date());
+        redisUtils.set(key, jsonObject);
 
-        key = "yytd" + Contant.UNDERLINE + "zhyd";
-        Set<String> values = redisUtils.keys(key + "*");
-        for(String str : values){
-            System.out.println("key:" + key + "; value:" + value);
+        Map<String, JSONObject> map = new HashMap<>();
+        map.put(key, jsonObject);
+        redisUtils.mset(map);
+
+        boolean hasKey = redisUtils.hasKey(key);
+        System.out.println("hasKey:" + hasKey + "; key:" + key);
+        JSONObject returnJson = (JSONObject) redisUtils.get(key);
+        System.out.println("returnJson:" + returnJson);
+        if(null == returnJson){
+            System.out.println("返回为空：returnJson：" + returnJson);
+        }else {
+            String flag = returnJson.getString("flag");
+            Date treport = returnJson.getDate("treport");
+            Integer targetLevel = returnJson.getInteger("targetLevel");
+            System.out.println("flag:" + flag + "; treport:" + DateUtil.format(treport) + "; targetLevel:" + targetLevel);
         }
     }
 
@@ -70,8 +83,8 @@ public class RedisTest {
         Map<String, String> map = new HashMap<>();
         map.put(key1, "key1value");
         map.put(key2, "key2-value");
-        boolean mset = redisUtils.mset(map);
-        System.out.println("mset:" + mset);
+//        boolean mset = redisUtils.mset(map);
+//        System.out.println("mset:" + mset);
 
 
     }

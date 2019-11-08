@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.utils;
+package com.kongtrolink.framework.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
