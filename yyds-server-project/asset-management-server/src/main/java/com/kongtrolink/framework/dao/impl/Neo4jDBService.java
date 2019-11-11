@@ -1228,7 +1228,7 @@ public class Neo4jDBService implements DBService {
                     recordList = statementResult.list();
                     if (recordList.size() > 0) {
                         transaction.failure();
-                        return false;
+                        return true;
                     }
 
                     CICorrespondenceType ciCorrespondenceType = CICorrespondenceType.values()[relationship.getInteger("correspondence")];
