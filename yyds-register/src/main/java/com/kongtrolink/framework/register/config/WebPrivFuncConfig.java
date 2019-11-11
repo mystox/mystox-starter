@@ -13,20 +13,17 @@ import org.springframework.stereotype.Component;
  * update record:
  */
 @Component
-@PropertySource(value = {"classpath:config/privFuncConfig.yml", "file:configResources/privFuncConfig.yml"},
+@PropertySource(value = "privFuncConfig.yml",
         ignoreResourceNotFound = true,factory = YamlPropertySourceFactory.class)
 @ConfigurationProperties/*(prefix = ServerName.LOG_SERVER)*/
 @RefreshScope
 public class WebPrivFuncConfig {
-
-
 
     private PrivFuncEntity privFunc;
 
     public PrivFuncEntity getPrivFunc() {
         return privFunc;
     }
-
     public void setPrivFunc(PrivFuncEntity privFunc) {
         this.privFunc = privFunc;
     }
