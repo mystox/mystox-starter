@@ -9,18 +9,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-@Lazy
 @Component
-@EnableScheduling
-public class AssetManagementTask {
+@DependsOn(value = "registerRunner")
+@Order
+public class AssetManagementTask implements ApplicationRunner {
 
     private Logger logger = LoggerFactory.getLogger(AssetManagementTask.class);
 
@@ -34,8 +37,16 @@ public class AssetManagementTask {
     @Qualifier(value = "MqttPublish")
     private Publish publish;
 
-    @Scheduled(fixedRate=60000)
+    @Override
+    public void run(ApplicationArguments args) {
+
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleWithFixedDelay(() -> deviceGet(), 0, 1, TimeUnit.DAYS);
+    }
+
     private void deviceGet() {
+
+        logger.info("deviceGet");
 
         JSONObject request = new JSONObject();
         request.put("curPage", 1);
