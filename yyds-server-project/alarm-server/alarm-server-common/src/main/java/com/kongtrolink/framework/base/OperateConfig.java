@@ -18,7 +18,6 @@ public class OperateConfig {
     List<OperateEntity> operate;
 
     public Map<String, List<OperateEntity>> getEnterServeOperaListMap() {
-        initConfigMap();
         return enterServeOperaListMap;
     }
 
@@ -37,7 +36,6 @@ public class OperateConfig {
      */
     public void initConfigMap(){
         if(null != operate && operate.size() >0){
-            enterServeOperaListMap.clear();
             for(OperateEntity operateEntity : operate){
                 String enterServerCode = operateEntity.getEnterServerCode();
                 if(StringUtil.isNUll(enterServerCode)){

@@ -3,25 +3,22 @@ package com.kongtrolink.framework.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
-import com.kongtrolink.framework.config.WebOperateConfig;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.kongtrolink.framework.mqtt.OperateEntity;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import com.kongtrolink.framework.service.MqttSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -36,8 +33,10 @@ public class EnterpriseLevelController extends BaseController {
     EnterpriseLevelService enterpriseLevelService;
     @Autowired
     MqttSender mqttSender;
-    @Autowired
-    WebOperateConfig webOperateConfig;
+    @Value("${asset.serverVerson:ASSET_MANAGEMENT_SERVER_1.0.0}")
+    private String assetServerVerson;
+    @Value("${asset.getCIModel:getCIModel}")
+    private String getCIModel;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -103,20 +102,10 @@ public class EnterpriseLevelController extends BaseController {
     @RequestMapping("/getDeviceTypeList")
     @ResponseBody
     public String getDeviceTypeList(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
-
-        String mqttServerCode = "ASSET_MANAGEMENT_SERVER_1.0.0";
-        String operaCode = "getCIModel";
-        webOperateConfig.initConfigMap();
-        List<OperateEntity> operate = webOperateConfig.getOperate();
-        if(null != operate && operate.size() > 0){
-            OperateEntity operateEntity = operate.get(0);
-            mqttServerCode = operateEntity.getServerVerson();
-            operaCode = operateEntity.getOperaCode();
-        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseLevelQuery.getEnterpriseCode());
         jsonObject.put("serverCode", enterpriseLevelQuery.getServerCode());
-        MsgResult msgResult = mqttSender.sendToMqttSyn(mqttServerCode, operaCode, jsonObject.toJSONString());
+        MsgResult msgResult = mqttSender.sendToMqttSyn(assetServerVerson, getCIModel, jsonObject.toJSONString());
         System.out.println(msgResult);
         return msgResult.getMsg();
     }

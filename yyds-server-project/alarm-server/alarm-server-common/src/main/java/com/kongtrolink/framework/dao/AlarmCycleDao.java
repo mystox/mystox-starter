@@ -28,7 +28,6 @@ public class AlarmCycleDao {
     private String table = MongTable.ALARM_CYCLE;
 
     public void save(AlarmCycle alarmCycle) {
-        alarmCycle.initEnterpirseServer();
         mongoTemplate.save(alarmCycle, table);
     }
 
@@ -40,7 +39,6 @@ public class AlarmCycleDao {
     }
 
     public boolean update(AlarmCycle alarmCycle) {
-        alarmCycle.initEnterpirseServer();
         Criteria criteria = Criteria.where("_id").is(alarmCycle.getId());
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, table);
@@ -158,7 +156,11 @@ public class AlarmCycleDao {
      * 功能描述:根据企业服务编码，获取自定义周期规则
      */
     public List<AlarmCycle> getCycleList(List<String> enterpriseServerList){
-        Criteria criteria = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        Criteria criteria = new Criteria();
+        Criteria enterCri = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        //获取默认周期规则
+        Criteria systemCri = Criteria.where("enterpriseCode").exists(false);
+        criteria.orOperator(enterCri, systemCri);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, AlarmCycle.class, table);
     }

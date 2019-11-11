@@ -94,16 +94,16 @@ public class SmsUtil {
         return stringBuilder.toString();
     }
 
-    public static <E extends ReqBaseMessage> RespMessage sendMessage(E message) throws IllegalAccessException, UnsupportedEncodingException {
-        String url = "";
-        if (message instanceof ReqSingleMessage) {
-            url = "http://sendcloud.sohu.com/smsapi/send";
-        } else if (message instanceof ReqMultipleMessage) {
-            url = "http://sendcloud.sohu.com/smsapi/sendn";
-        }
+    public static <E extends ReqBaseMessage> RespMessage sendMessage(E message, String url) throws IllegalAccessException, UnsupportedEncodingException {
+//        String url = "";
+//        if (message instanceof ReqSingleMessage) {
+//            url = "http://sendcloud.sohu.com/smsapi/send";
+//        } else if (message instanceof ReqMultipleMessage) {
+//            url = "http://sendcloud.sohu.com/smsapi/sendn";
+//        }
         String requestParams = createPostString(message);
         JSONObject responseObject = CommonUtil.httpRequest(url, "POST", requestParams);
-        LOGGER.info("Send Cloud Msg (JSON): {}", responseObject);
+//        LOGGER.info("Send Cloud Msg (JSON): {}", responseObject);
         RespMessage respMessage = JSONObject.toJavaObject(responseObject, RespMessage.class);
         return respMessage;
 

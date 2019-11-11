@@ -71,11 +71,11 @@ public class CreateInformMsgService {
         Date date = new Date();
         List<InformMsg> informMsgList = new ArrayList<>();
         for(Alarm alarm : alarmList){
-            List<InformMsg> msgInformMsgList = createMsg(alarm, Contant.INFORM_TYPE_MSG, date);
+            List<InformMsg> msgInformMsgList = createMsg(alarm, Contant.TEMPLATE_MSG, date);
             informMsgList.addAll(msgInformMsgList);
-            List<InformMsg> emailInformMsgList = createMsg(alarm, Contant.INFORM_TYPE_EMAL, date);
+            List<InformMsg> emailInformMsgList = createMsg(alarm, Contant.TEMPLATE_EMAIL, date);
             informMsgList.addAll(emailInformMsgList);
-            List<InformMsg> appEmailMsgList = createMsg(alarm, Contant.INFORM_TYPE_APP, date);
+            List<InformMsg> appEmailMsgList = createMsg(alarm, Contant.TEMPLATE_APP, date);
             informMsgList.addAll(appEmailMsgList);
         }
         if(informMsgList.size() > 0){

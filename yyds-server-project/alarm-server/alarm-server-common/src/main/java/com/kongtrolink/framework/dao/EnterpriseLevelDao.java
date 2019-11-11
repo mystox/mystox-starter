@@ -231,7 +231,7 @@ public class EnterpriseLevelDao {
         return remove.getN()>0 ? true : false;
     }
 
-    List<EnterpriseLevel> getByCodes(List<String> codeList){
+    public List<EnterpriseLevel> getByCodes(List<String> codeList){
         Criteria criteria = Criteria.where("code").in(codeList);
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "code"));
@@ -270,5 +270,25 @@ public class EnterpriseLevelDao {
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/6 10:45
+     * 功能描述:获取企业告警等级所有编码
+     */
+    public List<String> getCodes(){
+        Criteria criteria = Criteria.where("state").is(Contant.USEING);
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),  //查询条件
+                Aggregation.group("code", "updateTime")
+        );
+        AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
+        List<EnterpriseLevel> mappedResults = aggResult.getMappedResults();
+        List<String> codeList = new ArrayList<>();
+        for(EnterpriseLevel enterpriseLevel : mappedResults){
+            codeList.add(enterpriseLevel.getCode());
+        }
+        return codeList;
     }
 }

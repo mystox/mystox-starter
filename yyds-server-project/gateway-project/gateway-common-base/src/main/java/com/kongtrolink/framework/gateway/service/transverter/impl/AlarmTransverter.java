@@ -77,9 +77,7 @@ public class AlarmTransverter extends TransverterHandler {
             report.setEnterpriseCode(getEnterpriseCode());
             report.setServerCode(getBusinessCode());
             report.setAlarms(alarmInfoList);
-            logger.debug("上报告警的 数据: \n");
-            logger.debug(JSONObject.toJSONString(report));
-            logger.debug("\n");
+            logger.debug("上报告警的 数据: {} " ,JSONObject.toJSONString(report));
             String jsonResult = JSONObject.toJSONString(report);
             reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER_CONTROLLER,alarmServerVersion),
                     OperaCode.ALARM_REPORT,jsonResult);

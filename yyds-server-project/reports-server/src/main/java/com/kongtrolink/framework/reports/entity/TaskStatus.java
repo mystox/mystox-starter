@@ -7,7 +7,7 @@ package com.kongtrolink.framework.reports.entity;
  * update record:
  */
 public enum TaskStatus {
-    VALID(1),INVALID(0),RUNNING(2);
+    VALID(1),INVALID(0),RUNNING(2),TIMEOUT(3);
 
     int status;
     TaskStatus(int i) {

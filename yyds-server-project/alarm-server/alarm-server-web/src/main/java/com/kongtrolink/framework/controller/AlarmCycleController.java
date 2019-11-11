@@ -34,6 +34,7 @@ public class AlarmCycleController extends BaseController {
         alarmCycle.setUpdateTime(new Date());
         alarmCycle.setState(Contant.FORBIT);
         alarmCycle.setCycleType(Contant.MANUAL);
+        alarmCycle.initEnterpirseServer();
         cycleService.save(alarmCycle);
         return new JsonResult(Contant.OPE_ADD + Contant.RESULT_SUC, true);
     }
@@ -54,6 +55,7 @@ public class AlarmCycleController extends BaseController {
         alarmCycle.setUpdateTime(new Date());
         alarmCycle.setCycleType(Contant.MANUAL);
         alarmCycle.setUpdateTime(new Date());
+        alarmCycle.initEnterpirseServer();
         boolean update = cycleService.update(alarmCycle);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);

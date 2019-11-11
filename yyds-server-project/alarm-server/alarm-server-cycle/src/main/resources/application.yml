@@ -2,6 +2,23 @@
 spring:
   application:
     name: alarm-server-cycle
+  redis:
+    ## Redis数据库索引(默认为0)
+    database: 10
+    ## 连接超时时间（毫秒）
+    timeout: 60000
+    ## 连接池最大连接数（使用负值表示没有限制）
+    pool:
+      max-active: 300
+    ## 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: -1
+    ## 连接池中的最大空闲连接
+      max-idle: 100
+    ## 连接池中的最小空闲连接
+      min-idle: 20
+    host: 172.16.5.26
+    port: 6379
+    pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 
 server:
   name: ALARM-SERVER-CYCLE   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
@@ -25,3 +42,9 @@ executor:
   threadPool:
     corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
     maxPoolSize: 1000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
+assets:
+  serverVersion: ASSET_MANAGEMENT_SERVER_1.0.0
+  operaCode: getCI
+
+#周期处理过期时间
+hcOverTime: 3

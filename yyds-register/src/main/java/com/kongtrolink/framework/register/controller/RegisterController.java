@@ -34,10 +34,9 @@ public class RegisterController
     }
 
 
-    @RequestMapping("/getZookeeper")
+    @RequestMapping("/getPath")
     public JsonResult getZookeeper(@RequestParam(required = false) String path) {
         long sessionId = serviceRegistry.getZk().getSessionId();
-
         JSONObject result = new JSONObject();
         result.put("zookeeperSession", sessionId);
         List<String> children = null;

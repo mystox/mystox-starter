@@ -166,13 +166,13 @@ public class InformRuleDao {
         int week = DateUtil.getWeek(treport);
         Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
         criteria.and("serverCode").is(serverCode);
-        if(Contant.INFORM_TYPE_MSG.equals(type)) {
+        if(Contant.TEMPLATE_MSG.equals(type)) {
             criteria.and("msgEnable").is(Contant.YES);
             criteria.and("msgBeginTimeInt").lte(tReportInt);
             criteria.and("msgEndTimeInt").gte(tReportInt);
             criteria.and("msgDayList").is(week);
             criteria.and("msgLevelList").is(level);
-        }else if(Contant.INFORM_TYPE_EMAL.equals(type)){
+        }else if(Contant.TEMPLATE_EMAIL.equals(type)){
             criteria.and("emailEnable").is(Contant.YES);
             criteria.and("emailBeginTimeInt").lte(tReportInt);
             criteria.and("emailEndTimeInt").gte(tReportInt);

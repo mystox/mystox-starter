@@ -103,11 +103,11 @@ public class InformRuleServiceImpl implements InformRuleService {
             systemRule = new InformRule();
             systemRule.setName("默认告警投递规则");
             systemRule.setRuleType(Contant.SYSTEM);
-            systemRule.setContent(Arrays.asList("短信", "邮件"));
+            systemRule.setContent(Arrays.asList("短信", "邮件", "APP"));
             systemRule.setDescribe("系统默认告警投递规则");
 
-
-            systemRule.setMsgEnable("true");
+            //短信通知规则
+            systemRule.setMsgEnable(Contant.YES);
             systemRule.setMsgBeginTime("00:00:00");
             systemRule.setMsgEndTime("23:59:59");
             systemRule.setMsgBeginTimeInt(0);
@@ -120,8 +120,8 @@ public class InformRuleServiceImpl implements InformRuleService {
                 systemRule.setMsgTemplate(new FacadeView(msgTemplate.get_id(), msgTemplate.getName()));
                 systemRule.initTemplate(msgTemplate);
             }
-
-            systemRule.setEmailEnable("true");
+            //邮件通知规则
+            systemRule.setEmailEnable(Contant.YES);
             systemRule.setEmailBeginTime("00:00:00");
             systemRule.setEmailEndTime("23:59:59");
             systemRule.setEmailBeginTimeInt(0);
@@ -132,6 +132,19 @@ public class InformRuleServiceImpl implements InformRuleService {
             if(null != emailTemplate){
                 systemRule.setEmailTemplate(new FacadeView(emailTemplate.get_id(), emailTemplate.getName()));
                 systemRule.initTemplate(emailTemplate);
+            }
+            //APP通知规则
+            systemRule.setAppEnable(Contant.YES);
+            systemRule.setAppBeginTime("00:00:00");
+            systemRule.setAppEndTime("23:59:59");
+            systemRule.setAppBeginTimeInt(0);
+            systemRule.setAppEndTimeInt(235959);
+            systemRule.setAppDayList(Arrays.asList(0,1,2,3,4,5,6));
+            systemRule.setAppLevelList(Arrays.asList(1));
+            MsgTemplate appTemplate = msgTemplateService.getSystemTemplate(Contant.TEMPLATE_APP);
+            if(null != appTemplate){
+                systemRule.setEmailTemplate(new FacadeView(appTemplate.get_id(), appTemplate.getName()));
+                systemRule.initTemplate(appTemplate);
             }
             save(systemRule);
         }

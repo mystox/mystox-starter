@@ -34,14 +34,23 @@ public class Alarm {
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
-    private boolean hc;                 //是否正在处理周期
+    private Date hcTime;                //被周期处理时间
+    private String key ;                //唯一键，可作为索引
 
-    public boolean isHc() {
-        return hc;
+    public String getKey() {
+        return key;
     }
 
-    public void setHc(boolean hc) {
-        this.hc = hc;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Date getHcTime() {
+        return hcTime;
+    }
+
+    public void setHcTime(Date hcTime) {
+        this.hcTime = hcTime;
     }
 
     public String getStatus() {
@@ -222,6 +231,10 @@ public class Alarm {
 
     public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    public void initKey(){
+        this.key = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.COLON + deviceId + Contant.UNDERLINE + serial;
     }
 
     @Override
