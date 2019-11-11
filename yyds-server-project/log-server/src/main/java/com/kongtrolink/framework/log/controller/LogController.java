@@ -1,6 +1,10 @@
 package com.kongtrolink.framework.log.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.log.service.LogControllerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/log")
 public class LogController {
 
-    @RequestMapping("/getMqttLog")
-    public JsonResult getMqttLog() {
+    @Autowired
+    LogControllerService logControllerService;
 
-        return new JsonResult();
+    @RequestMapping("/getMqttLog")
+    public JsonResult getMqttLog(@RequestBody(required = false) JSONObject query) {
+        JSONObject mqttLogList = logControllerService.getMqttLogList(query);
+        return new JsonResult(mqttLogList);
     }
 
 }
