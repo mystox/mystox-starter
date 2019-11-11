@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.register.config;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Created by mystoxlol on 2019/11/11, 13:57.
@@ -42,8 +45,8 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
         for (String profile : profiles) {
             //从classpath路径下面查找文件
             ResourceLoader resourceLoader = new DefaultResourceLoader();
-            Resource resource = resourceLoader.getResource(profile);
             //加载成PropertySource对象，并添加到Environment环境中
+            Resource resource = resourceLoader.getResource(profile);
             if (!resource.exists()) {
                 if (ignoreFileNotFound) {
                     logger.warn("ignore file not exists..{}", profile);
@@ -51,7 +54,16 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
                 }
                 throw new IllegalArgumentException("resource " + resource + " in not exists");
             }
-            environment.getPropertySources().addLast(loadProfiles(resource));
+            try {
+                String s = FileUtils.readFileToString(resource.getFile(), Charset.defaultCharset());
+                if (StringUtils.isNotBlank(s))
+                    environment.getPropertySources().addLast(loadProfiles(resource));
+                else
+                    logger.warn("file is blank");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(0);
+            }
         }
     }
 
@@ -65,4 +77,5 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
             throw new IllegalStateException("load Yaml Property Source error" + resource, ex);
         }
     }
+
 }

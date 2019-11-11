@@ -127,20 +127,20 @@ public class RegisterRunner implements ApplicationRunner {
                 System.exit(0);
             register(registerMsg, subList);//注册操作码信息
             OperaResult result = registerWebPriv();
-            if (result.getStateCode() == StateCode.SUCCESS) {
-                logger.info("register web privilege function result:{}", result.getResult());
-            }
-            else {
-                logger.error("register web privilege function result:{}",result.getResult());
-                System.exit(0);
+            if (result != null)
+            {
+                if (result.getStateCode() == StateCode.SUCCESS) {
+                    logger.info("register web privilege function result:{}", result.getResult());
+                } else {
+                    logger.error("register web privilege function result:{}", result.getResult());
+                    System.exit(0);
+                }
             }
             subTopic(subList);//订阅操作码对应topic
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
-        //验证服务能力（pubList）
         logger.info("register successfully...serverCode[{}]", serverCode);
     }
 
