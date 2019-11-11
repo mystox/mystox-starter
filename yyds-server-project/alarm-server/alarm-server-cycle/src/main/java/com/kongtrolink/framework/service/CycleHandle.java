@@ -74,6 +74,8 @@ public class CycleHandle{
                 long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 int diff = count - size;
                 List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff, curTime);
+                //去除重复告警
+                alarmList.removeAll(currentAlarmList);
                 if(alarmList.size() == 0){
                     return null;
                 }

@@ -191,7 +191,7 @@ public class AlarmLevelDao {
     public List<AlarmLevel> getByEntDevCodeList(List<String> entDevCodeList){
         Criteria criteria = Criteria.where("entDevCode").in(entDevCodeList);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.ASC, "level"));
+        query.with(new Sort(Sort.Direction.ASC, "sourceLevel"));
         return mongoTemplate.find(query, AlarmLevel.class, table);
     }
 

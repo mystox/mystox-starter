@@ -252,7 +252,7 @@ public class AlarmDao {
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", state);
-        update.set("curDate", curDate);
+        update.set("trecover", curDate);
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
