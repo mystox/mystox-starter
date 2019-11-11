@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gateway-common-base
+    name: gateway-common-base1
   redis:
     ## Redis数据库索引(默认为0)
     database: 2
@@ -39,7 +39,7 @@ gateway:
       version: 1.0.0
 ###########消息框架相关配置#############
 server:
-  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
+  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU1 #服务编码
   version: 1.0.0 #服务版本
   port: 52002 #服务占用web端口
 
