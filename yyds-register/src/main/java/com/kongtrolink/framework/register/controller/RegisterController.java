@@ -77,7 +77,7 @@ public class RegisterController {
     }
 
 
-    @RequestMapping("/refreshConfig")
+    @RequestMapping("/refreshWebConfig")
     public JsonResult testConfigRefresh() {
         Object invoke = genericPostableMvcEndpoint.invoke();
         logger.info(JSONObject.toJSONString(invoke));
