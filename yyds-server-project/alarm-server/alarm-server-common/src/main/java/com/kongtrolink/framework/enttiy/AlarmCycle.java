@@ -141,11 +141,8 @@ public class AlarmCycle {
             return false;
         }
         Date tReport = alarm.getTreport();
-        String treportFormat = DateUtil.format(tReport);
-        String curTimeFormat = DateUtil.format(curDate);
         int pastTime = alarmCycle.diffTime * 60 * 60 * 1000;
         long time = curDate.getTime() - tReport.getTime();
-        System.out.println("treportFormat:" + treportFormat + "; curTimeFormat:" + curTimeFormat + "; time:" + time + "; pastTime:" + pastTime);
         if(time >= pastTime){
             return true;
         }

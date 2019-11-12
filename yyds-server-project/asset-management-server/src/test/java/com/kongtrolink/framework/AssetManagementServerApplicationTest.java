@@ -81,8 +81,8 @@ public class AssetManagementServerApplicationTest {
         System.out.println(JSONObject.toJSONString(result));
     }
 
-    private String enterpriseCode = "1";
-    private String serverCode = "1";
+    private String enterpriseCode = "yytd";
+    private String serverCode = "TOWER_SERVER";
 
     @Test
     public void testCreateCI() {
@@ -131,7 +131,7 @@ public class AssetManagementServerApplicationTest {
         jsonObjectENV.put("versionMinor", 2);
         jsonObjectENV.put("versionRevision", 9);
 
-        for (int i = 2; i <= 20000; ++i) {
+        for (int i = 1; i <= 20000; ++i) {
             String sn = "00000" + i;
             sn = sn.substring(sn.length() - 5);
             jsonObjectFsu.put("sn", "438" + sn);
@@ -151,7 +151,6 @@ public class AssetManagementServerApplicationTest {
 
             relationship.put("id2", envId);
             neo4jDBService.addCIRelationship(relationship);
-
         }
     }
 

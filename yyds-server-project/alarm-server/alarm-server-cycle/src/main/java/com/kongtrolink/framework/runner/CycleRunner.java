@@ -34,9 +34,6 @@ public class CycleRunner implements ApplicationRunner {
         //使用两个单线程任务池定期执行任务
         Timer timer = new Timer(true);
         timer.schedule(new BeforHandleTimerTask(), 10 * 1000, 10 * 1000);
-//        ScheduledExecutorService beforHandleExecutor = Executors.newSingleThreadScheduledExecutor();
-//        beforHandleExecutor.scheduleAtFixedRate(new BeforHandleTask(), 10 * 1000, 10 * 1000, TimeUnit.MILLISECONDS);
-
         ScheduledExecutorService handleExecutor = Executors.newSingleThreadScheduledExecutor();
         handleExecutor.scheduleAtFixedRate(new HandleTask(), 10 * 1000, 10 * 1000, TimeUnit.MILLISECONDS);
     }

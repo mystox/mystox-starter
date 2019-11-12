@@ -242,21 +242,33 @@ public class Alarm {
         return "Alarm{" +
                 "enterpriseCode='" + enterpriseCode + '\'' +
                 ", serverCode='" + serverCode + '\'' +
-                ", serial='" + serial + '\'' +
                 ", name='" + name + '\'' +
-                ", value=" + value +
-                ", level=" + level +
-                ", deviceType='" + deviceType + '\'' +
-                ", deviceModel='" + deviceModel + '\'' +
-                ", deviceId='" + deviceId + '\'' +
-                ", signalId='" + signalId + '\'' +
                 ", flag='" + flag + '\'' +
-                ", targetLevel=" + targetLevel +
-                ", targetLevelName='" + targetLevelName + '\'' +
-                ", color='" + color + '\'' +
                 ", state='" + state + '\'' +
-                ", type='" + type + '\'' +
-                ", status='" + status + '\'' +
+                ", key='" + key + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Alarm alarm = (Alarm) o;
+
+        if (enterpriseCode != null ? !enterpriseCode.equals(alarm.enterpriseCode) : alarm.enterpriseCode != null)
+            return false;
+        if (serverCode != null ? !serverCode.equals(alarm.serverCode) : alarm.serverCode != null) return false;
+        if (serial != null ? !serial.equals(alarm.serial) : alarm.serial != null) return false;
+        return deviceId != null ? deviceId.equals(alarm.deviceId) : alarm.deviceId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = enterpriseCode != null ? enterpriseCode.hashCode() : 0;
+        result = 31 * result + (serverCode != null ? serverCode.hashCode() : 0);
+        result = 31 * result + (serial != null ? serial.hashCode() : 0);
+        result = 31 * result + (deviceId != null ? deviceId.hashCode() : 0);
+        return result;
     }
 }
