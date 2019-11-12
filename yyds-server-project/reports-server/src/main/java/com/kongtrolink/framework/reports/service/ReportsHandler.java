@@ -27,7 +27,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -47,9 +46,7 @@ import java.util.concurrent.*;
  * update record:
  */
 @Aspect
-//@Lazy
 @Component
-@EnableScheduling
 @DependsOn(value = "registerRunner")
 @Order
 public class ReportsHandler implements ApplicationRunner {
@@ -112,6 +109,7 @@ public class ReportsHandler implements ApplicationRunner {
             e.setName(name);
             ReportExtend.FieldType type = reportExtend.type();
             e.setType(type.name());
+            e.setBelongs(reportExtend.belong().name());
             extendPropertiesList.add(e);
         }
 
@@ -280,13 +278,12 @@ public class ReportsHandler implements ApplicationRunner {
         }
         if (validity != null && validity) {
             int taskStatus = reportTask.getTaskStatus();
-            if (TaskStatus.RUNNING.getStatus() != taskStatus) {
+            if (TaskStatus.RUNNING.getStatus() == taskStatus) {
                 logger.warn("[{}]running task stay running", reportTask.getId());
             } else {
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
             }
-        }
-        else {
+        } else {
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
         reportTask.setCondition(reportConfig.getCondition());
@@ -393,12 +390,11 @@ public class ReportsHandler implements ApplicationRunner {
 
 
     void task() {
-//        logger.debug("report task executor...");
         try {
             ReportTask reportTask = reportTaskDao.findExecuteReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
             if (reportTask == null) return;
             String reportTaskId = reportTask.getId();
-            logger.info("[{}]task executor..", reportTaskId);
+            logger.debug("[{}]task executor..", reportTaskId);
             Integer rhythm = reportTask.getRhythm();
             Long operaValidity = reportTask.getOperaValidity();
             // 超时或设置无效
@@ -453,9 +449,12 @@ public class ReportsHandler implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        //启动任务执行器
         for (int i = 0; i < 9; i++)
             reportsScheduled.scheduleWithFixedDelay(() -> task()
                     , 1, 1, TimeUnit.SECONDS);
+        //启动任务扫描器
         reportsScheduled.scheduleWithFixedDelay(() -> checkRunning()
                 , 1, 3, TimeUnit.SECONDS);
 

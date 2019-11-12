@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * update record:
  */
 @RestController
-@RequestMapping(value = "/config")
+@RequestMapping(value = "/gatewayConfig")
 public class ConfigController {
 
     @Autowired

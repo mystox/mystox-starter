@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.service.MqttHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +39,8 @@ public class MqttHandlerAck implements MqttHandler {
 
     @Override
     public String assembleSubTopic(String operaCode) {
-        return serverName +"_"+ serverVersion + "/" + operaCode;
+        return MqttUtils.preconditionSubTopicId(
+                MqttUtils.preconditionServerCode(serverName, serverVersion), operaCode) + "/ack";
     }
 
     @Override
@@ -48,10 +51,17 @@ public class MqttHandlerAck implements MqttHandler {
     }
 
     @Override
-    public void addSubTopic(String... topics) {
-        logger.info("add topics: {}", topics);
+    public synchronized void addSubTopic(String... topics) {
+        logger.info("add ack topics: {}", topics);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
-        messageProducer.addTopic(topics);
+        List<String> topicAdd = new ArrayList<>();
+        for (String topic: topics)
+        {
+            if (!isExists(topic)){
+                topicAdd.add(topic);
+            }
+        }
+        messageProducer.addTopic(topicAdd.toArray(new String[topicAdd.size()]));
     }
 
     @Override

@@ -36,6 +36,17 @@ public class ReportConfig {
     private Integer rhythm;
     private Long startTime;
 
+    private String reportServerCode;
+
+
+    public String getReportServerCode() {
+        return reportServerCode;
+    }
+
+    public void setReportServerCode(String reportServerCode) {
+        this.reportServerCode = reportServerCode;
+    }
+
     public Long getStartTime() {
         return startTime;
     }

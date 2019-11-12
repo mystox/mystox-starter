@@ -11,7 +11,7 @@ spring:
 server:
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本
-  port: 58004 #服务占用web端口
+  port: 58105 #服务占用web端口
   title: FOO实例名
   serverUri: /home #首页名
   pageRoute: proxy_foo
