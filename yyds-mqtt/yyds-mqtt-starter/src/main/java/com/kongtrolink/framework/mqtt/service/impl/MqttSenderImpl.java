@@ -70,7 +70,7 @@ public class MqttSenderImpl implements MqttSender {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         //获取目标topic列表，判断sub_list是否有人订阅处理
         try {
@@ -108,7 +108,7 @@ public class MqttSenderImpl implements MqttSender {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload);
+        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         try {
             //获取目标topic列表，判断sub_list是否有人订阅处理
@@ -182,11 +182,12 @@ public class MqttSenderImpl implements MqttSender {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
 //        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建消息体
-        String topicAck = MqttUtils.preconditionSubTopicId(this.serverCode, operaCode) + "/ack";
+//        String topicAck = MqttUtils.preconditionSubTopicId(this.serverCode, operaCode) + "/ack";
+        String topicAck = mqttHandlerAck.assembleSubTopic(operaCode);
         if (!mqttHandlerAck.isExists(topicAck))
             mqttHandlerAck.addSubTopic(topicAck);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload);
+        MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
         if (sendResult) {
@@ -255,10 +256,11 @@ public class MqttSenderImpl implements MqttSender {
     }
 
 
-    private MqttMsg buildMqttMsg(String topicId, String localServerCode, String payload) {
+    private MqttMsg buildMqttMsg(String topicId, String localServerCode, String payload, String operaCode) {
         MqttMsg mqttMsg = new MqttMsg();
         mqttMsg.setTopic(topicId);
         mqttMsg.setPayloadType(PayloadType.STRING);
+        mqttMsg.setOperaCode(operaCode);
         mqttMsg.setPayload(payload);
         mqttMsg.setSourceAddress(localServerCode);
         return mqttMsg;

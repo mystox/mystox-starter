@@ -34,9 +34,9 @@ gateway:
   assetReport:
     version: 1.0.0
   alarm:
-      version: 1.0.0
+    version: 1.0.0
   scloud:
-      version: 1.0.0
+    version: 1.0.0
 ###########消息框架相关配置#############
 server:
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU1 #服务编码

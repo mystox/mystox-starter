@@ -126,6 +126,9 @@ public class RegisterRunner implements ApplicationRunner {
             if (registerMsg == null)
                 System.exit(0);
             register(registerMsg, subList);//注册操作码信息
+            subTopic(subList);//订阅操作码对应topic
+
+            //web注册置于最后，适应运管的启动顺序
             OperaResult result = registerWebPriv();
             if (result != null)
             {
@@ -136,7 +139,6 @@ public class RegisterRunner implements ApplicationRunner {
                     System.exit(0);
                 }
             }
-            subTopic(subList);//订阅操作码对应topic
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
@@ -159,9 +161,10 @@ public class RegisterRunner implements ApplicationRunner {
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
                     OperaCode.REGISTER_WEB_PRIV_FUNC, 2, registerMsg.toJSONString(), 30000L, TimeUnit.MILLISECONDS);
             String msg = registerWeb.getMsg();
-            OperaResult result = JSONObject.parseObject(msg, OperaResult.class);
-
-            return result;
+            if (StateCode.SUCCESS == registerWeb.getStateCode()) {
+                OperaResult result = JSONObject.parseObject(msg, OperaResult.class);
+                return result;
+            }
         } else {
             logger.warn("web privilege function config is null...");
         }

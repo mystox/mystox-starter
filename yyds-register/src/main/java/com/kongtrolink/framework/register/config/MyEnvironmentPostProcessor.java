@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.register.config;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +12,10 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 /**
@@ -55,11 +56,22 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
                 throw new IllegalArgumentException("resource " + resource + " in not exists");
             }
             try {
-                String s = FileUtils.readFileToString(resource.getFile(), Charset.defaultCharset());
-                if (StringUtils.isNotBlank(s))
-                    environment.getPropertySources().addLast(loadProfiles(resource));
-                else
-                    logger.warn("file is blank");
+                String s = "";
+                InputStream inputStream = null;
+                try {
+                    inputStream = resource.getInputStream();
+                    if (inputStream != null) {
+                        s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+                        if (StringUtils.isNotBlank(s)) {
+                            environment.getPropertySources().addLast(loadProfiles(resource));
+                            continue;
+                        }
+                    }
+                } finally {
+                    if (inputStream!=null)
+                        inputStream.close();
+                }
+                logger.warn("file is blank");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(0);

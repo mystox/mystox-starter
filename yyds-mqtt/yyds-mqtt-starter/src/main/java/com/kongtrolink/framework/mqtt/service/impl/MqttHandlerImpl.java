@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.service.MqttHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class MqttHandlerImpl implements MqttHandler {
 
     @Override
     public String assembleSubTopic(String operaCode) {
-        return serverCode + "/" + operaCode;
+        return MqttUtils.preconditionSubTopicId(serverCode,operaCode);
     }
 
     @Override
