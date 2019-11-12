@@ -13,7 +13,7 @@ server:
   version: SERVER #服务版本
   port: 59004 #服务占用web端口
   title: 铁塔业务实例
-  serverUri: /home #首页名
+  serverUri: /HomeReport #首页名
   pageRoute: proxy_tower
   routeMark: proxy_tower
 #jarResources:
