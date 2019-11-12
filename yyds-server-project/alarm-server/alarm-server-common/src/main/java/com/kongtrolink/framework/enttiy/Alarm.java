@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -237,6 +239,12 @@ public class Alarm {
         this.key = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.COLON + deviceId + Contant.UNDERLINE + serial;
     }
 
+    public String getHistoryTable(){
+        String table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + Contant.HIST_ALARM;
+        table = table + Contant.UNDERLINE + DateUtil.getYear_week(treport);
+        return table;
+    }
+
     @Override
     public String toString() {
         return "Alarm{" +
@@ -270,5 +278,26 @@ public class Alarm {
         result = 31 * result + (serial != null ? serial.hashCode() : 0);
         result = 31 * result + (deviceId != null ? deviceId.hashCode() : 0);
         return result;
+    }
+
+    public static void main(String[] a){
+        String enterpriseCode = "enterprise1";
+        String deviceId = "deviceId1";
+        String key = enterpriseCode + deviceId;
+        Map<String, Alarm> alarmMap = new HashMap<>();
+        Alarm alarm1 = new Alarm();
+        alarm1.setEnterpriseCode(enterpriseCode);
+        alarm1.setDeviceId(deviceId);
+        alarmMap.put(key, alarm1);
+
+        System.out.println("alarm1.state:" + alarm1.getState());
+
+        Alarm sourceAlarm = alarmMap.get(key);
+        sourceAlarm.setState(Contant.PENDING);
+        System.out.println("alarm1 --after alarmStete:" + alarm1.getState());
+        System.out.println("after get state:" + alarmMap.get(key).getState());
+
+
+
     }
 }

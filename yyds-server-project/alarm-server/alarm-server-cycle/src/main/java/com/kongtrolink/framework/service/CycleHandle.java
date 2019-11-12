@@ -58,7 +58,7 @@ public class CycleHandle{
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
-    private String historyTable = MongTable.ALARM_HISTORY;
+    private String historyTable = Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
 
     /**
      * @auther: liudd
@@ -116,7 +116,7 @@ public class CycleHandle{
         Map<String, AlarmCycle> enterpriseServer_cycleMap = new HashMap<>();
         Map<String, List<Alarm>> enterpirseServer_alarmListMap = readyMap(handleAlarmList, enterpriseServer_cycleMap);
 
-        Map<String, List<Alarm>> enterServerHistoryAlarmListMap = new HashMap<>();
+        Map<String, List<Alarm>> tableHistoryAlarmListMap = new HashMap<>();    //表名-历史告警列表map
         List<String> historyAlarmIdList = new ArrayList<>();    // 历史告警id列表
         List<String> currentAlarmIdList = new ArrayList<>();    //实时告警id列表
         List<String> deviceIdList = new ArrayList<>();          // 设备id列表
@@ -134,12 +134,14 @@ public class CycleHandle{
                 boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
                 if(history){
                     //以enterpriseCode_serverCode为键，保存历史告警列表，为后面批量存储做准备
-                    List<Alarm> enterServerHistoryAlarmList = enterServerHistoryAlarmListMap.get(enterpirseServer);
-                    if(null == enterServerHistoryAlarmList){
-                        enterServerHistoryAlarmList = new ArrayList<>();
+                    String subfix = DateUtil.getYMD(alarm.getTreport());
+                    String table = enterpirseServer + historyTable + subfix;
+                    List<Alarm> tableHistoryAlarmList = tableHistoryAlarmListMap.get(table);
+                    if(null == tableHistoryAlarmList){
+                        tableHistoryAlarmList = new ArrayList<>();
                     }
-                    enterServerHistoryAlarmList.add(alarm);
-                    enterServerHistoryAlarmListMap.put(enterpirseServer, enterServerHistoryAlarmList);
+                    tableHistoryAlarmList.add(alarm);
+                    tableHistoryAlarmListMap.put(table, tableHistoryAlarmList);
 
                     historyAlarmIdList.add(alarm.getId());
                     //修改redis中所在表
@@ -188,10 +190,10 @@ public class CycleHandle{
         //批量修改redis上告警flag
         redisUtils.mset(redisAlarmMap);
         //保存历史告警到对应的历史告警表
-        for(String enterServer : enterServerHistoryAlarmListMap.keySet()) {
-            List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);
-            logger.info("save history alarm, enterServer:{}, size:{}", enterServer, historyAlarmIdList.size());
-            alarmDao.addList(historyAlarmList, enterServer + Contant.UNDERLINE+ historyTable);
+        for(String tale : tableHistoryAlarmListMap.keySet()) {
+            List<Alarm> historyAlarmList = tableHistoryAlarmListMap.get(tale);
+            logger.info("save history alarm, enterServer:{}, size:{}", tale, historyAlarmIdList.size());
+            alarmDao.addList(historyAlarmList, tale);
         }
         //删除实时告警
         logger.info("delete history alarm from current table, size:{}", historyAlarmIdList.size());

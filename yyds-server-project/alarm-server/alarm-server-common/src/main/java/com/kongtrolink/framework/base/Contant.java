@@ -49,6 +49,7 @@ public class Contant {
     public static String ZERO = "0";
     public static String ONE = "1";
     public static String TWO = "2";     //其他操作（修改附加属性）
+    public static String THR = "3";
 
 //    public static String INFORM_TYPE_MSG = "msg";
 //    public static String INFORM_TYPE_EMAL = "email";
