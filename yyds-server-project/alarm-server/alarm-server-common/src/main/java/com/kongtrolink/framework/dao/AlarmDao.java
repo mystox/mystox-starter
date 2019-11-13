@@ -59,6 +59,10 @@ public class AlarmDao {
         int currentPage = alarmQuery.getCurrentPage();
         int pageSize = alarmQuery.getPageSize();
         query.skip( (currentPage-1)*pageSize ).limit(pageSize);
+        //历史告警分表分页使用指定起始数据和分页大小
+        if(null != alarmQuery.getRealBeginNum()){
+            query.skip(alarmQuery.getRealBeginNum()).limit(alarmQuery.getRealLimit());
+        }
         return mongoTemplate.find(query, DBObject.class, table);
     }
 
