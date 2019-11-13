@@ -5,15 +5,13 @@ privFunc:
   remark: 业务根目录 #备注 可填
   children:
   - type: ROOT
-    name: 报表页面
-    code: REPORTS
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
+    name: 资产管理
+    code: ASSETS
     children:
     - type: PAGE
       name: 报表任务
-      code: REPORT_TASK_RESULT
-      uri: /ZKReport/reportService
+      code: MANAGER
+      uri: /ZKAssets/assetsManager
 #    - type: PAGE
 #      name: 报表任务分配
 #      code: SETTING

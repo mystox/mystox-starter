@@ -9,13 +9,14 @@ spring:
     database: 2
 ###########服务及消息框架相关配置#############
 server:
-  name: TOWER #服务编码
-  version: SERVER #服务版本
+  name: TOWER_SERVER #服务编码
+  version: 1.0.0 #服务版本
   port: 59004 #服务占用web端口
   title: 铁塔业务实例
-  serverUri: /home #首页名
+  serverUri: /ZKReport/reportSetting #首页名
   pageRoute: proxy_tower
   routeMark: proxy_tower
+#  serverMark:  #服务端版本 默认*
 #jarResources:
 #  path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 #register:

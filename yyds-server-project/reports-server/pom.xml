@@ -36,11 +36,11 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 			<version>${spring-boot.version}</version>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>com.kongtrolink.framework</groupId>
 			<artifactId>yyds-core</artifactId>
 			<version>1.0.0</version>
-		</dependency>-->
+		</dependency>
 		<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-test</artifactId>

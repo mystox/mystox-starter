@@ -1,13 +1,19 @@
 spring:
   application:
     name: yytd-mqtt-demo
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
 ###########消息框架相关配置#############
 server:
   name: REPORTS_SERVER #服务编码
   version: 1.0.0 #服务版本
   port: 56002 #服务占用web端口
   title: 报表服务
-  serverUri: /home #首页名
+  serverUri: /ZKReport/reportService #首页名
   pageRoute: proxy_reports
   routeMark: proxy_reports
 jarResources:

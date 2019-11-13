@@ -3,7 +3,7 @@ package com.kongtrolink.framework.reports.entity;
 /**
  * Created by mystoxlol on 2019/11/5, 10:56.
  * company: kongtrolink
- * description:
+ * description: 报表配置页面的json数据保存实体
  * update record:
  */
 public class ReportWebConfig {
