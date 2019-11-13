@@ -117,6 +117,7 @@ public class AlarmLevelService {
     public void initAlarmLevelMap(){
         if(!userAlarmLevel){
             logger.info("不是用内存存储告警等级.userAlarmLevel:{}", userAlarmLevel);
+            return ;
         }
         List<AlarmLevel> all = alarmLevelDao.getAll();
         for(AlarmLevel alarmLevel : all){

@@ -71,7 +71,6 @@ public class CycleHandle{
             int size = currentAlarmList.size();
             if(size<count) {
                 Date curTime = new Date();
-                long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 int diff = count - size;
                 List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff, curTime);
                 //去除重复告警
@@ -81,6 +80,7 @@ public class CycleHandle{
                 }
                 //修改获取到的实时告警属性，防止再次获取到
                 List<String> idList = alarmDao.entity2IdList(alarmList);
+                long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 alarmDao.updateHcTime(idList, new Date(overTimeLong), currentTable);
                 currentAlarmList.addAll(alarmList);
                 logger.info("size:{}, diff:{}, alarmList.size:{}, currentAlarmList.size:{}", size, diff, alarmList.size(), currentAlarmList.size());
@@ -134,8 +134,7 @@ public class CycleHandle{
                 boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
                 if(history){
                     //以enterpriseCode_serverCode为键，保存历史告警列表，为后面批量存储做准备
-                    String subfix = DateUtil.getYMD(alarm.getTreport());
-                    String table = enterpirseServer + historyTable + subfix;
+                    String table = alarm.getHistoryTable();
                     List<Alarm> tableHistoryAlarmList = tableHistoryAlarmListMap.get(table);
                     if(null == tableHistoryAlarmList){
                         tableHistoryAlarmList = new ArrayList<>();
@@ -149,6 +148,10 @@ public class CycleHandle{
                     JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
                     if(null != redisJson){
                         redisJson.put("flag", Contant.ZERO);
+                        Alarm byKey = alarmDao.getByKey(alarm.getKey(), currentTable);
+                        if(null != byKey){
+                            redisJson.put("treport", alarm.getTreport());
+                        }
                         redisAlarmMap.put(redisKey, redisJson);
                     }
                     //保存设备id信息

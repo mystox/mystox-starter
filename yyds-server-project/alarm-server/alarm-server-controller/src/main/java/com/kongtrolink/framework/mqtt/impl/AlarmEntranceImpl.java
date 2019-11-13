@@ -118,8 +118,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             return ;
         }
         List<Alarm> reportAlarmList = new ArrayList<>();
-        //需要存储到redis中告警表
-        Map<String, JSONObject> pendingAlarmMap = new HashMap<>();
         Date curDate = new Date();
         String enterServerCode = enterpriseCode + Contant.UNDERLINE + serverCode;
         for(JSONObject jsonObject : alarmJsonList) {
@@ -137,7 +135,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     redisJson.put("flag", flag);
                     redisJson.put("treport", alarm.getTreport());
                     redisJson.put("targetLevel", alarm.getTargetLevel());
-                    //设置过期时间30天
+                    //存储到redis中设置过期时间30天
                     redisUtils.set(pendingAlarm+Contant.COLON+alarm.getKey(), redisJson, expiretionTime);
                 }
             }else {
@@ -152,7 +150,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             //实时告警不分表
             reportAlarmList = handleRemoteOperate(enterServerCode, reportAlarmList, alarmJsonList);
             for(Alarm alarm : reportAlarmList){
-                //将实时告警保存到内存map中
+                //将实时告警保存到内存map中（包含自定义告警等级）
                 handleCurAlarmList(alarm, Contant.ONE);
             }
         }
@@ -253,20 +251,19 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             //判断内存中是否存在
             alarm.setTrecover(new Date());
             alarm.setState(Contant.RESOLVE);
-            List<Alarm> mapAlarms = handleCurAlarmList(alarm, Contant.TWO);
+            List<Alarm> mapAlarms = handleCurAlarmList(alarm, Contant.THR);
             if(null != mapAlarms){
                 result = true;
             }else if(Contant.ONE.equals(redisJson.getString("flag"))) {
                 result = alarmDao.resolveByKey(alarm.getKey(), Contant.RESOLVE, new Date(), currentAlarmTable);
             }else{//修改历史表告警状态
+                alarm.setTreport(redisJson.getDate("treport"));
+                alarm.setTargetLevel(redisJson.getInteger("targetLevel"));
                 result = alarmDao.resolveByKey(alarm.getKey(), Contant.RESOLVE, new Date(), alarm.getHistoryTable());
             }
             if(result){
                 //liuddtodo 调用告警消除发送推送
                 redisUtils.del(redisKey);
-                alarm.setTrecover(new Date());
-                alarm.setTreport(redisJson.getDate("treport"));
-                alarm.setTargetLevel(redisJson.getInteger("targetLevel"));
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
                 String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));

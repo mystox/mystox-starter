@@ -2,6 +2,7 @@ package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.MongTable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -240,7 +241,7 @@ public class Alarm {
     }
 
     public String getHistoryTable(){
-        String table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + Contant.HIST_ALARM;
+        String table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + MongTable.ALARM_HISTORY;
         table = table + Contant.UNDERLINE + DateUtil.getYear_week(treport);
         return table;
     }
