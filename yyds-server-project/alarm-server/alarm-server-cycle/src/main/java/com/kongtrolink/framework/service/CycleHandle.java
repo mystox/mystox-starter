@@ -58,7 +58,7 @@ public class CycleHandle{
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
-    private String historyTable = MongTable.ALARM_HISTORY;
+    private String historyTable = Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
 
     /**
      * @auther: liudd
@@ -71,7 +71,6 @@ public class CycleHandle{
             int size = currentAlarmList.size();
             if(size<count) {
                 Date curTime = new Date();
-                long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 int diff = count - size;
                 List<Alarm> alarmList = alarmDao.getCurrentAlarmList(currentTable, diff, curTime);
                 //去除重复告警
@@ -81,6 +80,7 @@ public class CycleHandle{
                 }
                 //修改获取到的实时告警属性，防止再次获取到
                 List<String> idList = alarmDao.entity2IdList(alarmList);
+                long overTimeLong = curTime.getTime() + (hcOverTime * 60 * 1000);
                 alarmDao.updateHcTime(idList, new Date(overTimeLong), currentTable);
                 currentAlarmList.addAll(alarmList);
                 logger.info("size:{}, diff:{}, alarmList.size:{}, currentAlarmList.size:{}", size, diff, alarmList.size(), currentAlarmList.size());
@@ -116,7 +116,7 @@ public class CycleHandle{
         Map<String, AlarmCycle> enterpriseServer_cycleMap = new HashMap<>();
         Map<String, List<Alarm>> enterpirseServer_alarmListMap = readyMap(handleAlarmList, enterpriseServer_cycleMap);
 
-        Map<String, List<Alarm>> enterServerHistoryAlarmListMap = new HashMap<>();
+        Map<String, List<Alarm>> tableHistoryAlarmListMap = new HashMap<>();    //表名-历史告警列表map
         List<String> historyAlarmIdList = new ArrayList<>();    // 历史告警id列表
         List<String> currentAlarmIdList = new ArrayList<>();    //实时告警id列表
         List<String> deviceIdList = new ArrayList<>();          // 设备id列表
@@ -134,12 +134,13 @@ public class CycleHandle{
                 boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
                 if(history){
                     //以enterpriseCode_serverCode为键，保存历史告警列表，为后面批量存储做准备
-                    List<Alarm> enterServerHistoryAlarmList = enterServerHistoryAlarmListMap.get(enterpirseServer);
-                    if(null == enterServerHistoryAlarmList){
-                        enterServerHistoryAlarmList = new ArrayList<>();
+                    String table = alarm.getHistoryTable();
+                    List<Alarm> tableHistoryAlarmList = tableHistoryAlarmListMap.get(table);
+                    if(null == tableHistoryAlarmList){
+                        tableHistoryAlarmList = new ArrayList<>();
                     }
-                    enterServerHistoryAlarmList.add(alarm);
-                    enterServerHistoryAlarmListMap.put(enterpirseServer, enterServerHistoryAlarmList);
+                    tableHistoryAlarmList.add(alarm);
+                    tableHistoryAlarmListMap.put(table, tableHistoryAlarmList);
 
                     historyAlarmIdList.add(alarm.getId());
                     //修改redis中所在表
@@ -147,6 +148,10 @@ public class CycleHandle{
                     JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
                     if(null != redisJson){
                         redisJson.put("flag", Contant.ZERO);
+                        Alarm byKey = alarmDao.getByKey(alarm.getKey(), currentTable);
+                        if(null != byKey){
+                            redisJson.put("treport", alarm.getTreport());
+                        }
                         redisAlarmMap.put(redisKey, redisJson);
                     }
                     //保存设备id信息
@@ -188,10 +193,10 @@ public class CycleHandle{
         //批量修改redis上告警flag
         redisUtils.mset(redisAlarmMap);
         //保存历史告警到对应的历史告警表
-        for(String enterServer : enterServerHistoryAlarmListMap.keySet()) {
-            List<Alarm> historyAlarmList = enterServerHistoryAlarmListMap.get(enterServer);
-            logger.info("save history alarm, enterServer:{}, size:{}", enterServer, historyAlarmIdList.size());
-            alarmDao.addList(historyAlarmList, enterServer + Contant.UNDERLINE+ historyTable);
+        for(String tale : tableHistoryAlarmListMap.keySet()) {
+            List<Alarm> historyAlarmList = tableHistoryAlarmListMap.get(tale);
+            logger.info("save history alarm, enterServer:{}, size:{}", tale, historyAlarmIdList.size());
+            alarmDao.addList(historyAlarmList, tale);
         }
         //删除实时告警
         logger.info("delete history alarm from current table, size:{}", historyAlarmIdList.size());
