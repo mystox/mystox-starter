@@ -51,6 +51,10 @@ public class RegisterRunner implements ApplicationRunner {
     @Value("${server.version}")
     private String serverVersion;
 
+    @Value("${server.mark:*}")
+    private String serverMark;
+
+
     @Value("${server.name}_${server.version}")
     private String serverCode;
 
@@ -130,8 +134,7 @@ public class RegisterRunner implements ApplicationRunner {
 
             //web注册置于最后，适应运管的启动顺序
             OperaResult result = registerWebPriv();
-            if (result != null)
-            {
+            if (result != null) {
                 if (result.getStateCode() == StateCode.SUCCESS) {
                     logger.info("register web privilege function result:{}", result.getResult());
                 } else {
@@ -279,7 +282,8 @@ public class RegisterRunner implements ApplicationRunner {
     private void registerServerMsg() throws KeeperException, InterruptedException, InterruptedIOException {
 
         //获取服务信息并注册
-        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
+        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
+                routeMark, pageRoute, serverUri, title, serverMark);
         String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
         if (serviceRegistry.exists(subPath))
             serviceRegistry.setData(subPath, JSONObject.toJSONBytes(serverMsg));
@@ -329,7 +333,8 @@ public class RegisterRunner implements ApplicationRunner {
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
-            ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
+            ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
+                    routeMark, pageRoute, serverUri, title,serverMark);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
