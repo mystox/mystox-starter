@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -24,24 +23,29 @@ import java.nio.charset.Charset;
  * description:
  * update record:
  */
-@Configuration
-public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    Logger logger = LoggerFactory.getLogger(MyEnvironmentPostProcessor.class);
+    Logger logger = LoggerFactory.getLogger(RegisterEnvironmentPostProcessor.class);
 
-    private boolean ignoreFileNotFound = true;
+    protected boolean ignoreFileNotFound = true;
     //Properties对象
-    private final YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
+    protected final YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
+
+    String[] profiles = {
+            "classpath:config/privFuncConfig.yml",
+            "file:config/privFuncConfig.yml"
+    };
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-//自定义配置文件
-        String[] profiles = {
-                "classpath:config/privFuncConfig.yml",
-                "file:config/privFuncConfig.yml"/*,
-                "yyy.properties",
-                "zzz.yml",*/
-        };
+        loadResources(environment, application);
+        if (logger.isInfoEnabled())
+            logger.info("load register environment post processor success...");
+        else
+            System.out.println("load register environment post processor success...");
+    }
+
+    protected void loadResources(ConfigurableEnvironment environment, SpringApplication application) {
         //循环添加
         for (String profile : profiles) {
             //从classpath路径下面查找文件
@@ -50,7 +54,11 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
             Resource resource = resourceLoader.getResource(profile);
             if (!resource.exists()) {
                 if (ignoreFileNotFound) {
-                    logger.warn("ignore file not exists..{}", profile);
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("ignore file not exists..{}", profile);
+                    } else {
+                        System.out.println("ignore file not exists..{}" + profile);
+                    }
                     continue;
                 }
                 throw new IllegalArgumentException("resource " + resource + " in not exists");
@@ -68,10 +76,11 @@ public class MyEnvironmentPostProcessor implements EnvironmentPostProcessor {
                         }
                     }
                 } finally {
-                    if (inputStream!=null)
+                    if (inputStream != null)
                         inputStream.close();
                 }
-                logger.warn("file is blank");
+                if (logger.isWarnEnabled()) logger.warn("file is blank {}", resource.getFilename());
+                else System.out.println("file is blank " + resource.getFilename());
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(0);

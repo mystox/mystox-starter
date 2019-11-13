@@ -1,8 +1,0 @@
-#########接收器配置##############
-serverCode:
-  - name: base
-    businessCode: TOWER_SERVER
-    enterpriseCode: yytd
-    deviceType: type1 #可选
-    deviceModel: type1 #可选
-    regionCode: 000000 #可选
