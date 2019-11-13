@@ -16,19 +16,19 @@ privFunc:
     - type: PAGE
       name: 告警等级
       code: ALARM_LEVEL
-      uri: /ZKReport/alarmLevel
+      uri: /ZKAlarm/alarmLevel
     - type: PAGE
       name: 告警列表
       code: ALARM_LIST
-      uri: /ZKReport/alarmList
+      uri: /ZKAlarm/alarmList
     - type: PAGE
       name: 告警周期
       code: ALARM_CYCLE
-      uri: /ZKReport/alarmCycle
+      uri: /ZKAlarm/alarmCycle
     - type: PAGE
       name: 告警投递
       code: ALARM_POST
-      uri: /ZKReport/alarmPost
+      uri: /ZKAlarm/alarmPost
   - type: ROOT
     name: 资产功能
     code: ASSETS
@@ -38,7 +38,7 @@ privFunc:
     - type: PAGE
       name: 资产管理
       code: MANAGE
-      uri: /ZKReport/assetsManage_company
+      uri: /ZKAssets/assetsManage
   - type: ROOT
     name: 报表功能
     code: REPORTS
@@ -57,5 +57,10 @@ privFunc:
       name: 报表查看
       code: CUSTOM_REPORT_SHOW
       uri: /ZKReport/customReportShow
+    - type: PAGE
+      name: 首页
+      code: HOME
+      uri: /ZKReport/HomeReport
+
 
 

@@ -6,14 +6,12 @@ privFunc:
   children:
   - type: ROOT
     name: 资产管理
-    code: REPORTS
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
+    code: ASSETS
     children:
     - type: PAGE
       name: 报表任务
-      code: REPORT_TASK_RESULT
-      uri: /ZKReport/reportService
+      code: MANAGER
+      uri: /ZKAssets/assetsManager
 #    - type: PAGE
 #      name: 报表任务分配
 #      code: SETTING
