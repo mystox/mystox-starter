@@ -4,9 +4,11 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.MongTable;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * @Auther: liudd
@@ -240,7 +242,7 @@ public class Alarm {
         this.key = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.COLON + deviceId + Contant.UNDERLINE + serial;
     }
 
-    public String getHistoryTable(){
+    public String createHistoryTable(){
         String table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + MongTable.ALARM_HISTORY;
         table = table + Contant.UNDERLINE + DateUtil.getYear_week(treport);
         return table;
@@ -281,24 +283,19 @@ public class Alarm {
         return result;
     }
 
-    public static void main(String[] a){
-        String enterpriseCode = "enterprise1";
-        String deviceId = "deviceId1";
-        String key = enterpriseCode + deviceId;
-        Map<String, Alarm> alarmMap = new HashMap<>();
-        Alarm alarm1 = new Alarm();
-        alarm1.setEnterpriseCode(enterpriseCode);
-        alarm1.setDeviceId(deviceId);
-        alarmMap.put(key, alarm1);
+    public static void main(String[] a)throws Exception{
+        String dateStr = "2019-11-21 5:4:5";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d H:m:s");
+        System.out.println(simpleDateFormat.format(new Date()));
+        Date parse = simpleDateFormat.parse(dateStr);
+        SimpleDateFormat simple2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("dataStr:" + simple2.format(parse));
+        for(int i=1; i<20; i++){
+            int ran2 = (int) (Math.random()*10);
+            System.out.println("i:" + i + "; ran2:" + ran2);
+            int aa = ran2 % 2;
+            System.out.println("i :" + i + "; aa:" + aa);
 
-        System.out.println("alarm1.state:" + alarm1.getState());
-
-        Alarm sourceAlarm = alarmMap.get(key);
-        sourceAlarm.setState(Contant.PENDING);
-        System.out.println("alarm1 --after alarmStete:" + alarm1.getState());
-        System.out.println("after get state:" + alarmMap.get(key).getState());
-
-
-
+        }
     }
 }

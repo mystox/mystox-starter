@@ -58,7 +58,6 @@ public class CycleHandle{
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
-    private String historyTable = Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
 
     /**
      * @auther: liudd
@@ -134,7 +133,7 @@ public class CycleHandle{
                 boolean history = AlarmCycle.isHistory(alarmCycle, alarm, curTime);
                 if(history){
                     //以enterpriseCode_serverCode为键，保存历史告警列表，为后面批量存储做准备
-                    String table = alarm.getHistoryTable();
+                    String table = alarm.createHistoryTable();
                     List<Alarm> tableHistoryAlarmList = tableHistoryAlarmListMap.get(table);
                     if(null == tableHistoryAlarmList){
                         tableHistoryAlarmList = new ArrayList<>();
@@ -148,10 +147,6 @@ public class CycleHandle{
                     JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
                     if(null != redisJson){
                         redisJson.put("flag", Contant.ZERO);
-                        Alarm byKey = alarmDao.getByKey(alarm.getKey(), currentTable);
-                        if(null != byKey){
-                            redisJson.put("treport", alarm.getTreport());
-                        }
                         redisAlarmMap.put(redisKey, redisJson);
                     }
                     //保存设备id信息
