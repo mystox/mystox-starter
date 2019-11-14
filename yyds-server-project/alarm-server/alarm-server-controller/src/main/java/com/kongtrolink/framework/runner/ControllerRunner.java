@@ -40,8 +40,8 @@ public class ControllerRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        reportOperateConfig.initConfigMap();
-        resloverOperateConfig.initConfigMap();
+//        reportOperateConfig.initConfigMap();
+//        resloverOperateConfig.initConfigMap();
         ScheduledExecutorService handleExecutor = Executors.newSingleThreadScheduledExecutor();
         handleExecutor.scheduleAtFixedRate(new handleCurAlarmTask(), 10 * 1000, 10 * 1000, TimeUnit.MILLISECONDS);
     }
