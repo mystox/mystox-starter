@@ -1,2 +1,0 @@
-server:
-  code: ${server.name}_${server.version}

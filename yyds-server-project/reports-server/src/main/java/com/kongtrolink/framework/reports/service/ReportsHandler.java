@@ -233,16 +233,15 @@ public class ReportsHandler implements ApplicationRunner {
         ReportTask reportTask = new ReportTask();
         Boolean validity = reportConfig.getValidity();
         Long startTime = reportConfig.getStartTime();
-        startTime = startTime == null ? System.currentTimeMillis() : startTime;
+        startTime = startTime == null ? System.currentTimeMillis() :
+                (startTime<System.currentTimeMillis()?System.currentTimeMillis():startTime);//如果配置的生效时间早于当前时间，则设置当前时间
         boolean isTaskExists = reportTaskDao.isExistsByOperaCode(serverCode, enterpriseCode, operaCode, MqttUtils.preconditionServerCode(serverName, serverVersion));
         if (!isTaskExists) {
             //生成任务
-//            logger.info("add task...");
             reportTask.setOperaCode(operaCode);
             reportTask.setServerCode(serverCode);
             reportTask.setEnterpriseCode(enterpriseCode);
             ExecutorType executorType = reportConfig.getExecutorType();
-//            Boolean asyn = (Boolean) executorType;
             if (executorType != null) reportTask.setExecutorType(executorType);
             Long operaValidity = reportConfig.getOperaValidity();
             if (operaValidity != null) reportTask.setOperaValidity(operaValidity);
@@ -255,17 +254,9 @@ public class ReportsHandler implements ApplicationRunner {
             //触发任务
 
         } else {
-
-//            logger.info("modify task");
+            //修改任务
             reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode,
                     MqttUtils.preconditionServerCode(serverName, serverVersion));
-//            int taskStatus = reportTask.getTaskStatus();
-            /*if (validity != null && validity) {
-                if (TaskStatus.RUNNING.getStatus() == taskStatus) { //正在运行的报表任务不能被修改
-                    logger.warn("[{}]running task can not modify", reportTask.getId());
-                    return null;
-                }
-            }*/
             ExecutorType executorType = reportConfig.getExecutorType();
             if (executorType != null) reportTask.setExecutorType(executorType);
             Long operaValidity = reportConfig.getOperaValidity();
@@ -296,57 +287,6 @@ public class ReportsHandler implements ApplicationRunner {
 
     }
 
-
-    //3.添加定时任务
-//    @Scheduled(cron = "0/10 * * * * ?")
-    //或直接指定时间间隔，例如：5秒
-//    @Scheduled(fixedRate = 1000)
-//    @DependsOn(value = "registerRunner")
-//    @Order(3)
-   /* public void configureTasks() {
-        logger.info("schedule ...");
-        //
-        for (int i = 0; i < scheduleTaskCount; i++) {
-            reportsExecutor.execute(() -> {
-                try {
-                    ReportTask reportTask = reportTaskDao.findExecuteReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
-                    if (reportTask == null) return;
-                    Long operaValidity = reportTask.getOperaValidity();
-                    // 超时或设置无效
-                    if (!taskInvalid(operaValidity)) {
-                        logger.warn("task invalidity...");
-                        reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
-                        reportTask.setEndTime(new Date());
-                        reportTaskDao.save(reportTask);
-                        return;
-                    }
-                    ReportData result = null;
-                    ReportConfig reportConfig = buildScheduledReportConfig(reportTask);
-                    String operaCode = reportConfig.getOperaCode();
-//                    registerRunner.getRegisterMsg();
-                    String data = serviceRegistry.getData(
-                            MqttUtils.preconditionSubTopicId(
-                                    MqttUtils.preconditionServerCode(this.serverName, this.serverVersion),
-                                    operaCode));
-                    RegisterSub sub = JSONObject.parseObject(data, RegisterSub.class);
-                    String executeUnit = sub.getExecuteUnit();
-                    if (executeUnit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
-                        result = localExecute(executeUnit, JSONObject.toJSONString(reportConfig));
-                    } else if (executeUnit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
-//                        result = jarExecute(executeUnit, JSONObject.toJSONString(reportConfig));
-                    } else if (executeUnit.startsWith(UnitHead.HTTP)) {
-                        //todo 执行远程的http服务器
-                    }
-                    resultSave(reportTask, result);
-                }  catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-//        System.err.println("执行静态定时任务时间: " + LocalDateTime.now());
-
-
-    }*/
 
     /**
      * 报表规定的返回值必须为reportData
@@ -472,7 +412,7 @@ public class ReportsHandler implements ApplicationRunner {
             String reportTaskId = reportTask.getId();
             long currentTimeMillis = System.currentTimeMillis();
             long timeout3 = rhythm * 1000 * 3;
-            if (currentTimeMillis - serverStartTimeStamp < timeout3) continue; //如果服务启动时间还未超过任务执行周期
+//            if (currentTimeMillis - serverStartTimeStamp < timeout3) continue; //如果服务启动时间还未超过任务执行周期
             if (currentTimeMillis - startTime.getTime() > timeout3) { //如果任务三个周期内为改变运行状态，则该任务超时失效
                 logger.warn("[{}]task timeout 3 rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
