@@ -3,6 +3,7 @@ package com.kongtrolink.framework.service;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.FixSizeArrayList;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmCycleDao;
 import com.kongtrolink.framework.dao.AlarmDao;
@@ -12,10 +13,13 @@ import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import com.kongtrolink.framework.util.RedisUtils;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -39,6 +43,8 @@ public class CycleHandle{
     MqttSender mqttSender;
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    MongoTemplate mongoTemplate;
 
     @Value("${cycle.count:300}")
     private int count;
@@ -58,6 +64,7 @@ public class CycleHandle{
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
     private static List<Alarm> currentAlarmList = new ArrayList<>();
     private String currentTable = MongTable.ALARM_CURRENT;
+    private FixSizeArrayList<String> fixSizeArrayList = new FixSizeArrayList<>(600);
 
     /**
      * @auther: liudd
@@ -188,10 +195,22 @@ public class CycleHandle{
         //批量修改redis上告警flag
         redisUtils.mset(redisAlarmMap);
         //保存历史告警到对应的历史告警表
-        for(String tale : tableHistoryAlarmListMap.keySet()) {
-            List<Alarm> historyAlarmList = tableHistoryAlarmListMap.get(tale);
-            logger.info("save history alarm, enterServer:{}, size:{}", tale, historyAlarmIdList.size());
-            alarmDao.addList(historyAlarmList, tale);
+        for(String table : tableHistoryAlarmListMap.keySet()) {
+            List<Alarm> historyAlarmList = tableHistoryAlarmListMap.get(table);
+            logger.info("save history alarm, enterServer:{}, size:{}", table, historyAlarmIdList.size());
+            alarmDao.addList(historyAlarmList, table);
+            //判定该表是否存在key索引
+            if(!fixSizeArrayList.contains(table)){
+                DBCollection collection = mongoTemplate.getCollection(table);
+                boolean hadIndex = hadIndex(collection);
+                if(!hadIndex){
+                    collection.createIndex("key");
+                    hadIndex = hadIndex(collection);
+                    if(hadIndex){
+                        fixSizeArrayList.add(table);
+                    }
+                }
+            }
         }
         //删除实时告警
         logger.info("delete history alarm from current table, size:{}", historyAlarmIdList.size());
@@ -267,5 +286,20 @@ public class CycleHandle{
                     assetsServer+Contant.UNDERLINE+getCI, e.getMessage());
             return false;
         }
+    }
+
+    public boolean hadIndex(DBCollection collection){
+        List<DBObject> indexInfo = collection.getIndexInfo();
+        for(DBObject dbObject : indexInfo){
+            System.out.println(dbObject);
+            Object key = dbObject.get("key");
+            String keyStr = key.toString();
+            if(keyStr.contains("key")){
+                System.out.println("table:" + collection.getName() + " 包含索引key");
+                return true;
+            }
+        }
+        System.out.println("table:" + collection.getName() + " 不包含索引key");
+        return false;
     }
 }
