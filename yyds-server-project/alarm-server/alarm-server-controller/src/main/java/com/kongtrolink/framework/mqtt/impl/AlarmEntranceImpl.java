@@ -60,8 +60,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     private String pendingAlarm;
     private int expiretionTime = 2592000;        //redis过期时间，默认30天2592000
     private static final Logger logger = LoggerFactory.getLogger(AlarmEntranceImpl.class);
-    private AtomicLong countLong = new AtomicLong(0);
-    private AtomicLong noExistCount = new AtomicLong(0);
+    private volatile AtomicLong countLong = new AtomicLong(0);
+    private volatile AtomicLong oneNoExitCount = new AtomicLong(0);
+    private volatile AtomicLong oneExitCount = new AtomicLong(0);
+    private volatile AtomicLong zeroCount = new AtomicLong(0);
+    private volatile AtomicLong zeroNoExitCount = new AtomicLong(0);
     /**
      * @auther: liudd
      * @date: 2019/11/11 16:15
@@ -106,8 +109,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      */
     @Override
     public void alarmHandle(String payload) {
-        long count = countLong.incrementAndGet();
-        System.out.println("count:" + count);
         logger.info("alarmHandle - payload:{}", payload);
         AlarmMqttEntity mqttEntity = JSONObject.parseObject(payload, AlarmMqttEntity.class);
         String enterpriseCode = mqttEntity.getEnterpriseCode();
@@ -117,6 +118,8 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             System.out.printf("产生告警为空: %s %n ", payload);
             return ;
         }
+        long count = countLong.incrementAndGet();
+        System.out.println("countLong:" + count+"; oneNoExitCount: " + oneNoExitCount + "; zeroNoExitCount: " + zeroNoExitCount);
         List<Alarm> reportAlarmList = new ArrayList<>();
         Date curDate = new Date();
         String enterServerCode = enterpriseCode + Contant.UNDERLINE + serverCode;
@@ -128,6 +131,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 alarm.setServerCode(serverCode);
                 alarm.initKey();
                 if(!existAlarm(alarm)){ //判定告警是否存在
+                    System.out.println("oneExitCount: " + oneExitCount.incrementAndGet());
                     alarm.setTreport(curDate);
                     reportAlarmList.add(alarm);
                     //保存告警部分信息，用于告警消除需要
@@ -137,8 +141,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     redisJson.put("targetLevel", alarm.getTargetLevel());
                     //存储到redis中设置过期时间30天
                     redisUtils.set(pendingAlarm+Contant.COLON+alarm.getKey(), redisJson, expiretionTime);
+                    continue;
                 }
+                System.out.println("oneNoExitCount: " + oneNoExitCount.incrementAndGet());
             }else {
+                System.out.println("zeroCount: " + zeroCount.incrementAndGet());
                 jsonObject.put("enterServerCode", enterServerCode);
                 jsonObject.put("enterpriseCode", enterpriseCode);
                 jsonObject.put("serverCode", serverCode);
@@ -196,7 +203,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      */
     private List<Alarm> handleRemoteOperate(String enterServerCode, List<Alarm> reportAlarmList, List<JSONObject> alarmJsonList){
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
+        List<OperateEntity> operate = reportOperateConfig.getOperate();
+        System.out.println("ONE operate: " + operate);
         List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
+        System.out.println("ONE operateEntityList: " + operateEntityList);
         if(null != operateEntityList){
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for(OperateEntity operateEntity : operateEntityList){
@@ -243,8 +253,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
             if(null == redisJson){
                 //redis待处理列表中没有该告警，说明该告警已经消除或者已经超时失效
-                long noExist = noExistCount.incrementAndGet();
-                System.out.println("noExist:" + noExist);
+                System.out.println("zeroNoExitCount:" + zeroNoExitCount.incrementAndGet());
                 return ;
             }
             boolean result ;
@@ -259,13 +268,16 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             }else{//修改历史表告警状态
                 alarm.setTreport(redisJson.getDate("treport"));
                 alarm.setTargetLevel(redisJson.getInteger("targetLevel"));
-                result = alarmDao.resolveByKey(alarm.getKey(), Contant.RESOLVE, new Date(), alarm.getHistoryTable());
+                result = alarmDao.resolveByKey(alarm.getKey(), Contant.RESOLVE, new Date(), alarm.createHistoryTable());
             }
             if(result){
                 //liuddtodo 调用告警消除发送推送
                 redisUtils.del(redisKey);
+                List<OperateEntity> operate = resloverOperateConfig.getOperate();
+                System.out.println("ZERO operate: " + operate.toString());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
+                System.out.println("ZERO operateEntityList:" + operateEntityList);
                 String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
                 if(null != operateEntityList){
                     for(OperateEntity operateEntity : operateEntityList){

@@ -1,16 +1,20 @@
 package com.kongtrolink;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.utils.RedisUtils;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -29,6 +33,8 @@ public class RedisTest {
     RedisUtils redisUtils;
     @Autowired
     RedisTemplate redisTemplate;
+    @Autowired
+    MongoTemplate mongoTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(RedisTest.class);
 
@@ -87,6 +93,33 @@ public class RedisTest {
 //        System.out.println("mset:" + mset);
 
 
+    }
+
+    @Test
+    public void testIndex(){
+        String table = "yytd_TOWER_SERVER_alarm_history_2019_40";
+//        table = "alarm_current";
+        DBCollection collection = mongoTemplate.getCollection(table);
+        boolean hasIndex = hadIndex(collection);
+        if(!hasIndex){
+            collection.createIndex("key");
+            hadIndex(collection);
+        }
+    }
+
+    public boolean hadIndex(DBCollection collection){
+        List<DBObject> indexInfo = collection.getIndexInfo();
+        for(DBObject dbObject : indexInfo){
+            System.out.println("dbObject:" + dbObject);
+            Object key = dbObject.get("key");
+            String keyStr = key.toString();
+            if(keyStr.contains("key")){
+                System.out.println("table:" + collection.getName() + " 包含索引");
+                return true;
+            }
+        }
+        System.out.println("table:" + collection.getName() + " 不包含索引key");
+        return false;
     }
 
 }

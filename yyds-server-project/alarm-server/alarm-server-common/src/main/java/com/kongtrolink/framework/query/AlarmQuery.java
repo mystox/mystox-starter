@@ -27,6 +27,24 @@ public class AlarmQuery extends Paging {
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
     private Date clearEndTime;                  //清除结束时间
+    private Integer realBeginNum;               //真实分页起始数据
+    private Integer realLimit;                  //真实分页大小
+
+    public Integer getRealBeginNum() {
+        return realBeginNum;
+    }
+
+    public void setRealBeginNum(Integer realBeginNum) {
+        this.realBeginNum = realBeginNum;
+    }
+
+    public Integer getRealLimit() {
+        return realLimit;
+    }
+
+    public void setRealLimit(Integer realLimit) {
+        this.realLimit = realLimit;
+    }
 
     public String getId() {
         return id;
