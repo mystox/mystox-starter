@@ -31,8 +31,4 @@ public enum  PayloadType {
         }
     }
 
-    public static void main(String[] args)
-    {
-        System.out.println(PayloadType.STRING.toString());
-    }
 }

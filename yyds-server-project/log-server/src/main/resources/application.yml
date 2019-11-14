@@ -13,7 +13,7 @@ server:
   version: 1.0.0 #服务版本
   port: 54000 #服务占用web端口
   title: 日志服务
-  serverUri:  #首页名
+  serverUri: /ZKlog/mqttLog #首页名
   pageRoute: proxy_log
   routeMark: proxy_log
 jarResources:

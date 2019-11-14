@@ -16,4 +16,4 @@ privFunc:
     - type: PAGE
       name: 消息模块日志
       code: MQTT_LOG
-      uri: /log
+      uri: /ZKlog/mqttLlog
