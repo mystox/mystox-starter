@@ -27,7 +27,7 @@ public class AlarmServerWebApplicationTests {
 		EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
 		enterpriseLevel.setId(null);
 		enterpriseLevel.setCode("system_code");
-		enterpriseLevel.setName("系统默认告警等级");
+		enterpriseLevel.setName("系统默认告警等级2222");
 		int level = 1;
 		enterpriseLevel.setLevel(level);
 		enterpriseLevel.setLevelName(EnumLevelName.getNameByLevel(level));

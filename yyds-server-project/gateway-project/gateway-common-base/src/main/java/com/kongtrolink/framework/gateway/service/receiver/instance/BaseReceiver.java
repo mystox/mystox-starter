@@ -45,7 +45,7 @@ public class BaseReceiver extends ReceiveHandler {
                 }
                 String topics = message.getHeaders().get("mqtt_topic").toString();
                 String payload = message.getPayload();
-                logger.info("[MQTT] Message arrived. topic: {} message: {}", topics, payload);
+                logger.debug("[MQTT] Message arrived. topic: {} message: {}", topics, payload);
                 //iaiot/edge/yy/+/packetName/version
                 String sn = topics.split("/")[3];
                 String packetName = topics.split("/")[4];

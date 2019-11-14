@@ -9,15 +9,19 @@ import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.text.SimpleDateFormat;
@@ -32,7 +36,8 @@ import java.util.Map;
  * @Description:
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = AlarmTest.class)
+@ImportResource("application.yml")
 public class AlarmTest {
     @Autowired
     MongoTemplate mongoTemplate;
@@ -147,6 +152,17 @@ public class AlarmTest {
             e.printStackTrace();
             System.out.println("出异常罗");
         }
+    }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/11/13 19:31
+     * 功能描述:测试动态添加索引
+     */
+    @Test
+    public void testIndex(){
+        String table = "yytd_TOWER_SERVER_alarm_history_2019_46";
+        DBCollection collection = mongoTemplate.getCollection(table);
+        System.out.println(collection);
     }
 }

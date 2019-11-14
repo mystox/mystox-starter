@@ -203,7 +203,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      */
     private List<Alarm> handleRemoteOperate(String enterServerCode, List<Alarm> reportAlarmList, List<JSONObject> alarmJsonList){
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
+        List<OperateEntity> operate = reportOperateConfig.getOperate();
+        System.out.println("ONE operate: " + operate);
         List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
+        System.out.println("ONE operateEntityList: " + operateEntityList);
         if(null != operateEntityList){
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for(OperateEntity operateEntity : operateEntityList){
@@ -270,8 +273,11 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             if(result){
                 //liuddtodo 调用告警消除发送推送
                 redisUtils.del(redisKey);
+                List<OperateEntity> operate = resloverOperateConfig.getOperate();
+                System.out.println("ZERO operate: " + operate.toString());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
+                System.out.println("ZERO operateEntityList:" + operateEntityList);
                 String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
                 if(null != operateEntityList){
                     for(OperateEntity operateEntity : operateEntityList){

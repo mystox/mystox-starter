@@ -18,6 +18,13 @@ public class OperateConfig {
     List<OperateEntity> operate;
 
     public Map<String, List<OperateEntity>> getEnterServeOperaListMap() {
+        //判断当前是否初始化过
+        List<OperateEntity> operate = getOperate();
+        if(null == enterServeOperaListMap || enterServeOperaListMap.size()==0){
+            if(null != operate && operate.size()>0){
+                initConfigMap();
+            }
+        }
         return enterServeOperaListMap;
     }
 

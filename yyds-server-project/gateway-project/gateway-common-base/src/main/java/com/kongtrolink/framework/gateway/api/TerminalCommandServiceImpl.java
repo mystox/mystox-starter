@@ -49,7 +49,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         ackBase.setMsgId(msgId);
         String s = JSONObject.toJSONString(ackBase);
         MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,s,topicConfig.getFsuTopic(sn, MqttPubTopic.GetDeviceAsset));
-        if(StateCode.FAILED == result.getStateCode()){
+        logger.info("MsgResult :{} " ,result.toString());
+        if(StateCode.SUCCESS != result.getStateCode()){
             return JSONObject.toJSONString(result);
         }
         PushDeviceAssetDeviceList deviceList = JSONObject.parseObject(result.getMsg(),PushDeviceAssetDeviceList.class);
