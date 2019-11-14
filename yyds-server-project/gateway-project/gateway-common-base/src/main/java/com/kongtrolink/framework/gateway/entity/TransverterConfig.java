@@ -1,9 +1,7 @@
 package com.kongtrolink.framework.gateway.entity;
 
-import com.kongtrolink.framework.gateway.config.YamlPropertySourceFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,7 +14,7 @@ import java.util.Map;
  * update record:
  */
 @Component
-@PropertySource(value = "classpath:gateway-transverterRelation.yml",factory = YamlPropertySourceFactory.class)
+//@PropertySource(value = "classpath:gateway-transverterRelation.yml",factory = YamlPropertySourceFactory.class)
 @ConfigurationProperties
 @RefreshScope
 public class TransverterConfig {

@@ -1,6 +1,6 @@
 transverter:
   alarmTransverter:
-    - PushAlarm1
+    - PushAlarm
   asset:
     - PushDeviceAsset
   businessTransverter:

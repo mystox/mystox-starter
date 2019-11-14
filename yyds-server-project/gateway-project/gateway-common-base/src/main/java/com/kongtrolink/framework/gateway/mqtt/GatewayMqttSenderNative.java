@@ -106,7 +106,7 @@ public class GatewayMqttSenderNative{
                 String payload = message.getPayload();
                 MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
                 String msgId = resp.getMsgId();
-                logger.debug("[{}] message  ack is [{}]", msgId, payload);
+                logger.info("[{}] message  ack is [{}]", msgId, payload);
                 CallBackTopic callBackTopic = CALLBACKS.get(msgId);
                 if (callBackTopic != null) {
                     boolean subpackage = resp.isSubpackage();
