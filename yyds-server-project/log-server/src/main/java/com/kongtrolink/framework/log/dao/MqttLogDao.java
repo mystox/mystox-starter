@@ -45,19 +45,19 @@ public class MqttLogDao {
         }
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
-            criteria = criteria.and("serverCode").is(serverCode);
+            criteria = criteria.and("serverCode").regex(serverCode);
         }
 
         String sourceServerCode = query.getString("sourceServerCode");
         if (StringUtils.isNotBlank(sourceServerCode)) {
-            criteria = criteria.and("sourceServerCode").is(sourceServerCode);
+            criteria = criteria.and("sourceServerCode").regex(sourceServerCode);
         }
         String operaCode = query.getString("operaCode");
         if (StringUtils.isNotBlank(operaCode)) {
-            criteria = criteria.and("operaCode").is(operaCode);
+            criteria = criteria.and("operaCode").regex(operaCode);
         }
         Integer stateCode = query.getInteger("stateCode");
-        if (serverCode!=null) {
+        if (stateCode!=null) {
             criteria = criteria.and("stateCode").is(stateCode);
         }
         return mongoTemplate.find(Query.query(criteria)
@@ -83,19 +83,19 @@ public class MqttLogDao {
         }
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
-            criteria = criteria.and("serverCode").is(serverCode);
+            criteria = criteria.and("serverCode").regex(serverCode);
         }
 
         String sourceServerCode = query.getString("sourceServerCode");
         if (StringUtils.isNotBlank(sourceServerCode)) {
-            criteria = criteria.and("sourceServerCode").is(sourceServerCode);
+            criteria = criteria.and("sourceServerCode").regex(sourceServerCode);
         }
         String operaCode = query.getString("operaCode");
         if (StringUtils.isNotBlank(operaCode)) {
-            criteria = criteria.and("operaCode").is(operaCode);
+            criteria = criteria.and("operaCode").regex(operaCode);
         }
         Integer stateCode = query.getInteger("stateCode");
-        if (serverCode!=null) {
+        if (stateCode!=null) {
             criteria = criteria.and("stateCode").is(stateCode);
         }
         return mongoTemplate.count(Query.query(criteria),

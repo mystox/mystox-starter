@@ -452,15 +452,16 @@ public class ReportsHandler implements ApplicationRunner {
 
         //启动任务执行器
         for (int i = 0; i < 9; i++)
-            reportsScheduled.scheduleWithFixedDelay(() -> task()
+            reportsScheduled.scheduleWithFixedDelay(this::task
                     , 1, 1, TimeUnit.SECONDS);
         //启动任务扫描器
-        reportsScheduled.scheduleWithFixedDelay(() -> checkRunning()
+        final Long serverStartTimeStamp = System.currentTimeMillis();
+        reportsScheduled.scheduleWithFixedDelay(() -> checkRunning(serverStartTimeStamp)
                 , 1, 3, TimeUnit.SECONDS);
 
     }
 
-    private void checkRunning() {
+    private void checkRunning(Long serverStartTimeStamp) {
         // 检查正在运行的任务是否超时
 //        logger.debug("check running report task...");
         List<ReportTask> reportTasks = reportTaskDao.findRunningReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
@@ -469,10 +470,13 @@ public class ReportsHandler implements ApplicationRunner {
             Date startTime = reportTask.getStartTime();
             Integer rhythm = reportTask.getRhythm();
             String reportTaskId = reportTask.getId();
-            if (System.currentTimeMillis() - startTime.getTime() > rhythm * 1000 * 3) { //如果任务三个周期内为改变运行状态，则该任务超时失效
+            long currentTimeMillis = System.currentTimeMillis();
+            long timeout3 = rhythm * 1000 * 3;
+            if (currentTimeMillis - serverStartTimeStamp < timeout3) continue; //如果服务启动时间还未超过任务执行周期
+            if (currentTimeMillis - startTime.getTime() > timeout3) { //如果任务三个周期内为改变运行状态，则该任务超时失效
                 logger.warn("[{}]task timeout 3 rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
-            } else if (System.currentTimeMillis() - startTime.getTime() > rhythm * 1000) { //如果任务一个周期内，未改变任务状态，则该任务为一个周期超时，将任务状态置为有效，但不改变任务开始时间
+            } else if (currentTimeMillis - startTime.getTime() > rhythm * 1000) { //如果任务一个周期内，未改变任务状态，则该任务为一个周期超时，将任务状态置为有效，但不改变任务开始时间
                 logger.warn("[{}]task timeout 1 rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
                 reportTask.setStartTime(new Date());
