@@ -3,15 +3,11 @@ spring:
     name: tower-server
   session:
     store-type: redis
-  redis:
-    host: 172.16.5.26
-    port: 6379
-    database: 2
-###########服务及消息框架相关配置#############
+  profiles:
+    active: dev,test,prod
 server:
   name: TOWER_SERVER #服务编码
   version: 1.0.0 #服务版本
-  port: 59004 #服务占用web端口
   title: 铁塔业务实例
   serverUri: /ZKReport/reportSetting #首页名
   pageRoute: proxy_tower
@@ -22,11 +18,6 @@ server:
 #register:
 #  scanBasePackage: com.kongtrolink.framework.business.api #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
 #  url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
-mqtt:
-  username: root #可选配置 mqtt配置相关
-  password: 123456 #可选配置 mqtt配置相关
-  url: tcp://172.16.5.26:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
-
 ###########日志配置###########
 logging:
   level:
