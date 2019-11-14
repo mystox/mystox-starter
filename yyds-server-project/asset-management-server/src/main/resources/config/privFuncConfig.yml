@@ -4,14 +4,16 @@ privFunc:
   code: ${server.name}_${server.version} #权限编码 必填同级不可重复
   remark: 业务根目录 #备注 可填
   children:
-  - type: ROOT
-    name: 资产管理
-    code: ASSETS
-    children:
-    - type: PAGE
-      name: 报表任务
-      code: MANAGER
-      uri: /ZKAssets/assetsManager
+    - type: ROOT
+      name: 资产功能
+      code: ASSETS
+      routeMark: proxy_assets
+      pageRoute: proxy_assets
+      children:
+        - type: PAGE
+          name: 资产管理
+          code: MANAGE
+          uri: /ZKAssets/assetsManage
 #    - type: PAGE
 #      name: 报表任务分配
 #      code: SETTING
