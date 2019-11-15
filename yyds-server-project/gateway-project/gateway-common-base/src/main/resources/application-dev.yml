@@ -39,7 +39,7 @@ gateway:
     version: 1.0.0
 ###########消息框架相关配置#############
 server:
-  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU1 #服务编码
+  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU2 #服务编码
   version: 1.0.0 #服务版本
   port: 52002 #服务占用web端口
 

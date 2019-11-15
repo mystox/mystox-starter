@@ -38,14 +38,14 @@ public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcesso
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        loadResources(environment, application);
+        loadResources(environment, application,this.profiles);
         if (logger.isInfoEnabled())
             logger.info("load register environment post processor success...");
         else
             System.out.println("load register environment post processor success...");
     }
 
-    protected void loadResources(ConfigurableEnvironment environment, SpringApplication application) {
+    protected void loadResources(ConfigurableEnvironment environment, SpringApplication application,String[] profiles) {
         //循环添加
         for (String profile : profiles) {
             //从classpath路径下面查找文件

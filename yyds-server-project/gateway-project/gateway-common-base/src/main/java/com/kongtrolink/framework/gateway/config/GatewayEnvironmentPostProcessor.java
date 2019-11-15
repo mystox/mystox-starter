@@ -23,7 +23,7 @@ public class GatewayEnvironmentPostProcessor extends RegisterEnvironmentPostProc
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        loadResources(environment, application);
+        loadResources(environment, application,this.profiles);
         if (logger.isInfoEnabled())
             logger.info("load gateway environment post processor success");
         else
