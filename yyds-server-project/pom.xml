@@ -21,6 +21,7 @@
         <module>log-server</module>
         <module>gateway-project</module>
         <module>reports-server</module>
+        <module>business-project</module>
     </modules>
 
 

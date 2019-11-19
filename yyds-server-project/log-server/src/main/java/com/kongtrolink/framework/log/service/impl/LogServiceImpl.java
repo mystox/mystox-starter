@@ -3,8 +3,8 @@ package com.kongtrolink.framework.log.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MqttLog;
 import com.kongtrolink.framework.log.api.LogService;
+import com.kongtrolink.framework.log.dao.MqttLogDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,11 +17,11 @@ import org.springframework.stereotype.Service;
 public class LogServiceImpl implements LogService {
 
     @Autowired
-    MongoTemplate mongoTemplate;
+    MqttLogDao mqttLogDao;
 
     @Override
     public void mqLog(String moduleMsgStr) {
         MqttLog mqttLog = JSONObject.parseObject(moduleMsgStr, MqttLog.class);
-        mongoTemplate.save(mqttLog);
+        mqttLogDao.save(mqttLog);
     }
 }

@@ -2,21 +2,29 @@ package com.kongtrolink;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
+import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.kongtrolink.framework.service.AlarmService;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +36,15 @@ import java.util.Map;
  * @Description:
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = AlarmTest.class)
+@ImportResource("application.yml")
 public class AlarmTest {
     @Autowired
     MongoTemplate mongoTemplate;
     @Autowired
     AlarmDao alarmDao;
+    @Autowired
+    AlarmService alarmService;
 
     private String enterpriseCode = "meitainuo";
     private String serverCode = "zhyd";
@@ -108,5 +119,50 @@ public class AlarmTest {
         for(String key : deviceInfos.keySet()){
             System.out.println(key + ":" + deviceInfos.get(key));
         }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/13 19:29
+     * 功能描述:测试历史告警列表页分表分页查询
+     */
+    @Test
+    public void getHistory(){
+        try {
+            SimpleDateFormat simpleDateFormat = DateUtil.getSimpleDateFormat();
+            String beginTimeStr = "2019-10-12 06:22:25";
+            String endTimeStr = "2019-11-13 10:22:25";
+            Date beginTime = simpleDateFormat.parse(beginTimeStr);
+            Date endTime = simpleDateFormat.parse(endTimeStr);
+            System.out.println("beginTime year_week:" + DateUtil.getYear_week(beginTime) + "; endTime year_week:" + DateUtil.getYear_week(endTime));
+            int curPage = 2;
+            int pageSize = 15;
+            AlarmQuery alarmQuery = new AlarmQuery();
+            alarmQuery.setCurrentPage(curPage);
+            alarmQuery.setPageSize(pageSize);
+            alarmQuery.setEnterpriseCode("yytd");
+            alarmQuery.setServerCode("TOWER_SERVER");
+            alarmQuery.setType(Contant.HIST_ALARM);
+            alarmQuery.setStartBeginTime(beginTime);
+            ListResult<DBObject> historyAlarmList = alarmService.getHistoryAlarmList(alarmQuery);
+            List<DBObject> list = historyAlarmList.getList();
+            System.out.println("count:" + historyAlarmList.getCount() + "; listCount:" + list.size());
+            System.out.println(list.toString());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("出异常罗");
+        }
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/11/13 19:31
+     * 功能描述:测试动态添加索引
+     */
+    @Test
+    public void testIndex(){
+        String table = "yytd_TOWER_SERVER_alarm_history_2019_46";
+        DBCollection collection = mongoTemplate.getCollection(table);
+        System.out.println(collection);
     }
 }

@@ -1,0 +1,3 @@
+#WEB功能权限刷新配置说明
+1.功能权限配置文件默认配置文件置于jar同级或者resources目录的config/privFuncConfig.yml
+2.刷新配置文件接口/register/refreshConfig

@@ -31,4 +31,18 @@ public interface InformRuleService {
     boolean updateStatus(String ruleId, String status);
 
     List<InformRule> getByTemplateIdAndType(String templateId, String type);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/29 9:59
+     * 功能描述:火球系统默认告警投递规则
+     */
+    InformRule getSystemRule();
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/29 9:59
+     * 功能描述:初始化默认告警投递规则
+     */
+    void initInformRule();
 }

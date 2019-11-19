@@ -6,6 +6,8 @@ import com.kongtrolink.framework.dao.AlarmCycleDao;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.query.AlarmCycleQuery;
 import com.kongtrolink.framework.service.AlarmCycleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
 
     @Autowired
     AlarmCycleDao cycleDao;
+    private static final Logger logger = LoggerFactory.getLogger(AlarmCycleServiceImpl.class);
 
     @Override
     public boolean save(AlarmCycle alarmCycle) {
@@ -110,5 +113,33 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     @Override
     public AlarmCycle getLastUpdateOne(AlarmCycleQuery alarmCycleQuery) {
         return cycleDao.getLastUpdateOne(alarmCycleQuery);
+    }
+
+    @Override
+    public AlarmCycle getSystemCycle() {
+        return cycleDao.getSystemCycle();
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/10/28 16:57
+     * 功能描述:初始化默认告警周期
+     */
+    @Override
+    public void initAlarmCycle() {
+        //获取系统默认告警周期
+        AlarmCycle systemCycle = getSystemCycle();
+        if(null == systemCycle){
+            logger.info("默认告警周期不存在，准备初始化");
+            systemCycle = new AlarmCycle();
+            systemCycle.setName("系统默认告警周期");
+            systemCycle.setDiffTime(24);
+            systemCycle.setUpdateTime(new Date());
+            systemCycle.setState(Contant.USEING);
+            systemCycle.setCycleType(Contant.SYSTEM);
+            systemCycle.setEnterpriseServer(Contant.SYSTEM);
+        }
+        logger.info("默认告警周期：{}", systemCycle.toString());
+        cycleDao.save(systemCycle);
     }
 }

@@ -14,8 +14,12 @@ import java.lang.annotation.*;
 public @interface ReportOperaCode {
 
     String value() default "";
+    String code() default "";
 
-    String[] extend() default "";
+    ReportExtend[] extend() default {};
+
+    int rhythm() default 1;
+    String[] resultType() default {};
 
 
 }

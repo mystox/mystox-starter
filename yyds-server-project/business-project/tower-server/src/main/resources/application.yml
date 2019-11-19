@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: tower-server
+  session:
+    store-type: redis
+  profiles:
+    active: dev,test,prod
+server:
+  name: TOWER_SERVER #服务编码
+  version: 1.0.0 #服务版本
+  title: 铁塔业务实例
+  serverUri: /ZKReport/reportSetting #首页名
+  pageRoute: proxy_tower
+  routeMark: proxy_tower
+#  serverMark:  #服务端版本 默认*
+#jarResources:
+#  path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
+#register:
+#  scanBasePackage: com.kongtrolink.framework.business.api #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
+#  url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+###########日志配置###########
+logging:
+  level:
+    root: info
+    com.kongtrolink.framework: DEBUG
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+management:
+  security:
+    enabled: false

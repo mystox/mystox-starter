@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -33,6 +34,8 @@ public class GatewayMqttSenderNative{
 
     @Autowired
     private GatewayMqttSender gatewayMqttSender;
+    @Autowired
+    ThreadPoolTaskExecutor mqttExecutor;
 
     public void sendToMqtt(String payload, String topic) {
         try {
@@ -98,24 +101,26 @@ public class GatewayMqttSenderNative{
      */
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        try {
-            String payload = message.getPayload();
-            MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
-            String msgId = resp.getMsgId();
-            logger.debug("[{}] message  ack is [{}]", msgId, payload);
-            CallBackTopic callBackTopic = CALLBACKS.get(msgId);
-            if (callBackTopic != null) {
-                boolean subpackage = resp.isSubpackage();
-                if (subpackage)
-                    callBackTopic.callbackSubPackage(resp);
-                else
-                    callBackTopic.callback(resp);
-            } else {
-                logger.warn("[{}] message ack [{}] is Invalidation...", msgId);
+        mqttExecutor.execute(()->{
+            try {
+                String payload = message.getPayload();
+                MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
+                String msgId = resp.getMsgId();
+                logger.info("[{}] message  ack is [{}]", msgId, payload);
+                CallBackTopic callBackTopic = CALLBACKS.get(msgId);
+                if (callBackTopic != null) {
+                    boolean subpackage = resp.isSubpackage();
+                    if (subpackage)
+                        callBackTopic.callbackSubPackage(resp);
+                    else
+                        callBackTopic.callback(resp);
+                } else {
+                    logger.warn("[{}] message ack [{}] is Invalidation...", msgId);
+                }
+            } catch (Exception e) {
+                logger.warn("message ack receive error[{}] is Invalidation...",e.toString());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            logger.warn("message ack receive error[{}] is Invalidation...",e.toString());
-            e.printStackTrace();
-        }
+        });
     }
 }

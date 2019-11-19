@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.reports.api;
 
+import com.kongtrolink.framework.entity.OperaCodePrefix;
+import com.kongtrolink.framework.reports.entity.ReportData;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -13,8 +15,11 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface ReportsService  {
 
 
-    @OperaCode
-    public String reportConfig(String reportConfigStr);
+    @OperaCode(code = OperaCodePrefix.REPORTS+"config") //属于报表逻辑的operaCode约定前缀为report_
+    public ReportData reportConfig(String reportConfigStr);
+
+    @OperaCode(code = OperaCodePrefix.REPORTS+"report1") //属于报表逻辑的operaCode约定前缀为report_
+    public ReportData report1(String reportConfigStr);
 
 
 

@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.gateway.tower.entity.rec;
 
 import com.kongtrolink.framework.gateway.tower.entity.rec.base.RecBase;
-import com.kongtrolink.framework.gateway.tower.entity.rec.info.SetAlarmParamDeviceList;
+import com.kongtrolink.framework.gateway.tower.entity.rec.info.SetAlarmParamAckDeviceList;
 
 /**
  * 设置告警参数 响应
@@ -10,13 +10,13 @@ import com.kongtrolink.framework.gateway.tower.entity.rec.info.SetAlarmParamDevi
 public class SetAlarmParamAck extends RecBase{
     private static final long serialVersionUID = 7790678685056852462L;
 
-    private SetAlarmParamDeviceList payload;
+    private SetAlarmParamAckDeviceList payload;
 
-    public SetAlarmParamDeviceList getPayload() {
+    public SetAlarmParamAckDeviceList getPayload() {
         return payload;
     }
 
-    public void setPayload(SetAlarmParamDeviceList payload) {
+    public void setPayload(SetAlarmParamAckDeviceList payload) {
         this.payload = payload;
     }
 }

@@ -37,27 +37,28 @@ public class EmailService {
     private String email_from_name;
 
     public void sendEmail(InformMsg informMsg) {
+        Boolean result = true;
         //告警上报/告警消除
-        String typeName = informMsg.getAlarmStateType();
-        String email = informMsg.getInformAccount();
-        String enterpriseServer = informMsg.getEnterpriseName() + informMsg.getServerName();
-        String xsmtpapi = getXsmtpapi(informMsg);
-        ApiMailInfo apiMailInfo = new ApiMailInfo(email_api_user, email_api_key, email_from_address, email_from_name);
-        apiMailInfo.setSubject(enterpriseServer  + typeName + Contant.INFORM);
-        apiMailInfo.setXsmtpapi(xsmtpapi);
-        apiMailInfo.setUrl(informMsg.getUrl());
-        String tempCode = informMsg.getTempCode();
-        apiMailInfo.setTemplateInvokeName(tempCode);
-        apiMailInfo.setFrom_name(enterpriseServer);
-        Boolean result = false;
-        LOGGER.info(apiMailInfo.toString());
-        try {
-            LOGGER.info("email sending result {}", result);
-            result = SendMail.sendByJavaWebApi(apiMailInfo);
-        } catch (IOException ex) {
-            LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
-        }
-        informMsg.setResult(result);
+//        String typeName = informMsg.getAlarmStateType();
+//        String email = informMsg.getInformAccount();
+//        String enterpriseServer = informMsg.getEnterpriseName() + informMsg.getServerName();
+//        String xsmtpapi = getXsmtpapi(informMsg);
+//        ApiMailInfo apiMailInfo = new ApiMailInfo(email_api_user, email_api_key, email_from_address, email_from_name);
+//        apiMailInfo.setSubject(enterpriseServer  + typeName + Contant.INFORM);
+//        apiMailInfo.setXsmtpapi(xsmtpapi);
+//        apiMailInfo.setUrl(informMsg.getUrl());
+//        String tempCode = informMsg.getTempCode();
+//        apiMailInfo.setTemplateInvokeName(tempCode);
+//        apiMailInfo.setFrom_name(enterpriseServer);
+//        Boolean result = false;
+//        try {
+//            result = SendMail.sendByJavaWebApi(apiMailInfo);
+//            LOGGER.info("email send msg:{} result: {}", apiMailInfo.toString(), result);
+//        } catch (IOException ex) {
+//            LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
+//        }
+        String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
+        informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);
     }
 
@@ -68,9 +69,9 @@ public class EmailService {
 
         JSONArray tier = new JSONArray();
         tier.add(informMsg.getAddressName());
-
-        JSONArray device = new JSONArray();
-        device.add(informMsg.getDeviceName());
+        //20191114%site%-%device%当前没有实际值
+//        JSONArray device = new JSONArray();
+//        device.add(informMsg.getDeviceName());
 
         JSONArray alarmName = new JSONArray();
         alarmName.add(informMsg.getAlarmName());

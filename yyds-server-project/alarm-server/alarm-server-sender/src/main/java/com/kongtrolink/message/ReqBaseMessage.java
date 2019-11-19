@@ -1,6 +1,5 @@
 package com.kongtrolink.message;
 
-import com.kongtrolink.email.ConfUtil;
 import com.kongtrolink.utils.CommonUtil;
 
 /**

@@ -12,6 +12,7 @@ import java.util.Date;
 public class DateUtil {
 
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SimpleDateFormat otherDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     public static Calendar calendar = Calendar.getInstance();
 
     public static SimpleDateFormat getSimpleDateFormat() {
@@ -62,12 +63,23 @@ public class DateUtil {
         return simpleDateFormat.format(date);
     }
 
+    public static String getYMD(Date date){
+        return otherDateFormat.format(date).substring(0, 8);
+    }
+
+    public static String getYear_week(Date date){
+        calendar.setTime(date);
+        return calendar.get(Calendar.YEAR) + Contant.UNDERLINE + calendar.get(Calendar.WEEK_OF_YEAR);
+    }
+
     public static void main(String[] a){
         Date curTime = new Date();
-        String format = simpleDateFormat.format(curTime);
-        System.out.println("format:" + format);
+        String ymd = getYMD(curTime);
+        System.out.println("ymd:" + ymd);
 
-        int result = timeToInt(curTime);
-        System.out.println("result:" + result);
+        calendar.setTime(curTime);
+        int year = calendar.get(Calendar.YEAR);
+        int week = calendar.get(Calendar.WEEK_OF_YEAR);
+        System.out.println("year:" + year+ "; week:" + week);
     }
 }

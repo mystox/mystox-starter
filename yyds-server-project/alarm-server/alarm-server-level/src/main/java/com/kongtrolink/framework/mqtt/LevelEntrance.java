@@ -13,4 +13,7 @@ public interface LevelEntrance {
 
     @OperaCode
     String handleLevel(String alarm);
+
+    @OperaCode
+    void updateEnterpriseLevelMap(String jsonStr);
 }

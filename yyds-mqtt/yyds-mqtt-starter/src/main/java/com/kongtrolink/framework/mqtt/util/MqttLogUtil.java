@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  * Created by mystoxlol on 2019/10/12, 9:42.
  * company: kongtrolink
@@ -68,6 +70,7 @@ public class MqttLogUtil {
         mqttLog.setStateCode(stateCode);
         mqttLog.setSourceServerCode(serverCode);
         mqttLog.setServerCode(targetServerCode);
+        mqttLog.setRecordTime(new Date());
         logger.debug("logger entity： " + JSONObject.toJSONString(mqttLog));
         return mqttLog;
     }

@@ -12,11 +12,21 @@ logging:
 spring:
   application:
     name: yytd-asset-management-server
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
 
 server:
   name: ASSET_MANAGEMENT_SERVER
   version: 1.0.0
   port: 52202
+  title: 资产管理服务
+  serverUri: /ZKAssets/assetsManage #首页名
+  pageRoute: proxy_assets
+  routeMark: proxy_assets
 #jarResources:
 #  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:

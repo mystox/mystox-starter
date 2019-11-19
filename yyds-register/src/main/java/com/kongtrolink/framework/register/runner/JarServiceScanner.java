@@ -62,9 +62,9 @@ public class JarServiceScanner implements ServiceScanner {
                         String key = e.getKey();
                         String[] split = value.split(":");
                         String executeUnit = UnitHead.JAR + split[0];
+                        sub.setOperaCode(key);
                         sub.setAck(split.length > 1 && AckEnum.ACK.toString().equals(split[1]) ?
                                 AckEnum.ACK : AckEnum.NA);
-                        sub.setOperaCode(key);
                         sub.setExecuteUnit(executeUnit);
                         subList.add(sub);
                     }

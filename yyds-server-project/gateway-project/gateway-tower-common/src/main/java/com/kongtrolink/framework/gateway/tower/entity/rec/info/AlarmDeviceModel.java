@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class AlarmDeviceModel {
 
+    private String id;
     private int type;
     private String model;
     private int resourceNo;
@@ -43,5 +44,13 @@ public class AlarmDeviceModel {
 
     public void setAlarmPoints(List<AlarmPointSimple> alarmPoints) {
         this.alarmPoints = alarmPoints;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -12,6 +12,7 @@ public class Contant {
     public static String OPE_UPDATE ="修改";
     public static String OPE_LIST ="查询";
     public static String OPE_AUTH = "授权";
+    public static String OPE_SEND = "发送";
 
     public static String RESULT_SUC = "成功";
     public static String RESULT_FAIL = "失败";
@@ -37,6 +38,7 @@ public class Contant {
     public static String DELETED = "已删除";
 
     public static String UNDERLINE = "_";
+    public static String COLON = ":";
 
     public static String SYSTEM = "系统";
     public static String MANUAL = "手动";
@@ -47,10 +49,11 @@ public class Contant {
     public static String ZERO = "0";
     public static String ONE = "1";
     public static String TWO = "2";     //其他操作（修改附加属性）
+    public static String THR = "3";
 
-    public static String INFORM_TYPE_MSG = "msg";
-    public static String INFORM_TYPE_EMAL = "email";
-    public static String INFORM_TYPE_APP = "app";
+//    public static String INFORM_TYPE_MSG = "msg";
+//    public static String INFORM_TYPE_EMAL = "email";
+//    public static String INFORM_TYPE_APP = "app";
 
     public static String ENTERPRISECODE = "enterpriseCode";
     public static String SERVERCODE = "serverCode";
@@ -71,4 +74,11 @@ public class Contant {
     public static String INFORM = "通知";
     //推送使用字段
     public static final String TYPE = "type";
+
+    public static final String MQTT_RES_TIMEOUT = "消息超时";
+    public static final String MQTT_RES_NOSERVER = "未注册";
+    public static final String MQTT_RES_SUCC = "请求成功";
+    public static final String MQTT_RES_NODATA = "无数据";
+    public static final String MQTT_RES_FAIL = "请求失败";
+    public static final String MQTT_RES_NOADDRESS = "地区不存在";
 }

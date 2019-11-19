@@ -6,8 +6,8 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
-import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.entity.Transverter;
+import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.entity.alarm.AlarmReport;
 import com.kongtrolink.framework.gateway.tower.entity.alarm.AlarmReportInfo;
@@ -20,7 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,13 +36,16 @@ public class AlarmTransverter extends TransverterHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmTransverter.class);
 
-    @Value("${gateway.alarmReport.version:1.0.0}")
+    @Value("${gateway.alarmReport.version:V1.0.0}")
     private String alarmServerVersion;
     @Autowired
     private DeviceTypeConfig deviceTypeConfig;
     @Autowired
     RedisUtils redisUtils;
 
+    private String tallyTime = "";//计数
+    private int tallyNum = 0;//计数
+    private int total = 0;
     @Override
     protected void transferExecute(ParseProtocol parseProtocol) {
         try{
@@ -77,12 +82,22 @@ public class AlarmTransverter extends TransverterHandler {
             report.setEnterpriseCode(getEnterpriseCode());
             report.setServerCode(getBusinessCode());
             report.setAlarms(alarmInfoList);
-            logger.debug("上报告警的 数据: \n");
-            logger.debug(JSONObject.toJSONString(report));
-            logger.debug("\n");
+            logger.debug("上报告警的 数据: {} " ,JSONObject.toJSONString(report));
             String jsonResult = JSONObject.toJSONString(report);
-            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER,alarmServerVersion),
+            reportMsg(MqttUtils.preconditionServerCode(ServerName.ALARM_SERVER_CONTROLLER,alarmServerVersion),
                     OperaCode.ALARM_REPORT,jsonResult);
+            //统计计数
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time = sdf.format(new Date());
+            if(!time.equals(tallyTime)){
+                logger.debug("----------------->  统计告警数量时间: {}  数量: {} 合计:{} " ,tallyTime,tallyNum+1,total);
+                tallyTime = time;
+                tallyNum = 1;
+            }else{
+                tallyNum += 1;
+            }
+            total += 1;
+
         }catch (Exception e){
             e.printStackTrace();
         }

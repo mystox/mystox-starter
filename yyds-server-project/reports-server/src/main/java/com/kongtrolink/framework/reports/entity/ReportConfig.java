@@ -23,16 +23,72 @@ public class ReportConfig {
 
     private String reportName;//报表名称
 
-    private Boolean asyn;
+    private ExecutorType executorType; //查询|执行
 
     private JSONObject condition;
 
     private String resultTopic;
 
+    private Boolean skipAspect = false;
+
+    private Boolean validity = false;
+
+    private Integer rhythm;
+    private Long startTime;
+
+    private String reportServerCode;
+
+
+    public String getReportServerCode() {
+        return reportServerCode;
+    }
+
+    public void setReportServerCode(String reportServerCode) {
+        this.reportServerCode = reportServerCode;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
 
     public ReportConfig() {
     }
 
+    public Integer getRhythm() {
+        return rhythm;
+    }
+
+    public void setRhythm(Integer rhythm) {
+        this.rhythm = rhythm;
+    }
+
+    public Boolean getValidity() {
+        return validity;
+    }
+
+    public void setValidity(Boolean validity) {
+        this.validity = validity;
+    }
+
+    public String getResultTopic() {
+        return resultTopic;
+    }
+
+    public void setResultTopic(String resultTopic) {
+        this.resultTopic = resultTopic;
+    }
+
+    public Boolean getSkipAspect() {
+        return skipAspect;
+    }
+
+    public void setSkipAspect(Boolean skipAspect) {
+        this.skipAspect = skipAspect;
+    }
 
     public String getOperaCode() {
         return operaCode;
@@ -46,13 +102,6 @@ public class ReportConfig {
         this.reportName = reportName;
     }
 
-    public JSONObject getCondition() {
-        return condition;
-    }
-
-    public void setCondition(JSONObject condition) {
-        this.condition = condition;
-    }
 
     public void setOperaCode(String operaCode) {
         this.operaCode = operaCode;
@@ -90,11 +139,27 @@ public class ReportConfig {
         this.reportType = reportType;
     }
 
-    public Boolean getAsyn() {
-        return asyn;
+    public ExecutorType getExecutorType() {
+        return executorType;
     }
 
-    public void setAsyn(Boolean asyn) {
-        this.asyn = asyn;
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
+    }
+
+//    public Boolean getAsyn() {
+//        return asyn;
+//    }
+//
+//    public void setAsyn(Boolean asyn) {
+//        this.asyn = asyn;
+//    }
+
+    public JSONObject getCondition() {
+        return condition;
+    }
+
+    public void setCondition(JSONObject condition) {
+        this.condition = condition;
     }
 }

@@ -80,6 +80,17 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
         return msgTemplateDao.getByName(enterpriseCode, serverCode, name);
     }
 
+    /**
+     * @param type
+     * @auther: liudd
+     * @date: 2019/10/29 10:48
+     * 功能描述:获取默认模板
+     */
+    @Override
+    public MsgTemplate getSystemTemplate(String type) {
+        return msgTemplateDao.getSystemTemplate(type);
+    }
+
     public void initMsgTemplate(){
         Date curDate = new Date();
         MsgTemplate emailTemplate = msgTemplateDao.getSystemTemplate(Contant.TEMPLATE_EMAIL);
@@ -94,7 +105,6 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
             emailTemplate.setUrl(email_url);
             emailTemplate.setReportCode(emailReportCode);
             emailTemplate.setResolveCode(emailResolveCode);
-            emailTemplate.setOfflineCode(emailReportCode);
             emailTemplate.setUpdateTime(curDate);
             msgTemplateDao.save(emailTemplate);
         }
@@ -111,7 +121,6 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
             msgTemplate.setUrl(sms_url);
             msgTemplate.setReportCode(msgReportCode);
             msgTemplate.setResolveCode(msgRecoverCode);
-            msgTemplate.setOfflineCode(msgReportCode);
             msgTemplate.setUpdateTime(curDate);
             msgTemplateDao.save(msgTemplate);
         }
@@ -129,7 +138,6 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
 //            appTemplate.setUrl("http://sendcloud.sohu.com/smsapi/send");
             appTemplate.setReportCode(appReportCode);
             appTemplate.setResolveCode(appResolveCode);
-            appTemplate.setOfflineCode(appReportCode);
             appTemplate.setUpdateTime(curDate);
             msgTemplateDao.save(appTemplate);
         }

@@ -1,9 +1,14 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.MongTable;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * @Auther: liudd
@@ -30,11 +35,28 @@ public class Alarm {
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
     private String state;               //告警状态
-    private String sliceKey;            //片键，也可以作为普通索引键
     private Map<String, String> AuxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
+    private Date hcTime;                //被周期处理时间
+    private String key ;                //唯一键，可作为索引
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Date getHcTime() {
+        return hcTime;
+    }
+
+    public void setHcTime(Date hcTime) {
+        this.hcTime = hcTime;
+    }
 
     public String getStatus() {
         return status;
@@ -66,18 +88,6 @@ public class Alarm {
 
     public void setDeviceInfos(Map<String, String> deviceInfos) {
         this.deviceInfos = deviceInfos;
-    }
-
-    public void initSliceKey(){
-        sliceKey = this.enterpriseCode + this.serverCode + deviceType + deviceModel;
-    }
-
-    public String getSliceKey() {
-        return sliceKey;
-    }
-
-    public void setSliceKey(String sliceKey) {
-        this.sliceKey = sliceKey;
     }
 
     public String getEnterpriseCode() {
@@ -226,5 +236,66 @@ public class Alarm {
 
     public void setTargetLevel(Integer targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    public void initKey(){
+        this.key = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.COLON + deviceId + Contant.UNDERLINE + serial;
+    }
+
+    public String createHistoryTable(){
+        String table = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + MongTable.ALARM_HISTORY;
+        table = table + Contant.UNDERLINE + DateUtil.getYear_week(treport);
+        return table;
+    }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "enterpriseCode='" + enterpriseCode + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", name='" + name + '\'' +
+                ", flag='" + flag + '\'' +
+                ", state='" + state + '\'' +
+                ", key='" + key + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Alarm alarm = (Alarm) o;
+
+        if (enterpriseCode != null ? !enterpriseCode.equals(alarm.enterpriseCode) : alarm.enterpriseCode != null)
+            return false;
+        if (serverCode != null ? !serverCode.equals(alarm.serverCode) : alarm.serverCode != null) return false;
+        if (serial != null ? !serial.equals(alarm.serial) : alarm.serial != null) return false;
+        return deviceId != null ? deviceId.equals(alarm.deviceId) : alarm.deviceId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = enterpriseCode != null ? enterpriseCode.hashCode() : 0;
+        result = 31 * result + (serverCode != null ? serverCode.hashCode() : 0);
+        result = 31 * result + (serial != null ? serial.hashCode() : 0);
+        result = 31 * result + (deviceId != null ? deviceId.hashCode() : 0);
+        return result;
+    }
+
+    public static void main(String[] a)throws Exception{
+        String dateStr = "2019-11-21 5:4:5";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d H:m:s");
+        System.out.println(simpleDateFormat.format(new Date()));
+        Date parse = simpleDateFormat.parse(dateStr);
+        SimpleDateFormat simple2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("dataStr:" + simple2.format(parse));
+        for(int i=1; i<20; i++){
+            int ran2 = (int) (Math.random()*10);
+            System.out.println("i:" + i + "; ran2:" + ran2);
+            int aa = ran2 % 2;
+            System.out.println("i :" + i + "; aa:" + aa);
+
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FacadeView;
-
 import java.util.Date;
 
 /**
@@ -23,14 +23,14 @@ public class AlarmCycle {
     private FacadeView operator;
     private String state ;
     private String enterpriseServer;    //企业和服务合体
-    private String defaultCycle;
+    private String cycleType;           //周期类型（系统/手动）
 
-    public String getDefaultCycle() {
-        return defaultCycle;
+    public String getCycleType() {
+        return cycleType;
     }
 
-    public void setDefaultCycle(String defaultCycle) {
-        this.defaultCycle = defaultCycle;
+    public void setCycleType(String cycleType) {
+        this.cycleType = cycleType;
     }
 
     public String getName() {
@@ -134,13 +134,6 @@ public class AlarmCycle {
         if(null == alarm){
             return false;
         }
-        if(null == alarmCycle){
-            //如果告警周期为空，则默认已消除告警为历史告警
-            if(null != alarm.getTrecover()){
-                return true;
-            }
-            return false;
-        }
         if(alarmCycle.diffTime < 0){
             if(null != alarm.getTrecover()){
                 return true;
@@ -148,10 +141,30 @@ public class AlarmCycle {
             return false;
         }
         Date tReport = alarm.getTreport();
+//        int pastTime = alarmCycle.diffTime * 60 * 60 * 1000;
+        double pastTime = (0.05 * 60 * 60 * 1000);//liuddtodo 暂时写死3分钟就算历史
         long time = curDate.getTime() - tReport.getTime();
-        if(time >= (alarmCycle.diffTime * 60 * 1000)){
+        if(time >= pastTime){
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "AlarmCycle{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", enterpriseName='" + enterpriseName + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", diffTime=" + diffTime +
+                ", updateTime=" + updateTime +
+                ", operator=" + operator +
+                ", state='" + state + '\'' +
+                ", enterpriseServer='" + enterpriseServer + '\'' +
+                ", cycleType='" + cycleType + '\'' +
+                '}';
     }
 }

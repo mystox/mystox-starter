@@ -1,0 +1,23 @@
+privFunc:
+  type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+  name: ${server.title} #权限名称 必填
+  code: ${server.name}_${server.version} #权限编码 必填同级不可重复
+  remark: 业务根目录 #备注 可填
+  children:
+  - type: ROOT
+    name: 报表页面
+    code: REPORTS
+    routeMark: proxy_reports
+    pageRoute: proxy_reports
+    children:
+    - type: PAGE
+      name: 报表任务
+      code: REPORT_TASK_RESULT
+      uri: /ZKReport/reportService
+#    - type: PAGE
+#      name: 报表任务分配
+#      code: SETTING
+#      uri: /reportSetting
+#
+#
+

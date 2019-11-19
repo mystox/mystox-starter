@@ -35,7 +35,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- SendCloud -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>

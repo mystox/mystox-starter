@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>reports-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>reports-server</name>
 	<description>报表服务</description>
 
@@ -36,11 +36,11 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 			<version>${spring-boot.version}</version>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>com.kongtrolink.framework</groupId>
 			<artifactId>yyds-core</artifactId>
 			<version>1.0.0</version>
-		</dependency>-->
+		</dependency>
 		<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-test</artifactId>
@@ -64,6 +64,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.framework.reports.ReportsServerApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
