@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>log-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>log-server</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -79,5 +79,12 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<!--maven属性注入配置文件 例如：@project.version@ -->
+		<resources>
+			<resource>
+				<directory>src\main\resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 </project>

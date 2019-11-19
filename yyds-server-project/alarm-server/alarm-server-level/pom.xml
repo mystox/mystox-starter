@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-level</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>alarm-server-level</name>
 	<description>告警等级处理入口</description>
 
