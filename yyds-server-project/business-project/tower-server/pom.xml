@@ -13,7 +13,7 @@
     <version>1.0.0</version>
     <name>tower-server</name>
     <description>模拟铁塔业务服务</description>
-
+    <packaging>pom</packaging>
    <!-- <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
