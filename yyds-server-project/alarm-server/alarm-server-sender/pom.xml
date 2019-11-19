@@ -5,9 +5,8 @@
 	<parent>
 		<groupId>com.kongtrolink</groupId>
 		<artifactId>alarm-server</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
-	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-sender</artifactId>
 	<version>1.0.0</version>
 	<name>alarm-server-sender</name>
@@ -21,7 +20,7 @@
 		<dependency>
 			<groupId>com.kongtrolink</groupId>
 			<artifactId>alarm-server-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
