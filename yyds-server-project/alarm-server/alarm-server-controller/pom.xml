@@ -10,7 +10,7 @@
 
 	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-controller</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>alarm-server-controller</name>
 	<description>告服务后台逻辑入口</description>
 

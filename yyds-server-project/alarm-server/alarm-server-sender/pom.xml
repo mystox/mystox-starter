@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-sender</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>alarm-server-sender</name>
 	<description>告警投递动作模块，为了简单处理，先将短信，邮件，APP等都集中在一个模块。此投递模块是系统默认投递模块，实现当前系统的短信发送，邮件发送和APP推送</description>
 
