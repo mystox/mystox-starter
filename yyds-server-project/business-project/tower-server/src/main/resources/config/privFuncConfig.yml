@@ -61,6 +61,27 @@ privFunc:
       name: 首页
       code: HOME
       uri: /ZKReport/HomeReport
-
-
+  - type: ROOT
+    name: 系统管理
+    code: SYSTEM_MANAGER
+    routeMark: proxy_ap
+    pageRoute: page_route_privilege
+    children:
+    - type: PAGE
+      name: 用户信息
+      code: USER_SET
+      uri: /back/privilege/userList
+      priority: 1
+    - type: PAGE
+      name: 角色管理
+      code: POSITION_MANAGER
+      uri: /back/privilege/positionList
+    - type: PAGE
+      name: 组织管理
+      code: ORG_MANAGER
+      uri: /back/privilege/depList
+    - type: PAGE
+      name: 功能权限管理
+      code: FUNC_PRIV
+      uri: /back/privilege/list
 
