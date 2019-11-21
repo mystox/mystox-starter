@@ -34,17 +34,16 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<!--<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.2</version>
-		</dependency>
+			<version>4.3.6</version>
+		</dependency>-->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			<version>4.2</version>
+			<version>4.5.5</version>
 		</dependency>
-
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
@@ -72,8 +71,19 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.AlarmServerSenderApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
+
 	</build>
 
 </project>
