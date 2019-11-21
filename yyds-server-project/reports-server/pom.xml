@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>reports-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>reports-server</name>
 	<description>报表服务</description>
 
@@ -64,6 +64,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.framework.reports.ReportsServerApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

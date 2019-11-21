@@ -7,9 +7,8 @@
 		<groupId>com.kongtrolink.framework</groupId>
 		<version>1.0.0</version>
 	</parent>
-	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>foo-server-demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>foo-server-demo</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -54,6 +53,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.framework.foo.FooServerDemoApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -2,7 +2,9 @@ package com.kongtrolink.framework.gateway.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.gateway.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +53,11 @@ public class DeviceTypeConfig {
                     String deviceName = names[0];
                     String reportType = names[1];
                     String assentType = names[2];
+                    String isRoot = names[3];
+                    DeviceConfigEntity deviceConfigEntity = new DeviceConfigEntity(deviceName,reportType,assentType,Integer.parseInt(isRoot));
                     //更新最新数据
-                    redisUtils.hset(redisKey,reportType,assentType);
+                    String redisValue = JSON.toJSONString(deviceConfigEntity);
+                    redisUtils.hset(redisKey,reportType,redisValue);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -83,7 +88,7 @@ public class DeviceTypeConfig {
      * 获取转换过资管要求的设备的类型
      * @param deviceType 上报的设备类型
      */
-    public String getAssentDeviceType(String deviceType){
+    public DeviceConfigEntity getAssentDeviceType(String deviceType){
         if(deviceType==null){
             return null;
         }
@@ -93,7 +98,9 @@ public class DeviceTypeConfig {
             return null;
         }
         try{
-            return String.valueOf(o);
+            //格式 设备名称,上报的设备类型,资管的设备类型
+            DeviceConfigEntity deviceConfigEntity = JSONObject.parseObject(String.valueOf(o),DeviceConfigEntity.class);
+            return deviceConfigEntity;
         }catch (Exception e){
             return null;
         }
@@ -122,7 +129,7 @@ public class DeviceTypeConfig {
     }
 
 
-    public String getAssentDeviceType(int deviceType){
+    public DeviceConfigEntity getAssentDeviceType(int deviceType){
         try{
             return getAssentDeviceType(String.valueOf(deviceType));
         }catch (Exception e){

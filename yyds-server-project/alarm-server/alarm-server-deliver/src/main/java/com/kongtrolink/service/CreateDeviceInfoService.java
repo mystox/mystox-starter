@@ -122,7 +122,7 @@ public class CreateDeviceInfoService {
             Map<String, List<InformMsg>> serverInformListMap = new HashMap<>();
             for(InformMsg informMsg : handleInformMsgList){
                 //liuddtodo 为了测试云管，暂时写死serverCode = AUTH_PLATFORM_1.0.0
-                informMsg.setServerCode("AUTH_PLATFORM");
+//                informMsg.setServerCode("AUTH_PLATFORM");
                 String key = informMsg.getServerCode();
                 List<InformMsg> informMsgList = serverInformListMap.get(key);
                 if(null == informMsgList){
@@ -250,8 +250,7 @@ public class CreateDeviceInfoService {
         Map<String, List<InformMsg>> addressInformListMap = new HashMap<>();
         List<String> addressList = new ArrayList<>();
         for(InformMsg informMsg : handleInformMsgList){
-            //liuddtodo 20191105暂时强制将地区写死220281
-            informMsg.setAddress("220281");
+//            informMsg.setAddress("220281");
             addressList.add(informMsg.getAddress());
             List<InformMsg> addInformList = addressInformListMap.get(informMsg.getAddress());
             if(null == addInformList){

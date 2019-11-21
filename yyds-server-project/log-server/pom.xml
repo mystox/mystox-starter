@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kongtrolink.framework</groupId>
 	<artifactId>log-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>log-server</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -31,11 +31,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>com.kongtrolink.framework</groupId>
 			<artifactId>yyds-core</artifactId>
 			<version>1.0.0</version>
-		</dependency>-->
+		</dependency>
 		<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-test</artifactId>
@@ -59,6 +59,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.framework.log.LogServerApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -69,5 +79,12 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<!--maven属性注入配置文件 例如：@project.version@ -->
+		<resources>
+			<resource>
+				<directory>src\main\resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 </project>

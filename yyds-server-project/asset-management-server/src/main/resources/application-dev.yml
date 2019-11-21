@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: yytd-asset-management-server
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
+server:
+  host: 172.16.5.62
+  port: 52202
+mqtt:
+  username: root
+  password: 123456
+  url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+neo4j:
+  username: neo4j
+  password: 123456
+  uri: bolt://localhost:7687

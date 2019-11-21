@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2019/10/14 17:22
  * @Description:
  */
-//liuddtodo 后期需要将修改队列的方法同步
 @Service
 public class CycleHandle{
 

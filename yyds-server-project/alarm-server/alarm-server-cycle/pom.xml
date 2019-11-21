@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.kongtrolink</groupId>
 		<artifactId>alarm-server</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-cycle</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>alarm-server-cycle</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.kongtrolink</groupId>
 			<artifactId>alarm-server-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -59,6 +59,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.AlarmServerCycleApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
+import com.kongtrolink.framework.gateway.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.mqtt.base.MqttPubTopic;
+import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.service.TopicConfig;
 import com.kongtrolink.framework.gateway.service.transverter.impl.AssetTransverter;
 import com.kongtrolink.framework.gateway.tower.entity.rec.base.RecServerBase;
+import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDeviceList;
 import com.kongtrolink.framework.gateway.tower.entity.send.base.AckBase;
 import org.slf4j.Logger;
@@ -34,6 +37,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     @Autowired
     private TopicConfig topicConfig;
     @Autowired
+    private DeviceTypeConfig deviceTypeConfig;
+    @Autowired
     private AssetTransverter assetTransverter;
     /**
      * 资管主动下发 下发设备获取设备信息
@@ -48,6 +53,14 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         String msgId = 1+""+new Date().getTime();
         ackBase.setMsgId(msgId);
         String s = JSONObject.toJSONString(ackBase);
+        //根据设备ID获取设备type
+        PushDeviceAssetDevice deviceInfo = deviceTypeConfig.getDeviceInfo(sn);
+        if(deviceInfo !=null){
+            DeviceConfigEntity deviceConfigEntity = deviceTypeConfig.getAssentDeviceType(deviceInfo.getType());
+            if(deviceConfigEntity!=null && deviceConfigEntity.getIsRoot()==0){
+                return "{}";
+            }
+        }
         MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,s,topicConfig.getFsuTopic(sn, MqttPubTopic.GetDeviceAsset));
         logger.info("MsgResult :{} " ,result.toString());
         if(StateCode.SUCCESS != result.getStateCode()){

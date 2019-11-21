@@ -5,6 +5,7 @@ import com.kongtrolink.framework.entity.MqttLog;
 import com.kongtrolink.framework.log.entity.MongoDocName;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -44,22 +45,24 @@ public class MqttLogDao {
         }
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
-            criteria = criteria.and("serverCode").is(serverCode);
+            criteria = criteria.and("serverCode").regex(serverCode);
         }
 
         String sourceServerCode = query.getString("sourceServerCode");
         if (StringUtils.isNotBlank(sourceServerCode)) {
-            criteria = criteria.and("sourceServerCode").is(sourceServerCode);
+            criteria = criteria.and("sourceServerCode").regex(sourceServerCode);
         }
         String operaCode = query.getString("operaCode");
         if (StringUtils.isNotBlank(operaCode)) {
-            criteria = criteria.and("operaCode").is(operaCode);
+            criteria = criteria.and("operaCode").regex(operaCode);
         }
         Integer stateCode = query.getInteger("stateCode");
-        if (serverCode!=null) {
+        if (stateCode!=null) {
             criteria = criteria.and("stateCode").is(stateCode);
         }
-        return mongoTemplate.find(Query.query(criteria).skip((page - 1) * count).limit(count),
+        return mongoTemplate.find(Query.query(criteria)
+                        .with(new Sort(new Sort.Order(Sort.Direction.DESC,"recordTime")))
+                        .skip((page - 1) * count).limit(count),
                 MqttLog.class, MongoDocName.MQTT_LOG);
 
 
@@ -67,8 +70,6 @@ public class MqttLogDao {
 
 
     public long findMqttLogCount(JSONObject query) {
-        int count = query.get("count") == null ? 30 : (int) query.get("count");
-        int page = query.get("page") == null ? 1 : (int) query.get("page");
         Criteria criteria = new Criteria();
 
         Long startTime = query.getLong("startTime");
@@ -82,22 +83,22 @@ public class MqttLogDao {
         }
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
-            criteria = criteria.and("serverCode").is(serverCode);
+            criteria = criteria.and("serverCode").regex(serverCode);
         }
 
         String sourceServerCode = query.getString("sourceServerCode");
         if (StringUtils.isNotBlank(sourceServerCode)) {
-            criteria = criteria.and("sourceServerCode").is(sourceServerCode);
+            criteria = criteria.and("sourceServerCode").regex(sourceServerCode);
         }
         String operaCode = query.getString("operaCode");
         if (StringUtils.isNotBlank(operaCode)) {
-            criteria = criteria.and("operaCode").is(operaCode);
+            criteria = criteria.and("operaCode").regex(operaCode);
         }
         Integer stateCode = query.getInteger("stateCode");
-        if (serverCode!=null) {
+        if (stateCode!=null) {
             criteria = criteria.and("stateCode").is(stateCode);
         }
-        return mongoTemplate.count(Query.query(criteria).skip((page - 1) * count).limit(count),
+        return mongoTemplate.count(Query.query(criteria),
                 MongoDocName.MQTT_LOG);
 
 

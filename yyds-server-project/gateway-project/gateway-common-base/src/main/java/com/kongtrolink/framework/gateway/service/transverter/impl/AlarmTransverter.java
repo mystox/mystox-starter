@@ -5,6 +5,7 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
+import com.kongtrolink.framework.gateway.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.service.DeviceTypeConfig;
@@ -72,7 +73,10 @@ public class AlarmTransverter extends TransverterHandler {
                     logger.info("无法根据 sn:{} 在redis中查询到相关设备信息 !!!!",deviceSn);
                     continue;
                 }
-                alarmInfo.setDeviceType(deviceTypeConfig.getAssentDeviceType(deviceInfo.getType()));
+                DeviceConfigEntity deviceConfigEntity = deviceTypeConfig.getAssentDeviceType(deviceInfo.getType());
+                if(deviceConfigEntity!=null){
+                    alarmInfo.setDeviceType(deviceConfigEntity.getAssentType());
+                }
                 alarmInfo.setDeviceModel(deviceInfo.getModel());
                 alarmInfo.setSignalId(pushAlarmInfo.getId());
                 alarmInfo.setSerial(String.valueOf(pushAlarmInfo.getSerialNo()));
