@@ -42,21 +42,20 @@ public class MessageService {
      */
     public void doSendMessage(InformMsg informMsg){
         ReqSingleMessage reqSingleMessage = buildMessage(informMsg);
-//        boolean result = false;
-        boolean result = true;
-//        try{
-//            RespMessage msg = SmsUtil.sendMessage(reqSingleMessage, informMsg.getUrl());
-//            LOGGER.info("SMS Message sent. Msg: {}, result:{}", JSONObject.toJSONString(reqSingleMessage), JSONObject.toJSONString(msg));
-//            if(msg.getStatusCode() == 200){
-//                result = true;
-//            }else{
-//                throw new Exception(String.valueOf(msg.getStatusCode())+","+ msg.getMessage() + ";" + msg.getInfo());
-//            }
-//        }catch (Exception e){
-//            e.printStackTrace();
-//            LOGGER.info("发送告警短信失败,AlarmId: {}, phones: {}, isReport: {}", informMsg.getAlarmName(),
-//                    informMsg.getInformAccount(), informMsg.getAlarmStateType());
-//        }
+        boolean result = false;
+        try{
+            RespMessage msg = SmsUtil.sendMessage(reqSingleMessage, informMsg.getUrl());
+            LOGGER.info("SMS Message sent. Msg: {}, result:{}", JSONObject.toJSONString(reqSingleMessage), JSONObject.toJSONString(msg));
+            if(msg.getStatusCode() == 200){
+                result = true;
+            }else{
+                throw new Exception(String.valueOf(msg.getStatusCode())+","+ msg.getMessage() + ";" + msg.getInfo());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            LOGGER.info("发送告警短信失败,AlarmId: {}, phones: {}, isReport: {}", informMsg.getAlarmName(),
+                    informMsg.getInformAccount(), informMsg.getAlarmStateType());
+        }
         String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
         informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);

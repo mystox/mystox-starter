@@ -37,26 +37,25 @@ public class EmailService {
     private String email_from_name;
 
     public void sendEmail(InformMsg informMsg) {
-        Boolean result = true;
+        Boolean result = false;
         //告警上报/告警消除
-//        String typeName = informMsg.getAlarmStateType();
-//        String email = informMsg.getInformAccount();
-//        String enterpriseServer = informMsg.getEnterpriseName() + informMsg.getServerName();
-//        String xsmtpapi = getXsmtpapi(informMsg);
-//        ApiMailInfo apiMailInfo = new ApiMailInfo(email_api_user, email_api_key, email_from_address, email_from_name);
-//        apiMailInfo.setSubject(enterpriseServer  + typeName + Contant.INFORM);
-//        apiMailInfo.setXsmtpapi(xsmtpapi);
-//        apiMailInfo.setUrl(informMsg.getUrl());
-//        String tempCode = informMsg.getTempCode();
-//        apiMailInfo.setTemplateInvokeName(tempCode);
-//        apiMailInfo.setFrom_name(enterpriseServer);
-//        Boolean result = false;
-//        try {
-//            result = SendMail.sendByJavaWebApi(apiMailInfo);
-//            LOGGER.info("email send msg:{} result: {}", apiMailInfo.toString(), result);
-//        } catch (IOException ex) {
-//            LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
-//        }
+        String typeName = informMsg.getAlarmStateType();
+        String email = informMsg.getInformAccount();
+        String enterpriseServer = informMsg.getEnterpriseName() + informMsg.getServerName();
+        String xsmtpapi = getXsmtpapi(informMsg);
+        ApiMailInfo apiMailInfo = new ApiMailInfo(email_api_user, email_api_key, email_from_address, email_from_name);
+        apiMailInfo.setSubject(enterpriseServer  + typeName + Contant.INFORM);
+        apiMailInfo.setXsmtpapi(xsmtpapi);
+        apiMailInfo.setUrl(informMsg.getUrl());
+        String tempCode = informMsg.getTempCode();
+        apiMailInfo.setTemplateInvokeName(tempCode);
+        apiMailInfo.setFrom_name(enterpriseServer);
+        try {
+            result = SendMail.sendByJavaWebApi(apiMailInfo);
+            LOGGER.info("email send msg:{} result: {}", apiMailInfo.toString(), result);
+        } catch (IOException ex) {
+            LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
+        }
         String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
         informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);

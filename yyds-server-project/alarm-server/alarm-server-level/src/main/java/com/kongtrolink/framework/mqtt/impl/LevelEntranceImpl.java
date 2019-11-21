@@ -37,7 +37,6 @@ public class LevelEntranceImpl implements LevelEntrance{
         }
         return JSON.toJSONString(alarmList);
     }
-    //liuddtodo 还需要远程修改告警等级相关操作
 
     /**
      * @auther: liudd

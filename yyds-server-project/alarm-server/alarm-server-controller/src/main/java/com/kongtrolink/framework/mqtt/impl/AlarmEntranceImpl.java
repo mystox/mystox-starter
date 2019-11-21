@@ -292,13 +292,12 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 //                System.out.println("redisNotTable :" + redisNotTable.incrementAndGet());
             }
             if(result){
-                //liuddtodo 调用告警消除发送推送
                 redisUtils.del(redisKey);
                 List<OperateEntity> operate = resloverOperateConfig.getOperate();
-                System.out.println("ZERO operate: " + operate.toString());
+//                System.out.println("ZERO operate: " + operate.toString());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-                System.out.println("ZERO operateEntityList:" + operateEntityList);
+//                System.out.println("ZERO operateEntityList:" + operateEntityList);
                 String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
                 if(null != operateEntityList){
                     for(OperateEntity operateEntity : operateEntityList){

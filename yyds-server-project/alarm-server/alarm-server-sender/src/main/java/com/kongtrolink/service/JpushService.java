@@ -43,18 +43,18 @@ public class JpushService {
 
     public boolean pushApp(InformMsg informMsg) {
         //liuddtodo 先写发给智慧用电李元明
-        informMsg.setInformAccount("5ab45064fef5e1514ffd4581");
+//        informMsg.setInformAccount("5ab45064fef5e1514ffd4581");
         boolean pushSuccess = true;
         Set<String> userIds = new HashSet<>();
         userIds.add(informMsg.getInformAccount());
         // 推送至义益云监控
-//        if (userIds != null && userIds.size() > 0) {
-//            PushPayload payload = buildPayload(informMsg, userIds);
-//            PushResult result = sendPush(payload);
-//            if (result == null || result.isResultOK() == false) {
-//                pushSuccess = false;
-//            }
-//        }
+        if (userIds != null && userIds.size() > 0) {
+            PushPayload payload = buildPayload(informMsg, userIds);
+            PushResult result = sendPush(payload);
+            if (result == null || result.isResultOK() == false) {
+                pushSuccess = false;
+            }
+        }
         String resultStr = pushSuccess ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
         informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);
