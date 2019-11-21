@@ -41,3 +41,8 @@ neo4j:
   username: neo4j
   password: 123456
   uri: bolt://localhost:7687
+taskInterval:
+  deviceGet: 60 #获取设备列表时间间隔，秒
+management:
+  security:
+    enabled: false
