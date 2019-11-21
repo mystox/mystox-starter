@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: alarm-server_web
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
+server:
+  port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
+mqtt:
+  username: root #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  password: 123456 #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
+  url: tcp://172.16.5.26:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+mongodb:
+#  uri: mongodb://mini-fsu-db:123456@172.16.5.228:27017/mini-fsu-db
+#  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+  uri: mongodb://172.16.6.9:27017/alarm_server
+
+
