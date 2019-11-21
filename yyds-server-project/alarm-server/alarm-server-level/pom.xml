@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>com.kongtrolink</groupId>
 		<artifactId>alarm-server</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 	<groupId>com.kongtrolink</groupId>
 	<artifactId>alarm-server-level</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>alarm-server-level</name>
 	<description>告警等级处理入口</description>
 
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>com.kongtrolink</groupId>
 			<artifactId>alarm-server-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -47,7 +47,18 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
+				<configuration>
+					<mainClass>com.kongtrolink.AlarmServerLevelApplication</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 

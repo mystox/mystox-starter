@@ -141,8 +141,8 @@ public class AlarmCycle {
             return false;
         }
         Date tReport = alarm.getTreport();
-//        int pastTime = alarmCycle.diffTime * 60 * 60 * 1000;
-        double pastTime = (0.05 * 60 * 60 * 1000);//liuddtodo 暂时写死3分钟就算历史
+        int pastTime = alarmCycle.diffTime * 60 * 60 * 1000;
+//        double pastTime = (0.05 * 60 * 60 * 1000);//liuddtodo 暂时写死3分钟就算历史
         long time = curDate.getTime() - tReport.getTime();
         if(time >= pastTime){
             return true;
