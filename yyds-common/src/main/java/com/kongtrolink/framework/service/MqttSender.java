@@ -23,4 +23,5 @@ public interface MqttSender {
                             String payload);
     MsgResult sendToMqttSyn(String serverCode, String operaCode,
                          int qos, String payload, long timeout, TimeUnit timeUnit);
+
 }
