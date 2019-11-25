@@ -65,7 +65,7 @@ public class MqttReceiverImpl implements MqttReceiver {
     private MqttLogUtil mqttLogUtil;
     @Override
     public MqttResp receive(String topic, MqttMsg payload) {
-        logger.info("receive... ..." + JSONObject.toJSONString(payload));
+        logger.debug("receive... ..." + JSONObject.toJSONString(payload));
         String unit = getUnitBySubList(topic);
         MqttResp result = null;
         try {
@@ -183,23 +183,28 @@ public class MqttReceiverImpl implements MqttReceiver {
             String payload = message.getPayload();
             MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
             MqttResp result = receive(topic, mqttMsg);
+            if (!mqttMsg.getHasAck()) return; //如果不需返回
             String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
             result.setTopic(ackTopic);
             String ackPayload = JSONObject.toJSONString(result);
-            logger.info("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
+            logger.debug("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
 
             int length = ackPayload.getBytes(Charset.forName("utf-8")).length;
-            if (length > MQTT_PAYLOAD_LIMIT) {
-                //分包
-                List<MqttResp> resultArr = subpackage(result);
-                logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
-                int size = resultArr.size();
-                for (int i = 0; i < size; i++) {
-                    MqttResp resp = resultArr.get(i);
-                    iMqttSender.sendToMqtt(ackTopic, 2, JSONObject.toJSONString(resp));
-                }
-            } else
-                iMqttSender.sendToMqtt(ackTopic, 2, ackPayload);
+            try {
+                if (length > MQTT_PAYLOAD_LIMIT) {
+                    //分包
+                    List<MqttResp> resultArr = subpackage(result);
+                    logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
+                    int size = resultArr.size();
+                    for (int i = 0; i < size; i++) {
+                        MqttResp resp = resultArr.get(i);
+                        iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
+                    }
+                } else
+                    iMqttSender.sendToMqtt(ackTopic, 1, ackPayload);
+            } catch (Exception e) {
+                logger.error("[{}] message ");
+            }
         });
     }
 

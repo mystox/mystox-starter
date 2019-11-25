@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 @Component
+@DependsOn(value = "mqttOutbound")
 @Order(1)
 public class RegisterRunner implements ApplicationRunner {
     private Logger logger = LoggerFactory.getLogger(RegisterRunner.class);

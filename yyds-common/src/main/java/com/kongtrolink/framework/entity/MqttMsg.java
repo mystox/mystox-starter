@@ -14,12 +14,19 @@ public class MqttMsg {
     private String topic;
     private String operaCode;
     private String sourceAddress; //消息源地址，一般为生产消息的服务code serverName+"_"+serverVersion
+    private Boolean hasAck = false;
     private PayloadType payloadType;
     private String payload;
     private byte[] bytePayload;
 
 
+    public Boolean getHasAck() {
+        return hasAck;
+    }
 
+    public void setHasAck(Boolean hasAck) {
+        this.hasAck = hasAck;
+    }
 
     public String getOperaCode() {
         return operaCode;

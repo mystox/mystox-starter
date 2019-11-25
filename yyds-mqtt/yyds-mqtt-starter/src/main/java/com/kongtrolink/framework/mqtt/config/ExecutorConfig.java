@@ -16,33 +16,39 @@ public class ExecutorConfig
 {
     @Value("${executor.threadPool.corePoolSize:10}")
     private int CORE_POOL_SIZE;
-    @Value("${executor.threadPool.maxPoolSize:10000}")
+    @Value("${executor.threadPool.maxPoolSize:100000}")
     private int MAX_POOL_SIZE;
 
     @Bean(name = "logExecutor")
     public ThreadPoolTaskExecutor logExecutor()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,200,10000);
+        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"log-");
     }
 
 
     @Bean(name = "mqttExecutor")
     public ThreadPoolTaskExecutor mqttExecutor()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,200,10000);
+        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"mqttExecutor-");
     }
 
-    protected ThreadPoolTaskExecutor builder(int corePoolSize,int maxPoolSize,int queueCapacity,int aliveSecondis) {
+    @Bean(name = "mqttSenderExecutor")
+    public ThreadPoolTaskExecutor mqttSender()
+    {
+        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"mqttSender-");
+    }
+
+    protected ThreadPoolTaskExecutor builder(int corePoolSize,int maxPoolSize,int queueCapacity,int aliveSecondis,String threadName) {
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
-        poolTaskExecutor.setCorePoolSize(CORE_POOL_SIZE);
+        poolTaskExecutor.setCorePoolSize(corePoolSize);
         //线程池维护线程的最大数量
-        poolTaskExecutor.setMaxPoolSize(MAX_POOL_SIZE);
+        poolTaskExecutor.setMaxPoolSize(maxPoolSize);
         //线程池所使用的缓冲队列
-        poolTaskExecutor.setQueueCapacity(2000);
+        poolTaskExecutor.setQueueCapacity(queueCapacity);
         //线程池维护线程所允许的空闲时间
-        poolTaskExecutor.setKeepAliveSeconds(10000);
-        poolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        poolTaskExecutor.setKeepAliveSeconds(aliveSecondis);
+        poolTaskExecutor.setThreadNamePrefix(threadName);
         return poolTaskExecutor;
     }
 }

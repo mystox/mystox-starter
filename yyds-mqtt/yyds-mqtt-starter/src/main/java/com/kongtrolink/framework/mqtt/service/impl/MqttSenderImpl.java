@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -59,11 +60,15 @@ public class MqttSenderImpl implements MqttSender {
     @Qualifier("mqttHandlerAck")
     private MqttHandler mqttHandlerAck;
 
+    @Value("${mqtt.callback.maxCount:10000}")
+    private long callbackMaxCount;
+
     @Autowired
     private MqttLogUtil mqttLogUtil;
     @Autowired
-    ThreadPoolTaskExecutor mqttExecutor;
-
+    private ThreadPoolTaskExecutor mqttExecutor;
+    @Autowired
+    private ThreadPoolTaskExecutor mqttSenderExecutor;
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
         String localServerCode = this.serverName + "_" + this.serverVersion;
@@ -78,7 +83,7 @@ public class MqttSenderImpl implements MqttSender {
             if (isExistsBySubList(serverCode, operaCode)) {
                 boolean existsByPubList = addPubList(serverCode, operaCode);
                 if (existsByPubList) {
-                    logger.info("[{}]message send...topic[{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
+                    logger.debug("[{}]message send...topic[{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
                     mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
                 } else {
                     mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
@@ -103,7 +108,8 @@ public class MqttSenderImpl implements MqttSender {
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode,
-                           int qos, String payload) {
+                           int qos, String payload)
+    {
         String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
@@ -136,7 +142,8 @@ public class MqttSenderImpl implements MqttSender {
     }
 
     public boolean sendToMqttBoolean(String serverCode, String operaCode,
-                                     int qos, MqttMsg mqttMsg) {
+                                     int qos, MqttMsg mqttMsg)
+    {
 //        String localServerCode = this.serverName + "_" + this.serverVersion;
         String msgId = mqttMsg.getMsgId();
         try {
@@ -170,6 +177,11 @@ public class MqttSenderImpl implements MqttSender {
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
             return false;
+        } catch (MessagingException e) {
+            mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
+            e.printStackTrace();
+            return false;
         }
         mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
         logger.error("[{}]message send error[{}]...", msgId, StateCode.UNREGISTERED);
@@ -188,24 +200,35 @@ public class MqttSenderImpl implements MqttSender {
             mqttHandlerAck.addSubTopic(topicAck);
         //组建消息体
         MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload, operaCode);
+        mqttMsg.setHasAck(true);
         String msgId = mqttMsg.getMsgId();
-        boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
-        if (sendResult) {
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            CallBackTopic callBackTopic = new CallBackTopic();
-            FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
-            es.submit(mqttMsgFutureTask);
-            CALLBACKS.put(msgId, callBackTopic);
-            try {
+        CallBackTopic callBackTopic = new CallBackTopic();
+        if (CALLBACKS.size() > callbackMaxCount) {
+            mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
+            logger.error("[{}]message, system callback map is full[{}]", msgId);
+            return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
+        }
+        CALLBACKS.put(msgId, callBackTopic);
+        try {
+            boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
+            if (sendResult) {
+                ExecutorService es = Executors.newSingleThreadExecutor();
+                FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
+                es.submit(mqttMsgFutureTask);
+
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
-                logger.error("[{}]message, request timeout: [{}]", msgId, e.toString());
-                return new MsgResult(StateCode.TIMEOUT, e.toString());
-            } finally {
-                CALLBACKS.remove(msgId);
             }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
+            logger.error("[{}]message, request timeout: [{}]", msgId, e.toString());
+            return new MsgResult(StateCode.TIMEOUT, e.toString());
+        } catch (Exception e) {
+            mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
+            logger.error("[{}]message, request exception: [{}]", msgId, e.toString());
+            return new MsgResult(StateCode.FAILED, e.toString());
+        } finally {
+            CALLBACKS.remove(msgId);
         }
 //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
         return new MsgResult(StateCode.FAILED, "请求失败");
@@ -280,7 +303,7 @@ public class MqttSenderImpl implements MqttSender {
                 String msgId = resp.getMsgId();
 
                 logger.debug("[{}]message ack is [{}]", msgId, payload);
-                CallBackTopic callBackTopic = CALLBACKS.get(msgId);
+                CallBackTopic callBackTopic = CALLBACKS.get(msgId); //使用删除返回已经设置的callback对象
                 if (callBackTopic != null) {
                     boolean subpackage = resp.isSubpackage();
                     if (subpackage)
@@ -288,7 +311,7 @@ public class MqttSenderImpl implements MqttSender {
                     else
                         callBackTopic.callback(resp);
                 } else {
-                    logger.warn("[{}]message ack [{}] is Invalidation...", msgId);
+                    logger.warn("[{}]message ack [{}] is null...", msgId);
                 }
             } catch (Exception e) {
                 logger.warn("message ack receive error[{}] is Invalidation...", e.toString());
@@ -296,5 +319,9 @@ public class MqttSenderImpl implements MqttSender {
             }
         });
 
+    }
+
+    public Map<String, CallBackTopic> getCALLBACKS() {
+        return CALLBACKS;
     }
 }
