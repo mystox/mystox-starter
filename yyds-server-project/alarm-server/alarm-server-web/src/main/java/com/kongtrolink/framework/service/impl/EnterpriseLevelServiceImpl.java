@@ -212,20 +212,19 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         }
         Date curDate = new Date();
         List<EnterpriseLevel> enterpriseLevelList = new ArrayList<>();
-        EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
-        enterpriseLevel.setId(null);
-        enterpriseLevel.setCode("system_code");
-        enterpriseLevel.setName("系统默认告警等级");
-        enterpriseLevel.setColor("#DB001B");
-        enterpriseLevel.setUpdateTime(curDate);
-        enterpriseLevel.setLevelType(Contant.SYSTEM);
-        enterpriseLevel.setState(Contant.USEING);
-        enterpriseLevel.setEnterpriseCode("system");
-        enterpriseLevel.setServerCode("code");
-        enterpriseLevelList.add(enterpriseLevel);
         for(int i=1; i<=8; i++) {
+            EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
+            enterpriseLevel.setCode("system_code");
+            enterpriseLevel.setName("系统默认告警等级");
+            enterpriseLevel.setColor("#DB001B");
+            enterpriseLevel.setUpdateTime(curDate);
+            enterpriseLevel.setLevelType(Contant.SYSTEM);
+            enterpriseLevel.setState(Contant.USEING);
+            enterpriseLevel.setEnterpriseCode("system");
+            enterpriseLevel.setServerCode("code");
             enterpriseLevel.setLevel(i);
             enterpriseLevel.setLevelName(EnumLevelName.getNameByLevel(i));
+            enterpriseLevelList.add(enterpriseLevel);
             logger.info("默认等级：{}", enterpriseLevel.toString());
         }
         enterpriseLevelDao.add(enterpriseLevelList);

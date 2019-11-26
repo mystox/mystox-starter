@@ -106,6 +106,13 @@ public abstract class BaseController {
         return null;
     }
 
+    public List<JSONObject> getManagerUsersMsg() {
+        Object attribute = getSession().getAttribute(SessionConstant.USER_MANAGER_MSG_LIST);
+        if (attribute != null)
+            return JSONArray.parseArray(JSON.toJSONString(attribute), JSONObject.class);
+        return null;
+    }
+
     public String getClientVersion() {
         return (String) getSession().getAttribute(SessionConstant.CLIENT_VERSION);
     }

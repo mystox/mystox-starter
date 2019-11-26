@@ -72,7 +72,6 @@ public class MultiMqttMessageHandler extends AbstractMessageHandler implements L
             key = 0;
         }
         MyMqttPahoMessageHandler messageHandler = (MyMqttPahoMessageHandler) mqttHandlerMap.get(key);
-        System.out.println(messageHandler.toString() +"---------------------------"+key);
         messageHandler.handleMessageInternal(message);
     }
 }

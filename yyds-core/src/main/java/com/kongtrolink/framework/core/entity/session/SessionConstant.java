@@ -27,10 +27,10 @@ public class SessionConstant {
 
     public static final String CURRENT_ORG_TREE = "CURRENT_ORG_TREE";//当前有用户组织树
     public static final String USER_MANAGER_LIST = "USER_MANAGER_LIST";//当前用户管辖的用户列表
-
+    public static final String USER_MANAGER_MSG_LIST = "USER_MANAGER_MSG_LIST";//当前用户管辖的用户列表
     public static final String LOGIN_USER_SUB_SERVICE = "LOGIN_USER_SUB_SERVICE";//存放当前用户订阅的服务
 
-    public static final String IS_ADMIN = "IS_ADMIN";
+    public static final String IS_ADMIN = "IS_ADMIN"; //超级管理员的标记
     public static final String IS_ROOT = "IS_ROOT";//是否全局管理员
 
     public static final String TOKEN = "TOKEN";
@@ -43,7 +43,7 @@ public class SessionConstant {
 
     public static final String CLIENT_VERSION = "CLIENT_VERSION";
 
-    public static final String CURRENT_AUTH_SERVER_URI = "CURRENT_AUTH_SERVER_URI";
+    public static final String CURRENT_AUTH_SERVER_MARK= "CURRENT_AUTH_SERVER_MARK";
 
 
     /**
