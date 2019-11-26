@@ -1,108 +1,35 @@
-package com.kongtrolink.framework;
+package com.kongtrolink.framework.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.api.impl.MqttPublish;
-import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
-import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.service.MqttSender;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.session.data.redis.RedisOperationsSessionRepository;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class AssetManagementServerApplicationTest {
+@RestController
+@RequestMapping("/Test")
+public class TestController {
 
     @Autowired
     Neo4jDBService neo4jDBService;
 
-    @Autowired
-    MqttPublish mqttPublish;
+    @Resource(name = "assetManagementExecutor")
+    ThreadPoolTaskExecutor taskExecutor;
 
-    @Autowired
-    MqttSender mqttSender;
+    @RequestMapping("/create")
+    public String testCreateCI(@RequestBody JSONObject requestBody) {
 
-    @Test
-    public void testCIType() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("title", "测试1111");
-        jsonObject.put("name", "test1111");
-        jsonObject.put("code", "test1");
-        jsonObject.put("level", 2);
+        final String enterpriseCode = requestBody.getString("enterpriseCode");
+        final String serverCode = requestBody.getString("serverCode");
+        final int start = requestBody.getInteger("start");
+        final int end = requestBody.getInteger("end");
 
-        System.out.println("deleteCIType:" + neo4jDBService.deleteCIType("test1111"));
-        jsonObject.put("relationship", "Application");
-
-        System.out.println("addCIType:" + neo4jDBService.addCIType(jsonObject));
-
-        jsonObject.put("title", "测试2222");
-        System.out.println("modifyCIType:" + neo4jDBService.modifyCIType(jsonObject));
-
-        jsonObject.put("title", "");
-        jsonObject.put("name", "BusinessDevice");
-        jsonObject.put("code", "");
-        JSONArray array = neo4jDBService.searchCIType(jsonObject);
-        System.out.println(array);
-    }
-
-    @Test
-    public void testGetRegionCode() {
-
-        JSONObject jsonObject = new JSONObject();
-//        jsonObject.put("userId", "392e4847-abf5-48a7-b6a4-f2bdd41bf1c2");
-//        jsonObject.put("enterpriseCode", "Skongtrolink");
-//        jsonObject.put("serverCode", "");
-        jsonObject.put("structure", 0);
-
-        MsgResult msgResult = mqttPublish.getRegionCode(JSONObject.toJSONString(jsonObject));
-
-        System.out.println(JSONObject.toJSONString(msgResult));
-    }
-
-    @Test
-    public void testGetCIModel() {
-
-        String serverCode = MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER, "1.0.0");
-        String operaCode = "getCIModel";
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("enterpriseCode", "Skongtrolink");
-        jsonObject.put("serverCode", "AUTH_PLATFORM");
-
-        MsgResult result = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
-
-        System.out.println(JSONObject.toJSONString(result));
-    }
-
-    @MockBean
-    RedisOperationsSessionRepository redisOperationsSessionRepository;
-
-    @Test
-    public void testDate() {
-        long t1 = System.currentTimeMillis();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Date now = new Date(t1);
-        System.out.println(t1 + "," + simpleDateFormat.format(now));
-    }
-
-
-    private String enterpriseCode = "YYDS";
-    private String serverCode = "TOWER_SERVER_1.0.0";
-
-    @Test
-    public void testCreateCI() {
         JSONObject jsonObjectFsu = new JSONObject();
         jsonObjectFsu.put("enterpriseCode", enterpriseCode);
         jsonObjectFsu.put("serverCode", serverCode);
@@ -154,7 +81,7 @@ public class AssetManagementServerApplicationTest {
         Date now = new Date();
         System.out.println(simpleDateFormat.format(now) + ":Start");
 
-        for (int i = 1; i <= 0; ++i) {
+        for (int i = start; i <= end; ++i) {
             String sn = "00000" + i;
             sn = sn.substring(sn.length() - 5);
             jsonObjectFsu.put("sn", "438" + sn);
@@ -180,44 +107,41 @@ public class AssetManagementServerApplicationTest {
                 System.out.println(simpleDateFormat.format(now) + ":" + i);
             }
         }
+
+        now = new Date();
+        System.out.println(simpleDateFormat.format(now) + ":" + end);
+        return "1";
     }
 
-    @Resource(name = "assetManagementExecutor")
-    ThreadPoolTaskExecutor taskExecutor;
+    @RequestMapping("/search")
+    public String testSearchCI(@RequestBody JSONObject requestBody) {
 
-    final private int threadCount = 2;
-    private Boolean[] threadBoolean = new Boolean[threadCount];
+        int threadCount = requestBody.getInteger("threadCount");
+        final String enterpriseCode = requestBody.getString("enterpriseCode");
+        final String serverCode = requestBody.getString("serverCode");
+        final int times = requestBody.getInteger("times");
+        final int pageNum = requestBody.getInteger("pageNum");
+        final int total = requestBody.getInteger("total");
 
-    @Test
-    public void testSearchCI() {
+        Boolean[] threadBoolean = new Boolean[threadCount];
 
         neo4jDBService.searchCIConnectionType();
 
         for (int i = 0; i < threadCount; ++i) {
             threadBoolean[i] = false;
             final int index = i;
-            taskExecutor.execute(()->searchCI(index));
+            taskExecutor.execute(()->searchCI(index, enterpriseCode, serverCode, times, total, pageNum));
         }
 
-        for (int i = 0; i < threadCount;) {
-            if (!threadBoolean[i]) {
-                try {
-                    Thread.sleep(1000*3);
-                } catch (Exception e) {
-
-                }
-                continue;
-            } else {
-                ++i;
-            }
-        }
+        return "1";
     }
 
-    private void searchCI(int index) {
+    private void searchCI(int index, String enterpriseCode, String serverCode, int times, int total, int pageNum) {
 
-        int times = 10;
-        int pageNum = 20000;
-        int pageTotal = 60000 / pageNum;
+        int pageTotal = total / pageNum;
+        if ((total % pageNum) > 0) {
+            pageTotal++;
+        }
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseCode);
@@ -234,7 +158,7 @@ public class AssetManagementServerApplicationTest {
                 jsonObject.put("curPage", i);
 
                 Date startDate = new Date();
-                JSONObject result = neo4jDBService.searchCI(jsonObject);
+                neo4jDBService.searchCI(jsonObject);
                 Date endDate = new Date();
 
                 long diff = endDate.getTime() - startDate.getTime();
@@ -248,31 +172,5 @@ public class AssetManagementServerApplicationTest {
 
         double average = sum * 1.0 / times / pageTotal;
         System.out.println("Thread-" + index + ",average-" + average);
-        threadBoolean[index] = true;
-    }
-
-    @Test
-    public void testMsg() {
-
-        JSONObject request = new JSONObject();
-        request.put("sn", "38");
-        request.put("enterpriseCode", "1");
-        request.put("serverCode", "1");
-        request.put("curPage", 1);
-        request.put("pageNum", 20);
-
-        String serverCode = MqttUtils.preconditionServerCode("ASSET_MANAGEMENT_SERVER", "1.0.0");
-        String operaCode = "getCI";
-
-
-        request(0, request, serverCode, operaCode);
-    }
-
-    private void request(int threadIndex, JSONObject request, String serverCode, String operaCode) {
-
-        for (int i = 0; i < 100; ++i) {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(request));
-            System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());
-        }
     }
 }

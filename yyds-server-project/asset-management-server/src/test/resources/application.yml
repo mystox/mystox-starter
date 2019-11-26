@@ -12,11 +12,21 @@ logging:
 spring:
   application:
     name: yytd-asset-management-server
+  session:
+    store-type: redis
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
 
 server:
   name: ASSET_MANAGEMENT_SERVER_TEST
   version: 1.0.0
   port: 52202
+  title: 资产管理服务_Test
+  serverUri: /ZKAssets/assetsManage #首页名
+  pageRoute: proxy_assets
+  routeMark: proxy_assets
 #jarResources:
 #  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
@@ -27,5 +37,10 @@ mqtt:
   url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 neo4j:
   username: neo4j
-  password: 123456
-  uri: bolt://localhost:7687
+  password: admin
+  uri: bolt://172.16.5.61:7687
+taskInterval:
+  deviceGet: 60000 #获取设备列表时间间隔，秒
+management:
+  security:
+    enabled: false
