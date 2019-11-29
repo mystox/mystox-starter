@@ -88,7 +88,7 @@ public class AlarmServiceImpl implements AlarmService{
             if(tempCount > nextBegin){
                 alarmQuery.setRealBeginNum(nextBegin);
                 alarmQuery.setRealLimit(nextSize);
-                List<DBObject> tempList = list(alarmQuery, tablePrefix + weeks.get(i));
+                List<DBObject> tempList = alarmDao.getHistoryAlarmList(alarmQuery, tablePrefix + weeks.get(i));
                 allList.addAll(tempList);
                 if(tempCount >= endNum){     //如果当前表能满足剩余所有分页数据获取
                     break;
