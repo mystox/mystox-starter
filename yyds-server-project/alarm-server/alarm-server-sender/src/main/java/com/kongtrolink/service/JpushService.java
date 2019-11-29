@@ -33,7 +33,7 @@ public class JpushService {
 
     @Autowired
     InformMsgDao informMsgDao;
-//    @Value("${jpush.enable:false}")
+    @Value("${jpush.enable:false}")
     private boolean enable;
     @Value("${jpush.appKey}")
     String APP_KEY;
@@ -46,6 +46,8 @@ public class JpushService {
     public boolean pushApp(InformMsg informMsg) {
         if(!enable){
             LOGGER.info("APP推送功能被关闭");
+            informMsg.setResult("APP推送功能被关闭");
+            informMsgDao.save(informMsg);
             return false;
         }
         //liuddtodo 先写发给智慧用电李元明

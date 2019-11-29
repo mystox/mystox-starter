@@ -1,10 +1,10 @@
 
 spring:
   application:
-    name: alarm_server_sender_test
+    name: alarm_server_sender
 
 server:
-  name: ALARM_SERVER_SENDER_TEST   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
+  name: ALARM_SERVER_SENDER  #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
   version: V1.0.0                  #\u7248\u672C\u53F7
   port: 19005                      #\u7AEF\u53E3\u53F7
 
@@ -13,8 +13,8 @@ mqtt:
   password: 123456 #可选配置 mqtt配置相关
   url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 mongodb:
-#  uri: mongodb://172.16.6.9:27017/alarm_server
-  uri: mongodb://172.16.5.61:27017/alarm_server
+  uri: mongodb://172.16.6.9:27017/alarm_server
+#  uri: mongodb://172.16.5.61:27017/alarm_server
 
 deliver:
   count: 200    #\u544A\u8B66\u6295\u9012\u6570\u91CF
@@ -25,7 +25,7 @@ cycle:
 
 #sms短信相关配置
 sms:
-  enable: true
+  enable: false
   url: http://sendcloud.sohu.com/smsapi/send
   urlN: http://sendcloud.sohu.com/smsapi/sendn
   sms_user: KONGTROLINK
@@ -39,7 +39,7 @@ sms:
 
 #邮件相关配置
 email:
-  enable: true
+  enable: false
   url: http://api.sendcloud.net/apiv2/mail/sendtemplate
   api_user: Kongtrolink_test_Fnwqd9
   api_key: h3AGMVPe7ir8siUw
@@ -51,7 +51,7 @@ email:
       recoverTemplateId: power_alarm_clearId
 #APP推送相关配置
 jpush:
-  enable: true
+  enable: false
   appKey: 6d050a833fa17919b719d02c
 #jpush.masterSecret.yiyi=185e690a9858c0b580e7f0c0
   masterSecret:  59dbddde70bf61d9e03b2c21

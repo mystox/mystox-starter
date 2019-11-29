@@ -27,7 +27,7 @@ public class TestSender {
         String serverVerson = "ALARM_SERVER_SENDER_TEST_V1.0.0";
         String operateCode = "handleSender";
         InformMsg informMsg = new InformMsg();
-        informMsg.setType(Contant.TEMPLATE_MSG);
+        informMsg.setType(Contant.TEMPLATE_EMAIL);
         informMsg.setInformAccount("15267071976");
         informMsg.setTempCode("1144");
         informMsg.setAddressName("测试地址112601");

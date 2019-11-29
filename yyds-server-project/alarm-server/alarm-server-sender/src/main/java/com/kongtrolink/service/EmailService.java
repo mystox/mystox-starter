@@ -27,7 +27,7 @@ public class EmailService {
     InformMsgDao informMsgDao;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
-//    @Value("${email.enable:false}")
+    @Value("${email.enable:false}")
     private boolean enable;
     @Value("${email.api_user}")
     private String email_api_user;
@@ -39,6 +39,12 @@ public class EmailService {
     private String email_from_name;
 
     public void sendEmail(InformMsg informMsg) {
+        if(!enable){
+            LOGGER.info("发送邮件功能已关闭");
+            informMsg.setResult("发送邮件功能已关闭");
+            informMsgDao.save(informMsg);
+            return;
+        }
         Boolean result = false;
         //告警上报/告警消除
         String typeName = informMsg.getAlarmStateType();
@@ -53,17 +59,13 @@ public class EmailService {
         apiMailInfo.setTemplateInvokeName(tempCode);
         apiMailInfo.setFrom_name(enterpriseServer);
         try {
-            if(enable) {
-                result = SendMail.sendByJavaWebApi(apiMailInfo);
-            }else{
-                LOGGER.info("发送邮件功能已关闭");
-            }
+            result = SendMail.sendByJavaWebApi(apiMailInfo);
+            String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
+            informMsg.setResult(resultStr);
             LOGGER.info("email send msg:{} result: {}", apiMailInfo.toString(), result);
         } catch (IOException ex) {
             LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);
         }
-        String resultStr = result ? Contant.OPE_SEND + Contant.RESULT_SUC : Contant.OPE_SEND + Contant.RESULT_FAIL;
-        informMsg.setResult(resultStr);
         informMsgDao.save(informMsg);
     }
 
