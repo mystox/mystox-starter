@@ -39,6 +39,11 @@ unique:
       defaulg: serverCode1.operaCode1
       opera2: serverCode2.operaCode2
 
+#默认投递动作
+sender:
+  serverVersion: ALARM_SERVER_SENDER_DEFAULT_1.0.0
+  operaCode: handleSender
+
 #默认sms短信相关配置
 sms:
   enable: ture

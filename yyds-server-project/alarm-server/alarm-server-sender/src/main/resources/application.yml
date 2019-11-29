@@ -5,7 +5,7 @@ spring:
     name: alarm_server_sender
 
 server:
-  name: ALARM_SERVER_SENDER   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
+  name: ALARM_SERVER_SENDER_TEST   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
   version: V1.0.0                  #\u7248\u672C\u53F7
   port: 19005                      #\u7AEF\u53E3\u53F7
 
@@ -49,6 +49,7 @@ sms:
 
 #邮件相关配置
 email:
+  enable: true
   url: http://api.sendcloud.net/apiv2/mail/sendtemplate
   api_user: Kongtrolink_test_Fnwqd9
   api_key: h3AGMVPe7ir8siUw
@@ -60,6 +61,7 @@ email:
       recoverTemplateId: power_alarm_clearId
 #APP推送相关配置
 jpush:
+  enable: true
   appKey: 6d050a833fa17919b719d02c
 #jpush.masterSecret.yiyi=185e690a9858c0b580e7f0c0
   masterSecret:  59dbddde70bf61d9e03b2c21

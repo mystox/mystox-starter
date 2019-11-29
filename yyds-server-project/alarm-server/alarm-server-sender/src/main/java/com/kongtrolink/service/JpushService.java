@@ -33,6 +33,8 @@ public class JpushService {
 
     @Autowired
     InformMsgDao informMsgDao;
+//    @Value("${jpush.enable:false}")
+    private boolean enable;
     @Value("${jpush.appKey}")
     String APP_KEY;
     @Value("${jpush.masterSecret}")
@@ -42,6 +44,10 @@ public class JpushService {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpushService.class);
 
     public boolean pushApp(InformMsg informMsg) {
+        if(!enable){
+            LOGGER.info("APP推送功能被关闭");
+            return false;
+        }
         //liuddtodo 先写发给智慧用电李元明
 //        informMsg.setInformAccount("5ab45064fef5e1514ffd4581");
         boolean pushSuccess = true;

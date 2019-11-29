@@ -23,6 +23,11 @@ import java.util.List;
 @Service
 public class MsgTemplateServiceImpl implements MsgTemplateService{
 
+    @Value("${sender.serverVersion:ALARM-SERVER-SENDER_1.0.0}")
+    private String serverVersion;
+    @Value("${sender.operaCode:handleSender}")
+    private String operaCode;
+
     @Value("${sms.url}")
     private String sms_url;
     @Value("${sms.alarm.reportTemplateId}")
@@ -100,8 +105,8 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
             emailTemplate.setName("默认邮件模板");
             emailTemplate.setTemplateType("系统");
             emailTemplate.setType("邮件");
-            emailTemplate.setServerVerson("ALARM-SERVER-SENDER_DEFAULT-1.0.0");
-            emailTemplate.setOperaCode("handleSender");
+            emailTemplate.setServerVerson(serverVersion);
+            emailTemplate.setOperaCode(operaCode);
             emailTemplate.setUrl(email_url);
             emailTemplate.setReportCode(emailReportCode);
             emailTemplate.setResolveCode(emailResolveCode);
@@ -116,8 +121,8 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
             msgTemplate.setName("默认短信模板");
             msgTemplate.setTemplateType("系统");
             msgTemplate.setType("短信");
-            msgTemplate.setServerVerson("ALARM-SERVER-SENDER_DEFAULT-1.0.0");
-            msgTemplate.setOperaCode("handleSender");
+            msgTemplate.setServerVerson(serverVersion);
+            msgTemplate.setOperaCode(operaCode);
             msgTemplate.setUrl(sms_url);
             msgTemplate.setReportCode(msgReportCode);
             msgTemplate.setResolveCode(msgRecoverCode);
@@ -133,9 +138,8 @@ public class MsgTemplateServiceImpl implements MsgTemplateService{
             appTemplate.setName("默认APP模板");
             appTemplate.setTemplateType("系统");
             appTemplate.setType("APP");
-            appTemplate.setServerVerson("ALARM-SERVER-SENDER_DEFAULT-1.0.0");
-            appTemplate.setOperaCode("handleSender");
-//            appTemplate.setUrl("http://sendcloud.sohu.com/smsapi/send");
+            appTemplate.setServerVerson(serverVersion);
+            appTemplate.setOperaCode(operaCode);
             appTemplate.setReportCode(appReportCode);
             appTemplate.setResolveCode(appResolveCode);
             appTemplate.setUpdateTime(curDate);

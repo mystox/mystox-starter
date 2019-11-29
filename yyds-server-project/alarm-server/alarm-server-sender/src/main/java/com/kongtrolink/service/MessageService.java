@@ -26,8 +26,8 @@ public class MessageService {
 
     @Autowired
     InformMsgDao informMsgDao;
-    @Value("${sms.enable}")
-    String SMS_ENABLE;
+//    @Value("${sms.enable:false}")
+    private boolean SMS_ENABLE;
     @Value("${sms.sms_user}")
     private String sms_user;
     @Value("${sms.sms_key}")
@@ -41,6 +41,9 @@ public class MessageService {
      * 功能描述:发送告警短信
      */
     public void doSendMessage(InformMsg informMsg){
+        if(!SMS_ENABLE){
+            LOGGER.info("发送短信功能已关闭");
+        }
         ReqSingleMessage reqSingleMessage = buildMessage(informMsg);
         boolean result = false;
         try{

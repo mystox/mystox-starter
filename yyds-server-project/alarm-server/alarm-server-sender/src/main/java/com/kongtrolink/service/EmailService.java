@@ -27,6 +27,8 @@ public class EmailService {
     InformMsgDao informMsgDao;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailService.class);
+//    @Value("${email.enable:false}")
+    private boolean enable;
     @Value("${email.api_user}")
     private String email_api_user;
     @Value("${email.api_key}")
@@ -51,7 +53,11 @@ public class EmailService {
         apiMailInfo.setTemplateInvokeName(tempCode);
         apiMailInfo.setFrom_name(enterpriseServer);
         try {
-            result = SendMail.sendByJavaWebApi(apiMailInfo);
+            if(enable) {
+                result = SendMail.sendByJavaWebApi(apiMailInfo);
+            }else{
+                LOGGER.info("发送邮件功能已关闭");
+            }
             LOGGER.info("email send msg:{} result: {}", apiMailInfo.toString(), result);
         } catch (IOException ex) {
             LOGGER.info("发送告警邮件失败 ,AlarmId: {}, email: {}, isReport: {}", informMsg.getAlarmName(), email, typeName);

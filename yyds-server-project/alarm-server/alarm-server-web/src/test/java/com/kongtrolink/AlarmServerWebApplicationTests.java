@@ -37,4 +37,9 @@ public class AlarmServerWebApplicationTests {
 		mongoTemplate.save(enterpriseLevel, MongTable.ENTERPRISE_LEVEL);
 	}
 
+	@Test
+	public void testList(){
+
+	}
+
 }
