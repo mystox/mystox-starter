@@ -2,7 +2,12 @@ package com.kongtrolink.framework.mqtt.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.mqtt.service.MqttRestService;
+import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
+import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
+import com.kongtrolink.framework.service.MqttSender;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * Created by mystoxlol on 2019/8/20, 15:18.
@@ -22,10 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class MqttController {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttController.class);
-
+    @Autowired
+    MqttSender mqttSender;
 
     @Autowired
     MqttRestService mqttRestService;
+
+
 
     /**
      * 注册订阅表
@@ -99,6 +109,25 @@ public class MqttController {
         return new JsonResult();
     }
 
-
+    @RequestMapping("/getCallBack")
+    public JsonResult getCallBack(@RequestBody JSONObject condition)
+    {
+        String msgId = condition.getString("msgId");
+        MqttSenderImpl mqttSender = (MqttSenderImpl) this.mqttSender;
+        Map<String, CallBackTopic> callbacks = mqttSender.getCALLBACKS();
+        CallBackTopic callBackTopic = callbacks.get(msgId);
+        MqttResp call = null;
+        try {
+            if (callBackTopic != null) {
+                System.out.println(callBackTopic.toString());
+                call = callBackTopic.call();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (StringUtils.isBlank(msgId))
+            return new JsonResult(callbacks.size());
+        return new JsonResult(call);
+    }
 
 }

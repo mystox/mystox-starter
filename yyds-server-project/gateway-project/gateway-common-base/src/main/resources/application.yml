@@ -61,7 +61,7 @@ gatewayMqtt:
 logging:
   level:
     root: info
-    com.kongtrolink.framework: DEBUG
+    com.kongtrolink.framework: info
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF

@@ -66,9 +66,8 @@ public class MqttSenderImpl implements MqttSender {
     @Autowired
     private MqttLogUtil mqttLogUtil;
     @Autowired
-    private ThreadPoolTaskExecutor mqttExecutor;
-    @Autowired
-    private ThreadPoolTaskExecutor mqttSenderExecutor;
+    private ThreadPoolTaskExecutor mqttSenderAckExecutor;
+
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
         String localServerCode = this.serverName + "_" + this.serverVersion;
@@ -203,7 +202,8 @@ public class MqttSenderImpl implements MqttSender {
         mqttMsg.setHasAck(true);
         String msgId = mqttMsg.getMsgId();
         CallBackTopic callBackTopic = new CallBackTopic();
-        if (CALLBACKS.size() > callbackMaxCount) {
+        int size = CALLBACKS.size();
+        if (size > callbackMaxCount) {
             mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
             logger.error("[{}]message, system callback map is full[{}]", msgId);
             return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
@@ -221,7 +221,7 @@ public class MqttSenderImpl implements MqttSender {
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
-            logger.error("[{}]message, request timeout: [{}]", msgId, e.toString());
+            logger.error("[{}]message{},{}, request timeout: [{}]", msgId, serverCode, operaCode, e.toString());
             return new MsgResult(StateCode.TIMEOUT, e.toString());
         } catch (Exception e) {
             mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
@@ -231,6 +231,7 @@ public class MqttSenderImpl implements MqttSender {
             CALLBACKS.remove(msgId);
         }
 //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
+
         return new MsgResult(StateCode.FAILED, "请求失败");
     }
 
@@ -296,12 +297,11 @@ public class MqttSenderImpl implements MqttSender {
      */
     @ServiceActivator(inputChannel = CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        mqttExecutor.execute(() -> {
+        mqttSenderAckExecutor.execute(() -> {
             try {
                 String payload = message.getPayload();
                 MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
                 String msgId = resp.getMsgId();
-
                 logger.debug("[{}]message ack is [{}]", msgId, payload);
                 CallBackTopic callBackTopic = CALLBACKS.get(msgId); //使用删除返回已经设置的callback对象
                 if (callBackTopic != null) {
@@ -318,6 +318,9 @@ public class MqttSenderImpl implements MqttSender {
                 e.printStackTrace();
             }
         });
+//        int activeCount = mqttSenderAckExecutor.getActiveCount();
+//        if (activeCount>=50 && activeCount % 5 == 0)
+//            logger.warn("mqtt ack executor pool active count is [{}]", activeCount);
 
     }
 

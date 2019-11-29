@@ -40,7 +40,7 @@ mongodb:
 executor:
   threadPool:
     corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
-    maxPoolSize: 1000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
+    maxPoolSize: 100000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
 
 management:   #动态刷新配置文件
   security:

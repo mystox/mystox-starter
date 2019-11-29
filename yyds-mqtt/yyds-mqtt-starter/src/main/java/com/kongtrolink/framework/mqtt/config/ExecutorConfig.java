@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Created by mystoxlol on 2018/12/6, 15:23.
  * company: kongtrolink
@@ -12,8 +15,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * update record:
  */
 @Configuration
-public class ExecutorConfig
-{
+public class ExecutorConfig {
     @Value("${executor.threadPool.corePoolSize:10}")
     private int CORE_POOL_SIZE;
     @Value("${executor.threadPool.maxPoolSize:100000}")
@@ -22,23 +24,34 @@ public class ExecutorConfig
     @Bean(name = "logExecutor")
     public ThreadPoolTaskExecutor logExecutor()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"log-");
+        return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "log-");
     }
 
 
     @Bean(name = "mqttExecutor")
     public ThreadPoolTaskExecutor mqttExecutor()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"mqttExecutor-");
+        return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "mqttExecutor-");
     }
 
-    @Bean(name = "mqttSenderExecutor")
-    public ThreadPoolTaskExecutor mqttSender()
+    /*
+        @Bean(name = "mqttSenderExecutor")
+        public ThreadPoolTaskExecutor mqttSender()
+        {
+            return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttSender-");
+        }*/
+    @Bean(name = "mqttScheduled")
+    ScheduledExecutorService mqttScheduled() {
+        return Executors.newScheduledThreadPool(10);
+    }
+
+    @Bean(name = "mqttSenderAckExecutor")
+    public ThreadPoolTaskExecutor mqttAck()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"mqttSender-");
+        return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttAck-");
     }
 
-    protected ThreadPoolTaskExecutor builder(int corePoolSize,int maxPoolSize,int queueCapacity,int aliveSecondis,String threadName) {
+    protected ThreadPoolTaskExecutor builder(int corePoolSize, int maxPoolSize, int queueCapacity, int aliveSecondis, String threadName) {
         ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
         //线程池维护线程的最少数量
         poolTaskExecutor.setCorePoolSize(corePoolSize);
@@ -51,4 +64,5 @@ public class ExecutorConfig
         poolTaskExecutor.setThreadNamePrefix(threadName);
         return poolTaskExecutor;
     }
+
 }

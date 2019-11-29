@@ -2,13 +2,9 @@ package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
-import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
-import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
 import com.kongtrolink.framework.service.MqttSender;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -113,26 +108,6 @@ public class PerformanceController {
     }
 
 
-    @RequestMapping("/getCallBack")
-    public JsonResult getCallBack(@RequestBody JSONObject condition)
-    {
-        String msgId = condition.getString("msgId");
-        MqttSenderImpl mqttSender = (MqttSenderImpl) this.mqttSender;
-        Map<String, CallBackTopic> callbacks = mqttSender.getCALLBACKS();
-        CallBackTopic callBackTopic = callbacks.get(msgId);
-        MqttResp call = null;
-        try {
-            if (callBackTopic != null) {
-                System.out.println(callBackTopic.toString());
-                call = callBackTopic.call();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (StringUtils.isBlank(msgId))
-            return new JsonResult(callbacks.size());
-        return new JsonResult(call);
-    }
 
     @RequestMapping("/createThread")
     public JsonResult createThread(@RequestBody JSONObject condition)
