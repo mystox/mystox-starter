@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.kongtrolink.framework</groupId>
         <artifactId>business-project</artifactId>
@@ -13,13 +12,12 @@
     <version>1.0.0</version>
     <name>tower-server</name>
     <description>模拟铁塔业务服务</description>
-    <packaging>pom</packaging>
-   <!-- <properties>
+    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <skipTest>true</skipTest>
-    </properties>-->
+    </properties>
 
     <dependencies>
         <dependency>
@@ -76,5 +74,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

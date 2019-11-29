@@ -56,6 +56,11 @@ public class DeviceUtils {
 
         JSONObject jsonObject = JSONObject.parseObject(payload);
 
+        if (jsonObject.keySet().size() == 0) {
+            //该回复报文中无设备信息
+            return;
+        }
+
         JSONArray deviceList = jsonObject.getJSONArray("childDevices");
         jsonObject.remove("childDevices");
 

@@ -11,6 +11,7 @@ import com.kongtrolink.framework.enttiy.InformRuleUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -37,19 +38,19 @@ public class CreateInformMsgService {
 
     private List<Alarm> informAlarmList = new ArrayList<>();
 
-    public synchronized void handleInformAlarmList(List<Alarm> alarmList, String type){
-        if(Contant.ZERO.equals(type)){
+    public synchronized void handleInformAlarmList(List<Alarm> alarmList, String type) {
+        if (Contant.ZERO.equals(type)) {
             informAlarmList.clear();
-        }else if(Contant.ONE.equals(type)){
-            if(null != alarmList){
+        } else if (Contant.ONE.equals(type)) {
+            if (null != alarmList) {
                 informAlarmList.addAll(alarmList);
-                taskExecutor.execute(()->handle());
+                taskExecutor.execute(() -> handle());
             }
         }
     }
 
-    public synchronized List<Alarm> beforeHandle(){
-        if(informAlarmList.size() == 0){
+    public synchronized List<Alarm> beforeHandle() {
+        if (informAlarmList.size() == 0) {
             return null;
         }
         List<Alarm> hanldeAlarmList = new ArrayList<>();
@@ -63,14 +64,14 @@ public class CreateInformMsgService {
      * @date: 2019/10/22 10:25
      * 功能描述:不用定时任务试试
      */
-    public void handle(){
+    public void handle() {
         List<Alarm> alarmList = beforeHandle();
-        if(null == alarmList || alarmList.size() == 0){
-            return ;
+        if (null == alarmList || alarmList.size() == 0) {
+            return;
         }
         Date date = new Date();
         List<InformMsg> informMsgList = new ArrayList<>();
-        for(Alarm alarm : alarmList){
+        for (Alarm alarm : alarmList) {
             List<InformMsg> msgInformMsgList = createMsg(alarm, Contant.TEMPLATE_MSG, date);
             informMsgList.addAll(msgInformMsgList);
             List<InformMsg> emailInformMsgList = createMsg(alarm, Contant.TEMPLATE_EMAIL, date);
@@ -78,17 +79,18 @@ public class CreateInformMsgService {
             List<InformMsg> appEmailMsgList = createMsg(alarm, Contant.TEMPLATE_APP, date);
             informMsgList.addAll(appEmailMsgList);
         }
-        if(informMsgList.size() > 0){
+        if (informMsgList.size() > 0) {
             deliverService.handleInformMsgList(informMsgList, Contant.ONE);
         }
     }
 
-    private List<InformMsg> createMsg(Alarm alarm, String type, Date date){
+    private List<InformMsg> createMsg(Alarm alarm, String type, Date date) {
         List<InformMsg> msgList = new ArrayList<>();
         String enterpriseCode = alarm.getEnterpriseCode();
         String serverCode = alarm.getServerCode();
         Integer targetLevel = alarm.getTargetLevel();
         Date treport = alarm.getTreport();
+        if (treport == null) treport = new Date();
         List<InformRule> informRuleList = null;
         //获取匹配的短信通知
         try {
@@ -96,7 +98,7 @@ public class CreateInformMsgService {
             if (null == informRuleList || informRuleList.size() == 0) {
                 return msgList;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -106,45 +108,47 @@ public class CreateInformMsgService {
         //分别得到两个以informRule ID为键的map
         Map<String, List<InformRuleUser>> ruleId_ruleUserListMap = ruleUser2InformIdUserListMap(ruleUserList);
         Map<String, InformRule> informId_entityMap = inform2IdEntityMap(informRuleList);
-        for(String ruleId : informId_entityMap.keySet()){
+        for (String ruleId : informId_entityMap.keySet()) {
             InformRule informRule = informId_entityMap.get(ruleId);
             List<InformRuleUser> userList = ruleId_ruleUserListMap.get(ruleId);
-            for(InformRuleUser ruleUser : userList){
-                InformMsg msg = new InformMsg();
-                msg.initAlarmInfo(alarm, informRule, ruleUser, type, date);
-                msgList.add(msg);
+            if (!CollectionUtils.isEmpty(userList)) {
+                for (InformRuleUser ruleUser : userList) {
+                    InformMsg msg = new InformMsg();
+                    msg.initAlarmInfo(alarm, informRule, ruleUser, type, date);
+                    msgList.add(msg);
+                }
             }
         }
         return msgList;
     }
 
-    private List<String> inform2IdList(List<InformRule> informRuleList){
+    private List<String> inform2IdList(List<InformRule> informRuleList) {
         List<String> idList = new ArrayList<>();
-        if(null != informRuleList){
-            for (InformRule informRule : informRuleList){
+        if (null != informRuleList) {
+            for (InformRule informRule : informRuleList) {
                 idList.add(informRule.get_id());
             }
         }
         return idList;
     }
 
-    private Map<String, InformRule> inform2IdEntityMap(List<InformRule> informRuleList){
+    private Map<String, InformRule> inform2IdEntityMap(List<InformRule> informRuleList) {
         Map<String, InformRule> map = new HashMap<>();
-        if(null != informRuleList){
-            for(InformRule informRule : informRuleList){
+        if (null != informRuleList) {
+            for (InformRule informRule : informRuleList) {
                 map.put(informRule.get_id(), informRule);
             }
         }
         return map;
     }
 
-    private Map<String, List<InformRuleUser>> ruleUser2InformIdUserListMap(List<InformRuleUser> informRuleUserList){
+    private Map<String, List<InformRuleUser>> ruleUser2InformIdUserListMap(List<InformRuleUser> informRuleUserList) {
         Map<String, List<InformRuleUser>> map = new HashMap<>();
-        if(null != informRuleUserList){
-            for(InformRuleUser informRuleUser : informRuleUserList){
+        if (null != informRuleUserList) {
+            for (InformRuleUser informRuleUser : informRuleUserList) {
                 String informRuleId = informRuleUser.getInformRule().getStrId();
                 List<InformRuleUser> ruleUserList = map.get(informRuleId);
-                if(null == ruleUserList){
+                if (null == ruleUserList) {
                     ruleUserList = new ArrayList<>();
                 }
                 ruleUserList.add(informRuleUser);

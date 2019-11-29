@@ -5,6 +5,7 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
+import com.kongtrolink.framework.gateway.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
 import com.kongtrolink.framework.gateway.entity.Transverter;
 import com.kongtrolink.framework.gateway.mqtt.GatewayMqttSenderNative;
@@ -90,7 +91,10 @@ public class AssetTransverter extends TransverterHandler {
             deviceReport.setServerCode(getBusinessCode());
             deviceReport.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
             deviceReport.setRegionCode(getRegionCode());
-            deviceReport.setType(deviceTypeConfig.getAssentDeviceType(getFsuType()));
+            DeviceConfigEntity deviceConfigEntity = deviceTypeConfig.getAssentDeviceType(getFsuType());
+            if(deviceConfigEntity!=null){
+                deviceReport.setType(deviceConfigEntity.getAssentType());
+            }
             DeviceReportExtend extend= new DeviceReportExtend();
             extend.setModel(deviceReport.getType());
             deviceReport.setExtend(extend);
@@ -104,11 +108,11 @@ public class AssetTransverter extends TransverterHandler {
                 deviceReportChild.setServerCode(getBusinessCode());
                 deviceReportChild.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
                 deviceReportChild.setRegionCode(getRegionCode());
-                String type = deviceTypeConfig.getAssentDeviceType(device.getType());
-                if(type==null){
+                DeviceConfigEntity deviceConfig = deviceTypeConfig.getAssentDeviceType(device.getType());
+                if(deviceConfig==null){
                     deviceReportChild.setType(String.valueOf(device.getType()));
                 }else{
-                    deviceReportChild.setType(type);
+                    deviceReportChild.setType(deviceConfig.getAssentType());
                 }
                 DeviceReportExtendInfo extendInfo = new DeviceReportExtendInfo(device);
                 deviceReportChild.setExtend(extendInfo);

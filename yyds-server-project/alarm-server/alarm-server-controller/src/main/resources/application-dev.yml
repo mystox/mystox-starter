@@ -31,10 +31,10 @@ register:
 mqtt:
   username: root #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
   password: 123456 #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
-  url: tcp://172.16.5.26:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+  url: tcp://172.16.5.62:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 
 mongodb:
-  uri: mongodb://172.16.6.9:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm_server
 
 executor:
   threadPool:
@@ -47,16 +47,17 @@ management:   #动态刷新配置文件
 #告警产生操作流程
 reportOperate:
   operate[0]:
-    enterServerCode: yytd_TOWER_SERVER
+    enterServerCode: YYDS_TOWER_SERVER_1.0.0
     serverVerson: ALARM_SERVER_LEVEL_V1.0.0
     operaCode: handleLevel
   operate[1]:
-    enterServerCode: yytd_TOWER_SERVER
+    enterServerCode: YYDS_TOWER_SERVER_1.0.0
     serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver
+
 #告警消除操作流程
 resloveOperate:
   operate[0]:
-    enterServerCode: yytd_TOWER_SERVER
+    enterServerCode: YYDS_TOWER_SERVER_1.0.0
     serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver

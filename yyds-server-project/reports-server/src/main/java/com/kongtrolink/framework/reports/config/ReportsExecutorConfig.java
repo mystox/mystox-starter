@@ -26,7 +26,7 @@ public class ReportsExecutorConfig extends ExecutorConfig
     @Bean(name = "reportsExecutor")
     public ThreadPoolTaskExecutor reportsExecutor()
     {
-        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,200,10000);
+        return builder( CORE_POOL_SIZE,MAX_POOL_SIZE,2000,10000,"report-");
     }
 
     @Bean(name = "reportsScheduled")

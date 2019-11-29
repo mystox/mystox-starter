@@ -63,9 +63,11 @@ public class MqttReceiverImpl implements MqttReceiver {
     private ServiceRegistry serviceRegistry;
     @Autowired
     private MqttLogUtil mqttLogUtil;
+
     @Override
     public MqttResp receive(String topic, MqttMsg payload) {
-        logger.info("receive... ..." + JSONObject.toJSONString(payload));
+        logger.debug("receive... ..." + JSONObject.toJSONString(payload));
+
         String unit = getUnitBySubList(topic);
         MqttResp result = null;
         try {
@@ -77,12 +79,13 @@ public class MqttReceiverImpl implements MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(result.getMsgId(),StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
+            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
             logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
             result = new MqttResp(payload.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
         }
+
        /* String topic_ack = getAcyBySubList();
         if (StringUtils.isNotBlank(topic_ack))
             iMqttSender.sendToMqtt(topic_ack, 2, result);*/
@@ -172,6 +175,7 @@ public class MqttReceiverImpl implements MqttReceiver {
 
     @ServiceActivator(inputChannel = CHANNEL_NAME_IN/*, outputChannel = CHANNEL_NAME_OUT*/)
     public void messageReceiver(Message<String> message) {
+
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
@@ -183,24 +187,33 @@ public class MqttReceiverImpl implements MqttReceiver {
             String payload = message.getPayload();
             MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
             MqttResp result = receive(topic, mqttMsg);
+            if (!mqttMsg.getHasAck()) return; //如果不需返回
             String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
             result.setTopic(ackTopic);
             String ackPayload = JSONObject.toJSONString(result);
-            logger.info("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
+            logger.debug("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
 
             int length = ackPayload.getBytes(Charset.forName("utf-8")).length;
-            if (length > MQTT_PAYLOAD_LIMIT) {
-                //分包
-                List<MqttResp> resultArr = subpackage(result);
-                logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
-                int size = resultArr.size();
-                for (int i = 0; i < size; i++) {
-                    MqttResp resp = resultArr.get(i);
-                    iMqttSender.sendToMqtt(ackTopic, 2, JSONObject.toJSONString(resp));
-                }
-            } else
-                iMqttSender.sendToMqtt(ackTopic, 2, ackPayload);
+            try {
+                if (length > MQTT_PAYLOAD_LIMIT) {
+                    //分包
+                    List<MqttResp> resultArr = subpackage(result);
+                    logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
+                    int size = resultArr.size();
+                    for (int i = 0; i < size; i++) {
+                        MqttResp resp = resultArr.get(i);
+                        iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
+                    }
+                } else
+                    iMqttSender.sendToMqtt(ackTopic, 1, ackPayload);
+            } catch (Exception e) {
+                logger.error("[{}] message ",e);
+            }
         });
+//        int activeCount = mqttExecutor.getActiveCount();
+//        if (activeCount >= 50 && activeCount % 5 == 0)
+//            logger.warn("mqtt sender ack executor pool active count is [{}]", activeCount);
+
     }
 
 
@@ -266,7 +279,7 @@ public class MqttReceiverImpl implements MqttReceiver {
         int count = length / MQTT_PAYLOAD_LIMIT + 1;
         for (int i = 0; i < count; i++) {
             byte[] subarray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
-            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count,crc);
+            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count, crc);
             result.add(resp);
         }
         return result;

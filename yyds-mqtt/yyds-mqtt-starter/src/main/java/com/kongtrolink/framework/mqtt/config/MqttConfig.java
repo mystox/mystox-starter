@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
-import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -96,7 +96,7 @@ public class MqttConfig {
         // 设置会话心跳时间 单位为秒 服务器会每隔1.5*20秒的时间向客户端发送心跳判断客户端是否在线，但这个方法并没有重连的机制
         options.setKeepAliveInterval(20);
         // 设置“遗嘱”消息的话题，若客户端与服务器之间的连接意外中断，服务器将发布客户端的“遗嘱”消息。
-        options.setWill("willTopic", WILL_DATA, 2, false);
+        options.setWill("willTopic", WILL_DATA, 1, false);
         return options;
     }
 
@@ -135,16 +135,28 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = CHANNEL_NAME_OUT)
     public MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
+        /*MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
                 producerClientId,
                 mqttClientFactory());
         messageHandler.setAsync(true); //异步
         messageHandler.setAsyncEvents(true);
         messageHandler.setDefaultTopic(producerDefaultTopic);
         messageHandler.setCompletionTimeout(1000);
+        return messageHandler;*/
+        return new MultiMqttMessageHandler();
+    }
+    public MessageHandler createMqttOutbound()
+    {
+        String s = MqttAsyncClient.generateClientId();
+        MyMqttPahoMessageHandler messageHandler = new MyMqttPahoMessageHandler(producerClientId+"_"+s, mqttClientFactory());
+        messageHandler.setAsync(true); //异步
+//        messageHandler.setAsyncEvents(true);
+        messageHandler.setDefaultTopic(producerDefaultTopic);
+        messageHandler.setDefaultQos(1);
+//        messageHandler.setCompletionTimeout(1000);
+        messageHandler.onInit(); //手动初始化
         return messageHandler;
     }
-
     /**
      * MQTT消息订阅绑定（消费者）
      *
@@ -159,7 +171,7 @@ public class MqttConfig {
                         StringUtils.split(consumerDefaultTopic, ","));
         adapter.setCompletionTimeout(completionTimeout);
         adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
+//        adapter.setQos(0,1,2);
         // 设置订阅通道
         adapter.setOutputChannel(mqttInboundChannel());
         return adapter;
@@ -175,11 +187,11 @@ public class MqttConfig {
         // 可以同时消费（订阅）多个Topic
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(
-                        producerClientId+"_reply", mqttClientFactory(),
+                        producerClientId + "_reply", mqttClientFactory(),
                         StringUtils.split("topic_ack", ","));
         adapter.setCompletionTimeout(completionTimeout);
         adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
+//        adapter.setQos(0,1,2);
         // 设置订阅通道
         adapter.setOutputChannel(mqttReplyChannel());
         return adapter;
@@ -194,7 +206,6 @@ public class MqttConfig {
     public MessageChannel mqttInboundChannel() {
         return new DirectChannel();
     }
-
 
 
 }

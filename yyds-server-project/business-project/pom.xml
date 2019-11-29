@@ -7,14 +7,15 @@
         <groupId>com.kongtrolink.framework</groupId>
         <version>1.0.0</version>
     </parent>
+    <groupId>com.kongtrolink.framework</groupId>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>business-project</name>
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <artifactId>business-project</artifactId>
     <modules>
         <module>tower-server</module>
-        <!--<module>business-common</module>-->
+        <module>scloud-server</module>
     </modules>
 
 

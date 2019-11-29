@@ -12,8 +12,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @RunWith(SpringRunner.class)
@@ -81,8 +86,20 @@ public class AssetManagementServerApplicationTest {
         System.out.println(JSONObject.toJSONString(result));
     }
 
-    private String enterpriseCode = "yytd";
-    private String serverCode = "TOWER_SERVER";
+    @MockBean
+    RedisOperationsSessionRepository redisOperationsSessionRepository;
+
+    @Test
+    public void testDate() {
+        long t1 = System.currentTimeMillis();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date now = new Date(t1);
+        System.out.println(t1 + "," + simpleDateFormat.format(now));
+    }
+
+
+    private String enterpriseCode = "YYDS";
+    private String serverCode = "TOWER_SERVER_1.0.0";
 
     @Test
     public void testCreateCI() {
@@ -131,7 +148,13 @@ public class AssetManagementServerApplicationTest {
         jsonObjectENV.put("versionMinor", 2);
         jsonObjectENV.put("versionRevision", 9);
 
-        for (int i = 1; i <= 20000; ++i) {
+        neo4jDBService.searchCIConnectionType();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date now = new Date();
+        System.out.println(simpleDateFormat.format(now) + ":Start");
+
+        for (int i = 1; i <= 0; ++i) {
             String sn = "00000" + i;
             sn = sn.substring(sn.length() - 5);
             jsonObjectFsu.put("sn", "438" + sn);
@@ -151,7 +174,81 @@ public class AssetManagementServerApplicationTest {
 
             relationship.put("id2", envId);
             neo4jDBService.addCIRelationship(relationship);
+
+            if (i % 1000 == 0) {
+                now = new Date();
+                System.out.println(simpleDateFormat.format(now) + ":" + i);
+            }
         }
+    }
+
+    @Resource(name = "assetManagementExecutor")
+    ThreadPoolTaskExecutor taskExecutor;
+
+    final private int threadCount = 2;
+    private Boolean[] threadBoolean = new Boolean[threadCount];
+
+    @Test
+    public void testSearchCI() {
+
+        neo4jDBService.searchCIConnectionType();
+
+        for (int i = 0; i < threadCount; ++i) {
+            threadBoolean[i] = false;
+            final int index = i;
+            taskExecutor.execute(()->searchCI(index));
+        }
+
+        for (int i = 0; i < threadCount;) {
+            if (!threadBoolean[i]) {
+                try {
+                    Thread.sleep(1000*3);
+                } catch (Exception e) {
+
+                }
+                continue;
+            } else {
+                ++i;
+            }
+        }
+    }
+
+    private void searchCI(int index) {
+
+        int times = 10;
+        int pageNum = 20000;
+        int pageTotal = 60000 / pageNum;
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("enterpriseCode", enterpriseCode);
+        jsonObject.put("serverCode", serverCode);
+        jsonObject.put("pageNum", pageNum);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date now = new Date();
+        System.out.println(simpleDateFormat.format(now) + ":Thread-" + index + " Start");
+
+        long sum = 0;
+        for (int count = 0; count < times; ++count) {
+            for (int i = 1; i <= pageTotal; ++i) {
+                jsonObject.put("curPage", i);
+
+                Date startDate = new Date();
+                JSONObject result = neo4jDBService.searchCI(jsonObject);
+                Date endDate = new Date();
+
+                long diff = endDate.getTime() - startDate.getTime();
+
+                System.out.println(simpleDateFormat.format(startDate) + ":Thread-" + index + ",count-" + count + ",i-" + i + ",Begin");
+                System.out.println(simpleDateFormat.format(endDate) + ":Thread-" + index + ",count-" + count + ",i-" + i + ",End,interval-" + diff);
+
+                sum += diff;
+            }
+        }
+
+        double average = sum * 1.0 / times / pageTotal;
+        System.out.println("Thread-" + index + ",average-" + average);
+        threadBoolean[index] = true;
     }
 
     @Test

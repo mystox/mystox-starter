@@ -28,7 +28,7 @@ public class DeliverEntranceImpl implements DeliverEntrance{
     private static final Logger logger = LoggerFactory.getLogger(DeliverEntranceImpl.class);
     @Override
     public String handleDeliver(String alarmListJsonStr) {
-        logger.info("receive msg:{}", alarmListJsonStr);
+        logger.debug("receive msg:{}", alarmListJsonStr);
         List<Alarm> alarmList = JSON.parseArray(alarmListJsonStr, Alarm.class);
         msgService.handleInformAlarmList(alarmList, Contant.ONE);
         return alarmListJsonStr;
