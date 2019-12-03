@@ -1,6 +1,7 @@
 pipeline {
     parameters {
-        string(host60:'172.16.5.60', host65:'172.16.5.65')
+        string(name:'host60', defaultValue:'172.16.5.60')
+        string(name:'host65', defaultValue:'172.16.5.65')
     }
     agent {
         docker {
@@ -23,10 +24,11 @@ pipeline {
                   remote.name = 'controller'
                   remote.user = 'root'
                   remote.password = 'yytd1234'
+                  remote.host = ${params.host60}
                   remote.allowAnyHosts = true
                   writeFile file: 'abc.sh', text: 'ls'
                   sshCommand remote: remote, command: 'for i in {1..5}; do echo -n \"Loop \$i \"; date ; sleep 1; done', override: true
-                  sshPut remote: remote, from: 'abc.sh', into: '.'
+                  sshPut remote: remote, from: 'abc.sh', into: '/home'
                 }
             }
         }
