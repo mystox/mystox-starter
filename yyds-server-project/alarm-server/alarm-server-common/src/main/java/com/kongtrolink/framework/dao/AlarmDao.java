@@ -9,6 +9,7 @@ import com.mongodb.BulkWriteResult;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -32,6 +33,8 @@ public class AlarmDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
+    @Value("${alarm.currentLimit:100}")
+    private int currentLimit;
 
     public void save(Alarm alarm, String table) {
         mongoTemplate.save(alarm, table);
@@ -53,6 +56,17 @@ public class AlarmDao {
     }
 
     public List<DBObject> list(AlarmQuery alarmQuery, String table) {
+        Criteria criteria = new Criteria();
+        baseCriteria(criteria, alarmQuery);
+        Query query = Query.query(criteria);
+        int currentPage = alarmQuery.getCurrentPage();
+        int pageSize = alarmQuery.getPageSize();
+        query.with(new Sort(Sort.Direction.DESC, "treport"));
+        query.skip( (currentPage-1)*pageSize ).limit(currentLimit);
+        return mongoTemplate.find(query, DBObject.class, table);
+    }
+
+    public List<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery, String table) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);

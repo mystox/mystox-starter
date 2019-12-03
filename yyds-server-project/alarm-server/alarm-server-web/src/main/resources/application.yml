@@ -91,5 +91,7 @@ level:
   updateEnterpriseLevelMap: updateEnterpriseLevelMap
   useAlarmLevel: false
 
+alarm:
+  currentLimit: 200
 
 
