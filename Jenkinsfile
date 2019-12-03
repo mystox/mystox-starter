@@ -15,10 +15,6 @@ pipeline {
     post {
         success {
             script {
-                parameters {
-                    string(name:'host60', defaultValue:'172.16.5.60')
-                    string(name:'host65', defaultValue:'172.16.5.65')
-                }
                 stage ('pushJar') {
                   def remote = [:]
                   remote.name = 'controller'
