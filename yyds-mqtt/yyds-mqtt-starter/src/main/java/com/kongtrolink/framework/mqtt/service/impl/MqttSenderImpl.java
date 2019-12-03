@@ -208,26 +208,29 @@ public class MqttSenderImpl implements MqttSender {
             logger.error("[{}]message, system callback map is full[{}]", msgId);
             return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
         }
+        ExecutorService es = Executors.newSingleThreadExecutor();
         CALLBACKS.put(msgId, callBackTopic);
+        FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
         try {
             boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
             if (sendResult) {
-                ExecutorService es = Executors.newSingleThreadExecutor();
-                FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
                 es.submit(mqttMsgFutureTask);
-
                 MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
             logger.error("[{}]message{},{}, request timeout: [{}]", msgId, serverCode, operaCode, e.toString());
+            if (logger.isDebugEnabled()) e.printStackTrace();
             return new MsgResult(StateCode.TIMEOUT, e.toString());
         } catch (Exception e) {
             mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
             logger.error("[{}]message, request exception: [{}]", msgId, e.toString());
+            if (logger.isDebugEnabled()) e.printStackTrace();
             return new MsgResult(StateCode.FAILED, e.toString());
         } finally {
+            mqttMsgFutureTask.cancel(true);
+            es.shutdown();
             CALLBACKS.remove(msgId);
         }
 //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
