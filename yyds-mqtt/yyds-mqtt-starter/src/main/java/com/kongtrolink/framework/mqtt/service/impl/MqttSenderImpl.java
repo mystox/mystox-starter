@@ -169,17 +169,17 @@ public class MqttSenderImpl implements MqttSender {
         } catch (KeeperException e) {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
         } catch (InterruptedException e) {
             mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
         } catch (MessagingException e) {
             mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
         }
         mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
