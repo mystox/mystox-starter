@@ -1,4 +1,7 @@
 pipeline {
+    parameters {
+        string(host60:'172.16.5.60', host65:'172.16.5.65')
+    }
     agent {
         docker {
             image 'maven:3-alpine'
@@ -24,7 +27,7 @@ pipeline {
                   remote.allowAnyHosts = true
                   writeFile file: 'abc.sh', text: 'ls'
                   sshCommand remote: remote, command: 'for i in {1..5}; do echo -n \"Loop \$i \"; date ; sleep 1; done', override: true
-                  sshPut remote: remote, from: 'abc.sh', into: '/home'
+                  sshPut remote: remote, from: 'abc.sh', into: '.'
                 }
             }
         }
