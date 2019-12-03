@@ -33,7 +33,7 @@ public class AlarmDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    @Value("${alarm.currentLimit:100}")
+    @Value("${alarm.currentLimit:5}")
     private int currentLimit;
 
     public void save(Alarm alarm, String table) {
@@ -62,7 +62,7 @@ public class AlarmDao {
         int currentPage = alarmQuery.getCurrentPage();
         int pageSize = alarmQuery.getPageSize();
         query.with(new Sort(Sort.Direction.DESC, "treport"));
-        query.skip( (currentPage-1)*pageSize ).limit(currentLimit);
+        query.skip( (currentPage-1)*pageSize ).limit(pageSize * (currentLimit+1));
         return mongoTemplate.find(query, DBObject.class, table);
     }
 
