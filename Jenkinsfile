@@ -1,7 +1,5 @@
 pipeline {
-    parameters {
-        string(host60:'172.16.5.60', host65:'172.16.5.65')
-    }
+
     agent {
         docker {
             image 'maven:3-alpine'
