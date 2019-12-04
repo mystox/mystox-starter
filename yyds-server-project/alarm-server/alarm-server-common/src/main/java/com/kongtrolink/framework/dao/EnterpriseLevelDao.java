@@ -87,26 +87,35 @@ public class EnterpriseLevelDao {
     }
 
     public List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery) {
+        //先获取系统企业告警等级
+        List<EnterpriseLevel> systemLevel = getSystemLevel();
+
         Criteria criteria = new Criteria();
         baseCriteria(criteria, levelQuery);
-//        Sort sort = new Sort(Sort.Direction.ASC, "updateTime");
-        Aggregation agg = Aggregation.newAggregation(
-                Aggregation.match(criteria),  //查询条件
-                Aggregation.group("code", "updateTime"),
-//                Aggregation.sort(sort),
-                Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
-                Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
-        );
-        AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
-        List<EnterpriseLevel> mappedResults = aggResult.getMappedResults();
-        List<String> codeList = new ArrayList<>();
-        for(EnterpriseLevel enterpriseLevel : mappedResults){
-            codeList.add(enterpriseLevel.getCode());
-        }
-        List<EnterpriseLevel> byCodes = getByCodes(codeList);
+////        Sort sort = new Sort(Sort.Direction.ASC, "updateTime");
+//        Aggregation agg = Aggregation.newAggregation(
+//                        Aggregation.match(criteria),  //查询条件
+//                        Aggregation.group("code", "updateTime"),
+////                Aggregation.sort(sort),
+//                Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
+//                Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
+//        );
+//        AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
+//        List<EnterpriseLevel> mappedResults = aggResult.getMappedResults();
+//        List<String> codeList = new ArrayList<>();
+//        for(EnterpriseLevel enterpriseLevel : mappedResults){
+//            codeList.add(enterpriseLevel.getCode());
+//        }
+//        List<EnterpriseLevel> byCodes = getByCodes(codeList);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "code"));
+        query.with(new Sort(Sort.Direction.ASC, "level"));
+        List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
+        systemLevel.addAll(enterpriseLevelList);
+
         List<EnterpriseLevel> resuList = new ArrayList<>();
         Map<String, EnterpriseLevel> codeEnterpriseMap = new HashMap<>();
-        for(EnterpriseLevel enterpriseLevel : byCodes){
+        for(EnterpriseLevel enterpriseLevel : systemLevel){
             EnterpriseLevel firEnter = codeEnterpriseMap.get(enterpriseLevel.getCode());
             if(null == firEnter){
                 enterpriseLevel.setLevels(new ArrayList<>());
@@ -134,7 +143,7 @@ public class EnterpriseLevelDao {
                 Aggregation.group("code")
         );
         AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
-        return aggResult.getMappedResults().size();
+        return aggResult.getMappedResults().size() + 1;
     }
 
     Criteria baseCriteria(Criteria criteria, EnterpriseLevelQuery levelQuery){

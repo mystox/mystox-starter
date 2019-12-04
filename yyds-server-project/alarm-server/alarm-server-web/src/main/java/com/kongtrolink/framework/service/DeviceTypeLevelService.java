@@ -46,4 +46,6 @@ public interface DeviceTypeLevelService {
      * 功能描述:根据企业信息获取所有设备等级
      */
     List<DeviceTypeLevel> listByEnterpriseInfo(String enterpriseCode, String serverCode);
+
+    void updateAlarmLevelModel(String type, String level, String enterpriseCode, String serverCode, String deviceType, String deviceModel);
 }

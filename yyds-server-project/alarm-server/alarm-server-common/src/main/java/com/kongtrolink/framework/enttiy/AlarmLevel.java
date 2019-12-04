@@ -4,7 +4,9 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -199,5 +201,22 @@ public class AlarmLevel {
 
     public void setTargetLevelList(List<Integer> targetLevelList) {
         this.targetLevelList = targetLevelList;
+    }
+
+    public static void main(String[] ar){
+        Map<String, String> map = new HashMap<>();
+        map.put("one", "oneval");
+        map.put("two", "twoVal");
+        System.out.println("map:" + map);
+
+        Map<String, String> heheMap = new HashMap<>();
+        map.put("two", "twoNewVal");
+        map.put("thrr", "thrrVal");
+        map.putAll(heheMap);
+        System.out.println("map2222:" + map);
+    }
+
+    public String getKey(){
+        return enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel + Contant.EXCLAM + sourceLevel;
     }
 }
