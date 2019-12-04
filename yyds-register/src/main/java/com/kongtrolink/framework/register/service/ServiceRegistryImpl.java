@@ -55,10 +55,10 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     }
 
     public synchronized String create(final String path, byte data[], List<ACL> acl,
-                         CreateMode createMode)
-            throws KeeperException, InterruptedException {
+                                      CreateMode createMode) throws KeeperException, InterruptedException
+    {
         if (!exists(path))
-        return zk.create(path, data, acl, createMode);
+            return zk.create(path, data, acl, createMode);
         else return null;
     }
 
@@ -109,15 +109,18 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
 
     @Override
     public void deleteNode(String path) throws KeeperException, InterruptedException {
-        zk.delete(path,-1);
+        zk.delete(path, -1);
     }
 
     @Override
     public void process(WatchedEvent watchedEvent) {
-        if (watchedEvent.getState() == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
+        Event.KeeperState state = watchedEvent.getState();
+        if (state == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
             logger.warn("zookeeper connected successful...");
             latch.countDown();
-        } else if (watchedEvent.getState() == Watcher.Event.KeeperState.Expired) {
+        } else if (state == Watcher.Event.KeeperState.Expired
+                || state == Event.KeeperState.Disconnected)
+        {
             try {
                 synchronized (RegisterRunner.class) {
                     logger.warn("zookeeper reconnected...");

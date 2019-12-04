@@ -1,0 +1,64 @@
+pipeline {
+     agent {
+            docker {
+                image 'maven:3-alpine'
+                args '-v /home/mystox/respository:/root/.m2'
+            }
+        }
+    parameters {
+        string(name: 'host', defaultValue: '172.16.5.60', description: '')
+        string(name: 'user', defaultValue: 'root', description: '')
+        string(name: 'password', defaultValue: 'yytd1234', description: '')
+        string(name: 'deployServer', defaultValue: 'all', description: '')
+    }
+    environment {
+        def remote =''
+    }
+    stages {
+        //编译
+        stage ('Build') {
+            steps {
+                sh 'mvn -B -DskipTests clean package --settings /root/.m2/settings.xml'
+            }
+        }
+         stage ('init-ssh') {
+            steps {
+                script {
+                    remote = [:]
+                    remote.name = 'remote-server'
+                    remote.user = "${params.user}"
+                    remote.password = "${params.password}"
+                    remote.host = "${params.host}"
+                    remote.allowAnyHosts = true
+                }
+            }
+        }
+        //告警-页面服务
+        stage ('alarm-web') {
+            when {
+                expression {
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == 'ALARM_SERVER_WEB,' || deployServer =~ 'ALARM_SERVER_WEB,' || deployServer =~ ',ALARM_SERVER_WEB')
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('/home/yyds/alarm/','alarm-server-web-1.0.0.jar',10)
+                }
+            }
+        }
+
+    }
+
+}
+
+
+//远程部署方法
+def remoteExecutor(path, jarName, time){
+    sshCommand remote: remote, command: 'mkdir -p ' + path
+    sshPut remote: remote, from: 'yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', into: path + '/' + jarName
+    sshPut remote: remote, from: 'deployResources/alarm-web.ini', into: '/etc/supervisord.d'
+    sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
+    sshCommand remote: remote, command: 'supervisorctl update'
+    sshCommand remote: remote, command: 'supervisorctl restart alarms-web'
+}

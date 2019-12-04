@@ -47,6 +47,10 @@ public class MqttLogDao {
         if (StringUtils.isNotBlank(serverCode)) {
             criteria = criteria.and("serverCode").regex(serverCode);
         }
+        String msgId = query.getString("msgId");
+        if (StringUtils.isNotBlank(msgId)) {
+            criteria = criteria.and("msgId").regex(msgId);
+        }
 
         String sourceServerCode = query.getString("sourceServerCode");
         if (StringUtils.isNotBlank(sourceServerCode)) {
@@ -84,6 +88,10 @@ public class MqttLogDao {
         String serverCode = query.getString("serverCode");
         if (StringUtils.isNotBlank(serverCode)) {
             criteria = criteria.and("serverCode").regex(serverCode);
+        }
+        String msgId = query.getString("msgId");
+        if (StringUtils.isNotBlank(msgId)) {
+            criteria = criteria.and("msgId").regex(msgId);
         }
 
         String sourceServerCode = query.getString("sourceServerCode");
