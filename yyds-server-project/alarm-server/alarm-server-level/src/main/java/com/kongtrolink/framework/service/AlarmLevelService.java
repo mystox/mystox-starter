@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
@@ -10,13 +9,11 @@ import com.kongtrolink.framework.dao.EnterpriseLevelDao;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
-import com.sun.org.apache.bcel.internal.generic.ALOAD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +90,7 @@ public class AlarmLevelService {
             enterpriseLevelList.add(enterpriseLevel);
             enterpriseLevelMap.put(key, enterpriseLevelList);
         }
-        logger.info("initEnterpriseLevelMap, useEnterpriseLevel:{}, map keyset:{}", useEnterpriseLevel, enterpriseLevelMap.keySet().toString());
+        logger.info("初始化企业告警等级map, useEnterpriseLevel:{}, map keyset:{}", useEnterpriseLevel, enterpriseLevelMap.keySet().toString());
     }
 
     /**
@@ -169,7 +166,7 @@ public class AlarmLevelService {
             enterSerCodeAlarmLevelList.add(alarmLevel);
             enterSerCodeAlarmLevelListMap.put(enterServer, enterSerCodeAlarmLevelList);
         }
-        logger.info("initAlarmLevelMap, userAlarmLevel:{}, map.size:{} ", userAlarmLevel, alarmLevelMap.size());
+        logger.info("初始化告警等级map, userAlarmLevel:{}, map.size:{} ", userAlarmLevel, alarmLevelMap.size());
     }
 
     public AlarmLevel matchAlarmLevel(String enterpriseCode, String serverCode, String deviceType, String deviceModel, int sourceLevel){
@@ -183,47 +180,63 @@ public class AlarmLevelService {
             return;
         }
         String[] split = jsonStr.split(Contant.COLON);
-        if(split.length != 3){
+        if(split.length != 4){
             logger.info("接收到错误修改告警等级调用：{}", jsonStr);
             return;
         }
+        logger.info("接收到远程告警等级调用消息：{}", jsonStr);
         String type = split[0];
         String level = split[1];
-        String val = split[2];
-        String[] info = val.split(Contant.EXCLAM);
-        if(Contant.DEVICELEVEL.equals(level)){      //web端修改告警等级，或者添加，修改，删除设备等级
-            if(Contant.UPDATE.equals(type)) {
-                //根据enterpriseCode, serverCode, deviceType, deviceModel更新内存中告警信息
-                if (info.length != 4) {
-                    logger.info("接收到错误修改告警等级调用：{}", jsonStr);
-                    return;
+        String enterServerDevice = split[2];
+        String deleteKey = split[3];
+        String[] info = enterServerDevice.split(Contant.EXCLAM);
+        if(info.length <2){
+            logger.info("接收到错误修改告警等级调用：{}", jsonStr);
+            return;
+        }
+        String enterpriseCode = info[0];
+        String serverCode = info[1];
+        String enterServer = enterpriseCode + Contant.EXCLAM + serverCode;
+        if(Contant.DEVICELEVEL.equals(level)) {
+            if (info.length != 4) {
+                logger.info("接收到错误修改告警等级调用：{}", jsonStr);
+                return;
+            }
+            //添加设备type:level:enterpriseCode!serverCode!deviceType!deviceModel:THENULL
+            //告警等级页面修改告警等级，修改设备等级，删除设备等级type:level:enterpriseCode!serverCode!deviceType!deviceModel:key1,key2...
+            if (!Contant.THENULL.equals(deleteKey)){
+                for (String key : deleteKey.split(Contant.COMMA)) {
+                    alarmLevelMap.remove(key);
                 }
+            }
+            if(Contant.UPDATE.equals(type)) {
+                //根据enterpriseCode, serverCode, deviceType, deviceModel更新alarmLevelMap中告警信息
                 List<AlarmLevel> alarmLevelList = alarmLevelDao.getByInfo(info[0], info[1], info[2], info[3]);
                 for (AlarmLevel alarmLevel : alarmLevelList) {
                     alarmLevelMap.put(alarmLevel.getKey(), alarmLevel);
                 }
-            }else if(Contant.DELETE.equals(type)){
-                for(String key : val.split(Contant.COMMA)){
-                    alarmLevelMap.remove(key);
+            }
+            //重置enterSerCodeAlarmLevelListMap
+            //1根据enterpriseCode和serverCode从数据库获取告警
+            List<AlarmLevel> alarmLevelList = alarmLevelDao.getByInfo(enterpriseCode, serverCode, null, null);
+            //2，跟新enterSerCodeAlarmLevelListMap中数据
+            enterSerCodeAlarmLevelListMap.put(enterServer, alarmLevelList);
+
+        }else if(Contant.ENTERPRISELEVEL.equals(level)){
+            //企业告警等级只有修改type:level:enterpriseCode!serverCode:THENULL
+            List<AlarmLevel> enterSerCodeAlarmLevelList = enterSerCodeAlarmLevelListMap.get(enterServer);
+            if(null != enterSerCodeAlarmLevelList){
+                for(AlarmLevel alarmLevel : enterSerCodeAlarmLevelList){
+                    alarmLevelMap.remove(alarmLevel.getKey());
                 }
             }
-        }else if(Contant.ENTERPRISELEVEL.equals(level)){        //web端修改企业告警等级type:level:enterpriseCode!serverCode
-            String enterpriseCode = info[0];
-            String serverCode = info[1];
+            enterSerCodeAlarmLevelListMap.remove(enterServer);
             //修改企业告警，引发的修改告警等级
-            if(Contant.DELETE.equals(type)){
-                String enterServer = enterpriseCode + Contant.EXCLAM + serverCode;
-                List<AlarmLevel> enterSerCodeAlarmLevelList = enterSerCodeAlarmLevelListMap.get(enterServer);
-                if(null != enterSerCodeAlarmLevelList){
-                    for(AlarmLevel alarmLevel : enterSerCodeAlarmLevelList){
-                        alarmLevelMap.remove(alarmLevel.getKey());
-                    }
-                }
-            }else if(Contant.UPDATE.equals(type)){
+            if(Contant.UPDATE.equals(type)){
                 //1根据enterpriseCode和serverCode从数据库获取告警
                 List<AlarmLevel> alarmLevelList = alarmLevelDao.getByInfo(enterpriseCode, serverCode, null, null);
                 //2，跟新enterSerCodeAlarmLevelListMap中数据
-                enterSerCodeAlarmLevelListMap.put(enterpriseCode+Contant.EXCLAM+serverCode, alarmLevelList);
+                enterSerCodeAlarmLevelListMap.put(enterServer, alarmLevelList);
                 //3,更新alarmLevelMap中数据
                 for(AlarmLevel alarmLevel : alarmLevelList){
                     alarmLevelMap.put(alarmLevel.getKey(), alarmLevel);

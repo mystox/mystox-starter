@@ -38,4 +38,6 @@ public interface AlarmLevelService {
      * 功能描述:根据设备信息获取
      */
     List<AlarmLevel> getByInfo(String enterpriseCode, String serverCode, String deviceType, String deviceModel);
+
+    String getDeleteKey(String enterpriseCode, String serverCode, String deviceType, String deviceModel);
 }

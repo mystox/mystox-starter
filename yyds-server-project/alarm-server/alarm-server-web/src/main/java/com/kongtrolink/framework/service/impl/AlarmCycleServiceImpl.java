@@ -139,7 +139,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
             systemCycle.setCycleType(Contant.SYSTEM);
             systemCycle.setEnterpriseServer(Contant.SYSTEM);
         }
-        logger.info("默认告警周期：{}", systemCycle.toString());
+        logger.info("默认告警周期存在，无需初始化：{}", systemCycle.toString());
         cycleDao.save(systemCycle);
     }
 }

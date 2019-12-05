@@ -47,5 +47,14 @@ public interface DeviceTypeLevelService {
      */
     List<DeviceTypeLevel> listByEnterpriseInfo(String enterpriseCode, String serverCode);
 
-    void updateAlarmLevelModel(String type, String level, String enterpriseCode, String serverCode, String deviceType, String deviceModel);
+    /**
+     * @auther: liudd
+     * @date: 2019/12/5 12:24
+     * 功能描述:远程修改等级模块中告警等级
+     *  告警等级和设备等级
+     * String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel
+     * 企业等级：
+     * String key = enterpriseCode + Contant.EXCLAM + serverCode
+     */
+    void updateAlarmLevelModel(String type, String level, String key, String deleteKey);
 }

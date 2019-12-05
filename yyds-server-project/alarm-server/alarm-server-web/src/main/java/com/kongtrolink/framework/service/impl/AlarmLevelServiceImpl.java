@@ -3,20 +3,13 @@ package com.kongtrolink.framework.service.impl;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.dao.AlarmLevelDao;
-import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
-import com.kongtrolink.framework.service.MqttSender;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import sun.plugin2.os.windows.SECURITY_ATTRIBUTES;
-
 import java.util.List;
 
 /**
@@ -48,6 +41,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
         String serverCode = alarmLevel.getServerCode();
         String deviceType = alarmLevel.getDeviceType();
         String deviceModel = alarmLevel.getDeviceModel();
+        //先获取需要删除的告警等级
+        String deleteKey = getDeleteKey(enterpriseCode, serverCode, deviceType, deviceModel);
         //删除原有告警等级
         int resNum = deleteList(enterpriseCode, serverCode, deviceType, deviceModel);
         boolean result = resNum > 0 ? true : false;
@@ -70,8 +65,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
             }
         }
         //修改等级模块告警等级信息
-        deviceTypeLevelService.updateAlarmLevelModel(Contant.UPDATE, Contant.DEVICELEVEL, enterpriseCode,
-                serverCode, deviceType, deviceModel);
+        String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel;
+        deviceTypeLevelService.updateAlarmLevelModel(Contant.UPDATE, Contant.DEVICELEVEL, key, deleteKey);
         return result;
     }
 
@@ -115,5 +110,20 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
     @Override
     public List<AlarmLevel> getByInfo(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
         return alarmLevelDao.getByInfo(enterpriseCode, serverCode, deviceType, deviceModel);
+    }
+
+    @Override
+    public String getDeleteKey(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        String deleteKey = null;
+        //删除设备等级，先根据设备等级获取所有告警等级
+        List<AlarmLevel> alarmLevelList = getByInfo(enterpriseCode, serverCode, deviceType, deviceModel);
+        if(null != alarmLevelList && alarmLevelList.size()>0){
+            StringBuilder stringBuilder = new StringBuilder();
+            for(AlarmLevel alarmLevel : alarmLevelList) {
+                stringBuilder.append(alarmLevel.getKey()).append(",");
+            }
+            deleteKey = stringBuilder.substring(0, stringBuilder.lastIndexOf(","));
+        }
+        return deleteKey;
     }
 }
