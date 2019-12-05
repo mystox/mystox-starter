@@ -31,4 +31,11 @@ public interface AlarmService {
      * 功能描述:前端获取历史告警表
      */
     ListResult<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/5 19:20
+     * 功能描述:历史告警伪分页
+     */
+    ListResult<DBObject> historyAlarmList(AlarmQuery alarmQuery);
 }

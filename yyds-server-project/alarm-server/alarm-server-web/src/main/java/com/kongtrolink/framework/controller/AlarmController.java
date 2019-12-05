@@ -11,8 +11,11 @@ import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.kongtrolink.framework.service.AuxilaryService;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,26 +39,57 @@ public class AlarmController extends BaseController {
     AlarmService alarmService;
     @Autowired
     AuxilaryService auxilaryService;
+    @Autowired
+    MongoTemplate mongoTemplate;
 
     @RequestMapping("/list")
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery){
-        alarmQuery.setEnterpriseCode("YYDS");
-        alarmQuery.setServerCode("TOWER_SERVER_1.0.0");
+//        alarmQuery.setEnterpriseCode("YYDS");
+//        alarmQuery.setServerCode("TOWER_SERVER_1.0.0");
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
         ListResult<DBObject> listResult ;
         if(Contant.CURR_ALARM.equals(alarmQuery.getType())){
             List<DBObject> list= alarmService.list(alarmQuery, MongTable.ALARM_CURRENT);
-//            int count = alarmService.count(alarmQuery, MongTable.ALARM_CURRENT);
             int count = list.size();
             listResult = new ListResult<>(list, count);
         }else{
-            listResult = alarmService.getHistoryAlarmList(alarmQuery);
+            listResult = alarmService.historyAlarmList(alarmQuery);
         }
         JsonResult jsonResult = new JsonResult(listResult);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         jsonResult.setOtherInfo(auxilary);
         return jsonResult;
     }
+
+//    public void testIndex(){
+//        String table = "YYDS_TOWER_SERVER_1.0.0_alarm_history_2019_47";
+//        DBCollection collection = mongoTemplate.getCollection(table);
+//        System.out.println(collection);
+//        boolean hadIndex = hadIndex(collection);
+//        if(!hadIndex){
+//            collection.createIndex("key");
+//            collection.createIndex("treport");
+//            hadIndex = hadIndex(collection);
+//            if(hadIndex){
+//                System.out.println("拥有两个index了");
+//            }
+//        }
+//    }
+//
+//    public boolean hadIndex(DBCollection collection){
+//        List<DBObject> indexInfo = collection.getIndexInfo();
+//        for(DBObject dbObject : indexInfo){
+//            System.out.println(dbObject);
+//            Object key = dbObject.get("key");
+//            String keyStr = key.toString();
+//            if(keyStr.contains("key")){
+//                System.out.println("table:" + collection.getName() + " 包含索引key");
+//                return true;
+//            }
+//        }
+//        System.out.println("table:" + collection.getName() + " 不包含索引key");
+//        return false;
+//    }
 }

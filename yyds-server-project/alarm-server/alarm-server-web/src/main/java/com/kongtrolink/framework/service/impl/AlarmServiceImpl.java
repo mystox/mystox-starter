@@ -9,6 +9,7 @@ import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +27,8 @@ public class AlarmServiceImpl implements AlarmService{
     @Autowired
     AlarmDao alarmDao;
     Calendar calendar = DateUtil.calendar;
+    @Value("${alarm.currentLimit:5}")
+    private int currentLimit;
 
     /**
      * @param alarmQuery
@@ -55,7 +58,7 @@ public class AlarmServiceImpl implements AlarmService{
      * @param alarmQuery
      * @auther: liudd
      * @date: 2019/11/13 16:59
-     * 功能描述:前端获取历史告警表
+     * 功能描述:前端获取历史告警表， 完美的方法，但是真实分页不适合单表过大。只能使用类似于实时告警中的伪分页
      */
     @Override
     public ListResult<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery) {
@@ -105,6 +108,51 @@ public class AlarmServiceImpl implements AlarmService{
     }
 
     /**
+     * @param alarmQuery
+     * @auther: liudd
+     * @date: 2019/12/5 19:20
+     * 功能描述:历史告警伪分页
+     */
+    @Override
+    public ListResult<DBObject> historyAlarmList(AlarmQuery alarmQuery) {
+        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
+                + Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
+        //1，确定时间。如果开始接结束都没有选择，开始结束为今天到一个月前的今天
+        alarmQuery = initTime(alarmQuery);
+        //2，获取时间跨度内各个时间点的年周数，生成对应的表
+        List<String> weeks = getWeeks(alarmQuery);
+        System.out.println(weeks.toString());
+        List<DBObject> allList = new ArrayList<>();
+        int currentPage = alarmQuery.getCurrentPage();
+        int pageSize = alarmQuery.getPageSize();
+        int allSize = pageSize * (currentLimit+1);
+        int beginNum = (currentPage - 1) * pageSize;
+        int nextBegin = beginNum;   //下一个表分页起始数据
+        int nextSize = allSize;    //下一个表获取数量
+        //从各个表获取数据
+        for(int i=weeks.size()-1; i>=0; i--){
+            if(nextSize <= 0){
+                break;
+            }
+            String table = tablePrefix + weeks.get(i);
+            alarmQuery.setRealBeginNum(nextBegin);
+            alarmQuery.setRealLimit(nextSize);
+            List<DBObject> historyAlarmList = alarmDao.getHistoryAlarmList(alarmQuery, table);
+            int tempCount = historyAlarmList.size();
+            if(nextBegin > tempCount){
+                nextBegin = nextSize - tempCount;
+            }else {
+                for(int m = nextBegin; m< tempCount; m++){
+                    allList.add(historyAlarmList.get(m));
+                }
+                nextBegin = 0;
+                nextSize = nextSize+nextBegin - tempCount;
+            }
+        }
+        return new ListResult<>(allList, allList.size());
+    }
+
+    /**0
      * @auther: liudd
      * @date: 2019/11/13 16:36
      * 功能描述:确定开始结束时间
