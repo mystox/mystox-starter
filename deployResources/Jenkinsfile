@@ -34,16 +34,34 @@ pipeline {
             }
         }
         //告警-页面服务
-        stage ('alarm-web') {
+        def serverCode = 'ALARM_SERVER_WEB_1.0.0'
+        stage (serverCode) {
             when {
                 expression {
                     def deployServer = params.deployServer
-                    return (deployServer == 'all' || deployServer == 'ALARM_SERVER_WEB,' || deployServer =~ 'ALARM_SERVER_WEB,' || deployServer =~ ',ALARM_SERVER_WEB')
+                    return (deployServer == 'all' || deployServer == serverCode || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
                 }
             }
             steps {
                 script {
-                        remoteExecutor('/home/yyds/alarm','alarm-server-web-1.0.0.jar',20)
+                        remoteExecutor('yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', \
+                        '/home/yyds/alarm','alarm-server-web-1.0.0.jar',20,'deployResources/alarm-web.ini','alarm-web')
+                }
+            }
+        }
+         //报表-页面服务
+        serverCode= 'REPORTS_SERVER_1.0.0'
+        stage (serverCode) {
+            when {
+                expression {
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', \
+                        '/home/yyds/alarm','alarm-server-web-1.0.0.jar',20,'deployResources/alarm-web.ini','alarm-web')
                 }
             }
         }
@@ -54,11 +72,11 @@ pipeline {
 
 
 //远程部署方法
-def remoteExecutor(path, jarName, time){
+def remoteExecutor(sourcePath, path, jarName, time, initFile){
     sshCommand remote: remote, command: 'mkdir -p ' + path
-    sshPut remote: remote, from: 'yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', into: path + '/' + jarName
-    sshPut remote: remote, from: 'deployResources/alarm-web.ini', into: '/etc/supervisord.d'
+    sshPut remote: remote, from: sourcePath, into: path + '/' + jarName
+    sshPut remote: remote, from: initFile, into: '/etc/supervisord.d'
     sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
     sshCommand remote: remote, command: 'supervisorctl update'
-    sshCommand remote: remote, command: 'supervisorctl restart alarm-web'
+    sshCommand remote: remote, command: 'supervisorctl restart '+ initFile
 }
