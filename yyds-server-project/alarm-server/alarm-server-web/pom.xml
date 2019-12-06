@@ -21,6 +21,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.kongtrolink.framework</groupId>
+			<artifactId>yyds-mqtt-starter</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.kongtrolink.framework</groupId>
 			<artifactId>yyds-core</artifactId>
 			<version>1.0.0</version>
 		</dependency>
