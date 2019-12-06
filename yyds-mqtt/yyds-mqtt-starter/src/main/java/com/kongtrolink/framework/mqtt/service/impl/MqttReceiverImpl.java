@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -106,7 +107,7 @@ public class MqttReceiverImpl implements MqttReceiver {
             MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
 //            logger.info("local result: {}", result);
             return resp;
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException |NoSuchBeanDefinitionException| IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;
