@@ -43,7 +43,7 @@ pipeline {
             }
             steps {
                 script {
-                        remoteExecutor('/home/yyds/alarm/','alarm-server-web-1.0.0.jar',10)
+                        remoteExecutor('/home/yyds/alarm/','alarm-server-web-1.0.0.jar',20)
                 }
             }
         }
