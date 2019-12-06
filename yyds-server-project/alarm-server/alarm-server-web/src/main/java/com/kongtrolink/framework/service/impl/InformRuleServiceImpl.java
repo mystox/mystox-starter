@@ -148,6 +148,6 @@ public class InformRuleServiceImpl implements InformRuleService {
             }
             save(systemRule);
         }
-        logger.info("系统默认告警投递规则：{}", systemRule.toString());
+        logger.info("系统默认告警投递规则存在，无需初始化：{}", systemRule.toString());
     }
 }

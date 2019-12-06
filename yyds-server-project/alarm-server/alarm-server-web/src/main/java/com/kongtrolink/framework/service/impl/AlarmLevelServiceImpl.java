@@ -1,10 +1,12 @@
 package com.kongtrolink.framework.service.impl;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.dao.AlarmLevelDao;
 import com.kongtrolink.framework.enttiy.AlarmLevel;
 import com.kongtrolink.framework.query.AlarmLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
+import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
     AlarmLevelDao alarmLevelDao;
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
+    @Autowired
+    DeviceTypeLevelService deviceTypeLevelService;
 
     @Override
     public boolean save(AlarmLevel alarmLevel) {
@@ -33,8 +37,14 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
 
     @Override
     public boolean update(AlarmLevel alarmLevel) {
+        String enterpriseCode = alarmLevel.getEnterpriseCode();
+        String serverCode = alarmLevel.getServerCode();
+        String deviceType = alarmLevel.getDeviceType();
+        String deviceModel = alarmLevel.getDeviceModel();
+        //先获取需要删除的告警等级
+        String deleteKey = getDeleteKey(enterpriseCode, serverCode, deviceType, deviceModel);
         //删除原有告警等级
-        int resNum = deleteList(alarmLevel.getEnterpriseCode(), alarmLevel.getServerCode(), alarmLevel.getDeviceType(), alarmLevel.getDeviceModel());
+        int resNum = deleteList(enterpriseCode, serverCode, deviceType, deviceModel);
         boolean result = resNum > 0 ? true : false;
         if(result){
             List<Integer> sourceLevelList = alarmLevel.getSourceLevelList();
@@ -54,6 +64,9 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
                 save(alarmLevel);
             }
         }
+        //修改等级模块告警等级信息
+        String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel;
+        deviceTypeLevelService.updateAlarmLevelModel(Contant.UPDATE, Contant.DEVICELEVEL, key, deleteKey);
         return result;
     }
 
@@ -83,5 +96,34 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
 
     public List<AlarmLevel> getByEntDevCodeList(List<String> entDevCodeList){
         return alarmLevelDao.getByEntDevCodeList(entDevCodeList);
+    }
+
+    /**
+     * @param enterpriseCode
+     * @param serverCode
+     * @param deviceType
+     * @param deviceModel
+     * @auther: liudd
+     * @date: 2019/12/4 19:57
+     * 功能描述:根据设备信息获取
+     */
+    @Override
+    public List<AlarmLevel> getByInfo(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        return alarmLevelDao.getByInfo(enterpriseCode, serverCode, deviceType, deviceModel);
+    }
+
+    @Override
+    public String getDeleteKey(String enterpriseCode, String serverCode, String deviceType, String deviceModel) {
+        String deleteKey = null;
+        //删除设备等级，先根据设备等级获取所有告警等级
+        List<AlarmLevel> alarmLevelList = getByInfo(enterpriseCode, serverCode, deviceType, deviceModel);
+        if(null != alarmLevelList && alarmLevelList.size()>0){
+            StringBuilder stringBuilder = new StringBuilder();
+            for(AlarmLevel alarmLevel : alarmLevelList) {
+                stringBuilder.append(alarmLevel.getKey()).append(",");
+            }
+            deleteKey = stringBuilder.substring(0, stringBuilder.lastIndexOf(","));
+        }
+        return deleteKey;
     }
 }

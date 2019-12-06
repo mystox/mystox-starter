@@ -33,7 +33,7 @@ public class AlarmDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    @Value("${alarm.currentLimit:100}")
+    @Value("${alarm.currentLimit:5}")
     private int currentLimit;
 
     public void save(Alarm alarm, String table) {
@@ -62,7 +62,7 @@ public class AlarmDao {
         int currentPage = alarmQuery.getCurrentPage();
         int pageSize = alarmQuery.getPageSize();
         query.with(new Sort(Sort.Direction.DESC, "treport"));
-        query.skip( (currentPage-1)*pageSize ).limit(currentLimit);
+        query.skip( (currentPage-1)*pageSize ).limit(pageSize * (currentLimit+1));
         return mongoTemplate.find(query, DBObject.class, table);
     }
 
@@ -70,14 +70,9 @@ public class AlarmDao {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
-        int currentPage = alarmQuery.getCurrentPage();
-        int pageSize = alarmQuery.getPageSize();
         query.with(new Sort(Sort.Direction.DESC, "treport"));
-        query.skip( (currentPage-1)*pageSize ).limit(pageSize);
-        //历史告警分表分页使用指定起始数据和分页大小
-        if(null != alarmQuery.getRealBeginNum()){
-            query.skip(alarmQuery.getRealBeginNum()).limit(alarmQuery.getRealLimit());
-        }
+        query.skip(alarmQuery.getRealBeginNum()).limit(alarmQuery.getRealLimit());
+
         return mongoTemplate.find(query, DBObject.class, table);
     }
 

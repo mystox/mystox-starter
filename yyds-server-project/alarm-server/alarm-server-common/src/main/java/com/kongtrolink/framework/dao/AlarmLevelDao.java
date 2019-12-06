@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -197,5 +196,23 @@ public class AlarmLevelDao {
 
     public List<AlarmLevel> getAll(){
         return mongoTemplate.findAll(AlarmLevel.class, table);
+    }
+
+    public List<AlarmLevel> getByInfo(String enterpriseCode, String serverCode, String deviceType, String deviceModel){
+        Criteria criteria = new Criteria();
+        if(!StringUtil.isNUll(enterpriseCode)){
+            criteria.and("enterpriseCode").is(enterpriseCode);
+        }
+        if(!StringUtil.isNUll(serverCode)) {
+            criteria.and("serverCode").is(serverCode);
+        }
+        if(!StringUtil.isNUll(deviceType)) {
+            criteria.and("deviceType").is(deviceType);
+        }
+        if(!StringUtil.isNUll(deviceModel)) {
+            criteria.and("deviceModel").is(deviceModel);
+        }
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, AlarmLevel.class, table);
     }
 }

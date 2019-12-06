@@ -47,4 +47,14 @@ public class LevelEntranceImpl implements LevelEntrance{
     public void updateEnterpriseLevelMap(String jsonStr) {
         alarmLevelService.updateEnterpriseLevelMap(jsonStr);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/3 15:18
+     * 功能描述:web端修改告警等级后，同步修改告警等级模块内存中告警等级
+     */
+    @Override
+    public void updateAlarmLevelMap(String jsonStr) {
+        alarmLevelService.updateAlarmLevelMap(jsonStr);
+    }
 }

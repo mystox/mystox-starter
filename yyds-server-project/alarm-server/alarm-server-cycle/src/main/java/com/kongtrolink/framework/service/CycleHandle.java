@@ -204,6 +204,7 @@ public class CycleHandle{
                 boolean hadIndex = hadIndex(collection);
                 if(!hadIndex){
                     collection.createIndex("key");
+                    collection.createIndex("treport");
                     hadIndex = hadIndex(collection);
                     if(hadIndex){
                         fixSizeArrayList.add(table);
