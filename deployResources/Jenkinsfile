@@ -60,5 +60,5 @@ def remoteExecutor(path, jarName, time){
     sshPut remote: remote, from: 'deployResources/alarm-web.ini', into: '/etc/supervisord.d'
     sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
     sshCommand remote: remote, command: 'supervisorctl update'
-    sshCommand remote: remote, command: 'supervisorctl restart alarms-web'
+    sshCommand remote: remote, command: 'supervisorctl restart alarm-web'
 }
