@@ -11,14 +11,25 @@ public class ReportWebConfig {
     private String serverCode;
     private String enterpriseCode;
     private String configData;
+    private String funcPrivCode;
 
     public ReportWebConfig() {
     }
 
-    public ReportWebConfig(String serverCode, String enterpriseCode, String configData) {
+    public ReportWebConfig(String serverCode, String enterpriseCode, String configData, String funcPrivCode) {
         this.serverCode = serverCode;
         this.enterpriseCode = enterpriseCode;
         this.configData = configData;
+        this.funcPrivCode = funcPrivCode;
+    }
+
+
+    public String getFuncPrivCode() {
+        return funcPrivCode;
+    }
+
+    public void setFuncPrivCode(String funcPrivCode) {
+        this.funcPrivCode = funcPrivCode;
     }
 
     public String getId() {

@@ -1,9 +1,13 @@
 package com.kongtrolink.framework.reports.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.entity.TopicPrefix;
+import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
+import com.kongtrolink.framework.register.entity.PrivFuncEntity;
+import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.reports.dao.ReportTaskDao;
 import com.kongtrolink.framework.reports.dao.ReportTaskResultDao;
@@ -12,16 +16,22 @@ import com.kongtrolink.framework.reports.entity.ReportTask;
 import com.kongtrolink.framework.reports.entity.ReportTaskResult;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 import com.kongtrolink.framework.reports.service.ReportsControllerService;
+import org.apache.commons.io.FileUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +41,9 @@ import java.util.List;
  * description:
  * update record:
  */
+@Lazy
 @Service
+@Order(5)
 public class ReportsControllerServiceImpl implements ReportsControllerService, EnvironmentCapable {
 
     Logger logger = LoggerFactory.getLogger(ReportsControllerServiceImpl.class);
@@ -51,8 +63,24 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     private ReportWebConfigDao reportWebConfigDao;
     private ServiceRegistry serviceRegistry;
 
+    private WebPrivFuncConfig webPrivFuncConfig;
+
+    @Lazy
+    @Autowired(required = false)
+    RegisterRunner registerRunner;
+
     @Autowired
     Environment environment;
+
+    @Autowired
+    public void setWebPrivFuncConfig(WebPrivFuncConfig webPrivFuncConfig) {
+        this.webPrivFuncConfig = webPrivFuncConfig;
+    }
+
+//    @Autowired
+//    public void setRegisterRunner(RegisterRunner registerRunner) {
+//        this.registerRunner = registerRunner;
+//    }
 
     @Override
     public Environment getEnvironment() {
@@ -183,17 +211,114 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
         String serverCode = data.getString("serverCode");
         String enterpriseCode = data.getString("enterpriseCode");
         String configData = data.getString("configData");
+        String funPrivCode = data.getString("funPrivCode");
         boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode);
-        ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData);
+        ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData,funPrivCode);
         if (exits) {
-            ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode);
+            ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode,funPrivCode);
             reportWebConfig.setId(reportWebConfigOld.getId());
         }
         reportWebConfigDao.save(reportWebConfig);
+
+
+//        JSONObject privData = data.getJSONObject("privData");
+//        if (privData!=null) {
+//            //保存更新配置文件
+//            savePrivFuncConfig(privData);
+//        }
+
+
+    }
+
+
+    public void savePrivFuncConfig(JSONObject privData) {
+        PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
+
+        PrivFuncEntity privFuncEntity =  JSON.toJavaObject(privData, PrivFuncEntity.class);
+
+        List<PrivFuncEntity> children = privFunc.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            PrivFuncEntity c = children.get(i);
+            String code = c.getCode();
+            if (code.equals("REPORTS_PAGE")) //如果是自定义的告警页面，则保存和刷新告警功能
+                children.add(i, privFuncEntity);
+        }
+
+
+        updateConfigFile(privFunc);
+        //重新注册web
+        try {
+            registerRunner.registerWebPriv();
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+      /*  Iterator<PrivFuncEntity> iterator = children.iterator();
+        while (iterator.hasNext()) {
+            PrivFuncEntity next = iterator.next();
+            String code = next.getCode();
+            if (code.equals("REPORTS_PAGE"))
+                next = privFuncEntity;
+        }*/
+    }
+
+    private void updateConfigFile(PrivFuncEntity privFunc) {
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        File file = FileUtils.getFile("file:config/privFuncConfig.yml");
+        if (!file.exists()) {
+            try {
+                FileUtils.forceMkdirParent(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (file.exists()) {
+            FileOutputStream out = null;
+            OutputStreamWriter output = null;
+            try {
+//                Map load = (Map) yaml.load(new FileInputStream(file));
+                out = FileUtils.openOutputStream(file);
+                output = new OutputStreamWriter(out);
+                yaml.dump(privFunc, output);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                try {
+                    out.close();
+                    output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public ReportWebConfig getConfigData(String serverCode, String enterpriseCode,String funPrivCode) {
+        return reportWebConfigDao.find(serverCode, enterpriseCode,funPrivCode);
     }
 
     @Override
-    public ReportWebConfig getConfigData(String serverCode, String enterpriseCode) {
-        return reportWebConfigDao.find(serverCode, enterpriseCode);
+    public PrivFuncEntity getPrivData() {
+        PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
+        List<PrivFuncEntity> children = privFunc.getChildren();
+        for (PrivFuncEntity funcEntity : children)
+        {
+            String code = funcEntity.getCode();
+            if (code.equals("REPORTS_PAGE")) //如果是自定义的告警页面，则保存和刷新告警功能
+            {
+                return funcEntity;
+            }
+
+        }
+        return privFunc;
     }
 }

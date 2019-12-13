@@ -19,10 +19,10 @@ public class ReportWebConfigDao extends MongoBaseDao{
     public void save(ReportWebConfig reportWebConfig) {
         mongoTemplate.save(reportWebConfig, MongoDocName.REPORT_WEB_CONFIG);
     }
-    public ReportWebConfig find(String serverCode, String enterpriseCode) {
+    public ReportWebConfig find(String serverCode, String enterpriseCode, String funcPrivCode) {
         return mongoTemplate.findOne(Query.query(
                 Criteria.where("enterpriseCode").is(enterpriseCode)
-                        .and("serverCode").is(serverCode)), ReportWebConfig.class, MongoDocName.REPORT_WEB_CONFIG);
+                        .and("serverCode").is(serverCode).and("funcPrivCode").is(funcPrivCode)), ReportWebConfig.class, MongoDocName.REPORT_WEB_CONFIG);
     }
 
     public boolean exits(String serverCode, String enterpriseCode) {

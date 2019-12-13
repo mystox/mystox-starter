@@ -7,6 +7,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 import com.kongtrolink.framework.reports.service.ReportsControllerService;
 import com.kongtrolink.framework.service.MqttSender;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,14 +73,21 @@ public class ReportsController {
     @RequestMapping("/configDataSave")
     JsonResult configDataSave(@RequestBody(required = false) JSONObject body) {
         reportsControllerService.saveConfigData(body);
-        return new JsonResult("保存成功",true);
+        return new JsonResult("保存成功", true);
     }
+
     @RequestMapping("/configDataGet")
     JsonResult configDataGet(@RequestBody(required = false) JSONObject body) {
         String serverCode = body.getString("serverCode");
         String enterpriseCode = body.getString("enterpriseCode");
-        ReportWebConfig reportWebConfig = reportsControllerService.getConfigData(serverCode,enterpriseCode);
+        String funcPrivCode = body.getString("funcPrivCode");
+        ReportWebConfig reportWebConfig = reportsControllerService.getConfigData(serverCode, enterpriseCode,funcPrivCode);
+        if (StringUtils.isBlank(serverCode)) {
+            reportsControllerService.getPrivData();
+        }
         return new JsonResult(reportWebConfig);
     }
+
+
 }
 

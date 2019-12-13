@@ -81,9 +81,15 @@ public class RegisterController {
     public JsonResult testConfigRefresh() {
         Object invoke = genericPostableMvcEndpoint.invoke();
         logger.info(JSONObject.toJSONString(invoke));
-        OperaResult operaResult = registerRunner.registerWebPriv();
+        OperaResult operaResult = null;
+        try {
+            operaResult = registerRunner.registerWebPriv();
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return new JsonResult(operaResult);
     }
-
 
 }

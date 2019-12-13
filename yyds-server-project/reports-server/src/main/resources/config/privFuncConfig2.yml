@@ -6,7 +6,7 @@ privFunc:
   children:
   - type: ROOT
     name: 报表管理员页面
-    code: REPORTS_MANAGER
+    code: REPORTS
     routeMark: proxy_reports
     pageRoute: proxy_reports
     children:
@@ -16,7 +16,7 @@ privFunc:
       uri: /ZKReport/reportService
   - type: ROOT
     name: 报表业务功能
-    code: REPORTS_FUNCTION
+    code: REPORTS
     routeMark: proxy_reports
     pageRoute: proxy_reports
     children:
@@ -36,8 +36,10 @@ privFunc:
       name: 首页
       code: HOME
       uri: /ZKReport/HomeReport
-  - type: ROOT
-    name: 定制化报表
-    code: REPORTS_PAGE
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
+#    - type: PAGE
+#      name: 报表任务分配
+#      code: SETTING
+#      uri: /reportSetting
+#
+#
+

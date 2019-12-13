@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.reports.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 
 import java.util.List;
@@ -21,5 +22,7 @@ public interface ReportsControllerService {
 
     void saveConfigData(JSONObject data);
 
-    ReportWebConfig getConfigData(String serverCode, String enterpriseCode);
+    ReportWebConfig getConfigData(String serverCode, String enterpriseCode, String funcPrivCode);
+
+    PrivFuncEntity getPrivData();
 }

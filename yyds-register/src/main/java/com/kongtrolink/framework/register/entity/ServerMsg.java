@@ -15,10 +15,10 @@ public class ServerMsg {
     private String pageRoute;
     private String serviceUri;
     private String title;
-    private String serverMark; //服务端标识 对应云管的serviceVersion 默认为*
+//    private String serverMark; //服务端标识 对应云管的serviceVersion 默认为*
 
     public ServerMsg(String host, int port, String serverName, String serverVersion, String routeMark,
-                     String pageRoute, String serviceUri, String title, String serverMark) {
+                     String pageRoute, String serviceUri, String title) {
         this.host = host;
         this.port = port;
         this.serverName = serverName;
@@ -27,19 +27,19 @@ public class ServerMsg {
         this.pageRoute = pageRoute;
         this.serviceUri = serviceUri;
         this.title = title;
-        this.serverMark = serverMark;
+//        this.serverMark = serverMark;
     }
 
     public ServerMsg() {
     }
 
-    public String getServerMark() {
-        return serverMark;
-    }
-
-    public void setServerMark(String serverMark) {
-        this.serverMark = serverMark;
-    }
+//    public String getServerMark() {
+//        return serverMark;
+//    }
+//
+//    public void setServerMark(String serverMark) {
+//        this.serverMark = serverMark;
+//    }
 
     public String getTitle() {
         return title;
