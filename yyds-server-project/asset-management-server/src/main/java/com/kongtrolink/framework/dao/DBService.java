@@ -15,6 +15,8 @@ public interface DBService {
 
     JSONArray searchCIType(JSONObject jsonObject);
 
+    JSONArray searchCITypeByName(String name);
+
     boolean addCIConnectionType(JSONObject jsonObject);
 
     JSONArray searchCIConnectionType();

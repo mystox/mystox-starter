@@ -48,27 +48,21 @@ public class CITypeController {
 
         String name = requestBody.getString("name");
 
-        JSONObject request = new JSONObject();
-        request.put("title", "");
-        request.put("name", name);
-        request.put("code", "");
-        JSONArray ciTypeList = dbService.searchCIType(request);
+        JSONArray ciTypeList = dbService.searchCITypeByName(name);
         if (ciTypeList.size() != 1) {
-            result.put("info", "删除失败，类型有误");
+            result.put("info", "删除失败，无法查询到指定类型信息");
             return JSONObject.toJSONString(result);
         }
 
-        request = new JSONObject();
         JSONObject ciType = ciTypeList.getJSONObject(0);
-        int level = ciType.getInteger("level");
-        String code = ciType.getString("code");
-        if (level == 1) {
-            request.put("id", code + "-.*-.*-.*-.*-.*");
-        } else if (level == 2) {
-            request.put("id", ".*-" + code + "-.*-.*-.*-.*");
-        } else if (level == 3) {
-            request.put("id", ".*-.*-" + code + "-.*-.*-.*");
+        JSONArray children = ciType.getJSONArray("children");
+        if (children.size() > 0) {
+            result.put("info", "删除失败，该类型下存在子类型");
+            return JSONObject.toJSONString(result);
         }
+
+        JSONObject request = new JSONObject();
+        request.put("type", name);
         JSONObject ciList = dbService.searchCI(request);
         if (ciList.getInteger("count") > 0) {
             result.put("info", "删除失败，该类型下存在设备信息，无法删除");

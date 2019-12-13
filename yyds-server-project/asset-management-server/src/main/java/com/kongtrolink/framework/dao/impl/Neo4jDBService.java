@@ -263,6 +263,61 @@ public class Neo4jDBService implements DBService {
     }
 
     /**
+     * 通过类型名称查询CI类型信息
+     * @param name 类型名称
+     * @return 查询结果
+     */
+    @Override
+    public JSONArray searchCITypeByName(String name) {
+        JSONArray result = new JSONArray();
+
+        openDriver();
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String searchType = "match (item:" + Neo4jDBNodeType.CIType + ") " +
+                            "where item.name = '" + name + "' return item";
+
+                    StatementResult statementResult = transaction.run(searchType);
+                    List<Record> recordList = statementResult.list();
+
+                    for (int i = 0; i < recordList.size(); ++i) {
+                        JSONObject ciType = getCIType(recordList.get(i));
+
+                        JSONArray children = new JSONArray();
+                        ciType.put("parent", null);
+                        ciType.put("children", children);
+
+                        String searchRelationship = "match (tmp:" + Neo4jDBNodeType.CIType + " {name:'" + ciType.getString("name") + "'})" +
+                                "-[:" + Neo4jDBRelationshipType.INCLUDE + "]-(item:" + Neo4jDBNodeType.CIType + ") " +
+                                "return item";
+                        statementResult = transaction.run(searchRelationship);
+                        List<Record> relationshipCITypeList = statementResult.list();
+                        for (int j = 0; j < relationshipCITypeList.size(); ++j) {
+                            JSONObject relationshipCIType = getCIType(relationshipCITypeList.get(j));
+                            if (relationshipCIType.getInteger("level") > ciType.getInteger("level")) {
+                                children.add(relationshipCIType);
+                            } else {
+                                ciType.put("parent", relationshipCIType);
+                            }
+                        }
+                        result.add(ciType);
+                    }
+
+                    transaction.success();
+                }
+            }
+        } catch (Exception e) {
+            result = null;
+            logger.error(JSONObject.toJSONString(e), serverCode);
+        }
+
+        return result;
+    }
+
+    /**
      * 新增CI连接关系
      * @param jsonObject CI连接关系信息
      * @return 新增结果
