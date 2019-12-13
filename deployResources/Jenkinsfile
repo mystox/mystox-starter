@@ -18,7 +18,7 @@ pipeline {
         //编译
         stage ('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package --settings /root/.m2/settings.xml'
+                sh 'mvn -DskipTests clean package --settings /root/.m2/settings.xml'
             }
         }
          stage ('init-ssh') {
@@ -37,7 +37,7 @@ pipeline {
         stage ('ALARM_SERVER_WEB') {
             when {
                 expression {
-                    def serverCode = 'ALARM_SERVER_WEB_1.0.0'
+                    def serverCode = 'ALARM_SERVER_WEB'
                     def deployServer = params.deployServer
                     return (deployServer == 'all' || deployServer == serverCode \
                     || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
@@ -54,7 +54,7 @@ pipeline {
         stage ('REPORTS_SERVER') {
             when {
                 expression {
-                    def serverCode = 'REPORTS_SERVER_1.0.0'
+                    def serverCode = 'REPORTS_SERVER'
                     def deployServer = params.deployServer
                     return (deployServer == 'all' || deployServer == serverCode \
                     || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
@@ -67,7 +67,38 @@ pipeline {
                 }
             }
         }
-
+        stage ('LOG_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'LOG_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/log-server/target/log-server-1.0.0.jar', \
+                        '/home/yyds/log','log-server-1.0.0.jar',10,'deployResources/log-server.ini','log-server')
+                }
+            }
+        }
+        stage ('ASSET_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'ASSET_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/asset-management-server/target/asset-management-server-1.0.0.jar', \
+                        '/home/yyds/asset','asset-management-server-1.0.0.jar',10,'deployResources/asset-server.ini','asset-server')
+                }
+            }
+        }
     }
 
 }
@@ -76,6 +107,7 @@ pipeline {
 //远程部署方法
 def remoteExecutor(sourcePath, path, jarName, time, initFile, initName){
     sshCommand remote: remote, command: 'mkdir -p ' + path
+    sshCommand remote: remote, command: 'supervisorctl stop '+ initName
     sshPut remote: remote, from: sourcePath, into: path + '/' + jarName
     sshPut remote: remote, from: initFile, into: '/etc/supervisord.d'
     sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
