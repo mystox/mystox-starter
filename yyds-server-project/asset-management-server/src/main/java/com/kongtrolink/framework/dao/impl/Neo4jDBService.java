@@ -66,7 +66,7 @@ public class Neo4jDBService implements DBService {
 
                     if (level > 1) {
                         relationship = jsonObject.getString("relationship");
-                        String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}}) return item";
+                        String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}, businessCodes:[]}) return item";
                         statementResult = transaction.run(cmd, Values.parameters("Name", relationship, "Level", level - 1));
                         if (statementResult.list().size() != 1) {
                             transaction.failure();
@@ -212,16 +212,20 @@ public class Neo4jDBService implements DBService {
                     String title = jsonObject.getString("title");
                     String name = jsonObject.getString("name");
                     String code = jsonObject.getString("code");
-                    int level = 0;
-                    if (jsonObject.containsKey("level")) {
-                        level = jsonObject.getInteger("level");
-                    }
 
                     String searchType = "match (item:" + Neo4jDBNodeType.CIType + ") " +
                             "where item.name =~ '.*" + name + ".*' and item.title =~ '.*" + title + ".*' and " +
                             "item.code =~ '.*" + code + ".*'";
-                    if (level > 0) {
+                    if (jsonObject.containsKey("level")) {
+                        int level = jsonObject.getInteger("level");
                         searchType += " and item.level = " + level;
+                    }
+                    String businessCode = "";
+                    if (jsonObject.containsKey("enterpriseCode")
+                            && jsonObject.containsKey("serverCode")) {
+                        String enterpriseCode = jsonObject.getString("enterpriseCode");
+                        String serverCode = jsonObject.getString("serverCode");
+                        businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
                     }
                     searchType += " return item";
 
@@ -230,6 +234,15 @@ public class Neo4jDBService implements DBService {
 
                     for (int i = 0; i < recordList.size(); ++i) {
                         JSONObject ciType = getCIType(recordList.get(i));
+
+                        if (!businessCode.equals("")) {
+                            JSONArray businessCodes = ciType.getJSONArray("businessCodes");
+                            boolean enabled = businessCodes.contains(businessCode);
+
+                            ciType.put("enabled", enabled);
+                        } else {
+                            ciType.put("enabled", true);
+                        }
 
                         JSONArray children = new JSONArray();
                         ciType.put("parent", null);
@@ -311,6 +324,129 @@ public class Neo4jDBService implements DBService {
             }
         } catch (Exception e) {
             result = null;
+            logger.error(JSONObject.toJSONString(e), serverCode);
+        }
+
+        return result;
+    }
+
+    /**
+     * 绑定CI类型与业务编码
+     * @param jsonObject 绑定信息
+     * @return 绑定结果
+     */
+    @Override
+    public boolean bindCITypeBusinessCode(JSONObject jsonObject) {
+
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        openDriver();
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+                    String name = jsonObject.getString("name");
+                    String enterpriseCode = jsonObject.getString("enterpriseCode");
+                    String serverCode = jsonObject.getString("serverCode");
+                    String businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
+
+                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3}) " +
+                            "where {BusinessCode} in item.businessCodes return item";
+                    StatementResult statementResult = transaction.run(cmd,
+                            Values.parameters("Name", name, "BusinessCode", businessCode));
+                    List<Record> recordList = statementResult.list();
+
+                    if (recordList.size() == 1) {
+                        transaction.success();
+                        result = true;
+                        return result;
+                    }
+
+                    cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3}) " +
+                            "set item.businessCodes = item.businessCodes + {BusinessCode}";
+                    statementResult = transaction.run(cmd,
+                            Values.parameters("Name", name, "BusinessCode", businessCode));
+
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().propertiesSet() != 1) {
+                        transaction.failure();
+                        return result;
+                    }
+
+                    transaction.success();
+                    result = true;
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            logger.error(JSONObject.toJSONString(e), serverCode);
+        }
+
+        return result;
+    }
+
+    /**
+     * 解绑CI类型与业务编码
+     * @param jsonObject 解绑信息
+     * @return 解绑结果
+     */
+    @Override
+    public boolean unbindCITypeBusinessCode(JSONObject jsonObject) {
+        boolean result = false;
+
+        if (jsonObject == null) {
+            return result;
+        }
+
+        openDriver();
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+                    String name = jsonObject.getString("name");
+                    String enterpriseCode = jsonObject.getString("enterpriseCode");
+                    String serverCode = jsonObject.getString("serverCode");
+                    String businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
+
+                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3}) return item";
+                    StatementResult statementResult = transaction.run(cmd,
+                            Values.parameters("Name", name));
+                    List<Record> recordList = statementResult.list();
+
+                    if (recordList.size() != 1) {
+                        transaction.failure();
+                        return result;
+                    }
+
+                    JSONObject ciType = getCIType(recordList.get(0));
+                    JSONArray businessCodes = ciType.getJSONArray("businessCodes");
+                    if (businessCodes.contains(businessCode)) {
+                        businessCodes.remove(businessCode);
+
+                        cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:3}) " +
+                                "set item.businessCodes = {BusinessCodes}";
+                        statementResult = transaction.run(cmd,
+                                Values.parameters("Name", name, "BusinessCodes", businessCodes));
+
+                        ResultSummary summary = statementResult.summary();
+
+                        if (summary.counters().propertiesSet() != 1) {
+                            transaction.failure();
+                            return result;
+                        }
+                    }
+
+                    transaction.success();
+                    result = true;
+                }
+            }
+        } catch (Exception e) {
+            result = false;
             logger.error(JSONObject.toJSONString(e), serverCode);
         }
 
@@ -1577,6 +1713,7 @@ public class Neo4jDBService implements DBService {
         ciType.put("name", record.values().get(0).get("name").asString());
         ciType.put("code", record.values().get(0).get("code").asString());
         ciType.put("level", record.values().get(0).get("level").asInt());
+        ciType.put("businessCodes", JSONObject.parseArray(JSONObject.toJSONString(record.values().get(0).get("businessCodes").asList())));
 
         return ciType;
     }

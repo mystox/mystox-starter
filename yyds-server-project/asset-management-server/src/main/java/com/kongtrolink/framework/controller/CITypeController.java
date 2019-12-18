@@ -92,6 +92,36 @@ public class CITypeController {
         return JSONObject.toJSONString(result);
     }
 
+    @RequestMapping("/bindBusiness")
+    public String bindBusiness(@RequestBody JSONObject requestBody) {
+
+        JSONObject result = new JSONObject();
+        result.put("result", 0);
+        result.put("info", "绑定失败");
+
+        if (dbService.bindCITypeBusinessCode(requestBody)) {
+            result.put("result", 1);
+            result.put("info", "绑定成功");
+        }
+
+        return JSONObject.toJSONString(result);
+    }
+
+    @RequestMapping("/unbindBusiness")
+    public String unbindBusiness(@RequestBody JSONObject requestBody) {
+
+        JSONObject result = new JSONObject();
+        result.put("result", 0);
+        result.put("info", "解绑失败");
+
+        if (dbService.unbindCITypeBusinessCode(requestBody)) {
+            result.put("result", 1);
+            result.put("info", "解绑成功");
+        }
+
+        return JSONObject.toJSONString(result);
+    }
+
     @RequestMapping("/addConnection")
     public String addConnection(@RequestBody JSONObject requestBody) {
 

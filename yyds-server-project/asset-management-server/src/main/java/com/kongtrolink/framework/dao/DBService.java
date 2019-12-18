@@ -17,6 +17,10 @@ public interface DBService {
 
     JSONArray searchCITypeByName(String name);
 
+    boolean bindCITypeBusinessCode(JSONObject jsonObject);
+
+    boolean unbindCITypeBusinessCode(JSONObject jsonObject);
+
     boolean addCIConnectionType(JSONObject jsonObject);
 
     JSONArray searchCIConnectionType();
