@@ -66,7 +66,7 @@ public class Neo4jDBService implements DBService {
 
                     if (level > 1) {
                         relationship = jsonObject.getString("relationship");
-                        String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}, businessCodes:[]}) return item";
+                        String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}}) return item";
                         statementResult = transaction.run(cmd, Values.parameters("Name", relationship, "Level", level - 1));
                         if (statementResult.list().size() != 1) {
                             transaction.failure();
@@ -74,7 +74,7 @@ public class Neo4jDBService implements DBService {
                         }
                     }
 
-                    String cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}})";
+                    String cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}, businessCodes:[]})";
                     statementResult = transaction.run(cmd, Values.parameters("Title", title, "Name", name, "Code", code, "Level", level));
                     summary = statementResult.summary();
                     if (summary.counters().nodesCreated() != 1) {
