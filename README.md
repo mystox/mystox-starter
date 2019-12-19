@@ -1,3 +1,8 @@
+### 前端代码仓库
+http://git.kongtrolink.com:3000/luoc/MC_WEB
+
+然后下面的配置都没有用
+
 ### 前端环境
 1 安装node 下载地址 https://nodejs.org/en/
 
