@@ -218,7 +218,9 @@ public class Neo4jDBService implements DBService {
                             "item.code =~ '.*" + code + ".*'";
                     if (jsonObject.containsKey("level")) {
                         int level = jsonObject.getInteger("level");
-                        searchType += " and item.level = " + level;
+                        if (level > 0) {
+                            searchType += " and item.level = " + level;
+                        }
                     }
                     String businessCode = "";
                     if (jsonObject.containsKey("enterpriseCode")
