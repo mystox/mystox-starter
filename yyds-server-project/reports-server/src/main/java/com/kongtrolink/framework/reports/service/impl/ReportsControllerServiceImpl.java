@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.reports.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.entity.TopicPrefix;
@@ -9,9 +11,11 @@ import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
+import com.kongtrolink.framework.reports.dao.ReportConfigRecordDao;
 import com.kongtrolink.framework.reports.dao.ReportTaskDao;
 import com.kongtrolink.framework.reports.dao.ReportTaskResultDao;
 import com.kongtrolink.framework.reports.dao.ReportWebConfigDao;
+import com.kongtrolink.framework.reports.entity.ReportConfigRecord;
 import com.kongtrolink.framework.reports.entity.ReportTask;
 import com.kongtrolink.framework.reports.entity.ReportTaskResult;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
@@ -32,8 +36,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mystoxlol on 2019/10/31, 9:38.
@@ -65,6 +68,8 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
 
     private WebPrivFuncConfig webPrivFuncConfig;
 
+    private ReportConfigRecordDao reportConfigRecordDao;
+
     @Lazy
     @Autowired(required = false)
     RegisterRunner registerRunner;
@@ -93,6 +98,11 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     @Autowired
     public void setReportWebConfigDao(ReportWebConfigDao reportWebConfigDao) {
         this.reportWebConfigDao = reportWebConfigDao;
+    }
+
+    @Autowired
+    public void setReportConfigRecordDao(ReportConfigRecordDao reportConfigRecordDao) {
+        this.reportConfigRecordDao = reportConfigRecordDao;
     }
 
     @Autowired
@@ -213,9 +223,9 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
         String configData = data.getString("configData");
         String funPrivCode = data.getString("funPrivCode");
         boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode);
-        ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData,funPrivCode);
+        ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData, funPrivCode);
         if (exits) {
-            ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode,funPrivCode);
+            ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode, funPrivCode);
             reportWebConfig.setId(reportWebConfigOld.getId());
         }
         reportWebConfigDao.save(reportWebConfig);
@@ -234,7 +244,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     public void savePrivFuncConfig(JSONObject privData) {
         PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
 
-        PrivFuncEntity privFuncEntity =  JSON.toJavaObject(privData, PrivFuncEntity.class);
+        PrivFuncEntity privFuncEntity = JSON.toJavaObject(privData, PrivFuncEntity.class);
 
         List<PrivFuncEntity> children = privFunc.getChildren();
         for (int i = 0; i < children.size(); i++) {
@@ -289,7 +299,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 try {
                     out.close();
                     output.close();
@@ -302,16 +312,15 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
 
 
     @Override
-    public ReportWebConfig getConfigData(String serverCode, String enterpriseCode,String funPrivCode) {
-        return reportWebConfigDao.find(serverCode, enterpriseCode,funPrivCode);
+    public ReportWebConfig getConfigData(String serverCode, String enterpriseCode, String funPrivCode) {
+        return reportWebConfigDao.find(serverCode, enterpriseCode, funPrivCode);
     }
 
     @Override
     public PrivFuncEntity getPrivData() {
         PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
         List<PrivFuncEntity> children = privFunc.getChildren();
-        for (PrivFuncEntity funcEntity : children)
-        {
+        for (PrivFuncEntity funcEntity : children) {
             String code = funcEntity.getCode();
             if (code.equals("REPORTS_PAGE")) //如果是自定义的告警页面，则保存和刷新告警功能
             {
@@ -320,5 +329,61 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
 
         }
         return privFunc;
+    }
+
+    @Override
+    public void recordConfigData(JSONObject data, User user) {
+        String serverCode = data.getString("serverCode");
+        String enterpriseCode = data.getString("enterpriseCode");
+        String funPrivCode = data.getString("funPrivCode");
+
+        Set<String> saveReportCodes = new HashSet<>(); // 保存的报表配置code集合，去重使用
+        String configData = data.getString("configData");
+        JSONArray configDataArray = JSONArray.parseArray(configData);
+
+        configDataArray.forEach(config -> {
+            JSONObject jsonObject = (JSONObject) config;
+            String tabName = jsonObject.getString("name");
+            JSONArray saveArray = jsonObject.getJSONArray("save");
+            saveArray.forEach(s -> {
+                JSONObject save = (JSONObject) s;
+                String operaCode = save.getString("operaCode");
+                String reportServerCode = save.getString("reportServerCode");
+
+                if (!saveReportCodes.contains(operaCode)) { // 未保存过的在此保存
+                    saveReportCodes.add(operaCode);
+                    ReportTask reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode, reportServerCode);
+                    if (reportTask !=null) {
+                        String reportTaskId = reportTask.getId();
+                        ReportConfigRecord reportConfigRecord = reportConfigRecordDao.findByReportTaskIdAndFuncPrivCode(reportTaskId, funPrivCode);
+                        if (reportConfigRecord == null) reportConfigRecord = new ReportConfigRecord();
+                        reportConfigRecord.setReportsTaskId(reportTaskId);
+                        reportConfigRecord.setRecordTime(new Date());
+                        reportConfigRecord.setConfigUsername(user.getName());
+                        reportConfigRecordDao.save(reportConfigRecord);
+                    }
+
+                }
+            });
+        });
+
+
+    }
+
+    @Override
+    public List<ReportConfigRecord> getRecordConfigData(String serverCode, String enterpriseCode) {
+
+        return reportConfigRecordDao.findByServerCodeAndEnterpriseCode(serverCode,enterpriseCode);
+    }
+
+    @Override
+    public List<ReportConfigRecord> getRecordConfigDataByPrivCode(String serverCode, String enterpriseCode, String funcPrivCode) {
+
+        return reportConfigRecordDao.findByReportTaskIdAndFuncPrivCodeAndFuncPrivCode(serverCode, enterpriseCode, funcPrivCode);
+    }
+
+    @Override
+    public ReportTask getReportsTaskByTaskId(String reportsTaskId) {
+        return reportTaskDao.findById(reportsTaskId);
     }
 }

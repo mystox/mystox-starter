@@ -18,6 +18,7 @@ public class ReportWebConfigDao extends MongoBaseDao{
 
     public void save(ReportWebConfig reportWebConfig) {
         mongoTemplate.save(reportWebConfig, MongoDocName.REPORT_WEB_CONFIG);
+
     }
     public ReportWebConfig find(String serverCode, String enterpriseCode, String funcPrivCode) {
         return mongoTemplate.findOne(Query.query(

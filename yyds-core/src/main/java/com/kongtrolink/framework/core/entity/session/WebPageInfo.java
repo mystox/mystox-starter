@@ -21,10 +21,10 @@ public class WebPageInfo implements Serializable
 {
 
     private static final long serialVersionUID = 99349880817197110L;
-    public String name; //服务名
-    public String uri; //页面路径
-    public int priority = -1; //优先级编码
-    public List<WebPageInfo> nextMenuList;  //子菜单集合，用于前端生成树
+    private String name; //服务名
+    private String uri; //页面路径
+    private int priority = -1; //优先级编码
+    private List<WebPageInfo> nextMenuList;  //子菜单集合，用于前端生成树
     private String code;    //菜单编码
     private String superCode;   //父菜单编码
     private String mark;    //后台请求路由标记
@@ -32,7 +32,27 @@ public class WebPageInfo implements Serializable
     private String pageRoute;   //页面路由
     private String type;    //服务类型
     private boolean backMark;   //服务是否返回管理页面标记
+    private String hierarchyName; //权限层级名
 
+    private boolean isRoot = false; //是否管理页面
+
+
+    public boolean isRoot() {
+        return isRoot;
+    }
+
+    public void setRoot(boolean root) {
+        isRoot = root;
+    }
+
+
+    public String getHierarchyName() {
+        return hierarchyName;
+    }
+
+    public void setHierarchyName(String hierarchyName) {
+        this.hierarchyName = hierarchyName;
+    }
 
     public boolean isBackMark()
     {

@@ -154,4 +154,8 @@ public class ReportTaskDao extends MongoBaseDao {
                         .and("reportServerCode").is(reportServerCode)
         ), ReportTask.class, MongoDocName.REPORT_TASK);
     }
+
+    public ReportTask findById(String reportsTaskId) {
+        return mongoTemplate.findById(reportsTaskId,ReportTask.class, MongoDocName.REPORT_TASK);
+    }
 }

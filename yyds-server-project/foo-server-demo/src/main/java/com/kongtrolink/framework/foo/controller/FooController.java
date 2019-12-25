@@ -5,7 +5,9 @@ import com.kongtrolink.framework.foo.api.PerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * \* @Author: mystox
@@ -40,6 +42,13 @@ public class FooController {
         int activeCount = mqttExecutor.getActiveCount();
         int maxPoolSize = mqttExecutor.getMaxPoolSize();
         return new JsonResult("corePoolSize"+corePoolSize+"\n poolSize"+poolSize+"\n activeCount"+activeCount+"\n maxPoolSize"+maxPoolSize);
+    }
+
+
+    @RequestMapping("/importFile")
+    public JsonResult importFile(@RequestParam MultipartFile file) {
+        System.out.println(file.getOriginalFilename());
+        return new JsonResult();
     }
 
 }
