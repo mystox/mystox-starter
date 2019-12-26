@@ -22,6 +22,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/AppResources/**").addResourceLocations(ResourceUtils.FILE_URL_PREFIX + "./AppResources/");
     }
+
     @Bean(name = "multipartResolver")
     public CommonsMultipartResolver getCommonsMultipartResolver() {
         CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();

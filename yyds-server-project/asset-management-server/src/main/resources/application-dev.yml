@@ -1,4 +1,7 @@
 spring:
+  http:
+    multipart:
+      enabled: true
   application:
     name: yytd-asset-management-server
   session:
@@ -17,7 +20,7 @@ mqtt:
 neo4j:
   username: neo4j
   password: admin
-  uri: bolt://172.16.5.61:7687
+  uri: bolt://172.16.5.66:7687
 logging:
   level:
     root: info
