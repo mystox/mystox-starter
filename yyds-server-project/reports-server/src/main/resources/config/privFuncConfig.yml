@@ -28,6 +28,7 @@ privFunc:
       name: 自定义报表
       code: CUSTOM
       uri: /ZKReport/customReport
+      root: true
     - type: PAGE
       name: 报表查看
       code: CUSTOM_REPORT_SHOW

@@ -100,14 +100,14 @@ public class ReportsController extends BaseController {
         return new JsonResult(reportWebConfig);
     }
 
-    @RequestMapping("/recordConfigDataGet")
-    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
-        String serverCode = body.getString("serverCode");
-        String enterpriseCode = body.getString("enterpriseCode");
-//        String funcPrivCode = body.getString("funcPrivCode");
-        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
-        return new JsonResult(reportWebConfig);
-    }
+//    @RequestMapping("/recordConfigDataGet")
+//    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
+//        String serverCode = body.getString("serverCode");
+//        String enterpriseCode = body.getString("enterpriseCode");
+////        String funcPrivCode = body.getString("funcPrivCode");
+//        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
+//        return new JsonResult(reportWebConfig);
+//    }
 
 
     @RequestMapping("/recordConfigPrivGet")
@@ -144,6 +144,7 @@ public class ReportsController extends BaseController {
                     JSONObject recordJson = new JSONObject();
                     recordJson.put("privName", privName);
                     recordJson.put("privHierarchy", hierarchyName);
+                    recordJson.put("funcPrivCode", reportPrivCode);
                     result.add(recordJson);
                 }
 
