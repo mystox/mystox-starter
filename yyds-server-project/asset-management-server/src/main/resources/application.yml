@@ -46,5 +46,5 @@ taskInterval:
 management:
   security:
     enabled: false
-appResources: #资源目录，文件夹名称AppResources
-  ciTypeIcon: ciTypeIcon #CI类型图标文件夹，修改后需人工确认图标文件是否存放正常
+appResources: #资源目录
+  ciTypeIcon: AppResources/ciTypeIcon #CI类型图标文件夹，修改后需人工确认图标文件是否存放正常，该目录默认在应用根目录

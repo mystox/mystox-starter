@@ -74,7 +74,7 @@ public class Neo4jDBService implements DBService {
                         }
                     }
 
-                    String cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}, businessCodes:[]})";
+                    String cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}, businessCodes:[], icon:'default.png'})";
                     statementResult = transaction.run(cmd, Values.parameters("Title", title, "Name", name, "Code", code, "Level", level));
                     summary = statementResult.summary();
                     if (summary.counters().nodesCreated() != 1) {
@@ -170,7 +170,47 @@ public class Neo4jDBService implements DBService {
 
                     String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}}) " +
                             "set item.title = {Title}";
+
                     StatementResult statementResult = transaction.run(cmd, Values.parameters("Name", name, "Title", title));
+                    ResultSummary summary = statementResult.summary();
+
+                    if (summary.counters().propertiesSet() != 1) {
+                        transaction.failure();
+                        return result;
+                    }
+
+                    transaction.success();
+                    result = true;
+                }
+            }
+        } catch (Exception e) {
+            result = false;
+            logger.error(JSONObject.toJSONString(e), serverCode);
+        }
+
+        return result;
+    }
+
+    /**
+     * 修改CI类型对应的图标文件名称
+     * @param name CI类型名称
+     * @param icon 图标文件名称
+     * @return 修改结果
+     */
+    @Override
+    public boolean modifyCITypeIcon(String name, String icon) {
+        boolean result = false;
+
+        openDriver();
+
+        try {
+            try (Session session = driver.session()) {
+                try (Transaction transaction = session.beginTransaction()) {
+
+                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}}) " +
+                            "set item.icon = {Icon}";
+
+                    StatementResult statementResult = transaction.run(cmd, Values.parameters("Name", name, "Icon", icon));
                     ResultSummary summary = statementResult.summary();
 
                     if (summary.counters().propertiesSet() != 1) {
@@ -1716,6 +1756,7 @@ public class Neo4jDBService implements DBService {
         ciType.put("code", record.values().get(0).get("code").asString());
         ciType.put("level", record.values().get(0).get("level").asInt());
         ciType.put("businessCodes", JSONObject.parseArray(JSONObject.toJSONString(record.values().get(0).get("businessCodes").asList())));
+        ciType.put("icon", record.values().get(0).get("icon").asString());
 
         return ciType;
     }
