@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by mystoxlol on 2019/11/6, 20:45.
  * company: kongtrolink
- * description:
+ * description: privFuncConfig.yml映射实体类
  * update record:
  */
 public class PrivFuncEntity {
@@ -19,6 +19,16 @@ public class PrivFuncEntity {
     private String uri;
     private String routeMark;
     private String pageRoute;
+    private Boolean root;
+
+
+    public Boolean getRoot() {
+        return root;
+    }
+
+    public void setRoot(Boolean root) {
+        this.root = root;
+    }
 
     private List<PrivFuncEntity> children;
 

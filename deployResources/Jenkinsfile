@@ -18,7 +18,7 @@ pipeline {
         //编译
         stage ('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package --settings /root/.m2/settings.xml'
+                sh 'mvn -DskipTests clean package --settings /root/.m2/settings.xml'
             }
         }
          stage ('init-ssh') {
@@ -34,31 +34,83 @@ pipeline {
             }
         }
         //告警-页面服务
-        stage ('alarm-web') {
+        stage ('ALARM_SERVER_WEB') {
             when {
                 expression {
+                    def serverCode = 'ALARM_SERVER_WEB'
                     def deployServer = params.deployServer
-                    return (deployServer == 'all' || deployServer == 'ALARM_SERVER_WEB,' || deployServer =~ 'ALARM_SERVER_WEB,' || deployServer =~ ',ALARM_SERVER_WEB')
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
                 }
             }
             steps {
                 script {
-                        remoteExecutor('/home/yyds/alarm','alarm-server-web-1.0.0.jar',20)
+                        remoteExecutor('yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', \
+                        '/home/yyds/alarm','alarm-server-web-1.0.0.jar',10,'deployResources/alarm-web.ini','alarm-web')
                 }
             }
         }
-
+         //报表-页面服务
+        stage ('REPORTS_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'REPORTS_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/reports-server/target/reports-server-1.0.0.jar', \
+                        '/home/yyds/reports','reports-server-1.0.0.jar',10,'deployResources/reports-server.ini','reports-server')
+                }
+            }
+        }
+        stage ('LOG_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'LOG_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/log-server/target/log-server-1.0.0.jar', \
+                        '/home/yyds/log','log-server-1.0.0.jar',10,'deployResources/log-server.ini','log-server')
+                }
+            }
+        }
+        stage ('ASSET_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'ASSET_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/asset-management-server/target/asset-management-server-1.0.0.jar', \
+                        '/home/yyds/asset','asset-management-server-1.0.0.jar',10,'deployResources/asset-server.ini','asset-server')
+                }
+            }
+        }
     }
 
 }
 
 
 //远程部署方法
-def remoteExecutor(path, jarName, time){
+def remoteExecutor(sourcePath, path, jarName, time, initFile, initName){
     sshCommand remote: remote, command: 'mkdir -p ' + path
-    sshPut remote: remote, from: 'yyds-server-project/alarm-server/alarm-server-web/target/alarm-server-web-1.0.0.jar', into: path + '/' + jarName
-    sshPut remote: remote, from: 'deployResources/alarm-web.ini', into: '/etc/supervisord.d'
+    sshCommand remote: remote, command: 'supervisorctl stop '+ initName
+    sshPut remote: remote, from: sourcePath, into: path + '/' + jarName
+    sshPut remote: remote, from: initFile, into: '/etc/supervisord.d'
     sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
     sshCommand remote: remote, command: 'supervisorctl update'
-    sshCommand remote: remote, command: 'supervisorctl restart alarm-web'
+    sshCommand remote: remote, command: 'supervisorctl restart '+ initName
 }

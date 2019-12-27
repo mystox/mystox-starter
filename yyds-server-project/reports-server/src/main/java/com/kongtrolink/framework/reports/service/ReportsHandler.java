@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -47,8 +46,8 @@ import java.util.concurrent.*;
  */
 @Aspect
 @Component
-@DependsOn(value = "registerRunner")
-@Order
+//@DependsOn(value = "registerRunner")
+@Order(3)
 public class ReportsHandler implements ApplicationRunner {
 
 
@@ -128,7 +127,7 @@ public class ReportsHandler implements ApplicationRunner {
         }
 
         if (ExecutorType.query.equals(reportConfig.getExecutorType())) {
-            logger.info("reports request is query and return");
+            logger.debug("reports request query and return");
             try {
                 ReportData result = queryExecutor(joinPoint, args);
                 return result;

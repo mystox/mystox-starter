@@ -128,22 +128,24 @@ public class RegisterRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         try {
             RegisterMsg registerMsg = getRegisterMsg();
-            List<RegisterSub> subList = scanSubList();
-            if (registerMsg == null)
+            if (registerMsg == null) {
+                logger.error("register message is null");
                 System.exit(0);
+
+            }
+            List<RegisterSub> subList = scanSubList();
             register(registerMsg, subList);//注册操作码信息
             subTopic(subList);//订阅操作码对应topic
 
             //web注册置于最后，适应运管的启动顺序
-            OperaResult result = registerWebPriv();
-            if (result != null) {
+           /* if (result != null) {
                 if (result.getStateCode() == StateCode.SUCCESS) {
                     logger.info("register web privilege function result:{}", result.getResult());
                 } else {
                     logger.error("register web privilege function result:{}", result.getResult());
                     System.exit(0);
                 }
-            }
+            }*/
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
@@ -154,22 +156,30 @@ public class RegisterRunner implements ApplicationRunner {
     /**
      * 注册web 功能权限
      */
-    public OperaResult registerWebPriv() {
+    public OperaResult registerWebPriv() throws KeeperException, InterruptedException {
         PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
         if (privFunc != null) {
-            //往云管注册功能权限
-            JSONObject registerMsg = new JSONObject();
-//            String privFuncJson = JSONObject.toJSONString(privFunc);
-            registerMsg.put("serverCode", serverCode);
-            registerMsg.put("webPrivFunc", privFunc);
-            MsgResult registerWeb = mqttSender.sendToMqttSyn(
+            //往云管注册功能权限（放弃）
+//            JSONObject registerMsg = new JSONObject();
+////            String privFuncJson = JSONObject.toJSONString(privFunc);
+//            ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
+//                    routeMark, pageRoute, serverUri, title);
+//            registerMsg.put("serverCode", serverMsg);
+//            registerMsg.put("webPrivFunc", privFunc);
+            //获取服务信息并注册至注册中心
+            String privPath = TopicPrefix.PRIV_PREFIX + "/" + serverCode;
+            if (serviceRegistry.exists(privPath))
+                serviceRegistry.setData(privPath, JSONObject.toJSONBytes(privFunc));
+            else
+                serviceRegistry.create(privPath, JSONObject.toJSONBytes(privFunc), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+           /* MsgResult registerWeb = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
                     OperaCode.REGISTER_WEB_PRIV_FUNC, 2, registerMsg.toJSONString(), 30000L, TimeUnit.MILLISECONDS);
             String msg = registerWeb.getMsg();
             if (StateCode.SUCCESS == registerWeb.getStateCode()) {
                 OperaResult result = JSONObject.parseObject(msg, OperaResult.class);
                 return result;
-            }
+            }*/
         } else {
             logger.warn("web privilege function config is null...");
         }
@@ -187,7 +197,7 @@ public class RegisterRunner implements ApplicationRunner {
 
         //获取服务信息
 //        ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion, routeMark, pageRoute, serverUri, title);
-
+        //顶层目录
         if (!serviceRegistry.exists(TopicPrefix.TOPIC_PREFIX))
             serviceRegistry.create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
@@ -196,8 +206,15 @@ public class RegisterRunner implements ApplicationRunner {
         String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
         if (!serviceRegistry.exists(subPath))
             serviceRegistry.create(subPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-//        else
-//            serviceRegistry.setData(TopicPrefix.SUB_PREFIX + "/" + serverCode, JSONObject.toJSONBytes(serverMsg));
+        //请求列表目录
+        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
+            serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
+        if (!serviceRegistry.exists(pubPath))
+            serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        //功能权限目录
+        if (!serviceRegistry.exists(TopicPrefix.PRIV_PREFIX))
+            serviceRegistry.create(TopicPrefix.PRIV_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //在线标志
         if (!serviceRegistry.exists(TopicPrefix.SERVER_STATUS))
             serviceRegistry.create(TopicPrefix.SERVER_STATUS, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -207,12 +224,7 @@ public class RegisterRunner implements ApplicationRunner {
         else
             serviceRegistry.create(onlineStatus, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);*/
 
-        //请求列表目录
-        if (!serviceRegistry.exists(TopicPrefix.PUB_PREFIX))
-            serviceRegistry.create(TopicPrefix.PUB_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        String pubPath = TopicPrefix.PUB_PREFIX + "/" + serverCode;
-        if (!serviceRegistry.exists(pubPath))
-            serviceRegistry.create(pubPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+
     }
 
 
@@ -225,6 +237,7 @@ public class RegisterRunner implements ApplicationRunner {
             setDataToRegistry(sub);
         }
         registerServerMsg();
+        registerWebPriv();
 
     }
 
@@ -270,10 +283,11 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterType registerType = registerMsg.getRegisterType();
         if (RegisterType.ZOOKEEPER.equals(registerType)) {
             serviceRegistry.build(registerMsg.getRegisterUrl());
-            registerServer(); //注册服务基本信息
-            registerServerMsg();
+            registerServer(); //初始化目录信息
+            registerServerMsg(); //注册服务信息
+            registerWebPriv(); //注册服务目录
             for (RegisterSub sub : subList) {
-                //往服务节点注册服务信息
+                //往服务节点注册订阅服务信息
                 setDataToRegistry(sub);
             }
         } else {
@@ -285,17 +299,20 @@ public class RegisterRunner implements ApplicationRunner {
 
         //获取服务信息并注册
         ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                routeMark, pageRoute, serverUri, title, serverMark);
-        String subPath = TopicPrefix.SUB_PREFIX + "/" + serverCode;
-        if (serviceRegistry.exists(subPath))
-            serviceRegistry.setData(subPath, JSONObject.toJSONBytes(serverMsg));
+                routeMark, pageRoute, serverUri, title);
+//        String subPath = TopicPrefix.SERVER_STATUS + "/" + serverCode;
+//        if (serviceRegistry.exists(subPath))
+//            serviceRegistry.setData(subPath, JSONObject.toJSONBytes(serverMsg));
 
         //在线状态
-        String onlineStatus = TopicPrefix.SERVER_STATUS + "/" + MqttUtils.preconditionServerCode(serverName, serverVersion);
-        if (serviceRegistry.exists(onlineStatus))
+        String serverCode = MqttUtils.preconditionServerCode(serverName, serverVersion);
+        String onlineStatus = TopicPrefix.SERVER_STATUS + "/" + serverCode;
+        if (serviceRegistry.exists(onlineStatus)) {
+            logger.error("server[{}] status is already online ... exits",serverCode);
             throw new InterruptedIOException();
-        else
-            serviceRegistry.create(onlineStatus, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        } else {
+            serviceRegistry.create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        }
     }
 
 
@@ -336,7 +353,7 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
             ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                    routeMark, pageRoute, serverUri, title,serverMark);
+                    routeMark, pageRoute, serverUri, title);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
             MsgResult slogin = mqttSender.sendToMqttSyn(
                     MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),

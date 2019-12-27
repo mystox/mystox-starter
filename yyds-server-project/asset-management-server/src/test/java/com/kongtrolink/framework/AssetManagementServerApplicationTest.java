@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.impl.MqttPublish;
 import com.kongtrolink.framework.common.util.MqttUtils;
+import com.kongtrolink.framework.controller.CITypeController;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.ServerName;
@@ -274,5 +275,17 @@ public class AssetManagementServerApplicationTest {
             MsgResult msgResult = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(request));
             System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());
         }
+    }
+
+    @Autowired
+    CITypeController ciTypeController;
+
+    @Test
+    public void testDeleteCIType() {
+
+        JSONObject request = new JSONObject();
+        request.put("name", "1");
+
+        ciTypeController.delete(request);
     }
 }
