@@ -127,7 +127,7 @@ public class ReportsHandler implements ApplicationRunner {
         }
 
         if (ExecutorType.query.equals(reportConfig.getExecutorType())) {
-            logger.info("reports request is query and return");
+            logger.debug("reports request query and return");
             try {
                 ReportData result = queryExecutor(joinPoint, args);
                 return result;

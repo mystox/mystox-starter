@@ -88,15 +88,18 @@ public class AlarmDao {
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
         }
-        String name = alarmQuery.getName();
-        if(!StringUtil.isNUll(name)){
-            name = MongoUtil.escapeExprSpecialWord(name);
-            criteria.and("name").regex(".*?" + name + ".*?");
+        String enterpriseCode = alarmQuery.getEnterpriseCode();
+        if(!StringUtil.isNUll(enterpriseCode)) {
+            criteria.and("enterpriseCode").is(enterpriseCode);
+        }
+        String serverCode = alarmQuery.getServerCode();
+        if(!StringUtil.isNUll(serverCode)){
+            criteria.and("serverCode").is(serverCode);
         }
         String targetLevelName = alarmQuery.getTargetLevelName();
         if(!StringUtil.isNUll(targetLevelName)){
             targetLevelName = MongoUtil.escapeExprSpecialWord(targetLevelName);
-            criteria.and("targetLevelName").regex(".*?" + targetLevelName + ".*?");
+            criteria.and("targetLevelName").is(targetLevelName);
         }
         String state = alarmQuery.getState();
         if(!StringUtil.isNUll(state)){
@@ -106,12 +109,12 @@ public class AlarmDao {
         String deviceType = alarmQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){
             deviceType = MongoUtil.escapeExprSpecialWord(deviceType);
-            criteria.and("deviceType").regex(".*?" + deviceType + ".*?");
+            criteria.and("deviceType").is(deviceType);
         }
         String deviceModel = alarmQuery.getDeviceModel();
         if(!StringUtil.isNUll(deviceModel)){
             deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
-            criteria.and("deviceModel").regex(".*?" + deviceModel + ".*?");
+            criteria.and("deviceModel").is(deviceModel);
         }
 
         Date startBeginTime = alarmQuery.getStartBeginTime();
@@ -133,13 +136,11 @@ public class AlarmDao {
         }else if(null == clearBeginTime && null != clearEndTime){
             criteria.and("trecover").lte(clearEndTime);
         }
-        String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(!StringUtil.isNUll(enterpriseCode)) {
-            criteria.and("enterpriseCode").is(enterpriseCode);
-        }
-        String serverCode = alarmQuery.getServerCode();
-        if(!StringUtil.isNUll(serverCode)){
-            criteria.and("serverCode").is(serverCode);
+
+        String name = alarmQuery.getName();
+        if(!StringUtil.isNUll(name)){
+            name = MongoUtil.escapeExprSpecialWord(name);
+            criteria.and("name").regex(".*?" + name + ".*?");
         }
         return criteria;
     }
@@ -161,28 +162,6 @@ public class AlarmDao {
         BulkWriteResult execute = ops.execute();
         int insertedCount = execute.getInsertedCount();
         return insertedCount>0 ? true : false;
-    }
-
-    /**
-     * @param alarm
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/24 11:10
-     * 功能描述:修改告警属性，包括附属属性
-     */
-    public boolean updateProperties(Alarm alarm, String table) {
-        Map<String, String> auxilaryMap = alarm.getAuxilaryMap();
-        if(null != auxilaryMap){
-            Criteria criteria = Criteria.where("_id").is(alarm.getId());
-            Query query = Query.query(criteria);
-            Update update = new Update();
-            for(String key : auxilaryMap.keySet()){
-                update.set("key", auxilaryMap.get(key));
-            }
-            WriteResult result = mongoTemplate.updateFirst(query, update, table);
-            return result.getN()>0 ? true : false;
-        }
-        return true;
     }
 
     /**

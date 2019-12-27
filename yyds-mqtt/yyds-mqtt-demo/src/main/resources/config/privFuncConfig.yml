@@ -13,7 +13,7 @@ privFunc:
     code: code1 #权限编码 必填同级不可重复
     uri: /abc/ac #uri路径 必填
     children:
-    - type: PAGE
+    - type: BUTTON
       name: name3
       code: code_code
       uri: /dddd
