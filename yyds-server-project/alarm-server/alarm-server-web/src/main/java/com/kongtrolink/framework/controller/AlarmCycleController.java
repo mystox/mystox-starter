@@ -66,6 +66,8 @@ public class AlarmCycleController extends BaseController {
     @RequestMapping("/list")
     @ResponseBody
     public JsonResult list(@RequestBody AlarmCycleQuery alarmCycleQuery){
+        //判定企业默认告警周期是否存在
+        cycleService.handleUniqueDefault(alarmCycleQuery.getEnterpriseCode(), alarmCycleQuery.getServerCode());
         List<AlarmCycle> list = cycleService.list(alarmCycleQuery);
         int count = cycleService.count(alarmCycleQuery);
         ListResult<AlarmCycle> listResult = new ListResult<>(list, count);
@@ -81,5 +83,20 @@ public class AlarmCycleController extends BaseController {
             return new JsonResult(state + Contant.RESULT_SUC, true);
         }
         return new JsonResult(state + Contant.RESULT_FAIL, true);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 14:58
+     * 功能描述:判定规则名称是否已存在，用于添加规则或者修改规则
+     */
+    @RequestMapping
+    @ResponseBody
+    public JsonResult checkName(@RequestBody AlarmCycleQuery cycleQuery){
+        AlarmCycle byName = cycleService.getByName(cycleQuery.getEnterpriseCode(), cycleQuery.getServerCode(), cycleQuery.getName());
+        if(null == byName){
+            return new JsonResult("该规则名称可以使用", true);
+        }
+        return new JsonResult("该规则名称已存在", false);
     }
 }

@@ -33,7 +33,19 @@ public interface AlarmCycleService {
 
     AlarmCycle getLastUpdateOne(AlarmCycleQuery alarmCycleQuery);
 
-    AlarmCycle getSystemCycle();
-
     void initAlarmCycle();
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 11:09
+     * 功能描述:处理企业默认告警周期
+     */
+    void handleUniqueDefault(String enterpriseServer, String serverCode);
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 14:55
+     * 功能描述:根据名称获取
+     */
+    AlarmCycle getByName(String enterpriseServer, String serverCode, String name);
 }

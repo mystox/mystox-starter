@@ -45,8 +45,6 @@ public class AlarmController extends BaseController {
     @RequestMapping("/list")
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery){
-//        alarmQuery.setEnterpriseCode("YYDS");
-//        alarmQuery.setServerCode("TOWER_SERVER_1.0.0");
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
         ListResult<DBObject> listResult ;
