@@ -17,9 +17,7 @@ public class EnterpriseLevel {
     private String code;                //告警规则编码
     private String name;
     private String enterpriseCode;
-    private String enterpriseName;
     private String serverCode;
-    private String serverName;
     private Integer level;
     private String levelName;
     private String color;
@@ -104,22 +102,6 @@ public class EnterpriseLevel {
         this.colors = colors;
     }
 
-    public String getEnterpriseName() {
-        return enterpriseName;
-    }
-
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
     public FacadeView getOperator() {
         return operator;
     }
@@ -174,9 +156,7 @@ public class EnterpriseLevel {
                 "code='" + code + '\'' +
                 ", name='" + name + '\'' +
                 ", enterpriseCode='" + enterpriseCode + '\'' +
-                ", enterpriseName='" + enterpriseName + '\'' +
                 ", serverCode='" + serverCode + '\'' +
-                ", serverName='" + serverName + '\'' +
                 ", level=" + level +
                 ", levelName='" + levelName + '\'' +
                 ", color='" + color + '\'' +

@@ -9,6 +9,7 @@ import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
+import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -87,35 +88,17 @@ public class EnterpriseLevelDao {
     }
 
     public List<EnterpriseLevel> list(EnterpriseLevelQuery levelQuery) {
-        //先获取系统企业告警等级
-        List<EnterpriseLevel> systemLevel = getSystemLevel();
-
         Criteria criteria = new Criteria();
         baseCriteria(criteria, levelQuery);
-////        Sort sort = new Sort(Sort.Direction.ASC, "updateTime");
-//        Aggregation agg = Aggregation.newAggregation(
-//                        Aggregation.match(criteria),  //查询条件
-//                        Aggregation.group("code", "updateTime"),
-////                Aggregation.sort(sort),
-//                Aggregation.skip((levelQuery.getCurrentPage() - 1) * levelQuery.getPageSize()),//跳到第几个开始
-//                Aggregation.limit(levelQuery.getPageSize())//查出多少个数据
-//        );
-//        AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
-//        List<EnterpriseLevel> mappedResults = aggResult.getMappedResults();
-//        List<String> codeList = new ArrayList<>();
-//        for(EnterpriseLevel enterpriseLevel : mappedResults){
-//            codeList.add(enterpriseLevel.getCode());
-//        }
-//        List<EnterpriseLevel> byCodes = getByCodes(codeList);
+
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "code"));
         query.with(new Sort(Sort.Direction.ASC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
-        systemLevel.addAll(enterpriseLevelList);
 
         List<EnterpriseLevel> resuList = new ArrayList<>();
         Map<String, EnterpriseLevel> codeEnterpriseMap = new HashMap<>();
-        for(EnterpriseLevel enterpriseLevel : systemLevel){
+        for(EnterpriseLevel enterpriseLevel : enterpriseLevelList){
             EnterpriseLevel firEnter = codeEnterpriseMap.get(enterpriseLevel.getCode());
             if(null == firEnter){
                 enterpriseLevel.setLevels(new ArrayList<>());
@@ -143,7 +126,7 @@ public class EnterpriseLevelDao {
                 Aggregation.group("code")
         );
         AggregationResults<EnterpriseLevel> aggResult = mongoTemplate.aggregate(agg, table, EnterpriseLevel.class);
-        return aggResult.getMappedResults().size() + 1;
+        return aggResult.getMappedResults().size();
     }
 
     Criteria baseCriteria(Criteria criteria, EnterpriseLevelQuery levelQuery){
@@ -195,12 +178,11 @@ public class EnterpriseLevelDao {
         return mongoTemplate.findOne(query, EnterpriseLevel.class, table);
     }
 
-    public boolean updateState(EnterpriseLevelQuery enterpriseLevelQuery) {
-        String code = enterpriseLevelQuery.getCode();
+    public boolean updateState(String code, String state) {
         Criteria criteria = Criteria.where("code").is(code);
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("state", enterpriseLevelQuery.getState());
+        update.set("state", state);
         update.set("updateTime", new Date());
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
@@ -221,16 +203,10 @@ public class EnterpriseLevelDao {
         query.with(new Sort(Sort.Direction.DESC, "level"));
         List<EnterpriseLevel> enterpriseLevelList = mongoTemplate.find(query, EnterpriseLevel.class, table);
         if(enterpriseLevelList == null || enterpriseLevelList.size() == 0){
-            enterpriseLevelList = getSystemLevel();
+            //如果没有启用的企业告警等级，使用系统默认告警等级
+            enterpriseLevelList = getSystemDefault("system", "code");
         }
         return enterpriseLevelList;
-    }
-
-    public List<EnterpriseLevel> getSystemLevel() {
-        Criteria criteria = Criteria.where("levelType").is(Contant.SYSTEM);
-        Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.DESC, "level"));
-        return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
 
     public boolean deleteSystemLevel(){
@@ -299,5 +275,44 @@ public class EnterpriseLevelDao {
             codeList.add(enterpriseLevel.getCode());
         }
         return codeList;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 17:16
+     * 功能描述:获取系统或企业默认告警
+     */
+    public List<EnterpriseLevel> getSystemDefault(String enterpriseCode, String serverCode){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("levelType").is(Contant.SYSTEM);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.ASC, "level"));
+        return mongoTemplate.find(query, EnterpriseLevel.class, table);
+    }
+
+    public void deleteSystemDefault(String enterpriseCode, String serverCode){
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        criteria.and("levelType").is(Contant.SYSTEM);
+        Query query = Query.query(criteria);
+        mongoTemplate.remove(query, table);
+    }
+
+    /**
+     * @param serverCode
+     * @param name
+     * @auther: liudd
+     * @date: 2019/12/27 17:46
+     * 功能描述:根据规则名称获取
+     */
+    public List<EnterpriseLevel> getByName(String enterpriseCode, String serverCode, String name) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
+        criteria.and("serverCode").is(serverCode);
+        name = MongoUtil.escapeExprSpecialWord(name);
+        criteria.and("name").is(name);
+        Query query = Query.query(criteria);
+        query.with(new Sort(Sort.Direction.ASC, "level"));
+        return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
 }

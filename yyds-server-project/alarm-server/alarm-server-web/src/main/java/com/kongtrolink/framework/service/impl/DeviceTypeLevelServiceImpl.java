@@ -160,11 +160,12 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      */
     @Override
     public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel) {
-        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode());
+        String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
+        String serverCode = deviceTypeLevel.getServerCode();
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseCode, serverCode);
         for(Integer level : deviceTypeLevel.getLevels()){
             EnterpriseLevel match = getMatch(lastUse, level);
-            AlarmLevel alarmLevel = new AlarmLevel(deviceTypeLevel.getEnterpriseCode(), deviceTypeLevel.getServerCode(),
-                    deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
+            AlarmLevel alarmLevel = new AlarmLevel(enterpriseCode, serverCode, deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
             alarmLevel.setEnterpriseName(deviceTypeLevel.getEnterpriseName());
             alarmLevel.setServerName(deviceTypeLevel.getServerName());
             alarmLevel.setSourceLevel(level);

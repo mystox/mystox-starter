@@ -76,6 +76,8 @@ public class EnterpriseLevelController extends BaseController {
     @RequestMapping("/list")
     @ResponseBody
     public JsonResult list(@RequestBody EnterpriseLevelQuery levelQuery){
+        //处理默认企业告警等级;
+        enterpriseLevelService.handleUniqueDefault(levelQuery.getEnterpriseCode(), levelQuery.getServerCode());
         List<EnterpriseLevel> list = enterpriseLevelService.list(levelQuery);
         int count = enterpriseLevelService.count(levelQuery);
         ListResult<EnterpriseLevel> listResult = new ListResult<>(list, count);
@@ -92,6 +94,13 @@ public class EnterpriseLevelController extends BaseController {
     @ResponseBody
     public JsonResult updateState(@RequestBody EnterpriseLevelQuery levelQuery){
         String state = levelQuery.getState();
+        String enterpriseCode = levelQuery.getEnterpriseCode();
+        String serverCode = levelQuery.getServerCode();
+        String code = levelQuery.getCode();
+        String entserpriseServer = enterpriseCode + Contant.UNDERLINE + serverCode;
+        if(Contant.FORBIT.equals(state) && code.equals(entserpriseServer)){
+            return new JsonResult("企业默认告警等级不能禁用", false);
+        }
         boolean result = enterpriseLevelService.updateState(levelQuery);
         if(result){
             return new JsonResult(state + Contant.RESULT_SUC, true);
@@ -120,5 +129,23 @@ public class EnterpriseLevelController extends BaseController {
     public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
         List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
         return new JsonResult(lastUse);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 14:58
+     * 功能描述:判定规则名称是否已存在，用于添加规则或者修改规则
+     */
+    @RequestMapping
+    @ResponseBody
+    public JsonResult checkName(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
+        String enterpriseCode = enterpriseLevelQuery.getEnterpriseCode();
+        String serverCode = enterpriseLevelQuery.getServerCode();
+        String name = enterpriseLevelQuery.getName();
+        List<EnterpriseLevel> byName = enterpriseLevelService.getByName(enterpriseCode, serverCode, name);
+        if(null != byName && byName.size()>0){
+            return new JsonResult("规则名称已存在",false);
+        }
+        return new JsonResult("规则名称可以使用", true);
     }
 }

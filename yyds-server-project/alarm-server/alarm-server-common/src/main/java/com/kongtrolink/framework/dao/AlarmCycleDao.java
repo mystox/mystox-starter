@@ -149,11 +149,11 @@ public class AlarmCycleDao {
     /**
      * @auther: liudd
      * @date: 2019/10/14 18:15
-     * 功能描述:根据企业服务编码，获取自定义周期规则
+     * 功能描述:根据企业服务编码，获取企业启用的告警周期
      */
     public List<AlarmCycle> getCycleList(List<String> enterpriseServerList){
         Criteria criteria = new Criteria();
-        Criteria enterCri = Criteria.where("enterpriseServer").in(enterpriseServerList);
+        Criteria enterCri = Criteria.where("enterpriseServer").in(enterpriseServerList).and("state").is(Contant.USEING);
         //获取默认周期规则
         Criteria systemCri = Criteria.where("enterpriseCode").exists(false);
         criteria.orOperator(enterCri, systemCri);
