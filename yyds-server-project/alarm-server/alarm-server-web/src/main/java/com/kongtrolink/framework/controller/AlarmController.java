@@ -63,33 +63,36 @@ public class AlarmController extends BaseController {
         return jsonResult;
     }
 
-//    public void testIndex(){
-//        String table = "YYDS_TOWER_SERVER_1.0.0_alarm_history_2019_47";
-//        DBCollection collection = mongoTemplate.getCollection(table);
-//        System.out.println(collection);
-//        boolean hadIndex = hadIndex(collection);
-//        if(!hadIndex){
-//            collection.createIndex("key");
-//            collection.createIndex("treport");
-//            hadIndex = hadIndex(collection);
-//            if(hadIndex){
-//                System.out.println("拥有两个index了");
-//            }
-//        }
-//    }
+    public void testIndex(){
+        String table = "YYDS_TOWER_SERVER_1.0.0_alarm_history_2019_47";
+        DBCollection collection = mongoTemplate.getCollection(table);
+        System.out.println(collection);
+        boolean hadIndex = hadIndex(collection);
+        if(!hadIndex){
+            collection.createIndex("key");
+            collection.createIndex("treport");
+            collection.createIndex("deviceType");
+            collection.createIndex("deviceModel");
+            collection.createIndex("targetLevel");
+            hadIndex = hadIndex(collection);
+            if(hadIndex){
+                System.out.println("拥有两个index了");
+            }
+        }
+    }
 //
-//    public boolean hadIndex(DBCollection collection){
-//        List<DBObject> indexInfo = collection.getIndexInfo();
-//        for(DBObject dbObject : indexInfo){
-//            System.out.println(dbObject);
-//            Object key = dbObject.get("key");
-//            String keyStr = key.toString();
-//            if(keyStr.contains("key")){
-//                System.out.println("table:" + collection.getName() + " 包含索引key");
-//                return true;
-//            }
-//        }
-//        System.out.println("table:" + collection.getName() + " 不包含索引key");
-//        return false;
-//    }
+    public boolean hadIndex(DBCollection collection){
+        List<DBObject> indexInfo = collection.getIndexInfo();
+        for(DBObject dbObject : indexInfo){
+            System.out.println(dbObject);
+            Object key = dbObject.get("key");
+            String keyStr = key.toString();
+            if(keyStr.contains("key")){
+                System.out.println("table:" + collection.getName() + " 包含索引key");
+                return true;
+            }
+        }
+        System.out.println("table:" + collection.getName() + " 不包含索引key");
+        return false;
+    }
 }

@@ -205,6 +205,9 @@ public class CycleHandle{
                 if(!hadIndex){
                     collection.createIndex("key");
                     collection.createIndex("treport");
+                    collection.createIndex("deviceType");
+                    collection.createIndex("deviceModel");
+                    collection.createIndex("targetLevel");
                     hadIndex = hadIndex(collection);
                     if(hadIndex){
                         fixSizeArrayList.add(table);
