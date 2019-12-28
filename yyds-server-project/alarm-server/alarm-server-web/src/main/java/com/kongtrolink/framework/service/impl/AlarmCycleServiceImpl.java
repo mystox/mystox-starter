@@ -177,4 +177,16 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     public AlarmCycle getByName(String enterpriseServer, String serverCode, String name) {
         return cycleDao.getByName(enterpriseServer, serverCode, name);
     }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/12/28 14:58
+     * 功能描述:获取最后在使用的告警周期规则。如果没有，使用系统默认规则
+     */
+    @Override
+    public AlarmCycle getLastUse(String enterpriseServer, String serverCode) {
+        return cycleDao.getLastUse(enterpriseServer, serverCode);
+    }
 }

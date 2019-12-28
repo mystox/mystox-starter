@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao;
 
+import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.enttiy.Alarm;
@@ -72,7 +73,6 @@ public class AlarmDao {
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "treport"));
         query.skip(alarmQuery.getRealBeginNum()).limit(alarmQuery.getRealLimit());
-
         return mongoTemplate.find(query, DBObject.class, table);
     }
 
@@ -141,6 +141,14 @@ public class AlarmDao {
         if(!StringUtil.isNUll(name)){
             name = MongoUtil.escapeExprSpecialWord(name);
             criteria.and("name").regex(".*?" + name + ".*?");
+        }
+        Boolean check = alarmQuery.getCheck();
+        if(null != check){
+            if(false == check) {
+                criteria.and("checkTime").exists(false);
+            }else{
+                criteria.and("checkTime").exists(true);
+            }
         }
         return criteria;
     }
@@ -297,5 +305,23 @@ public class AlarmDao {
             update.set("hcTime", overTime);
         }
         mongoTemplate.updateMulti(query, update, table);
+    }
+
+    /**
+     * @param table
+     * @param date
+     * @auther: liudd
+     * @date: 2019/12/28 15:06
+     * 功能描述:确认告警
+     */
+    public boolean check(String key,  String table, Date date, String checkContant, FacadeView checker) {
+        Criteria criteria = Criteria.where("key").is(key);
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("checkTime", date);
+        update.set("checkContant", checkContant);
+        update.set("checker", checker);
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
+        return result.getN()>0 ? true : false;
     }
 }

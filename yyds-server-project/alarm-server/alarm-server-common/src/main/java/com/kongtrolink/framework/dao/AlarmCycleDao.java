@@ -218,4 +218,24 @@ public class AlarmCycleDao {
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, AlarmCycle.class, table);
     }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/12/28 14:58
+     * 功能描述:获取最后在使用的告警周期规则
+     */
+    public AlarmCycle getLastUse(String enterpriseServer, String serverCode) {
+        Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseServer);
+        criteria.and("serverCode").is(serverCode).and("state").is(Contant.USEING);
+        Query query = Query.query(criteria);
+        AlarmCycle enterpriseCycle = mongoTemplate.findOne(query, AlarmCycle.class, table);
+        if(null == enterpriseCycle){
+            Criteria systemCri = Criteria.where("enterpriseCode").exists(false);
+            Query systemQuery = Query.query(systemCri);
+            enterpriseCycle = mongoTemplate.findOne(systemQuery, AlarmCycle.class, table);
+        }
+        return enterpriseCycle;
+    }
 }

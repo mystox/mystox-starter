@@ -77,8 +77,12 @@ public class AlarmCycleController extends BaseController {
     @RequestMapping("/updateState")
     @ResponseBody
     public JsonResult updateState(@RequestBody AlarmCycleQuery cycleQuery){
-        boolean result = cycleService.updateState(cycleQuery);
         String state = cycleQuery.getState();
+        String cycleType = cycleQuery.getCycleType();
+        if(Contant.FORBIT.equals(state) && cycleType.equals(Contant.SYSTEM)){
+            return new JsonResult("企业默认告警周期不能手动禁用", false);
+        }
+        boolean result = cycleService.updateState(cycleQuery);
         if(result){
             return new JsonResult(state + Contant.RESULT_SUC, true);
         }
