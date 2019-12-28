@@ -99,7 +99,7 @@ public class EnterpriseLevelController extends BaseController {
         String code = levelQuery.getCode();
         String entserpriseServer = enterpriseCode + Contant.UNDERLINE + serverCode;
         if(Contant.FORBIT.equals(state) && code.equals(entserpriseServer)){
-            return new JsonResult("企业默认告警等级不能禁用", false);
+            return new JsonResult("企业默认告警等级手动不能禁用", false);
         }
         boolean result = enterpriseLevelService.updateState(levelQuery);
         if(result){

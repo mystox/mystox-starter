@@ -36,7 +36,7 @@ public interface EnterpriseLevelService {
      */
     List<EnterpriseLevel> getLastUse(String enterpriseCode, String serverCode);
 
-    void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode);
+    void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode, List<EnterpriseLevel> lastUse);
 
     /**
      * @auther: liudd
@@ -57,7 +57,7 @@ public interface EnterpriseLevelService {
      * @date: 2019/11/6 16:23
      * 功能描述:调用远程接口修改告警等级模块中企业等级
      */
-    void updateEnterpriseLevelMap(String enterpriseCode, String serverCode, String enterpriseLevelCode, String type);
+    void updateEnterpriseLevelMap(String enterpriseCode, String serverCode, List<EnterpriseLevel> lastUse);
 
     /**
      * @auther: liudd

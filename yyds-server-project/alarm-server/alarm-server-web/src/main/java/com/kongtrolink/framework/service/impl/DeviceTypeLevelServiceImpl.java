@@ -50,9 +50,10 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         typeLevelDao.add(deviceTypeLevel);
         if(!StringUtil.isNUll(deviceTypeLevel.getId())){
             //添加成功，则生成对应的自定义告警等级
-            addAlarmLevelByDeviceLevel(deviceTypeLevel);
             String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
             String serverCode = deviceTypeLevel.getServerCode();
+            List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseCode, serverCode);
+            addAlarmLevelByDeviceLevel(deviceTypeLevel, lastUse);
             String deviceType = deviceTypeLevel.getDeviceType();
             String deviceModel = deviceTypeLevel.getDeviceModel();
             //修改等级模块告警等级
@@ -100,8 +101,9 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
             String deleteKey = alarmLevelService.getDeleteKey(enterpriseCode, serverCode, deviceType, deviceModel);
             //删除之前设备型号等级对应的告警等级
             alarmLevelService.deleteList(enterpriseCode, serverCode, deviceType, deviceModel);
-            //添加告警等级
-            addAlarmLevelByDeviceLevel(deviceTypeLevel);
+            //生成对应的自定义告警等级
+            List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseCode, serverCode);
+            addAlarmLevelByDeviceLevel(deviceTypeLevel, lastUse);
             //修改等级模块告警等级
             String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel;
             updateAlarmLevelModel(Contant.UPDATE, Contant.DEVICELEVEL, key, deleteKey);
@@ -159,10 +161,9 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      * 功能描述:根据设备型号告警，生成新告警自定义等级
      */
     @Override
-    public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel) {
+    public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel, List<EnterpriseLevel> lastUse) {
         String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
         String serverCode = deviceTypeLevel.getServerCode();
-        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseCode, serverCode);
         for(Integer level : deviceTypeLevel.getLevels()){
             EnterpriseLevel match = getMatch(lastUse, level);
             AlarmLevel alarmLevel = new AlarmLevel(enterpriseCode, serverCode, deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
@@ -178,6 +179,12 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         return true;
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/12/28 9:50
+     * 功能描述:匹配设备等级的最小企业等级
+     * 要求企业等级列表是倒叙
+     */
     private EnterpriseLevel getMatch( List<EnterpriseLevel> enterpriseLevels, Integer level){
         EnterpriseLevel resultEnter = null;
         for(EnterpriseLevel enterpriseLevel : enterpriseLevels){

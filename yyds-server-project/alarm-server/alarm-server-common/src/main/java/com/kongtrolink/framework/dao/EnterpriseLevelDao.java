@@ -287,7 +287,7 @@ public class EnterpriseLevelDao {
         criteria.and("serverCode").is(serverCode);
         criteria.and("levelType").is(Contant.SYSTEM);
         Query query = Query.query(criteria);
-        query.with(new Sort(Sort.Direction.ASC, "level"));
+        query.with(new Sort(Sort.Direction.DESC, "level"));
         return mongoTemplate.find(query, EnterpriseLevel.class, table);
     }
 
