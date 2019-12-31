@@ -2,6 +2,7 @@ package com.kongtrolink.framework.service.impl;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.ListResult;
@@ -208,5 +209,17 @@ public class AlarmServiceImpl implements AlarmService{
             weekList.add(endWeek);
         }
         return weekList;
+    }
+
+    /**
+     * @param table
+     * @param date
+     * @auther: liudd
+     * @date: 2019/12/28 15:06
+     * 功能描述:确认告警
+     */
+    @Override
+    public boolean check(String key,  String table, Date date, String checkContant, FacadeView checker) {
+        return alarmDao.check(key, table, date, checkContant, checker);
     }
 }

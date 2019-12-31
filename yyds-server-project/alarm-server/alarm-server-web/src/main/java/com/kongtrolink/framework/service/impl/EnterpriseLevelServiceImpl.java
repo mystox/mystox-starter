@@ -70,26 +70,12 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         if(null == enterpriseLevel){
             return false;
         }
-        boolean result = deleteByCode(enterpriseLevel.getCode());
-        if(result) {
-            if (Contant.USEING.equals(enterpriseLevel.getState())) {//20191205当前设定，启用状态的企业告警等级不能删除，所以本段代码无用。
-                String enterpriseCode = enterpriseLevel.getEnterpriseCode();
-                String serverCode = enterpriseLevel.getServerCode();
-                alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
-                addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
-                //删除告警等级模块中企业告警
-                updateEnterpriseLevelMap(enterpriseCode, serverCode, enterpriseLevel.getCode(), Contant.ZERO);
-                String key = enterpriseCode + Contant.EXCLAM + serverCode;
-                typeLevelService.updateAlarmLevelModel(Contant.DELETE, Contant.ENTERPRISELEVEL, key, Contant.THENULL);
-            }
-        }
-        return result;
+        return deleteByCode(enterpriseLevel.getCode());
     }
 
     @Override
     public boolean deleteByCode(String code) {
-        boolean result = enterpriseLevelDao.deleteByCode(code);
-        return result;
+        return enterpriseLevelDao.deleteByCode(code);
     }
 
     @Override
@@ -100,20 +86,6 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         if(delRes){
             add(enterpriseLevel);
         }
-        //如果该企业等级属于启用状态，需要重新生成告警等级
-        String state = enterpriseLevel.getState();
-        if(Contant.USEING.equals(state)){   //20191205当前设定，启用状态的企业告警等级不能修改，所以本段代码无用。
-            String enterpriseCode = enterpriseLevel.getEnterpriseCode();
-            String serverCode = enterpriseLevel.getServerCode();
-            alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
-            addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
-            //修改告警等级模块的企业告警
-            updateEnterpriseLevelMap(enterpriseCode, serverCode, enterpriseLevel.getCode(), Contant.ONE);
-            //先删除告警等级模块的告警等级
-            String key = enterpriseCode + Contant.EXCLAM + serverCode;
-            typeLevelService.updateAlarmLevelModel(Contant.UPDATE, Contant.ENTERPRISELEVEL, key, Contant.THENULL);
-        }
-
         return delRes;
     }
 
@@ -144,25 +116,20 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         String state = enterpriseLevelQuery.getState();
         String enterpriseCode = enterpriseLevelQuery.getEnterpriseCode();
         String serverCode = enterpriseLevelQuery.getServerCode();
+        //先删除原来的告警等级对应关系
+        alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
+        //先禁用原来的企业等级
+        enterpriseLevelDao.forbitBefor(enterpriseCode, serverCode, curTime);
+        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery.getCode(), state);
         if(Contant.FORBIT.equals(state)){
-            //如果禁用，需要删除原来的告警等级，然后使用默认企业等级生成告警等级
-            alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
-            //删除告警等级模块中企业告警
-            updateEnterpriseLevelMap(enterpriseCode, serverCode, enterpriseLevelQuery.getCode(), Contant.ZERO);
-        }else {
-            //先禁用原来的企业等级
-            boolean result = forbitBefor(enterpriseCode, serverCode, curTime);
-            if(!result){
-                return false;
-            }
-            alarmLevelService.deleteList(enterpriseCode, serverCode, null, null);
+            //如果是禁用启用默认企业默认告警等级
+            result = enterpriseLevelDao.updateState(enterpriseCode + Contant.UNDERLINE+serverCode, Contant.USEING);
         }
-        boolean result = enterpriseLevelDao.updateState(enterpriseLevelQuery);
-        if(result && Contant.USEING.equals(state)){
-            //修改告警等级模块中企业告警
-            updateEnterpriseLevelMap(enterpriseCode, serverCode, enterpriseLevelQuery.getCode(), Contant.ONE);
-        }
-        addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode);
+        List<EnterpriseLevel> lastUse = getLastUse(enterpriseCode, serverCode);
+        //生成新的等级对应关系
+        addAlarmLevelByEnterpriseInfo(enterpriseCode, serverCode, lastUse);
+        //修改告警等级模块中企业告警
+        updateEnterpriseLevelMap(enterpriseCode, serverCode, lastUse);
         //修改告警模块中告警等级
         String key = enterpriseCode + Contant.EXCLAM + serverCode;
         typeLevelService.updateAlarmLevelModel(Contant.UPDATE, Contant.ENTERPRISELEVEL, key, Contant.THENULL);
@@ -181,14 +148,19 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         return enterpriseLevelDao.getLastUse(enterpriseCode, serverCode);
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2019/12/27 18:44
+     * 功能描述:根据新启用的企业告警等级，生成新的告警等级对应关系
+     */
     @Override
-    public void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode) {
+    public void addAlarmLevelByEnterpriseInfo(String enterpriseCode, String serverCode, List<EnterpriseLevel> lastUse) {
         List<DeviceTypeLevel> deviceTypeLevels = typeLevelService.listByEnterpriseInfo(enterpriseCode, serverCode);
         if(null == deviceTypeLevels || deviceTypeLevels.size() == 0){
             return ;
         }
         for(DeviceTypeLevel deviceTypeLevel : deviceTypeLevels){
-            typeLevelService.addAlarmLevelByDeviceLevel(deviceTypeLevel);
+            typeLevelService.addAlarmLevelByDeviceLevel(deviceTypeLevel, lastUse);
         }
     }
 
@@ -207,12 +179,12 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     /**
      * @auther: liudd
      * @date: 2019/10/28 14:27
-     * 功能描述:初始化默认企业告警等级
+     * 功能描述:初始化默认系统告警等级
      */
     @Override
     public void initEnterpriseLevel() {
         //1，获取所有默认告警
-        List<EnterpriseLevel> systemLevel = enterpriseLevelDao.getSystemLevel();
+        List<EnterpriseLevel> systemLevel = enterpriseLevelDao.getSystemDefault("system", "code");
         if(null == systemLevel || systemLevel.size()<8){
             logger.info("准备初始化系统默认告警...");
             //删除所有当前不完整默认告警
@@ -249,33 +221,70 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
      * 功能描述:调用远程接口修改告警等级模块中企业等级
      */
     @Override
-    public void updateEnterpriseLevelMap(String enterpriseCode, String serverCode, String enterpriseLevelCode, String type) {
+    public void updateEnterpriseLevelMap(String enterpriseCode, String serverCode, List<EnterpriseLevel> lastUse) {
         if(!useEnterpriseLevel){
             logger.info("不需要修改告警等级模块企业告警等级, useEnterpriseLevel:{}", useEnterpriseLevel);
             return;
         }
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", type);
         String key = enterpriseCode + Contant.UNDERLINE + serverCode;
         jsonObject.put("key", key);
         int resultCode = 0;
-        if (Contant.ZERO.equals(type)) {
-            //删除告警等级模块的企业告警等级-
-        }else if(Contant.ONE.equals(type)){
-            //先根据企业编码和服务编码获取企业告警等级
-            List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelDao.getByCodes(Arrays.asList(enterpriseLevelCode));
-            jsonObject.put("enterpriseLevelList", enterpriseLevelList);
-        }
+        jsonObject.put("enterpriseLevelList", lastUse);
         try {
+            System.out.println("levelServerVersion:" + levelServerVersion + "; updateEnterpriseLevelMap:" + updateEnterpriseLevelMap);
             MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateEnterpriseLevelMap, jsonObject.toJSONString());
             resultCode = msgResult.getStateCode();
         }catch (Exception e){
             e.printStackTrace();
         }
         if(resultCode != 1) {
-            logger.info("修改告警等级模块企业告警等级失败，请重启告警等级模块.type:{}, code:{}, msg:{}, result:", type, key, jsonObject.toJSONString(), resultCode);
+            logger.info("修改告警等级模块企业告警等级失败，请重启告警等级模块. code:{}, msg:{}, result:", key, jsonObject.toJSONString(), resultCode);
         }else{
-            logger.info("修改告警等级模块企业告警等级成功.type:{}, code:{}, msg:{}, result:{}", type, key, jsonObject.toJSONString(), resultCode);
+            logger.info("修改告警等级模块企业告警等级成功. code:{}, msg:{}, result:{}",  key, jsonObject.toJSONString(), resultCode);
         }
+    }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/12/27 11:09
+     * 功能描述:处理企业默认告警等级
+     */
+    @Override
+    public void handleUniqueDefault(String enterpriseServer, String serverCode) {
+        //获取企业默认告警等级
+        List<EnterpriseLevel> enterpriseDefault = enterpriseLevelDao.getSystemDefault(enterpriseServer, serverCode);
+        //获取系统默认告警等级
+        List<EnterpriseLevel> systemDefault = enterpriseLevelDao.getSystemDefault("system", "code");
+        if(null == systemDefault || systemDefault.size() == 0){
+            return;
+        }
+        if(enterpriseDefault == null || enterpriseDefault.size() < systemDefault.size()){
+            //如果企业默认告警等级为空，或者小于系统默认告警等级，则根据系统默认告警等级初始化企业默认告警等级
+            enterpriseLevelDao.deleteSystemDefault(enterpriseServer, serverCode);
+            for(EnterpriseLevel enterpriseLevel : systemDefault){
+                enterpriseLevel.setId(null);
+                enterpriseLevel.setEnterpriseCode(enterpriseServer);
+                enterpriseLevel.setServerCode(serverCode);
+                enterpriseLevel.setCode(enterpriseServer+Contant.UNDERLINE+serverCode);
+                enterpriseLevel.setName("企业默认告警等级");
+                enterpriseLevel.setState(Contant.USEING);
+            }
+            enterpriseLevelDao.add(systemDefault);
+        }
+    }
+
+    /**
+     * @param serverCode
+     * @param name
+     * @auther: liudd
+     * @date: 2019/12/27 17:46
+     * 功能描述:根据规则名称获取
+     */
+    @Override
+    public List<EnterpriseLevel> getByName(String enterpriseCode, String serverCode, String name) {
+        return enterpriseLevelDao.getByName(enterpriseCode, serverCode, name);
     }
 }

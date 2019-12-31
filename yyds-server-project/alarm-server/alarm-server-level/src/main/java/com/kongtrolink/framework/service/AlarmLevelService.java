@@ -97,29 +97,22 @@ public class AlarmLevelService {
      * @auther: liudd
      * @date: 2019/11/6 16:14
      * 功能描述:修改内存中企业告警等级
+     * 20191228企业告警等级已经不存在删除了，web模块禁用，启用企业告警等级，都是修改
      */
     public void updateEnterpriseLevelMap(String jsonStr){
         JSONObject jsonObject = JSONObject.parseObject(jsonStr, JSONObject.class);
-        String type = jsonObject.getString(Contant.TYPE);
         String key = jsonObject.getString("key");
-        if(Contant.ONE.equals(type)){
-            //1,添加，修改
-            String enterpriseLevelListStr = jsonObject.getString("enterpriseLevelList");
-            List<EnterpriseLevel> enterpriseLevelList = JSONArray.parseArray(enterpriseLevelListStr, EnterpriseLevel.class);
-            enterpriseLevelMap.put(key, enterpriseLevelList);
-            logger.info("add enterpriseLevel, key:{}, enterpriseListStr:{}", key, enterpriseLevelListStr);
-            //liuddtodo 修改企业告警等级，对应的修改告警等级
-        }else if(Contant.ZERO.equals(type)){
-            //0，删除
-           enterpriseLevelMap.remove(key);
-           logger.info("remove enterpriseLevel, code:{}", key);
-        }
+        String enterpriseLevelListStr = jsonObject.getString("enterpriseLevelList");
+        List<EnterpriseLevel> enterpriseLevelList = JSONArray.parseArray(enterpriseLevelListStr, EnterpriseLevel.class);
+        enterpriseLevelMap.put(key, enterpriseLevelList);
+        logger.info("add enterpriseLevel, key:{}, enterpriseListStr:{}", key, enterpriseLevelListStr);
     }
 
     /**
      * @auther: liudd
      * @date: 2019/12/3 15:15
      * 功能描述:修改企业告警等级
+     * 2191228enterpriseLevelList存储顺序为lastUse
      */
     public EnterpriseLevel matchEnterpriseLevel(String enterpriseCode, String serverCode, int level){
         String key = enterpriseCode + Contant.UNDERLINE + serverCode;
@@ -132,7 +125,7 @@ public class AlarmLevelService {
             logger.info("默认告警等级不存在，请重启服务器，初始化默认告警等级");
             return null;
         }
-        for(int i=enterpriseLevelList.size()-1; i>=0; i--){
+        for(int i=0; i<enterpriseLevelList.size(); i++){
             EnterpriseLevel enterpriseLevel = enterpriseLevelList.get(i);
             if(enterpriseLevel.getLevel() > level){
                 continue;

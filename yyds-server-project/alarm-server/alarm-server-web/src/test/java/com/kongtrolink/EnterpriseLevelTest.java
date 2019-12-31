@@ -46,9 +46,7 @@ public class EnterpriseLevelTest {
     public void add(){
         EnterpriseLevel enterpriseLevel = new EnterpriseLevel();
         enterpriseLevel.setEnterpriseCode("zhyd");
-        enterpriseLevel.setEnterpriseName("智慧用电");
         enterpriseLevel.setServerCode("alarm-server");
-        enterpriseLevel.setServerName("告警服务");
         String code = StringUtil.getCode(new Date());
         enterpriseLevel.setCode("201910161847504864");
         System.out.println("code:" + code);
