@@ -21,8 +21,12 @@ spring:
     port: 6379
     database: 2
 
+management:
+  security:
+    enabled: false
+
 server:
-  name: ASSET_MANAGEMENT_SERVER2
+  name: ASSET_MANAGEMENT_SERVER
   version: 1.0.0
   port: 52202
   title: 资产管理服务
@@ -43,8 +47,5 @@ neo4j:
   uri: bolt://localhost:7687
 taskInterval:
   deviceGet: 6000 #获取设备列表时间间隔，秒
-management:
-  security:
-    enabled: false
-appResources: #资源目录，文件夹名称AppResources
-  ciTypeIcon: ciTypeIcon #CI类型图标文件夹，修改后需人工确认图标文件是否存放正常
+appResources: #资源目录
+  ciTypeIcon: AppResources/ciTypeIcon #CI类型图标文件夹，修改后需人工确认图标文件是否存放正常，该目录在应用根目录

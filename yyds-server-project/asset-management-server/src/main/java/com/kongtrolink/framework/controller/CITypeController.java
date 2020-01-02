@@ -19,8 +19,8 @@ public class CITypeController {
     @Resource(name = "Neo4jDBService")
     private DBService dbService;
 
-    @Value("${appResources.ciTypeIcon:ciTypeIcon}")
-    private String ciTypeIcon;
+    @Value("${appResources.ciTypeIcon:AppResources/ciTypeIcon}")
+    private String ciTypeIconFolder;
 
     @RequestMapping("/search")
     public String search(@RequestBody JSONObject requestBody) {
@@ -29,7 +29,8 @@ public class CITypeController {
         for (int i = 0; i < result.size(); ++i) {
             JSONObject jsonObject = result.getJSONObject(i);
             String name = jsonObject.getString("name");
-            jsonObject.put("icon", "/AppResources/" + ciTypeIcon + "/" + name + ".ico");
+            String icon = jsonObject.getString("icon");
+            jsonObject.put("icon", ciTypeIconFolder + "/" + icon);
         }
 
         return JSONObject.toJSONString(result);
@@ -47,15 +48,15 @@ public class CITypeController {
             result.put("result", 1);
             result.put("info", "添加成功");
 
-            String defaultPath = "./AppResources/" + ciTypeIcon + "/default.ico";
-            String iconPath = "./AppResources/" + ciTypeIcon + "/" + requestBody.getString("name") + ".ico";
-            File defaultFile = new File(defaultPath);
-            File iconFile = new File(iconPath);
-            try {
-                Files.copy(defaultFile.toPath(), iconFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (Exception e) {
-                result.put("info", "添加成功，图标加载失败");
-            }
+//            String defaultPath = "./" + ciTypeIconFolder + "/default.ico";
+//            String iconPath = "./AppResources/" + ciTypeIcon + "/" + requestBody.getString("name") + ".ico";
+//            File defaultFile = new File(defaultPath);
+//            File iconFile = new File(iconPath);
+//            try {
+//                Files.copy(defaultFile.toPath(), iconFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//            } catch (Exception e) {
+//                result.put("info", "添加成功，图标加载失败");
+//            }
         }
 
         return JSONObject.toJSONString(result);
@@ -69,12 +70,16 @@ public class CITypeController {
         result.put("info", "图标上传失败");
 
         if (!multipartFile.isEmpty()) {
-            String filePath = "./AppResources/" + ciTypeIcon + "/" + name + ".ico";
+            String filePath = "./" + ciTypeIconFolder + "/" + multipartFile.getName();
             File file = new File(filePath);
             try {
                 multipartFile.transferTo(file);
-                result.put("result", 1);
-                result.put("info", "图标上传成功");
+                if (dbService.modifyCITypeIcon(name, multipartFile.getName())) {
+                    result.put("result", 1);
+                    result.put("info", "图标上传成功");
+                } else {
+                    result.put("info", "图标信息保存失败");
+                }
             } catch (Exception e) {
                 result.put("info", "图标上传失败");
             }

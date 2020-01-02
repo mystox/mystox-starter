@@ -2,6 +2,7 @@ package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongTable;
 
 import java.text.SimpleDateFormat;
@@ -41,6 +42,33 @@ public class Alarm {
     private String status;              //告警状态（待处理，已消除）
     private Date hcTime;                //被周期处理时间
     private String key ;                //唯一键，可作为索引
+    private Date checkTime;             //确认时间
+    private String checkContant;        //确认内容
+    private FacadeView checker;         //确认人
+
+    public String getCheckContant() {
+        return checkContant;
+    }
+
+    public void setCheckContant(String checkContant) {
+        this.checkContant = checkContant;
+    }
+
+    public FacadeView getChecker() {
+        return checker;
+    }
+
+    public void setChecker(FacadeView checker) {
+        this.checker = checker;
+    }
+
+    public Date getCheckTime() {
+        return checkTime;
+    }
+
+    public void setCheckTime(Date checkTime) {
+        this.checkTime = checkTime;
+    }
 
     public String getKey() {
         return key;

@@ -13,6 +13,8 @@ public interface DBService {
 
     boolean modifyCIType(JSONObject jsonObject);
 
+    boolean modifyCITypeIcon(String name, String icon);
+
     JSONArray searchCIType(JSONObject jsonObject);
 
     JSONArray searchCITypeByName(String name);

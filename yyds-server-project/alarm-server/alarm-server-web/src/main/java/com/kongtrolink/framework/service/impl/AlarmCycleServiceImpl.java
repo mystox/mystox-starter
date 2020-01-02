@@ -39,24 +39,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
 
     @Override
     public boolean delete(String alarmCycleId) {
-        AlarmCycle alarmCycle = get(alarmCycleId);
-        boolean delete = cycleDao.delete(alarmCycleId);
-        if(delete){
-            //如果删除成功，先判定企业有没有启用状态的告警周期
-            alarmCycle.setState(Contant.USEING);
-            AlarmCycleQuery alarmCycleQuery = AlarmCycleQuery.alarmCycle2Query(alarmCycle);
-            AlarmCycle one = getOne(alarmCycleQuery);
-            if(null == one){
-                alarmCycleQuery.setState(Contant.FORBIT);
-                AlarmCycle lastUpdateOne = getLastUpdateOne(alarmCycleQuery);
-                if(null != lastUpdateOne) {
-                    alarmCycleQuery.setId(lastUpdateOne.getId());
-                    alarmCycleQuery.setState(Contant.USEING);
-                    updateState(alarmCycleQuery);
-                }
-            }
-        }
-        return delete;
+        return cycleDao.delete(alarmCycleId);
     }
 
     @Override
@@ -98,26 +81,36 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
 
     @Override
     public boolean updateState(AlarmCycleQuery cycleQuery) {
-        //如果是禁用，直接禁用；如果是启用，需要先禁用当前启用的规则
+        boolean result ;
         String state = cycleQuery.getState();
         String enterpriseCode = cycleQuery.getEnterpriseCode();
         String serverCode = cycleQuery.getServerCode();
         Date curTime = new Date();
         if(Contant.USEING.equals(state)){
-            cycleDao.forbitBefor(enterpriseCode, serverCode, curTime, cycleQuery.getOperator());
+            //如果是启用，需要禁用当前所有告警周期
+            result = cycleDao.forbitBefor(enterpriseCode, serverCode, curTime, cycleQuery.getOperator());
+            if(result) {
+                result = cycleDao.updateState(enterpriseCode, serverCode, cycleQuery.getId(), state, curTime, cycleQuery.getOperator());
+            }
+            return result;
         }
-        boolean result = cycleDao.updateState(enterpriseCode, serverCode, cycleQuery.getId(), state, curTime, cycleQuery.getOperator());
+        //如果是禁用，需要启动当前企业默认告警周期
+        //1,获取企业默认告警周期
+        AlarmCycle systemCycle = cycleDao.getSystemCycle(enterpriseCode, serverCode);
+        if(null == systemCycle){
+            return false;
+        }
+        result = cycleDao.updateState(enterpriseCode, serverCode, cycleQuery.getId(), state, curTime, cycleQuery.getOperator());
+        if(result) {
+            //禁用后，启用系统默认告警周期
+            result = cycleDao.updateState(enterpriseCode, serverCode, systemCycle.getId(), Contant.USEING, curTime, cycleQuery.getOperator());
+        }
         return result;
     }
 
     @Override
     public AlarmCycle getLastUpdateOne(AlarmCycleQuery alarmCycleQuery) {
         return cycleDao.getLastUpdateOne(alarmCycleQuery);
-    }
-
-    @Override
-    public AlarmCycle getSystemCycle() {
-        return cycleDao.getSystemCycle();
     }
 
     /**
@@ -128,7 +121,7 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
     @Override
     public void initAlarmCycle() {
         //获取系统默认告警周期
-        AlarmCycle systemCycle = getSystemCycle();
+        AlarmCycle systemCycle = cycleDao.getSystemCycle(null, null);
         if(null == systemCycle){
             logger.info("默认告警周期不存在，准备初始化");
             systemCycle = new AlarmCycle();
@@ -141,5 +134,59 @@ public class AlarmCycleServiceImpl implements AlarmCycleService {
         }
         logger.info("默认告警周期存在，无需初始化：{}", systemCycle.toString());
         cycleDao.save(systemCycle);
+    }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/12/27 11:09
+     * 功能描述:处理企业默认告警周期
+     */
+    @Override
+    public void handleUniqueDefault(String enterpriseServer, String serverCode) {
+        //判断企业默认告警是否存在
+        AlarmCycle enterpriseSystemCycle = cycleDao.getSystemCycle(enterpriseServer, serverCode);
+        if(null == enterpriseSystemCycle){
+            //如果企业默认告警周期不存在，使用系统默认告警周期初始化企业默认告警周期
+            AlarmCycle systemCycle = cycleDao.getSystemCycle(null, null);
+            if(null == systemCycle){
+                logger.error("系统默认告警周期不存在，请重启服务");
+                return;
+            }
+            systemCycle.setId(null);
+            systemCycle.setName("企业默认告警周期");
+            systemCycle.setEnterpriseCode(enterpriseServer);
+            systemCycle.setServerCode(serverCode);
+            systemCycle.setEnterpriseServer(enterpriseServer+Contant.UNDERLINE+serverCode);
+            systemCycle.setUpdateTime(new Date());
+            systemCycle.setState(Contant.USEING);
+            cycleDao.save(systemCycle);
+        }
+    }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @param name
+     * @auther: liudd
+     * @date: 2019/12/27 14:55
+     * 功能描述:根据名称获取
+     */
+    @Override
+    public AlarmCycle getByName(String enterpriseServer, String serverCode, String name) {
+        return cycleDao.getByName(enterpriseServer, serverCode, name);
+    }
+
+    /**
+     * @param enterpriseServer
+     * @param serverCode
+     * @auther: liudd
+     * @date: 2019/12/28 14:58
+     * 功能描述:获取最后在使用的告警周期规则。如果没有，使用系统默认规则
+     */
+    @Override
+    public AlarmCycle getLastUse(String enterpriseServer, String serverCode) {
+        return cycleDao.getLastUse(enterpriseServer, serverCode);
     }
 }

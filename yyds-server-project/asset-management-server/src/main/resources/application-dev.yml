@@ -11,6 +11,8 @@ spring:
     port: 6379
     database: 2
 server:
+  name: ASSET_MANAGEMENT_SERVER1
+  version: 1.0.0
   host: 172.16.5.62
   port: 52202
 mqtt:
@@ -31,3 +33,8 @@ logging:
   pattern:
     console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+
+taskInterval:
+  deviceGet: 6000 #获取设备列表时间间隔，秒
+appResources: #资源目录
+  ciTypeIcon: AppResources/ciTypeIcon #CI类型图标文件夹，修改后需人工确认图标文件是否存放正常，该目录在应用根目录

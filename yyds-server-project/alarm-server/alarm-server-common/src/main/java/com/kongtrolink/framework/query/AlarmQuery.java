@@ -29,6 +29,15 @@ public class AlarmQuery extends Paging {
     private Date clearEndTime;                  //清除结束时间
     private Integer realBeginNum;               //真实分页起始数据
     private Integer realLimit;                  //真实分页大小
+    private Boolean isCheck;                    //是否确认
+
+    public Boolean getCheck() {
+        return isCheck;
+    }
+
+    public void setCheck(Boolean check) {
+        isCheck = check;
+    }
 
     public Integer getRealBeginNum() {
         return realBeginNum;

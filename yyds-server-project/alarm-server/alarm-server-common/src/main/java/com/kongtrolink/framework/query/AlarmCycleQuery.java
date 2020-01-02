@@ -25,6 +25,15 @@ public class AlarmCycleQuery extends Paging{
     private String state;
     private String operatorName;
     private FacadeView operator;
+    private String cycleType;           //周期类型（系统/手动）
+
+    public String getCycleType() {
+        return cycleType;
+    }
+
+    public void setCycleType(String cycleType) {
+        this.cycleType = cycleType;
+    }
 
     public FacadeView getOperator() {
         return operator;

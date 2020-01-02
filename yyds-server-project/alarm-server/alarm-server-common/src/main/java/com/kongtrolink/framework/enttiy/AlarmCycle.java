@@ -15,9 +15,7 @@ public class AlarmCycle {
     private String id;
     private String name;
     private String enterpriseCode;
-    private String enterpriseName;
     private String serverCode;
-    private String serverName;
     private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
     private Date updateTime;
     private FacadeView operator;
@@ -100,22 +98,6 @@ public class AlarmCycle {
         this.updateTime = updateTime;
     }
 
-    public String getEnterpriseName() {
-        return enterpriseName;
-    }
-
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    public void setServerName(String serverName) {
-        this.serverName = serverName;
-    }
-
     public FacadeView getOperator() {
         return operator;
     }
@@ -156,9 +138,7 @@ public class AlarmCycle {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", enterpriseCode='" + enterpriseCode + '\'' +
-                ", enterpriseName='" + enterpriseName + '\'' +
                 ", serverCode='" + serverCode + '\'' +
-                ", serverName='" + serverName + '\'' +
                 ", diffTime=" + diffTime +
                 ", updateTime=" + updateTime +
                 ", operator=" + operator +

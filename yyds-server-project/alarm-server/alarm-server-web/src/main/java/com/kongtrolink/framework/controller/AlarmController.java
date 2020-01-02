@@ -2,6 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
+import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
@@ -9,6 +10,7 @@ import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.kongtrolink.framework.service.AlarmCycleService;
 import com.kongtrolink.framework.service.AlarmService;
 import com.kongtrolink.framework.service.AuxilaryService;
 import com.mongodb.DBCollection;
@@ -41,12 +43,12 @@ public class AlarmController extends BaseController {
     AuxilaryService auxilaryService;
     @Autowired
     MongoTemplate mongoTemplate;
+    @Autowired
+    AlarmCycleService cycleService;
 
-    @RequestMapping("/list")
+    @RequestMapping("list")
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery){
-//        alarmQuery.setEnterpriseCode("YYDS");
-//        alarmQuery.setServerCode("TOWER_SERVER_1.0.0");
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
         ListResult<DBObject> listResult ;
@@ -61,6 +63,33 @@ public class AlarmController extends BaseController {
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         jsonResult.setOtherInfo(auxilary);
         return jsonResult;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2019/12/28 11:28
+     * 功能描述:告警确认
+     */
+    @RequestMapping("check")
+    @ResponseBody
+    public JsonResult check(@RequestBody Alarm alarm){
+        String key = alarm.getKey();
+        String type = alarm.getType();
+        String table = MongTable.ALARM_CURRENT;
+        if(Contant.HIST_ALARM.equals(type)){
+            String tablePrefix = alarm.getEnterpriseCode() + Contant.UNDERLINE + alarm.getServerCode()
+                    + Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
+            String year_week = DateUtil.getYear_week(alarm.getTreport());
+            table = tablePrefix + year_week;
+        }
+        Date checkDate = new Date();
+        String checkContant = alarm.getCheckContant();
+        FacadeView checker = alarm.getChecker();
+        boolean result = alarmService.check(key, table, checkDate, checkContant, checker);
+        if(result){
+            return new JsonResult("确认成功", true);
+        }
+        return new JsonResult("确认失败", false);
     }
 
     public void testIndex(){
