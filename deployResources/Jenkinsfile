@@ -64,6 +64,8 @@ pipeline {
                 script {
                         remoteExecutor('yyds-server-project/reports-server/target/reports-server-1.0.0.jar', \
                         '/home/yyds/reports','reports-server-1.0.0.jar',10,'deployResources/reports-server.ini','reports-server')
+                        sshCommand remote: remote, command: 'mkdir -p ' + '/home/yyds/reports/testResources'
+                        sshPut remote: remote, from: 'testResources/testReport.json', into: '/home/yyds/reports/testResources/testReport.json'
                 }
             }
         }

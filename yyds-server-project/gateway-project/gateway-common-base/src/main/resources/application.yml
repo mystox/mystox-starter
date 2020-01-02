@@ -2,7 +2,7 @@ spring:
   application:
     name: gateway-common-base
   profiles:
-    active: dev
+    active: dev,test,prod
   redis:
     ## Redis数据库索引(默认为0)
     database: 2

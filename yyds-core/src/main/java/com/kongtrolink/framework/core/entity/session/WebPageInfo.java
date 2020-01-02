@@ -33,9 +33,18 @@ public class WebPageInfo implements Serializable
     private String type;    //服务类型
     private boolean backMark;   //服务是否返回管理页面标记
     private String hierarchyName; //权限层级名
+    private String alias; // 别名
 
     private boolean isRoot = false; //是否管理页面
 
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
     public boolean isRoot() {
         return isRoot;

@@ -3,6 +3,8 @@ spring:
     name: reports-server
   profiles:
     active: dev,test,prod
+  session:
+    store-type: redis
 ###########消息框架相关配置#############
 server:
   name: REPORTS_SERVER #服务编码

@@ -1,8 +1,4 @@
 spring:
-  application:
-    name: yytd-mqtt-demo
-  session:
-    store-type: redis
   redis:
     host: 172.16.5.26
     port: 6379
@@ -15,4 +11,3 @@ mqtt:
   url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 mongodb:
   uri: mongodb://172.16.6.9:27017/reports_server
-

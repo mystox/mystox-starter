@@ -1,8 +1,4 @@
 spring:
-  application:
-    name: log-server
-  session:
-    store-type: redis
   redis:
     host: 172.16.5.26
     port: 6379

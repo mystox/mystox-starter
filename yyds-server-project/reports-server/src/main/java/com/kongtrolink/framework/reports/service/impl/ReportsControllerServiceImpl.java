@@ -221,8 +221,8 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
         String serverCode = data.getString("serverCode");
         String enterpriseCode = data.getString("enterpriseCode");
         String configData = data.getString("configData");
-        String funPrivCode = data.getString("funPrivCode");
-        boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode);
+        String funPrivCode = data.getString("funcPrivCode");
+        boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode,funPrivCode);
         ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData, funPrivCode);
         if (exits) {
             ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode, funPrivCode);
@@ -335,15 +335,19 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     public void recordConfigData(JSONObject data, User user) {
         String serverCode = data.getString("serverCode");
         String enterpriseCode = data.getString("enterpriseCode");
-        String funPrivCode = data.getString("funPrivCode");
+        String funcPrivCode = data.getString("funcPrivCode");
+
+        //删除旧的记录
+
+        List<ReportConfigRecord> reportConfigRecords = reportConfigRecordDao.removeByServerCodeAndEnterpriseCodeAndFuncPrivCode(serverCode, enterpriseCode, funcPrivCode);
 
         Set<String> saveReportCodes = new HashSet<>(); // 保存的报表配置code集合，去重使用
         String configData = data.getString("configData");
         JSONArray configDataArray = JSONArray.parseArray(configData);
-
+        Date recordDate = new Date();
         configDataArray.forEach(config -> {
             JSONObject jsonObject = (JSONObject) config;
-            String tabName = jsonObject.getString("name");
+//            String tabName = jsonObject.getString("name");
             JSONArray saveArray = jsonObject.getJSONArray("save");
             saveArray.forEach(s -> {
                 JSONObject save = (JSONObject) s;
@@ -355,10 +359,13 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
                     ReportTask reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode, reportServerCode);
                     if (reportTask !=null) {
                         String reportTaskId = reportTask.getId();
-                        ReportConfigRecord reportConfigRecord = reportConfigRecordDao.findByReportTaskIdAndFuncPrivCode(reportTaskId, funPrivCode);
+                        ReportConfigRecord reportConfigRecord = reportConfigRecordDao.findByReportTaskIdAndFuncPrivCode(reportTaskId, funcPrivCode);
                         if (reportConfigRecord == null) reportConfigRecord = new ReportConfigRecord();
+                        reportConfigRecord.setEnterpriseCode(enterpriseCode);
+                        reportConfigRecord.setServerCode(serverCode);
                         reportConfigRecord.setReportsTaskId(reportTaskId);
-                        reportConfigRecord.setRecordTime(new Date());
+                        reportConfigRecord.setFuncPrivCode(funcPrivCode);
+                        reportConfigRecord.setRecordTime(recordDate);
                         reportConfigRecord.setConfigUsername(user.getName());
                         reportConfigRecordDao.save(reportConfigRecord);
                     }
@@ -379,7 +386,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     @Override
     public List<ReportConfigRecord> getRecordConfigDataByPrivCode(String serverCode, String enterpriseCode, String funcPrivCode) {
 
-        return reportConfigRecordDao.findByReportTaskIdAndFuncPrivCodeAndFuncPrivCode(serverCode, enterpriseCode, funcPrivCode);
+        return reportConfigRecordDao.findByServerCodeAndEnterpriseCodeAndFuncPrivCode(serverCode, enterpriseCode, funcPrivCode);
     }
 
     @Override

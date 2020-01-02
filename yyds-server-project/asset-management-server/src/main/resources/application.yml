@@ -22,7 +22,7 @@ spring:
     database: 2
 
 server:
-  name: ASSET_MANAGEMENT_SERVER1
+  name: ASSET_MANAGEMENT_SERVER2
   version: 1.0.0
   port: 52202
   title: 资产管理服务

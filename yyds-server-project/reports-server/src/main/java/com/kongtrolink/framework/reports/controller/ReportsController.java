@@ -100,14 +100,14 @@ public class ReportsController extends BaseController {
         return new JsonResult(reportWebConfig);
     }
 
-//    @RequestMapping("/recordConfigDataGet")
-//    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
-//        String serverCode = body.getString("serverCode");
-//        String enterpriseCode = body.getString("enterpriseCode");
-////        String funcPrivCode = body.getString("funcPrivCode");
-//        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
-//        return new JsonResult(reportWebConfig);
-//    }
+    @RequestMapping("/recordConfigDataGet")
+    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
+        String serverCode = body.getString("serverCode");
+        String enterpriseCode = body.getString("enterpriseCode");
+//        String funcPrivCode = body.getString("funcPrivCode");
+        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
+        return new JsonResult(reportWebConfig);
+    }
 
 
     @RequestMapping("/recordConfigPrivGet")
@@ -122,7 +122,8 @@ public class ReportsController extends BaseController {
 //            List<String> privCodes = ReflectionUtils.convertElementPropertyToList(reportPrivs, "code");
             reportPrivs.forEach(reportPriv->{
                 String reportPrivCode = reportPriv.getCode();
-                String privName = reportPriv.getName();
+//                String privName = reportPriv.getName();
+                String showName = StringUtils.isBlank(reportPriv.getAlias()) ? reportPriv.getName():reportPriv.getAlias();
                 String hierarchyName = reportPriv.getHierarchyName();
                 List<ReportConfigRecord> recordConfigDataList = reportsControllerService.getRecordConfigDataByPrivCode(serverCode, enterpriseCode,reportPrivCode);
                 if (CollectionUtils.isNotEmpty(recordConfigDataList))
@@ -136,13 +137,12 @@ public class ReportsController extends BaseController {
                         recordJson.put("reportName", reportTask.getReportName());
                         recordJson.put("operaCode", reportTask.getOperaCode());
                         //填充页面权限名称信息
-                        recordJson.put("privName", privName);
+                        recordJson.put("privName", showName);
                         recordJson.put("privHierarchy", hierarchyName);
-                        result.add(recordJson);
                     });
                 } else {
                     JSONObject recordJson = new JSONObject();
-                    recordJson.put("privName", privName);
+                    recordJson.put("privName", showName);
                     recordJson.put("privHierarchy", hierarchyName);
                     recordJson.put("funcPrivCode", reportPrivCode);
                     result.add(recordJson);
