@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.kongtrolink.framework.entity.GroupCode;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.TopicPrefix;
@@ -128,8 +129,19 @@ public class MqttOperaImpl implements MqttOpera {
         //遍历订阅服务列表
         for (String serverCode : serverArr) {
             String groupServerCode = preconditionGroupServerCode(groupCode, serverCode);
-            String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
-                    groupServerCode);
+            String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
+            List<String> serverOperaCodeArr = serviceRegistry.getChildren(serverPath);
+            if (serverOperaCodeArr.contains(operaCode)) {
+                result.add(groupServerCode);
+            }
+        }
+        //ROOT 节点获取服务接口信息即云管等
+        String rootSubPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, GroupCode.ROOT);
+        List<String> rootServerArr = serviceRegistry.getChildren(rootSubPath); //获取订阅表的服务列表
+        //遍历订阅服务列表
+        for (String serverCode : rootServerArr) {
+            String groupServerCode = preconditionGroupServerCode(GroupCode.ROOT, serverCode);
+            String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
             List<String> serverOperaCodeArr = serviceRegistry.getChildren(serverPath);
             if (serverOperaCodeArr.contains(operaCode)) {
                 result.add(groupServerCode);

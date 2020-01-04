@@ -56,6 +56,7 @@ public class RegisterRunner implements ApplicationRunner {
 
     @Value("${server.mark:*}")
     private String serverMark;
+
     @Value("${server.groupCode}")
     private String groupCode;
 
@@ -138,6 +139,7 @@ public class RegisterRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         try {
+            ackTopic();//ack操作嘛对应的topic注册 格式样例 /mqtt/sub/GROUP_CODE/SERVER_CODE/+/ack
             RegisterMsg registerMsg = getRegisterMsg();
             if (registerMsg == null) {
                 logger.error("register message is null");
@@ -147,7 +149,6 @@ public class RegisterRunner implements ApplicationRunner {
             List<RegisterSub> subList = scanSubList();
             register(registerMsg, subList);//注册操作码信息
             subTopic(subList);//订阅操作码对应topic
-            ackTopic();//ack操作嘛对应的topic注册 格式样例 /mqtt/sub/GROUP_CODE/SERVER_CODE/+/ack
             //web注册置于最后，适应运管的启动顺序
            /* if (result != null) {
                 if (result.getStateCode() == StateCode.SUCCESS) {
@@ -384,7 +385,7 @@ public class RegisterRunner implements ApplicationRunner {
 //                    MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
 //                    OperaCode.SLOGIN, 2, sLoginPayload, 30000L, TimeUnit.MILLISECONDS);
             MsgResult slogin = mqttOpera.slogin(
-                    preconditionGroupServerCode("ROOT", preconditionServerCode(registerServerName, registerServerVersion)),
+                    preconditionGroupServerCode(GroupCode.ROOT, preconditionServerCode(registerServerName, registerServerVersion)),
                     sLoginPayload);
             int stateCode = slogin.getStateCode();
             if (StateCode.SUCCESS == stateCode) {

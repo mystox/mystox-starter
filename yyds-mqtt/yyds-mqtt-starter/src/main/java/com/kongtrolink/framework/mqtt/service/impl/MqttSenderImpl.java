@@ -57,7 +57,6 @@ public class MqttSenderImpl implements MqttSender {
     @Value("${server.groupCode}")
     private String groupCode;
 
-
     @Autowired
     private IMqttSender mqttSender;
     //    @Autowired
