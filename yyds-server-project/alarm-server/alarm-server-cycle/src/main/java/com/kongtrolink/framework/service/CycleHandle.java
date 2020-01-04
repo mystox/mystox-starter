@@ -2,7 +2,6 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FixSizeArrayList;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmCycleDao;
@@ -10,8 +9,8 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
-import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.util.RedisUtils;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -22,9 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Auther: liudd

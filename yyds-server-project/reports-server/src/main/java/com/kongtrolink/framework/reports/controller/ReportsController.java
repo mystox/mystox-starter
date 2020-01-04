@@ -12,7 +12,7 @@ import com.kongtrolink.framework.reports.entity.ReportConfigRecord;
 import com.kongtrolink.framework.reports.entity.ReportTask;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 import com.kongtrolink.framework.reports.service.ReportsControllerService;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

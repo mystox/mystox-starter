@@ -15,7 +15,7 @@ import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.mqtt.AlarmEntrance;
 import com.kongtrolink.framework.mqtt.AlarmMqttEntity;
 import com.kongtrolink.framework.mqtt.OperateEntity;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.utils.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

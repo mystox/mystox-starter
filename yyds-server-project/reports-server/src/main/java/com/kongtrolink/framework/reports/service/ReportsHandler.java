@@ -12,7 +12,7 @@ import com.kongtrolink.framework.reports.dao.ReportTaskResultDao;
 import com.kongtrolink.framework.reports.entity.*;
 import com.kongtrolink.framework.reports.stereotype.ReportExtend;
 import com.kongtrolink.framework.reports.stereotype.ReportOperaCode;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

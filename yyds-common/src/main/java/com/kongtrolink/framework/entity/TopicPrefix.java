@@ -14,5 +14,6 @@ public class TopicPrefix {
     public final static String PUB_PREFIX = "/mqtt/pub";
     public final static String PRIV_PREFIX = "/mqtt/priv";
     public final static String SERVER_STATUS = "/mqtt/status";
+    public final static String OPERA_ROUTE = "/mqtt/operaRoute";
 
 }

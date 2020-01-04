@@ -14,7 +14,7 @@ import com.kongtrolink.framework.enttiy.*;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.service.MsgTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

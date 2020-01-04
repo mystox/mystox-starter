@@ -25,9 +25,9 @@ privFunc:
       code: SETTING
       uri: /ZKReport/reportSetting
     - type: PAGE
-      name: 自定义报表
-      code: CUSTOM
-      uri: /ZKReport/customReport
+      name: 报表层级
+      code: TIER
+      uri: /ZKReport/reportTier
       root: true
     - type: PAGE
       name: 报表查看
