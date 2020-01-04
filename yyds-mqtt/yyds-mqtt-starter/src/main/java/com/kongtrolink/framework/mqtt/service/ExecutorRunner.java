@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.mqtt.service;
 
 import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
-import com.kongtrolink.framework.service.MqttSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

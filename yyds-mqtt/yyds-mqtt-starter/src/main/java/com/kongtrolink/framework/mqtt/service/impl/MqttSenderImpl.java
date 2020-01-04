@@ -7,7 +7,7 @@ import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.util.MqttLogUtil;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionGroupServerCode;
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionServerCode;
 import static com.kongtrolink.framework.mqtt.config.MqttConfig.CHANNEL_REPLY;
 
 /**
@@ -51,11 +53,16 @@ public class MqttSenderImpl implements MqttSender {
 
     @Value("${server.name}_${server.version}")
     private String serverCode;
+
+    @Value("${server.groupCode}")
+    private String groupCode;
+
+
     @Autowired
     private IMqttSender mqttSender;
-    @Autowired
-    @Qualifier("mqttHandlerImpl")
-    private MqttHandler mqttHandler;
+    //    @Autowired
+//    @Qualifier("mqttHandlerImpl")
+//    private MqttHandler mqttHandler;
     @Autowired
     @Qualifier("mqttHandlerAck")
     private MqttHandler mqttHandlerAck;
@@ -70,11 +77,10 @@ public class MqttSenderImpl implements MqttSender {
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
-        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload, operaCode);
+        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         //获取目标topic列表，判断sub_list是否有人订阅处理
         try {
@@ -109,11 +115,10 @@ public class MqttSenderImpl implements MqttSender {
     public void sendToMqtt(String serverCode, String operaCode,
                            int qos, String payload)
     {
-        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, localServerCode, payload, operaCode);
+        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         try {
             //获取目标topic列表，判断sub_list是否有人订阅处理
@@ -191,14 +196,8 @@ public class MqttSenderImpl implements MqttSender {
     @Override
     public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-//        String localServerCode = this.serverName + "_" + this.serverVersion;
         //组建消息体
-//        String topicAck = MqttUtils.preconditionSubTopicId(this.serverCode, operaCode) + "/ack";
-        String topicAck = mqttHandlerAck.assembleSubTopic(operaCode);
-        if (!mqttHandlerAck.isExists(topicAck))
-            mqttHandlerAck.addSubTopic(topicAck);
-        //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, this.serverCode, payload, operaCode);
+        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
         mqttMsg.setHasAck(true);
         String msgId = mqttMsg.getMsgId();
         CallBackTopic callBackTopic = new CallBackTopic();
@@ -283,13 +282,13 @@ public class MqttSenderImpl implements MqttSender {
     }
 
 
-    private MqttMsg buildMqttMsg(String topicId, String localServerCode, String payload, String operaCode) {
+    private MqttMsg buildMqttMsg(String topicId, String payload, String operaCode) {
         MqttMsg mqttMsg = new MqttMsg();
         mqttMsg.setTopic(topicId);
         mqttMsg.setPayloadType(PayloadType.STRING);
         mqttMsg.setOperaCode(operaCode);
         mqttMsg.setPayload(payload);
-        mqttMsg.setSourceAddress(localServerCode);
+        mqttMsg.setSourceAddress( preconditionGroupServerCode(groupCode,preconditionServerCode(serverName,serverVersion)));
         return mqttMsg;
     }
 

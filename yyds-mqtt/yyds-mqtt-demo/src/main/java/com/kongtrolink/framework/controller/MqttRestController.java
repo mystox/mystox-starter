@@ -2,7 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.service.MqttHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

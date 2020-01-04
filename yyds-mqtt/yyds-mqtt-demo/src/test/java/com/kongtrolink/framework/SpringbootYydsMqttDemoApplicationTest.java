@@ -5,7 +5,7 @@ import com.kongtrolink.framework.entity.TransverterConfig;
 import com.kongtrolink.framework.mqtt.config.MqttConfig;
 import com.kongtrolink.framework.mqtt.service.impl.MqttReceiverImpl;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;

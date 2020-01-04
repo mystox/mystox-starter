@@ -5,7 +5,7 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.MqttLog;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

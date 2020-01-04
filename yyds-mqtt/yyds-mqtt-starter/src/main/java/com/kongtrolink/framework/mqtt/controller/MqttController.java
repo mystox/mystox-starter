@@ -6,7 +6,7 @@ import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.mqtt.service.MqttRestService;
 import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
 import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
