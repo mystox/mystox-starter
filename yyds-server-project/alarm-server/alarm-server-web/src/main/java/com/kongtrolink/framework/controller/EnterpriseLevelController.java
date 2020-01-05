@@ -10,13 +10,14 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +32,10 @@ public class EnterpriseLevelController extends BaseController {
 
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
+//    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
     @Value("${asset.serverVerson:ASSET_MANAGEMENT_SERVER_1.0.0}")
     private String assetServerVerson;
     @Value("${asset.getCIModel:getCIModel}")
@@ -114,7 +117,8 @@ public class EnterpriseLevelController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseLevelQuery.getEnterpriseCode());
         jsonObject.put("serverCode", enterpriseLevelQuery.getServerCode());
-        MsgResult msgResult = mqttSender.sendToMqttSyn(assetServerVerson, getCIModel, jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(assetServerVerson, getCIModel, jsonObject.toJSONString());
+        MsgResult msgResult = mqttOpera.opera(getCIModel, jsonObject.toJSONString());
         System.out.println(msgResult);
         return msgResult.getMsg();
     }

@@ -22,13 +22,14 @@ public class StateCode {
     public final static int EXCEPTION = 12; //非法异常
     public final static int MESSAGE_EXCEPTION = 13; //消息异常
     public final static int CALLBACK_FULL = 14; //回调集合满
+    public final static int OPERA_ROUTE_EXCEPTION = 15; //operaCode路由异常
 
     public enum StateCodeEnum {
         FAILED(0, "响应失败"), SUCCESS(1, "请求成功"), UNREGISTERED(2, "注册错误"), CONNECT_ERROR(3, "通信出错"),
         CONNECT_INTERRUPT(4, "通讯中断"), REDIS_ERROR(5, "redis异常"), MONGO_ERROR(6, "MONGO数据库异常"),
         ILLEGAL_LOGIN(7, "非法登录"), JSON_ILLEGAL(8, "json报文不合规"), XML_ILLEGAL(9, "xml报文不合规"),
         MSG_DUPLICATE(10, "消息重复发送"), TIMEOUT(11, "消息超时"), EXCEPTION(12, "非法异常"), MESSAGE_EXCEPTION(13, "消息异常"),
-        CALLBACK_FULL(14,"回调集合满");
+        CALLBACK_FULL(14,"回调集合满"),OPERA_ROUTE_EXCEPTION(15,"operaCode路由异常");
 
         private int code;
         private String stateCodeName;

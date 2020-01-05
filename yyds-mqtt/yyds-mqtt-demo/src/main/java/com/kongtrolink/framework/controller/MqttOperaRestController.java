@@ -30,4 +30,10 @@ public class MqttOperaRestController {
         return new JsonResult(opera);
     }
 
+    @RequestMapping("/broadcast")
+    public JsonResult broadcast(@RequestParam String operaCode,@RequestBody String message) {
+        mqttOpera.broadcast(operaCode,message);
+        return new JsonResult("ok");
+    }
+
 }

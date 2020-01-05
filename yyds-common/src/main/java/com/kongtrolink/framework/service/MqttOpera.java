@@ -15,6 +15,6 @@ public interface MqttOpera {
 
     public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
 
-    public void boardCast(String operaCode, String msg);
+    public void broadcast(String operaCode, String msg);
     public MsgResult slogin(String registerServerName, String registerServerVersion);
 }

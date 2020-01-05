@@ -11,12 +11,13 @@ import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,8 +36,10 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
     AlarmLevelService alarmLevelService;
     @Autowired
     DeviceTypeLevelService typeLevelService;
+//    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
     @Value("${level.useEnterpriseLevel:true}")
     private boolean useEnterpriseLevel;
     @Value("${level.serverVersion:ALARM_SERVER_LEVEL_V1.0.0}")
@@ -231,7 +234,8 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         jsonObject.put("enterpriseLevelList", lastUse);
         try {
             System.out.println("levelServerVersion:" + levelServerVersion + "; updateEnterpriseLevelMap:" + updateEnterpriseLevelMap);
-            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateEnterpriseLevelMap, jsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateEnterpriseLevelMap, jsonObject.toJSONString());
+            MsgResult msgResult = mqttOpera.opera( updateEnterpriseLevelMap, jsonObject.toJSONString());
             resultCode = msgResult.getStateCode();
         }catch (Exception e){
             e.printStackTrace();

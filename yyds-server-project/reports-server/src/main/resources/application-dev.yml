@@ -4,6 +4,7 @@ spring:
     port: 6379
     database: 2
 server:
+  groupCode: GROUP
   port: 56002 #服务占用web端口
 mqtt:
   username: root #可选配置 mqtt配置相关

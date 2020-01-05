@@ -54,6 +54,9 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     @Value("${server.version}")
     private String serverVersion;
 
+    @Value("${server.groupCode}")
+    private String groupCode;
+
     static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
     String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
@@ -147,7 +150,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     public List<JSONObject> getReportsOperaCodeList() {
         try {
             String reportsName = ServerName.REPORTS_SERVER;
-            List<String> children = serviceRegistry.getChildren(TopicPrefix.SUB_PREFIX);
+            List<String> children = serviceRegistry.getChildren(TopicPrefix.SUB_PREFIX + "/" + groupCode);
             List<JSONObject> operaList = new ArrayList<>();
             for (String c : children) {
 //                String serverVersion = serverMsg.getServerVersion();
@@ -222,7 +225,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
         String enterpriseCode = data.getString("enterpriseCode");
         String configData = data.getString("configData");
         String funPrivCode = data.getString("funcPrivCode");
-        boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode,funPrivCode);
+        boolean exits = reportWebConfigDao.exits(serverCode, enterpriseCode, funPrivCode);
         ReportWebConfig reportWebConfig = new ReportWebConfig(serverCode, enterpriseCode, configData, funPrivCode);
         if (exits) {
             ReportWebConfig reportWebConfigOld = reportWebConfigDao.find(serverCode, enterpriseCode, funPrivCode);
@@ -357,7 +360,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
                 if (!saveReportCodes.contains(operaCode)) { // 未保存过的在此保存
                     saveReportCodes.add(operaCode);
                     ReportTask reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode, reportServerCode);
-                    if (reportTask !=null) {
+                    if (reportTask != null) {
                         String reportTaskId = reportTask.getId();
                         ReportConfigRecord reportConfigRecord = reportConfigRecordDao.findByReportTaskIdAndFuncPrivCode(reportTaskId, funcPrivCode);
                         if (reportConfigRecord == null) reportConfigRecord = new ReportConfigRecord();
@@ -380,7 +383,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
     @Override
     public List<ReportConfigRecord> getRecordConfigData(String serverCode, String enterpriseCode) {
 
-        return reportConfigRecordDao.findByServerCodeAndEnterpriseCode(serverCode,enterpriseCode);
+        return reportConfigRecordDao.findByServerCodeAndEnterpriseCode(serverCode, enterpriseCode);
     }
 
     @Override

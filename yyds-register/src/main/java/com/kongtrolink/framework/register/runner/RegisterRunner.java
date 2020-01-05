@@ -322,7 +322,7 @@ public class RegisterRunner implements ApplicationRunner {
 
         //获取服务信息并注册
         ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                routeMark, pageRoute, serverUri, title);
+                routeMark, pageRoute, serverUri, title,groupCode);
 //        String subPath = TopicPrefix.SERVER_STATUS + "/" + serverCode;
 //        if (serviceRegistry.exists(subPath))
 //            serviceRegistry.setData(subPath, JSONObject.toJSONBytes(serverMsg));
@@ -379,7 +379,7 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
             ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                    routeMark, pageRoute, serverUri, title);
+                    routeMark, pageRoute, serverUri, title,groupCode);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
 //            MsgResult slogin = mqttSender.sendToMqttSyn(
 //                    MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),
@@ -391,9 +391,15 @@ public class RegisterRunner implements ApplicationRunner {
             if (StateCode.SUCCESS == stateCode) {
                 String msg = slogin.getMsg();
                 Object parse = JSON.parse(msg);
-                if (parse instanceof JSONObject)
+                if (parse instanceof JSONObject) {
                     registerUrl = ((JSONObject) parse).getString("registerUrl");
-                logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
+                    if (StringUtils.isBlank(registerUrl)) {
+                        String errorMsg = ((JSONObject) parse).getString("errorMsg");
+                        logger.error("slogin failed state[{}], msg: [{}]", stateCode, errorMsg);
+                        return null;
+                    }
+                    logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
+                }
             } else {
                 logger.error("slogin failed state[{}], msg: [{}]", stateCode, slogin.getMsg());
                 if ("dev".equals(devFlag)) {

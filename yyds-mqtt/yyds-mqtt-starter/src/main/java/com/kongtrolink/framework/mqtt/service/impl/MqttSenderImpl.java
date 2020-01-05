@@ -233,7 +233,7 @@ public class MqttSenderImpl implements MqttSender {
         }
 //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
 
-        return new MsgResult(StateCode.FAILED, "请求失败");
+        return new MsgResult(StateCode.FAILED, "request failed");
     }
 
     @Override
