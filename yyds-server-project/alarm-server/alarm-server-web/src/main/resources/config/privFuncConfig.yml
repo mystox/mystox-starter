@@ -8,12 +8,25 @@ privFunc:
 #  pageRoute: proxy_demo #页面标记，不填写继承父节点的标记 服务节点不写默认为当前服务的路由表标记
   children:
   - type: ROOT
-    name: 日志功能
-    code: LOG_SHOW
-#    routeMark: proxy_log
-#    pageRoute: proxy_log
+    name: 告警功能
+    code: ALARM
+    routeMark: proxy_alarm
+    pageRoute: proxy_alarm
     children:
     - type: PAGE
-      name: 消息模块日志
-      code: MQTT_LOG
-      uri: /ZKlog/mqttLog
+      name: 告警等级
+      code: ALARM_LEVEL
+      uri: /ZKAlarm/alarmLevel
+    - type: PAGE
+      name: 告警列表
+      code: ALARM_LIST
+      uri: /ZKAlarm/alarmList
+    - type: PAGE
+      name: 告警周期
+      code: ALARM_CYCLE
+      uri: /ZKAlarm/alarmCycle
+    - type: PAGE
+      name: 告警投递
+      code: ALARM_POST
+      uri: /ZKAlarm/alarmPost
+

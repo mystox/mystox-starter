@@ -11,9 +11,20 @@ privFunc:
     pageRoute: proxy_reports
     children:
     - type: PAGE
-      name: 报表任务
+      name: 报表任务结果
       code: REPORT_TASK_RESULT
       uri: /ZKReport/reportService
+      root: true
+    - type: PAGE
+      name: 报表任务分配
+      code: SETTING
+      uri: /ZKReport/reportSetting
+      root: true
+    - type: PAGE
+      name: 报表层级
+      code: TIER
+      uri: /ZKReport/reportTier
+      root: true
   - type: ROOT
     name: 报表业务功能
     code: REPORTS_FUNCTION
@@ -21,24 +32,6 @@ privFunc:
     pageRoute: proxy_reports
     children:
     - type: PAGE
-      name: 报表任务分配
-      code: SETTING
-      uri: /ZKReport/reportSetting
-    - type: PAGE
-      name: 报表层级
-      code: TIER
-      uri: /ZKReport/reportTier
-      root: true
-    - type: PAGE
       name: 报表查看
       code: CUSTOM_REPORT_SHOW
       uri: /ZKReport/customReportShow
-    - type: PAGE
-      name: 首页
-      code: HOME
-      uri: /ZKReport/HomeReport
-  - type: ROOT
-    name: 定制化报表
-    code: REPORTS_PAGE
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
