@@ -9,7 +9,8 @@ pipeline {
         string(name: 'host', defaultValue: '172.16.5.60', description: '')
         string(name: 'user', defaultValue: 'root', description: '')
         string(name: 'password', defaultValue: 'yytd1234', description: '')
-        string(name: 'deployServer', defaultValue: 'all', description: '')
+        //string(name: 'deployServer', defaultValue: 'all', description: '')
+        choice(name: 'deployServer', choices: ['all', 'dev', 'product'], description: 'serverChoices')
     }
     environment {
         def remote =''
