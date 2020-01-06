@@ -70,11 +70,11 @@ public class CITypeController {
         result.put("info", "图标上传失败");
 
         if (!multipartFile.isEmpty()) {
-            String filePath = "./" + ciTypeIconFolder + "/" + multipartFile.getName();
+            String filePath = "./" + ciTypeIconFolder + "/" + multipartFile.getOriginalFilename();
             File file = new File(filePath);
             try {
                 multipartFile.transferTo(file);
-                if (dbService.modifyCITypeIcon(name, multipartFile.getName())) {
+                if (dbService.modifyCITypeIcon(name, multipartFile.getOriginalFilename())) {
                     result.put("result", 1);
                     result.put("info", "图标上传成功");
                 } else {
