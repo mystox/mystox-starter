@@ -103,7 +103,7 @@ pipeline {
                        remoteExecutor('yyds-server-project/asset-management-server/target/asset-management-server-1.0.0.jar', \
                        '/home/yyds/asset','asset-management-server-1.0.0.jar',10,'deployResources/asset-server.ini','asset-server')
                        sshCommand remote: remote, command: 'mkdir -p ' + '/home/yyds/asset/AppResources'
-                       sshPut remote: remote, from: 'yyds-server-project/asset-management-server/target/', into: '/home/yyds/reports/testResources/testReport.json'
+                       sshPut remote: remote, from: 'yyds-server-project/asset-management-server/target/classes/AppResources/ciTypeIcon/default.png', into: '/home/yyds/asset/AppResources/ciTypeIcon/default.png'
                 }
             }
         }
