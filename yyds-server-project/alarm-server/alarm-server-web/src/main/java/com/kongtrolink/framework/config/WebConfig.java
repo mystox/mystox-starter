@@ -34,7 +34,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry interceptorRegistry) {
         interceptorRegistry.addInterceptor(new SessionTimeoutInterceptor()).addPathPatterns("/**","/res/page/back/center.html")
-                .excludePathPatterns("/**")    //真实环境注释掉，测试环境放开
+//                .excludePathPatterns("/**")    //真实环境注释掉，测试环境放开
                 .excludePathPatterns("/commonFunc/logout",
                 "/httpInterface/*", "/commonInterface/*", "/app/v2/user/**", "/phoneFunc/**", "/redirect", "/testMain",
                 "/index.html").excludePathPatterns("/error");//"error"的拦截是为了异常的抛出不会重定向
