@@ -96,8 +96,8 @@ pipeline {
             }
             steps {
                 script {
-                        remoteExecutor('yyds-server-project\gateway-project\gateway-common-base\target\gateway-common-base-1.0.0.jar', \
-                        '/home/yyds/gateway','gateway-common-base-1.0.0.jar',10,'deployResources/gateway-common-base.ini','gateway-common-base')
+                       remoteExecutor('yyds-server-project/asset-management-server/target/asset-management-server-1.0.0.jar', \
+                       '/home/yyds/asset','asset-management-server-1.0.0.jar',10,'deployResources/asset-server.ini','asset-server')
                 }
             }
         }
@@ -113,8 +113,9 @@ pipeline {
            }
            steps {
                script {
-                       remoteExecutor('yyds-server-project/asset-management-server/target/asset-management-server-1.0.0.jar', \
-                       '/home/yyds/asset','asset-management-server-1.0.0.jar',10,'deployResources/asset-server.ini','asset-server')
+                       remoteExecutor('yyds-server-project\gateway-project\gateway-common-base\target\gateway-common-base-1.0.0.jar', \
+                       '/home/yyds/gateway','gateway-common-base-1.0.0.jar',10,'deployResources/gateway-common-base.ini','gateway-common-base')
+
                }
            }
        }
