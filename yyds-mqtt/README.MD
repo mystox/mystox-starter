@@ -31,6 +31,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=com.kongtrolink.framework 
 ```
 ###########消息框架相关配置#############
 server:
+  groupCode: GROUP #组编码
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本,可以扩展为 * app
   port: 52002 #服务占用web端口 占用拦截{/mqtt/*,/register*}

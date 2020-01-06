@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.OperaResult;
-import com.kongtrolink.framework.register.config.OperaRouteConfig;
 import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -85,9 +84,7 @@ public class RegisterController {
         OperaResult operaResult = null;
         try {
             operaResult = registerRunner.registerWebPriv();
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
         return new JsonResult(operaResult);

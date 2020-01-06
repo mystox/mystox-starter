@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import org.apache.zookeeper.KeeperException;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -17,5 +18,5 @@ public interface MqttRestService {
 
     JsonResult deleteSub(JSONObject body);
 
-    void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException;
+    void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException, IOException;
 }

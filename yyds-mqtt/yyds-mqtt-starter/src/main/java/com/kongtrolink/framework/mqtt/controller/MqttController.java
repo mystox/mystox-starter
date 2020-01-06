@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -142,7 +143,7 @@ public class MqttController {
 //        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         try {
             mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
-        } catch (KeeperException | InterruptedException e) {
+        } catch (KeeperException | InterruptedException |IOException e) {
             logger.error("update opera route error: [{}]",e.toString());
             if (logger.isDebugEnabled())
                 e.printStackTrace();

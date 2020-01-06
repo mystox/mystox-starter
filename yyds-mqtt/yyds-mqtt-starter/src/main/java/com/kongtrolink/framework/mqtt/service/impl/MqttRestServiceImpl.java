@@ -13,6 +13,7 @@ import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.runner.ServiceScanner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
+import org.apache.commons.io.FileUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -22,13 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.kongtrolink.framework.common.util.MqttUtils.preconditionGroupServerCode;
-import static com.kongtrolink.framework.common.util.MqttUtils.preconditionRoutePath;
-import static com.kongtrolink.framework.common.util.MqttUtils.preconditionServerCode;
+import static com.kongtrolink.framework.common.util.MqttUtils.*;
 import static com.kongtrolink.framework.entity.UnitHead.*;
 
 /**
@@ -69,6 +74,7 @@ public class MqttRestServiceImpl implements MqttRestService {
     ServiceScanner jarServiceScanner;
 
     private OperaRouteConfig operaRouteConfig;
+
     @Autowired
     public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
         this.operaRouteConfig = operaRouteConfig;
@@ -151,19 +157,56 @@ public class MqttRestServiceImpl implements MqttRestService {
 //        String unitHead = body.getString("unitHead");
 
 
-
         return new JsonResult();
     }
 
     @Override
-    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException {
+    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException, IOException {
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        if (operaRoute == null) {
+            operaRoute = new LinkedHashMap<>();
+            operaRouteConfig.setOperaRoute(operaRoute);
+        }
+        List<String> oldServerArr = operaRoute.get(operaCode);
         operaRoute.put(operaCode, subGroupServerList);
+        //写入文件
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setPrettyFlow(false);
+        Yaml yaml = new Yaml(dumperOptions);
+        try {
+            File file = FileUtils.getFile("./config/operaRoute.yml");
+
+            if (!file.exists()) {
+                System.out.println(1231231);
+                File directory = new File("./config");
+                if (!directory.exists()) {
+                    boolean mkdirs = directory.mkdirs();
+                }
+                boolean newFile = file.createNewFile();
+            }
+//            Map testLoad = (Map) yaml.load(new FileInputStream(file));
+            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+//            Object invoke = genericPostableMvcEndpoint.invoke();
+//            logger.info(JSONObject.toJSONString(invoke));
+            System.out.println(JSONObject.toJSON(operaRouteConfig));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            operaRoute.put(operaCode, oldServerArr);
+        }
+
+
         String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-            if (!serviceRegistry.exists(routePath))
-                serviceRegistry.create(routePath, JSONArray.toJSONBytes(subGroupServerList), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-            else
-                serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
+        if (!serviceRegistry.exists(routePath))
+            serviceRegistry.create(routePath, JSONArray.toJSONBytes(subGroupServerList), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        else
+            serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
+
+
     }
+
 }
