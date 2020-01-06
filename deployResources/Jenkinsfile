@@ -111,6 +111,7 @@ def remoteExecutor(sourcePath, path, jarName, time, initFile, initName){
     sshCommand remote: remote, command: 'mkdir -p ' + path
     sshCommand remote: remote, command: 'supervisorctl stop '+ initName
     sshPut remote: remote, from: sourcePath, into: path + '/' + jarName
+    sshPut remote: remote, from: sourcePath+'/classes/application-dev.yml', into: path + '/' + application-dev.yml
     sshPut remote: remote, from: initFile, into: '/etc/supervisord.d'
     sshCommand remote: remote, command: 'for i in {1..'+ time +'}; do echo -n \"Loop \$i \"; date ; sleep 1; done'
     sshCommand remote: remote, command: 'supervisorctl update'

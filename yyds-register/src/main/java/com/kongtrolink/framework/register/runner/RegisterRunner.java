@@ -1,10 +1,12 @@
 package com.kongtrolink.framework.register.runner;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.exception.RegisterAnalyseException;
+import com.kongtrolink.framework.register.config.OperaRouteConfig;
 import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.entity.PrivFuncEntity;
 import com.kongtrolink.framework.register.entity.RegisterMsg;
@@ -30,8 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
@@ -120,6 +121,12 @@ public class RegisterRunner implements ApplicationRunner {
 //        this.mqttSender = mqttSender;
 //    }
 
+    private OperaRouteConfig operaRouteConfig;
+
+    @Autowired
+    public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
+        this.operaRouteConfig = operaRouteConfig;
+    }
 
     private MqttOpera mqttOpera;
 
@@ -149,6 +156,8 @@ public class RegisterRunner implements ApplicationRunner {
             List<RegisterSub> subList = scanSubList();
             register(registerMsg, subList);//注册操作码信息
             subTopic(subList);//订阅操作码对应topic
+            // 注册操作路由信息
+            registerOperaRoute();
             //web注册置于最后，适应运管的启动顺序
            /* if (result != null) {
                 if (result.getStateCode() == StateCode.SUCCESS) {
@@ -159,10 +168,35 @@ public class RegisterRunner implements ApplicationRunner {
                 }
             }*/
         } catch (Exception e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            logger.error("register failed...serverCode[{}]", e.toString());
             System.exit(0);
         }
         logger.info("register successfully...serverCode[{}]", preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
+    }
+
+    /**
+     * @return void
+     * @Date 20:28 2020/1/5
+     * @Param No such property: code for class: Script1
+     * @Author mystox
+     * @Description 注册操作路由信息
+     **/
+    private void registerOperaRoute() throws KeeperException, InterruptedException {
+        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+        if (operaRoute != null) {
+            Set<String> operaCodes = operaRoute.keySet();
+            for (String operaCode : operaCodes) {
+                List<String> subServerArr = operaRoute.get(operaCode);
+                String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
+                if (!serviceRegistry.exists(routePath))
+                    serviceRegistry.create(routePath, JSONArray.toJSONBytes(subServerArr), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                else
+                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subServerArr));
+            }
+        }
     }
 
     /**
@@ -245,13 +279,14 @@ public class RegisterRunner implements ApplicationRunner {
      * 重连注册
      */
     public void multiRegister() throws InterruptedException, IOException, KeeperException {
+        ackTopic();
         List<RegisterSub> subList = scanSubList();//重新扫描
         for (RegisterSub sub : subList) {
             setDataToRegistry(sub);
         }
         registerServerMsg();
         registerWebPriv();
-
+        registerOperaRoute();
     }
 
     /**
@@ -272,6 +307,13 @@ public class RegisterRunner implements ApplicationRunner {
         }
     }
 
+    /**
+     * @Date 0:22 2020/1/6
+     * @Param No such property: code for class: Script1
+     * @return void
+     * @Author mystox
+     * @Description 订阅订阅表信息
+     **/
     private void subTopic(List<RegisterSub> subList) {
         subList.forEach(sub -> {
             String operaCode = sub.getOperaCode();
@@ -286,6 +328,13 @@ public class RegisterRunner implements ApplicationRunner {
 
     }
 
+    /**
+     * @Date 0:22 2020/1/6
+     * @Param No such property: code for class: Script1
+     * @return void
+     * @Author mystox
+     * @Description 订阅统一ackTopic
+     **/
     private void ackTopic() {
         String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
         logger.info("add ackTopicId is [{}]", ackTopicId);
@@ -318,11 +367,18 @@ public class RegisterRunner implements ApplicationRunner {
         }
     }
 
+    /**
+     * @Date 0:21 2020/1/6
+     * @Param No such property: code for class: Script1
+     * @return void
+     * @Author mystox
+     * @Description 注册服务信息
+     **/
     private void registerServerMsg() throws KeeperException, InterruptedException, InterruptedIOException {
 
         //获取服务信息并注册
         ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                routeMark, pageRoute, serverUri, title,groupCode);
+                routeMark, pageRoute, serverUri, title, groupCode);
 //        String subPath = TopicPrefix.SERVER_STATUS + "/" + serverCode;
 //        if (serviceRegistry.exists(subPath))
 //            serviceRegistry.setData(subPath, JSONObject.toJSONBytes(serverMsg));
@@ -379,7 +435,7 @@ public class RegisterRunner implements ApplicationRunner {
         RegisterMsg registerMsg = new RegisterMsg();
         if (!serverName.equals(registerServerName)) {
             ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
-                    routeMark, pageRoute, serverUri, title,groupCode);
+                    routeMark, pageRoute, serverUri, title, groupCode);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);
 //            MsgResult slogin = mqttSender.sendToMqttSyn(
 //                    MqttUtils.preconditionServerCode(registerServerName, registerServerVersion),

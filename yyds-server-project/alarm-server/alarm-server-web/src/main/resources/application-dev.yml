@@ -1,9 +1,4 @@
-
 spring:
-  profiles:
-    active: dev
-  application:
-    name: alarm-server_web
   session:
     store-type: redis
   redis:

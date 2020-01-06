@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: dev,test,prod
   application:
     name: alarm-server-controller
   redis:
@@ -17,7 +17,7 @@ spring:
         max-idle: 100
       ## 连接池中的最小空闲连接
         min-idle: 20
-      host: 172.16.5.26
+      host: 172.16.5.62
       port: 6379
       pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 
@@ -61,3 +61,15 @@ resloveOperate:
     enterServerCode: yytd_TOWER_SERVER
     serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver
+###########日志配置###########
+logging:
+  level:
+    root: info
+    com.kongtrolink.framework: info
+    com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.AckEnum;
@@ -7,11 +8,14 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
 import com.kongtrolink.framework.mqtt.service.MqttRestService;
+import com.kongtrolink.framework.register.config.OperaRouteConfig;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.runner.ServiceScanner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttHandler;
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionGroupServerCode;
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionRoutePath;
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionServerCode;
 import static com.kongtrolink.framework.entity.UnitHead.*;
 
 /**
@@ -31,6 +41,17 @@ import static com.kongtrolink.framework.entity.UnitHead.*;
 public class MqttRestServiceImpl implements MqttRestService {
     Logger logger = LoggerFactory.getLogger(MqttRestServiceImpl.class);
 
+    @Value("${server.name}")
+    private String serverName;
+
+    @Value("${server.version}")
+    private String serverVersion;
+
+    @Value("${server.mark:*}")
+    private String serverMark;
+
+    @Value("${server.groupCode}")
+    private String groupCode;
     @Value("${server.name}_${server.version}")
     private String serverCode;
 
@@ -46,6 +67,12 @@ public class MqttRestServiceImpl implements MqttRestService {
 
     @Autowired
     ServiceScanner jarServiceScanner;
+
+    private OperaRouteConfig operaRouteConfig;
+    @Autowired
+    public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
+        this.operaRouteConfig = operaRouteConfig;
+    }
 
     @Override
     public JsonResult registerSub(JSONObject subJson) {
@@ -126,5 +153,17 @@ public class MqttRestServiceImpl implements MqttRestService {
 
 
         return new JsonResult();
+    }
+
+    @Override
+    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException {
+        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        operaRoute.put(operaCode, subGroupServerList);
+        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+        String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
+            if (!serviceRegistry.exists(routePath))
+                serviceRegistry.create(routePath, JSONArray.toJSONBytes(subGroupServerList), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            else
+                serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
     }
 }

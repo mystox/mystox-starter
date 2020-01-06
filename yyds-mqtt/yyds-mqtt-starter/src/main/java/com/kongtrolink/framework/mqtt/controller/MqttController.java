@@ -1,13 +1,15 @@
 package com.kongtrolink.framework.mqtt.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MqttResp;
 import com.kongtrolink.framework.mqtt.service.MqttRestService;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
 import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +48,7 @@ public class MqttController {
     @RequestMapping("/registerSub")
     public JsonResult registerSub(@RequestBody JSONObject subJson) {
         logger.info("register sub msg" + subJson);
-       return mqttRestService.registerSub(subJson);
+        return mqttRestService.registerSub(subJson);
     }
 
     /**
@@ -128,6 +131,25 @@ public class MqttController {
         if (StringUtils.isBlank(msgId))
             return new JsonResult(callbacks.size());
         return new JsonResult(call);
+    }
+
+
+    @RequestMapping("/updateOperaRoute")
+    public JsonResult updateOperaRoute(@RequestBody JSONObject body) {
+        String operaCode = body.getString("operaCode");
+        JSONArray subGroupServerArr = body.getJSONArray("subGroupServerArr");
+        List<String> subGroupServerList = subGroupServerArr.toJavaList(String.class);
+//        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        try {
+            mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
+        } catch (KeeperException | InterruptedException e) {
+            logger.error("update opera route error: [{}]",e.toString());
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            return new JsonResult("update opera route error: [{}]"+e.toString(), false);
+        }
+        return new JsonResult();
+
     }
 
 }

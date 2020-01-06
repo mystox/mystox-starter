@@ -1,7 +1,6 @@
-
 spring:
   profiles:
-    active: dev
+    active: dev,test,prod
   application:
     name: alarm-server_web
   session:

@@ -16,6 +16,7 @@ privFunc:
     name: name2 #权限名称 必填
     code: code2 #权限编码 必填同级不可重复
     uri: /abc/ac #uri路径 必填
+    root: true #管理权限的标记
 #  - type: PAGE #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
 #    name: name3 #权限名称 必填
 #    code: code3 #权限编码 必填同级不可重复

@@ -157,7 +157,7 @@ public class ReportsControllerServiceImpl implements ReportsControllerService, E
 //                String serverName = serverMsg.getServerName();
 //                String serverCode = MqttUtils.preconditionServerCode(serverName, serverVersion);
                 if (c.contains(reportsName)) {
-                    String serverPath = TopicPrefix.SUB_PREFIX + "/" + c;
+                    String serverPath = TopicPrefix.SUB_PREFIX + "/" + groupCode+"/" + c;
 //                String data = serviceRegistry.getData(TopicPrefix.SUB_PREFIX + "/" + c);
                     List<String> operaChildren = serviceRegistry.getChildren(serverPath);
                     for (String operaPath : operaChildren) {

@@ -127,38 +127,20 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
 代码示例
 
 ```
-@Autowired
-MqttSender mqttSender; //mqtt消息发送接口
+    @Autowired
+    MqttOpera mqttOpera;
+    ...
+    {
+        //同步操作接口
+        MsgResult opera = mqttOpera.opera(operaCode,message);
+        //同步意向接口自定义配置qos和超时时间
+        mqttOpera.opera(operaCode, message, 2, 10, TimeUnit.SECONDS);
+        //广播接口
+        mqttOpera.broadcast(operaCode,message);
+    }
 
-/**
-* 异步的mqtt消息发送者
-* @param serverCode 目标的服务编码：serverName_serverVersion
-* @param operaCode 操作码
-* @param message 消息实体
-* @return
-*/
-@RequestMapping("/sendMsg")
-public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
-                       @RequestBody String message) {
-    mqttSender.sendToMqtt(serverCode, operaCode, message);
-    return "ok";
-}
-
-/**
- * 同步接口发送mqtt消息处理返回值
- * @param serverCode 目标的服务编码：serverName_serverVersion
- * @param operaCode 操作码
- * @param message 消息实体
- * @return
- */
-@RequestMapping("/sendMsgSyn")
-public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
-                       @RequestBody String message) {
-    MsgResult s = mqttSender.sendToMqttSyn(serverCode, operaCode, message);
-    return s;
-}
 ```
-消息发送者载入MqttSender即可实现消息的同步和异步发送，参数分别为：serverCode（目标的服务编码），operaCode(操作码)，message（发送的消息实体，默认为String）
+消息发送者载入MqttOpera即可实现消息的同步和异步发送，参数分别为：operaCode(操作码)，message（发送的消息实体，默认为String）
 
 ---
 

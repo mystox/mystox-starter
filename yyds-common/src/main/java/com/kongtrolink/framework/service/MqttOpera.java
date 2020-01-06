@@ -11,10 +11,13 @@ import java.util.concurrent.TimeUnit;
  * \
  */
 public interface MqttOpera {
+
+
     public MsgResult opera(String operaCode, String msg);
 
     public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
 
     public void broadcast(String operaCode, String msg);
+
     public MsgResult slogin(String registerServerName, String registerServerVersion);
 }

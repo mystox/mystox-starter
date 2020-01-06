@@ -19,10 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/operaRest")
 public class MqttOperaRestController {
 
-
     @Autowired
     MqttOpera mqttOpera;
-
 
     @RequestMapping("/operaSyn")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {

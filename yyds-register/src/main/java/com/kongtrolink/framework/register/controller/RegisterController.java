@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.OperaResult;
+import com.kongtrolink.framework.register.config.OperaRouteConfig;
 import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -46,11 +47,11 @@ public class RegisterController {
     }
 
     WebPrivFuncConfig webPrivFuncConfig;
-
     @Autowired
     public void setWebPrivFuncConfig(WebPrivFuncConfig webPrivFuncConfig) {
         this.webPrivFuncConfig = webPrivFuncConfig;
     }
+
 
     @Autowired
     @Lazy
@@ -91,5 +92,7 @@ public class RegisterController {
         }
         return new JsonResult(operaResult);
     }
+
+
 
 }

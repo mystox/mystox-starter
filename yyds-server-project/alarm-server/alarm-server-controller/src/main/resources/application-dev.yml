@@ -20,6 +20,7 @@ spring:
       pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 
 server:
+  groupCode: GROUP
   name: ALARM_SERVER_CONTROLLER #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
   version: V1.0.0                  #\u7248\u672C\u53F7
   port: 19001                      #\u7AEF\u53E3\u53F7
@@ -48,16 +49,13 @@ management:   #动态刷新配置文件
 reportOperate:
   operate[0]:
     enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    serverVerson: ALARM_SERVER_LEVEL_V1.0.0
     operaCode: handleLevel
   operate[1]:
     enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver
 
 #告警消除操作流程
 resloveOperate:
   operate[0]:
     enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver

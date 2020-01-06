@@ -3,6 +3,8 @@ package com.kongtrolink.framework.mqtt.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.mqtt.util.MqttLogUtil;
+import com.kongtrolink.framework.register.config.OperaRouteConfig;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.zookeeper.CreateMode;
@@ -45,6 +47,20 @@ public class MqttOperaImpl implements MqttOpera {
     private MqttSender mqttSender;
 
     private ServiceRegistry serviceRegistry;
+    private MqttLogUtil mqttLogUtil;
+
+
+    private OperaRouteConfig operaRouteConfig;
+
+    @Autowired
+    public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
+        this.operaRouteConfig = operaRouteConfig;
+    }
+
+    @Autowired
+    public void setMqttLogUtil(MqttLogUtil mqttLogUtil) {
+        this.mqttLogUtil = mqttLogUtil;
+    }
 
     @Autowired
     public void setMqttSender(MqttSender mqttSender) {
@@ -76,10 +92,12 @@ public class MqttOperaImpl implements MqttOpera {
      **/
     private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag) {
         MsgResult result;
-        // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
-        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
-        String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
         try {
+            //优先配置中获取
+            // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
+//            if (CollectionUtils.isEmpty(topicArr)) {
             if (!serviceRegistry.exists(routePath))
                 serviceRegistry.create(routePath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
             String data = serviceRegistry.getData(routePath);
@@ -94,11 +112,12 @@ public class MqttOperaImpl implements MqttOpera {
             int size = topicArr.size();
             if (CollectionUtils.isEmpty(topicArr)) {
                 logger.error("route topic list size is null error...");
+                mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
                 return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route topic list size is null error...");
             }
             if (size == 1) {
                 String groupServerCode = topicArr.get(0);
-                result =  setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
                         : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
                 return result;
             }
@@ -106,10 +125,9 @@ public class MqttOperaImpl implements MqttOpera {
                 Random r = new Random();
                 int i = r.nextInt(size);
                 String groupServerCode = topicArr.get(i);
-                result =  setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
                         : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
-                if (result.getStateCode() != StateCode.SUCCESS)
-                {
+                if (result.getStateCode() != StateCode.SUCCESS) {
                     //移除路由
                     topicArr.remove(i);
                     serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
@@ -121,12 +139,23 @@ public class MqttOperaImpl implements MqttOpera {
         } catch (KeeperException | InterruptedException e) {
             if (logger.isDebugEnabled())
                 e.printStackTrace();
+            mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
             logger.error("[{}] operaCode executor error [{}]", operaCode, e.toString());
         }
-        result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION,"route request failed");
+        result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route request failed");
         return result;
     }
 
+    /*private List<String> getOperaFormOperaRouteConfig(String operaCode) {
+        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        if (operaRoute != null) {
+            List<String> strings = operaRoute.get(operaCode);
+            return strings;
+        }
+        logger.warn("[{}] operaCode route is not exists in operaRoute.yml configuration");
+        return null;
+    }
+*/
 
     /**
      * @return java.util.List<java.lang.String>
@@ -165,7 +194,7 @@ public class MqttOperaImpl implements MqttOpera {
 
     @Override
     public void broadcast(String operaCode, String msg) {
-        broadcast(operaCode, msg, 0,false);
+        broadcast(operaCode, msg, 0, false);
     }
 
     /**
@@ -175,7 +204,7 @@ public class MqttOperaImpl implements MqttOpera {
      * @Author mystox
      * @Description
      **/
-    private void broadcast(String operaCode, String msg, int qos,boolean setFlag) {
+    private void broadcast(String operaCode, String msg, int qos, boolean setFlag) {
         // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
         String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);

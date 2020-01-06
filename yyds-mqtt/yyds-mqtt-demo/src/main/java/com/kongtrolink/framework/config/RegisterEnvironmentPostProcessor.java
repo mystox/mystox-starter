@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.register.config;
+package com.kongtrolink.framework.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,6 +36,8 @@ public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcesso
             "file:config/privFuncConfig.yml",
             "classpath:config/operaRoute.yml",
             "file:config/operaRoute.yml",
+            "classpath:config/operaRoute-test.yml",
+            "file:config/operaRoute-test.yml",
     };
 
     @Override

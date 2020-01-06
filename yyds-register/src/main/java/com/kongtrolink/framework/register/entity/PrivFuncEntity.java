@@ -20,7 +20,7 @@ public class PrivFuncEntity {
     private String routeMark;
     private String pageRoute;
     private Boolean root;
-
+    private List<PrivFuncEntity> children;
 
     public Boolean getRoot() {
         return root;
@@ -30,7 +30,7 @@ public class PrivFuncEntity {
         this.root = root;
     }
 
-    private List<PrivFuncEntity> children;
+
 
     public String getName() {
         return name;

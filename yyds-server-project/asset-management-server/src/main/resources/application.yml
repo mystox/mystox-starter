@@ -11,7 +11,7 @@ logging:
 
 spring:
   profiles:
-    active: dev
+    active: dev,test,prod
   application:
     name: yytd-asset-management-server
   session:
