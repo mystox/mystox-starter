@@ -17,9 +17,3 @@ privFunc:
       name: 消息模块日志
       code: MQTT_LOG
       uri: /ZKlog/mqttLog
-    - type: PAGE
-      name: 报表任务
-      routeMark: proxy_reports
-      pageRoute: proxy_reports
-      code: REPORT_TASK_RESULT
-      uri: /ZKReport/reportService

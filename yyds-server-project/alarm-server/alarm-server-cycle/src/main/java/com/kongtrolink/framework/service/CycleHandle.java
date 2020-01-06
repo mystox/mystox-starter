@@ -2,7 +2,6 @@ package com.kongtrolink.framework.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FixSizeArrayList;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmCycleDao;
@@ -10,7 +9,6 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
-import com.kongtrolink.framework.enttiy.InformMsg;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
 import com.kongtrolink.framework.util.RedisUtils;
 import com.mongodb.DBCollection;
@@ -21,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Auther: liudd
@@ -38,8 +34,10 @@ public class CycleHandle{
     AlarmDao alarmDao;
     @Autowired
     AlarmCycleDao alarmCycleDao;
+//    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
     @Autowired
     RedisUtils redisUtils;
     @Autowired
@@ -266,7 +264,9 @@ public class CycleHandle{
         JSONObject resJsonObject = new JSONObject();
         resJsonObject.put("sns", deviceIdList);
         try {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, resJsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, resJsonObject.toJSONString());
+            MsgResult msgResult = mqttOpera.opera(getCI, resJsonObject.toJSONString());
+
             logger.info("---getCI : msg:{}, operate:{}, result:{}", deviceIdList.toString(), assetsServer+Contant.UNDERLINE+getCI, msgResult);
             if(1 == msgResult.getStateCode()) {
                 CIResponseEntity ciResponseEntity = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);

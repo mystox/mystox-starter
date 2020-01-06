@@ -21,6 +21,7 @@ management:
   security:
     enabled: false
 server:
+  groupCode: GROUP
   name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000
@@ -32,6 +33,8 @@ jarResources:
   path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
   scanBasePackage1: com.kongtrolink.framework.api
+  url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+
 mqtt:
   username: root
   password: 123456

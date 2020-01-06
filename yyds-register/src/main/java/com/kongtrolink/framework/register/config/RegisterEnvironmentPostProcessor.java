@@ -33,7 +33,9 @@ public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcesso
 
     String[] profiles = {
             "classpath:config/privFuncConfig.yml",
-            "file:config/privFuncConfig.yml"
+            "file:config/privFuncConfig.yml",
+            "classpath:config/operaRoute.yml",
+            "file:config/operaRoute.yml",
     };
 
     @Override

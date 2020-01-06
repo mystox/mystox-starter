@@ -12,7 +12,7 @@ import com.kongtrolink.framework.reports.entity.ReportConfigRecord;
 import com.kongtrolink.framework.reports.entity.ReportTask;
 import com.kongtrolink.framework.reports.entity.ReportWebConfig;
 import com.kongtrolink.framework.reports.service.ReportsControllerService;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +37,16 @@ public class ReportsController extends BaseController {
     @Autowired
     ReportsControllerService reportsControllerService;
 
+    //    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
 
     @Value("${server.name}")
     private String serverName;
     @Value("${server.version}")
     private String serverVersion;
+
 
     @RequestMapping(value = "/getReportTaskList", method = RequestMethod.POST)
     JsonResult getReportsTask(@RequestBody JSONObject body) {
@@ -71,8 +74,9 @@ public class ReportsController extends BaseController {
     JsonResult reportsTest(@RequestBody(required = false) JSONObject body) {
         String operaCode = body.getString("operaCode");
         String reportServerCode = body.getString("reportServerCode");
-        MsgResult msgResult = mqttSender.sendToMqttSyn(
-                reportServerCode, operaCode, body.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(
+//                reportServerCode, operaCode, body.toJSONString());
+        MsgResult msgResult = mqttOpera.opera(operaCode, body.toJSONString());
         String msg = msgResult.getMsg();
         return new JsonResult(JSON.parseObject(msg));
 
@@ -100,14 +104,14 @@ public class ReportsController extends BaseController {
         return new JsonResult(reportWebConfig);
     }
 
-//    @RequestMapping("/recordConfigDataGet")
-//    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
-//        String serverCode = body.getString("serverCode");
-//        String enterpriseCode = body.getString("enterpriseCode");
-////        String funcPrivCode = body.getString("funcPrivCode");
-//        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
-//        return new JsonResult(reportWebConfig);
-//    }
+    @RequestMapping("/recordConfigDataGet")
+    JsonResult recordConfigDataGet(@RequestBody(required = false) JSONObject body) {
+        String serverCode = body.getString("serverCode");
+        String enterpriseCode = body.getString("enterpriseCode");
+//        String funcPrivCode = body.getString("funcPrivCode");
+        List<ReportConfigRecord> reportWebConfig = reportsControllerService.getRecordConfigData(serverCode, enterpriseCode);
+        return new JsonResult(reportWebConfig);
+    }
 
 
     @RequestMapping("/recordConfigPrivGet")
@@ -115,34 +119,33 @@ public class ReportsController extends BaseController {
         String serverCode = body.getString("serverCode");
         String enterpriseCode = body.getString("enterpriseCode");
         WebPageInfo currentMainMenu = getCurrentMainMenu();
-        List<WebPageInfo> reportPrivs= new ArrayList<>();
-        ControllerCommonUtils.getReportsFuncPriv(currentMainMenu,reportPrivs);
+        List<WebPageInfo> reportPrivs = new ArrayList<>();
+        ControllerCommonUtils.getReportsFuncPriv(currentMainMenu, reportPrivs);
         List<JSONObject> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(reportPrivs)) {
 //            List<String> privCodes = ReflectionUtils.convertElementPropertyToList(reportPrivs, "code");
-            reportPrivs.forEach(reportPriv->{
+            reportPrivs.forEach(reportPriv -> {
                 String reportPrivCode = reportPriv.getCode();
-                String privName = reportPriv.getName();
+//                String privName = reportPriv.getName();
+                String showName = StringUtils.isBlank(reportPriv.getAlias()) ? reportPriv.getName() : reportPriv.getAlias();
                 String hierarchyName = reportPriv.getHierarchyName();
-                List<ReportConfigRecord> recordConfigDataList = reportsControllerService.getRecordConfigDataByPrivCode(serverCode, enterpriseCode,reportPrivCode);
-                if (CollectionUtils.isNotEmpty(recordConfigDataList))
-                {
+                List<ReportConfigRecord> recordConfigDataList = reportsControllerService.getRecordConfigDataByPrivCode(serverCode, enterpriseCode, reportPrivCode);
+                if (CollectionUtils.isNotEmpty(recordConfigDataList)) {
                     recordConfigDataList.forEach(reportConfigRecord -> {
                         String reportsTaskId = reportConfigRecord.getReportsTaskId();
-                        JSONObject recordJson= JSON.parseObject(JSON.toJSONString(reportConfigRecord),JSONObject.class);
+                        JSONObject recordJson = JSON.parseObject(JSON.toJSONString(reportConfigRecord), JSONObject.class);
                         result.add(recordJson);
                         ReportTask reportTask = reportsControllerService.getReportsTaskByTaskId(reportsTaskId);
                         //填充包报表信息
                         recordJson.put("reportName", reportTask.getReportName());
                         recordJson.put("operaCode", reportTask.getOperaCode());
                         //填充页面权限名称信息
-                        recordJson.put("privName", privName);
+                        recordJson.put("privName", showName);
                         recordJson.put("privHierarchy", hierarchyName);
-                        result.add(recordJson);
                     });
                 } else {
                     JSONObject recordJson = new JSONObject();
-                    recordJson.put("privName", privName);
+                    recordJson.put("privName", showName);
                     recordJson.put("privHierarchy", hierarchyName);
                     recordJson.put("funcPrivCode", reportPrivCode);
                     result.add(recordJson);
@@ -154,9 +157,6 @@ public class ReportsController extends BaseController {
         return new JsonResult(result);
 //        return new JsonResult(reportWebConfig);
     }
-
-
-
 
 
 }

@@ -15,10 +15,11 @@ public class ServerMsg {
     private String pageRoute;
     private String serviceUri;
     private String title;
+    private String groupCode; //对应云服务编码
 //    private String serverMark; //服务端标识 对应云管的serviceVersion 默认为*
 
     public ServerMsg(String host, int port, String serverName, String serverVersion, String routeMark,
-                     String pageRoute, String serviceUri, String title) {
+                     String pageRoute, String serviceUri, String title,String groupCode) {
         this.host = host;
         this.port = port;
         this.serverName = serverName;
@@ -27,6 +28,7 @@ public class ServerMsg {
         this.pageRoute = pageRoute;
         this.serviceUri = serviceUri;
         this.title = title;
+        this.groupCode = groupCode;
 //        this.serverMark = serverMark;
     }
 
@@ -40,6 +42,15 @@ public class ServerMsg {
 //    public void setServerMark(String serverMark) {
 //        this.serverMark = serverMark;
 //    }
+
+
+    public String getGroupCode() {
+        return groupCode;
+    }
+
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
+    }
 
     public String getTitle() {
         return title;

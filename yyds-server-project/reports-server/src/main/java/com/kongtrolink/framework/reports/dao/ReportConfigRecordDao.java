@@ -31,7 +31,7 @@ public class ReportConfigRecordDao extends MongoBaseDao {
     }
 
     public void save(ReportConfigRecord reportConfigRecord) {
-        mongoTemplate.save(reportConfigRecord);
+        mongoTemplate.save(reportConfigRecord,MongoDocName.REPORT_CONFIG_RECORD);
     }
 
     public List<ReportConfigRecord> findByServerCodeAndEnterpriseCode(String serverCode, String enterpriseCode) {
@@ -39,8 +39,12 @@ public class ReportConfigRecordDao extends MongoBaseDao {
 
     }
 
-    public List<ReportConfigRecord> findByReportTaskIdAndFuncPrivCodeAndFuncPrivCode(String serverCode, String enterpriseCode, String funcPrivCode) {
+    public List<ReportConfigRecord> findByServerCodeAndEnterpriseCodeAndFuncPrivCode(String serverCode, String enterpriseCode, String funcPrivCode) {
         return mongoTemplate.find(Query.query(Criteria.where("serverCode").is(serverCode).and("enterpriseCode").is(enterpriseCode).and("funcPrivCode").is(funcPrivCode)), ReportConfigRecord.class, MongoDocName.REPORT_CONFIG_RECORD);
 
+    }
+
+    public List<ReportConfigRecord> removeByServerCodeAndEnterpriseCodeAndFuncPrivCode(String serverCode, String enterpriseCode, String funcPrivCode) {
+        return mongoTemplate.findAllAndRemove(Query.query(Criteria.where("serverCode").is(serverCode).and("enterpriseCode").is(enterpriseCode).and("funcPrivCode").is(funcPrivCode)), ReportConfigRecord.class, MongoDocName.REPORT_CONFIG_RECORD);
     }
 }

@@ -14,10 +14,8 @@ privFunc:
           name: 资产管理
           code: MANAGE
           uri: /ZKAssets/assetsManage
-#    - type: PAGE
-#      name: 报表任务分配
-#      code: SETTING
-#      uri: /reportSetting
-#
-#
-
+        - type: PAGE
+          name: 资产管理高级版
+          code: MANAGE_ROOT
+          uri: /ZKAssets/assetsManage_root
+          root: true

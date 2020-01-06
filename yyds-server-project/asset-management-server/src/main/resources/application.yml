@@ -11,15 +11,15 @@ logging:
 
 spring:
   profiles:
-    active: dev
+    active: dev,test,prod
   application:
     name: yytd-asset-management-server
   session:
     store-type: redis
-  redis:
-    host: 172.16.5.26
-    port: 6379
-    database: 2
+#  redis:
+#    host: 172.16.5.26
+#    port: 6379
+#    database: 2
 
 management:
   security:

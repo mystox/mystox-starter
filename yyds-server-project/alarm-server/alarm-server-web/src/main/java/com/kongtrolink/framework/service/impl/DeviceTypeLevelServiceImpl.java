@@ -11,13 +11,13 @@ import com.kongtrolink.framework.query.DeviceTypeLevelQuery;
 import com.kongtrolink.framework.service.AlarmLevelService;
 import com.kongtrolink.framework.service.DeviceTypeLevelService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
-import com.kongtrolink.framework.service.MqttSender;
-import com.sun.tools.internal.jxc.ap.Const;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 
@@ -34,8 +34,10 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     AlarmLevelService alarmLevelService;
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
+    //    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
 
     @Value("${level.serverVersion:ALARM_SERVER_LEVEL_V1.0.0}")
     private String levelServerVersion;
@@ -48,7 +50,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     @Override
     public boolean add(DeviceTypeLevel deviceTypeLevel) {
         typeLevelDao.add(deviceTypeLevel);
-        if(!StringUtil.isNUll(deviceTypeLevel.getId())){
+        if (!StringUtil.isNUll(deviceTypeLevel.getId())) {
             //添加成功，则生成对应的自定义告警等级
             String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
             String serverCode = deviceTypeLevel.getServerCode();
@@ -72,7 +74,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         String deviceType = deviceTypeLevel.getDeviceType();
         String deviceModel = deviceTypeLevel.getDeviceModel();
         boolean delete = typeLevelDao.delete(deviceTypeLevelId);
-        if(delete){
+        if (delete) {
             //获取等级模块该设备需要删除的告警等级
             String deleteKey = alarmLevelService.getDeleteKey(enterpriseCode, serverCode, deviceType, deviceModel);
             //删除设备对应的等级关系
@@ -80,9 +82,9 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
             //删除等级模块告警等级
             String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel;
             updateAlarmLevelModel(Contant.DELETE, Contant.DEVICELEVEL, key, deleteKey);
-            if(result >0 ){
+            if (result > 0) {
                 delete = true;
-            }else {
+            } else {
                 delete = false;
             }
         }
@@ -92,7 +94,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     @Override
     public boolean update(DeviceTypeLevel deviceTypeLevel) {
         boolean update = typeLevelDao.update(deviceTypeLevel);
-        if(update){
+        if (update) {
             String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
             String serverCode = deviceTypeLevel.getServerCode();
             String deviceType = deviceTypeLevel.getDeviceType();
@@ -145,10 +147,10 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         levelQuery.setDeviceType(typeLevel.getDeviceType());
         levelQuery.setDeviceModel(typeLevel.getDeviceModel());
         DeviceTypeLevel one = getOne(levelQuery);
-        if(null == one){
+        if (null == one) {
             return false;
         }
-        if(one.getId().equals(typeLevel.getId())){
+        if (one.getId().equals(typeLevel.getId())) {
             return false;
         }
         return true;
@@ -164,7 +166,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
     public boolean addAlarmLevelByDeviceLevel(DeviceTypeLevel deviceTypeLevel, List<EnterpriseLevel> lastUse) {
         String enterpriseCode = deviceTypeLevel.getEnterpriseCode();
         String serverCode = deviceTypeLevel.getServerCode();
-        for(Integer level : deviceTypeLevel.getLevels()){
+        for (Integer level : deviceTypeLevel.getLevels()) {
             EnterpriseLevel match = getMatch(lastUse, level);
             AlarmLevel alarmLevel = new AlarmLevel(enterpriseCode, serverCode, deviceTypeLevel.getDeviceType(), deviceTypeLevel.getDeviceModel());
             alarmLevel.setEnterpriseName(deviceTypeLevel.getEnterpriseName());
@@ -185,10 +187,10 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      * 功能描述:匹配设备等级的最小企业等级
      * 要求企业等级列表是倒叙
      */
-    private EnterpriseLevel getMatch( List<EnterpriseLevel> enterpriseLevels, Integer level){
+    private EnterpriseLevel getMatch(List<EnterpriseLevel> enterpriseLevels, Integer level) {
         EnterpriseLevel resultEnter = null;
-        for(EnterpriseLevel enterpriseLevel : enterpriseLevels){
-            if(enterpriseLevel.getLevel() > level){
+        for (EnterpriseLevel enterpriseLevel : enterpriseLevels) {
+            if (enterpriseLevel.getLevel() > level) {
                 continue;
             }
             resultEnter = enterpriseLevel;
@@ -213,30 +215,31 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
      * @auther: liudd
      * @date: 2019/12/5 12:24
      * 功能描述:远程修改等级模块中告警等级
-     *  告警等级和设备等级
+     * 告警等级和设备等级
      * String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel
      * 企业等级：
      * String key = enterpriseCode + Contant.EXCLAM + serverCode
      */
-    public void updateAlarmLevelModel(String type, String level, String key, String deleteKey){
-        if(!useAlarmLevel){
+    public void updateAlarmLevelModel(String type, String level, String key, String deleteKey) {
+        if (!useAlarmLevel) {
             logger.info("不需要修改告警等级模块企业告警等级, useAlarmLevel:{}", useAlarmLevel);
             return;
         }
         int resultCode;
-        if(!Contant.DEVICELEVEL.equals(level) && !Contant.ENTERPRISELEVEL.equals(level)) {
+        if (!Contant.DEVICELEVEL.equals(level) && !Contant.ENTERPRISELEVEL.equals(level)) {
             return;
         }
         try {
             String jsonStr = type + Contant.COLON + level + Contant.COLON + key + Contant.COLON + deleteKey;
-            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateAlarmLevelMap, jsonStr);
+//            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateAlarmLevelMap, jsonStr);
+            MsgResult msgResult = mqttOpera.opera( updateAlarmLevelMap, jsonStr);
             resultCode = msgResult.getStateCode();
-            if(resultCode != 1) {
+            if (resultCode != 1) {
                 logger.info("修改告警等级模块告警等级失败，请重启告警等级模块,key:{}, result:", jsonStr, resultCode);
-            }else{
+            } else {
                 logger.info("修改告警等级模块告警等级成功.key:{}, result:", jsonStr, resultCode);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

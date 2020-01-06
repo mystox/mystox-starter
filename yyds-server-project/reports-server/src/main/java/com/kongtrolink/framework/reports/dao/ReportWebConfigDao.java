@@ -26,9 +26,11 @@ public class ReportWebConfigDao extends MongoBaseDao{
                         .and("serverCode").is(serverCode).and("funcPrivCode").is(funcPrivCode)), ReportWebConfig.class, MongoDocName.REPORT_WEB_CONFIG);
     }
 
-    public boolean exits(String serverCode, String enterpriseCode) {
+    public boolean exits(String serverCode, String enterpriseCode, String funcPrivCode) {
         return mongoTemplate.exists(Query.query(
                 Criteria.where("enterpriseCode").is(enterpriseCode)
-                        .and("serverCode").is(serverCode)), MongoDocName.REPORT_WEB_CONFIG);
+                        .and("serverCode").is(serverCode).and("funcPrivCode").is(funcPrivCode)), MongoDocName.REPORT_WEB_CONFIG);
     }
+
+
 }

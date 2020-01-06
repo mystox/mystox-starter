@@ -37,4 +37,6 @@ public interface ReportsControllerService {
     List<ReportConfigRecord> getRecordConfigDataByPrivCode(String serverCode, String enterpriseCode, String reportPrivCode);
 
     ReportTask getReportsTaskByTaskId(String reportsTaskId);
+
+
 }

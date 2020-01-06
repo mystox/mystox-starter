@@ -8,7 +8,7 @@ import com.kongtrolink.framework.controller.CITypeController;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

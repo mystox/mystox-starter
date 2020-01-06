@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.reports.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
 import com.kongtrolink.framework.register.runner.RegisterRunner;
 import com.kongtrolink.framework.register.service.ServiceRegistry;
@@ -12,7 +12,6 @@ import com.kongtrolink.framework.reports.dao.ReportTaskResultDao;
 import com.kongtrolink.framework.reports.entity.*;
 import com.kongtrolink.framework.reports.stereotype.ReportExtend;
 import com.kongtrolink.framework.reports.stereotype.ReportOperaCode;
-import com.kongtrolink.framework.service.MqttSender;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,6 +37,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionGroupServerCode;
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionServerCode;
+import static com.kongtrolink.framework.common.util.MqttUtils.preconditionSubTopicId;
+
 /**
  * Created by mystoxlol on 2019/10/23, 8:33.
  * company: kongtrolink
@@ -59,6 +62,8 @@ public class ReportsHandler implements ApplicationRunner {
     @Value("${server.name}")
     private String serverName;
 
+    @Value("${server.groupCode}")
+    private String groupCode;
     @Value("${report.count:10}")
     private int scheduleTaskCount;
 
@@ -179,7 +184,7 @@ public class ReportsHandler implements ApplicationRunner {
         reportTask.setEndTime(recordTime);
         ReportTask task = reportTaskDao.findByByUniqueCondition(
                 reportTask.getServerCode(), reportTask.getEnterpriseCode(),
-                reportTask.getOperaCode(), MqttUtils.preconditionServerCode(serverName, serverVersion));
+                reportTask.getOperaCode(), preconditionServerCode(serverName, serverVersion));
         String reportTaskId = reportTask.getId();
         int taskStatus = task.getTaskStatus();
         if (TaskStatus.INVALID.getStatus() == taskStatus) {
@@ -234,7 +239,7 @@ public class ReportsHandler implements ApplicationRunner {
         Long startTime = reportConfig.getStartTime();
         startTime = startTime == null ? System.currentTimeMillis() :
                 (startTime<System.currentTimeMillis()?System.currentTimeMillis():startTime);//如果配置的生效时间早于当前时间，则设置当前时间
-        boolean isTaskExists = reportTaskDao.isExistsByOperaCode(serverCode, enterpriseCode, operaCode, MqttUtils.preconditionServerCode(serverName, serverVersion));
+        boolean isTaskExists = reportTaskDao.isExistsByOperaCode(serverCode, enterpriseCode, operaCode, preconditionServerCode(serverName, serverVersion));
         if (!isTaskExists) {
             //生成任务
             reportTask.setOperaCode(operaCode);
@@ -248,14 +253,14 @@ public class ReportsHandler implements ApplicationRunner {
             reportTask.setTaskType(reportType);
             reportTask.setReportName(reportConfig.getReportName());
             reportTask.setStartTime(new Date(startTime));
-            reportTask.setReportServerCode(MqttUtils.preconditionServerCode(serverName, serverVersion));
+            reportTask.setReportServerCode(preconditionServerCode(serverName, serverVersion));
 
             //触发任务
 
         } else {
             //修改任务
             reportTask = reportTaskDao.findByByUniqueCondition(serverCode, enterpriseCode, operaCode,
-                    MqttUtils.preconditionServerCode(serverName, serverVersion));
+                    preconditionServerCode(serverName, serverVersion));
             ExecutorType executorType = reportConfig.getExecutorType();
             if (executorType != null) reportTask.setExecutorType(executorType);
             Long operaValidity = reportConfig.getOperaValidity();
@@ -330,7 +335,7 @@ public class ReportsHandler implements ApplicationRunner {
 
     void task() {
         try {
-            ReportTask reportTask = reportTaskDao.findExecuteReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
+            ReportTask reportTask = reportTaskDao.findExecuteReportTask(preconditionServerCode(serverName, serverVersion));
             if (reportTask == null) return;
             String reportTaskId = reportTask.getId();
             logger.debug("[{}]task executor..", reportTaskId);
@@ -349,8 +354,8 @@ public class ReportsHandler implements ApplicationRunner {
                 ReportConfig reportConfig = buildScheduledReportConfig(reportTask);
                 String operaCode = reportConfig.getOperaCode();
                 String data = serviceRegistry.getData(
-                        MqttUtils.preconditionSubTopicId(
-                                MqttUtils.preconditionServerCode(this.serverName, this.serverVersion),
+                        preconditionSubTopicId(preconditionGroupServerCode(groupCode,
+                                preconditionServerCode(this.serverName, this.serverVersion)),
                                 operaCode));
                 RegisterSub sub = JSONObject.parseObject(data, RegisterSub.class);
                 String executeUnit = sub.getExecuteUnit();
@@ -403,7 +408,7 @@ public class ReportsHandler implements ApplicationRunner {
     private void checkRunning(Long serverStartTimeStamp) {
         // 检查正在运行的任务是否超时
 //        logger.debug("check running report task...");
-        List<ReportTask> reportTasks = reportTaskDao.findRunningReportTask(MqttUtils.preconditionServerCode(serverName, serverVersion));
+        List<ReportTask> reportTasks = reportTaskDao.findRunningReportTask(preconditionServerCode(serverName, serverVersion));
         if (CollectionUtils.isEmpty(reportTasks)) return;
         for (ReportTask reportTask : reportTasks) {
             Date startTime = reportTask.getStartTime();

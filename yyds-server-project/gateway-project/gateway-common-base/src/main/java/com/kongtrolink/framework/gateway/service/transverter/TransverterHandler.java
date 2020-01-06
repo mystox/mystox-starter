@@ -2,7 +2,7 @@ package com.kongtrolink.framework.gateway.service.transverter;
 
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.entity.ParseProtocol;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -32,8 +32,10 @@ public abstract class TransverterHandler implements TransverterService {
     private String serverName;
     @Value("${server.version}")
     private String serverVersion;
+//    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
 
 
     public void transfer(ParseProtocol parseProtocol){
@@ -43,11 +45,12 @@ public abstract class TransverterHandler implements TransverterService {
     protected abstract void transferExecute(ParseProtocol parseProtocol);
 
     protected void reportMsg(String serverCode,String operaCode,String payload) {
-        mqttSender.sendToMqtt(serverCode,operaCode,payload);
+//        mqttSender.sendToMqtt(serverCode,operaCode,payload);
+        mqttOpera.broadcast(operaCode,payload);
     }
 
     protected MsgResult reportMsgSyn(String serverCode, String operaCode, String payload) {
-        return mqttSender.sendToMqttSyn(serverCode,operaCode,payload);
+        return mqttOpera.opera(operaCode,payload);
     }
 
     public String getBusinessCode() {

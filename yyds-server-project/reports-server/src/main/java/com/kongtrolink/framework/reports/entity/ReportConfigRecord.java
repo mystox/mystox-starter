@@ -12,6 +12,8 @@ import java.util.Date;
 public class ReportConfigRecord {
     private String id;
     private String reportsTaskId;
+    private String serverCode;
+    private String enterpriseCode;
     private String funcPrivCode;
     private String configUsername;
     private Date recordTime;
@@ -19,6 +21,22 @@ public class ReportConfigRecord {
     public ReportConfigRecord() {
     }
 
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
 
     public String getId() {
         return id;

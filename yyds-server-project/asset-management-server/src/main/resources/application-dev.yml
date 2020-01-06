@@ -2,17 +2,12 @@ spring:
   http:
     multipart:
       enabled: true
-  application:
-    name: yytd-asset-management-server
-  session:
-    store-type: redis
   redis:
     host: 172.16.5.26
     port: 6379
     database: 2
 server:
-  name: ASSET_MANAGEMENT_SERVER1
-  version: 1.0.0
+  groupCode: GROUP
   host: 172.16.5.62
   port: 52202
 mqtt:

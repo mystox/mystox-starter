@@ -14,7 +14,8 @@ import com.kongtrolink.framework.enttiy.*;
 import com.kongtrolink.framework.query.InformRuleQuery;
 import com.kongtrolink.framework.service.InformRuleService;
 import com.kongtrolink.framework.service.InformRuleUserService;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import com.kongtrolink.framework.service.MsgTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,9 @@ public class InformRuleController extends BaseController {
     MsgTemplateService msgTemplateService;
     @Autowired
     MqttSender mqttSender;
+    @Autowired
+    MqttOpera mqttOpera;
+
     private static final Logger logger = LoggerFactory.getLogger(InformRuleController.class);
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -298,7 +302,8 @@ public class InformRuleController extends BaseController {
             msgStr = jsonObject.toJSONString();
         }
         System.out.println("serverVerson:" + serverVerson +"; operateCode: "+operateCode+";msgStr:" + msgStr);
-        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operateCode, msgStr);
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operateCode, msgStr);
+        MsgResult msgResult = mqttOpera.opera(operateCode,msgStr);
         if("5".equals(tempCode)){
             JSONObject resultObject = JSONObject.parseObject(msgResult.getMsg(), JSONObject.class);
             for(String userId : resultObject.keySet()){
@@ -327,7 +332,8 @@ public class InformRuleController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sns", sns);
         System.out.println("jsonObject:" + jsonObject.toJSONString());
-        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
+        MsgResult msgResult = mqttOpera.opera( msgOperaCode, jsonObject.toJSONString());
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);
         return new JsonResult(msgResult);
@@ -371,7 +377,8 @@ public class InformRuleController extends BaseController {
            "alarmStateType":"告警产生"
            }
          */
-        MsgResult msgResult = mqttSender.sendToMqttSyn(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
+        MsgResult msgResult = mqttOpera.opera(informMsg.getOperateCode(), jsonObject.toJSONString());
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);
 
@@ -392,7 +399,8 @@ public class InformRuleController extends BaseController {
         String reportAlarmListJson = JSONObject.toJSONString(alarms);
         System.out.println(reportAlarmListJson);
         //{"enterpriseServer":"yytd","enterpriseCode":"yytd","serverCode":"TOWER_SERVER", "deviceId":"10010_1021006","deviceModel":"YY006","deviceType":"yy6","flag":1,"level":"1","name":"整流模块01故障告警","serial":"12","signalId":"024001"}
-        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVersion, operateCode, reportAlarmListJson);
+//        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVersion, operateCode, reportAlarmListJson);
+        MsgResult msgResult = mqttOpera.opera(operateCode, reportAlarmListJson);
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);
 

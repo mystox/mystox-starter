@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.mqtt.service.impl;
 
-import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.service.MqttHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +36,11 @@ public class MqttHandlerAck implements MqttHandler {
     @Qualifier(value = "replyProducer")
     private MessageProducer messageProducer;
 
-    @Override
-    public String assembleSubTopic(String operaCode) {
-        return MqttUtils.preconditionSubTopicId(
-                MqttUtils.preconditionServerCode(serverName, serverVersion), operaCode) + "/ack";
-    }
+//    @Override
+//    public String assembleSubTopic(String operaCode) {
+//        return MqttUtils.preconditionSubTopicId(
+//                MqttUtils.preconditionServerCode(serverName, serverVersion), operaCode) + "/ack";
+//    }
 
     @Override
     public void addSubTopic(String topic, int qos) {

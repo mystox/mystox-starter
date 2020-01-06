@@ -15,7 +15,7 @@ import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.mqtt.AlarmEntrance;
 import com.kongtrolink.framework.mqtt.AlarmMqttEntity;
 import com.kongtrolink.framework.mqtt.OperateEntity;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.service.MqttOpera;
 import com.kongtrolink.framework.utils.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +51,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     ReportOperateConfig reportOperateConfig;
     @Autowired
     ResloverOperateConfig resloverOperateConfig;
+    //    @Autowired
+//    MqttSender mqttSender;
     @Autowired
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
     //redis存储待消除的告警和所在表信息
     @Autowired
     RedisUtils redisUtils;
@@ -232,7 +234,8 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 
                 try {
                     //所有其他模块，都返回告警列表json字符串
-                    MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
+//                    MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
+                    MsgResult msgResult = mqttOpera.opera(operaCode, reportAlarmListJson);
                     //打印请求相关信息
                     logger.debug("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);
                     int stateCode = msgResult.getStateCode();
@@ -322,7 +325,8 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                         String operaCode = operateEntity.getOperaCode();
                         try {
                             //所有其他模块，都返回告警列表json字符串
-                            mqttSender.sendToMqtt(serverVerson, operaCode, resolveAlarmListJson);
+//                            mqttSender.sendToMqtt(serverVerson, operaCode, resolveAlarmListJson);
+                            mqttOpera.broadcast(operaCode, resolveAlarmListJson);
                         } catch (Exception e) {
                             //打印调用失败消息
                             logger.error("***resolve: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(resolveAlarmListJson), operateEntity, e.getMessage());

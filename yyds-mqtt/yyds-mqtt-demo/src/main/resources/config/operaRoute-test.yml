@@ -1,0 +1,9 @@
+groupRoute:
+  groupCode: ${server.name}
+  jsonObject:
+    operaCode1:
+    - ${server.name}
+rootRoute:
+  groupCode: ROOT
+  jsonObject:
+    operaCode2: [abc,ded]

@@ -5,7 +5,7 @@ import com.kongtrolink.framework.api.Publish;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.service.MqttSender;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.utils.DeviceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
