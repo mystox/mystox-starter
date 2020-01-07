@@ -175,8 +175,8 @@ public class MqttRestServiceImpl implements MqttRestService {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
-        try {
             File file = FileUtils.getFile("./config/operaRoute.yml");
+        try {
 
             if (!file.exists()) {
                 System.out.println(1231231);
@@ -186,25 +186,21 @@ public class MqttRestServiceImpl implements MqttRestService {
                 }
                 boolean newFile = file.createNewFile();
             }
-//            Map testLoad = (Map) yaml.load(new FileInputStream(file));
             yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
-//            Object invoke = genericPostableMvcEndpoint.invoke();
-//            logger.info(JSONObject.toJSONString(invoke));
-            System.out.println(JSONObject.toJSON(operaRouteConfig));
-        } catch (IOException e) {
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
+            if (!serviceRegistry.exists(routePath))
+                serviceRegistry.create(routePath, JSONArray.toJSONBytes(subGroupServerList), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            else
+                serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         } finally {
             operaRoute.put(operaCode, oldServerArr);
+            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
         }
 
-
-        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
-        String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-        if (!serviceRegistry.exists(routePath))
-            serviceRegistry.create(routePath, JSONArray.toJSONBytes(subGroupServerList), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-        else
-            serviceRegistry.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
 
 
     }
