@@ -1,7 +1,0 @@
-opoeraResource:
-  - groupCode: ${server.groupCode}
-    operaMap:
-      operaCode1: [abc,ded]
-  - groupCode: ROOT
-    operaMap:
-      operaCode2: [root]
