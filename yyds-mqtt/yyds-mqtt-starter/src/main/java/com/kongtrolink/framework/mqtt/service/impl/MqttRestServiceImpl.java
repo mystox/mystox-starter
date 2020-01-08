@@ -179,7 +179,6 @@ public class MqttRestServiceImpl implements MqttRestService {
         try {
 
             if (!file.exists()) {
-                System.out.println(1231231);
                 File directory = new File("./config");
                 if (!directory.exists()) {
                     boolean mkdirs = directory.mkdirs();
@@ -200,8 +199,6 @@ public class MqttRestServiceImpl implements MqttRestService {
             operaRoute.put(operaCode, oldServerArr);
             yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
         }
-
-
 
     }
 
