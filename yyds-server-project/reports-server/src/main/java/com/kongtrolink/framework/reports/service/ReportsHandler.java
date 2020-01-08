@@ -182,6 +182,7 @@ public class ReportsHandler implements ApplicationRunner {
     private void resultSave(ReportTask reportTask, ReportData reportData) {
         Date recordTime = new Date();
         reportTask.setEndTime(recordTime);
+        Date startTime = reportTask.getStartTime();
         ReportTask task = reportTaskDao.findByByUniqueCondition(
                 reportTask.getServerCode(), reportTask.getEnterpriseCode(),
                 reportTask.getOperaCode(), preconditionServerCode(serverName, serverVersion));
@@ -205,7 +206,7 @@ public class ReportsHandler implements ApplicationRunner {
             logger.debug("[{}]next task start time is [{}]", reportTaskId, reportTask.getStartTime());
         } else {//如果结果为空或者结果类型为ERROR，说明任务执行失败，则以定时器三倍执行周期都为错误为超时
             logger.error("[{}]task result[{}] is wrong", task.getId(), JSONObject.toJSONString(reportData));
-            Date startTime = reportTask.getStartTime();
+//            Date startTime = reportTask.getStartTime();
             if (rhythm != null)
                 if (System.currentTimeMillis() - startTime.getTime() > 1000 * 3 * (rhythm == 0 ? 1 : rhythm)) {
                     logger.error("[{}]task time out... set invalid...", reportTaskId);
@@ -222,7 +223,7 @@ public class ReportsHandler implements ApplicationRunner {
         ReportTaskResult reportTaskResult = new ReportTaskResult();
         reportTaskResult.setRecordTime(recordTime);
         reportTaskResult.setRunId(System.currentTimeMillis() + "");
-        reportTaskResult.setStartTime(reportTask.getStartTime());
+        reportTaskResult.setStartTime(startTime);
         reportTaskResult.setTaskId(reportTaskId);
         if (reportData != null)
             reportTaskResult.setResult(JSONObject.parseObject(JSONObject.toJSONString(reportData), ReportData.class));

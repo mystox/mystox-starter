@@ -10,8 +10,6 @@ privFunc:
   - type: ROOT
     name: 日志功能
     code: LOG_SHOW
-#    routeMark: proxy_log
-#    pageRoute: proxy_log
     children:
     - type: PAGE
       name: 消息模块日志
