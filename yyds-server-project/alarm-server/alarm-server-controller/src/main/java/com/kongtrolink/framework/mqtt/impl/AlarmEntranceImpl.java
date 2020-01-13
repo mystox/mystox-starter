@@ -223,9 +223,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
         List<OperateEntity> operate = reportOperateConfig.getOperate();
-//        System.out.println("ONE operate: " + operate);
+        System.out.println("ONE operate: " + operate);
         List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-//        System.out.println("ONE operateEntityList: " + operateEntityList);
+        System.out.println("enterServerCode:"+ enterServerCode +"; operateEntityList:" + operateEntityList);
+        System.out.println("enterServerCodeONE operateEntityList: " + operateEntityList);
         if (null != operateEntityList) {
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for (OperateEntity operateEntity : operateEntityList) {
