@@ -23,6 +23,7 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'mvn -DskipTests clean package --settings /root/.m2/settings.xml'
+                sh 'mvn -DskipTests -pl /yyds-mqtt/yyds-mqtt-starter -am install --settings /root/.m2/settings.xml'
             }
         }
          stage ('init-ssh') {
