@@ -147,16 +147,6 @@ public class MqttOperaImpl implements MqttOpera {
         return result;
     }
 
-    public static void main(String[] args)
-    {
-        List<String> result = new ArrayList<>();
-        result.add("abc");
-        result.add("dba");
-        result.add("123");
-        result.remove(2);
-        System.out.println(result);
-
-    }
     /*private List<String> getOperaFormOperaRouteConfig(String operaCode) {
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute != null) {
