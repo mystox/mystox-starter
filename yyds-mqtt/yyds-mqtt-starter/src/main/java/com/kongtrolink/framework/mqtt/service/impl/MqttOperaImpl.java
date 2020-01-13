@@ -130,6 +130,7 @@ public class MqttOperaImpl implements MqttOpera {
                 if (result.getStateCode() != StateCode.SUCCESS) {
                     //移除路由
                     topicArr.remove(i);
+                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}",operaCode,JSONArray.toJSONString(topicArr));
                     serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
                     //重新请求
                     opera(operaCode, msg, qos, timeout, timeUnit, setFlag);
@@ -146,6 +147,16 @@ public class MqttOperaImpl implements MqttOpera {
         return result;
     }
 
+    public static void main(String[] args)
+    {
+        List<String> result = new ArrayList<>();
+        result.add("abc");
+        result.add("dba");
+        result.add("123");
+        result.remove(2);
+        System.out.println(result);
+
+    }
     /*private List<String> getOperaFormOperaRouteConfig(String operaCode) {
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute != null) {
