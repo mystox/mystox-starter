@@ -121,7 +121,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         String serverCode = mqttEntity.getServerCode();
         List<JSONObject> alarmJsonList = mqttEntity.getAlarms();
         if (null == alarmJsonList || alarmJsonList.size() == 0) {
-            System.out.printf("产生告警为空: %s %n ", payload);
+            logger.error("产生告警为空: %s %n ", payload);
             return;
         }
         List<Alarm> reportAlarmList = new ArrayList<>();
@@ -223,10 +223,10 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
         List<OperateEntity> operate = reportOperateConfig.getOperate();
-        System.out.println("ONE operate: " + operate);
+        logger.debug("ONE operate: " + operate);
         List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-        System.out.println("enterServerCode:"+ enterServerCode +"; operateEntityList:" + operateEntityList);
-        System.out.println("enterServerCodeONE operateEntityList: " + operateEntityList);
+        logger.debug("enterServerCode:"+ enterServerCode +"; operateEntityList:" + operateEntityList);
+        logger.debug("enterServerCodeONE operateEntityList: " + operateEntityList);
         if (null != operateEntityList) {
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for (OperateEntity operateEntity : operateEntityList) {
@@ -309,7 +309,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 }
             }
             if (!result) {
-                System.out.println("redis存在但无法再内存和数据库找到的告警：" + alarm.toString() + "; redisJson:" + redisJson);
+                logger.warn("redis存在但无法再内存和数据库找到的告警：" + alarm.toString() + "; redisJson:" + redisJson);
 //                System.out.println("redisNotTable :" + redisNotTable.incrementAndGet());
             }
             if (result) {
