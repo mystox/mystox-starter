@@ -114,19 +114,19 @@ public class MqttOperaImpl implements MqttOpera {
                 topicArr = subTopicArr;
             }
             //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
-            int size = topicArr.size();
+//            int size = topicArr.size();
             if (CollectionUtils.isEmpty(topicArr)) {
                 logger.error("route topic list size is null error...");
                 mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
                 return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route topic list size is null error...");
             }
-            String groupServerCode = "";
-            if (size == 1) {
-                groupServerCode = topicArr.get(0);
-                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
-                return result;
-            }
-            if (size > 1) { //默认数组多于1的情况下，识别为负载均衡
+//            String groupServerCode = "";
+//            if (size == 1) {
+//                groupServerCode = topicArr.get(0);
+//                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+//                return result;
+//            }
+//            if (size > 1) { //默认数组多于1的情况下，识别为负载均衡
 //                Random r = new Random();
 //                int i = r.nextInt(size);
 //                groupServerCode = topicArr.get(i);
@@ -137,10 +137,10 @@ public class MqttOperaImpl implements MqttOpera {
 //                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
 ////                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
 //                    //负载请求
-                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr); //
+            return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
 //                }
 //                return result;
-            }
+//            }
         } catch (KeeperException | InterruptedException e) {
             if (logger.isDebugEnabled())
                 e.printStackTrace();
@@ -151,7 +151,7 @@ public class MqttOperaImpl implements MqttOpera {
         return result;
     }
 
-    private MsgResult operaBalance(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, List<String> topicArr) {
+    private MsgResult operaBalance(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, List<String> topicArr, String routePath) throws KeeperException, InterruptedException {
         //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
         int size = topicArr.size();
         String groupServerCode = "";
@@ -164,9 +164,9 @@ public class MqttOperaImpl implements MqttOpera {
                 //移除路由
                 topicArr.remove(i);
                 logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
-//                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
+                serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
                 //重新请求
-                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr); //
+                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
             }
             return result;
         } else {
