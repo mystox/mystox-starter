@@ -114,18 +114,18 @@ public class MqttOperaImpl implements MqttOpera {
                 topicArr = subTopicArr;
             }
             //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
-//            int size = topicArr.size();
             if (CollectionUtils.isEmpty(topicArr)) {
                 logger.error("route topic list size is null error...");
                 mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
                 return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route topic list size is null error...");
             }
-//            String groupServerCode = "";
-//            if (size == 1) {
-//                groupServerCode = topicArr.get(0);
-//                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
-//                return result;
-//            }
+            int size = topicArr.size();
+            String groupServerCode = "";
+            if (size == 1) {
+                groupServerCode = topicArr.get(0);
+                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+                return result;
+            }
 //            if (size > 1) { //默认数组多于1的情况下，识别为负载均衡
 //                Random r = new Random();
 //                int i = r.nextInt(size);
@@ -171,7 +171,14 @@ public class MqttOperaImpl implements MqttOpera {
             return result;
         } else {
             groupServerCode = topicArr.get(0);
-            return operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+            MsgResult result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+            if (result.getStateCode() != StateCode.SUCCESS) {
+                topicArr.remove(0);
+                logger.error("[{}] mqtt sender topicArr is empty...", operaCode);
+                mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
+                serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
+            }
+            return result;
         }
     }
 
