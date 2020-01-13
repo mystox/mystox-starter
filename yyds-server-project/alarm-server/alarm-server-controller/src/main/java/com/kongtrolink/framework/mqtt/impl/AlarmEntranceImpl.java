@@ -327,7 +327,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                         try {
                             //所有其他模块，都返回告警列表json字符串
 //                            mqttSender.sendToMqtt(serverVerson, operaCode, resolveAlarmListJson);
-                            mqttOpera.broadcast(operaCode, resolveAlarmListJson);
+                            mqttOpera.operaAsync(operaCode, resolveAlarmListJson);
                         } catch (Exception e) {
                             //打印调用失败消息
                             logger.error("***resolve: remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(resolveAlarmListJson), operateEntity, e.getMessage());

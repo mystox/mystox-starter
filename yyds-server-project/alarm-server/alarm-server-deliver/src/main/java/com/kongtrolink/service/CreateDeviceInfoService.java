@@ -358,7 +358,7 @@ public class CreateDeviceInfoService {
                 logger.info("---send : msg:{}, operate:{}, result:{}", JSONObject.toJSONString(informMsg),
                         serverVerson + Contant.UNDERLINE + operateCode, "");
 //                mqttSender.sendToMqtt(serverVerson, operateCode, JSONObject.toJSONString(informMsg));
-                mqttOpera.broadcast(operateCode, JSONObject.toJSONString(informMsg));
+                mqttOpera.operaAsync(operateCode, JSONObject.toJSONString(informMsg));
             }
         } catch (Exception e) {
             logger.info("---getUserInfo: remote call error, msg:{}, operate:{}, result:{}", jsonObject.toString(),

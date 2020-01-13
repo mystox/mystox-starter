@@ -135,7 +135,9 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
         //同步操作接口
         MsgResult opera = mqttOpera.opera(operaCode,message);
         //同步意向接口自定义配置qos和超时时间
-        mqttOpera.opera(operaCode, message, 2, 10, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera(operaCode, message, 2, 10, TimeUnit.SECONDS);
+        //异步意向接口
+        void operaAsync(String operaCode, String msg);
         //广播接口
         mqttOpera.broadcast(operaCode,message);
     }

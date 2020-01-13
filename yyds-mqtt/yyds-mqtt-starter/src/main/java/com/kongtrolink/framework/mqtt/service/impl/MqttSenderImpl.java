@@ -83,7 +83,6 @@ public class MqttSenderImpl implements MqttSender {
         String msgId = mqttMsg.getMsgId();
         //获取目标topic列表，判断sub_list是否有人订阅处理
         try {
-
             if (isExistsBySubList(serverCode, operaCode)) {
                 boolean existsByPubList = addPubList(serverCode, operaCode);
                 if (existsByPubList) {
@@ -191,6 +190,14 @@ public class MqttSenderImpl implements MqttSender {
         return false;
     }
 
+
+    public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload) {
+        //组建topicid
+        String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
+        //组建消息体
+        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
+        return sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
+    }
 
     @Override
     public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {

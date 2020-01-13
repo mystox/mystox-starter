@@ -46,7 +46,7 @@ public abstract class TransverterHandler implements TransverterService {
 
     protected void reportMsg(String serverCode,String operaCode,String payload) {
 //        mqttSender.sendToMqtt(serverCode,operaCode,payload);
-        mqttOpera.broadcast(operaCode,payload);
+        mqttOpera.operaAsync(operaCode,payload);
     }
 
     protected MsgResult reportMsgSyn(String serverCode, String operaCode, String payload) {

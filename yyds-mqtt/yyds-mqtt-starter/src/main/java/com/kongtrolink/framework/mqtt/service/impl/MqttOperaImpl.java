@@ -74,13 +74,18 @@ public class MqttOperaImpl implements MqttOpera {
 
     @Override
     public MsgResult opera(String operaCode, String msg) {
-        return opera(operaCode, msg, 1, 0, null, false);
+        return opera(operaCode, msg, 1, 0, null, false, false);
 
     }
 
     @Override
     public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit) {
-        return opera(operaCode, msg, qos, timeout, timeUnit, true);
+        return opera(operaCode, msg, qos, timeout, timeUnit, true, false);
+    }
+
+    @Override
+    public void operaAsync(String operaCode, String msg) {
+        opera(operaCode, msg, 1, 0, null, false, true);
     }
 
     /**
@@ -90,7 +95,7 @@ public class MqttOperaImpl implements MqttOpera {
      * @Author mystox
      * @Description
      **/
-    private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag) {
+    private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean asyn) {
         MsgResult result;
         try {
             //优先配置中获取
@@ -125,15 +130,25 @@ public class MqttOperaImpl implements MqttOpera {
                 Random r = new Random();
                 int i = r.nextInt(size);
                 String groupServerCode = topicArr.get(i);
-                result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
-                        : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
+                if (asyn) {
+                    boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
+                    if (resultBoolean)
+                        result = new MsgResult(StateCode.SUCCESS, StateCode.StateCodeEnum.toStateCodeName(StateCode.SUCCESS));
+                    else
+                        result = new MsgResult(StateCode.FAILED, StateCode.StateCodeEnum.toStateCodeName(StateCode.FAILED));
+
+                } else {
+                    result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                            : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
+                }
+
                 if (result.getStateCode() != StateCode.SUCCESS) {
                     //移除路由
                     topicArr.remove(i);
-                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}",operaCode,JSONArray.toJSONString(topicArr));
+                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
                     serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
                     //重新请求
-                    opera(operaCode, msg, qos, timeout, timeUnit, setFlag);
+                    opera(operaCode, msg, qos, timeout, timeUnit, setFlag, asyn);
                 }
                 return result;
             }
