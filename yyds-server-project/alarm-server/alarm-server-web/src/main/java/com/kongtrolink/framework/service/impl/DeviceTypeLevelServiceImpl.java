@@ -231,7 +231,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         }
         try {
             String jsonStr = type + Contant.COLON + level + Contant.COLON + key + Contant.COLON + deleteKey;
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateAlarmLevelMap, jsonStr);
+//            MsgResult msgResult = mqttSender.sendToMqttSync(levelServerVersion, updateAlarmLevelMap, jsonStr);
             MsgResult msgResult = mqttOpera.opera( updateAlarmLevelMap, jsonStr);
             resultCode = msgResult.getStateCode();
             if (resultCode != 1) {

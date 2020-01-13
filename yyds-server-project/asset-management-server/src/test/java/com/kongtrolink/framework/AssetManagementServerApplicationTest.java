@@ -82,7 +82,7 @@ public class AssetManagementServerApplicationTest {
         jsonObject.put("enterpriseCode", "Skongtrolink");
         jsonObject.put("serverCode", "AUTH_PLATFORM");
 
-        MsgResult result = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
+        MsgResult result = mqttSender.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
 
         System.out.println(JSONObject.toJSONString(result));
     }
@@ -272,7 +272,7 @@ public class AssetManagementServerApplicationTest {
     private void request(int threadIndex, JSONObject request, String serverCode, String operaCode) {
 
         for (int i = 0; i < 100; ++i) {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(serverCode, operaCode, JSONObject.toJSONString(request));
+            MsgResult msgResult = mqttSender.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(request));
             System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());
         }
     }

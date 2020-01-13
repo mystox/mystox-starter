@@ -264,7 +264,7 @@ public class CycleHandle{
         JSONObject resJsonObject = new JSONObject();
         resJsonObject.put("sns", deviceIdList);
         try {
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, resJsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSync(assetsServer, getCI, resJsonObject.toJSONString());
             MsgResult msgResult = mqttOpera.opera(getCI, resJsonObject.toJSONString());
 
             logger.info("---getCI : msg:{}, operate:{}, result:{}", deviceIdList.toString(), assetsServer+Contant.UNDERLINE+getCI, msgResult);

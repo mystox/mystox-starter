@@ -74,7 +74,7 @@ public class ReportsController extends BaseController {
     JsonResult reportsTest(@RequestBody(required = false) JSONObject body) {
         String operaCode = body.getString("operaCode");
         String reportServerCode = body.getString("reportServerCode");
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(
+//        MsgResult msgResult = mqttSender.sendToMqttSync(
 //                reportServerCode, operaCode, body.toJSONString());
         MsgResult msgResult = mqttOpera.opera(operaCode, body.toJSONString());
         String msg = msgResult.getMsg();

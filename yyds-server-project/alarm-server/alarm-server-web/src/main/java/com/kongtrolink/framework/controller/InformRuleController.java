@@ -302,7 +302,7 @@ public class InformRuleController extends BaseController {
             msgStr = jsonObject.toJSONString();
         }
         System.out.println("serverVerson:" + serverVerson +"; operateCode: "+operateCode+";msgStr:" + msgStr);
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operateCode, msgStr);
+//        MsgResult msgResult = mqttSender.sendToMqttSync(serverVerson, operateCode, msgStr);
         MsgResult msgResult = mqttOpera.opera(operateCode,msgStr);
         if("5".equals(tempCode)){
             JSONObject resultObject = JSONObject.parseObject(msgResult.getMsg(), JSONObject.class);
@@ -332,7 +332,7 @@ public class InformRuleController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sns", sns);
         System.out.println("jsonObject:" + jsonObject.toJSONString());
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSync(msgServerVerson, msgOperaCode, jsonObject.toJSONString());
         MsgResult msgResult = mqttOpera.opera( msgOperaCode, jsonObject.toJSONString());
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);
@@ -377,7 +377,7 @@ public class InformRuleController extends BaseController {
            "alarmStateType":"告警产生"
            }
          */
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSync(informMsg.getServerVerson(), informMsg.getOperateCode(), jsonObject.toJSONString());
         MsgResult msgResult = mqttOpera.opera(informMsg.getOperateCode(), jsonObject.toJSONString());
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);
@@ -399,7 +399,7 @@ public class InformRuleController extends BaseController {
         String reportAlarmListJson = JSONObject.toJSONString(alarms);
         System.out.println(reportAlarmListJson);
         //{"enterpriseServer":"yytd","enterpriseCode":"yytd","serverCode":"TOWER_SERVER", "deviceId":"10010_1021006","deviceModel":"YY006","deviceType":"yy6","flag":1,"level":"1","name":"整流模块01故障告警","serial":"12","signalId":"024001"}
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(serverVersion, operateCode, reportAlarmListJson);
+//        MsgResult msgResult = mqttSender.sendToMqttSync(serverVersion, operateCode, reportAlarmListJson);
         MsgResult msgResult = mqttOpera.opera(operateCode, reportAlarmListJson);
         String msg = msgResult.getMsg();
         System.out.println(msgResult.getStateCode() + ";" + msg);

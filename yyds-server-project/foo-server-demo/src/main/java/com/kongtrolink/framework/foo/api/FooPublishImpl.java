@@ -37,7 +37,7 @@ public class FooPublishImpl implements FooPublish {
      */
     @Override
     public MsgResult sendMsgSyn(String serverCode, String operaCode, String payload) {
-        MsgResult s = mqttSender.sendToMqttSyn(serverCode, operaCode, payload);
+        MsgResult s = mqttSender.sendToMqttSync(serverCode, operaCode, payload);
         return s;
     }
 }

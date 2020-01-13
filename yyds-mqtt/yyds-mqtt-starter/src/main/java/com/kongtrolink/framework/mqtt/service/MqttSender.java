@@ -19,10 +19,10 @@ public interface MqttSender {
                     int qos,
                     String payload);
 
-    MsgResult sendToMqttSyn(String serverCode, String operaCode,
-                            String payload);
-    MsgResult sendToMqttSyn(String serverCode, String operaCode,
-                         int qos, String payload, long timeout, TimeUnit timeUnit);
+    MsgResult sendToMqttSync(String serverCode, String operaCode,
+                             String payload);
+    MsgResult sendToMqttSync(String serverCode, String operaCode,
+                             int qos, String payload, long timeout, TimeUnit timeUnit);
 
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload);
 }

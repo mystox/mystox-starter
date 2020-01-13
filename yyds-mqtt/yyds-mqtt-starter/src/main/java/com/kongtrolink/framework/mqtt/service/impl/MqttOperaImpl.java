@@ -95,7 +95,7 @@ public class MqttOperaImpl implements MqttOpera {
      * @Author mystox
      * @Description
      **/
-    private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean asyn) {
+    private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async) {
         MsgResult result;
         try {
             //优先配置中获取
@@ -120,37 +120,26 @@ public class MqttOperaImpl implements MqttOpera {
                 mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
                 return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route topic list size is null error...");
             }
+            String groupServerCode = "";
             if (size == 1) {
-                String groupServerCode = topicArr.get(0);
-                result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
-                        : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
+                groupServerCode = topicArr.get(0);
+                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
                 return result;
             }
             if (size > 1) { //默认数组多于1的情况下，识别为负载均衡
-                Random r = new Random();
-                int i = r.nextInt(size);
-                String groupServerCode = topicArr.get(i);
-                if (asyn) {
-                    boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
-                    if (resultBoolean)
-                        result = new MsgResult(StateCode.SUCCESS, StateCode.StateCodeEnum.toStateCodeName(StateCode.SUCCESS));
-                    else
-                        result = new MsgResult(StateCode.FAILED, StateCode.StateCodeEnum.toStateCodeName(StateCode.FAILED));
-
-                } else {
-                    result = setFlag ? mqttSender.sendToMqttSyn(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
-                            : mqttSender.sendToMqttSyn(groupServerCode, operaCode, msg);
-                }
-
-                if (result.getStateCode() != StateCode.SUCCESS) {
-                    //移除路由
-                    topicArr.remove(i);
-                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
-                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
-                    //重新请求
-                    opera(operaCode, msg, qos, timeout, timeUnit, setFlag, asyn);
-                }
-                return result;
+//                Random r = new Random();
+//                int i = r.nextInt(size);
+//                groupServerCode = topicArr.get(i);
+//                result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+//                if (result.getStateCode() != StateCode.SUCCESS) {
+//                    //移除路由
+//                    topicArr.remove(i);
+//                    logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
+////                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
+//                    //负载请求
+                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr); //
+//                }
+//                return result;
             }
         } catch (KeeperException | InterruptedException e) {
             if (logger.isDebugEnabled())
@@ -160,6 +149,44 @@ public class MqttOperaImpl implements MqttOpera {
         }
         result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route request failed");
         return result;
+    }
+
+    private MsgResult operaBalance(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, List<String> topicArr) {
+        //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
+        int size = topicArr.size();
+        String groupServerCode = "";
+        if (size > 1) { //默认数组多于1的情况下，识别为负载均衡
+            Random r = new Random();
+            int i = r.nextInt(size);
+            groupServerCode = topicArr.get(i);
+            MsgResult result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+            if (result.getStateCode() != StateCode.SUCCESS) {
+                //移除路由
+                topicArr.remove(i);
+                logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
+//                    serviceRegistry.setData(routePath, JSONArray.toJSONBytes(topicArr));
+                //重新请求
+                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr); //
+            }
+            return result;
+        } else {
+            groupServerCode = topicArr.get(0);
+            return operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
+        }
+    }
+
+    MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
+        if (async) {
+            boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
+            if (resultBoolean)
+                return new MsgResult(StateCode.SUCCESS, StateCode.StateCodeEnum.toStateCodeName(StateCode.SUCCESS));
+            else
+                return new MsgResult(StateCode.FAILED, StateCode.StateCodeEnum.toStateCodeName(StateCode.FAILED));
+        } else {
+            return setFlag ? mqttSender.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                    : mqttSender.sendToMqttSync(groupServerCode, operaCode, msg);
+        }
+
     }
 
     /*private List<String> getOperaFormOperaRouteConfig(String operaCode) {
@@ -250,7 +277,7 @@ public class MqttOperaImpl implements MqttOpera {
 
     @Override
     public MsgResult slogin(String registerGroupServerCode, String sLoginPayload) {
-        MsgResult slogin = mqttSender.sendToMqttSyn(registerGroupServerCode,
+        MsgResult slogin = mqttSender.sendToMqttSync(registerGroupServerCode,
                 OperaCode.SLOGIN, 2, sLoginPayload, 30000L, TimeUnit.MILLISECONDS);
         return slogin;
     }

@@ -234,7 +234,7 @@ public class EnterpriseLevelServiceImpl implements EnterpriseLevelService{
         jsonObject.put("enterpriseLevelList", lastUse);
         try {
             System.out.println("levelServerVersion:" + levelServerVersion + "; updateEnterpriseLevelMap:" + updateEnterpriseLevelMap);
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(levelServerVersion, updateEnterpriseLevelMap, jsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSync(levelServerVersion, updateEnterpriseLevelMap, jsonObject.toJSONString());
             MsgResult msgResult = mqttOpera.opera( updateEnterpriseLevelMap, jsonObject.toJSONString());
             resultCode = msgResult.getStateCode();
         }catch (Exception e){

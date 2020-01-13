@@ -235,7 +235,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
 
                 try {
                     //所有其他模块，都返回告警列表json字符串
-//                    MsgResult msgResult = mqttSender.sendToMqttSyn(serverVerson, operaCode, reportAlarmListJson);
+//                    MsgResult msgResult = mqttSender.sendToMqttSync(serverVerson, operaCode, reportAlarmListJson);
                     MsgResult msgResult = mqttOpera.opera(operaCode, reportAlarmListJson);
                     //打印请求相关信息
                     logger.debug("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);

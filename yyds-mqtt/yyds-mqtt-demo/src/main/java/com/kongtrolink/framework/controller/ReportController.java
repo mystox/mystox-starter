@@ -42,7 +42,7 @@ public class ReportController {
 //        if (asyn)
 //            mqttSender.sendToMqtt(MqttUtils.preconditionServerCode(ServerName.REPORTS_SERVER, "1.0.0"), operaCode, body.toJSONString());
 //        else {
-            MsgResult msgResult = mqttSender.sendToMqttSyn(MqttUtils.preconditionServerCode(ServerName.REPORTS_SERVER, "1.0.0"), operaCode, body.toJSONString());
+            MsgResult msgResult = mqttSender.sendToMqttSync(MqttUtils.preconditionServerCode(ServerName.REPORTS_SERVER, "1.0.0"), operaCode, body.toJSONString());
             return new JsonResult(msgResult);
 //        }
 //        return new JsonResult();

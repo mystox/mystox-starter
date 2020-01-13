@@ -27,7 +27,7 @@ public class MqttPublish implements Publish {
         String serverCode = MqttUtils.preconditionServerCode(ServerName.AUTH_PLATFORM, "1.0.0");
         String operaCode = "getRegionCode";
 
-        return mqttSender.sendToMqttSyn(serverCode, operaCode, payload);
+        return mqttSender.sendToMqttSync(serverCode, operaCode, payload);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class MqttPublish implements Publish {
         JSONObject payload = new JSONObject();
         payload.put("sn", sn);
 
-        MsgResult msgResult = mqttSender.sendToMqttSyn(gatewayServerCode, operaCode, JSONObject.toJSONString(payload));
+        MsgResult msgResult = mqttSender.sendToMqttSync(gatewayServerCode, operaCode, JSONObject.toJSONString(payload));
         if (msgResult.getStateCode() == 1) {
             deviceUtils.deviceGetAck(msgResult.getMsg());
         }

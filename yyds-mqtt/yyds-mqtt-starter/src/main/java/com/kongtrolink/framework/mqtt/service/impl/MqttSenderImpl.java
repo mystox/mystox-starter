@@ -190,7 +190,7 @@ public class MqttSenderImpl implements MqttSender {
         return false;
     }
 
-
+    @Override
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload) {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
@@ -200,7 +200,7 @@ public class MqttSenderImpl implements MqttSender {
     }
 
     @Override
-    public MsgResult sendToMqttSyn(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
+    public MsgResult sendToMqttSync(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
         MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
@@ -244,8 +244,8 @@ public class MqttSenderImpl implements MqttSender {
     }
 
     @Override
-    public MsgResult sendToMqttSyn(String serverCode, String operaCode, String payload) {
-        return sendToMqttSyn(serverCode, operaCode, 2, payload, 30000L, TimeUnit.MILLISECONDS);
+    public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
+        return sendToMqttSync(serverCode, operaCode, 2, payload, 30000L, TimeUnit.MILLISECONDS);
     }
 
     private boolean addPubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {

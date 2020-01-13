@@ -162,7 +162,7 @@ public class CreateDeviceInfoService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("sns", deviceIdList);
         try {
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(assetsServer, getCI, jsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSync(assetsServer, getCI, jsonObject.toJSONString());
             MsgResult msgResult = mqttOpera.opera(getCI, jsonObject.toJSONString());
             logger.info("---getCI : msg:{}, operate:{}, result:{}", JSONObject.toJSON(deviceIdList),
                     assetsServer + Contant.UNDERLINE + getCI, msgResult);
@@ -264,7 +264,7 @@ public class CreateDeviceInfoService {
             addressInformListMap.put(informMsg.getAddress(), addInformList);
         }
         try {
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getRegionCodeEntity, addressList.toString());
+//            MsgResult msgResult = mqttSender.sendToMqttSync(yunguanServerVersion, getRegionCodeEntity, addressList.toString());
             MsgResult msgResult = mqttOpera.opera(getRegionCodeEntity, addressList.toString());
             logger.info("---getAddressName : msg:{}, operate:{}, result:{}", JSONObject.toJSON(addressList),
                     yunguanServerVersion + Contant.UNDERLINE + getRegionCodeEntity, msgResult);
@@ -341,7 +341,7 @@ public class CreateDeviceInfoService {
         jsonObject.put("serverCode", key);
         jsonObject.put("userIds", userIds);
         try {
-//            MsgResult msgResult = mqttSender.sendToMqttSyn(yunguanServerVersion, getRegionListByUsers, jsonObject.toJSONString());
+//            MsgResult msgResult = mqttSender.sendToMqttSync(yunguanServerVersion, getRegionListByUsers, jsonObject.toJSONString());
             MsgResult msgResult = mqttOpera.opera(getRegionListByUsers, jsonObject.toJSONString());
             logger.info("---getUserInfo : msg:{}, operate:{}, result:{}", jsonObject.toString(),
                     yunguanServerVersion + Contant.UNDERLINE + getRegionListByUsers, msgResult);

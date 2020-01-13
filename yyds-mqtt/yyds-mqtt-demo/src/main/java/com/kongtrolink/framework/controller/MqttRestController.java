@@ -66,7 +66,7 @@ public class MqttRestController {
     @RequestMapping("/sendMsgSyn")
     public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgResult s = mqttSender.sendToMqttSyn(serverCode, operaCode, message);
+        MsgResult s = mqttSender.sendToMqttSync(serverCode, operaCode, message);
         return s;
     }
 

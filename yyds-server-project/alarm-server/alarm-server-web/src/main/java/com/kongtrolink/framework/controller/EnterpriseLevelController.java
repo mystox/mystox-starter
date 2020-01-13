@@ -117,7 +117,7 @@ public class EnterpriseLevelController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseLevelQuery.getEnterpriseCode());
         jsonObject.put("serverCode", enterpriseLevelQuery.getServerCode());
-//        MsgResult msgResult = mqttSender.sendToMqttSyn(assetServerVerson, getCIModel, jsonObject.toJSONString());
+//        MsgResult msgResult = mqttSender.sendToMqttSync(assetServerVerson, getCIModel, jsonObject.toJSONString());
         MsgResult msgResult = mqttOpera.opera(getCIModel, jsonObject.toJSONString());
         System.out.println(msgResult);
         return msgResult.getMsg();

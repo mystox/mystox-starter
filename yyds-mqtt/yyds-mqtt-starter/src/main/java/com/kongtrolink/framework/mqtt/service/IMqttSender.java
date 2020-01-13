@@ -57,7 +57,7 @@ public interface IMqttSender {
 
 
 //    @Gateway(requestChannel = MqttConfig.CHANNEL_NAME_OUT/*,replyChannel = MqttConfig.CHANNEL_REPLY,replyTimeout = 6000*/)
-//    Future<?> sendToMqttSyn(@Header(MqttHeaders.TOPIC) String topic,
+//    Future<?> sendToMqttSync(@Header(MqttHeaders.TOPIC) String topic,
 //                                 @Header(MqttHeaders.QOS) int qos,
 //                                 String payload);
 }

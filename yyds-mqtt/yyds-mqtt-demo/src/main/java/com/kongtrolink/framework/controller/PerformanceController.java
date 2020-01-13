@@ -59,7 +59,7 @@ public class PerformanceController {
 
         long time = 1000 / timeSeconds;
 
-//        MsgResult countStatistic = mqttSender.sendToMqttSyn("FOO_SERVER_DEMO_1.0.0", "clearCount", "");
+//        MsgResult countStatistic = mqttSender.sendToMqttSync("FOO_SERVER_DEMO_1.0.0", "clearCount", "");
 //        MsgResult countStatistic = new MsgResult();
         String baseMsg = condition.getString("msg");
         if (coreSize!= null) demoExecutor.setCorePoolSize(coreSize);
@@ -84,7 +84,7 @@ public class PerformanceController {
                             mqttSender.sendToMqtt("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos, msg);
                         else {
                             MsgResult countStatistic1 = mqttSender.
-                                    sendToMqttSyn("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos,msg,100, TimeUnit.SECONDS);
+                                    sendToMqttSync("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos,msg,100, TimeUnit.SECONDS);
                             if (countStatistic1 != null && StateCode.SUCCESS != countStatistic1.getStateCode()) {
                                 logger.error("send error...");
                             } else
