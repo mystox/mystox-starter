@@ -22,12 +22,17 @@ public class MqttOperaRestController {
     @Autowired
     MqttOpera mqttOpera;
 
-    @RequestMapping("/operaSyn")
+    @RequestMapping("/operaSync")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
         MsgResult opera = mqttOpera.opera(operaCode,message);
         return new JsonResult(opera);
     }
 
+    @RequestMapping("/operaAsync")
+    public JsonResult operaAsync(@RequestParam String operaCode,@RequestBody String message) {
+        mqttOpera.operaAsync(operaCode,message);
+        return new JsonResult();
+    }
     @RequestMapping("/broadcast")
     public JsonResult broadcast(@RequestParam String operaCode,@RequestBody String message) {
         mqttOpera.broadcast(operaCode,message);
