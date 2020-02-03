@@ -2,7 +2,6 @@ package com.kongtrolink.framework.gateway.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.gateway.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.tower.entity.rec.info.PushDeviceAssetDevice;
