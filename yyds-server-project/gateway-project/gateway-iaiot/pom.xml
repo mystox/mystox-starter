@@ -6,17 +6,16 @@
 
     <parent>
         <groupId>com.kongtrolink.framework</groupId>
-        <artifactId>yyds-server-project</artifactId>
+        <artifactId>gateway-project</artifactId>
         <version>1.0.0</version>
     </parent>
     <groupId>com.kongtrolink.framework</groupId>
-    <artifactId>gateway-project</artifactId>
+    <artifactId>gateway-iaiot</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>gateway-common</module>
-        <module>gateway-tower</module>
-        <module>gateway-iaiot</module>
+        <module>gateway-iaiot-server</module>
+        <module>gateway-iaiot-core</module>
     </modules>
     
 </project>

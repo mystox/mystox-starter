@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://SCService.chinatowercom.com" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://SCService.chinatowercom.com" xmlns:intf="http://SCService.chinatowercom.com" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+   <wsdl:message name="invokeRequest">
+
+      <wsdl:part name="xmlData" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="invokeResponse">
+
+      <wsdl:part name="invokeReturn" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="SCService">
+
+      <wsdl:operation name="invoke" parameterOrder="xmlData">
+
+         <wsdl:input message="impl:invokeRequest" name="invokeRequest"/>
+
+         <wsdl:output message="impl:invokeResponse" name="invokeResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="SCServiceSoapBinding" type="impl:SCService">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="invoke">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="invokeRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://SCService.chinatowercom.com" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="invokeResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://SCService.chinatowercom.com" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="SCServiceService">
+
+      <wsdl:port binding="impl:SCServiceSoapBinding" name="SCService">
+
+         <wsdlsoap:address location="http://127.0.0.1:8080/services/SCService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>
