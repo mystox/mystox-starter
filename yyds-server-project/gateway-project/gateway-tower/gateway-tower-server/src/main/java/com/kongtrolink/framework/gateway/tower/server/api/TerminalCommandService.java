@@ -18,23 +18,33 @@ public interface TerminalCommandService {
     /**
      *  SC向GW请求监控点数据
      */
-
     @OperaCode(code = "getData")
     String getData(String message);
+    /**
+     * SC向GW设置监控点数据
+     */
+    @OperaCode(code = "setPoint")
+    String setPoint(String message);
+    /**
+     * SC向GW请求门限值数据
+     */
+    @OperaCode(code="getThreshold")
+    String getThreshold(String message);
 
-    @OperaCode(code = "setData")
-    String setData(String message);
+    /**
+     * SC向GW 设置门限值数据
+     */
+    @OperaCode(code="setThreshold")
+    String setThreshold(String message);
 
-    @OperaCode(code="getDeviceDataModel")
-    String getDeviceDataModel(String message);
-
-    @OperaCode(code="getAlarmParam")
-    String getAlarmParam(String message);
-
-    @OperaCode(code="setAlarmParam")
-    String setAlarmParam(String message);
-
-    @OperaCode(code="getDeviceAlarmModel")
-    String getDeviceAlarmModel(String message);
-
+    /**
+     * SC向GW 获取FSU状态
+     */
+    @OperaCode(code="getFsuInfo")
+    String getFsuInfo(String message);
+    /**
+     * SC向GW FSU重启
+     */
+    @OperaCode(code="reboot")
+    String reboot(String message);
 }

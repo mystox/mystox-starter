@@ -4,8 +4,8 @@ package com.kongtrolink.framework.gateway.tower.server.mqtt.base;
  * mqtt publish m-box
  */
 public enum MqttPubTopic {
-    RegisterAck("RegisterAck"),     //  注册
-    HeartbeatAck("HeartbeatAck"), // 发送心跳
+    GetDataAck("getDataAck"),     //  注册
+    SetPointAck("setPointAck"), // 发送心跳
     PushDeviceAssetAck("PushDeviceAssetAck"),//推送设备资产信息,
     GetDeviceAsset("GetDeviceAsset"), //获取设备资产信息
     GetDeviceDataModel("GetDeviceDataModel"), //获取设备数据模型信息

@@ -48,35 +48,53 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     }
 
     /**
-     * 业务平台 设置数值
-     * @param message 消息体
-     * @return  结果
+     * SC向GW请求监控点数据
+     *
      */
     @Override
-    public String setData(String message) {
-        return getMsgResult(message,MqttPubTopic.SetData);
+    public String getData(String message) {
+        return null;
     }
 
+    /**
+     * SC向GW设置监控点数据
+     */
     @Override
-    public String getDeviceDataModel(String message) {
-        return getMsgResult(message,MqttPubTopic.GetDeviceDataModel);
+    public String setPoint(String message) {
+        return null;
     }
 
+    /**
+     * SC向GW请求门限值数据
+     */
     @Override
-    public String getAlarmParam(String message) {
-        return getMsgResult(message,MqttPubTopic.GetAlarmParam);
+    public String getThreshold(String message) {
+        return null;
     }
 
+    /**
+     * SC向GW 设置门限值数据
+     */
     @Override
-    public String setAlarmParam(String message) {
-        return getMsgResult(message,MqttPubTopic.SetAlarmParam);
+    public String setThreshold(String message) {
+        return null;
     }
 
+    /**
+     * SC向GW 获取FSU状态
+     */
     @Override
-    public String getDeviceAlarmModel(String message) {
-        return getMsgResult(message,MqttPubTopic.GetDeviceAlarmModel);
+    public String getFsuInfo(String message) {
+        return null;
     }
 
+    /**
+     * SC向GW FSU重启
+     */
+    @Override
+    public String reboot(String message) {
+        return null;
+    }
 
 
     private String getMsgResult(String message, MqttPubTopic topic){
