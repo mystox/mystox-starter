@@ -91,5 +91,19 @@ public class LoginParse extends ParseHandler {
         return null;
     }
 
+    public RedisFsuInfo getRedisFsuInfo(String fsuId){
+        String uniqueCode = getEnterpriseCode();
+        String redisKeyFsuInfo = uniqueCode+"#"+fsuId;
+        Object object = redisUtils.hget(RedisKey.FSU_INFO,redisKeyFsuInfo);
+        if(object==null){
+            return null;
+        }
+        try {
+            RedisFsuInfo value = JSONObject.parseObject(String.valueOf(object),RedisFsuInfo.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
