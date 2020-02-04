@@ -15,6 +15,12 @@ public interface TerminalCommandService {
     @OperaCode(code = "deviceGet")
     String deviceGet(String message);
 
+    /**
+     *  SC向GW请求监控点数据
+     */
+
+    @OperaCode(code = "getData")
+    String getData(String message);
 
     @OperaCode(code = "setData")
     String setData(String message);
