@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.gateway.tower.core.entity.mqtt.back;
 
 import java.io.Serializable;
-import java.lang.ref.PhantomReference;
 
 /**
  * 返回,响应SC报文 消息体
