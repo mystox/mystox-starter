@@ -35,6 +35,7 @@ gateway:
   fsuOffAlarmName: "FSU离线告警"
   fsuOffAlarmLevel: "1"
   user: "yytd_root"
+  fsuPort: 8080
   assetReport:
     version: "1.0.0"
   alarm:

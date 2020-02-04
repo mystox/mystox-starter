@@ -5,8 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.iaiot.core.rec.RecServerBase;
 import com.kongtrolink.framework.gateway.iaiot.core.send.AckBase;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.GetDataAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.GetThresholdAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetPointAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetThresholdAckMessage;
 import com.kongtrolink.framework.gateway.tower.server.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.tower.server.mqtt.base.MqttPubTopic;
+import com.kongtrolink.framework.gateway.tower.server.service.NorthService;
 import com.kongtrolink.framework.gateway.tower.server.service.TopicConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +35,9 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     GatewayMqttSenderNative gatewayMqttSenderNative;
     @Autowired
     private TopicConfig topicConfig;
+    @Autowired
+    private NorthService northService;
+
     /**
      * 资管主动下发 下发设备获取设备信息
      * @param message 消息体
@@ -53,7 +61,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String getData(String message) {
-        return null;
+        GetDataAckMessage getDataAckMessage = northService.getData(message);
+        return JSONObject.toJSONString(getDataAckMessage);
     }
 
     /**
@@ -61,7 +70,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String setPoint(String message) {
-        return null;
+        SetPointAckMessage setPointAckMessage = northService.setPoint(message);
+        return JSONObject.toJSONString(setPointAckMessage);
     }
 
     /**
@@ -69,7 +79,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String getThreshold(String message) {
-        return null;
+        GetThresholdAckMessage getThresholdAckMessage = northService.getThreshold(message);
+        return JSONObject.toJSONString(getThresholdAckMessage);
     }
 
     /**
@@ -77,7 +88,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String setThreshold(String message) {
-        return null;
+        SetThresholdAckMessage setThresholdAckMessage = northService.setThreshold(message);
+        return JSONObject.toJSONString(setThresholdAckMessage);
     }
 
     /**

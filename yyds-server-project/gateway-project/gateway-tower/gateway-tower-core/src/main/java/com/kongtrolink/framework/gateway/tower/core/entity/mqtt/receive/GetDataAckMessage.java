@@ -4,14 +4,15 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * SC请求获取门限值下发报文
- * Created by Eric on 2019/6/17.
+ * SC请求获取监控点数据下发报文
+ * Created by Eric on 2019/6/14.
  */
-public class GetThresholdMessage implements Serializable{
+public class GetDataAckMessage implements Serializable{
+    private static final long serialVersionUID = -4471874791195635080L;
 
-    private static final long serialVersionUID = -7001078305253047007L;
     private String msgId;
     private String fsuId;
+    private int result; // //1 正确 0 错误
     private DeviceIdEntity payload;
 
     public String getMsgId() {
@@ -36,5 +37,13 @@ public class GetThresholdMessage implements Serializable{
 
     public void setPayload(DeviceIdEntity payload) {
         this.payload = payload;
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public void setResult(int result) {
+        this.result = result;
     }
 }

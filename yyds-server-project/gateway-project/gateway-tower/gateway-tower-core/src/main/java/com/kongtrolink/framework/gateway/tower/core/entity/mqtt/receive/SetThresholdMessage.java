@@ -1,59 +1,39 @@
 package com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * SC请求设置门限值下发报文
  * Created by Eric on 2019/6/17.
  */
 public class SetThresholdMessage implements Serializable {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1600119043507533017L;
-    private String reqId;
-    private String uniqueCode;
-    private String deviceId;
-    private String signalId;
-    private Double threshold;
+    private static final long serialVersionUID = -6999313684298687333L;
+    private String msgId;
+    private String fsuId;
+    private DeviceIdEntity payload;
 
-    public String getReqId() {
-        return reqId;
+    public String getMsgId() {
+        return msgId;
     }
 
-    public void setReqId(String reqId) {
-        this.reqId = reqId;
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getFsuId() {
+        return fsuId;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setFsuId(String fsuId) {
+        this.fsuId = fsuId;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public DeviceIdEntity getPayload() {
+        return payload;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    public String getSignalId() {
-        return signalId;
-    }
-
-    public void setSignalId(String signalId) {
-        this.signalId = signalId;
-    }
-
-    public Double getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(Double threshold) {
-        this.threshold = threshold;
+    public void setPayload(DeviceIdEntity payload) {
+        this.payload = payload;
     }
 }

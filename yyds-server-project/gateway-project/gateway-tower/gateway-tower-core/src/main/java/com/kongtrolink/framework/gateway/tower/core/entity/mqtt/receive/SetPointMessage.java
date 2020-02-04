@@ -4,12 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * SC请求获取门限值下发报文
+ * SC请求设置监控点数据下发报文
  * Created by Eric on 2019/6/17.
  */
-public class GetThresholdMessage implements Serializable{
-
-    private static final long serialVersionUID = -7001078305253047007L;
+public class SetPointMessage implements Serializable{
+    private static final long serialVersionUID = -1848536986036985999L;
     private String msgId;
     private String fsuId;
     private DeviceIdEntity payload;
