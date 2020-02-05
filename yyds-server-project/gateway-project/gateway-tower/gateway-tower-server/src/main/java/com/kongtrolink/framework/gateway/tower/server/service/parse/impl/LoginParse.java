@@ -47,7 +47,7 @@ public class LoginParse extends ParseHandler {
 
             LoginAck infoAck = new LoginAck();
             boolean flag = true; //todo 上报业务平台返回注册结果
-            if(flag){
+            if(!flag){
                 LOGGER.info("在数据库中没有查询到相关FSU fsuShortCode:{}  uniqueCode:{}  的FSU .... ",fsuShortCode,uniqueCode);
                 infoAck.setScIp("");
                 infoAck.setRightLevel("0");
@@ -95,6 +95,7 @@ public class LoginParse extends ParseHandler {
         }
         try {
             RedisFsuInfo value = JSONObject.parseObject(String.valueOf(object),RedisFsuInfo.class);
+            return value;
         }catch (Exception e){
             e.printStackTrace();
         }

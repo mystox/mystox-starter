@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.gateway.iaiot.server.service.parse;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.entity.RedisHashTable;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.gateway.iaiot.server.entity.ParseProtocol;
+import com.kongtrolink.framework.gateway.iaiot.server.entity.RedisHashTable;
 import com.kongtrolink.framework.gateway.iaiot.server.entity.Transverter;
 import com.kongtrolink.framework.gateway.iaiot.server.entity.TransverterConfig;
 import com.kongtrolink.framework.gateway.iaiot.server.service.transverter.TransverterService;

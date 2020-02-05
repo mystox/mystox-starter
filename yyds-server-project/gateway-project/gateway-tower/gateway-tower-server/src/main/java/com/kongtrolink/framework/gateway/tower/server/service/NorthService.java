@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.gateway.tower.server.service;
 
 import com.alibaba.fastjson.JSON;
-import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.gateway.tower.core.entity.RedisFsuInfo;
 import com.kongtrolink.framework.gateway.tower.core.entity.base.MessageResp;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
@@ -229,6 +228,7 @@ public class NorthService {
     private String getFsuIp(String fsuId){
         RedisFsuInfo redisFsuInfo = loginParse.getRedisFsuInfo(fsuId);
         if(redisFsuInfo==null){
+            logger.error("未能根据 FsuId：{} 查询到相关的在线的FSU信息",fsuId);
             return null;
         }
         return redisFsuInfo.getIp();

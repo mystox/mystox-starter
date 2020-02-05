@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file was auto-generated from WSDL -->
+<!-- by the Apache Axis2 version: 1.7.5  Built on : May 06, 2017 (03:45:26 BST) -->
+<serviceGroup>
+    <service name="SCService">
+        <messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out" class="com.chinatowercom.scservice.SCServiceServiceMessageReceiverInOut"/>
+        </messageReceivers>
+        <parameter name="ServiceObjectSupplier">org.apache.axis2.extensions.spring.receivers.SpringServletContextObjectSupplier</parameter>
+        <parameter name="SpringBeanName">baseReceiver</parameter>
+
+        <parameter name="useOriginalwsdl">true</parameter>
+        <parameter name="modifyUserWSDLPortAddress">true</parameter>
+        <operation name="invoke" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://SCService.kongtrolink.framework.com">
+            <actionMapping>http://FSUService.kongtrolink.framework.com/FSUService/invokeRequest</actionMapping>
+            <outputActionMapping>http://FSUService.kongtrolink.framework.com/FSUService/invokeResponse</outputActionMapping>
+        </operation>
+    </service>
+</serviceGroup>
