@@ -26,11 +26,6 @@ public abstract class ReceiveHandler extends SCServiceServiceSkeleton implements
     @Value("${gateway.regionCode:null}")
     private String regionCode;
 
-    @Autowired
-    ParseService parseService;
-
-
-
     public ReceiveHandler port(int port) {
         setPort(port);
         return this;
