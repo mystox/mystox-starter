@@ -26,7 +26,7 @@ management:
     enabled: false
 #########网关相关配置##############
 gateway:
-  businessCode: TOWER_SERVER_1.0.0
+  businessCode: TOWER_SERVER_2.0.0
   enterpriseCode: YYDS
   deviceType: FSU #可选
   deviceModel: "MUU100" #可选
@@ -35,6 +35,7 @@ gateway:
   fsuOffAlarmName: "FSU离线告警"
   fsuOffAlarmLevel: "1"
   user: "yytd_root"
+  fsuPort: 8080
   assetReport:
     version: "1.0.0"
   alarm:
@@ -45,7 +46,7 @@ gateway:
 server:
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
   version: 1.0.0 #服务版本
-  host: 172.16.5.233
+  host: 172.16.6.14
   port: 52002 #服务占用web端口
 
 register:

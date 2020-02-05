@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * update record:
  * 注册 - 平台注册返回结果 -> 资管上报/告警消除
  */
-@Service
+@Service("alarmParse")
 public class AlarmParse extends ParseHandler {
 
     @Autowired

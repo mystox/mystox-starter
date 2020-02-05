@@ -1,42 +1,40 @@
 package com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * SC请求获取门限值下发报文
  * Created by Eric on 2019/6/17.
  */
 public class GetThresholdMessage implements Serializable{
-    /**
-     *
-     */
-    private static final long serialVersionUID = -5396756026134714301L;
 
-    private String reqId;
-    private String uniqueCode;
-    private String deviceId;
+    private static final long serialVersionUID = -7001078305253047007L;
+    private String msgId;
+    private String fsuId;
+    private DeviceIdEntity payload;
 
-    public String getReqId() {
-        return reqId;
+    public String getMsgId() {
+        return msgId;
     }
 
-    public void setReqId(String reqId) {
-        this.reqId = reqId;
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
-    public String getUniqueCode() {
-        return uniqueCode;
+    public String getFsuId() {
+        return fsuId;
     }
 
-    public void setUniqueCode(String uniqueCode) {
-        this.uniqueCode = uniqueCode;
+    public void setFsuId(String fsuId) {
+        this.fsuId = fsuId;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public DeviceIdEntity getPayload() {
+        return payload;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setPayload(DeviceIdEntity payload) {
+        this.payload = payload;
     }
 }

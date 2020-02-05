@@ -1,13 +1,13 @@
 package com.kongtrolink.framework.gateway.tower.server.api;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.iaiot.core.rec.RecServerBase;
 import com.kongtrolink.framework.gateway.iaiot.core.send.AckBase;
-import com.kongtrolink.framework.gateway.tower.server.mqtt.GatewayMqttSenderNative;
-import com.kongtrolink.framework.gateway.tower.server.mqtt.base.MqttPubTopic;
-import com.kongtrolink.framework.gateway.tower.server.service.TopicConfig;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.GetDataAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.GetThresholdAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetPointAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetThresholdAckMessage;
+import com.kongtrolink.framework.gateway.tower.server.service.NorthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +27,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     private static final Logger logger = LoggerFactory.getLogger(TerminalCommandServiceImpl.class);
 
     @Autowired
-    GatewayMqttSenderNative gatewayMqttSenderNative;
-    @Autowired
-    private TopicConfig topicConfig;
+    private NorthService northService;
+
     /**
      * 资管主动下发 下发设备获取设备信息
      * @param message 消息体
@@ -53,7 +52,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String getData(String message) {
-        return null;
+        GetDataAckMessage getDataAckMessage = northService.getData(message);
+        return JSONObject.toJSONString(getDataAckMessage);
     }
 
     /**
@@ -61,7 +61,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String setPoint(String message) {
-        return null;
+        SetPointAckMessage setPointAckMessage = northService.setPoint(message);
+        return JSONObject.toJSONString(setPointAckMessage);
     }
 
     /**
@@ -69,7 +70,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String getThreshold(String message) {
-        return null;
+        GetThresholdAckMessage getThresholdAckMessage = northService.getThreshold(message);
+        return JSONObject.toJSONString(getThresholdAckMessage);
     }
 
     /**
@@ -77,7 +79,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String setThreshold(String message) {
-        return null;
+        SetThresholdAckMessage setThresholdAckMessage = northService.setThreshold(message);
+        return JSONObject.toJSONString(setThresholdAckMessage);
     }
 
     /**
@@ -96,22 +99,4 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         return null;
     }
 
-
-    private String getMsgResult(String message, MqttPubTopic topic){
-        try{
-            RecServerBase recServerBase = JSONObject.parseObject(message,RecServerBase.class);
-            String sn = recServerBase.getSn();
-            String payload = recServerBase.getPayload();
-            JSONObject json = (JSONObject) JSON.toJSON(payload);
-            String msgId = json.getString("msgId");
-            MsgResult result = gatewayMqttSenderNative.sendToMqttSyn(msgId,payload,topicConfig.getFsuTopic(sn, topic));
-            if(result==null){
-                return null;
-            }
-            return result.getMsg();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

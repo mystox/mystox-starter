@@ -24,8 +24,6 @@ public class ConfigController {
     TransverterConfig transverterConfig;
     @Value("${server.port}")
     private int port;
-    @Autowired
-    ParseService parseService;
 
 
     @Autowired
@@ -34,11 +32,8 @@ public class ConfigController {
     @RequestMapping("/refreshConfig")
     public String testConfigRefresh() {
         genericPostableMvcEndpoint.invoke();
-        parseService.configTransverterInit();
         return JSONObject.toJSONString(transverterConfig);
     }
-
-
 
 
 }

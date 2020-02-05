@@ -116,6 +116,27 @@ public class FSUServiceUtil {
         return getMessageResp(req,ip,port);
     }
 
+    //5.2.11.5　用户请求写监控点的设置值 SET_POINT 这边只做单个设置
+    public static MessageResp setPoints(String fsuId, String deviceId, List<TSemaphore> tSemaphores, String ip, int port) {
+        SetPoint setPoint = new SetPoint();
+        setPoint.setFsuCode(fsuId);
+        setPoint.setFsuId(fsuId);
+        Value value = new Value();
+        List<XmlList> deviceListList = new ArrayList<>();
+        XmlList xmlLists = new XmlList();
+        List<Device> deviceList = new ArrayList<>();
+        Device device = new Device();
+        device.setCode(deviceId);
+        device.setId(deviceId);
+        device.settSemaphoreList(tSemaphores);
+        deviceList.add(device);
+        xmlLists.setDeviceList(deviceList);
+        deviceListList.add(xmlLists);
+        value.setDeviceListList(deviceListList);
+        setPoint.setValue(value);
+        Message req = new Message(setPoint);
+        return getMessageResp(req,ip,port);
+    }
 
     //5.2.11.6　用户请求监控点门限数据 单个设备 GET_THRESHOLD
     public static MessageResp getThresholdSignal(String fsuId,String deviceId,List<String> signalIds,String ip,int port) {
@@ -157,7 +178,22 @@ public class FSUServiceUtil {
         Message req = new Message(getThreshold);
         return getMessageResp(req,ip,port);
     }
-
+    public static MessageResp getThresholdByFsu(String fsuId,String ip,int port) {
+        GetThreshold getThreshold = new GetThreshold();
+        getThreshold.setFsuId(fsuId);
+        getThreshold.setFsuCode(fsuId);
+        XmlList xmlLists = new XmlList();
+        List<Device> deviceList = new ArrayList<>();
+        Device device = new Device();
+        //当为全9时（即“99999999999999”），则返回该FSU所监控的所有设备的监控点的值；这种情况下，忽略IDs参数（即监控点ID列表）
+        device.setCode("99999999999999");
+        device.setId("99999999999999");
+        deviceList.add(device);
+        xmlLists.setDeviceList(deviceList);
+        getThreshold.setDeviceList(xmlLists);
+        Message req = new Message(getThreshold);
+        return getMessageResp(req,ip,port);
+    }
 
     //5.2.11.7　用户请求写监控点门限数据 SET_THRESHOLD
     public static MessageResp setThreshold(String fsuId,String deviceId,TThreshold tThreshold,String ip,int port) {
@@ -169,6 +205,26 @@ public class FSUServiceUtil {
         XmlList xmlLists = new XmlList();
         List<TThreshold> tThresholds = new ArrayList<>();
         tThresholds.add(tThreshold);
+        List<Device> deviceList = new ArrayList<>();
+        Device device = new Device();
+        device.setCode(deviceId);
+        device.setId(deviceId);
+        device.settThresholdList(tThresholds);
+        deviceList.add(device);
+        xmlLists.setDeviceList(deviceList);
+        deviceListList.add(xmlLists);
+        value.setDeviceListList(deviceListList);
+        setThreshold.setValue(value);
+        Message req = new Message(setThreshold);
+        return getMessageResp(req,ip,port);
+    }
+    public static MessageResp setThresholds(String fsuId,String deviceId,List<TThreshold> tThresholds,String ip,int port) {
+        SetThreshold setThreshold = new SetThreshold();
+        setThreshold.setFsuCode(fsuId);
+        setThreshold.setFsuId(fsuId);
+        Value value = new Value();
+        List<XmlList> deviceListList = new ArrayList<>();
+        XmlList xmlLists = new XmlList();
         List<Device> deviceList = new ArrayList<>();
         Device device = new Device();
         device.setCode(deviceId);
