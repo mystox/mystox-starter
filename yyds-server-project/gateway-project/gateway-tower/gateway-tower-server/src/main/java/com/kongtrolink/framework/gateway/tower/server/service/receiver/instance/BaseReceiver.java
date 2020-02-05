@@ -18,6 +18,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import javax.annotation.Resource;
+
 /**
  * Created by mystoxlol on 2019/10/16, 9:40
  * company: kongtrolink
@@ -27,9 +29,9 @@ import org.w3c.dom.Node;
 public class BaseReceiver extends ReceiveHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseReceiver.class);
-    @Autowired
+    @Resource(name="loginParse")
     LoginParse loginParse;
-    @Autowired
+    @Resource(name="alarmParse")
     AlarmParse alarmParse;
     @Autowired
     ThreadPoolTaskExecutor mqttExecutor;

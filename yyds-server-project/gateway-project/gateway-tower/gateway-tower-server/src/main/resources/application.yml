@@ -46,7 +46,7 @@ gateway:
 server:
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
   version: 1.0.0 #服务版本
-  host: 172.16.5.233
+  host: 172.16.6.14
   port: 52002 #服务占用web端口
 
 register:

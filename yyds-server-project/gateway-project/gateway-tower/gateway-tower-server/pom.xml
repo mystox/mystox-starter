@@ -77,7 +77,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
 				<configuration>
-					<mainClass>com.kongtrolink.framework.gateway.tower.server.GatewayCommonBaseApplication</mainClass>
+					<mainClass>com.kongtrolink.framework.gateway.tower.server.GatewayTowerApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>
