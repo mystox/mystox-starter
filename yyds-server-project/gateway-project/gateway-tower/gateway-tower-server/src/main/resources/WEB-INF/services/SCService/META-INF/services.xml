@@ -7,7 +7,7 @@
             <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out" class="com.chinatowercom.scservice.SCServiceServiceMessageReceiverInOut"/>
         </messageReceivers>
         <parameter name="ServiceObjectSupplier">org.apache.axis2.extensions.spring.receivers.SpringServletContextObjectSupplier</parameter>
-        <parameter name="SpringBeanName">scService</parameter>
+        <parameter name="SpringBeanName">baseReceiver</parameter>
 
         <parameter name="useOriginalwsdl">true</parameter>
         <parameter name="modifyUserWSDLPortAddress">true</parameter>

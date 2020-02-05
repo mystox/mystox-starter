@@ -273,7 +273,8 @@ public class FSUServiceUtil {
                 LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
             }else{
                 LOGGER.info("response..数据太大 不进行展现 请用debug模式");
-                LOGGER.debug("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
+                //todo 测试阶段用info 正式上线之后改成debug
+                LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
             }
             LOGGER.info("--------------------------****************---------------------------------");
             return invokeResponse.getInvokeReturn().toString();

@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.gateway.tower.server.service.transverter.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.chinatowercom.scservice.InvokeResponse;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.OperaCode;
@@ -13,8 +12,6 @@ import com.kongtrolink.framework.gateway.tower.core.entity.msg.Device;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.XmlList;
 import com.kongtrolink.framework.gateway.tower.core.util.GatewayTowerUtil;
 import com.kongtrolink.framework.gateway.tower.server.entity.DeviceConfigEntity;
-import com.kongtrolink.framework.gateway.tower.server.entity.Transverter;
-import com.kongtrolink.framework.gateway.tower.server.mqtt.GatewayMqttSenderNative;
 import com.kongtrolink.framework.gateway.tower.server.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.tower.server.service.transverter.TransverterHandler;
 import org.slf4j.Logger;
@@ -40,8 +37,7 @@ public class AssetTransverter extends TransverterHandler {
     private DeviceTypeConfig deviceTypeConfig;
     @Autowired
     RedisUtils redisUtils;
-    @Autowired
-    GatewayMqttSenderNative gatewayMqttSenderNative;
+
     private static final Logger logger = LoggerFactory.getLogger(AssetTransverter.class);
 
     public void transferExecute(String payload,String sn) {

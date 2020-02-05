@@ -1,0 +1,8 @@
+gatewayMqtt:
+  producer:
+    clientId: ${server.name}_${server.version}_gateway_producer
+    defaultTopic: topic
+  completionTimeout: 3000
+  consumer:
+    clientId: ${server.name}_${server.version}_gateway_consumer
+    defaultTopic: topic

@@ -13,23 +13,23 @@ import org.springframework.stereotype.Component;
  * description:
  * update record:
  */
-@Component
+
 public class ReceiverInit implements ApplicationRunner {
 
-    @Autowired
-    ReceiveService receiveService;
-
-    @Autowired
-    ParseService parseService;
+//    @Autowired
+//    ReceiveService receiveService;
+//
+//    @Autowired
+//    ParseService parseService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        receiveService.start();
-        //启动接收器
-
-
-        parseService.init();
-        //扫描协议转换器
+//        receiveService.start();
+//        //启动接收器
+//
+//
+//        parseService.init();
+//        //扫描协议转换器
     }
 
 }

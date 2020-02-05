@@ -15,8 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+
+import javax.annotation.Resource;
 
 /**
  * Created by mystoxlol on 2019/10/16, 9:40
@@ -24,12 +27,13 @@ import org.w3c.dom.Node;
  * description:
  * update record:
  */
+@Service("baseReceiver")
 public class BaseReceiver extends ReceiveHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseReceiver.class);
-    @Autowired
+    @Resource(name="loginParse")
     LoginParse loginParse;
-    @Autowired
+    @Resource(name="alarmParse")
     AlarmParse alarmParse;
     @Autowired
     ThreadPoolTaskExecutor mqttExecutor;
