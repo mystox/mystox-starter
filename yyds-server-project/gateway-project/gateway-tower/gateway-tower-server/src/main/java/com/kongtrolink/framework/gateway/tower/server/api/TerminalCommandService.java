@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.tower.server.api;
 
+import com.kongtrolink.framework.gateway.tower.core.constant.GatewayTonerOperate;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -47,4 +48,10 @@ public interface TerminalCommandService {
      */
     @OperaCode(code="reboot")
     String reboot(String message);
+
+    /**
+     * 心跳程序判断离线
+     */
+    @OperaCode(code= GatewayTonerOperate.ALARM_OFFLINE)
+    String fsuOfflineAlarm(String message);
 }

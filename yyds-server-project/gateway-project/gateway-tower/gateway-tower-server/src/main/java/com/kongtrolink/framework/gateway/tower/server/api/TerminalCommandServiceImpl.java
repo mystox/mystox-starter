@@ -8,6 +8,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.GetThres
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetPointAckMessage;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetThresholdAckMessage;
 import com.kongtrolink.framework.gateway.tower.server.service.NorthService;
+import com.kongtrolink.framework.gateway.tower.server.service.transverter.impl.AlarmTransverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
 
     @Autowired
     private NorthService northService;
-
+    @Autowired
+    private AlarmTransverter alarmTransverter;
     /**
      * 资管主动下发 下发设备获取设备信息
      * @param message 消息体
@@ -96,6 +98,17 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
      */
     @Override
     public String reboot(String message) {
+        return null;
+    }
+
+    /**
+     * 心跳程序判断离线
+     *
+     * @param message
+     */
+    @Override
+    public String fsuOfflineAlarm(String message) {
+        alarmTransverter.offlineAlarmStart(message);
         return null;
     }
 

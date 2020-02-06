@@ -16,6 +16,7 @@
     <modules>
         <module>gateway-tower-server</module>
         <module>gateway-tower-core</module>
+        <module>gateway-tower-heart</module>
     </modules>
     <properties>
         <axis2.version>1.7.5</axis2.version>

@@ -98,6 +98,8 @@ public class AlarmTransverter extends TransverterHandler {
     public void offlineAlarmEnd(String sn){
         Object offlineAlarmSerialNo = redisUtils.hget(RedisKey.FSU_ALARM_INFO,sn);
         if(offlineAlarmSerialNo !=null){
+            //删除离线告警
+            redisUtils.hdel(RedisKey.FSU_ALARM_INFO,sn);
             List<AlarmReportInfo> alarmInfoList = new ArrayList<>();
             AlarmReportInfo alarmInfo = new AlarmReportInfo();
             alarmInfo.setName(getFsuOffAlarmName());
@@ -117,6 +119,39 @@ public class AlarmTransverter extends TransverterHandler {
             alarmInfoList.add(alarmInfo);
             sendMessage(alarmInfoList);
         }
+    }
+
+
+    public void offlineAlarmStart(String sn){
+        logger.error("收到fsuId：{} 离线告警   .... ",sn);
+        Object offlineAlarmSerialNo = redisUtils.hget(RedisKey.FSU_ALARM_INFO,sn);
+        if(offlineAlarmSerialNo !=null){
+            logger.error("离线告警已存在");
+            return;
+        }
+        long serial = System.currentTimeMillis();
+        List<AlarmReportInfo> alarmInfoList = new ArrayList<>();
+        AlarmReportInfo alarmInfo = new AlarmReportInfo();
+        alarmInfo.setName(getFsuOffAlarmName());
+        alarmInfo.setValue("1");
+        alarmInfo.setLevel(getFsuOffAlarmLevel());
+        alarmInfo.setFlag(1);//1开始 0 结束
+        alarmInfo.setDeviceId(sn);
+        String deviceType = getFsuType();
+        DeviceConfigEntity deviceConfigEntity = deviceTypeConfig.getAssentDeviceType(deviceType);
+        if(deviceConfigEntity!=null){
+            deviceType = deviceConfigEntity.getAssentType();
+        }
+        alarmInfo.setDeviceType(deviceType);
+        alarmInfo.setDeviceModel(deviceType);
+        alarmInfo.setSignalId("");
+        alarmInfo.setSerial(String.valueOf(serial));
+        alarmInfoList.add(alarmInfo);
+        //保存在redis中
+        redisUtils.hset(RedisKey.FSU_ALARM_INFO,sn,String.valueOf(serial));
+        //推送给告警模块
+        sendMessage(alarmInfoList);
+
     }
 
     private void sendMessage(List<AlarmReportInfo> alarmInfoList){

@@ -8,8 +8,6 @@ public class RedisKey {
     public static final String FSU_INFO_SHORT = "gw_fsu_shortCode";
     //FSU信息
     public static final String FSU_INFO = "gw_fsu_info";
-    //FSU 心跳列表
-    public static final String FSU_HEART_LIST = "gw_fsu_heartList";
     //FSU 心跳离线统计
     public static final String FSU_HEART_OFF = "gw_fsu_heartOff";
     //告警

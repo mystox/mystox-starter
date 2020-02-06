@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: gateway-common-base
+  profiles:
+    active: dev,test,prod
+management:
+  security:
+    enabled: false
+#########网关相关配置##############
+gateway:
+  businessCode: TOWER_HEART_2.0.0
+  enterpriseCode: dadongdong
+  deviceType: FSU #可选
+  deviceModel: "MUU100" #可选
+  regionCode: "220281" #可选
+  fsuType: 38
+  fsuOffAlarmName: "FSU离线告警"
+  fsuOffAlarmLevel: "1"
+  user: "yytd_root"
+  fsuPort: 8181
+  offlineNum: 3 #心跳离线次数
+
+###########消息框架相关配置#############
+server:
+  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
+  version: 2.0.0 #服务版本
+  host: 172.16.6.14
+  port: 52003 #服务占用web端口
+
+register:
+  scanBasePackage: com.kongtrolink.framework #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
+#  url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+#mqtt:
+#  username: root #可选配置 mqtt配置相关
+#  password: 123456 #可选配置 mqtt配置相关
+#  url: tcp://172.16.5.26:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+#gatewayMqtt:
+#  username: root #可选配置 mqtt配置相关
+#  password: 123456 #可选配置 mqtt配置相关
+#  url: tcp://172.16.6.37:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+#  version: 1.0.0
+
+###########日志配置###########
+logging:
+  level:
+    root: info
+    com.kongtrolink.framework: info
+    com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
