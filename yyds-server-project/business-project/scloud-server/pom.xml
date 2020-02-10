@@ -16,6 +16,7 @@
 		<module>scloud-server-web</module>
 		<module>scloud-server-core</module>
 		<module>scloud-server-task</module>
+		<module>scloud-server-history</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
