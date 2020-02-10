@@ -3,12 +3,15 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.kongtrolink.framework.scloud.service.HomePageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,6 +62,26 @@ public class HomePageServiceImpl implements HomePageService {
      */
     @Override
     public List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        Date end = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, -30); //设置为前30天
+        Date start =  calendar.getTime();
+        homeQuery.setEndTime(end);
+        homeQuery.setStartTime(start);
         return homePageMongo.getHomeWorkModel(uniqueCode,userId,homeQuery);
+    }
+
+    /**
+     * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
+     *
+     * @param uniqueCode 企业编码
+     * @param userId     用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    @Override
+    public List<HomeFsuOnlineModel> getHomeFsuOnlineModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        return homePageMongo.getHomeFsuOnlineModel(uniqueCode,userId,homeQuery);
     }
 }
