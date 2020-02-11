@@ -1,6 +1,6 @@
 package com.kongtrolink.framework.scloud.entity.model;
 
-import com.kongtrolink.framework.scloud.entity.SignalInfoEntity;
+import com.kongtrolink.framework.scloud.entity.realtime.SignalInfoEntity;
 
 import java.io.Serializable;
 import java.util.List;

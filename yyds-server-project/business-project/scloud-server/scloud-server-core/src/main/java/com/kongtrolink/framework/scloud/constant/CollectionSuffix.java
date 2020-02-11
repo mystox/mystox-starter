@@ -10,4 +10,6 @@ public class CollectionSuffix {
     public static final String SIGNAL_TYPE = "_signalType";
     // 企业设备
     public static final String DEVICE = "_device";
+    // 企业站点
+    public static final String SITE = "_site";
 }

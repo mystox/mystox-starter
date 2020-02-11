@@ -10,24 +10,29 @@
  */
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.base.GeneratedValue;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.io.Serializable;
 
 /**
  *
  * @author Mosaico
  */
-public class DeviceEntity implements Serializable {
+public class Device implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6887354115876021753L;
-	private String _id;
-	private String siteId;
-	private String fsuId;
+	@Field(value = "id")
+	@GeneratedValue
+	private int id; //主键
+	private int siteId;
+	private int fsuId;
 	private String name;
-	private String code;
-	private String shortCode;//14位编码 针对code裁剪
+	private String code;//铁塔的ID
+	private String fsuCode;//铁塔的FSU ID
 	private String type;
 	private String typeCode;
 	private String systemName;
@@ -47,27 +52,27 @@ public class DeviceEntity implements Serializable {
 
 	private boolean special = false;
 
-	public String getId() {
-		return _id;
+	public int getId() {
+		return id;
 	}
 
-	public void setId(String _id) {
-		this._id = _id;
+	public void setId(int id) {
+		this.id = id;
 	}
 
-	public String getSiteId() {
+	public int getSiteId() {
 		return siteId;
 	}
 
-	public void setSiteId(String siteId) {
+	public void setSiteId(int siteId) {
 		this.siteId = siteId;
 	}
 
-	public String getFsuId() {
+	public int getFsuId() {
 		return fsuId;
 	}
 
-	public void setFsuId(String fsuId) {
+	public void setFsuId(int fsuId) {
 		this.fsuId = fsuId;
 	}
 
@@ -85,14 +90,6 @@ public class DeviceEntity implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
 	}
 
 	public String getType() {
@@ -143,19 +140,12 @@ public class DeviceEntity implements Serializable {
 		this.special = special;
 	}
 
-	@Override
-	public String toString() {
-		return "Device{" + "_id=" + _id + ", siteId=" + siteId + ", fsuId=" + fsuId + ", name=" + name + ", code="
-				+ code + ", type=" + type + ", typeCode=" + typeCode + ", systemName=" + systemName + ", coordinate="
-				+ coordinate + ", manufactory=" + manufactory + ", model=" + model + ", special=" + special + '}';
+	public String getCode() {
+		return code;
 	}
 
-	public String getShortCode() {
-		return shortCode;
-	}
-
-	public void setShortCode(String shortCode) {
-		this.shortCode = shortCode;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public int getDefaultSignal() {
@@ -164,5 +154,13 @@ public class DeviceEntity implements Serializable {
 
 	public void setDefaultSignal(int defaultSignal) {
 		this.defaultSignal = defaultSignal;
+	}
+
+	public String getFsuCode() {
+		return fsuCode;
+	}
+
+	public void setFsuCode(String fsuCode) {
+		this.fsuCode = fsuCode;
 	}
 }

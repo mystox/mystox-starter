@@ -8,7 +8,7 @@
  * Proprietary and confidential
  ******************************************************
  */
-package com.kongtrolink.framework.scloud.entity;
+package com.kongtrolink.framework.scloud.entity.realtime;
 
 import java.io.Serializable;
 import java.util.Date;

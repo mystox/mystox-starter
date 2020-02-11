@@ -1,19 +1,30 @@
 package com.kongtrolink.framework.scloud.dao;
 
+import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.entity.Device;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
+import com.kongtrolink.framework.scloud.entity.Site;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 /**
  * 数据监控 - 实时数据
@@ -83,6 +94,80 @@ public class RealTimeDataDao{
     }
 
 
+    /**
+     * 查询 条件 获取站点
+     * @param uniqueCode 企业编码
+     * @param param 查询条件
+     * @return list
+     */
+    public List<Site> findSite(String uniqueCode, SignalDiInfoQuery param) {
+        List<String> tierCodes = param.getTierCodes();// 区域codes
+        List<String> siteIds2 = param.getSiteIds2();
+        Criteria criteria = Criteria.where("BASE_CONDITION").exists(false);
+        if (tierCodes != null && tierCodes.size()>0) {
+            if (siteIds2 != null && siteIds2.size()>0) {
+                criteria.orOperator(Criteria.where("tierCode").in(tierCodes),Criteria.where("_id").in(siteIds2));
+            }else{
+                criteria.and("tierCode").in(tierCodes);
+            }
+        }
+        DBObject dbObject = new BasicDBObject();
+        DBObject fieldObject = new BasicDBObject();
+        fieldObject.put("_id", true);
+        fieldObject.put("tier", true);
+        fieldObject.put("name", true);
+        fieldObject.put("code", true);
+        fieldObject.put("stationType", true);
+        Query query = new BasicQuery(dbObject, fieldObject);
+        query.addCriteria(criteria);
+        List<Site> siteList = mongoTemplate.find(query, Site.class, uniqueCode + CollectionSuffix.SITE);
+        return siteList;
+    }
+
+    /**
+     * 查询 条件
+     * @param uniqueCode 企业编码
+     * @param param 站点列表
+     * @return list
+     */
+    public List<Device> findDeviceDiList(String uniqueCode,List<String> siteIds, SignalDiInfoQuery param) {
+        Criteria criteria = getDeviceDiCriteria(siteIds, param);
+        int currentPage = param.getCurrentPage();
+        int pageSize = param.getPageSize();
+        DBObject dbObject = new BasicDBObject();
+        DBObject fieldObject = new BasicDBObject();
+        fieldObject.put("_id", true);
+        fieldObject.put("name", true);
+        fieldObject.put("code", true);
+        Query query = new BasicQuery(dbObject, fieldObject);
+        query.addCriteria(criteria);
+        query.skip((currentPage - 1) * pageSize).limit(pageSize);
+        return mongoTemplate.find(query, Device.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+
+    public int findDeviceDiCount(String uniqueCode,List<String> siteIds, SignalDiInfoQuery param) {
+        Criteria criteria = getDeviceDiCriteria(siteIds, param);
+        Query query = new Query(criteria);
+        return (int)mongoTemplate.count(query, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    private Criteria getDeviceDiCriteria(List<String> siteIds, SignalDiInfoQuery param){
+        Criteria criteria = Criteria.where("siteId").in(siteIds);
+        String systemName = param.getSystemName();//所属系统
+        String deviceName = param.getDeviceName();//设备名称
+        String deviceCode = param.getDeviceCode();//设备编码
+        if(systemName!=null && !"".equals(systemName)){
+            criteria.and("systemName").regex(".*?" + systemName + ".*?");
+        }
+        if(deviceName!=null && !"".equals(deviceName)){
+            criteria.and("name").regex(".*?" + deviceName + ".*?");
+        }
+        if(deviceCode!=null && !"".equals(deviceCode)){
+            criteria.and("code").regex(".*?" + deviceCode + ".*?");
+        }
+        return criteria;
+    }
 
     private Criteria getDeviceCriteria(DeviceQuery deviceQuery){
         String siteId = deviceQuery.getSiteId();

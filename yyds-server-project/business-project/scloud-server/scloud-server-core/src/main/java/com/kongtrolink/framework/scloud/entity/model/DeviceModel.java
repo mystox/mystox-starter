@@ -11,15 +11,13 @@
 package com.kongtrolink.framework.scloud.entity.model;
 
 
-import com.kongtrolink.framework.scloud.entity.DeviceEntity;
-
-import java.io.Serializable;
+import com.kongtrolink.framework.scloud.entity.Device;
 
 /**
  *
  * @author Mag
  */
-public class DeviceModel extends DeviceEntity{
+public class DeviceModel extends Device {
 
 	/**
 	 * 
