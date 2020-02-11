@@ -1,7 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceType;
-import com.kongtrolink.framework.scloud.entity.DeviceType.SignalType;
+import com.kongtrolink.framework.scloud.entity.SignalType;
 import com.kongtrolink.framework.scloud.exception.ExcelParseException;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import org.springframework.stereotype.Service;
@@ -30,12 +30,12 @@ public class TypeMappingExcelService {
                 dt.setTypeName(row[0]);
                 dt.setCode(row[1]);
 
-                List<DeviceType.SignalType> signalTypeList = new ArrayList<>();
+                List<SignalType> signalTypeList = new ArrayList<>();
                 currentRowIndex ++;
                 while (currentRowIndex < typeArray.length) {
                     row = typeArray[currentRowIndex];
                     if (row[2] != null && row[3] != null) {
-                        SignalType st = dt.new SignalType();
+                        SignalType st = new SignalType();
                         st.setTypeName(row[2]);
                         st.setCode(row[3]);
                         st.setMeasurement(row[4]);
