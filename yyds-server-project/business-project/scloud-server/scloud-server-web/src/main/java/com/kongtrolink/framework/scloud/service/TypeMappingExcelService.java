@@ -40,7 +40,8 @@ public class TypeMappingExcelService {
                         st.setCode(row[3]);
                         st.setMeasurement(row[4]);
                         st.setCntbId(row[5]);
-                        st.setCommunicationError(row[6] != null);
+                        st.setType(row[6]);
+                        st.setCommunicationError(row[7] != null);
                         signalTypeList.add(st);
 
                         currentRowIndex ++;
