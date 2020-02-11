@@ -54,6 +54,7 @@ public class DeviceType implements Serializable {
         private String typeName;
         private String measurement;
         private String cntbId;
+        private String type;    //信号点类型。"0"-遥信信号(DI),"1"-遥测信号(AI),"2"-遥控信号(DO),"3"-遥调信号(AO)
         private boolean communicationError;
 
         public String getCode() {
@@ -88,6 +89,14 @@ public class DeviceType implements Serializable {
             this.cntbId = cntbId;
         }
 
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
         public boolean isCommunicationError() {
             return communicationError;
         }
@@ -98,7 +107,7 @@ public class DeviceType implements Serializable {
 
         @Override
         public String toString() {
-            return "SignalType{" + "code=" + code + ", typeName=" + typeName + ", measurement=" + measurement + ", cntbId=" + cntbId + ", communicationError=" + communicationError + '}';
+            return "SignalType{" + "code=" + code + ", typeName=" + typeName + ", measurement=" + measurement + ", cntbId=" + cntbId + ", type" + type + ", communicationError=" + communicationError + '}';
         }
 
     }
