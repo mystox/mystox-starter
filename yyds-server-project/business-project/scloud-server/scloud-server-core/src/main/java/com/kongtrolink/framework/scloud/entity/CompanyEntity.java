@@ -1,5 +1,9 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.base.GeneratedValue;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -7,12 +11,16 @@ import java.util.List;
  * 企业 数据实体类
  * Created by Eric on 2020/2/5.
  */
+@Document(collection = "company_info")
 public class CompanyEntity implements Serializable{
     /**
      *
      */
     private static final long serialVersionUID = 9128821310937466848L;
-    private String _id;
+
+    @Field(value = "id")
+    @GeneratedValue
+    private Integer id; //主键
 
     //企业信息（业务平台只保存扩展信息）
     private String uniqueCode;  //企业唯一码
@@ -30,12 +38,12 @@ public class CompanyEntity implements Serializable{
     private int cycleTimes = 1; //循环次数。默认1次
     private int flashFrequency = 60;    //灯闪频率，次/分钟。默认60次/分钟
 
-    public String getId() {
-        return _id;
+    public Integer getId() {
+        return id;
     }
 
-    public void setId(String _id) {
-        this._id = _id;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUniqueCode() {

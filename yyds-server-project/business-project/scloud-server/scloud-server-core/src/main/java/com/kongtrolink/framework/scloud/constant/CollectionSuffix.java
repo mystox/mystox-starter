@@ -6,8 +6,6 @@ package com.kongtrolink.framework.scloud.constant;
  */
 public class CollectionSuffix {
 
-    //企业信息表
-    public static final String COMPANY_INFO = "company_info";
     //企业设备信号映射字典表
     public static final String SIGNAL_TYPE = "_signalType";
 

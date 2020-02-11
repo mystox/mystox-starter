@@ -25,7 +25,7 @@ public class CompanyMongo {
      * 根据企业唯一码获取企业扩展信息及配置信息
      */
     public CompanyEntity findCompanyInfo(String uniqueCode){
-        return mongoTemplate.findOne(new Query(Criteria.where("uniqueCode").is(uniqueCode)), CompanyEntity.class, CollectionSuffix.COMPANY_INFO);
+        return mongoTemplate.findOne(new Query(Criteria.where("uniqueCode").is(uniqueCode)), CompanyEntity.class);
     }
 
     /**
@@ -60,6 +60,6 @@ public class CompanyMongo {
         update.set("flashFrequency", flashFrequency);
 
         Query query = Query.query(Criteria.where("uniqueCode").is(uniqueCode));
-        mongoTemplate.updateFirst(query, update, CollectionSuffix.COMPANY_INFO);
+        mongoTemplate.updateFirst(query, update, CompanyEntity.class);
     }
 }
