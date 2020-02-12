@@ -4,10 +4,12 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
+import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
+import com.kongtrolink.framework.scloud.query.SignalQuery;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
 import com.kongtrolink.framework.scloud.util.pdf.PDFUtil;
 import org.apache.commons.collections.ArrayStack;
@@ -39,8 +41,7 @@ public class RealTimeDataController extends ExportController {
      * 分页查询设备列表。
      */
     @RequestMapping(value = "/getList")
-    public @ResponseBody
-    JsonResult getDeviceList(@RequestBody DeviceQuery query) {
+    public @ResponseBody JsonResult getDeviceList(@RequestBody DeviceQuery query) {
         try{
             String uniqueCode = getUniqueCode();
             ListResult<DeviceModel> deviceResult = realTimeDataService.getDeviceList(uniqueCode, query);
@@ -51,6 +52,20 @@ public class RealTimeDataController extends ExportController {
         }
     }
 
+    /**
+     * 获取实时数据列表
+     */
+    @RequestMapping(value = "/getData")
+    public @ResponseBody JsonResult getData(@RequestBody SignalQuery query) {
+        try{
+            String uniqueCode = getUniqueCode();
+            SignalModel signalModel = realTimeDataService.getData(uniqueCode, query);
+            return new JsonResult(signalModel);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("查询失败",false);
+        }
+    }
     /**
      * 根据查询 某一个遥测信号值列表 -分页
      * @param query 查询参数
@@ -87,9 +102,6 @@ public class RealTimeDataController extends ExportController {
 
     /**
      * 导出遥测信号值列表pdf
-     * @param query
-     * @param request
-     * @param response
      */
     @RequestMapping(value = "/exportSignalDiInfoPDF", method = RequestMethod.POST)
     public void exportSignalDiInfoPDF(@RequestBody SignalDiInfoQuery query, HttpServletRequest request,HttpServletResponse response){
@@ -117,7 +129,6 @@ public class RealTimeDataController extends ExportController {
         OutputStream outputStream ;
         try {
             fileName = URLEncoder.encode(fileName, "UTF-8");
-            response.setCharacterEncoding("UTF-8");
             response.setContentType("application/pdf");
             response.addHeader("Content-Disposition", "attachment;filename=" + fileName+".pdf");
             outputStream =  response.getOutputStream();

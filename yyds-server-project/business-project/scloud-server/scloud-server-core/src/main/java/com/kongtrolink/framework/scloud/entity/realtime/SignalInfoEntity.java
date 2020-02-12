@@ -10,6 +10,8 @@
  */
 package com.kongtrolink.framework.scloud.entity.realtime;
 
+import com.kongtrolink.framework.scloud.entity.SignalType;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,6 +30,18 @@ public class SignalInfoEntity implements Serializable{
     private Double threshold;  // 门限值
     private String alarmLevel;      //告警等级
     private String cntbId; //铁塔的10位ID
+
+    public void init(SignalType signalType,Object value) {
+        this.name = signalType.getTypeName();
+        this.type = signalType.getType();
+        this.alarmLevel = signalType.getAlarmLevel();
+        this.cntbId = signalType.getCntbId();
+        this.measurement = signalType.getMeasurement();
+        if(value!=null){
+            this.value = String.valueOf(value);
+        }
+
+    }
 
     public String getName() {
         return name;
