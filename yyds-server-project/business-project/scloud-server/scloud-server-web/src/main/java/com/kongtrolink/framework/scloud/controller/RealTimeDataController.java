@@ -59,7 +59,8 @@ public class RealTimeDataController extends ExportController {
     public @ResponseBody JsonResult getData(@RequestBody SignalQuery query) {
         try{
             String uniqueCode = getUniqueCode();
-            SignalModel signalModel = realTimeDataService.getData(uniqueCode, query);
+            String userId = getUserId();
+            SignalModel signalModel = realTimeDataService.getData(uniqueCode, query,userId);
             return new JsonResult(signalModel);
         }catch (Exception e){
             e.printStackTrace();

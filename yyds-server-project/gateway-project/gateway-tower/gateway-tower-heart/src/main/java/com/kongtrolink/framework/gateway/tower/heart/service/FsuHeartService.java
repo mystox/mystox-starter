@@ -29,8 +29,6 @@ import java.util.Date;
 public class FsuHeartService {
 
 
-    @Value("${gateway.fsuPort}")
-    private int defaultFsuPort;
     @Value("${gateway.offlineNum}")
     private int offlineNum;
     @Autowired
@@ -47,11 +45,12 @@ public class FsuHeartService {
             RedisFsuInfo fsu = dto.getRedisFsuInfo();
             String uniqueCode = dto.getUniqueCode();
             String fsuShortCode = fsu.getShortCode();
+            int port = fsu.getPort();
             //发送FSU心跳检测消息
             boolean flag = false;
             LOGGER.info("开始轮询:fsu fsuShortCode:{} ID:{}  心跳检测...",fsuShortCode,fsu.getId());
             try{
-                MessageResp value = FSUServiceUtil.getFsuInfo(fsuShortCode,fsu.getIp(),defaultFsuPort);
+                MessageResp value = FSUServiceUtil.getFsuInfo(fsuShortCode,fsu.getIp(),port);
                 //有返回 证明 心跳正常
                 if(value !=null && value.getInfo() !=null){
                     flag = true;

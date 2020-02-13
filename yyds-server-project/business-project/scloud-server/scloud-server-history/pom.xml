@@ -57,7 +57,13 @@
 		<artifactId>spring-boot-starter-test</artifactId>
 		<scope>test</scope>
 	</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.kongtrolink.framework</groupId>
+            <artifactId>gateway-tower-core</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

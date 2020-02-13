@@ -12,4 +12,6 @@ public class CollectionSuffix {
     public static final String DEVICE = "_device";
     // 企业站点
     public static final String SITE = "_site";
+    // 企业站点
+    public static final String HISTORY = "_history";
 }

@@ -14,3 +14,6 @@ mqtt:
 ########## mongo数据库配置 ##########
 mongodb:
   uri: mongodb://172.16.5.61:27017/scloud_server
+
+corn:
+  history: "0 * * * * ?"

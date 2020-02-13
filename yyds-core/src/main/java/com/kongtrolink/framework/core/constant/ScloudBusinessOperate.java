@@ -11,4 +11,5 @@ public class ScloudBusinessOperate {
     public static final String SET_THRESHOLD = "business_setThreshold";
     public static final String GET_FSUINFO = "business_getFsuInfo";
     public static final String REBOOT = "business_reboot";
+    public static final String HISTORY = "business_history";
 }
