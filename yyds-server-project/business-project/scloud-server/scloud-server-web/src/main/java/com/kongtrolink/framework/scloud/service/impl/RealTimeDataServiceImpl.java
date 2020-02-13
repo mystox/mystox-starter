@@ -10,10 +10,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
 import com.kongtrolink.framework.scloud.constant.StationType;
 import com.kongtrolink.framework.scloud.dao.RealTimeDataDao;
-import com.kongtrolink.framework.scloud.entity.Device;
-import com.kongtrolink.framework.scloud.entity.DeviceType;
-import com.kongtrolink.framework.scloud.entity.SignalType;
-import com.kongtrolink.framework.scloud.entity.Site;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -22,6 +19,7 @@ import com.kongtrolink.framework.scloud.entity.realtime.SignalInfoEntity;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
+import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
@@ -44,6 +42,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     RealTimeDataDao realTimeDataDao;
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    FocusSignalService focusSignalService;
     @Autowired
     MqttOpera mqttOpera;
     /**
@@ -74,7 +74,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * @param uniqueCode 企业编码
      */
     @Override
-    public SignalModel getData(String uniqueCode,SignalQuery signalQuery) {
+    public SignalModel getData(String uniqueCode,SignalQuery signalQuery,String userId) {
         try{
             String devType = signalQuery.getDeviceType();//设备类型
             DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
@@ -86,7 +86,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
-            SignalModel signalModel = getSignalModel(signalQuery.getFsuCode(),signalQuery.getType(),getDataAckMessage,deviceType.getSignalTypeList());
+            //查询关注的信号点
+            List<FocusSignalEntity> focusSignalEntityList = focusSignalService.queryListByDevice(uniqueCode,signalQuery.getDeviceId(),userId);
+            SignalModel signalModel = getSignalModel(signalQuery.getFsuCode(),signalQuery.getType(),
+                                                    getDataAckMessage,deviceType.getSignalTypeList(),focusSignalEntityList);
             return signalModel;
         }catch (Exception e){
             e.printStackTrace();
@@ -97,7 +100,9 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * 获取实时数据
      * 整理返回下前段展现 并存放到redis中
      */
-    private SignalModel getSignalModel(String fsuCode,String type,GetDataAckMessage getDataAckMessage,List<SignalType> signalTypeList){
+    private SignalModel getSignalModel(String fsuCode,String type,GetDataAckMessage getDataAckMessage,
+                                       List<SignalType> signalTypeList,
+                                       List<FocusSignalEntity> focusSignalEntityList){
         SignalModel signalModel = new SignalModel();
         signalModel.setReportTime(new Date().getTime());
         Map<String,List<SignalInfoEntity>> infoList = new HashMap<>();//前端返回值
@@ -109,46 +114,56 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         if(getDataAckMessage!=null
                 && getDataAckMessage.getPayload()!=null
                 && getDataAckMessage.getPayload().getDeviceIds() !=null){
-            for(DeviceIdInfo deviceIdInfo:getDataAckMessage.getPayload().getDeviceIds()){
-                List<SignalIdInfo> ids = deviceIdInfo.getIds();
-                String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
-                Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
-                try{
-                    if(value==null){
-                        valueMap = new HashMap<>();
-                    }else{
-                        valueMap = JSONObject.parseObject(String.valueOf(value));
-                    }
-                    if(ids !=null){
-                        for(SignalIdInfo signalIdInfo:ids){
-                            valueMap.put(signalIdInfo.getId(),signalIdInfo.getValue());
-                        }
-                    }
-                    //更新redis里面的值
-                    redisUtils.hset(RedisKey.DEVICE_REAL_DATA,redisKey,valueMap);
-                }catch (Exception e){
-                    LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
+            //单个设备查询的
+            DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
+            List<SignalIdInfo> ids = deviceIdInfo.getIds();
+            String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
+            Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
+            try{
+                if(value==null){
+                    valueMap = new HashMap<>();
+                }else{
+                    valueMap = JSONObject.parseObject(String.valueOf(value));
                 }
-                for(SignalType signalType:signalTypeList){
-                    if(type!=null && !type.equals(signalType.getType())){
-                        //判断查询的是指定类型的信号点类型
-                        continue;
-                    }
-                    Object realData = valueMap.get(signalType.getCntbId());
-                    SignalInfoEntity signalInfoEntity = new SignalInfoEntity();
-                    signalInfoEntity.init(signalType,realData);
-                    if(infoList.containsKey(type)){
-                        List<SignalInfoEntity> typeInfoList = infoList.get(type);
-                        typeInfoList.add(signalInfoEntity);
-                        infoList.put(type,typeInfoList);
-                    }else{
-                        List<SignalInfoEntity> typeInfoList = new ArrayList<>();
-                        typeInfoList.add(signalInfoEntity);
-                        infoList.put(type,typeInfoList);
+                if(ids !=null){
+                    for(SignalIdInfo signalIdInfo:ids){
+                        valueMap.put(signalIdInfo.getId(),signalIdInfo.getValue());
                     }
                 }
-                signalModel.setInfoList(infoList);
+                //更新redis里面的值
+                redisUtils.hset(RedisKey.DEVICE_REAL_DATA,redisKey,valueMap);
+            }catch (Exception e){
+                LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
             }
+            Map<String,FocusSignalEntity> focusMap = new HashMap<>();
+            if(focusSignalEntityList!=null){
+                for(FocusSignalEntity focusSignalEntity:focusSignalEntityList){
+                    focusMap.put(focusSignalEntity.getCntbId(),focusSignalEntity);
+                }
+            }
+            for(SignalType signalType:signalTypeList){
+                if(type!=null && !type.equals(signalType.getType())){
+                    //判断查询的是指定类型的信号点类型
+                    continue;
+                }
+                Object realData = valueMap.get(signalType.getCntbId());
+                SignalInfoEntity signalInfoEntity = new SignalInfoEntity();
+                signalInfoEntity.init(signalType,realData);
+                if(infoList.containsKey(type)){
+                    List<SignalInfoEntity> typeInfoList = infoList.get(type);
+                    typeInfoList.add(signalInfoEntity);
+                    infoList.put(type,typeInfoList);
+                }else{
+                    List<SignalInfoEntity> typeInfoList = new ArrayList<>();
+                    typeInfoList.add(signalInfoEntity);
+                    infoList.put(type,typeInfoList);
+                }
+                if(focusMap.containsKey(signalType.getCntbId())){
+                    FocusSignalEntity focusSignalEntity = focusMap.get(signalType.getCntbId());
+                    signalInfoEntity.setFocusId(focusSignalEntity.getId());
+                }
+            }
+            signalModel.setInfoList(infoList);
         }
         return signalModel;
     }

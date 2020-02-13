@@ -21,7 +21,7 @@ public class SignalQuery extends Paging {
 	 * 
 	 */
 	private static final long serialVersionUID = 515408966365570432L;
-	private String deviceId;
+	private int deviceId;
 	private String deviceType;//设备类型 必传!
     private String type;
     private String name;
@@ -50,17 +50,17 @@ public class SignalQuery extends Paging {
     public SignalQuery() {
     }
     
-    public SignalQuery(String deviceId, String type, String name) {
+    public SignalQuery(int deviceId, String type, String name) {
         this.deviceId = deviceId;
         this.type = type;
         this.name = name;
     }
     
-    public String getDeviceId() {
+    public int getDeviceId() {
         return deviceId;
     }
     
-    public void setDeviceId(String deviceId) {
+    public void setDeviceId(int deviceId) {
         this.deviceId = deviceId;
     }
     

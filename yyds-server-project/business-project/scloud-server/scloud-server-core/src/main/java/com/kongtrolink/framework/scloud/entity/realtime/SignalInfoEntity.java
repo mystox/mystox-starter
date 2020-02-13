@@ -30,6 +30,7 @@ public class SignalInfoEntity implements Serializable{
     private Double threshold;  // 门限值
     private String alarmLevel;      //告警等级
     private String cntbId; //铁塔的10位ID
+    private Integer focusId;//是否已经被关注.若没有被关注则为null
 
     public void init(SignalType signalType,Object value) {
         this.name = signalType.getTypeName();
@@ -105,5 +106,13 @@ public class SignalInfoEntity implements Serializable{
 
     public void setCntbId(String cntbId) {
         this.cntbId = cntbId;
+    }
+
+    public Integer getFocusId() {
+        return focusId;
+    }
+
+    public void setFocusId(Integer focusId) {
+        this.focusId = focusId;
     }
 }

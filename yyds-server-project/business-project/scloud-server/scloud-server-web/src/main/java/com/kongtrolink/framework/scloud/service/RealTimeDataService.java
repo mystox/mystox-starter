@@ -22,7 +22,7 @@ public interface RealTimeDataService {
     /**
      * 实时数据-获取改设备的实时数据
      */
-    SignalModel getData(String uniqueCode, SignalQuery signalQuery);
+    SignalModel getData(String uniqueCode, SignalQuery signalQuery,String userId);
     /**
      * 根据查询 某一个遥测信号值列表 -分页
      * @param uniqueCode 企业唯一吗
