@@ -1,8 +1,12 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
@@ -68,11 +72,41 @@ public class RealTimeDataController extends ExportController {
         }
     }
     /**
+     * 设置值
+     *
+     */
+    @RequestMapping(value = "/setPoint")
+    public @ResponseBody JsonResult setPoint(@RequestBody SignalQuery query) {
+        try{
+            SetPointAckMessage ack = realTimeDataService.setPoint(query);
+            return new JsonResult(ack);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("设置失败",false);
+        }
+    }
+
+
+    /**
+     * 设置阈值
+     */
+    @RequestMapping(value = "/setThreshold")
+    public @ResponseBody JsonResult setThreshold(@RequestBody SignalQuery query) {
+        try{
+            SetThresholdAckMessage ack = realTimeDataService.setThreshold(query);
+            return new JsonResult(ack);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("设置失败",false);
+        }
+    }
+
+    /**
      * 根据查询 某一个遥测信号值列表 -分页
      * @param query 查询参数
      */
     @RequestMapping(value = "/getSignalDiInfo", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getSignalDiInfo(@RequestBody SignalDiInfoQuery query, HttpServletRequest request) {
+    public @ResponseBody JsonResult getSignalDiInfo(@RequestBody SignalDiInfoQuery query) {
         try {
             String uniqueCode = getUniqueCode();
             List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
@@ -89,8 +123,7 @@ public class RealTimeDataController extends ExportController {
      * 根据查询 某一个遥测信号值列表 导出
      */
     @RequestMapping(value = "/exportSignalDiInfo", method = RequestMethod.POST)
-    public void exportSignalDiInfo(@RequestBody SignalDiInfoQuery query,
-                                   HttpServletRequest request, HttpServletResponse response) {
+    public void exportSignalDiInfo(@RequestBody SignalDiInfoQuery query, HttpServletResponse response) {
         String uniqueCode = getUniqueCode();
         query.setPageSize(Integer.MAX_VALUE);
         query.setCurrentPage(1);

@@ -107,6 +107,67 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         }
         return null;
     }
+
+    /**
+     * 设置值
+     *
+     * @param signalQuery 参数
+     * @return 返回
+     */
+    @Override
+    public SetPointAckMessage setPoint(SignalQuery signalQuery) {
+        SetPointMessage setPointMessage = new SetPointMessage();
+        DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
+        setPointMessage.setPayload(deviceIdEntity);
+        setPointMessage.setFsuId(signalQuery.getFsuCode());
+        //下发到网关
+        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
+        String ack = result.getMsg();//消息返回内容
+        SetPointAckMessage setPointAckMessage = JSONObject.parseObject(ack,SetPointAckMessage.class);
+        return setPointAckMessage;
+    }
+
+    /**
+     * 设置阈值
+     *
+     * @param signalQuery 参数
+     * @return 返回
+     */
+    @Override
+    public SetThresholdAckMessage setThreshold(SignalQuery signalQuery) {
+        SetThresholdMessage setThresholdMessage = new SetThresholdMessage();
+        DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
+        setThresholdMessage.setPayload(deviceIdEntity);
+        setThresholdMessage.setFsuId(signalQuery.getFsuCode());
+        //下发到网关
+        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
+        String ack = result.getMsg();//消息返回内容
+        SetThresholdAckMessage setThresholdAckMessage = JSONObject.parseObject(ack,SetThresholdAckMessage.class);
+        return setThresholdAckMessage;
+}
+    /**
+     * 设置值和设置阈值的数据结构类似 精简单位
+     * @param type 1=设置值 2=设置阈值
+     * @return 对象
+     */
+    private DeviceIdEntity getPayload(SignalQuery signalQuery,int type){
+        DeviceIdEntity payload = new DeviceIdEntity();
+        List<DeviceIdInfo> deviceIds = new ArrayList<>();
+        List<SignalIdInfo> ids = new ArrayList<>();
+        SignalIdInfo signalIdInfo = new SignalIdInfo();
+        signalIdInfo.setId(signalQuery.getCntbId());
+        if(type==1){
+            signalIdInfo.setValue(signalQuery.getValue());
+        }else if(type==2){
+            signalIdInfo.setThreshold(signalQuery.getValue());
+        }
+        ids.add(signalIdInfo);
+        DeviceIdInfo deviceIdInfo = new DeviceIdInfo(signalQuery.getDeviceCode());
+        deviceIdInfo.setIds(ids);
+        deviceIds.add(deviceIdInfo);
+        payload.setDeviceIds(deviceIds);
+        return payload;
+    }
     /**
      * 获取实时数据
      * 整理返回下前段展现 并存放到redis中

@@ -26,17 +26,26 @@ public class SignalQuery extends Paging {
     private String type;
     private String name;
     private String uniqueCode;
-    private String signalId;
+    private String cntbId;
     private Boolean displayMark;
     private String deviceCode;
     private String fsuCode;
+    private String value;//下发的值或者阈值
 
-    public String getSignalId() {
-        return signalId;
+    public String getCntbId() {
+        return cntbId;
     }
 
-    public void setSignalId(String signalId) {
-        this.signalId = signalId;
+    public void setCntbId(String cntbId) {
+        this.cntbId = cntbId;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public Boolean getDisplayMark() {
