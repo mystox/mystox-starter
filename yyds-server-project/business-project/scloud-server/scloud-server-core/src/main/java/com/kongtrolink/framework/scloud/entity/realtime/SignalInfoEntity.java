@@ -27,12 +27,12 @@ public class SignalInfoEntity implements Serializable{
     private String value;   //实时值
     private String measurement; //单位
     private double downValue;//针对遥控保存下发值
-    private Double threshold;  // 门限值
+    private String threshold;  // 门限值
     private String alarmLevel;      //告警等级
     private String cntbId; //铁塔的10位ID
     private Integer focusId;//是否已经被关注.若没有被关注则为null
 
-    public void init(SignalType signalType,Object value) {
+    public void init(SignalType signalType,Object value,Object threshold) {
         this.name = signalType.getTypeName();
         this.type = signalType.getType();
         this.alarmLevel = signalType.getAlarmLevel();
@@ -41,7 +41,9 @@ public class SignalInfoEntity implements Serializable{
         if(value!=null){
             this.value = String.valueOf(value);
         }
-
+        if(threshold!=null){
+            this.threshold = String.valueOf(threshold);
+        }
     }
 
     public String getName() {
@@ -84,11 +86,11 @@ public class SignalInfoEntity implements Serializable{
         this.downValue = downValue;
     }
 
-    public Double getThreshold() {
+    public String getThreshold() {
         return threshold;
     }
 
-    public void setThreshold(Double threshold) {
+    public void setThreshold(String threshold) {
         this.threshold = threshold;
     }
 

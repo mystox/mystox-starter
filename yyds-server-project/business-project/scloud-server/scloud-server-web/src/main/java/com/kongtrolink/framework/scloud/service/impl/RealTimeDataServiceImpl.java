@@ -7,6 +7,7 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
+import com.kongtrolink.framework.gateway.tower.core.entity.msg.GetThreshold;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
 import com.kongtrolink.framework.scloud.constant.StationType;
 import com.kongtrolink.framework.scloud.dao.RealTimeDataDao;
@@ -76,20 +77,30 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public SignalModel getData(String uniqueCode,SignalQuery signalQuery,String userId) {
         try{
+            String fsuCode = signalQuery.getFsuCode();
             String devType = signalQuery.getDeviceType();//设备类型
+            String type = signalQuery.getType();//是否是特定类的查询
             DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
             if(deviceType==null || deviceType.getSignalTypeList()==null || deviceType.getSignalTypeList().size()==0){
                 return new SignalModel();
             }
+            List<SignalType> signalTypes = deviceType.getSignalTypeList();
             GetDataMessage getDataMessage = getGetDataMessage(signalQuery,deviceType.getSignalTypeList());
             //下发到网关获取实时数据
             MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
+            //获取阈值
+            GetThresholdMessage getThresholdMessage = new GetThresholdMessage();
+            getThresholdMessage.setFsuId(getDataMessage.getFsuId());
+            getThresholdMessage.setPayload(getDataMessage.getPayload());
+            //下发到网关获取实时数据
+            MsgResult resultThreshold = mqttOpera.opera(ScloudBusinessOperate.GET_THRESHOLD,JSONObject.toJSONString(getThresholdMessage));
+            String ackThreshold = resultThreshold.getMsg();//消息返回内容
+            GetThresholdAckMessage getThresholdAckMessage = JSONObject.parseObject(ackThreshold,GetThresholdAckMessage.class);
             //查询关注的信号点
             List<FocusSignalEntity> focusSignalEntityList = focusSignalService.queryListByDevice(uniqueCode,signalQuery.getDeviceId(),userId);
-            SignalModel signalModel = getSignalModel(signalQuery.getFsuCode(),signalQuery.getType(),
-                                                    getDataAckMessage,deviceType.getSignalTypeList(),focusSignalEntityList);
+            SignalModel signalModel = getSignalModel(fsuCode,type,getDataAckMessage,getThresholdAckMessage, signalTypes,focusSignalEntityList);
             return signalModel;
         }catch (Exception e){
             e.printStackTrace();
@@ -100,7 +111,9 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * 获取实时数据
      * 整理返回下前段展现 并存放到redis中
      */
-    private SignalModel getSignalModel(String fsuCode,String type,GetDataAckMessage getDataAckMessage,
+    private SignalModel getSignalModel(String fsuCode,String type,
+                                       GetDataAckMessage getDataAckMessage,
+                                       GetThresholdAckMessage getThresholdAckMessage,
                                        List<SignalType> signalTypeList,
                                        List<FocusSignalEntity> focusSignalEntityList){
         SignalModel signalModel = new SignalModel();
@@ -135,20 +148,25 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             }catch (Exception e){
                 LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
             }
+            //获取关注点
             Map<String,FocusSignalEntity> focusMap = new HashMap<>();
             if(focusSignalEntityList!=null){
                 for(FocusSignalEntity focusSignalEntity:focusSignalEntityList){
                     focusMap.put(focusSignalEntity.getCntbId(),focusSignalEntity);
                 }
             }
+            //获取阈值
+            Map<String,Object> thresholdMap = messageThresholdAckTran(getThresholdAckMessage);
+
             for(SignalType signalType:signalTypeList){
                 if(type!=null && !type.equals(signalType.getType())){
                     //判断查询的是指定类型的信号点类型
                     continue;
                 }
                 Object realData = valueMap.get(signalType.getCntbId());
+                Object threshold = thresholdMap.get(signalType.getCntbId());
                 SignalInfoEntity signalInfoEntity = new SignalInfoEntity();
-                signalInfoEntity.init(signalType,realData);
+                signalInfoEntity.init(signalType,realData,threshold);
                 if(infoList.containsKey(type)){
                     List<SignalInfoEntity> typeInfoList = infoList.get(type);
                     typeInfoList.add(signalInfoEntity);
@@ -166,6 +184,28 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             signalModel.setInfoList(infoList);
         }
         return signalModel;
+    }
+
+    private Map<String,Object> messageThresholdAckTran(GetThresholdAckMessage getThresholdAckMessage){
+        Map<String,Object> valueMap = new HashMap<>(); ;//存放信号点数据 key:cntbId value:值
+        if(getThresholdAckMessage!=null
+                && getThresholdAckMessage.getPayload()!=null
+                && getThresholdAckMessage.getPayload().getDeviceIds() !=null){
+            //单个设备查询的
+            DeviceIdInfo deviceIdInfo = getThresholdAckMessage.getPayload().getDeviceIds().get(0);
+            List<SignalIdInfo> ids = deviceIdInfo.getIds();
+            try{
+                if(ids !=null){
+                    for(SignalIdInfo signalIdInfo:ids){
+                        valueMap.put(signalIdInfo.getId(),signalIdInfo.getThreshold());
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
+        return valueMap;
     }
     /**
      * 获取实时数据
