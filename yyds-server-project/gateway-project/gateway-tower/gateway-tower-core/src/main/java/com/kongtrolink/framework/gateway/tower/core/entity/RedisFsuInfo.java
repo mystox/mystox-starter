@@ -22,6 +22,7 @@ public class RedisFsuInfo implements Serializable {
 	private String id;
 	private String shortCode;
 	private String ip;
+	private int port;
 	private String mqttId;//对面的mqtt信息
 
 	public String getId() {
@@ -54,5 +55,13 @@ public class RedisFsuInfo implements Serializable {
 
 	public void setMqttId(String mqttId) {
 		this.mqttId = mqttId;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 }

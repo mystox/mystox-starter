@@ -57,9 +57,9 @@ public class LoginParse extends ParseHandler {
             //redis保存注册信息
             RedisFsuInfo redisFsuInfo = new RedisFsuInfo();
             redisFsuInfo.setShortCode(fsuShortCode);
+            redisFsuInfo.setPort(getFsuPort());
             redisFsuInfo.setIp(login.getIp());
-            String redisKeyFsuInfo = uniqueCode+"#"+fsuShortCode;
-            redisUtils.hset(RedisKey.FSU_INFO,redisKeyFsuInfo,JSONObject.toJSONString(redisFsuInfo));
+            redisUtils.hset(RedisKey.FSU_INFO + "_"+uniqueCode,fsuShortCode,JSONObject.toJSONString(redisFsuInfo));
             //判断是否有离线告警
             try{
                 alarmTransverter.offlineAlarmEnd(fsuShortCode);

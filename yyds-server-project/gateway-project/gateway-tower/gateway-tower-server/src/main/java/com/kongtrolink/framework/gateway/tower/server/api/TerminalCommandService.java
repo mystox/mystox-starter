@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.gateway.tower.server.api;
 
+import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.gateway.tower.core.constant.GatewayTonerOperate;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
@@ -19,34 +20,34 @@ public interface TerminalCommandService {
     /**
      *  SC向GW请求监控点数据
      */
-    @OperaCode(code = "getData")
+    @OperaCode(code = ScloudBusinessOperate.GET_DATA)
     String getData(String message);
     /**
      * SC向GW设置监控点数据
      */
-    @OperaCode(code = "setPoint")
+    @OperaCode(code = ScloudBusinessOperate.SET_POINT)
     String setPoint(String message);
     /**
      * SC向GW请求门限值数据
      */
-    @OperaCode(code="getThreshold")
+    @OperaCode(code= ScloudBusinessOperate.GET_THRESHOLD)
     String getThreshold(String message);
 
     /**
      * SC向GW 设置门限值数据
      */
-    @OperaCode(code="setThreshold")
+    @OperaCode(code= ScloudBusinessOperate.SET_THRESHOLD)
     String setThreshold(String message);
 
     /**
      * SC向GW 获取FSU状态
      */
-    @OperaCode(code="getFsuInfo")
+    @OperaCode(code= ScloudBusinessOperate.GET_FSUINFO)
     String getFsuInfo(String message);
     /**
      * SC向GW FSU重启
      */
-    @OperaCode(code="reboot")
+    @OperaCode(code= ScloudBusinessOperate.REBOOT)
     String reboot(String message);
 
     /**

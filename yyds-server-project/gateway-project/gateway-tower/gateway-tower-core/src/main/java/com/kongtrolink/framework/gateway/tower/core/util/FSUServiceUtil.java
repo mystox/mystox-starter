@@ -269,13 +269,12 @@ public class FSUServiceUtil {
             FSUServiceServiceStub stub = new FSUServiceServiceStub(ip,port);
             InvokeResponse invokeResponse = stub.invoke(invokeRequest);
             LOGGER.info("--------------------------****************---------------------------------");
-            if(invokeResponse.getInvokeReturn()!=null && invokeResponse.getInvokeReturn().toString().length()<1024){
-                LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
-            }else{
-                LOGGER.info("response..数据太大 不进行展现 请用debug模式");
-                //todo 测试阶段用info 正式上线之后改成debug
-                LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
-            }
+            LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
+//            if(invokeResponse.getInvokeReturn()!=null && invokeResponse.getInvokeReturn().toString().length()<1024){
+//                LOGGER.info("[LSCService Web Client]  response...\n"+invokeResponse.getInvokeReturn());
+//            }else{
+//                LOGGER.debug("response..数据太大 不进行展现 请用debug模式");
+//            }
             LOGGER.info("--------------------------****************---------------------------------");
             return invokeResponse.getInvokeReturn().toString();
         }  catch (Exception ex) {

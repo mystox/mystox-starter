@@ -17,7 +17,6 @@ gateway:
   fsuOffAlarmName: "FSU离线告警"
   fsuOffAlarmLevel: "1"
   user: "yytd_root"
-  fsuPort: 8181
   offlineNum: 3 #心跳离线次数
 
 ###########消息框架相关配置#############

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.business.scloud.his.api;
 
+import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -13,7 +14,7 @@ import com.kongtrolink.framework.stereotype.Register;
 @Register
 public interface TerminalCommandService {
 
-    @OperaCode(code = "scloudHistory")
+    @OperaCode(code = ScloudBusinessOperate.HISTORY)
     void scloudHistory(String message);
 
 }

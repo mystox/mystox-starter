@@ -57,6 +57,8 @@ public abstract class ParseHandler implements ParseService, EnvironmentCapable {
     private String enterpriseCode; //必须配置
     @Value("${config.resources:./configResources}")
     private String resourcesPath;
+    @Value("${gateway.fsuPort}")
+    private int fsuPort; //FSu默认端口
 
     static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
     String resourcePattern = DEFAULT_RESOURCE_PATTERN;
@@ -256,6 +258,14 @@ public abstract class ParseHandler implements ParseService, EnvironmentCapable {
 
     public void setEnterpriseCode(String enterpriseCode) {
         this.enterpriseCode = enterpriseCode;
+    }
+
+    public int getFsuPort() {
+        return fsuPort;
+    }
+
+    public void setFsuPort(int fsuPort) {
+        this.fsuPort = fsuPort;
     }
 
     /**

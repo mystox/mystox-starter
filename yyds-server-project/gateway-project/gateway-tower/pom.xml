@@ -50,6 +50,10 @@
                     <artifactId>woodstox-core-asl</artifactId>
                     <groupId>org.codehaus.woodstox</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 

@@ -37,7 +37,7 @@ public class FsuHeartTask {
     @Scheduled(cron = "${corn.heart:0 * * * * ?}")
     public void execute() {
         LOGGER.info("开始进行心跳检测...");
-        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKey.FSU_INFO);
+        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKey.FSU_INFO+"_"+uniqueCode);
         if(redisMap==null || redisMap.size()==0){
             LOGGER.info(" 无FSU需要 心跳检测 !! 结束");
             return;

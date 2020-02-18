@@ -26,7 +26,7 @@ management:
 server:
   groupCode: GROUP
   host: 172.16.6.37
-  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
+  name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode} #服务编码
   port: 52002 #服务占用web端口
 mqtt:
   username: root #可选配置 mqtt配置相关
