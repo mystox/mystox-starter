@@ -111,15 +111,16 @@ public class RealTimeDataDao{
                 criteria.and("tierCode").in(tierCodes);
             }
         }
-        DBObject dbObject = new BasicDBObject();
-        DBObject fieldObject = new BasicDBObject();
-        fieldObject.put("_id", true);
-        fieldObject.put("tier", true);
-        fieldObject.put("name", true);
-        fieldObject.put("code", true);
-        fieldObject.put("stationType", true);
-        Query query = new BasicQuery(dbObject, fieldObject);
-        query.addCriteria(criteria);
+//        DBObject dbObject = new BasicDBObject();
+//        DBObject fieldObject = new BasicDBObject();
+//        fieldObject.put("_id", true);
+//        fieldObject.put("id", true);
+//        fieldObject.put("tier", true);
+//        fieldObject.put("name", true);
+//        fieldObject.put("code", true);
+//        fieldObject.put("stationType", true);
+        Query query = new Query(criteria);
+//        query.addCriteria(criteria);
         List<Site> siteList = mongoTemplate.find(query, Site.class, uniqueCode + CollectionSuffix.SITE);
         return siteList;
     }
@@ -130,30 +131,31 @@ public class RealTimeDataDao{
      * @param param 站点列表
      * @return list
      */
-    public List<Device> findDeviceDiList(String uniqueCode,List<String> siteIds, SignalDiInfoQuery param) {
+    public List<Device> findDeviceDiList(String uniqueCode,List<Integer> siteIds, SignalDiInfoQuery param) {
         Criteria criteria = getDeviceDiCriteria(siteIds, param);
         int currentPage = param.getCurrentPage();
         int pageSize = param.getPageSize();
-        DBObject dbObject = new BasicDBObject();
-        DBObject fieldObject = new BasicDBObject();
-        fieldObject.put("_id", true);
-        fieldObject.put("name", true);
-        fieldObject.put("code", true);
-        Query query = new BasicQuery(dbObject, fieldObject);
-        query.addCriteria(criteria);
+//        DBObject dbObject = new BasicDBObject();
+//        DBObject fieldObject = new BasicDBObject();
+//        fieldObject.put("_id", true);
+//        fieldObject.put("name", true);
+//        fieldObject.put("code", true);
+//        Query query = new BasicQuery(dbObject, fieldObject);
+//        query.addCriteria(criteria);
+        Query query = new Query(criteria);
         query.skip((currentPage - 1) * pageSize).limit(pageSize);
         return mongoTemplate.find(query, Device.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 
 
-    public int findDeviceDiCount(String uniqueCode,List<String> siteIds, SignalDiInfoQuery param) {
+    public int findDeviceDiCount(String uniqueCode,List<Integer> siteIds, SignalDiInfoQuery param) {
         Criteria criteria = getDeviceDiCriteria(siteIds, param);
         Query query = new Query(criteria);
         return (int)mongoTemplate.count(query, uniqueCode + CollectionSuffix.DEVICE);
     }
 
-    private Criteria getDeviceDiCriteria(List<String> siteIds, SignalDiInfoQuery param){
-        Criteria criteria = Criteria.where("siteId").in(siteIds);
+    private Criteria getDeviceDiCriteria(List<Integer> siteIds, SignalDiInfoQuery param){
+        Criteria criteria = Criteria.where("siteId").in(siteIds).and("typeCode").is(param.getTypeCode());
         String systemName = param.getSystemName();//所属系统
         String deviceName = param.getDeviceName();//设备名称
         String deviceCode = param.getDeviceCode();//设备编码
@@ -171,7 +173,7 @@ public class RealTimeDataDao{
 
     private Criteria getDeviceCriteria(DeviceQuery deviceQuery){
         String siteId = deviceQuery.getSiteId();
-        String fsuId = deviceQuery.getFsuId();
+        Integer fsuId = deviceQuery.getFsuId();
         String systemName = deviceQuery.getSystemName();
         String name = deviceQuery.getDeviceName();
         String code = deviceQuery.getDeviceCode();

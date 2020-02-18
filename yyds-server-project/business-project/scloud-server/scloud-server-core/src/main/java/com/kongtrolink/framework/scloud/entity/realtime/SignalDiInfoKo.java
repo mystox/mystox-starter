@@ -18,8 +18,8 @@ public class SignalDiInfoKo implements Serializable{
 
     private Map<String, Site> siteMap = new HashMap<>();
     private Map<String, Device> deviceMap = new HashMap<>();
-    private List<String> siteIds = new ArrayList<>();
-    private List<String> deviceIds = new ArrayList<>();
+    private List<Integer> siteIds = new ArrayList<>();
+    private List<Integer> deviceIds = new ArrayList<>();
 
     public Map<String, Site> getSiteMap() {
         return siteMap;
@@ -37,19 +37,19 @@ public class SignalDiInfoKo implements Serializable{
         this.deviceMap = deviceMap;
     }
 
-    public List<String> getSiteIds() {
+    public List<Integer> getSiteIds() {
         return siteIds;
     }
 
-    public void setSiteIds(List<String> siteIds) {
+    public void setSiteIds(List<Integer> siteIds) {
         this.siteIds = siteIds;
     }
 
-    public List<String> getDeviceIds() {
+    public List<Integer> getDeviceIds() {
         return deviceIds;
     }
 
-    public void setDeviceIds(List<String> deviceIds) {
+    public void setDeviceIds(List<Integer> deviceIds) {
         this.deviceIds = deviceIds;
     }
 }

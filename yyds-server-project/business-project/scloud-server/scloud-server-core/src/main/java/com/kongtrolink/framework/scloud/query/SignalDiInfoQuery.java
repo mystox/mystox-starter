@@ -19,6 +19,15 @@ public class SignalDiInfoQuery extends Paging{
     private List<String> tierCodes;// 区域codes 查询一个区域选的
 
     private List<String> siteIds2;//站点IDs 选择了部分站点
+    private String typeCode;//设备类型
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
 
     public String getSystemName() {
         return systemName;

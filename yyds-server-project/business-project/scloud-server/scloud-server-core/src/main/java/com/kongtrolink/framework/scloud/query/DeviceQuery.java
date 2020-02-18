@@ -21,7 +21,7 @@ public class DeviceQuery extends Paging {
 	 */
 	private static final long serialVersionUID = 201367096037913874L;
 	private String siteId;
-	private String fsuId;
+	private Integer fsuId;
 
 	private String systemName;
 	private String deviceName;
@@ -46,11 +46,11 @@ public class DeviceQuery extends Paging {
 		this.siteId = siteId;
 	}
 
-	public String getFsuId() {
+	public Integer getFsuId() {
 		return fsuId;
 	}
 
-	public void setFsuId(String fsuId) {
+	public void setFsuId(Integer fsuId) {
 		this.fsuId = fsuId;
 	}
 

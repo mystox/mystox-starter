@@ -115,7 +115,7 @@ public class NorthService {
                 List<SignalIdInfo> ids = deviceIdInfos.getIds();
                 String deviceId = deviceIdInfos.getDeviceId();
                 if(ids ==null || ids.size()==0){
-                    value = FSUServiceUtil.getDataDevice(fsuId,deviceId,ip,fsuPort);
+                    value = FSUServiceUtil.getThresholdDevice(fsuId,deviceId,ip,fsuPort);
                 }else{
                     List<String> signalIds = new ArrayList<>();
                     for(SignalIdInfo signalIdInfo:ids){
@@ -159,7 +159,7 @@ public class NorthService {
             DeviceIdInfo deviceIdInfos = payload.getDeviceIds().get(0);
             List<SignalIdInfo> ids = deviceIdInfos.getIds();
             String deviceId = deviceIdInfos.getDeviceId();
-            if(ids !=null &&  ids.size()==0){
+            if(ids !=null &&  ids.size()>0){
                 List<TSemaphore> tSemaphores = new ArrayList<>();
                 for(SignalIdInfo signalIdInfo:ids){
                     TSemaphore tSemaphore = new TSemaphore();
@@ -203,7 +203,7 @@ public class NorthService {
             DeviceIdInfo deviceIdInfos = payload.getDeviceIds().get(0);
             List<SignalIdInfo> ids = deviceIdInfos.getIds();
             String deviceId = deviceIdInfos.getDeviceId();
-            if(ids !=null &&  ids.size()==0){
+            if(ids !=null &&  ids.size()>0){
                 List<TThreshold> tThresholds = new ArrayList<>();
                 for(SignalIdInfo signalIdInfo:ids){
                     TThreshold tThreshold = new TThreshold();

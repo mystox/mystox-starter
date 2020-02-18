@@ -224,18 +224,19 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                     //判断查询的是指定类型的信号点类型
                     continue;
                 }
+                String signalTypes = signalType.getType();
                 Object realData = valueMap.get(signalType.getCntbId());
                 Object threshold = thresholdMap.get(signalType.getCntbId());
                 SignalInfoEntity signalInfoEntity = new SignalInfoEntity();
                 signalInfoEntity.init(signalType,realData,threshold);
-                if(infoList.containsKey(type)){
-                    List<SignalInfoEntity> typeInfoList = infoList.get(type);
+                if(infoList.containsKey(signalTypes)){
+                    List<SignalInfoEntity> typeInfoList = infoList.get(signalTypes);
                     typeInfoList.add(signalInfoEntity);
-                    infoList.put(type,typeInfoList);
+                    infoList.put(signalTypes,typeInfoList);
                 }else{
                     List<SignalInfoEntity> typeInfoList = new ArrayList<>();
                     typeInfoList.add(signalInfoEntity);
-                    infoList.put(type,typeInfoList);
+                    infoList.put(signalTypes,typeInfoList);
                 }
                 if(focusMap.containsKey(signalType.getCntbId())){
                     FocusSignalEntity focusSignalEntity = focusMap.get(signalType.getCntbId());
@@ -309,7 +310,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         //根据区域数查询获取站点ID列表和局站类型 封装在SignalDiInfoKo对象中
         SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
         Map<String, Site> siteMap =ko.getSiteMap();//局站类型Map
-        List<String> siteIds = ko.getSiteIds();//站点ID列表
+        List<Integer> siteIds = ko.getSiteIds();//站点ID列表
         String signalCntbId = query.getSignalCode(); //遥测信号点ID
         List<Device> deviceList = realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
         for(Device device:deviceList){
@@ -318,7 +319,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             String deviceCode = device.getCode();
             String fsuCode = device.getFsuCode();
             if(siteMap.containsKey(String.valueOf(siteId))){
-                Site site = siteMap.get(siteId);
+                Site site = siteMap.get(String.valueOf(siteId));
                 info.setTier(site.getTierString());
                 info.setSiteCode(site.getCode());
                 info.setSiteName(site.getName());
@@ -351,7 +352,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public int getSignalDiInfoNum(String uniqueCode, SignalDiInfoQuery query) {
         SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
-        List<String> siteIds = ko.getSiteIds();
+        List<Integer> siteIds = ko.getSiteIds();
         return realTimeDataDao.findDeviceDiCount(uniqueCode,siteIds,query);
     }
 
@@ -361,14 +362,14 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     private SignalDiInfoKo getDeviceList(String uniqueCode, SignalDiInfoQuery query){
         Map<String,Site> siteMap = new HashMap<>();
-        List<String> siteIds = new ArrayList<>();
+        List<Integer> siteIds = new ArrayList<>();
         List<Site> siteList = realTimeDataDao.findSite(uniqueCode,query);
         for(Site site:siteList){
             if(!siteMap.containsKey(site.getId())) {
                 siteMap.put(String.valueOf(site.getId()), site);
             }
             site.setCompany(StationType.toValue(site.getStationType()));//暂存这个局站类型
-            siteIds.add(String.valueOf(site.getId()));
+            siteIds.add(site.getId());
         }
         SignalDiInfoKo ko = new SignalDiInfoKo();
         ko.setSiteIds(siteIds);
