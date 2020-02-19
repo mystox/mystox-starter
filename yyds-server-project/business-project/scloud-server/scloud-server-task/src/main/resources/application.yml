@@ -1,6 +1,8 @@
 spring:
   application:
     name: scloud-server-task
+  profiles:
+    active: dev,test,prod
   session:
     store-type: redis
   redis:

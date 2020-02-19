@@ -12,4 +12,5 @@ public class ScloudBusinessOperate {
     public static final String GET_FSUINFO = "business_getFsuInfo";
     public static final String REBOOT = "business_reboot";
     public static final String HISTORY = "business_history";
+    public static final String UPDATE_FSU_POLLING = "business_updateFsuPolling";
 }
