@@ -109,6 +109,54 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     }
 
     /**
+     * 单个信号点的实时数据
+     *
+     * @param uniqueCode
+     * @param signalQuery
+     */
+    @Override
+    public Object getDataDetail(String uniqueCode, SignalQuery signalQuery) {
+        try{
+            String fsuCode = signalQuery.getFsuCode();
+            GetDataMessage getDataMessage = getGetDataDetailMessage(signalQuery);
+            //下发到网关获取实时数据
+            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            String ack = result.getMsg();//消息返回内容
+            GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
+            Map<String,Object> valueMap = null ;//存放信号点数据 key:cntbId value:值
+            if(getDataAckMessage!=null
+                    && getDataAckMessage.getPayload()!=null
+                    && getDataAckMessage.getPayload().getDeviceIds() !=null) {
+                //单个设备查询的
+                DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
+                List<SignalIdInfo> ids = deviceIdInfo.getIds();
+                String redisKey = fsuCode + "#" + deviceIdInfo.getDeviceId();
+                Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA, redisKey);
+                try {
+                    if (value == null) {
+                        valueMap = new HashMap<>();
+                    } else {
+                        valueMap = JSONObject.parseObject(String.valueOf(value));
+                    }
+                    if (ids != null) {
+                        for (SignalIdInfo signalIdInfo : ids) {
+                            valueMap.put(signalIdInfo.getId(), signalIdInfo.getValue());
+                        }
+                    }
+                    //更新redis里面的值
+                    redisUtils.hset(RedisKey.DEVICE_REAL_DATA, redisKey, valueMap);
+                } catch (Exception e) {
+                    LOGGER.error("获取redis数据异常 {} ,{} ", RedisKey.DEVICE_REAL_DATA, redisKey);
+                }
+            }
+            return valueMap.get(signalQuery.getCntbId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * 设置值
      *
      * @param signalQuery 参数
@@ -297,6 +345,22 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         return getDataMessage;
     }
 
+    private GetDataMessage getGetDataDetailMessage(SignalQuery signalQuery){
+        GetDataMessage getDataMessage = new GetDataMessage();
+        DeviceIdEntity payload = new DeviceIdEntity();
+        List<DeviceIdInfo> deviceIds = new ArrayList<>();
+
+        DeviceIdInfo deviceIdInfo = new DeviceIdInfo(signalQuery.getDeviceCode());
+        List<SignalIdInfo> ids = new ArrayList<>();
+        SignalIdInfo signalIdInfo = new SignalIdInfo();
+        signalIdInfo.setId(signalQuery.getCntbId());
+        deviceIdInfo.setIds(ids);
+        deviceIds.add(deviceIdInfo);
+        payload.setDeviceIds(deviceIds);
+        getDataMessage.setFsuId(signalQuery.getFsuCode());
+        getDataMessage.setPayload(payload);
+        return getDataMessage;
+    }
     /**
      * 根据查询 某一个遥测信号值列表
      *

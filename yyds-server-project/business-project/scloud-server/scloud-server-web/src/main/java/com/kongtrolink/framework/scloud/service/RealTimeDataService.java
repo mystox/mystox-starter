@@ -27,6 +27,10 @@ public interface RealTimeDataService {
     SignalModel getData(String uniqueCode, SignalQuery signalQuery,String userId);
 
     /**
+     * 单个信号点的实时数据
+     */
+    Object getDataDetail(String uniqueCode, SignalQuery signalQuery);
+    /**
      * 设置值
      * @param signalQuery 参数
      * @return 返回

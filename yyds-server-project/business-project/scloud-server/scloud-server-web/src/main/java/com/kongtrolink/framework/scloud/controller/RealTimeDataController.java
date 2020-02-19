@@ -71,6 +71,17 @@ public class RealTimeDataController extends ExportController {
             return new JsonResult("查询失败",false);
         }
     }
+    @RequestMapping(value = "/getDataDetail")
+    public @ResponseBody JsonResult getDataDetail(@RequestBody SignalQuery query) {
+        try{
+            String uniqueCode = getUniqueCode();
+            Object value  = realTimeDataService.getDataDetail(uniqueCode, query);
+            return new JsonResult(value);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("查询失败",false);
+        }
+    }
     /**
      * 设置值
      *
