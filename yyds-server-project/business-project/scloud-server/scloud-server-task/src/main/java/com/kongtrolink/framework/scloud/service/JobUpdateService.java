@@ -29,10 +29,10 @@ public class JobUpdateService {
      */
     public JobMessageAckEntity onMessage(JobMessageEntity entity) {
         try {
-			String corn = entity.getCron();
+			String cron = entity.getCron();
 			String uniqueCode = entity.getUniqueCode();
             JobUpdateLogEntity logEntity = new JobUpdateLogEntity("30");//存放 修改日志
-            JobEntity queryEntity = new JobEntity(uniqueCode, "HistoryTestTask",corn,uniqueCode);
+            JobEntity queryEntity = new JobEntity(uniqueCode, "HistoryTestTask",cron,uniqueCode);
             JobEntity dbEntity = jobService.find(queryEntity);//根据job名称 从数据库中查找数据
             if(dbEntity!=null){
             	logEntity.setJobId(dbEntity.getId());
@@ -60,11 +60,11 @@ public class JobUpdateService {
 			}else if(!cronOk){
 				return new JobMessageAckEntity("时间粒度不符合规范");
 			}else{
+				if(dbEntity==null){
+					dbEntity = new JobEntity(uniqueCode, "HistoryTestTask",corn,uniqueCode);
+				}
 				boolean ifJobExist  =quartzManager.ifJobExist(dbEntity);//判断当前是否在运行
 				if(!ifJobExist){
-					if(dbEntity==null){
-						dbEntity = new JobEntity(uniqueCode, "HistoryTestTask",corn,uniqueCode);
-					}
 					dbEntity.setStatus("启动");
 					logEntity.setAfterJob(dbEntity);
 					quartzManager.addJob(dbEntity);

@@ -13,7 +13,7 @@ spring:
 server:
   name: SCLOUD_SERVER_TASK #服务编码
   version: 1.0.0 #服务版本
-  port: 58201 #服务占用web端口
+#  port: 58201 #服务占用web端口
   title: 雲平台任务服务
   #serverUri: /home #首页名
   #pageRoute: proxy_foo
