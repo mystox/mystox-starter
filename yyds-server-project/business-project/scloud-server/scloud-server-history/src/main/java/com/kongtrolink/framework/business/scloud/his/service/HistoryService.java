@@ -42,7 +42,7 @@ public class HistoryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryService.class);
 
 
-    public void heartBeatFsu(String message){
+    public void scloudHistory(String message){
         try {
             HistoryModuleDto dto = JSONObject.parseObject(message,HistoryModuleDto.class);
             RedisFsuInfo fsu = dto.getRedisFsuInfo();
