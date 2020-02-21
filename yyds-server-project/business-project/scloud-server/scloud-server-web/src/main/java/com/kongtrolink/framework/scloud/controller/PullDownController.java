@@ -62,38 +62,5 @@ public class PullDownController  extends ExportController {
         return new JsonResult("查询失败",false);
     }
 
-    /**
-     * 获取系统名称列表
-     * @return 系统名称类型
-     */
-    @RequestMapping(value = "/getSystemNameList")
-    public @ResponseBody JsonResult getSystemNameList(@RequestBody PullDownQuery query) {
-        try{
-            String uniqueCode = getUniqueCode();
-            List<String> list = pullDownService.getSystemNameList(uniqueCode,query);
-            return new JsonResult(list);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return new JsonResult("查询失败",false);
-    }
-
-    /**
-     * 根据查询获取设备下拉框 - 不分页
-     *
-     * @param query      查询条件
-     * @return 设备列表
-     */
-    @RequestMapping(value = "/getDeviceList")
-    public @ResponseBody JsonResult  getDeviceList(@RequestBody DeviceQuery query) {
-        try{
-            String uniqueCode = getUniqueCode();
-            List<DeviceModel> list = pullDownService.getDeviceList(uniqueCode,query);
-            return new JsonResult(list);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return new JsonResult("查询失败",false);
-    }
 
 }

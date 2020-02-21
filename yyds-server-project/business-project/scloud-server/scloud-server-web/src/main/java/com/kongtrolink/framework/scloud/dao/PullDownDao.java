@@ -73,30 +73,4 @@ public class PullDownDao{
         return list;
     }
 
-    /**
-     * 获取系统名称列表
-     *
-     * @param uniqueCode 企业编码
-     * @return 系统名称类型
-     */
-    public List<String> getSystemNameList(String uniqueCode,String siteId) {
-        List<AggregationOperation> aggregationOperations = new ArrayList<>();
-        if(siteId!=null){
-            Criteria criteria = Criteria.where("siteId").is(siteId);
-            aggregationOperations.add(match(criteria));
-        }
-        aggregationOperations.add(group("systemName"));
-        aggregationOperations.add(project().and("systemName").previousOperation());
-        Aggregation agg = Aggregation.newAggregation(aggregationOperations);
-        AggregationResults<Device> result = mongoTemplate.aggregate(agg,uniqueCode+CollectionSuffix.DEVICE, Device.class);
-        List<Device> list = result.getMappedResults();
-        List<String> value = new ArrayList<>();
-        if(list!=null){
-            for(Device device:list){
-                value.add(device.getSystemName());
-            }
-        }
-        return value;
-    }
-
 }

@@ -29,18 +29,4 @@ public interface PullDownService {
      */
     List<SignalType> getSignalTypeList(String uniqueCode, PullDownQuery query);
 
-    /**
-     * 获取系统名称列表
-     * @param uniqueCode 企业编码
-     * @return 系统名称类型
-     */
-    List<String> getSystemNameList(String uniqueCode, PullDownQuery query);
-
-    /**
-     * 根据查询获取设备下拉框 - 不分页
-     * @param uniqueCode 企业编码
-     * @param query 查询条件
-     * @return 设备列表
-     */
-    List<DeviceModel> getDeviceList(String uniqueCode,DeviceQuery query);
 }
