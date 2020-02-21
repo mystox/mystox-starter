@@ -171,7 +171,7 @@ public class RealTimeDataDao{
         return criteria;
     }
 
-    private Criteria getDeviceCriteria(DeviceQuery deviceQuery){
+    public Criteria getDeviceCriteria(DeviceQuery deviceQuery){
         String siteId = deviceQuery.getSiteId();
         Integer fsuId = deviceQuery.getFsuId();
         String systemName = deviceQuery.getSystemName();
