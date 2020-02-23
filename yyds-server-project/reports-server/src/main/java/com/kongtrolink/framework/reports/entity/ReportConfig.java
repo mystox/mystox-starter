@@ -13,7 +13,7 @@ public class ReportConfig {
 
     private String operaCode;
 
-    private String serverCode;
+    private String serverCode; //此处serverCode 对应为订阅服务的serviceCode
 
     private String enterpriseCode;
 
