@@ -22,6 +22,7 @@ import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
 import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import com.kongtrolink.framework.service.MqttOpera;
+import com.sun.xml.xsom.impl.UName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,24 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         int count = realTimeDataDao.getDeviceCount(uniqueCode, query);
         ListResult<DeviceModel> value = new ListResult(list,count);
         return value;
+    }
+
+    /**
+     * 根据 设备code 获取 该设备所属的FSU
+     *
+     * @param uniqueCode 企业编码
+     * @param query      查询
+     * @return FSU信息
+     */
+    @Override
+    public DeviceEntity getFsuInfoByDeviceCode(String uniqueCode, DeviceQuery query) {
+        FsuDeviceEntity fsuDeviceEntity = realTimeDataDao.getFsuInfoByDeviceCode(uniqueCode,query.getDeviceCode());
+        if(fsuDeviceEntity==null || fsuDeviceEntity.getFsuCode()==null){
+            LOGGER.error("根据deviceCode:{} 未找到关联的FSU信息",query.getDeviceCode());
+            return null;
+        }
+
+        return realTimeDataDao.getFsuInfo(uniqueCode,fsuDeviceEntity.getFsuCode());
     }
 
     /**

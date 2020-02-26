@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.dao;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
+import com.kongtrolink.framework.scloud.entity.FsuDeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
@@ -95,7 +96,7 @@ public class RealTimeDataDao{
     public List<SiteEntity> findSite(String uniqueCode, SignalDiInfoQuery param) {
         List<String> tierCodes = param.getTierCodes();// 区域codes
         List<String> siteIds2 = param.getSiteIds2();
-        Criteria criteria = Criteria.where("BASE_CONDITION").exists(false);
+        Criteria criteria = new Criteria();
         if (tierCodes != null && tierCodes.size()>0) {
             if (siteIds2 != null && siteIds2.size()>0) {
                 criteria.orOperator(Criteria.where("tierCode").in(tierCodes),Criteria.where("_id").in(siteIds2));
@@ -170,7 +171,7 @@ public class RealTimeDataDao{
         String type = deviceQuery.getDeviceType();
         String typeCode = deviceQuery.getDeviceTypeCode();
         // 默认条件（无实际作用）
-        Criteria criteria = Criteria.where("BASE_CONDITION").exists(false);
+        Criteria criteria = new Criteria();
         if (siteIds != null) {
             criteria = criteria.and("siteId").is(siteIds);
         }
@@ -188,5 +189,30 @@ public class RealTimeDataDao{
             }
         }
         return criteria;
+    }
+
+    /**
+     * 根据 设备code 获取 该设备所属的FSU
+     *
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @return FSU信息
+     */
+    public FsuDeviceEntity getFsuInfoByDeviceCode(String uniqueCode, String deviceCode) {
+        Criteria criteria = Criteria.where("deviceCode").is(deviceCode);
+        Query query = new Query(criteria);
+        return mongoTemplate.findOne(query,FsuDeviceEntity.class,uniqueCode + CollectionSuffix.FSU_DEVICE);
+    }
+
+    /**
+     * 根据 FSU CODE 获取 该设备信息
+     * @param uniqueCode 企业编码
+     * @param code FSU code
+     * @return FSU信息
+     */
+    public DeviceEntity getFsuInfo(String uniqueCode, String code) {
+        Criteria criteria = Criteria.where("code").is(code);
+        Query query = new Query(criteria);
+        return mongoTemplate.findOne(query,DeviceEntity.class,uniqueCode + CollectionSuffix.DEVICE);
     }
 }

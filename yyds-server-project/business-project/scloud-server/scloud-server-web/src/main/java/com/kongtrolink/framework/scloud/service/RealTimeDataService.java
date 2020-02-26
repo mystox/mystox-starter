@@ -3,6 +3,8 @@ package com.kongtrolink.framework.scloud.service;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetPointAckMessage;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetThresholdAckMessage;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.FsuDeviceEntity;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -21,6 +23,15 @@ public interface RealTimeDataService {
      * 实时数据-获取设备列表
      */
     ListResult<DeviceModel> getDeviceList(String uniqueCode, DeviceQuery query);
+
+    /**
+     * 根据 设备code 获取 该设备所属的FSU
+     * @param uniqueCode 企业编码
+     * @param query 查询
+     * @return FSU信息
+     */
+    DeviceEntity getFsuInfoByDeviceCode(String uniqueCode,DeviceQuery query);
+
     /**
      * 实时数据-获取改设备的实时数据
      */

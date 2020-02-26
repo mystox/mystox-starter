@@ -162,4 +162,36 @@ public class DeviceEntity implements Serializable {
 	public void setOperationState(String operationState) {
 		this.operationState = operationState;
 	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getEnterpriseCode() {
+		return enterpriseCode;
+	}
+
+	public void setEnterpriseCode(String enterpriseCode) {
+		this.enterpriseCode = enterpriseCode;
+	}
+
+	public String getServerCode() {
+		return serverCode;
+	}
+
+	public void setServerCode(String serverCode) {
+		this.serverCode = serverCode;
+	}
+
+	public String getGatewayServerCode() {
+		return gatewayServerCode;
+	}
+
+	public void setGatewayServerCode(String gatewayServerCode) {
+		this.gatewayServerCode = gatewayServerCode;
+	}
 }
