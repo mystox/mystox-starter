@@ -16,6 +16,7 @@ import com.kongtrolink.framework.scloud.entity.SignalType;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalInfoEntity;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
+import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class HistoryService {
             //单个设备查询的
             for(DeviceIdInfo deviceIdInfo:getDataAckMessage.getPayload().getDeviceIds()){
                 List<SignalIdInfo> ids = deviceIdInfo.getIds();
-                String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
+                String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceIdInfo.getDeviceId());
                 Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
                 try{
                     if(value==null){

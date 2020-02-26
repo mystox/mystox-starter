@@ -19,6 +19,7 @@ import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
+import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             GetThresholdAckMessage getThresholdAckMessage = JSONObject.parseObject(ackThreshold,GetThresholdAckMessage.class);
             //查询关注的信号点
             List<FocusSignalEntity> focusSignalEntityList = focusSignalService.queryListByDevice(uniqueCode,signalQuery.getDeviceId(),userId);
-            SignalModel signalModel = getSignalModel(fsuCode,type,getDataAckMessage,getThresholdAckMessage, signalTypes,focusSignalEntityList);
+            SignalModel signalModel = getSignalModel(uniqueCode,type,getDataAckMessage,getThresholdAckMessage, signalTypes,focusSignalEntityList);
             return signalModel;
         }catch (Exception e){
             e.printStackTrace();
@@ -127,7 +128,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                 //单个设备查询的
                 DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
                 List<SignalIdInfo> ids = deviceIdInfo.getIds();
-                String redisKey = fsuCode + "#" + deviceIdInfo.getDeviceId();
+                String redisKey = RedisUtil.getRealDataKey(fsuCode,deviceIdInfo.getDeviceId());
                 Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA, redisKey);
                 try {
                     if (value == null) {
@@ -217,7 +218,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * 获取实时数据
      * 整理返回下前段展现 并存放到redis中
      */
-    private SignalModel getSignalModel(String fsuCode,String type,
+    private SignalModel getSignalModel(String uniqueCode,String type,
                                        GetDataAckMessage getDataAckMessage,
                                        GetThresholdAckMessage getThresholdAckMessage,
                                        List<SignalType> signalTypeList,
@@ -236,7 +237,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             //单个设备查询的
             DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
             List<SignalIdInfo> ids = deviceIdInfo.getIds();
-            String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
+
+            String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceIdInfo.getDeviceId());
             Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
             try{
                 if(value==null){
@@ -373,21 +375,21 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         Map<String, SiteEntity> siteMap =ko.getSiteMap();//局站类型Map
         List<Integer> siteIds = ko.getSiteIds();//站点ID列表
         String signalCntbId = query.getSignalCode(); //遥测信号点ID
-        List<DeviceEntity> deviceList = realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
-        /*for(DeviceEntity device:deviceList){
+        List<DeviceModel> deviceList =null;// todo 采用晓龙的获取设备方法
+        //realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
+        for(DeviceModel device:deviceList){
             SignalDiInfo info = new SignalDiInfo();
             int siteId = device.getSiteId();
             String deviceCode = device.getCode();
-            String fsuCode = device.getFsuCode();
             if(siteMap.containsKey(String.valueOf(siteId))){
                 SiteEntity siteEntity = siteMap.get(String.valueOf(siteId));
                 info.setTier(siteEntity.getTierName());
                 info.setSiteCode(siteEntity.getCode());
-//                info.setSiteName(siteEntity.getName());
             }
-//            info.setDeviceName(device.getName());
+            info.setSiteName(device.getSiteName());
+            info.setDeviceName(device.getName());
             info.setDeviceCode(device.getCode());
-            String redisKey = fsuCode+"#"+deviceCode;
+            String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceCode);
             Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
             try{
                 Map<String,Object> redisValue = JSONObject.parseObject(String.valueOf(value));
@@ -398,7 +400,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                 LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
             }
             list.add(info);
-        }*/
+        }
 
         return list;
     }
