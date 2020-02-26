@@ -9,7 +9,7 @@ import java.util.List;
 public class FsuDeviceEntity {
 
     private String fsuCode;   //FSU Code,即保存在device表中FSU动环主机设备对应的code字段
-    private List<String> deviceCodes;  //设备编码
+    private String deviceCode;  //设备编码
 
     public String getFsuCode() {
         return fsuCode;
@@ -19,11 +19,11 @@ public class FsuDeviceEntity {
         this.fsuCode = fsuCode;
     }
 
-    public List<String> getDeviceCodes() {
-        return deviceCodes;
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
-    public void setDeviceCodes(List<String> deviceCodes) {
-        this.deviceCodes = deviceCodes;
+    public void setDeviceCode(String deviceCodes) {
+        this.deviceCode = deviceCodes;
     }
 }

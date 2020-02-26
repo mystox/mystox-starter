@@ -16,4 +16,6 @@ public class CollectionSuffix {
     public static final String SITE = "_site";
     // 企业历史数据
     public static final String HISTORY = "_history";
+    //FSU Device关系表
+    public static final String FSU_DEVICE = "_fsu_device";
 }

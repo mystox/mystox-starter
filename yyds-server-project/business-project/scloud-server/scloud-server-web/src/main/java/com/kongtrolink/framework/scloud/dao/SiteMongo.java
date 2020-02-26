@@ -58,11 +58,16 @@ public class SiteMongo {
         String respName = siteQuery.getRespName();    //资产管理员名称
         Long startTime = siteQuery.getStartTime(); //开始时间
         Long endTime = siteQuery.getEndTime();   //结束时间
-        List<String> siteCodes = siteQuery.getSiteCodes(); //站点编码集合
+        String siteCode = siteQuery.getSiteCode();  //站点编码（模糊搜索）
+        List<String> siteCodes = siteQuery.getSiteCodes(); //站点编码集合(资管获取的)
 
         Criteria criteria = new Criteria();
         if (towerType != null){
             criteria.and("towerType").is(towerType);
+        }
+        if (siteCode != null && !siteCode.equals("")){
+            address = MongoRegexUtil.escapeExprSpecialWord(address);
+            criteria.and("address").regex("^" + address + ".*?");
         }
         if (siteCodes != null){
             criteria.and("code").in(siteCodes);
