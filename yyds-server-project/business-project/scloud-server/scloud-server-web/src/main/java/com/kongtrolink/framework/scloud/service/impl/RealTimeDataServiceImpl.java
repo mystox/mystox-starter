@@ -6,6 +6,7 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
 import com.kongtrolink.framework.scloud.dao.RealTimeDataDao;
 import com.kongtrolink.framework.scloud.entity.*;
@@ -24,6 +25,7 @@ import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,7 +46,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Autowired
     FocusSignalService focusSignalService;
     @Autowired
-    MqttOpera mqttOpera;
+    @Lazy
+    MqttSender mqttSender;
     /**
      * 实时数据-获取设备列表
      *
@@ -75,7 +78,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public SignalModel getData(String uniqueCode,SignalQuery signalQuery,String userId) {
         try{
-            String fsuCode = signalQuery.getFsuCode();
+            String gatewayServerCode = signalQuery.getGatewayServerCode();
             String devType = signalQuery.getDeviceType();//设备类型
             String type = signalQuery.getType();//是否是特定类的查询
             DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
@@ -85,7 +88,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             List<SignalType> signalTypes = deviceType.getSignalTypeList();
             GetDataMessage getDataMessage = getGetDataMessage(signalQuery,deviceType.getSignalTypeList());
             //下发到网关获取实时数据
-            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             //获取阈值
@@ -93,7 +96,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             getThresholdMessage.setFsuId(getDataMessage.getFsuId());
             getThresholdMessage.setPayload(getDataMessage.getPayload());
             //下发到网关获取实时数据
-            MsgResult resultThreshold = mqttOpera.opera(ScloudBusinessOperate.GET_THRESHOLD,JSONObject.toJSONString(getThresholdMessage));
+            MsgResult resultThreshold = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_THRESHOLD,JSONObject.toJSONString(getThresholdMessage));
             String ackThreshold = resultThreshold.getMsg();//消息返回内容
             GetThresholdAckMessage getThresholdAckMessage = JSONObject.parseObject(ackThreshold,GetThresholdAckMessage.class);
             //查询关注的信号点
@@ -116,9 +119,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     public Object getDataDetail(String uniqueCode, SignalQuery signalQuery) {
         try{
             String fsuCode = signalQuery.getFsuCode();
+            String gatewayServerCode = signalQuery.getGatewayServerCode();
             GetDataMessage getDataMessage = getGetDataDetailMessage(signalQuery);
             //下发到网关获取实时数据
-            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             Map<String,Object> valueMap = null ;//存放信号点数据 key:cntbId value:值
@@ -162,12 +166,13 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     @Override
     public SetPointAckMessage setPoint(SignalQuery signalQuery) {
+        String gatewayServerCode = signalQuery.getGatewayServerCode();
         SetPointMessage setPointMessage = new SetPointMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setPointMessage.setPayload(deviceIdEntity);
         setPointMessage.setFsuId(signalQuery.getFsuCode());
         //下发到网关
-        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
+        MsgResult result =  mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
         String ack = result.getMsg();//消息返回内容
         SetPointAckMessage setPointAckMessage = JSONObject.parseObject(ack,SetPointAckMessage.class);
         return setPointAckMessage;
@@ -181,12 +186,13 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     @Override
     public SetThresholdAckMessage setThreshold(SignalQuery signalQuery) {
+        String gatewayServerCode = signalQuery.getGatewayServerCode();
         SetThresholdMessage setThresholdMessage = new SetThresholdMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setThresholdMessage.setPayload(deviceIdEntity);
         setThresholdMessage.setFsuId(signalQuery.getFsuCode());
         //下发到网关
-        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
+        MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
         String ack = result.getMsg();//消息返回内容
         SetThresholdAckMessage setThresholdAckMessage = JSONObject.parseObject(ack,SetThresholdAckMessage.class);
         return setThresholdAckMessage;
