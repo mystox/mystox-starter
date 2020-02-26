@@ -22,6 +22,13 @@ public class CompanyMongo {
     MongoTemplate mongoTemplate;
 
     /**
+     * 添加企业
+     */
+    public void addCompany(CompanyEntity companyEntity){
+        mongoTemplate.save(companyEntity);
+    }
+
+    /**
      * 根据企业唯一码获取企业扩展信息及配置信息
      */
     public CompanyEntity findCompanyInfo(String uniqueCode){

@@ -52,8 +52,21 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 			<version>${spring-boot.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>4.3.18.RELEASE</version>
+		</dependency>
+
+		<!--图片上传-->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.8</version>
+		</dependency>
+
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<!--<plugin>

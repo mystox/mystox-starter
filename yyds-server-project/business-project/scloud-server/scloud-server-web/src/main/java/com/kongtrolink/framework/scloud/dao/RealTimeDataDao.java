@@ -1,30 +1,22 @@
 package com.kongtrolink.framework.scloud.dao;
 
-import com.kongtrolink.framework.core.entity.Fsu;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
-import com.kongtrolink.framework.scloud.entity.Device;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
-import com.kongtrolink.framework.scloud.entity.Site;
+import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 /**
  * 数据监控 - 实时数据
@@ -100,7 +92,7 @@ public class RealTimeDataDao{
      * @param param 查询条件
      * @return list
      */
-    public List<Site> findSite(String uniqueCode, SignalDiInfoQuery param) {
+    public List<SiteEntity> findSite(String uniqueCode, SignalDiInfoQuery param) {
         List<String> tierCodes = param.getTierCodes();// 区域codes
         List<String> siteIds2 = param.getSiteIds2();
         Criteria criteria = Criteria.where("BASE_CONDITION").exists(false);
@@ -121,8 +113,8 @@ public class RealTimeDataDao{
 //        fieldObject.put("stationType", true);
         Query query = new Query(criteria);
 //        query.addCriteria(criteria);
-        List<Site> siteList = mongoTemplate.find(query, Site.class, uniqueCode + CollectionSuffix.SITE);
-        return siteList;
+        List<SiteEntity> siteEntityList = mongoTemplate.find(query, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        return siteEntityList;
     }
 
     /**
@@ -131,7 +123,7 @@ public class RealTimeDataDao{
      * @param param 站点列表
      * @return list
      */
-    public List<Device> findDeviceDiList(String uniqueCode,List<Integer> siteIds, SignalDiInfoQuery param) {
+    public List<DeviceEntity> findDeviceDiList(String uniqueCode, List<Integer> siteIds, SignalDiInfoQuery param) {
         Criteria criteria = getDeviceDiCriteria(siteIds, param);
         int currentPage = param.getCurrentPage();
         int pageSize = param.getPageSize();
@@ -144,7 +136,7 @@ public class RealTimeDataDao{
 //        query.addCriteria(criteria);
         Query query = new Query(criteria);
         query.skip((currentPage - 1) * pageSize).limit(pageSize);
-        return mongoTemplate.find(query, Device.class, uniqueCode + CollectionSuffix.DEVICE);
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 
 
@@ -171,24 +163,16 @@ public class RealTimeDataDao{
         return criteria;
     }
 
-    public Criteria getDeviceCriteria(DeviceQuery deviceQuery){
-        String siteId = deviceQuery.getSiteId();
-        Integer fsuId = deviceQuery.getFsuId();
-        String systemName = deviceQuery.getSystemName();
+    private Criteria getDeviceCriteria(DeviceQuery deviceQuery){
+        List<Integer> siteIds = deviceQuery.getSiteIds();
         String name = deviceQuery.getDeviceName();
         String code = deviceQuery.getDeviceCode();
         String type = deviceQuery.getDeviceType();
         String typeCode = deviceQuery.getDeviceTypeCode();
         // 默认条件（无实际作用）
         Criteria criteria = Criteria.where("BASE_CONDITION").exists(false);
-        if (siteId != null) {
-            criteria = criteria.and("siteId").is(siteId);
-        }
-        if (fsuId != null) {
-            criteria = criteria.and("fsuId").is(fsuId);
-        }
-        if (systemName != null) {
-            criteria.and("systemName").is(systemName);
+        if (siteIds != null) {
+            criteria = criteria.and("siteId").is(siteIds);
         }
         if (name != null) {
             criteria.and("name").regex(".*?" + name + ".*?");

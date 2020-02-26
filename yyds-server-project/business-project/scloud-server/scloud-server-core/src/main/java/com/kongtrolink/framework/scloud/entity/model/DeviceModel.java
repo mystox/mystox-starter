@@ -11,27 +11,72 @@
 package com.kongtrolink.framework.scloud.entity.model;
 
 
-import com.kongtrolink.framework.scloud.entity.Device;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 
 /**
- *
+ * 设备 前端显示模型
  * @author Mag
  */
-public class DeviceModel extends Device {
+public class DeviceModel extends DeviceEntity {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3878090092310831714L;
 
-	private int countSignal;
+	private String tierName;	//区域名称
+	private String siteName;	//站点名称
+	private String name;	//设备名称
+	private String model;	//设备型号
 
+	private String ip;	//FSU IP地址
+	private Integer countSignal;
 
-	public int getCountSignal() {
+	public String getTierName() {
+		return tierName;
+	}
+
+	public void setTierName(String tierName) {
+		this.tierName = tierName;
+	}
+
+	public String getSiteName() {
+		return siteName;
+	}
+
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public Integer getCountSignal() {
 		return countSignal;
 	}
 
-	public void setCountSignal(int countSignal) {
+	public void setCountSignal(Integer countSignal) {
 		this.countSignal = countSignal;
 	}
 }

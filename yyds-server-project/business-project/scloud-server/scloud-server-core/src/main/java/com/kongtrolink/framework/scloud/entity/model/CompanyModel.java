@@ -12,7 +12,6 @@ public class CompanyModel {
     private String uniqueCode;  //企业唯一码
     private String companyName; //企业名称
     private String serverName;  //服务名称
-    private String agent;   //代理
     private String contactsId;  //企业联系人Id
     private String contactsName;    //企业联系人名称
     private String contactsPhone;   //企业联系人电话
@@ -51,14 +50,6 @@ public class CompanyModel {
 
     public void setServerName(String serverName) {
         this.serverName = serverName;
-    }
-
-    public String getAgent() {
-        return agent;
-    }
-
-    public void setAgent(String agent) {
-        this.agent = agent;
     }
 
     public String getContactsId() {

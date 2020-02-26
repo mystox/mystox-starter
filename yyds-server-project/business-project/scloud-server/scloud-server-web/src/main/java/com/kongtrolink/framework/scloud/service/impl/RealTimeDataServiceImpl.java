@@ -1,15 +1,12 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
-import com.kongtrolink.framework.gateway.tower.core.entity.msg.GetThreshold;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
-import com.kongtrolink.framework.scloud.constant.StationType;
 import com.kongtrolink.framework.scloud.dao.RealTimeDataDao;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
@@ -373,23 +370,22 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         List<SignalDiInfo> list = new ArrayList<>();
         //根据区域数查询获取站点ID列表和局站类型 封装在SignalDiInfoKo对象中
         SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
-        Map<String, Site> siteMap =ko.getSiteMap();//局站类型Map
+        Map<String, SiteEntity> siteMap =ko.getSiteMap();//局站类型Map
         List<Integer> siteIds = ko.getSiteIds();//站点ID列表
         String signalCntbId = query.getSignalCode(); //遥测信号点ID
-        List<Device> deviceList = realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
-        for(Device device:deviceList){
+        List<DeviceEntity> deviceList = realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
+        /*for(DeviceEntity device:deviceList){
             SignalDiInfo info = new SignalDiInfo();
             int siteId = device.getSiteId();
             String deviceCode = device.getCode();
             String fsuCode = device.getFsuCode();
             if(siteMap.containsKey(String.valueOf(siteId))){
-                Site site = siteMap.get(String.valueOf(siteId));
-                info.setTier(site.getTierString());
-                info.setSiteCode(site.getCode());
-                info.setSiteName(site.getName());
-                info.setSiteType(site.getCompany());
+                SiteEntity siteEntity = siteMap.get(String.valueOf(siteId));
+                info.setTier(siteEntity.getTierName());
+                info.setSiteCode(siteEntity.getCode());
+//                info.setSiteName(siteEntity.getName());
             }
-            info.setDeviceName(device.getName());
+//            info.setDeviceName(device.getName());
             info.setDeviceCode(device.getCode());
             String redisKey = fsuCode+"#"+deviceCode;
             Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
@@ -402,7 +398,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                 LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
             }
             list.add(info);
-        }
+        }*/
 
         return list;
     }
@@ -425,15 +421,14 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
 
      */
     private SignalDiInfoKo getDeviceList(String uniqueCode, SignalDiInfoQuery query){
-        Map<String,Site> siteMap = new HashMap<>();
+        Map<String,SiteEntity> siteMap = new HashMap<>();
         List<Integer> siteIds = new ArrayList<>();
-        List<Site> siteList = realTimeDataDao.findSite(uniqueCode,query);
-        for(Site site:siteList){
-            if(!siteMap.containsKey(site.getId())) {
-                siteMap.put(String.valueOf(site.getId()), site);
+        List<SiteEntity> siteEntityList = realTimeDataDao.findSite(uniqueCode,query);
+        for(SiteEntity siteEntity : siteEntityList){
+            if(!siteMap.containsKey(siteEntity.getId())) {
+                siteMap.put(String.valueOf(siteEntity.getId()), siteEntity);
             }
-            site.setCompany(StationType.toValue(site.getStationType()));//暂存这个局站类型
-            siteIds.add(site.getId());
+            siteIds.add(siteEntity.getId());
         }
         SignalDiInfoKo ko = new SignalDiInfoKo();
         ko.setSiteIds(siteIds);
