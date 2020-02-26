@@ -28,8 +28,8 @@ public class DeviceModel extends DeviceEntity {
 	private String siteName;	//站点名称
 	private String name;	//设备名称
 	private String model;	//设备型号
-
-	private String ip;	//FSU IP地址
+	private Integer fsuId; //fsuId
+	private String fsuCode; //fsuCode
 	private Integer countSignal;
 
 	public String getTierName() {
@@ -64,19 +64,27 @@ public class DeviceModel extends DeviceEntity {
 		this.model = model;
 	}
 
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-
 	public Integer getCountSignal() {
 		return countSignal;
 	}
 
 	public void setCountSignal(Integer countSignal) {
 		this.countSignal = countSignal;
+	}
+
+	public String getFsuCode() {
+		return fsuCode;
+	}
+
+	public void setFsuCode(String fsuCode) {
+		this.fsuCode = fsuCode;
+	}
+
+	public Integer getFsuId() {
+		return fsuId;
+	}
+
+	public void setFsuId(Integer fsuId) {
+		this.fsuId = fsuId;
 	}
 }

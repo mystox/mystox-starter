@@ -42,7 +42,11 @@ public class DeviceEntity implements Serializable {
 	private String manufacturer;	//生产厂家
 	private String brand;	//品牌
 	private String deviceDesc;	//备注
-
+	//网关上报
+	private String ip;
+	private String enterpriseCode;
+	private String serverCode;
+	private String gatewayServerCode;
 	//下面为FSU动环主机设备特有属性
 	private String state = CommonConstant.OFFLINE;	//注册状态（FSU类型、摄像机类型）：在线、离线
 	private String operationState = FsuOperationState.PROJECT;	//运行状态（FSU类型）：工程态、测试态、交维态
