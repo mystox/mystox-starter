@@ -8,4 +8,6 @@ public class CommonConstant {
 
     public static final String OFFLINE = "离线";
     public static final String ONLINE = "在线";
+    public static final String YES = "是";
+    public static final String NO = "否";
 }

@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class AlarmQuery {
 
+    private String id;
     private String enterpriseCode;
     private String serverCode;
     private String name;                //告警名称
@@ -23,6 +24,32 @@ public class AlarmQuery {
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
     private List<String> tierCodeList;  //区域层级编码列表
     private List<String> siteIdList;    //站点编码列表
+    private String focus;              //告警关注操作
+    private String operationState;      //FSU运行状态
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
+
+    public String getFocus() {
+        return focus;
+    }
+
+    public void setFocus(String focus) {
+        this.focus = focus;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getEnterpriseCode() {
         return enterpriseCode;
