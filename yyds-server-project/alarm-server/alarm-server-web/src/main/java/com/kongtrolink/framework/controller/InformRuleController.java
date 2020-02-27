@@ -63,13 +63,13 @@ public class InformRuleController extends BaseController {
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
         User user = getUser(request);
-        if(null == user){
+        if(null != user){
             user = new User();
+            user.setId("admin");
+            user.setName("超级管理员");
+            informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         }
-        user.setId("admin");
-        user.setName("超级管理员");
         Date curDate = new Date();
-        informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         informRule.setUpdateTime(curDate);
         informRule.initDateInt();
         informRule.setRuleType(Contant.MANUAL);
