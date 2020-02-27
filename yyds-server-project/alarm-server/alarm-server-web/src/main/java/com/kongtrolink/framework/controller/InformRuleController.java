@@ -63,13 +63,13 @@ public class InformRuleController extends BaseController {
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
         User user = getUser(request);
-        if(null == user){
+        if(null != user){
             user = new User();
+            user.setId("admin");
+            user.setName("超级管理员");
+            informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         }
-        user.setId("admin");
-        user.setName("超级管理员");
         Date curDate = new Date();
-        informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         informRule.setUpdateTime(curDate);
         informRule.initDateInt();
         informRule.setRuleType(Contant.MANUAL);
@@ -182,10 +182,10 @@ public class InformRuleController extends BaseController {
     @RequestMapping("/authUser")
     public @ResponseBody JsonResult authUser(@RequestBody InformRuleQuery ruleQuery){
         List<String> userIds = ruleQuery.getUserIds();
+        //删除原来数据，保证一个用户只有一条启用的通知规则
+        ruleUserService.deleteByRuleId(ruleQuery.get_id());
+        ruleUserService.deleteByUserIds(userIds);
         if(null != userIds && userIds.size()>0){
-            //删除原来数据，保证一个用户只有一条启用的通知规则
-            ruleUserService.deleteByRuleId(ruleQuery.get_id());
-            ruleUserService.deleteByUserIds(userIds);
             List<String> usernames = ruleQuery.getUsernames();
             Date curTime = new Date();
             for(int i=0; i<userIds.size(); i++){
