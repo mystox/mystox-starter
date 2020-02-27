@@ -10,7 +10,8 @@ import java.util.List;
 /**
  * 启动  任务配置
  * @author John
- *
+ * 暂时不主动配置
+ * 又业务平台主动设置
  */
 public class JobInitConfig {
 	
@@ -27,9 +28,9 @@ public class JobInitConfig {
 			return list;
 		}
 
-        list.add(new JobEntity("yytd", "HistoryTestTask", JonCron.everySe10,"yytd"));
-        list.add(new JobEntity("dadongdong", "HistoryTestTask", JonCron.everySe15,"dadongdong"));
-        list.add(new JobEntity("cntb", "HistoryTestTask", JonCron.everySe20,"cntb"));
+        list.add(new JobEntity("yytd", "HistoryTask", JonCron.everySe10,"yytd"));
+        list.add(new JobEntity("dadongdong", "HistoryTask", JonCron.everySe15,"dadongdong"));
+        list.add(new JobEntity("cntb", "HistoryTask", JonCron.everySe20,"cntb"));
         return list;
 	}
 }
