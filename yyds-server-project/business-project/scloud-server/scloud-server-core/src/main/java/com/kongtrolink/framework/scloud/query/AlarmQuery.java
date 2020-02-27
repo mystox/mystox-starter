@@ -24,8 +24,17 @@ public class AlarmQuery {
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
     private List<String> tierCodeList;  //区域层级编码列表
     private List<String> siteIdList;    //站点编码列表
-    private String focus;              //告警关注操作
+    private String focus;              //告警关注操作(关注/取消关注)
     private String operationState;      //FSU运行状态
+    private String type;                //告警类型（实时/历史）
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getOperationState() {
         return operationState;

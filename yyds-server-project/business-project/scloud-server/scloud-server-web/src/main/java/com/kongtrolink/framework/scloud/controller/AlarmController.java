@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.scloud.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -58,15 +56,14 @@ public class AlarmController extends BaseController{
         String operaCode = "";
         //2，将设备id列表和其他参数传递过去
         try {
+            //具体查询历史还是实时数据，由中台告警模块根据参数判定
             MsgResult msgResult = mqttOpera.opera(operaCode, JSONObject.toJSONString(alarmQuery));
             //liuddtodo 20200227可能需要补充拓展字段
             String msg = msgResult.getMsg();
             JSONObject jsonObject = (JSONObject)JSONObject.parse(msg);
-            Integer count = jsonObject.getInteger("count");
             String list = jsonObject.getString("list");
             List<Alarm> alarmList = JSONObject.parseArray(list, Alarm.class);
-            ListResult<Alarm> alarmListResult = new ListResult<>(alarmList, count);
-            return new JsonResult(alarmListResult);
+            return new JsonResult(alarmList);
         } catch (Exception e) {
             //打印调用失败消息
             logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
@@ -134,11 +131,13 @@ public class AlarmController extends BaseController{
             MsgResult msgResult = mqttOpera.opera(operaCode, jsonObject.toString());
             int stateCode = msgResult.getStateCode();
             //liuddtodo 需要确认返回值含义
+
+            return new JsonResult("告警消除成功", true);
         }catch (Exception e) {
             //打印调用失败消息
             logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
+            return new JsonResult("告警消除失败", false);
         }
-        return null;
     }
 
     /**
@@ -161,10 +160,12 @@ public class AlarmController extends BaseController{
             MsgResult msgResult = mqttOpera.opera(operaCode, jsonObject.toString());
             int stateCode = msgResult.getStateCode();
             //liuddtodo 需要确认返回值含义
+
+            return new JsonResult(alarmQuery.getFocus() + "成功", true);
         }catch (Exception e) {
             //打印调用失败消息
             logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
+            return new JsonResult(alarmQuery.getFocus() + "失败", false);
         }
-        return null;
     }
 }
