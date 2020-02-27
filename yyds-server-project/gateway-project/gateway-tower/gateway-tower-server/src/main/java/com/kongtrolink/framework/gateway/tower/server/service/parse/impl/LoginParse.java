@@ -66,6 +66,7 @@ public class LoginParse extends ParseHandler {
             redisFsuInfo.setShortCode(fsuShortCode);
             redisFsuInfo.setPort(getFsuPort());
             redisFsuInfo.setIp(login.getIp());
+            redisFsuInfo.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
             redisUtils.hset(RedisKey.FSU_INFO + "_"+uniqueCode,fsuShortCode,JSONObject.toJSONString(redisFsuInfo));
             //判断是否有离线告警
             try{
