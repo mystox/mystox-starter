@@ -1,15 +1,18 @@
 package com.kongtrolink.framework.scloud.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmFocus;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.service.AlarmFocusService;
 import com.kongtrolink.framework.scloud.service.AlarmService;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.SiteService;
@@ -43,6 +46,9 @@ public class AlarmController extends BaseController{
     DeviceService deviceService;
     @Autowired
     MqttOpera mqttOpera;
+    @Autowired
+    AlarmFocusService alarmFocusService;
+
     private static final Logger logger = LoggerFactory.getLogger(AlarmController.class);
 
     /**
@@ -55,7 +61,7 @@ public class AlarmController extends BaseController{
     public JsonResult list(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
         listCommon(alarmQuery);
         //操作模块待定
-        String operaCode = "";
+        String operaCode = "list";
         //2，将设备id列表和其他参数传递过去
         try {
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
@@ -65,6 +71,7 @@ public class AlarmController extends BaseController{
             JSONObject jsonObject = (JSONObject)JSONObject.parse(msg);
             String list = jsonObject.getString("list");
             List<Alarm> alarmList = JSONObject.parseArray(list, Alarm.class);
+            //liuddtodo 可能需要补充其他信息
             return new JsonResult(alarmList);
         } catch (Exception e) {
             //打印调用失败消息
@@ -114,7 +121,7 @@ public class AlarmController extends BaseController{
     /**
      * @auther: liudd
      * @date: 2020/2/26 15:20
-     * 功能描述:手动消除告警
+     * 功能描述:手动消除告警，消除后需发送推送
      */
     @RequestMapping("/reslove")
     @ResponseBody
@@ -122,17 +129,11 @@ public class AlarmController extends BaseController{
         //消除时间，消除用户，
         Date resloveTime = new Date();
         User user = getUser(request);
-        //liuddtodo 告警消除的操作码待定
+        //需要参数1，告警id， 2，告警上报时间，3，告警类型
         String operaCode = "reslove";
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", alarmQuery.getId());
-        //必须要传递告警上报时间，帮助判定告警所在表
-        jsonObject.put("tReport", alarmQuery.getBeginTime().getTime());
-        jsonObject.put("userId", user.getId());
-        jsonObject.put("username", user.getUsername());
-        jsonObject.put("time", resloveTime.getTime());
+        alarmQuery.setOperateTime(resloveTime);
         try {
-            MsgResult msgResult = mqttOpera.opera(operaCode, jsonObject.toString());
+            MsgResult msgResult = mqttOpera.opera(operaCode, JSONObject.toJSONString(alarmQuery));
             int stateCode = msgResult.getStateCode();
             //liuddtodo 需要确认返回值含义
 
@@ -152,24 +153,26 @@ public class AlarmController extends BaseController{
     @RequestMapping("/focus")
     @ResponseBody
     public JsonResult focus(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
-        //调用中台告警模块，关注/取消关注告警
-        String operaCode = "focus";
-        Date focueTime = new Date();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", alarmQuery.getId());
-        jsonObject.put("tReport", alarmQuery.getBeginTime().getTime());
-        jsonObject.put("focus", alarmQuery.getFocus());
-        jsonObject.put("time", focueTime.getTime());
-        try {
-            MsgResult msgResult = mqttOpera.opera(operaCode, jsonObject.toString());
-            int stateCode = msgResult.getStateCode();
-            //liuddtodo 需要确认返回值含义
-
-            return new JsonResult(alarmQuery.getFocus() + "成功", true);
-        }catch (Exception e) {
-            //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
-            return new JsonResult(alarmQuery.getFocus() + "失败", false);
+        Date curTime = new Date();
+        User user = getUser(request);
+        String uniqueCode = getUniqueCode();
+        String operate = alarmQuery.getOperate();
+        boolean result ;
+        if(Const.ALARM_OPERATE_FOCUS.equals(operate)){
+            AlarmFocus alarmFocus = new AlarmFocus();
+            alarmFocus.setAlarmId(alarmQuery.getId());
+            alarmFocus.setFocusTime(curTime);
+            if(null != user){
+                alarmFocus.setUserId(user.getId());
+                alarmFocus.setUsername(user.getUsername());
+            }
+            result = alarmFocusService.add(uniqueCode, alarmFocus);
+        }else{
+            result = alarmFocusService.delete(uniqueCode, alarmQuery.getId());
         }
+        if(result){
+            return new JsonResult(operate + Const.RESULT_SUCC, true);
+        }
+        return new JsonResult(operate + Const.RESULT_FAIL, false);
     }
 }

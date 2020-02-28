@@ -5,6 +5,7 @@ import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
@@ -30,82 +31,33 @@ public class AlarmServiceImpl implements AlarmService{
     Calendar calendar = DateUtil.calendar;
     @Value("${alarm.currentLimit:5}")
     private int currentLimit;
+    private static final String current_table = MongTable.ALARM_CURRENT;
+    private static final String history_table = MongTable.ALARM_HISTORY;
+
 
     /**
      * @param alarmQuery
-     * @param table
+     * @auther: liudd
+     * @date: 2020/2/28 13:54
+     * 功能描述:获取列表
+     */
+    @Override
+    public List<DBObject> list(AlarmQuery alarmQuery) {
+        if(Contant.CURR_ALARM.equals(alarmQuery.getType())){
+            return listCurrent(alarmQuery);
+        }else{
+            return listHistory(alarmQuery);
+        }
+    }
+
+    /**
+     * @param alarmQuery
      * @auther: liudd
      * @date: 2019/9/11 14:48
      * 功能描述:列表
      */
-    @Override
-    public List<DBObject> list(AlarmQuery alarmQuery, String table) {
-        return alarmDao.list(alarmQuery, table);
-    }
-
-    /**
-     * @param alarmQuery
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/11 14:48
-     * 功能描述:统计
-     */
-    @Override
-    public int count(AlarmQuery alarmQuery, String table) {
-        return alarmDao.count(alarmQuery, table);
-    }
-
-    /**
-     * @param alarmQuery
-     * @auther: liudd
-     * @date: 2019/11/13 16:59
-     * 功能描述:前端获取历史告警表， 完美的方法，但是真实分页不适合单表过大。只能使用类似于实时告警中的伪分页
-     */
-    @Override
-    public ListResult<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery) {
-        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
-                + Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
-        //1，确定时间。如果开始接结束都没有选择，开始结束为今天到一个月前的今天
-        alarmQuery = initTime(alarmQuery);
-        //2，获取时间跨度内各个时间点的年周数，生成对应的表
-        List<String> weeks = getWeeks(alarmQuery);
-        System.out.println(weeks.toString());
-
-        //根据周数，获取所有数据
-        int allCount = 0;       //计算总数
-        int[] weekCounts = new int[weeks.size()];
-        for(int i=0; i<weeks.size(); i++){
-            String table = tablePrefix + weeks.get(i);
-            weekCounts[i] = count(alarmQuery, table);
-            allCount += weekCounts[i];
-        }
-        //判定每个表是否能满足当前分页数据
-        List<DBObject> allList = new ArrayList<>();
-        int currentPage = alarmQuery.getCurrentPage();
-        int pageSize = alarmQuery.getPageSize();
-        int beginNum = (currentPage - 1) * pageSize;
-        int nextBegin = beginNum;   //下一个表分页起始数据
-        int nextSize = pageSize;    //下一个表获取数量
-        for(int i=0; i<weeks.size(); i++){
-            int endNum = nextBegin + nextSize;
-            int tempCount = weekCounts[i];
-            if(tempCount > nextBegin){
-                alarmQuery.setRealBeginNum(nextBegin);
-                alarmQuery.setRealLimit(nextSize);
-                List<DBObject> tempList = alarmDao.getHistoryAlarmList(alarmQuery, tablePrefix + weeks.get(i));
-                allList.addAll(tempList);
-                if(tempCount >= endNum){     //如果当前表能满足剩余所有分页数据获取
-                    break;
-                }else{
-                    nextBegin = 0;
-                    nextSize = endNum - tempCount;
-                }
-            }else{
-                nextBegin = nextBegin - tempCount;
-            }
-        }
-        ListResult<DBObject> listResult = new ListResult<>(allList, allCount);
-        return listResult;
+    private List<DBObject> listCurrent(AlarmQuery alarmQuery) {
+        return alarmDao.listCurrent(alarmQuery, MongTable.ALARM_CURRENT);
     }
 
     /**
@@ -114,10 +66,9 @@ public class AlarmServiceImpl implements AlarmService{
      * @date: 2019/12/5 19:20
      * 功能描述:历史告警伪分页
      */
-    @Override
-    public ListResult<DBObject> historyAlarmList(AlarmQuery alarmQuery) {
+    public List<DBObject> listHistory(AlarmQuery alarmQuery) {
         String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
-                + Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
+                + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
         //1，确定时间。如果开始接结束都没有选择，开始结束为今天到一个月前的今天
         alarmQuery = initTime(alarmQuery);
         //2，获取时间跨度内各个时间点的年周数，生成对应的表
@@ -138,7 +89,7 @@ public class AlarmServiceImpl implements AlarmService{
             String table = tablePrefix + weeks.get(i);
             alarmQuery.setRealBeginNum(nextBegin);
             alarmQuery.setRealLimit(nextSize);
-            List<DBObject> historyAlarmList = alarmDao.getHistoryAlarmList(alarmQuery, table);
+            List<DBObject> historyAlarmList = alarmDao.listHistory(alarmQuery, table);
             int tempCount = historyAlarmList.size();
             if(nextBegin > tempCount){
                 nextBegin = nextSize - tempCount;
@@ -150,7 +101,7 @@ public class AlarmServiceImpl implements AlarmService{
                 nextSize = nextSize+nextBegin - tempCount;
             }
         }
-        return new ListResult<>(allList, allList.size());
+        return allList;
     }
 
     /**0
@@ -221,5 +172,20 @@ public class AlarmServiceImpl implements AlarmService{
     @Override
     public boolean check(String key,  String table, Date date, String checkContant, FacadeView checker) {
         return alarmDao.check(key, table, date, checkContant, checker);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/2/28 12:10
+     * 功能描述:根据告警类型和告警上报时间获取单个告警所在表名
+     */
+    private String getTable(String enterpriseCode, String serverCode, String type, Date treport){
+        String table = current_table;
+        if(Contant.HIST_ALARM.equals(type)){
+            String tablePrefix = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.UNDERLINE + MongTable.ALARM_HISTORY + Contant.UNDERLINE;
+            String year_week = DateUtil.getYear_week(treport);
+            table = tablePrefix + year_week;
+        }
+        return table;
     }
 }

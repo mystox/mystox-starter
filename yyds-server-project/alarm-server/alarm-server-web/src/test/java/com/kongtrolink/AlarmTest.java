@@ -144,9 +144,7 @@ public class AlarmTest {
             alarmQuery.setServerCode("TOWER_SERVER");
             alarmQuery.setType(Contant.HIST_ALARM);
             alarmQuery.setStartBeginTime(beginTime);
-            ListResult<DBObject> historyAlarmList = alarmService.getHistoryAlarmList(alarmQuery);
-            List<DBObject> list = historyAlarmList.getList();
-            System.out.println("count:" + historyAlarmList.getCount() + "; listCount:" + list.size());
+            List<DBObject> list = alarmService.list(alarmQuery);
             System.out.println(list.toString());
         }catch (Exception e){
             e.printStackTrace();

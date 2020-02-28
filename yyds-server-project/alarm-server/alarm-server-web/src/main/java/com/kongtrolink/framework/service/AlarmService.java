@@ -14,33 +14,13 @@ import java.util.List;
  * @Description:
  */
 public interface AlarmService {
-    /**
-     * @auther: liudd
-     * @date: 2019/9/11 14:48
-     * 功能描述:列表
-     */
-    List<DBObject> list(AlarmQuery alarmQuery, String table);
 
     /**
      * @auther: liudd
-     * @date: 2019/9/11 14:48
-     * 功能描述:统计
+     * @date: 2020/2/28 13:54
+     * 功能描述:获取列表
      */
-    int count(AlarmQuery alarmQuery, String table);
-
-    /**
-     * @auther: liudd
-     * @date: 2019/11/13 16:59
-     * 功能描述:前端获取历史告警表
-     */
-    ListResult<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery);
-
-    /**
-     * @auther: liudd
-     * @date: 2019/12/5 19:20
-     * 功能描述:历史告警伪分页
-     */
-    ListResult<DBObject> historyAlarmList(AlarmQuery alarmQuery);
+    List<DBObject> list(AlarmQuery alarmQuery);
 
     /**
      * @auther: liudd

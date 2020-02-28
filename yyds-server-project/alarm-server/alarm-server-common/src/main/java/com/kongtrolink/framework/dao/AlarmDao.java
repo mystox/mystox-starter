@@ -56,7 +56,7 @@ public class AlarmDao {
         return result.getN()>0 ? true : false;
     }
 
-    public List<DBObject> list(AlarmQuery alarmQuery, String table) {
+    public List<DBObject> listCurrent(AlarmQuery alarmQuery, String table) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
@@ -67,7 +67,7 @@ public class AlarmDao {
         return mongoTemplate.find(query, DBObject.class, table);
     }
 
-    public List<DBObject> getHistoryAlarmList(AlarmQuery alarmQuery, String table) {
+    public List<DBObject> listHistory(AlarmQuery alarmQuery, String table) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
