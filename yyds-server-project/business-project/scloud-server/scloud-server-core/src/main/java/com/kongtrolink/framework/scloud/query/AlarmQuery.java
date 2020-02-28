@@ -23,7 +23,7 @@ public class AlarmQuery {
     private Date endTime;               //结束时间
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
     private List<String> tierCodeList;  //区域层级编码列表
-    private List<String> siteIdList;    //站点编码列表
+    private List<Integer> siteIdList;    //站点编码列表
     private String focus;              //告警关注操作(关注/取消关注)
     private String operationState;      //FSU运行状态
     private String type;                //告警类型（实时/历史）
@@ -156,11 +156,11 @@ public class AlarmQuery {
         this.tierCodeList = tierCodeList;
     }
 
-    public List<String> getSiteIdList() {
+    public List<Integer> getSiteIdList() {
         return siteIdList;
     }
 
-    public void setSiteIdList(List<String> siteIdList) {
+    public void setSiteIdList(List<Integer> siteIdList) {
         this.siteIdList = siteIdList;
     }
 }

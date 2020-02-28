@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,32 +18,19 @@ public class DeviceServiceImpl implements DeviceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
     /**
-     * @param siteIdList
+     * @param deviceQuery
      * @auther: liudd
-     * @date: 2020/2/26 16:31
-     * 功能描述:根据站点id列表获取设备列表
+     * @date: 2020/2/28 9:48
+     * 功能描述:列表
      */
     @Override
-    public List<DeviceEntity> listBySiteIdList(List<String> siteIdList) {
+    public List<DeviceEntity> list(DeviceQuery deviceQuery) {
         return null;
     }
 
-    /**
-     * @param deviceEntityList
-     * @auther: liudd
-     * @date: 2020/2/26 16:33
-     * 功能描述:设备列表转换成设备ID列表
-     */
     @Override
-    public List<String> list2IdList(List<DeviceEntity> deviceEntityList) {
-        if(null == deviceEntityList){
-            return null;
-        }
-        List<String> deviceIdList = new ArrayList<>();
-        for(DeviceEntity deviceEntity : deviceEntityList){
-            deviceIdList.add(deviceEntity.getId() + "");
-        }
-        return deviceIdList;
+    public int count(DeviceQuery deviceQuery) {
+        return 0;
     }
 
     /**

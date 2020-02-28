@@ -9,6 +9,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.service.AlarmService;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.SiteService;
@@ -74,11 +75,12 @@ public class AlarmController extends BaseController{
 
     private void listCommon(AlarmQuery alarmQuery){
         //1，获取用户管辖范围设备id列表
-        List<String> siteIdList = alarmQuery.getSiteIdList();
-        //liuddtodo 还需要根据根据状态过滤
-        //liuddtodo 需要根据FSU运行状态，获取站点id列表，与前端的站点id列表取交集
-        List<DeviceEntity> deviceEntities = deviceService.listBySiteIdList(siteIdList);
-        List<String> deviceCodeList = deviceService.list2CodeList(deviceEntities);
+        List<Integer> siteIdList = alarmQuery.getSiteIdList();
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setSiteIds(siteIdList);
+        deviceQuery.setOperationState(alarmQuery.getOperationState());
+        List<DeviceEntity> deviceEntityList = deviceService.list(deviceQuery);
+        List<String> deviceCodeList = deviceService.list2CodeList(deviceEntityList);
         alarmQuery.setDeviceCodeList(deviceCodeList);
     }
 

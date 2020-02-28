@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 
 import java.util.List;
 
@@ -12,17 +13,12 @@ public interface DeviceService {
 
     /**
      * @auther: liudd
-     * @date: 2020/2/26 16:31
-     * 功能描述:根据站点id列表获取设备列表
+     * @date: 2020/2/28 9:48
+     * 功能描述:列表
      */
-    List<DeviceEntity> listBySiteIdList(List<String> siteIdList);
+    List<DeviceEntity> list(DeviceQuery deviceQuery);
 
-    /**
-     * @auther: liudd
-     * @date: 2020/2/26 16:33
-     * 功能描述:设备列表转换成设备ID列表
-     */
-    List<String> list2IdList(List<DeviceEntity> deviceEntityList);
+    int count(DeviceQuery deviceQuery);
 
     /**
      * @auther: liudd
