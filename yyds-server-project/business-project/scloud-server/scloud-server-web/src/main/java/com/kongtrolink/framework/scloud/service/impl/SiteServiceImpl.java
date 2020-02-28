@@ -123,7 +123,7 @@ public class SiteServiceImpl implements SiteService {
         MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
         int stateCode = msgResult.getStateCode();
         if (1 == stateCode){
-            LOGGER.info("【站点管理】，从【资管】获取站点成功");
+            LOGGER.info("【站点管理】，从【资管】获取站点基本信息成功");
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             List<String> siteCodes = new ArrayList<>();
             Map<String, BasicSiteEntity> map = new HashMap<>();

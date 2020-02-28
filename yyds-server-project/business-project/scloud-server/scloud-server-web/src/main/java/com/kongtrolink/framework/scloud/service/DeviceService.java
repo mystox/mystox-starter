@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 
 import java.util.List;
@@ -26,4 +27,9 @@ public interface DeviceService {
      * 功能描述:列表转换成编码列表
      */
     List<String> list2CodeList(List<DeviceEntity> deviceEntityList);
+
+    /**
+     * 获取设备列表
+     */
+    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
 }
