@@ -18,4 +18,10 @@ public class OperaCodeConstant {
     //添加CI
     public static final String ADD_CI_MSG = "addCIMsg";
 
+    //修改CI
+    public static final String MODIFY_CI_MSG = "modifyCIMsg";
+
+    //删除CI
+    public static final String DELETE_CI_MSG = "deleteCIMsg";
+
 }

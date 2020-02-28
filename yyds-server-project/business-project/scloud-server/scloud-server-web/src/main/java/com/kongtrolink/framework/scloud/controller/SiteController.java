@@ -98,7 +98,7 @@ public class SiteController extends BaseController{
     }
 
     /**
-     * 导入站点(批量)
+     * 批量导入站点
      */
     @RequestMapping(value = "importSiteList", method = RequestMethod.POST)
     public @ResponseBody JsonResult importSiteList(@RequestBody MultipartFile file){
