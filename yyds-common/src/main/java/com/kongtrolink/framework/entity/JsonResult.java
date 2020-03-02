@@ -15,7 +15,16 @@ public class JsonResult {
     private String info = "请求成功！";
     private Boolean success = true;
     private Object data;
+    private int count;
     private Object otherInfo;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public JsonResult() {
         printResult();

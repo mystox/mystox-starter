@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.mqtt.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.mqtt.MqttService;
 import com.kongtrolink.framework.query.AlarmQuery;
@@ -16,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,39 +40,37 @@ public class MqttServiceImpl implements MqttService{
      */
     @Override
     public String remoteList(String jsonStr) {
-        System.out.println("+++++++++++++++");
         logger.info(jsonStr);
-        JSONObject resultJson = new JSONObject();
-        resultJson.put(Const.RESULT_CODE, "1");
         //填充查询条件
         JSONObject jsonObject = (JSONObject)JSONObject.parse(jsonStr);
+        JsonResult jsonResult = new JsonResult();
         AlarmQuery alarmQuery = new AlarmQuery();
         initPara(alarmQuery, jsonObject);
         String type = alarmQuery.getType();
         if(StringUtil.isNUll(type)){
-            resultJson.put(Const.RESULT_CODE, "0");
-            resultJson.put(Const.RESULT_INFO, "告警类型为空");
-            return resultJson.toJSONString();
+            jsonResult.setSuccess(false);
+            jsonResult.setData("告警类型为空");
+            return JSONObject.toJSONString(jsonResult);
         }
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         if(StringUtil.isNUll(enterpriseCode)){
-            resultJson.put(Const.RESULT_CODE, "0");
-            resultJson.put(Const.RESULT_INFO, "企业编码为空");
-            return resultJson.toJSONString();
+            jsonResult.setSuccess(false);
+            jsonResult.setData("企业编码为空");
+            return JSONObject.toJSONString(jsonResult);
         }
         String serverCode = alarmQuery.getServerCode();
         if(StringUtil.isNUll(serverCode)){
-            resultJson.put(Const.RESULT_CODE, "0");
-            resultJson.put(Const.RESULT_INFO, "服务编码为空");
-            return resultJson.toJSONString();
+            jsonResult.setSuccess(false);
+            jsonResult.setData("服务编码为空");
+            return JSONObject.toJSONString(jsonResult);
         }
-
         List<DBObject> dbObjectList = alarmService.list(alarmQuery);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
-        JsonResult jsonResult = new JsonResult(dbObjectList);
         jsonResult.setOtherInfo(auxilary);
-        resultJson.put(Const.DATA, jsonResult);
-        return resultJson.toJSONString();
+        jsonResult.setSuccess(true);
+        jsonResult.setData(dbObjectList);
+        jsonResult.setCount(dbObjectList.size());
+        return JSONObject.toJSONString(jsonResult);
     }
 
     /**
@@ -86,41 +82,83 @@ public class MqttServiceImpl implements MqttService{
         //list相关参数
         alarmQuery.setCurrentPage(jsonObject.getInteger(Const.ALARM_LIST_CURRENTPAGE));
         alarmQuery.setPageSize(jsonObject.getInteger(Const.ALARM_LIST_PAGESIZE));
+        alarmQuery.setType(jsonObject.getString(Const.ALARM_LIST_TYPE));
         alarmQuery.setId(jsonObject.getString(Const.ALARM_LIST_ID));
         alarmQuery.setEnterpriseCode(jsonObject.getString(Const.ALARM_LIST_ENTERPRISECODE));
         alarmQuery.setServerCode(jsonObject.getString(Const.ALARM_LIST_SERVERCODE));
         alarmQuery.setName(jsonObject.getString(Const.ALARM_LIST_NAME));
-        alarmQuery.setLevel(jsonObject.getInteger(Const.ALARM_LIST_LEVEL));
-        alarmQuery.setTargetLevel(jsonObject.getInteger(Const.ALARM_LIST_TARGETLEVEL));
         alarmQuery.setTargetLevelName(jsonObject.getString(Const.ALARM_LIST_TARGETLEVELNAME));
         alarmQuery.setState(jsonObject.getString(Const.ALARM_LIST_STATE));
-        alarmQuery.setCheck(jsonObject.getBoolean(Const.ALARM_LIST_CHECKSTATE));
+        String isCheck = jsonObject.getString(Const.ALARM_LIST_CHECKSTATE);
+        if(!StringUtil.isNUll(isCheck)){
+            alarmQuery.setCheck(Boolean.parseBoolean(isCheck));
+        }
         alarmQuery.setDeviceType(jsonObject.getString(Const.ALARM_LIST_DEVICETYPE));
         alarmQuery.setDeviceModel(jsonObject.getString(Const.ALARM_LIST_DEVICEMODEL));
-        alarmQuery.setTreport(jsonObject.getDate(Const.ALARM_LIST_TREPORT));
-        alarmQuery.setStartBeginTime(jsonObject.getDate(Const.ALARM_LIST_BEGINTIME));
-        alarmQuery.setStartEndTime(jsonObject.getDate(Const.ALARM_LIST_ENDTIME));
+        Long startBeginTime = jsonObject.getLong(Const.ALARM_LIST_STARTBEGINTIME);
+        if(null != startBeginTime){
+            alarmQuery.setStartBeginTime(new Date(startBeginTime));
+        }
+        Long startEndTime = jsonObject.getLong(Const.ALARM_LIST_STARTENDTIME);
+        if(null != startEndTime){
+            alarmQuery.setStartEndTime(new Date(startEndTime));
+        }
 
+        //远程确认相关参数
         alarmQuery.setOperate(jsonObject.getString(Const.ALARM_OPERATE));
-        alarmQuery.setOperateTime(jsonObject.getDate(Const.ALARM_OPERATE_TIME));
+        Long checkTime = jsonObject.getLong(Const.ALARM_OPERATE_TIME);
+        if(null != checkTime){
+            alarmQuery.setOperateTime(new Date(checkTime));
+        }
         alarmQuery.setOperateUserId(jsonObject.getString(Const.ALARM_OPERATE_USER_ID));
         alarmQuery.setOperateUsername(jsonObject.getString(Const.ALARM_OPERATE_USERNAME));
+        alarmQuery.setOperateDesc(jsonObject.getString(Const.ALARM_OPERATE_DESC));
+        Long treport = jsonObject.getLong(Const.ALARM_LIST_TREPORT);
+        if(null != treport){
+            alarmQuery.setTreport(new Date(treport));
+        }
     }
 
     /**
      * @param jsonStr
      * @auther: liudd
-     * @date: 2020/2/28 10:04
-     * 功能描述:修改告警属性，包括告警消除，关注，取消关注等
+     * @date: 2020/3/2 13:25
+     * 功能描述:远程告警确认
      */
     @Override
-    public String update(String jsonStr) {
+    public String alarmRemoteCheck(String jsonStr) {
         logger.info(jsonStr);
-        JSONObject resultJson = new JSONObject();
-        JSONObject jsonObject = (JSONObject) JSONObject.parse(jsonStr);
         //填充查询条件
+        JSONObject jsonObject = (JSONObject)JSONObject.parse(jsonStr);
+        JsonResult jsonResult = new JsonResult();
         AlarmQuery alarmQuery = new AlarmQuery();
         initPara(alarmQuery, jsonObject);
-        return resultJson.toJSONString();
+        String type = alarmQuery.getType();
+        if(StringUtil.isNUll(type)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("告警类型为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        String enterpriseCode = alarmQuery.getEnterpriseCode();
+        if(StringUtil.isNUll(enterpriseCode)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("企业编码为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        String serverCode = alarmQuery.getServerCode();
+        if(StringUtil.isNUll(serverCode)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("服务编码为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        boolean check = alarmService.check(alarmQuery);
+        if(check){
+            jsonResult.setSuccess(true);
+            jsonResult.setData(Const.ALARM_OPERATE_CHECK + Const.RESULT_SUCC);
+        }else{
+            jsonResult.setSuccess(false);
+            jsonResult.setData(Const.ALARM_OPERATE_CHECK + Const.RESULT_FAIL);
+        }
+        return JSONObject.toJSONString(jsonResult);
     }
 }
