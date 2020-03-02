@@ -94,9 +94,9 @@ public class HistoryService {
                     historyDataEntity.setFsuCode(fsuCode);
                     historyDataEntity.setTime(new Date().getTime());
                     historyDataEntity.setValue(valueMap);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                    String tableTime = sdf.format(new Date());
-                    historyDao.saveHistory(uniqueCode,historyDataEntity,tableTime);
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//                    String tableTime = sdf.format(new Date());
+                    historyDao.saveHistory(uniqueCode,historyDataEntity);
                 }catch (Exception e){
                     e.printStackTrace();
                     LOGGER.error("历史数据异常 {} ,{} ",uniqueCode,fsuCode);
