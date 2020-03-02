@@ -23,4 +23,6 @@ public class MongoTableName
     public final static String COMPILER_PRODUCT_DIC = "t_compiler_product_dic";
     public final static String COMPILER_BUSINESSSCENE_DIC = "t_compiler_businessScene_dic";
 
+
+
 }
