@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.entity.FocusSignalEntity;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = "/focusSignal", method = RequestMethod.POST)
-public class FocusSignalController {
+public class FocusSignalController  extends BaseController {
 
     @Autowired
     FocusSignalService focusSignalService;
@@ -30,6 +31,10 @@ public class FocusSignalController {
     @RequestMapping(value = "/save")
     public @ResponseBody JsonResult  saveFocusSignal(@RequestBody FocusSignalEntity focusSignalEntity) {
        try{
+           String uniqueCode = getUniqueCode();
+           String userId = getUserId();
+           focusSignalEntity.setUniqueCode(uniqueCode);
+           focusSignalEntity.setUserId(userId);
            focusSignalService.saveFocusSignal(focusSignalEntity);
            return new JsonResult("保存成功");
        }catch (Exception e){
