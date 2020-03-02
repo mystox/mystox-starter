@@ -21,6 +21,9 @@ public class FocusSignalEntity implements Serializable {
     private String deviceType; //设备类型
     private String fsuCode; //FSU code
     private String deviceCode; //设备code
+    private String tierName;	//区域名称
+    private String siteName;	//站点名称
+    private String deviceName;	//设备名称
     private String cntbId;//信号灯的cntbId
     private String userId; //用户ID
     private String typeName;  //信号点名称
@@ -122,5 +125,29 @@ public class FocusSignalEntity implements Serializable {
 
     public void setAlarmLevel(String alarmLevel) {
         this.alarmLevel = alarmLevel;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }
