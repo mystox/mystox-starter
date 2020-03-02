@@ -321,7 +321,7 @@ public class RegisterRunner implements ApplicationRunner {
                     preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)), operaCode);
             if (mqttHandler != null) {
                 if (!mqttHandler.isExists(topicId))
-                    logger.info("订阅了:{} ",topicId);
+                    //logger.info("订阅了:{} ",topicId);
                     mqttHandler.addSubTopic(topicId, 2);
             }
         });

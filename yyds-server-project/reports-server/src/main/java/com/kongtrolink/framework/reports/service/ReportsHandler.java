@@ -209,13 +209,13 @@ public class ReportsHandler implements ApplicationRunner {
 //            Date startTime = reportTask.getStartTime();
             if (rhythm != null)
                 if (System.currentTimeMillis() - startTime.getTime() > 1000 * 3 * (rhythm == 0 ? 1 : rhythm)) {
-                    logger.error("[{}]task time out... set invalid...", reportTaskId);
+                    logger.error("[{}]task time out... set [invalid]...", reportTaskId);
                     reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
                 }
         }
         if (TaskType.singleTask.name().equals(reportTask.getTaskType())) //如果为单次任务，则在任务完成后设置任务为无效
         {
-            logger.warn("[{}]task is singleTask,set invalid when task ending...", reportTaskId);
+            logger.warn("[{}]task is singleTask, set [invalid] when task ending...", reportTaskId);
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
 

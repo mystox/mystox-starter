@@ -225,6 +225,8 @@ public class XlsExporter {
 			return (String) obj;
 		} else if (obj instanceof Integer) { // Integer
 			return (Integer) obj;
+		}else if (obj instanceof Long && ((Long) obj).longValue()>99999999) { // 时间 1583115217569
+			return DateUtil.getInstance().format(new Date((Long) obj));
 		} else if (obj instanceof Double) { // Double
 			return (Double) obj;
 		} else if (obj instanceof Boolean) { // Boolean
