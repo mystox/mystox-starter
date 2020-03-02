@@ -21,8 +21,9 @@ public interface MqttService {
 
     /**
      * @auther: liudd
-     * @date: 2020/2/28 10:04
-     * 功能描述:修改告警属性，包括告警消除，关注，取消关注等
+     * @date: 2020/3/2 13:25
+     * 功能描述:远程告警确认
      */
-    String update(String jsonStr);
+    @OperaCode
+    String alarmRemoteCheck(String jsonStr);
 }

@@ -59,6 +59,14 @@ public class DateUtil {
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    public static Date parse(String str){
+        try {
+         return    simpleDateFormat.parse(str);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
     public static String format(Date date){
         return simpleDateFormat.format(date);
     }
@@ -73,7 +81,11 @@ public class DateUtil {
     }
 
     public static void main(String[] a){
+        String date = "2020-01-26 00:00:00";
+        Date parse = DateUtil.parse(date);
+        System.out.println(parse + "; int:" + parse.getTime());
         Date curTime = new Date();
+        System.out.println(curTime.getTime());
         String ymd = getYMD(curTime);
         System.out.println("ymd:" + ymd);
 

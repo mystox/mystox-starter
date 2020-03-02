@@ -8,7 +8,7 @@ import java.util.List;
  * @Date: 2020/2/26 15:19
  * @Description:
  */
-public class AlarmQuery {
+public class AlarmQuery extends Paging{
 
     private String id;
     private String enterpriseCode;
