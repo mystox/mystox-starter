@@ -52,10 +52,12 @@ public class AlarmController extends BaseController{
     AlarmFocusService alarmFocusService;
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmController.class);
-    @Value("${alarmModule.list:remoteList}")
+    @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
     @Value("${alarmModule.check:alarmRemoteCheck}")
     private String remoteCheck;
+    @Value("${alarmModule.check:alarmRemoteResolve}")
+    private String remoteResolve;
 
 
     /**
@@ -159,26 +161,21 @@ public class AlarmController extends BaseController{
     /**
      * @auther: liudd
      * @date: 2020/2/26 15:20
-     * 功能描述:手动消除告警，消除后需发送推送
+     * 功能描述:手动消除告警，调用原告警消除远程接口，需要拼接参数
+     *     private String enterpriseCode;
+            private String serverCode;
+            private List<JSONObject> alarms;
      */
     @RequestMapping("/reslove")
     @ResponseBody
     public JsonResult reslove(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
-        //消除时间，消除用户，
-        Date resloveTime = new Date();
-        User user = getUser(request);
-        //需要参数1，告警id， 2，告警上报时间，3，告警类型
-        String operaCode = "reslove";
-        alarmQuery.setOperateTime(resloveTime);
         try {
-            MsgResult msgResult = mqttOpera.opera(operaCode, JSONObject.toJSONString(alarmQuery));
-            int stateCode = msgResult.getStateCode();
-            //liuddtodo 需要确认返回值含义
-
+            MsgResult msgResult = mqttOpera.opera(remoteResolve, JSONObject.toJSONString(alarmQuery));
+            logger.error(" remote call result, msg:{}, operate:{}", JSONObject.toJSONString(msgResult), remoteCheck);
             return new JsonResult("告警消除成功", true);
         }catch (Exception e) {
             //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
+            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), remoteResolve, e.getMessage());
             return new JsonResult("告警消除失败", false);
         }
     }
@@ -195,22 +192,21 @@ public class AlarmController extends BaseController{
         User user = getUser(request);
         String uniqueCode = getUniqueCode();
         String operate = alarmQuery.getOperate();
-        boolean result ;
+        List<String> idList = alarmQuery.getIdList();
         if(Const.ALARM_OPERATE_FOCUS.equals(operate)){
-            AlarmFocus alarmFocus = new AlarmFocus();
-            alarmFocus.setAlarmId(alarmQuery.getId());
-            alarmFocus.setFocusTime(curTime);
-            if(null != user){
-                alarmFocus.setUserId(user.getId());
-                alarmFocus.setUsername(user.getUsername());
+            for(String id : idList) {
+                AlarmFocus alarmFocus = new AlarmFocus();
+                alarmFocus.setAlarmId(id);
+                alarmFocus.setFocusTime(curTime);
+                if (null != user) {
+                    alarmFocus.setUserId(user.getId());
+                    alarmFocus.setUsername(user.getUsername());
+                }
+                alarmFocusService.add(uniqueCode, alarmFocus);
             }
-            result = alarmFocusService.add(uniqueCode, alarmFocus);
         }else{
-            result = alarmFocusService.delete(uniqueCode, alarmQuery.getId());
+            alarmFocusService.deleteByIdList(uniqueCode, idList);
         }
-        if(result){
-            return new JsonResult(operate + Const.RESULT_SUCC, true);
-        }
-        return new JsonResult(operate + Const.RESULT_FAIL, false);
+        return new JsonResult(operate + Const.RESULT_SUCC, true);
     }
 }

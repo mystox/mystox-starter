@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
@@ -39,7 +40,7 @@ public class MqttServiceImpl implements MqttService{
      * 功能描述:告警列表，需要判定所属表
      */
     @Override
-    public String remoteList(String jsonStr) {
+    public String alarmRemoteList(String jsonStr) {
         logger.info(jsonStr);
         //填充查询条件
         JSONObject jsonObject = (JSONObject)JSONObject.parse(jsonStr);
@@ -160,5 +161,47 @@ public class MqttServiceImpl implements MqttService{
             jsonResult.setData(Const.ALARM_OPERATE_CHECK + Const.RESULT_FAIL);
         }
         return JSONObject.toJSONString(jsonResult);
+    }
+
+    /**
+     * @param jsonStr
+     * @auther: liudd
+     * @date: 2020/3/2 16:13
+     * 功能描述:远程告警消除
+     */
+    @Override
+    public String alarmRemoteResolve(String jsonStr) {
+        logger.info(jsonStr);
+        //填充查询条件
+        AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
+        JsonResult jsonResult = new JsonResult();
+        String type = alarmQuery.getType();
+        if(StringUtil.isNUll(type)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("告警类型为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        String enterpriseCode = alarmQuery.getEnterpriseCode();
+        if(StringUtil.isNUll(enterpriseCode)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("企业编码为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        String serverCode = alarmQuery.getServerCode();
+        if(StringUtil.isNUll(serverCode)){
+            jsonResult.setSuccess(false);
+            jsonResult.setData("服务编码为空");
+            return JSONObject.toJSONString(jsonResult);
+        }
+        List<String> idList = alarmQuery.getIdList();
+        List<Date> treportList = alarmQuery.getTreportList();
+        for(int i=0; i<idList.size(); i++){
+            String id = idList.get(i);
+            Date date = treportList.get(i);
+            alarmQuery.setId(id);
+            alarmQuery.setTreport(date);
+            boolean resolve = alarmService.resolve(alarmQuery);
+        }
+        return new JSONObject().toJSONString();
     }
 }

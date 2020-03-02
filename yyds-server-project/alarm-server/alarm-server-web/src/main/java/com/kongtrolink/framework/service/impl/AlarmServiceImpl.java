@@ -200,4 +200,16 @@ public class AlarmServiceImpl implements AlarmService{
         String table = getTable(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode(), alarmQuery.getType(), alarmQuery.getTreport());
         return alarmDao.check(table, alarmQuery);
     }
+
+    /**
+     * @param alarmQuery
+     * @auther: liudd
+     * @date: 2020/3/2 16:57
+     * 功能描述:告警消除
+     */
+    @Override
+    public boolean resolve(AlarmQuery alarmQuery) {
+        String table = getTable(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode(), alarmQuery.getType(), alarmQuery.getTreport());
+        return alarmDao.resolve(table, alarmQuery);
+    }
 }

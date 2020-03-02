@@ -17,7 +17,7 @@ public interface MqttService {
      * 功能描述:告警列表，需要判定所属表
      */
     @OperaCode
-    String remoteList(String jsonStr);
+    String alarmRemoteList(String jsonStr);
 
     /**
      * @auther: liudd
@@ -26,4 +26,12 @@ public interface MqttService {
      */
     @OperaCode
     String alarmRemoteCheck(String jsonStr);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/2 16:13
+     * 功能描述:远程告警消除
+     */
+    @OperaCode
+    String alarmRemoteResolve(String jsonStr);
 }

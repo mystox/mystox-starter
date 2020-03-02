@@ -41,6 +41,20 @@ public class AlarmFocusDao {
         return remove.getN() > 0 ? true : false;
     }
 
+    /**
+     * @param uniqueCode
+     * @param idList
+     * @auther: liudd
+     * @date: 2020/3/2 15:53
+     * 功能描述:根据批量删除
+     */
+    public boolean deleteByIdList(String uniqueCode, List<String> idList) {
+        Criteria criteria = Criteria.where("_id").in(idList);
+        Query query = Query.query(criteria);
+        WriteResult remove = mongoTemplate.remove(query, uniqueCode + table);
+        return remove.getN()>0 ? true : false;
+    }
+
     public List<AlarmFocus> list(String uniqueCode, AlarmFocusQuery alarmFocusQuery) {
         Criteria criteria = new Criteria();
         baseCriteira(criteria, alarmFocusQuery);

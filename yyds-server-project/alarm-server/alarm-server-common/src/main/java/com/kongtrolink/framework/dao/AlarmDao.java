@@ -192,13 +192,13 @@ public class AlarmDao {
      * @date: 2019/9/26 10:29
      * 功能描述:告警消除
      */
-    public boolean resolve(AlarmQuery alarmQuery, String table, Date trecover) {
+    public boolean resolve(String table, AlarmQuery alarmQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", alarmQuery.getState());
-        update.set("trecover", trecover);
+        update.set("trecover", alarmQuery.getTrecover());
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }

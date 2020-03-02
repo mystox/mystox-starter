@@ -11,6 +11,7 @@ import java.util.List;
 public class AlarmQuery extends Paging{
 
     private String id;
+    private List<String> idList;
     private String enterpriseCode;
     private String serverCode;
     private String name;                //告警名称
@@ -20,7 +21,9 @@ public class AlarmQuery extends Paging{
     private Boolean isCheck;              //是否确认
     private String deviceType;          //设备型号，设备类型，与资管一致
     private String deviceModel;         //设备型号，设备型号，如果没有与deviceType一致
-    private String treport;             //告警发生时间
+    private Date treport;             //告警发生时间
+    private Date trecover;              //消除时间
+    private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
@@ -35,6 +38,30 @@ public class AlarmQuery extends Paging{
     private String operateUserId;           //操作用户id
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
+
+    public Date getTrecover() {
+        return trecover;
+    }
+
+    public void setTrecover(Date trecover) {
+        this.trecover = trecover;
+    }
+
+    public List<Date> getTreportList() {
+        return treportList;
+    }
+
+    public void setTreportList(List<Date> treportList) {
+        this.treportList = treportList;
+    }
+
+    public List<String> getIdList() {
+        return idList;
+    }
+
+    public void setIdList(List<String> idList) {
+        this.idList = idList;
+    }
 
     public String getOperateDesc() {
         return operateDesc;
@@ -68,11 +95,11 @@ public class AlarmQuery extends Paging{
         this.operateTime = operateTime;
     }
 
-    public String getTreport() {
+    public Date getTreport() {
         return treport;
     }
 
-    public void setTreport(String treport) {
+    public void setTreport(Date treport) {
         this.treport = treport;
     }
 
