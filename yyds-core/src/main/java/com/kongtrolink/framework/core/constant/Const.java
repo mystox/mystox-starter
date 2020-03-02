@@ -45,5 +45,7 @@ public class Const {
     public static final String ALARM_OPERATE_USER_ID = "operateUserId";
     public static final String ALARM_OPERATE_USERNAME = "operateUsername";
     public static final String ALARM_OPERATE_DESC = "operateDesc";
+    //告警远程返回数据属性名称
+    public static final String DATA = "data";
 
 }

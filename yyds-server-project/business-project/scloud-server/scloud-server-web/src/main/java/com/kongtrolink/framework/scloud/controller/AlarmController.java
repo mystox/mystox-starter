@@ -21,6 +21,7 @@ import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +51,9 @@ public class AlarmController extends BaseController{
     AlarmFocusService alarmFocusService;
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmController.class);
+    @Value("${alarmModule.list:remoteList}")
+    private String listOperaCode;
+
 
     /**
      * @auther: liudd
@@ -60,22 +64,20 @@ public class AlarmController extends BaseController{
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
         listCommon(alarmQuery);
-        //操作模块待定
-        String operaCode = "list";
         //2，将设备id列表和其他参数传递过去
         try {
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
-            MsgResult msgResult = mqttOpera.opera(operaCode, JSONObject.toJSONString(alarmQuery));
+            MsgResult msgResult = mqttOpera.opera(listOperaCode, JSONObject.toJSONString(alarmQuery));
             //liuddtodo 20200227可能需要补充拓展字段
             String msg = msgResult.getMsg();
             JSONObject jsonObject = (JSONObject)JSONObject.parse(msg);
-            String list = jsonObject.getString("list");
-            List<Alarm> alarmList = JSONObject.parseArray(list, Alarm.class);
+            String data = jsonObject.getString(Const.DATA);
+            JsonResult jsonResult = JSONObject.parseObject(data, JsonResult.class);
             //liuddtodo 可能需要补充其他信息
-            return new JsonResult(alarmList);
+            return jsonResult;
         } catch (Exception e) {
             //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), operaCode, e.getMessage());
+            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), listOperaCode, e.getMessage());
         }
         return new JsonResult("获取数据失败", false);
     }

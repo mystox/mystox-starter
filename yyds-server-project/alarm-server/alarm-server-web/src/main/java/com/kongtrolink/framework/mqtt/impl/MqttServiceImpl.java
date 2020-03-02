@@ -4,10 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.mqtt.MqttService;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
+import com.kongtrolink.framework.service.AuxilaryService;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,9 @@ public class MqttServiceImpl implements MqttService{
 
     @Autowired
     AlarmService alarmService;
+    @Autowired
+    AuxilaryService auxilaryService;
+
     private static final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);
 
     /**
@@ -35,7 +41,8 @@ public class MqttServiceImpl implements MqttService{
      * 功能描述:告警列表，需要判定所属表
      */
     @Override
-    public String list(String jsonStr) {
+    public String remoteList(String jsonStr) {
+        System.out.println("+++++++++++++++");
         logger.info(jsonStr);
         JSONObject resultJson = new JSONObject();
         resultJson.put(Const.RESULT_CODE, "1");
@@ -63,7 +70,10 @@ public class MqttServiceImpl implements MqttService{
         }
 
         List<DBObject> dbObjectList = alarmService.list(alarmQuery);
-        resultJson.put(Const.RESULT_INFO, dbObjectList);
+        Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
+        JsonResult jsonResult = new JsonResult(dbObjectList);
+        jsonResult.setOtherInfo(auxilary);
+        resultJson.put(Const.DATA, jsonResult);
         return resultJson.toJSONString();
     }
 

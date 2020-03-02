@@ -91,7 +91,7 @@ public class AlarmTest {
         AlarmQuery alarmQuery = new AlarmQuery();
         alarmQuery.setEnterpriseCode(enterpriseCode);
         alarmQuery.setServerCode(serverCode);
-        List<DBObject> list = alarmDao.list(alarmQuery, currentTable);
+        List<DBObject> list = alarmDao.listCurrent(alarmQuery, currentTable);
         System.out.println(list);
     }
 

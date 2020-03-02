@@ -17,7 +17,7 @@ public interface MqttService {
      * 功能描述:告警列表，需要判定所属表
      */
     @OperaCode
-    String list(String jsonStr);
+    String remoteList(String jsonStr);
 
     /**
      * @auther: liudd
