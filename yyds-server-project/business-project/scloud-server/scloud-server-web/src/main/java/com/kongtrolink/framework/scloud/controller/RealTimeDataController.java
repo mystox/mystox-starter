@@ -8,6 +8,8 @@ import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.FsuDeviceEntity;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -57,6 +59,21 @@ public class RealTimeDataController extends ExportController {
     }
 
     /**
+     * 根据 设备code 获取 该设备所属的FSU
+     */
+    @RequestMapping(value = "/fsuInfo")
+    public @ResponseBody JsonResult fsuInfo(@RequestBody DeviceQuery query) {
+        try{
+            String uniqueCode = getUniqueCode();
+            DeviceEntity deviceEntity = realTimeDataService.getFsuInfoByDeviceCode(uniqueCode, query);
+            return new JsonResult(deviceEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("未找到关联的FSU信息",false);
+        }
+    }
+
+    /**
      * 获取实时数据列表
      */
     @RequestMapping(value = "/getData")
@@ -66,6 +83,17 @@ public class RealTimeDataController extends ExportController {
             String userId = getUserId();
             SignalModel signalModel = realTimeDataService.getData(uniqueCode, query,userId);
             return new JsonResult(signalModel);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("查询失败",false);
+        }
+    }
+    @RequestMapping(value = "/getDataDetail")
+    public @ResponseBody JsonResult getDataDetail(@RequestBody SignalQuery query) {
+        try{
+            String uniqueCode = getUniqueCode();
+            Object value  = realTimeDataService.getDataDetail(uniqueCode, query);
+            return new JsonResult(value);
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("查询失败",false);

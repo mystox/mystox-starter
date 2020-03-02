@@ -8,6 +8,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.base.MessageResp;
 import com.kongtrolink.framework.gateway.tower.core.util.MessageUtil;
 import com.kongtrolink.framework.gateway.tower.server.entity.Transverter;
 import com.kongtrolink.framework.gateway.tower.server.entity.TransverterConfig;
+import com.kongtrolink.framework.gateway.tower.server.service.transverter.TransverterHandler;
 import com.kongtrolink.framework.gateway.tower.server.service.transverter.TransverterService;
 import com.kongtrolink.framework.mqtt.util.SpringContextUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  * description:
  * update record:
  */
-public abstract class ParseHandler implements ParseService, EnvironmentCapable {
+public abstract class ParseHandler extends TransverterHandler implements ParseService, EnvironmentCapable {
     Logger logger = LoggerFactory.getLogger(ParseHandler.class);
 
     @Autowired

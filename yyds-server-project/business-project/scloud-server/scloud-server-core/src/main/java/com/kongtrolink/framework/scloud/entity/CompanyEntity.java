@@ -29,7 +29,7 @@ public class CompanyEntity implements Serializable{
     //企业业务配置
     private int pollingInterval = 30;    //FSU数据轮询间隔（min）。默认30min
     private int refreshInterval = 300; //页面刷新间隔（s）。默认5分钟
-    private int fsuOfflineDelayTime;    //FSU离线告警延时时间
+    private int fsuOfflineDelayTime;    //FSU离线告警延时时间(min)
 
     //告警提醒配置
     private boolean alarmReminderOpen;    //是否开启告警提醒（弹窗）。默认关闭

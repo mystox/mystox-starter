@@ -51,14 +51,9 @@ public class AlarmController extends BaseController {
     public JsonResult list(@RequestBody AlarmQuery alarmQuery){
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
-        ListResult<DBObject> listResult ;
-        if(Contant.CURR_ALARM.equals(alarmQuery.getType())){
-            List<DBObject> list= alarmService.list(alarmQuery, MongTable.ALARM_CURRENT);
-            int count = list.size();
-            listResult = new ListResult<>(list, count);
-        }else{
-            listResult = alarmService.historyAlarmList(alarmQuery);
-        }
+        List<DBObject> alarmList = alarmService.list(alarmQuery);
+        int count = alarmList.size();
+        ListResult<DBObject> listResult = new ListResult<>(alarmList, count);
         JsonResult jsonResult = new JsonResult(listResult);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         jsonResult.setOtherInfo(auxilary);

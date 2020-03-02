@@ -20,7 +20,10 @@ public class AlarmQuery extends Paging {
     private String name;                        //告警名称
     private String deviceType;                  //设备型号
     private String deviceModel;                 //设备类型
+    private List<String> deviceCodeList;        //设备编码列表，需要统一
     private String state;                       //告警状态
+    private Integer level;
+    private Integer targetLevel;
     private String targetLevelName;             //目标等级名称
     private String type;                        //告警类型（实时告警/历史告警）
     private Date startBeginTime;                //发生开始时间
@@ -30,6 +33,85 @@ public class AlarmQuery extends Paging {
     private Integer realBeginNum;               //真实分页起始数据
     private Integer realLimit;                  //真实分页大小
     private Boolean isCheck;                    //是否确认
+    private Date treport;                       //上报时间
+    //远程调用需要参数
+    private String operate;             //操作，告警确认，取消确认，告警消除
+    private Date operateTime;         //操作对应的时间，方便远程接口参数解析
+    private String operateUserId;           //操作用户id
+    private String operateUsername;         //操作用户名
+    private String operateDesc;             //操作描述
+
+    public String getOperateDesc() {
+        return operateDesc;
+    }
+
+    public void setOperateDesc(String operateDesc) {
+        this.operateDesc = operateDesc;
+    }
+
+    public Date getOperateTime() {
+        return operateTime;
+    }
+
+    public void setOperateTime(Date operateTime) {
+        this.operateTime = operateTime;
+    }
+
+    public String getOperateUserId() {
+        return operateUserId;
+    }
+
+    public void setOperateUserId(String operateUserId) {
+        this.operateUserId = operateUserId;
+    }
+
+    public String getOperateUsername() {
+        return operateUsername;
+    }
+
+    public void setOperateUsername(String operateUsername) {
+        this.operateUsername = operateUsername;
+    }
+
+    public String getOperate() {
+        return operate;
+    }
+
+    public void setOperate(String operate) {
+        this.operate = operate;
+    }
+
+    public List<String> getDeviceCodeList() {
+        return deviceCodeList;
+    }
+
+    public void setDeviceCodeList(List<String> deviceCodeList) {
+        this.deviceCodeList = deviceCodeList;
+    }
+
+    public Date getTreport() {
+        return treport;
+    }
+
+    public void setTreport(Date treport) {
+        this.treport = treport;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Integer getTargetLevel() {
+        return targetLevel;
+    }
+
+    public void setTargetLevel(Integer targetLevel) {
+        this.targetLevel = targetLevel;
+    }
 
     public Boolean getCheck() {
         return isCheck;

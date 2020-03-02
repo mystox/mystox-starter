@@ -27,4 +27,11 @@ public class SignalMongo  {
             mongoTemplate.save(deviceType, uniqueCode + CollectionSuffix.SIGNAL_TYPE);
         }
     }
+
+    /**
+     * 查询企业设备信号类型映射表
+     */
+    public List<DeviceType> findSignalTypeList(String uniqueCode){
+        return mongoTemplate.findAll(DeviceType.class, uniqueCode + CollectionSuffix.SIGNAL_TYPE);
+    }
 }

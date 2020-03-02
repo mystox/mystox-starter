@@ -10,6 +10,8 @@
  */
 package com.kongtrolink.framework.scloud.query;
 
+import java.util.List;
+
 /**
  * 设备查询类
  * @author Mag
@@ -20,54 +22,43 @@ public class DeviceQuery extends Paging {
 	 * 
 	 */
 	private static final long serialVersionUID = 201367096037913874L;
-	private String siteId;
-	private Integer fsuId;
-
-	private String systemName;
-	private String deviceName;
-	private String deviceCode;
-	private String deviceType;
-	private String deviceTypeCode;
+	private List<String> tierCodes;	//区域Code
+	private String siteName;	//站点名称
+	private List<Integer> siteIds;	//站点Id
+	private String deviceCode;	//设备编码
+	private String deviceType;	//设备类型
+	private String deviceTypeCode;	//设备类型编码
+	private String deviceName;	//设备名称
 	private String signalType;	//信号类型（AI,AO,DI,DO）
+	private String model;	//设备型号
+	private String manufacturer;	//设备厂家
+	private Long startTime;	//开始时间
+	private Long endTime;	//结束时间
+	private String state;	//注册状态（FSU类型、摄像机类型）：在线、离线
+	private String operationState;	//运行状态（FSU类型）：工程态、测试态、交维态
 
-	public String getSignalType() {
-		return signalType;
+	public List<String> getTierCodes() {
+		return tierCodes;
 	}
 
-	public void setSignalType(String signalType) {
-		this.signalType = signalType;
+	public void setTierCodes(List<String> tierCodes) {
+		this.tierCodes = tierCodes;
 	}
 
-	public String getSiteId() {
-		return siteId;
+	public String getSiteName() {
+		return siteName;
 	}
 
-	public void setSiteId(String siteId) {
-		this.siteId = siteId;
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
 	}
 
-	public Integer getFsuId() {
-		return fsuId;
+	public List<Integer> getSiteIds() {
+		return siteIds;
 	}
 
-	public void setFsuId(Integer fsuId) {
-		this.fsuId = fsuId;
-	}
-
-	public String getSystemName() {
-		return systemName;
-	}
-
-	public void setSystemName(String systemName) {
-		this.systemName = systemName;
-	}
-
-	public String getDeviceName() {
-		return deviceName;
-	}
-
-	public void setDeviceName(String deviceName) {
-		this.deviceName = deviceName;
+	public void setSiteIds(List<Integer> siteIds) {
+		this.siteIds = siteIds;
 	}
 
 	public String getDeviceCode() {
@@ -94,4 +85,67 @@ public class DeviceQuery extends Paging {
 		this.deviceTypeCode = deviceTypeCode;
 	}
 
+	public String getDeviceName() {
+		return deviceName;
+	}
+
+	public void setDeviceName(String deviceName) {
+		this.deviceName = deviceName;
+	}
+
+	public String getSignalType() {
+		return signalType;
+	}
+
+	public void setSignalType(String signalType) {
+		this.signalType = signalType;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public String getManufacturer() {
+		return manufacturer;
+	}
+
+	public void setManufacturer(String manufacturer) {
+		this.manufacturer = manufacturer;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getOperationState() {
+		return operationState;
+	}
+
+	public void setOperationState(String operationState) {
+		this.operationState = operationState;
+	}
 }

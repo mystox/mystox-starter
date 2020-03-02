@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.FacadeView;
+import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -51,11 +55,15 @@ public class AlarmCycleController extends BaseController {
 
     @RequestMapping("/update")
     @ResponseBody
-    public JsonResult update(@RequestBody AlarmCycle alarmCycle){
+    public JsonResult update(@RequestBody AlarmCycle alarmCycle, HttpServletRequest request){
         alarmCycle.setUpdateTime(new Date());
         alarmCycle.setCycleType(Contant.MANUAL);
         alarmCycle.setUpdateTime(new Date());
         alarmCycle.initEnterpirseServer();
+        User user = getUser(request);
+        if(null != user){
+            alarmCycle.setOperator(new FacadeView(user.getId(), user.getUsername()));
+        }
         boolean update = cycleService.update(alarmCycle);
         if(update){
             return new JsonResult(Contant.OPE_UPDATE + Contant.RESULT_SUC, true);
@@ -76,11 +84,16 @@ public class AlarmCycleController extends BaseController {
 
     @RequestMapping("/updateState")
     @ResponseBody
-    public JsonResult updateState(@RequestBody AlarmCycleQuery cycleQuery){
+    public JsonResult updateState(@RequestBody AlarmCycleQuery cycleQuery, HttpServletRequest request){
         String state = cycleQuery.getState();
         String cycleType = cycleQuery.getCycleType();
         if(Contant.FORBIT.equals(state) && cycleType.equals(Contant.SYSTEM)){
             return new JsonResult("企业默认告警周期不能手动禁用", false);
+        }
+        User user = getUser(request);
+        if(null != user){
+            cycleQuery.setOperator(new FacadeView(user.getId(), user.getUsername()));
+            cycleQuery.setOperatorName(user.getName());
         }
         boolean result = cycleService.updateState(cycleQuery);
         if(result){

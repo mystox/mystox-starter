@@ -1,15 +1,13 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
-import com.kongtrolink.framework.gateway.tower.core.entity.msg.GetThreshold;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
-import com.kongtrolink.framework.scloud.constant.StationType;
 import com.kongtrolink.framework.scloud.dao.RealTimeDataDao;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
@@ -22,10 +20,13 @@ import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
+import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import com.kongtrolink.framework.service.MqttOpera;
+import com.sun.xml.xsom.impl.UName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -46,7 +47,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Autowired
     FocusSignalService focusSignalService;
     @Autowired
-    MqttOpera mqttOpera;
+    @Lazy
+    MqttSender mqttSender;
     /**
      * 实时数据-获取设备列表
      *
@@ -70,6 +72,24 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     }
 
     /**
+     * 根据 设备code 获取 该设备所属的FSU
+     *
+     * @param uniqueCode 企业编码
+     * @param query      查询
+     * @return FSU信息
+     */
+    @Override
+    public DeviceEntity getFsuInfoByDeviceCode(String uniqueCode, DeviceQuery query) {
+        FsuDeviceEntity fsuDeviceEntity = realTimeDataDao.getFsuInfoByDeviceCode(uniqueCode,query.getDeviceCode());
+        if(fsuDeviceEntity==null || fsuDeviceEntity.getFsuCode()==null){
+            LOGGER.error("根据deviceCode:{} 未找到关联的FSU信息",query.getDeviceCode());
+            return null;
+        }
+
+        return realTimeDataDao.getFsuInfo(uniqueCode,fsuDeviceEntity.getFsuCode());
+    }
+
+    /**
      * 实时数据-获取改设备的实时数据
      *
      * @param uniqueCode 企业编码
@@ -77,7 +97,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public SignalModel getData(String uniqueCode,SignalQuery signalQuery,String userId) {
         try{
-            String fsuCode = signalQuery.getFsuCode();
+            String gatewayServerCode = signalQuery.getGatewayServerCode();
             String devType = signalQuery.getDeviceType();//设备类型
             String type = signalQuery.getType();//是否是特定类的查询
             DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
@@ -87,7 +107,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             List<SignalType> signalTypes = deviceType.getSignalTypeList();
             GetDataMessage getDataMessage = getGetDataMessage(signalQuery,deviceType.getSignalTypeList());
             //下发到网关获取实时数据
-            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             //获取阈值
@@ -95,13 +115,62 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             getThresholdMessage.setFsuId(getDataMessage.getFsuId());
             getThresholdMessage.setPayload(getDataMessage.getPayload());
             //下发到网关获取实时数据
-            MsgResult resultThreshold = mqttOpera.opera(ScloudBusinessOperate.GET_THRESHOLD,JSONObject.toJSONString(getThresholdMessage));
+            MsgResult resultThreshold = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_THRESHOLD,JSONObject.toJSONString(getThresholdMessage));
             String ackThreshold = resultThreshold.getMsg();//消息返回内容
             GetThresholdAckMessage getThresholdAckMessage = JSONObject.parseObject(ackThreshold,GetThresholdAckMessage.class);
             //查询关注的信号点
             List<FocusSignalEntity> focusSignalEntityList = focusSignalService.queryListByDevice(uniqueCode,signalQuery.getDeviceId(),userId);
-            SignalModel signalModel = getSignalModel(fsuCode,type,getDataAckMessage,getThresholdAckMessage, signalTypes,focusSignalEntityList);
+            SignalModel signalModel = getSignalModel(uniqueCode,type,getDataAckMessage,getThresholdAckMessage, signalTypes,focusSignalEntityList);
             return signalModel;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 单个信号点的实时数据
+     *
+     * @param uniqueCode
+     * @param signalQuery
+     */
+    @Override
+    public Object getDataDetail(String uniqueCode, SignalQuery signalQuery) {
+        try{
+            String fsuCode = signalQuery.getFsuCode();
+            String gatewayServerCode = signalQuery.getGatewayServerCode();
+            GetDataMessage getDataMessage = getGetDataDetailMessage(signalQuery);
+            //下发到网关获取实时数据
+            MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            String ack = result.getMsg();//消息返回内容
+            GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
+            Map<String,Object> valueMap = null ;//存放信号点数据 key:cntbId value:值
+            if(getDataAckMessage!=null
+                    && getDataAckMessage.getPayload()!=null
+                    && getDataAckMessage.getPayload().getDeviceIds() !=null) {
+                //单个设备查询的
+                DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
+                List<SignalIdInfo> ids = deviceIdInfo.getIds();
+                String redisKey = RedisUtil.getRealDataKey(fsuCode,deviceIdInfo.getDeviceId());
+                Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA, redisKey);
+                try {
+                    if (value == null) {
+                        valueMap = new HashMap<>();
+                    } else {
+                        valueMap = JSONObject.parseObject(String.valueOf(value));
+                    }
+                    if (ids != null) {
+                        for (SignalIdInfo signalIdInfo : ids) {
+                            valueMap.put(signalIdInfo.getId(), signalIdInfo.getValue());
+                        }
+                    }
+                    //更新redis里面的值
+                    redisUtils.hset(RedisKey.DEVICE_REAL_DATA, redisKey, valueMap);
+                } catch (Exception e) {
+                    LOGGER.error("获取redis数据异常 {} ,{} ", RedisKey.DEVICE_REAL_DATA, redisKey);
+                }
+            }
+            return valueMap.get(signalQuery.getCntbId());
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -116,12 +185,13 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     @Override
     public SetPointAckMessage setPoint(SignalQuery signalQuery) {
+        String gatewayServerCode = signalQuery.getGatewayServerCode();
         SetPointMessage setPointMessage = new SetPointMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setPointMessage.setPayload(deviceIdEntity);
         setPointMessage.setFsuId(signalQuery.getFsuCode());
         //下发到网关
-        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
+        MsgResult result =  mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
         String ack = result.getMsg();//消息返回内容
         SetPointAckMessage setPointAckMessage = JSONObject.parseObject(ack,SetPointAckMessage.class);
         return setPointAckMessage;
@@ -135,12 +205,13 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     @Override
     public SetThresholdAckMessage setThreshold(SignalQuery signalQuery) {
+        String gatewayServerCode = signalQuery.getGatewayServerCode();
         SetThresholdMessage setThresholdMessage = new SetThresholdMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setThresholdMessage.setPayload(deviceIdEntity);
         setThresholdMessage.setFsuId(signalQuery.getFsuCode());
         //下发到网关
-        MsgResult result = mqttOpera.opera(ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
+        MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
         String ack = result.getMsg();//消息返回内容
         SetThresholdAckMessage setThresholdAckMessage = JSONObject.parseObject(ack,SetThresholdAckMessage.class);
         return setThresholdAckMessage;
@@ -172,7 +243,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * 获取实时数据
      * 整理返回下前段展现 并存放到redis中
      */
-    private SignalModel getSignalModel(String fsuCode,String type,
+    private SignalModel getSignalModel(String uniqueCode,String type,
                                        GetDataAckMessage getDataAckMessage,
                                        GetThresholdAckMessage getThresholdAckMessage,
                                        List<SignalType> signalTypeList,
@@ -191,7 +262,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             //单个设备查询的
             DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
             List<SignalIdInfo> ids = deviceIdInfo.getIds();
-            String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
+
+            String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceIdInfo.getDeviceId());
             Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
             try{
                 if(value==null){
@@ -297,6 +369,22 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         return getDataMessage;
     }
 
+    private GetDataMessage getGetDataDetailMessage(SignalQuery signalQuery){
+        GetDataMessage getDataMessage = new GetDataMessage();
+        DeviceIdEntity payload = new DeviceIdEntity();
+        List<DeviceIdInfo> deviceIds = new ArrayList<>();
+
+        DeviceIdInfo deviceIdInfo = new DeviceIdInfo(signalQuery.getDeviceCode());
+        List<SignalIdInfo> ids = new ArrayList<>();
+        SignalIdInfo signalIdInfo = new SignalIdInfo();
+        signalIdInfo.setId(signalQuery.getCntbId());
+        deviceIdInfo.setIds(ids);
+        deviceIds.add(deviceIdInfo);
+        payload.setDeviceIds(deviceIds);
+        getDataMessage.setFsuId(signalQuery.getFsuCode());
+        getDataMessage.setPayload(payload);
+        return getDataMessage;
+    }
     /**
      * 根据查询 某一个遥测信号值列表
      *
@@ -309,25 +397,24 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         List<SignalDiInfo> list = new ArrayList<>();
         //根据区域数查询获取站点ID列表和局站类型 封装在SignalDiInfoKo对象中
         SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
-        Map<String, Site> siteMap =ko.getSiteMap();//局站类型Map
+        Map<String, SiteEntity> siteMap =ko.getSiteMap();//局站类型Map
         List<Integer> siteIds = ko.getSiteIds();//站点ID列表
         String signalCntbId = query.getSignalCode(); //遥测信号点ID
-        List<Device> deviceList = realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
-        for(Device device:deviceList){
+        List<DeviceModel> deviceList =null;// todo 采用晓龙的获取设备方法
+        //realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
+        for(DeviceModel device:deviceList){
             SignalDiInfo info = new SignalDiInfo();
             int siteId = device.getSiteId();
             String deviceCode = device.getCode();
-            String fsuCode = device.getFsuCode();
             if(siteMap.containsKey(String.valueOf(siteId))){
-                Site site = siteMap.get(String.valueOf(siteId));
-                info.setTier(site.getTierString());
-                info.setSiteCode(site.getCode());
-                info.setSiteName(site.getName());
-                info.setSiteType(site.getCompany());
+                SiteEntity siteEntity = siteMap.get(String.valueOf(siteId));
+                info.setTier(siteEntity.getTierName());
+                info.setSiteCode(siteEntity.getCode());
             }
+            info.setSiteName(device.getSiteName());
             info.setDeviceName(device.getName());
             info.setDeviceCode(device.getCode());
-            String redisKey = fsuCode+"#"+deviceCode;
+            String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceCode);
             Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
             try{
                 Map<String,Object> redisValue = JSONObject.parseObject(String.valueOf(value));
@@ -361,15 +448,14 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
 
      */
     private SignalDiInfoKo getDeviceList(String uniqueCode, SignalDiInfoQuery query){
-        Map<String,Site> siteMap = new HashMap<>();
+        Map<String,SiteEntity> siteMap = new HashMap<>();
         List<Integer> siteIds = new ArrayList<>();
-        List<Site> siteList = realTimeDataDao.findSite(uniqueCode,query);
-        for(Site site:siteList){
-            if(!siteMap.containsKey(site.getId())) {
-                siteMap.put(String.valueOf(site.getId()), site);
+        List<SiteEntity> siteEntityList = realTimeDataDao.findSite(uniqueCode,query);
+        for(SiteEntity siteEntity : siteEntityList){
+            if(!siteMap.containsKey(siteEntity.getId())) {
+                siteMap.put(String.valueOf(siteEntity.getId()), siteEntity);
             }
-            site.setCompany(StationType.toValue(site.getStationType()));//暂存这个局站类型
-            siteIds.add(site.getId());
+            siteIds.add(siteEntity.getId());
         }
         SignalDiInfoKo ko = new SignalDiInfoKo();
         ko.setSiteIds(siteIds);

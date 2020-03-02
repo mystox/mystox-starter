@@ -26,7 +26,7 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     @Override
     public void scloudHistory(String message) {
         logger.info("receive: {}",message);
-        historyService.heartBeatFsu(message);
+        historyService.scloudHistory(message);
     }
 
 

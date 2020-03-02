@@ -16,6 +16,7 @@ import com.kongtrolink.framework.scloud.entity.SignalType;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalInfoEntity;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
+import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class HistoryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryService.class);
 
 
-    public void heartBeatFsu(String message){
+    public void scloudHistory(String message){
         try {
             HistoryModuleDto dto = JSONObject.parseObject(message,HistoryModuleDto.class);
             RedisFsuInfo fsu = dto.getRedisFsuInfo();
@@ -72,7 +73,7 @@ public class HistoryService {
             //单个设备查询的
             for(DeviceIdInfo deviceIdInfo:getDataAckMessage.getPayload().getDeviceIds()){
                 List<SignalIdInfo> ids = deviceIdInfo.getIds();
-                String redisKey = fsuCode+"#"+deviceIdInfo.getDeviceId();
+                String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceIdInfo.getDeviceId());
                 Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
                 try{
                     if(value==null){
@@ -93,9 +94,9 @@ public class HistoryService {
                     historyDataEntity.setFsuCode(fsuCode);
                     historyDataEntity.setTime(new Date().getTime());
                     historyDataEntity.setValue(valueMap);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                    String tableTime = sdf.format(new Date());
-                    historyDao.saveHistory(uniqueCode,historyDataEntity,tableTime);
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//                    String tableTime = sdf.format(new Date());
+                    historyDao.saveHistory(uniqueCode,historyDataEntity);
                 }catch (Exception e){
                     e.printStackTrace();
                     LOGGER.error("历史数据异常 {} ,{} ",uniqueCode,fsuCode);

@@ -31,6 +31,7 @@ public class SignalQuery extends Paging {
     private String deviceCode;
     private String fsuCode;
     private String value;//下发的值或者阈值
+    private String gatewayServerCode;//必传
 
     public String getCntbId() {
         return cntbId;
@@ -119,5 +120,13 @@ public class SignalQuery extends Paging {
 
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public String getGatewayServerCode() {
+        return gatewayServerCode;
+    }
+
+    public void setGatewayServerCode(String gatewayServerCode) {
+        this.gatewayServerCode = gatewayServerCode;
     }
 }

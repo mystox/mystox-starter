@@ -12,9 +12,9 @@ public class HistoryDao {
     MongoTemplate mongoTemplate;
 
     /**
-     * 历史数据保存 每天保存一个表
+     * 历史数据保存
      */
-    public void saveHistory(String uniqueCode,HistoryDataEntity historyDataEntity,String tableTime){
-        mongoTemplate.save(historyDataEntity,uniqueCode+ CollectionSuffix.HISTORY+ "_"+tableTime);
+    public void saveHistory(String uniqueCode,HistoryDataEntity historyDataEntity){
+        mongoTemplate.save(historyDataEntity,uniqueCode+ CollectionSuffix.HISTORY);
     }
 }

@@ -2,6 +2,8 @@ package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Paging;
 
+import java.util.List;
+
 /**
  * @Auther: liudd
  * @Date: 2019/9/20 16:40
@@ -10,12 +12,21 @@ import com.kongtrolink.framework.base.Paging;
 public class DeviceTypeLevelQuery extends Paging {
 
     private String id;
+    private List<String> idList;
     private String enterpriseCode;
     private String serverCode;
     private String deviceType;      //设备类型
     private String deviceModel;     //设备型号
     private Integer level;
     private String operatorName;        //操作用户姓名
+
+    public List<String> getIdList() {
+        return idList;
+    }
+
+    public void setIdList(List<String> idList) {
+        this.idList = idList;
+    }
 
     public String getOperatorName() {
         return operatorName;

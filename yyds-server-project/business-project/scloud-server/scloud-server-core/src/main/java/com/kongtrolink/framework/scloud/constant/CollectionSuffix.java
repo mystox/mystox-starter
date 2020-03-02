@@ -6,12 +6,16 @@ package com.kongtrolink.framework.scloud.constant;
  */
 public class CollectionSuffix {
 
-    //企业设备信号映射字典表
+    // 企业设备信号映射字典表
     public static final String SIGNAL_TYPE = "_signalType";
     // 企业设备
     public static final String DEVICE = "_device";
+    // 企业设备特有属性
+    public static final String DEVICE_SPECIAL_INFO = "_device_special_info";
     // 企业站点
     public static final String SITE = "_site";
-    // 企业站点
+    // 企业历史数据
     public static final String HISTORY = "_history";
+    //FSU Device关系表
+    public static final String FSU_DEVICE = "_fsu_device";
 }

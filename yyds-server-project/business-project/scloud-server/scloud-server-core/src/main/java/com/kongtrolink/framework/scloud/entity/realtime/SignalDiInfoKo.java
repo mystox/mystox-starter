@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.scloud.entity.realtime;
 
 
-import com.kongtrolink.framework.scloud.entity.Device;
-import com.kongtrolink.framework.scloud.entity.Site;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.SiteEntity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,24 +16,24 @@ import java.util.Map;
 public class SignalDiInfoKo implements Serializable{
     private static final long serialVersionUID = 4292212058977817974L;
 
-    private Map<String, Site> siteMap = new HashMap<>();
-    private Map<String, Device> deviceMap = new HashMap<>();
+    private Map<String, SiteEntity> siteMap = new HashMap<>();
+    private Map<String, DeviceEntity> deviceMap = new HashMap<>();
     private List<Integer> siteIds = new ArrayList<>();
     private List<Integer> deviceIds = new ArrayList<>();
 
-    public Map<String, Site> getSiteMap() {
+    public Map<String, SiteEntity> getSiteMap() {
         return siteMap;
     }
 
-    public void setSiteMap(Map<String, Site> siteMap) {
+    public void setSiteMap(Map<String, SiteEntity> siteMap) {
         this.siteMap = siteMap;
     }
 
-    public Map<String, Device> getDeviceMap() {
+    public Map<String, DeviceEntity> getDeviceMap() {
         return deviceMap;
     }
 
-    public void setDeviceMap(Map<String, Device> deviceMap) {
+    public void setDeviceMap(Map<String, DeviceEntity> deviceMap) {
         this.deviceMap = deviceMap;
     }
 

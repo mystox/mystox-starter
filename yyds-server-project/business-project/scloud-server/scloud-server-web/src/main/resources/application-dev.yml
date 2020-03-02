@@ -15,3 +15,10 @@ mqtt:
 ########## mongo数据库配置 ##########
 spring.data.mongodb:
   uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+
+###########上传文件配置###########
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 20MB
+    max-request-size: 100MB
