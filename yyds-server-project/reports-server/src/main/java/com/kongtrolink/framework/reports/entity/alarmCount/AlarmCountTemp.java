@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.reports.entity.alarmCount;
 
+import java.util.Date;
+
 /**
  * \* @Author: mystox
  * \* Date: 2020/2/23 19:19
@@ -10,6 +12,7 @@ public class AlarmCountTemp {
     private String id;
     private Integer year;
     private Integer month;
+    private Date tempDate;
     private String province; //省
     private String municipality; //市
     private String county; //县|区
@@ -17,10 +20,27 @@ public class AlarmCountTemp {
     private String stationType;//站点类型
     private String alarmLevel;
     private String alarmState; //告警状态： 历史告警
-    private String alarmCount; //告警总数
-    private String alarmRecoveryCount; //告警恢复数
+    private Long alarmCount; //告警总数
+    private Long alarmRecoveryCount; //告警恢复数
     private Boolean deleteFlag = false;
 
+
+
+    public Date getTempDate() {
+        return tempDate;
+    }
+
+    public void setTempDate(Date tempDate) {
+        this.tempDate = tempDate;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
 
     public void setYear(Integer year) {
         this.year = year;
@@ -103,19 +123,19 @@ public class AlarmCountTemp {
         this.alarmState = alarmState;
     }
 
-    public String getAlarmCount() {
+    public Long getAlarmCount() {
         return alarmCount;
     }
 
-    public void setAlarmCount(String alarmCount) {
+    public void setAlarmCount(Long alarmCount) {
         this.alarmCount = alarmCount;
     }
 
-    public String getAlarmRecoveryCount() {
+    public Long getAlarmRecoveryCount() {
         return alarmRecoveryCount;
     }
 
-    public void setAlarmRecoveryCount(String alarmRecoveryCount) {
+    public void setAlarmRecoveryCount(Long alarmRecoveryCount) {
         this.alarmRecoveryCount = alarmRecoveryCount;
     }
 }
