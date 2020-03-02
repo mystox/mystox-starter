@@ -22,16 +22,8 @@ public interface MqttService {
     /**
      * @auther: liudd
      * @date: 2020/3/2 13:25
-     * 功能描述:远程告警确认
+     * 功能描述:远程告警确认或消除
      */
     @OperaCode
-    String alarmRemoteCheck(String jsonStr);
-
-    /**
-     * @auther: liudd
-     * @date: 2020/3/2 16:13
-     * 功能描述:远程告警消除
-     */
-    @OperaCode
-    String alarmRemoteResolve(String jsonStr);
+    String alarmRemoteOperate(String jsonStr);
 }

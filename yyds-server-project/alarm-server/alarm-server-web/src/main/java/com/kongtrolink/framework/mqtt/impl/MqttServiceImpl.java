@@ -6,6 +6,7 @@ import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
+import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.mqtt.MqttService;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
@@ -43,30 +44,17 @@ public class MqttServiceImpl implements MqttService{
     public String alarmRemoteList(String jsonStr) {
         logger.info(jsonStr);
         //填充查询条件
-        JSONObject jsonObject = (JSONObject)JSONObject.parse(jsonStr);
         JsonResult jsonResult = new JsonResult();
-        AlarmQuery alarmQuery = new AlarmQuery();
-        initPara(alarmQuery, jsonObject);
-        String type = alarmQuery.getType();
-        if(StringUtil.isNUll(type)){
+        AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
+        try{
+            checkPara(alarmQuery);
+        }catch (ParameterException e){
             jsonResult.setSuccess(false);
-            jsonResult.setData("告警类型为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(StringUtil.isNUll(enterpriseCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("企业编码为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        String serverCode = alarmQuery.getServerCode();
-        if(StringUtil.isNUll(serverCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("服务编码为空");
+            jsonResult.setInfo(e.getMessage());
             return JSONObject.toJSONString(jsonResult);
         }
         List<DBObject> dbObjectList = alarmService.list(alarmQuery);
-        Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
+        Auxilary auxilary = auxilaryService.getByEnterServerCode(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode());
         jsonResult.setOtherInfo(auxilary);
         jsonResult.setSuccess(true);
         jsonResult.setData(dbObjectList);
@@ -77,46 +65,36 @@ public class MqttServiceImpl implements MqttService{
     /**
      * @auther: liudd
      * @date: 2020/2/28 10:50
-     * 功能描述:填充远程接口调用的参数
+     * 功能描述:判定远程调用基本参数
      */
-    private void initPara(AlarmQuery alarmQuery, JSONObject jsonObject){
-        //list相关参数
-        alarmQuery.setCurrentPage(jsonObject.getInteger(Const.ALARM_LIST_CURRENTPAGE));
-        alarmQuery.setPageSize(jsonObject.getInteger(Const.ALARM_LIST_PAGESIZE));
-        alarmQuery.setType(jsonObject.getString(Const.ALARM_LIST_TYPE));
-        alarmQuery.setId(jsonObject.getString(Const.ALARM_LIST_ID));
-        alarmQuery.setEnterpriseCode(jsonObject.getString(Const.ALARM_LIST_ENTERPRISECODE));
-        alarmQuery.setServerCode(jsonObject.getString(Const.ALARM_LIST_SERVERCODE));
-        alarmQuery.setName(jsonObject.getString(Const.ALARM_LIST_NAME));
-        alarmQuery.setTargetLevelName(jsonObject.getString(Const.ALARM_LIST_TARGETLEVELNAME));
-        alarmQuery.setState(jsonObject.getString(Const.ALARM_LIST_STATE));
-        String isCheck = jsonObject.getString(Const.ALARM_LIST_CHECKSTATE);
-        if(!StringUtil.isNUll(isCheck)){
-            alarmQuery.setCheck(Boolean.parseBoolean(isCheck));
+    private void checkPara(AlarmQuery alarmQuery)throws ParameterException{
+        if(StringUtil.isNUll(alarmQuery.getEnterpriseCode())){
+            throw new ParameterException("企业编码为空");
         }
-        alarmQuery.setDeviceType(jsonObject.getString(Const.ALARM_LIST_DEVICETYPE));
-        alarmQuery.setDeviceModel(jsonObject.getString(Const.ALARM_LIST_DEVICEMODEL));
-        Long startBeginTime = jsonObject.getLong(Const.ALARM_LIST_STARTBEGINTIME);
-        if(null != startBeginTime){
-            alarmQuery.setStartBeginTime(new Date(startBeginTime));
+        if(StringUtil.isNUll(alarmQuery.getServerCode())){
+            throw new ParameterException("服务编码为空");
         }
-        Long startEndTime = jsonObject.getLong(Const.ALARM_LIST_STARTENDTIME);
-        if(null != startEndTime){
-            alarmQuery.setStartEndTime(new Date(startEndTime));
+        if(StringUtil.isNUll(alarmQuery.getType())){
+            throw new ParameterException("告警类型为空");
         }
+    }
 
-        //远程确认相关参数
-        alarmQuery.setOperate(jsonObject.getString(Const.ALARM_OPERATE));
-        Long checkTime = jsonObject.getLong(Const.ALARM_OPERATE_TIME);
-        if(null != checkTime){
-            alarmQuery.setOperateTime(new Date(checkTime));
+    private void checkUpdatePara(AlarmQuery alarmQuery)throws ParameterException{
+        checkPara(alarmQuery);
+        //判定告警id，上报时间
+        List<String> idList = alarmQuery.getIdList();
+        List<Date> treportList = alarmQuery.getTreportList();
+        if(null == idList || idList.size() == 0){
+            throw new ParameterException("告警id为空");
         }
-        alarmQuery.setOperateUserId(jsonObject.getString(Const.ALARM_OPERATE_USER_ID));
-        alarmQuery.setOperateUsername(jsonObject.getString(Const.ALARM_OPERATE_USERNAME));
-        alarmQuery.setOperateDesc(jsonObject.getString(Const.ALARM_OPERATE_DESC));
-        Long treport = jsonObject.getLong(Const.ALARM_LIST_TREPORT);
-        if(null != treport){
-            alarmQuery.setTreport(new Date(treport));
+        if(null == treportList || treportList.size() == 0){
+            throw new ParameterException("上报时间为空");
+        }
+        if(idList.size() != treportList.size()){
+            throw new ParameterException("告警id和告警上报时间数量一致");
+        }
+        if(StringUtil.isNUll(alarmQuery.getOperate())){
+            throw new ParameterException("操作类型为空");
         }
     }
 
@@ -127,81 +105,44 @@ public class MqttServiceImpl implements MqttService{
      * 功能描述:远程告警确认
      */
     @Override
-    public String alarmRemoteCheck(String jsonStr) {
+    public String alarmRemoteOperate(String jsonStr) {
         logger.info(jsonStr);
         //填充查询条件
-        JSONObject jsonObject = (JSONObject)JSONObject.parse(jsonStr);
         JsonResult jsonResult = new JsonResult();
-        AlarmQuery alarmQuery = new AlarmQuery();
-        initPara(alarmQuery, jsonObject);
-        String type = alarmQuery.getType();
-        if(StringUtil.isNUll(type)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("告警类型为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(StringUtil.isNUll(enterpriseCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("企业编码为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        String serverCode = alarmQuery.getServerCode();
-        if(StringUtil.isNUll(serverCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("服务编码为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        boolean check = alarmService.check(alarmQuery);
-        if(check){
-            jsonResult.setSuccess(true);
-            jsonResult.setData(Const.ALARM_OPERATE_CHECK + Const.RESULT_SUCC);
-        }else{
-            jsonResult.setSuccess(false);
-            jsonResult.setData(Const.ALARM_OPERATE_CHECK + Const.RESULT_FAIL);
-        }
-        return JSONObject.toJSONString(jsonResult);
-    }
-
-    /**
-     * @param jsonStr
-     * @auther: liudd
-     * @date: 2020/3/2 16:13
-     * 功能描述:远程告警消除
-     */
-    @Override
-    public String alarmRemoteResolve(String jsonStr) {
-        logger.info(jsonStr);
-        //填充查询条件
         AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
-        JsonResult jsonResult = new JsonResult();
-        String type = alarmQuery.getType();
-        if(StringUtil.isNUll(type)){
+        try{
+            checkUpdatePara(alarmQuery);
+        }catch (ParameterException e){
             jsonResult.setSuccess(false);
-            jsonResult.setData("告警类型为空");
+            jsonResult.setInfo(e.getMessage());
             return JSONObject.toJSONString(jsonResult);
         }
-        String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(StringUtil.isNUll(enterpriseCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("企业编码为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
-        String serverCode = alarmQuery.getServerCode();
-        if(StringUtil.isNUll(serverCode)){
-            jsonResult.setSuccess(false);
-            jsonResult.setData("服务编码为空");
-            return JSONObject.toJSONString(jsonResult);
-        }
+        int succCount = 0;
+        int failCount = 0;
         List<String> idList = alarmQuery.getIdList();
         List<Date> treportList = alarmQuery.getTreportList();
+        boolean check = false;
         for(int i=0; i<idList.size(); i++){
             String id = idList.get(i);
-            Date date = treportList.get(i);
+            Date treport = treportList.get(i);
             alarmQuery.setId(id);
-            alarmQuery.setTreport(date);
-            boolean resolve = alarmService.resolve(alarmQuery);
+            alarmQuery.setTreport(treport);
+            if(Const.ALARM_OPERATE_CHECK.equals(alarmQuery.getOperate())) {
+                check = alarmService.check(alarmQuery);
+            }else if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
+                check = alarmService.resolve(alarmQuery);
+            }
+            if(check){
+                succCount ++;
+            }else{
+                failCount ++;
+            }
         }
-        return new JSONObject().toJSONString();
+        jsonResult.setData("共" + idList.size() + "个告警，成功" + succCount + "个， 失败" + failCount+"个");
+        jsonResult.setSuccess(true);
+        if(succCount == 0){
+            jsonResult.setSuccess(false);
+        }
+        return JSONObject.toJSONString(jsonResult);
     }
 }

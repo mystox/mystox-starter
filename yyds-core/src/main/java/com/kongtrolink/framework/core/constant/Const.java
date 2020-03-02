@@ -9,6 +9,7 @@ public class Const {
 
     public static final String RESULT_SUCC = "成功";
     public static final String RESULT_FAIL = "失败";
+    public static final String PARA_MISS = "缺失";
 
     //成功，失败编码
     public static final String RESULT_CODE = "resultCode";
