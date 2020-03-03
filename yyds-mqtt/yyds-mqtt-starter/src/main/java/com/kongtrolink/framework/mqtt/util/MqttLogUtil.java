@@ -59,6 +59,10 @@ public class MqttLogUtil {
     }
 
     public void OPERA_ERROR(int stateCode, String operaCode) {
+        if (OperaCode.MQLOG.equals(operaCode)) {
+            logger.error("mqtt log server is not running, skip save log...");
+            return;
+        }
         MqttLog mqttLog = operaRouteLogBuilder(UUID.randomUUID().toString(), stateCode, operaCode);
             logExecutor.execute(() ->
                     mqttOpera.operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
