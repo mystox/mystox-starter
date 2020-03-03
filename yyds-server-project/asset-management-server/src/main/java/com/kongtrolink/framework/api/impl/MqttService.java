@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.Service;
 import com.kongtrolink.framework.dao.DBService;
-import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.DBResult;
 import com.kongtrolink.framework.utils.DeviceUtils;
 import org.slf4j.Logger;

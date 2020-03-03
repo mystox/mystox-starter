@@ -18,7 +18,7 @@ public class MqttPublish implements Publish {
     @Lazy
     MqttSender mqttSender;
 
-//    @Autowired
+    @Autowired
     DeviceUtils deviceUtils;
 
     @Override
