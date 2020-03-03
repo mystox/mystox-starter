@@ -106,6 +106,8 @@ public class AlarmController extends BaseController{
             MsgResult msgResult = mqttOpera.opera(remoteList, JSONObject.toJSONString(alarmQuery));
             String msg = msgResult.getMsg();
             JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            Object data = jsonResult.getData();
+
             //liuddtodo 导出相关的代码待定
             return new JsonResult("导出成功", true);
         } catch (Exception e) {
