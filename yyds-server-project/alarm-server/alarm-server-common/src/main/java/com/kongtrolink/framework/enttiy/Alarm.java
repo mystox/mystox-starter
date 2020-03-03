@@ -19,7 +19,7 @@ import java.util.Random;
 public class Alarm {
 
     private String id;
-    private String enterpriseCode;
+    private String enterpriseCode;      //企业编码（uniqueCode）
     private String serverCode;
     private String serial;              //告警序列号
     private String name;                //告警名称
@@ -27,8 +27,8 @@ public class Alarm {
     private Integer level;               //告警等级
     private String deviceType;          //设备型号，设备类型，与资管一致
     private String deviceModel;         //设备类型，设备型号，如果没有与deviceType一致
-    private String deviceId;            //设备对应的编码，需要与资产管理对应，设备id，即SN
-    private String signalId;            //信号点id，信号点id必须有，如果消息报文不包含信号点，则需要根据业务定义相关信号点
+    private String deviceId;            //设备对应的编码，需要与资产管理对应，设备id，即SN(deviceCode)
+    private String signalId;            //信号点id，信号点id必须有，如果消息报文不包含信号点，则需要根据业务定义相关信号点(cntbId)
     private String flag;                //告警标志（0-结束；1-上报）
     private Integer targetLevel;         //目标等级
     private String targetLevelName;     //目标等级名称
@@ -41,6 +41,7 @@ public class Alarm {
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
     private Date hcTime;                //被周期处理时间
+    private String entDevSig;           //enterpriseCodedeviceIdsignalId， 用于告警关注，屏蔽等功能
     private String key ;                //唯一键，可作为索引
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
@@ -266,7 +267,20 @@ public class Alarm {
         this.targetLevel = targetLevel;
     }
 
+    public String getEntDevSig() {
+        return entDevSig;
+    }
+
+    public void setEntDevSig(String entDevSig) {
+        this.entDevSig = entDevSig;
+    }
+
+    public void initEntDevSig(){
+        this.entDevSig = enterpriseCode + deviceId +signalId;
+    }
+
     public void initKey(){
+        initEntDevSig();
         this.key = enterpriseCode + Contant.UNDERLINE + serverCode + Contant.COLON + deviceId + Contant.UNDERLINE + serial;
     }
 

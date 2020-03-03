@@ -11,6 +11,7 @@ public class SiteQuery extends Paging{
      *
      */
     private static final long serialVersionUID = -6757930718134122244L;
+    private List<Integer> siteIdList;   //站点id集合
     private List<String> tierCodes;    //区域Code
     private String siteName;    //站点名称
     private String siteCode;    //站点编码
@@ -21,6 +22,14 @@ public class SiteQuery extends Paging{
     private Long startTime; //开始时间
     private Long endTime;   //结束时间
     private List<String> siteCodes; //站点编码集合
+
+    public List<Integer> getSiteIdList() {
+        return siteIdList;
+    }
+
+    public void setSiteIdList(List<Integer> siteIdList) {
+        this.siteIdList = siteIdList;
+    }
 
     public List<String> getTierCodes() {
         return tierCodes;

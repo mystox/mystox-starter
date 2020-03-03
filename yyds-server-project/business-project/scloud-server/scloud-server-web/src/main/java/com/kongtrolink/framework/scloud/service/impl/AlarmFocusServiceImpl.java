@@ -30,18 +30,6 @@ public class AlarmFocusServiceImpl implements AlarmFocusService {
         return alarmFocusDao.delete(uniqueCode, id);
     }
 
-    /**
-     * @param uniqueCode
-     * @param idList
-     * @auther: liudd
-     * @date: 2020/3/2 15:53
-     * 功能描述:根据批量删除
-     */
-    @Override
-    public boolean deleteByIdList(String uniqueCode, List<String> idList) {
-        return alarmFocusDao.deleteByIdList(uniqueCode, idList);
-    }
-
     @Override
     public List<AlarmFocus> list(String uniqueCode, AlarmFocusQuery alarmFocusQuery) {
         return alarmFocusDao.list(uniqueCode, alarmFocusQuery);
@@ -50,10 +38,5 @@ public class AlarmFocusServiceImpl implements AlarmFocusService {
     @Override
     public int count(String uniqueCode, AlarmFocusQuery alarmFocusQuery) {
         return alarmFocusDao.count(uniqueCode, alarmFocusQuery);
-    }
-
-    @Override
-    public List<String> list2AlarmIdList(List<AlarmFocus> alarmFocusList) {
-        return alarmFocusDao.list2AlarmIdList(alarmFocusList);
     }
 }

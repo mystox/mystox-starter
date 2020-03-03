@@ -185,34 +185,4 @@ public class AlarmController extends BaseController{
             throw new ParameterException("操作类型为空");
         }
     }
-
-    /**
-     * @auther: liudd
-     * @date: 2020/2/26 15:21
-     * 功能描述:关注/取消关注告警
-     */
-    @RequestMapping("/focus")
-    @ResponseBody
-    public JsonResult focus(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
-        Date curTime = new Date();
-        User user = getUser(request);
-        String uniqueCode = getUniqueCode();
-        String operate = alarmQuery.getOperate();
-        List<String> idList = alarmQuery.getIdList();
-        if(Const.ALARM_OPERATE_FOCUS.equals(operate)){
-            for(String id : idList) {
-                AlarmFocus alarmFocus = new AlarmFocus();
-                alarmFocus.setAlarmId(id);
-                alarmFocus.setFocusTime(curTime);
-                if (null != user) {
-                    alarmFocus.setUserId(user.getId());
-                    alarmFocus.setUsername(user.getUsername());
-                }
-                alarmFocusService.add(uniqueCode, alarmFocus);
-            }
-        }else{
-            alarmFocusService.deleteByIdList(uniqueCode, idList);
-        }
-        return new JsonResult(operate + Const.RESULT_SUCC, true);
-    }
 }

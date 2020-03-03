@@ -65,4 +65,15 @@ public class SignalServiceImpl implements SignalService{
         }
         return value;
     }
+
+    /**
+     * @param uniqueCode
+     * @auther: liudd
+     * @date: 2020/3/3 11:06
+     * 功能描述:根据设备类型编码获取deviceType
+     */
+    @Override
+    public DeviceType getByCode(String uniqueCode, String typeCode) {
+        return signalMongo.getByCode(uniqueCode, typeCode);
+    }
 }

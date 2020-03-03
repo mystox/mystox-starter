@@ -15,17 +15,7 @@ public interface AlarmFocusService {
 
     boolean delete(String uniqueCode, String id);
 
-    /**
-     * @auther: liudd
-     * @date: 2020/3/2 15:53
-     * 功能描述:根据批量删除
-     */
-    boolean deleteByIdList(String uniqueCode, List<String> idList);
-
     List<AlarmFocus> list(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
 
     int count(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
-
-    List<String> list2AlarmIdList(List<AlarmFocus> alarmFocusList);
-
 }
