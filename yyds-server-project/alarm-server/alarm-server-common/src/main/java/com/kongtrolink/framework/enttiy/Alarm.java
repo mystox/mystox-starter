@@ -41,7 +41,7 @@ public class Alarm {
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
     private Date hcTime;                //被周期处理时间
-    private String entDevSig;           //enterpriseCodedeviceIdsignalId， 用于告警关注，屏蔽等功能
+    private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
     private String key ;                //唯一键，可作为索引
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
@@ -276,7 +276,7 @@ public class Alarm {
     }
 
     public void initEntDevSig(){
-        this.entDevSig = enterpriseCode + deviceId +signalId;
+        this.entDevSig = enterpriseCode + Contant.UNDERLINE + deviceId+ Contant.UNDERLINE +signalId;
     }
 
     public void initKey(){

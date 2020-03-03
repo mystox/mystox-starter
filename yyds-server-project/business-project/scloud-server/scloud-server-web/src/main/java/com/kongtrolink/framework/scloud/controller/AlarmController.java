@@ -49,7 +49,6 @@ public class AlarmController extends BaseController{
     @Autowired
     AlarmFocusService alarmFocusService;
 
-    private static final Logger logger = LoggerFactory.getLogger(AlarmController.class);
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
     @Value("${alarmModule.check:alarmRemoteOperate}")
@@ -65,32 +64,17 @@ public class AlarmController extends BaseController{
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
         try {
-            listCommon(alarmQuery, request);
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
-            MsgResult msgResult = mqttOpera.opera(remoteList, JSONObject.toJSONString(alarmQuery));
-            String msg = msgResult.getMsg();
-            JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            JsonResult jsonResult = alarmService.list(alarmQuery);
             return jsonResult;
         }catch (ParameterException paraException){
             return new JsonResult(paraException.getMessage(), false);
         }catch (Exception e) {
-            //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSONString(alarmQuery), remoteList, e.getMessage());
+            return new JsonResult(e.getMessage(), false);
         }
-        return new JsonResult("获取数据失败", false);
     }
 
-    private void listCommon(AlarmQuery alarmQuery, HttpServletRequest request)throws ParameterException{
-        checkPara(alarmQuery, request);
-        //1，获取用户管辖范围设备id列表
-        List<Integer> siteIdList = alarmQuery.getSiteIdList();
-        DeviceQuery deviceQuery = new DeviceQuery();
-        deviceQuery.setSiteIds(siteIdList);
-        deviceQuery.setOperationState(alarmQuery.getOperationState());
-        List<DeviceEntity> deviceEntityList = deviceService.list(deviceQuery);
-        List<String> deviceCodeList = deviceService.list2CodeList(deviceEntityList);
-        alarmQuery.setDeviceCodeList(deviceCodeList);
-    }
+
 
     /**
      * @auther: liudd
@@ -101,18 +85,11 @@ public class AlarmController extends BaseController{
     @ResponseBody
     public JsonResult export(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
         try {
-            listCommon(alarmQuery, request);
-            //具体查询历史还是实时数据，由中台告警模块根据参数判定
-            MsgResult msgResult = mqttOpera.opera(remoteList, JSONObject.toJSONString(alarmQuery));
-            String msg = msgResult.getMsg();
-            JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            JsonResult jsonResult = alarmService.list(alarmQuery);
             Object data = jsonResult.getData();
-
             //liuddtodo 导出相关的代码待定
             return new JsonResult("导出成功", true);
         } catch (Exception e) {
-            //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmQuery), remoteList, e.getMessage());
         }
         return new JsonResult("导出数据失败", false);
     }
@@ -136,53 +113,12 @@ public class AlarmController extends BaseController{
             alarmQuery.setOperateUsername("超级管理员");
         }
         try {
-            checkOperatePara(alarmQuery, request);
-            Date curTime = new Date();
-            alarmQuery.setOperateTime(curTime);
-            String jsonStr = JSONObject.toJSONString(alarmQuery);
-            MsgResult msgResult = mqttOpera.opera(remoteOperate, jsonStr);
-            String msg = msgResult.getMsg();
-            logger.error(" remote call result, msg:{}, operate:{}", JSONObject.toJSONString(msgResult), remoteOperate);
-            JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            JsonResult jsonResult = alarmService.operate(alarmQuery);
             return jsonResult;
         }catch (ParameterException paraException){
             return new JsonResult(paraException.getMessage(), false);
         } catch (Exception e) {
-            //打印调用失败消息
-            logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSONString(alarmQuery), remoteOperate, e.getMessage());
-        }
-        return new JsonResult("确认失败", false);
-    }
-
-    private void checkPara(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request)throws ParameterException{
-        String enterpriseCode = alarmQuery.getEnterpriseCode();
-        if(StringUtil.isNUll(enterpriseCode)){
-            throw new ParameterException(Const.ALARM_LIST_ENTERPRISECODE + Const.PARA_MISS);
-        }
-        if(StringUtil.isNUll(alarmQuery.getServerCode())){
-            throw new ParameterException(Const.ALARM_LIST_SERVERCODE + Const.PARA_MISS);
-        }
-        if(StringUtil.isNUll(alarmQuery.getType())){
-            throw new ParameterException(Const.ALARM_LIST_TYPE + Const.PARA_MISS);
-        }
-    }
-
-    private void checkOperatePara(AlarmQuery alarmQuery, HttpServletRequest request)throws ParameterException{
-        checkPara(alarmQuery, request);
-        //判定告警id，上报时间
-        List<String> idList = alarmQuery.getIdList();
-        List<Date> treportList = alarmQuery.getTreportList();
-        if(null == idList || idList.size() == 0){
-            throw new ParameterException("告警id为空");
-        }
-        if(null == treportList || treportList.size() == 0){
-            throw new ParameterException("上报时间为空");
-        }
-        if(idList.size() != treportList.size()){
-            throw new ParameterException("告警id和告警上报时间数量一致");
-        }
-        if(StringUtil.isNUll(alarmQuery.getOperate())){
-            throw new ParameterException("操作类型为空");
+            return new JsonResult(e.getMessage(), false);
         }
     }
 }

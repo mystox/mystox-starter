@@ -46,7 +46,7 @@ public class MqttServiceImpl implements MqttService{
         //填充查询条件
         JsonResult jsonResult = new JsonResult();
         AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
-        try{
+            try{
             checkPara(alarmQuery);
         }catch (ParameterException e){
             jsonResult.setSuccess(false);

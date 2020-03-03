@@ -14,6 +14,7 @@ public class AlarmFocus {
 
     private String id;
     private String enterpriseCode;
+    private String serverCode;
     private int siteId;
     private String deviceId;  //设备编码
     private String signalId;      //signalType中cntbId
@@ -21,11 +22,28 @@ public class AlarmFocus {
     private String userId;
     private String username;
     private Date focusTime;
+    private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
 
     private String siteCode;
     private String siteName;
     private String siteAddress;
     private String deviceName;
+
+    public String getEntDevSig() {
+        return entDevSig;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
+
+    public void setEntDevSig(String entDevSig) {
+        this.entDevSig = entDevSig;
+    }
 
     public int getSiteId() {
         return siteId;
@@ -129,6 +147,11 @@ public class AlarmFocus {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String initEntDevSig(){
+        this.entDevSig = enterpriseCode + "_" + deviceId+ "_" +signalId;
+        return this.entDevSig;
     }
 
     public void initSiteInfo(SiteModel siteModel){

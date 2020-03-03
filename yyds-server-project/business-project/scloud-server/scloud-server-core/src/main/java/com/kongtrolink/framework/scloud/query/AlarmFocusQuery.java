@@ -7,6 +7,7 @@ package com.kongtrolink.framework.scloud.query;
  */
 public class AlarmFocusQuery extends Paging{
     private String enterpriseCode;
+    private String serverCode;
     private String siteName;
     private String deviceId;
     private String deviceName;
@@ -14,6 +15,23 @@ public class AlarmFocusQuery extends Paging{
     private String beginTime;
     private String endTiem;
     private String userId;
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getDeviceId() {
         return deviceId;

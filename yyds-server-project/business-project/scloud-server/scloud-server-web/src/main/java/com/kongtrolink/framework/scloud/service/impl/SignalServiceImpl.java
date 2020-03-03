@@ -76,4 +76,17 @@ public class SignalServiceImpl implements SignalService{
     public DeviceType getByCode(String uniqueCode, String typeCode) {
         return signalMongo.getByCode(uniqueCode, typeCode);
     }
+
+    /**
+     * @param uniqueCode
+     * @param codeList
+     * @param cntbIdList
+     * @auther: liudd
+     * @date: 2020/3/3 16:23
+     * 功能描述:根据设备类型和cntbid列表，获取signalType列表
+     */
+    @Override
+    public List<SignalType> getByCodeListCntbIdList(String uniqueCode, List<String> codeList, List<String> cntbIdList) {
+        return signalMongo.getByCodeListCntbIdList(uniqueCode, codeList, cntbIdList);
+    }
 }

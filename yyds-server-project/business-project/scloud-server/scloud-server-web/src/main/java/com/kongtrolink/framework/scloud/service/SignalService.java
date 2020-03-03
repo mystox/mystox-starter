@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.DeviceTypeExport;
+import com.kongtrolink.framework.scloud.entity.SignalType;
 
 import java.util.List;
 
@@ -32,4 +33,11 @@ public interface SignalService {
      * 功能描述:根据设备类型编码获取deviceType
      */
     DeviceType getByCode(String uniqueCode, String typeCode);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/3 16:23
+     * 功能描述:根据设备类型和cntbid列表，获取signalType列表
+     */
+    List<SignalType> getByCodeListCntbIdList(String uniqueCode, List<String> codeList, List<String> cntbIdList);
 }

@@ -1,19 +1,18 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmFocusQuery;
-import com.kongtrolink.framework.scloud.query.SiteQuery;
-import com.kongtrolink.framework.scloud.service.AlarmFocusService;
-import com.kongtrolink.framework.scloud.service.DeviceService;
-import com.kongtrolink.framework.scloud.service.SignalService;
-import com.kongtrolink.framework.scloud.service.SiteService;
+import com.kongtrolink.framework.scloud.query.AlarmQuery;
+import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,6 +38,8 @@ public class AlarmFocusController extends BaseController {
     SiteService siteService;
     @Autowired
     SignalService signalService;
+    @Autowired
+    AlarmService alarmService;
 
     /**
      * @auther: liudd
@@ -166,5 +167,42 @@ public class AlarmFocusController extends BaseController {
         }
         ListResult<AlarmFocus> listResult = new ListResult<>(alarmFocusList, count);
         return new JsonResult(listResult);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/3 14:21
+     * 功能描述:获取当前用户关注的信号点所在告警(实时告警)
+     */
+    @RequestMapping("/getFocusAlarmList")
+    @ResponseBody
+    public JsonResult getFocusAlarmList(@RequestBody AlarmFocusQuery focusQuery, HttpServletRequest request){
+        User user = getUser(request);
+        String uniqueCode = getUniqueCode();
+        //获取当前用户关注的信号点
+        focusQuery.setUserId(user.getId());
+        List<AlarmFocus> alarmFocusList = alarmFocusService.list(uniqueCode, focusQuery);
+        List<String> entDevSigList = new ArrayList<>();
+        for(AlarmFocus alarmFocus : alarmFocusList){
+            String entDevSig = alarmFocus.initEntDevSig();
+            if(!entDevSigList.contains(entDevSig)){
+                entDevSigList.add(entDevSig);
+            }
+        }
+        AlarmQuery alarmQuery = new AlarmQuery();
+        alarmQuery.setCurrentPage(focusQuery.getCurrentPage());
+        alarmQuery.setPageSize(focusQuery.getPageSize());
+        alarmQuery.setEnterpriseCode(focusQuery.getEnterpriseCode());
+        alarmQuery.setServerCode(focusQuery.getServerCode());
+        alarmQuery.setType(focusQuery.getType());
+        try {
+            //具体查询历史还是实时数据，由中台告警模块根据参数判定
+            JsonResult jsonResult = alarmService.list(alarmQuery);
+            return jsonResult;
+        }catch (ParameterException paraException){
+            return new JsonResult(paraException.getMessage(), false);
+        }catch (Exception e) {
+            return new JsonResult(e.getMessage(), false);
+        }
     }
 }
