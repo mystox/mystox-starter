@@ -1043,16 +1043,26 @@ public class Neo4jDBService implements DBService {
                 String ciTypeCode = Neo4jUtils.getCITypeCode(code1, code2, code3);
                 String ciId = Neo4jUtils.getCIId(ciTypeCode, sn, enterpriseCode, serverCode);
 
-                cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "}) return ci.id";
+                try {
+                    cmd = "create (ci:" + Neo4jDBNodeType.CI + " {id:{Id}" + propStr + "}) return ci.id";
 
-                statementResult = transaction.run(cmd, Values.parameters("Id", ciId,
-                        "BusinessCode", businessCode));
-                ResultSummary summary = statementResult.summary();
+                    statementResult = transaction.run(cmd, Values.parameters("Id", ciId,
+                            "BusinessCode", businessCode));
+                    ResultSummary summary = statementResult.summary();
 
-                if (summary.counters().nodesCreated() != 1) {
+                    if (summary.counters().nodesCreated() != 1) {
+                        transaction.failure();
+                        result.setInfo("CI信息新增失败，创建节点失败");
+                        return result;
+                    }
+                } catch (ClientException e) {
                     transaction.failure();
-                    result.setInfo("CI信息新增失败，创建节点失败");
-                    return result;
+                    if (e.getMessage().contains("already exists with label `CI` and property `id`")) {
+                        result.setInfo("CI信息新增失败，序列号重复");
+                        return result;
+                    } else {
+                        throw e;
+                    }
                 }
 
                 recordList = statementResult.list();
