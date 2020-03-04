@@ -13,12 +13,22 @@ import java.util.List;
 public interface DeviceService {
 
     /**
+     * 获取设备列表
+     */
+    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
      * @auther: liudd
      * @date: 2020/2/28 9:48
-     * 功能描述:列表
+     * 功能描述:获取设备列表
      */
     List<DeviceEntity> list(DeviceQuery deviceQuery);
 
+    /**
+     * @auther: liudd
+     * @date: 2020/2/28 9:48
+     * 功能描述:统计设备列表数量
+     */
     int count(DeviceQuery deviceQuery);
 
     /**
@@ -29,16 +39,16 @@ public interface DeviceService {
     List<String> list2CodeList(List<DeviceEntity> deviceEntityList);
 
     /**
-     * 获取设备列表
-     */
-    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
-
-    /**
      * @auther: liudd
      * @date: 2020/3/3 10:49
      * 功能描述:根据设备编码获取单个设备
      */
     DeviceModel getByCode(String uniqueCode, String code);
 
+    /**
+     * @auther: liudd
+     * @date: 2020/3/3 10:49
+     * 功能描述:根据设备编码获取设备列表
+     */
     List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList);
 }
