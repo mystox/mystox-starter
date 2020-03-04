@@ -98,7 +98,6 @@ public class HistoryService {
                     //保存到数据库中
                     HistoryDataEntity historyDataEntity = new HistoryDataEntity();
                     historyDataEntity.setDeviceCode(deviceIdInfo.getDeviceId());
-                    historyDataEntity.setFsuCode(fsuCode);
                     historyDataEntity.setTime(new Date().getTime());
                     historyDataEntity.setValue(valueMap);
 //                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
