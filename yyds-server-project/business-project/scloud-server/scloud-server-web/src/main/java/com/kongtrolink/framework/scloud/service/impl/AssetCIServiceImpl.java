@@ -3,10 +3,14 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.AssetTypeConstant;
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
+import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
+import com.kongtrolink.framework.scloud.mqtt.query.BasicDeviceQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicSiteQuery;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AssetCIService;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -34,13 +38,13 @@ public class AssetCIServiceImpl implements AssetCIService{
     @Override
     public MsgResult getSiteCI(String uniqueCode, SiteQuery siteQuery) {
         BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
-        basicSiteQuery.setServerCode(siteQuery.getServerCode());
-        basicSiteQuery.setEnterpriseCode(uniqueCode);
-        basicSiteQuery.setName(AssetTypeConstant.ASSET_TYPE_SITE);
-        basicSiteQuery.setAddress(siteQuery.getTierCodes());
-        basicSiteQuery.setSn(siteQuery.getSiteCode());
-        basicSiteQuery.setSiteName(siteQuery.getSiteName());
-        basicSiteQuery.setSiteType(siteQuery.getSiteType());
+        basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
+        basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+        basicSiteQuery.setName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
+        basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
+        basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));
+        basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));
+        basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
 
         MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
         return msgResult;
@@ -52,6 +56,7 @@ public class AssetCIServiceImpl implements AssetCIService{
     @Override
     public MsgResult addSiteCI(String uniqueCode, SiteModel siteModel) {
         List<BasicSiteEntity> basicSiteEntityList = new ArrayList<>();
+
         BasicSiteEntity basicSiteEntity = new BasicSiteEntity();
         basicSiteEntity.setServerCode(siteModel.getServerCode());
         basicSiteEntity.setUniqueCode(uniqueCode);
@@ -106,8 +111,12 @@ public class AssetCIServiceImpl implements AssetCIService{
      * 从【中台-资管】 获取设备（基本信息）
      */
     @Override
-    public MsgResult getDeviceCI() {
-        return null;
+    public MsgResult getDeviceCI(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
     }
 
     /**

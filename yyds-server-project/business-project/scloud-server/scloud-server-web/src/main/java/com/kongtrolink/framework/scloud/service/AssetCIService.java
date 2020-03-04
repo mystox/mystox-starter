@@ -2,6 +2,8 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 
 /**
@@ -36,7 +38,7 @@ public interface AssetCIService {
     /**
      * 从【中台-资管】 获取设备（基本信息）
      */
-    MsgResult getDeviceCI();
+    MsgResult getDeviceCI(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * 向【中台-资管】 添加设备
