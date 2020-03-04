@@ -24,7 +24,7 @@ public class FocusSignalEntity implements Serializable {
     private String tierName;	//区域名称
     private String siteName;	//站点名称
     private String deviceName;	//设备名称
-    private String cntbId;//信号灯的cntbId
+    private String cntbId;//信号点的cntbId
     private String userId; //用户ID
     private String typeName;  //信号点名称
     private String measurement; //单位

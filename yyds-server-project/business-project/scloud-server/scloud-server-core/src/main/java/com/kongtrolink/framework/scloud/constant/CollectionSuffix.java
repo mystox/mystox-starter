@@ -24,4 +24,6 @@ public class CollectionSuffix {
     public static final String MAINTAINER = "_maintainer";
     // 附件表
     public static final String ATTACHMENTS = "_attachments";
+    // 综合机房 展现的信号点-单个企业单个设备自定义设置
+    public static final String MULTIPLE_ROOM_SIGNAL_CONFIG ="_room_signal_config";
 }
