@@ -1,5 +1,8 @@
 package com.kongtrolink.framework.scloud.entity.multRoom;
 
+import com.kongtrolink.framework.scloud.base.GeneratedValue;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,23 +14,25 @@ public class RoomSignalTypeConfig implements Serializable{
 
     private static final long serialVersionUID = 477673618826699795L;
 
-    private String id;
-    private String deviceId;
+    @Field(value = "id")
+    @GeneratedValue
+    private int id; //主键ID
+    private int deviceId;
     private List<RoomSignalTypeDevice> signals;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public String getDeviceId() {
+    public int getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(String deviceId) {
+    public void setDeviceId(int deviceId) {
         this.deviceId = deviceId;
     }
 
