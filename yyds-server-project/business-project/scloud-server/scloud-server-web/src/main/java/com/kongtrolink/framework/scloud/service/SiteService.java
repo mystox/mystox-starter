@@ -45,11 +45,8 @@ public interface SiteService {
 
     /**
      * 删除站点
-     *
-     * @param uniqueCode 企业识别码
-     * @param code 站点编码
      */
-    void deleteSite(String uniqueCode, String code);
+    void deleteSite(String uniqueCode, SiteQuery siteQuery);
 
     /**
      * 获取资产管理员列表

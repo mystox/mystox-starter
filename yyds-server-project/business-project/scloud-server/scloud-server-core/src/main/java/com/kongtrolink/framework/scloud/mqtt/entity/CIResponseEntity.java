@@ -10,8 +10,17 @@ import java.util.List;
  */
 public class CIResponseEntity {
 
+    private int result; //请求结果。0-失败，1-成功
     private int count;
     private List<JSONObject> infos;
+
+    public int getResult() {
+        return result;
+    }
+
+    public void setResult(int result) {
+        this.result = result;
+    }
 
     public int getCount() {
         return count;

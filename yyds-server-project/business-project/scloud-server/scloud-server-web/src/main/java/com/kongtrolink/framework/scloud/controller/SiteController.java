@@ -1,13 +1,13 @@
 package com.kongtrolink.framework.scloud.controller;
 
-import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.scloud.entity.ImageFileInfo;
+import com.kongtrolink.framework.scloud.entity.ComAttachmentsEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.ComAttachmentsModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
-import com.kongtrolink.framework.scloud.service.ImageFileService;
+import com.kongtrolink.framework.scloud.service.ComAttachmentsService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -36,7 +36,8 @@ public class SiteController extends BaseController{
     @Autowired
     SiteService siteService;
     @Autowired
-    ImageFileService imageFileService;
+    ComAttachmentsService comAttachmentsService;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteController.class);
 
@@ -100,8 +101,8 @@ public class SiteController extends BaseController{
     /**
      * 批量导入站点
      */
-    @RequestMapping(value = "importSiteList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult importSiteList(@RequestBody MultipartFile file){
+    @RequestMapping(value = "importSiteList/{serverCode}", method = RequestMethod.POST)
+    public @ResponseBody JsonResult importSiteList(@PathVariable String serverCode, @RequestBody MultipartFile file){
         try {
             String uniqueCode = getUniqueCode();
 
@@ -125,34 +126,39 @@ public class SiteController extends BaseController{
     }
 
     /**
-     * 上传站点图片
+     * 上传站点图纸
      */
-    @RequestMapping(value = "importSiteImage", method = RequestMethod.POST)
-    public @ResponseBody JsonResult importSiteImage(@RequestParam("file") CommonsMultipartFile file){
+    @RequestMapping(value = "uploadSiteDrawing", method = RequestMethod.POST)
+    public @ResponseBody JsonResult uploadSiteDrawing(@RequestBody MultipartFile file){
         try{
             String uniqueCode = getUniqueCode();
-            User uploader = getUser();
-            String imgId = imageFileService.saveImg(uniqueCode, file, uploader, "siteImg", 800, 800);
-            return new JsonResult(imgId);
+            if (file == null || file.isEmpty()){
+                return new JsonResult("文件为空", false);
+            }
+            ComAttachmentsEntity attachment = comAttachmentsService.saveMultipartFile(uniqueCode, file, false);
+            if(attachment==null){
+                LOGGER.error("保存文件失败");
+                throw new Exception();
+            }
+
+            ComAttachmentsModel comAttachmentsModel = new ComAttachmentsModel(attachment.getId(),attachment.getFileName());
+            return new JsonResult(comAttachmentsModel);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("上传图片失败", false);
+            return new JsonResult("上传站点图纸失败", false);
         }
     }
 
     /**
-     * 查询站点图片
+     * 下载站点图纸
      */
-    @RequestMapping(value = "querySiteImage", method = RequestMethod.GET)
-    public @ResponseBody void querySiteImage(@RequestBody String imgId, HttpServletResponse response) {
-        ImageFileInfo info = imageFileService.getInfo("clusterImg", Integer.valueOf(imgId));
-        if(info==null){
-            System.out.println("未找到相关图片");
-            return ;
-        }
-        byte[] data = info.getImage();
-        if (data != null) {
-            imageFileService.write(data, response);
+    @RequestMapping(value = "downloadSiteDrawing/{id}", method = RequestMethod.GET)
+    public @ResponseBody void downloadSiteDrawing(@PathVariable int id, HttpServletResponse response){
+        try{
+            String uniqueCode = getUniqueCode();
+            comAttachmentsService.downloadMultipartFile(uniqueCode, id, response);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -190,13 +196,16 @@ public class SiteController extends BaseController{
      * 删除站点（批量）
      */
     @RequestMapping(value = "deleteSite", method = RequestMethod.POST)
-    public @ResponseBody JsonResult deleteSite(@RequestBody SiteEntity siteEntity){
+    public @ResponseBody JsonResult deleteSite(@RequestBody SiteQuery siteQuery){
         try {
             String uniqueCode = getUniqueCode();
-            String code = siteEntity.getCode();
-            siteService.deleteSite(uniqueCode, code);
+            if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0) {
+                siteService.deleteSite(uniqueCode, siteQuery);
 
-            return new JsonResult("删除成功", true);
+                return new JsonResult("删除成功", true);
+            }else {
+                return new JsonResult("未选中站点", true);
+            }
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("删除异常，删除失败", false);
@@ -208,6 +217,23 @@ public class SiteController extends BaseController{
      */
     @RequestMapping(value = "getSiteMaintainers", method = RequestMethod.POST)
     public @ResponseBody JsonResult getSiteMaintainers(@RequestBody SiteQuery siteQuery){
+        return null;
+    }
+
+    /**
+     * 获取企业区域树（去除没有站点的区域）
+     */
+    @RequestMapping(value = "getTierTree", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getTierTree(){
+        return null;
+    }
+
+    /**
+     * 获取简化版站点列表
+     *  根据query.getSimplifiedSitekeys()获取到的简化版站点所需参数的key，删减Site中不需要的参数，仅保留Site中所传需要的参数
+     */
+    @RequestMapping(value = "/getSimplifiedSiteList", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getSimplifiedSiteList(@RequestBody SiteQuery query){
         return null;
     }
 }

@@ -10,4 +10,6 @@ public class CommonConstant {
     public static final String ONLINE = "在线";
     public static final String YES = "是";
     public static final String NO = "否";
+    public static final int FAILED = 0;
+    public static final int SUCCESSFUL = 1;
 }
