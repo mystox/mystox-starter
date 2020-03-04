@@ -21,9 +21,6 @@ import java.util.List;
 @Service("Neo4jDBService")
 public class Neo4jDBService implements DBService {
 
-    @Value("${server.name}_${server.version}")
-    private String serverCode;
-
     @Value("${neo4j.username}")
     private String username;
 
@@ -964,6 +961,7 @@ public class Neo4jDBService implements DBService {
 
                 String name = jsonObject.getString("type");
                 String enterpriseCode = jsonObject.getString("enterpriseCode");
+                String serverCode = jsonObject.getString("serverCode");
                 String businessCode = getBusinessCode(jsonObject);
 
                 jsonObject.put("createTime", System.currentTimeMillis());
