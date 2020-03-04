@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
@@ -26,6 +27,7 @@ import com.sun.xml.xsom.impl.UName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,9 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Autowired
     @Lazy
     MqttSender mqttSender;
+    @Value("${server.groupCode}")
+    private String groupCode;
+
     /**
      * 实时数据-获取设备列表
      *
@@ -98,6 +103,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     public SignalModel getData(String uniqueCode,SignalQuery signalQuery,String userId) {
         try{
             String gatewayServerCode = signalQuery.getGatewayServerCode();
+            //拼凑group
+            gatewayServerCode = MqttUtils.preconditionGroupServerCode(groupCode,gatewayServerCode);
             String devType = signalQuery.getDeviceType();//设备类型
             String type = signalQuery.getType();//是否是特定类的查询
             DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
@@ -106,7 +113,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             }
             List<SignalType> signalTypes = deviceType.getSignalTypeList();
             GetDataMessage getDataMessage = getGetDataMessage(signalQuery,deviceType.getSignalTypeList());
-            //下发到网关获取实时数据
+            ;
             MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
@@ -139,6 +146,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         try{
             String fsuCode = signalQuery.getFsuCode();
             String gatewayServerCode = signalQuery.getGatewayServerCode();
+            //下发到网关获取实时数据
+            gatewayServerCode = MqttUtils.preconditionGroupServerCode(groupCode,gatewayServerCode);
             GetDataMessage getDataMessage = getGetDataDetailMessage(signalQuery);
             //下发到网关获取实时数据
             MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
@@ -151,7 +160,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                 //单个设备查询的
                 DeviceIdInfo deviceIdInfo = getDataAckMessage.getPayload().getDeviceIds().get(0);
                 List<SignalIdInfo> ids = deviceIdInfo.getIds();
-                String redisKey = RedisUtil.getRealDataKey(fsuCode,deviceIdInfo.getDeviceId());
+                String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceIdInfo.getDeviceId());
                 Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA, redisKey);
                 try {
                     if (value == null) {
@@ -169,8 +178,9 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
                 } catch (Exception e) {
                     LOGGER.error("获取redis数据异常 {} ,{} ", RedisKey.DEVICE_REAL_DATA, redisKey);
                 }
+                return valueMap.get(signalQuery.getCntbId());
             }
-            return valueMap.get(signalQuery.getCntbId());
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -186,6 +196,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public SetPointAckMessage setPoint(SignalQuery signalQuery) {
         String gatewayServerCode = signalQuery.getGatewayServerCode();
+        //拼凑group
+        gatewayServerCode = MqttUtils.preconditionGroupServerCode(groupCode,gatewayServerCode);
         SetPointMessage setPointMessage = new SetPointMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setPointMessage.setPayload(deviceIdEntity);
@@ -206,6 +218,8 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Override
     public SetThresholdAckMessage setThreshold(SignalQuery signalQuery) {
         String gatewayServerCode = signalQuery.getGatewayServerCode();
+        //拼凑group
+        gatewayServerCode = MqttUtils.preconditionGroupServerCode(groupCode,gatewayServerCode);
         SetThresholdMessage setThresholdMessage = new SetThresholdMessage();
         DeviceIdEntity deviceIdEntity = getPayload(signalQuery,1);
         setThresholdMessage.setPayload(deviceIdEntity);

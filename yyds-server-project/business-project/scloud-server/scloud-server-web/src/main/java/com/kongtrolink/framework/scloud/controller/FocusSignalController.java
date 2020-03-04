@@ -52,6 +52,10 @@ public class FocusSignalController  extends BaseController {
     @RequestMapping(value = "/getList")
     public @ResponseBody JsonResult  getList(@RequestBody FocusSignalQuery focusSignalQuery) {
        try{
+           String uniqueCode = getUniqueCode();
+           String userId = getUserId();
+           focusSignalQuery.setUniqueCode(uniqueCode);
+           focusSignalQuery.setUserId(userId);
             List<FocusSignalEntity> list = focusSignalService.getList(focusSignalQuery);
             int count = focusSignalService.getListCount(focusSignalQuery);
             ListResult value = new ListResult(list,count);

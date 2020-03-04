@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 /**
+ * 上传文件Resolver配置
  * Created by Eric on 2020/2/20.
  */
 @Configuration

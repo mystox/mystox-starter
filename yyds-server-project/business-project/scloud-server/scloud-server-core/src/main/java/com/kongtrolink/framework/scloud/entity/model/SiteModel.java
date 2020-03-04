@@ -5,8 +5,9 @@ package com.kongtrolink.framework.scloud.entity.model;
  *  使用场景：【资产管理-站点资产管理】
  * Created by Eric on 2020/2/24.
  */
-public class SiteModel {
+public class SiteModel{
 
+    private String serverCode;
     private int siteId; //站点主键Id
     private String tierCode;	//区域编码
     private String tierName;	//区域名称(中间用"-"隔开)
@@ -23,9 +24,17 @@ public class SiteModel {
     private String assetNature;	//产权性质（自建、社会资源、注入）
     private Long createTime;	//投入使用时间
     private String areaCovered;	//占地面积
-    private String imgId;	//站点图片Id
+    private int fileId;	//站点图纸文件Id
 
-    private Boolean isModified; //修改站点时，是否修改了站点名称或站点类型
+    private Boolean isModified; //修改站点时，是否修改了站点名称
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public int getSiteId() {
         return siteId;
@@ -155,12 +164,12 @@ public class SiteModel {
         this.areaCovered = areaCovered;
     }
 
-    public String getImgId() {
-        return imgId;
+    public int getFileId() {
+        return fileId;
     }
 
-    public void setImgId(String imgId) {
-        this.imgId = imgId;
+    public void setFileId(int fileId) {
+        this.fileId = fileId;
     }
 
     public Boolean getModified() {

@@ -11,6 +11,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.back.SendScMessa
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.dto.HeartModuleDto;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.topic.EnumMqttSendSCTopics;
 import com.kongtrolink.framework.gateway.tower.core.util.FSUServiceUtil;
+import com.kongtrolink.framework.gateway.tower.core.util.RedisKeyUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,15 +64,15 @@ public class FsuHeartService {
             String redisKeyFsuInfo = uniqueCode+"#"+fsuShortCode;
             if(!flag){
                 //获取FSU离线消息
-                Object offInfo = redisUtils.hget(RedisKey.FSU_HEART_OFF,redisKeyFsuInfo);
+                Object offInfo = redisUtils.hget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_HEART_OFF),redisKeyFsuInfo);
                 int offlineNum =0;
                 try{
                     offlineNum = Integer.parseInt(String.valueOf(offInfo));
                 }catch (Exception e){
-                    LOGGER.error("redis:{} 获取redisKey值:{} 异常",RedisKey.FSU_HEART_OFF,redisKeyFsuInfo);
+                    LOGGER.error("redis:{} 获取redisKey值:{} 异常",RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_HEART_OFF),redisKeyFsuInfo);
                 }
                 offlineNum +=1;
-                redisUtils.hset(RedisKey.FSU_HEART_OFF,redisKeyFsuInfo,offlineNum);
+                redisUtils.hset(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_HEART_OFF),redisKeyFsuInfo,offlineNum);
                 boolean isAlarmReport = isOutAlarm(fsu,offlineNum);
                 /**
                  * 判断已经离线了 进行2步骤（无先后顺序）
@@ -81,8 +82,8 @@ public class FsuHeartService {
                  */
                 if (isAlarmReport) {
                     //若发生离线告警 则将FSU移除redis队列，不再进行Task的相关定时任务
-                    redisUtils.hdel(RedisKey.FSU_INFO,redisKeyFsuInfo);
-                    redisUtils.hdel(RedisKey.FSU_HEART_OFF,redisKeyFsuInfo);
+                    redisUtils.hdel(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_INFO),redisKeyFsuInfo);
+                    redisUtils.hdel(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_HEART_OFF),redisKeyFsuInfo);
                     LOGGER.info("fsu {}  {} 离线超时 需要 进行离线告警上报 ", fsu.getId(),fsu.getShortCode());
                     //1 上报给告警模块
                     mqttOpera.opera(GatewayTonerOperate.ALARM_OFFLINE,fsu.getShortCode());
@@ -90,7 +91,7 @@ public class FsuHeartService {
 
             }else{
                 //若在线是将离线次数 设置成0
-                redisUtils.hset(RedisKey.FSU_HEART_OFF,redisKeyFsuInfo,String.valueOf(0));
+                redisUtils.hset(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_HEART_OFF),redisKeyFsuInfo,String.valueOf(0));
             }
         }catch (Exception e){
             e.printStackTrace();

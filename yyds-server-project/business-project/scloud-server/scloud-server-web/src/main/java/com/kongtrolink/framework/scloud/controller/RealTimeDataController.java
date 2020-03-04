@@ -106,6 +106,7 @@ public class RealTimeDataController extends ExportController {
     @RequestMapping(value = "/setPoint")
     public @ResponseBody JsonResult setPoint(@RequestBody SignalQuery query) {
         try{
+            query.setUniqueCode(getUniqueCode());
             SetPointAckMessage ack = realTimeDataService.setPoint(query);
             return new JsonResult(ack);
         }catch (Exception e){
@@ -121,6 +122,7 @@ public class RealTimeDataController extends ExportController {
     @RequestMapping(value = "/setThreshold")
     public @ResponseBody JsonResult setThreshold(@RequestBody SignalQuery query) {
         try{
+            query.setUniqueCode(getUniqueCode());
             SetThresholdAckMessage ack = realTimeDataService.setThreshold(query);
             return new JsonResult(ack);
         }catch (Exception e){

@@ -10,4 +10,12 @@ public class CommonConstant {
     public static final String ONLINE = "在线";
     public static final String YES = "是";
     public static final String NO = "否";
+    public static final int FAILED = 0; //失败
+    public static final int SUCCESSFUL = 1; //成功
+
+    //--------------------搜索类型----------------------
+    public static final int SEARCH_TYPE_FUZZY = 0;  //模糊搜索
+    public static final int SEARCH_TYPE_EXACT = 1;  //精确搜索
+    public static final int SEARCH_TYPE_IN = 2;  //IN搜索
+
 }

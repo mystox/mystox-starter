@@ -6,6 +6,7 @@ import com.kongtrolink.framework.gateway.tower.core.constant.GatewayTonerOperate
 import com.kongtrolink.framework.gateway.tower.core.constant.RedisKey;
 import com.kongtrolink.framework.gateway.tower.core.entity.RedisFsuInfo;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.dto.HeartModuleDto;
+import com.kongtrolink.framework.gateway.tower.core.util.RedisKeyUtil;
 import com.kongtrolink.framework.gateway.tower.server.service.NorthService;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class FsuHeartTask {
     @Scheduled(cron = "${corn.heart:0 * * * * ?}")
     public void execute() {
         LOGGER.info("开始进行心跳检测...");
-        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKey.FSU_INFO+"_"+uniqueCode);
+        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_INFO));
         if(redisMap==null || redisMap.size()==0){
             LOGGER.info(" 无FSU需要 心跳检测 !! 结束");
             return;

@@ -6,6 +6,7 @@ import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.gateway.tower.core.constant.RedisKey;
 import com.kongtrolink.framework.gateway.tower.core.entity.RedisFsuInfo;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.dto.HeartModuleDto;
+import com.kongtrolink.framework.gateway.tower.core.util.RedisKeyUtil;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -39,7 +40,7 @@ public class HistoryTask  implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         String uniqueCode = dataMap.getString("uniqueCode");
         LOGGER.info("企业:{} 开始进行历史数据轮询...",uniqueCode);
-        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKey.FSU_INFO + "_" +uniqueCode);
+        Map<Object,Object> redisMap =  redisUtils.hmget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_INFO));
         if(redisMap==null || redisMap.size()==0){
             LOGGER.info(" 无FSU需要 历史数据轮询 !! 结束");
             return;

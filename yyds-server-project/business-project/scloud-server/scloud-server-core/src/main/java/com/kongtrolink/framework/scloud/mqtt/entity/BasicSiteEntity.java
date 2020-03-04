@@ -8,18 +8,28 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class BasicSiteEntity {
 
+    @JSONField(name = "serverCode")
+    private String serverCode;
     @JSONField(name = "enterpriseCode")
     private String uniqueCode;  //企业识别码
     @JSONField(name = "address")
     private String tierCode;    //区域层级编码
+    @JSONField(name = "name")
+    private String assetType;    //资产类型
     @JSONField(name = "sn")
     private String code;    //站点编码
     @JSONField(name = "siteName")
     private String name;    //站点名称
     @JSONField(name = "siteType")
     private String siteType;    //站点类型
-    @JSONField(name = "name")
-    private String assetType;    //资产类型
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getUniqueCode() {
         return uniqueCode;

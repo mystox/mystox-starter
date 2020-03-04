@@ -16,12 +16,12 @@ public class OperaCodeConstant {
     public static final String GET_CI = "getCI";
 
     //添加CI
-    public static final String ADD_CI_MSG = "addCIMsg";
+    public static final String ADD_CI = "addCI";
 
     //修改CI
-    public static final String MODIFY_CI_MSG = "modifyCIMsg";
+    public static final String MODIFY_CI = "modifyCI";
 
     //删除CI
-    public static final String DELETE_CI_MSG = "deleteCIMsg";
+    public static final String DELETE_CI = "deleteCI";
 
 }
