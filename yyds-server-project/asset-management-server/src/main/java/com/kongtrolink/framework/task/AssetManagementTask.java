@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.Publish;
 import com.kongtrolink.framework.dao.DBService;
 import com.kongtrolink.framework.entity.AssetManagementConfig;
+import com.kongtrolink.framework.entity.DBResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class AssetManagementTask implements ApplicationRunner {
     public void run(ApplicationArguments args) {
 
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.scheduleWithFixedDelay(() -> beat(), 0, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::beat, 0, 1, TimeUnit.SECONDS);
         System.out.println("AssetManagementTask.run" + this.toString());
 
     }
@@ -61,7 +62,7 @@ public class AssetManagementTask implements ApplicationRunner {
 
         if((++deviceGetCount) >= assetManagementConfig.getDeviceGetInterval()) {
             deviceGetCount = 0;
-            taskExecutor.execute(()->deviceGet());
+            taskExecutor.execute(this::deviceGet);
         }
     }
 
@@ -73,27 +74,31 @@ public class AssetManagementTask implements ApplicationRunner {
         request.put("curPage", 1);
         request.put("pageNum", 0);
 
-        JSONObject response = dbService.searchCI(request);
-        if (response == null || response.getInteger("count") <= 0) {
-            return;
-        }
+        try {
+            DBResult dbResult = dbService.searchCI(request);
+            if (!dbResult.getResult() || dbResult.getCount() <= 0) {
+                return;
+            }
 
-        int pageNum = 100;
-        request.put("pageNum", pageNum);
-        int count = response.getInteger("count");
-        for (int curPage = 0; curPage * pageNum < count; ++curPage) {
-            request.put("curPage", curPage + 1);
-            response = dbService.searchCI(request);
+            int pageNum = 100;
+            request.put("pageNum", pageNum);
+            for (int curPage = 0; curPage * pageNum < dbResult.getCount(); ++curPage) {
+                request.put("curPage", curPage + 1);
 
-            JSONArray ciList = response.getJSONArray("infos");
-            for (int i = 0; i < ciList.size(); ++i) {
-                String sn = ciList.getJSONObject(i).getString("sn");
-                String gatewayServerCode = ciList.getJSONObject(i).getString("gatewayServerCode");
+                dbResult = dbService.searchCI(request);
 
-                if (gatewayServerCode != null && !gatewayServerCode.equals("")) {
-                    publish.deviceGet(sn, gatewayServerCode);
+                JSONArray ciList = dbResult.getJsonArray();
+                for (int i = 0; i < ciList.size(); ++i) {
+                    String sn = ciList.getJSONObject(i).getString("sn");
+                    String gatewayServerCode = ciList.getJSONObject(i).getString("gatewayServerCode");
+
+                    if (gatewayServerCode != null && !gatewayServerCode.equals("")) {
+                        publish.deviceGet(sn, gatewayServerCode);
+                    }
                 }
             }
+        } catch (Exception e) {
+            logger.error(JSONObject.toJSONString(e), serverCode);
         }
     }
 }
