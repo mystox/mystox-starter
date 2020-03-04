@@ -13,6 +13,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.msg.TAlarm;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.XmlList;
 import com.kongtrolink.framework.gateway.tower.core.util.GatewayTowerUtil;
 import com.kongtrolink.framework.gateway.tower.core.util.MessageUtil;
+import com.kongtrolink.framework.gateway.tower.core.util.RedisKeyUtil;
 import com.kongtrolink.framework.gateway.tower.server.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.tower.server.entity.Transverter;
 import com.kongtrolink.framework.gateway.tower.server.service.DeviceTypeConfig;
@@ -96,10 +97,11 @@ public class AlarmTransverter extends TransverterHandler {
 
     @Override
     public void offlineAlarmEnd(String sn){
-        Object offlineAlarmSerialNo = redisUtils.hget(RedisKey.FSU_ALARM_INFO,sn);
+        String uniqueCode = getEnterpriseCode();
+        Object offlineAlarmSerialNo = redisUtils.hget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_ALARM_INFO),sn);
         if(offlineAlarmSerialNo !=null){
             //删除离线告警
-            redisUtils.hdel(RedisKey.FSU_ALARM_INFO,sn);
+            redisUtils.hdel(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_ALARM_INFO),sn);
             List<AlarmReportInfo> alarmInfoList = new ArrayList<>();
             AlarmReportInfo alarmInfo = new AlarmReportInfo();
             alarmInfo.setName(getFsuOffAlarmName());
@@ -123,8 +125,9 @@ public class AlarmTransverter extends TransverterHandler {
 
 
     public void offlineAlarmStart(String sn){
+        String uniqueCode = getEnterpriseCode();
         logger.error("收到fsuId：{} 离线告警   .... ",sn);
-        Object offlineAlarmSerialNo = redisUtils.hget(RedisKey.FSU_ALARM_INFO,sn);
+        Object offlineAlarmSerialNo = redisUtils.hget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_ALARM_INFO),sn);
         if(offlineAlarmSerialNo !=null){
             logger.error("离线告警已存在");
             return;
@@ -148,7 +151,7 @@ public class AlarmTransverter extends TransverterHandler {
         alarmInfo.setSerial(String.valueOf(serial));
         alarmInfoList.add(alarmInfo);
         //保存在redis中
-        redisUtils.hset(RedisKey.FSU_ALARM_INFO,sn,String.valueOf(serial));
+        redisUtils.hset(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_ALARM_INFO),sn,String.valueOf(serial));
         //推送给告警模块
         sendMessage(alarmInfoList);
 

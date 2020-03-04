@@ -15,6 +15,7 @@ import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginMes
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.Login;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.LoginAck;
 import com.kongtrolink.framework.gateway.tower.core.util.MessageUtil;
+import com.kongtrolink.framework.gateway.tower.core.util.RedisKeyUtil;
 import com.kongtrolink.framework.gateway.tower.server.service.parse.ParseHandler;
 import com.kongtrolink.framework.gateway.tower.server.service.transverter.impl.AlarmTransverter;
 import com.kongtrolink.framework.gateway.tower.server.service.transverter.impl.AssetTransverter;
@@ -67,7 +68,7 @@ public class LoginParse extends ParseHandler {
             redisFsuInfo.setPort(getFsuPort());
             redisFsuInfo.setIp(login.getIp());
             redisFsuInfo.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
-            redisUtils.hset(RedisKey.FSU_INFO + "_"+uniqueCode,fsuShortCode,JSONObject.toJSONString(redisFsuInfo));
+            redisUtils.hset(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_INFO),fsuShortCode,JSONObject.toJSONString(redisFsuInfo));
             //判断是否有离线告警
             try{
                 alarmTransverter.offlineAlarmEnd(fsuShortCode);
@@ -115,8 +116,7 @@ public class LoginParse extends ParseHandler {
     }
     public RedisFsuInfo getRedisFsuInfo(String fsuId){
         String uniqueCode = getEnterpriseCode();
-        String redisKeyFsuInfo = uniqueCode+"#"+fsuId;
-        Object object = redisUtils.hget(RedisKey.FSU_INFO,redisKeyFsuInfo);
+        Object object = redisUtils.hget(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_INFO),fsuId);
         if(object==null){
             return null;
         }

@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.api;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginAckMessage;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,9 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
     @Override
     public String login(String message) {
         LoginMessage recServerBase = JSONObject.parseObject(message,LoginMessage.class);
-
-        return "{}";
+        LoginAckMessage ack = new LoginAckMessage();
+        ack.setResult(true);
+        return JSONObject.toJSONString(ack);
     }
 
 

@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
 
-@SpringBootApplication(scanBasePackages = {"com.kongtrolink.framework"})
-@EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
+@SpringBootApplication(scanBasePackages = {"com.kongtrolink.framework"},
+		exclude = {MultipartAutoConfiguration.class})
 public class ScloudServerWebApplication {
 
 	public static void main(String[] args) {
