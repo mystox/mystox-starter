@@ -9,6 +9,7 @@ import com.kongtrolink.framework.entity.Neo4jDBRelationshipType;
 import com.kongtrolink.framework.dao.DBService;
 import com.kongtrolink.framework.utils.Neo4jUtils;
 import org.neo4j.driver.v1.*;
+import org.neo4j.driver.v1.exceptions.ClientException;
 import org.neo4j.driver.v1.summary.ResultSummary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -60,12 +61,13 @@ public class Neo4jDBService implements DBService {
                 int level = jsonObject.getInteger("level");
                 String relationship = "";
 
+                String cmd;
                 StatementResult statementResult;
                 ResultSummary summary;
 
                 if (level > 1) {
                     relationship = jsonObject.getString("relationship");
-                    String cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}}) return item";
+                    cmd = "match (item:" + Neo4jDBNodeType.CIType + " {name:{Name}, level:{Level}}) return item";
                     statementResult = transaction.run(cmd, Values.parameters("Name", relationship, "Level", level - 1));
                     if (statementResult.list().size() != 1) {
                         transaction.failure();
@@ -74,13 +76,23 @@ public class Neo4jDBService implements DBService {
                     }
                 }
 
-                String cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}, businessCodes:[], icon:'default.png'})";
-                statementResult = transaction.run(cmd, Values.parameters("Title", title, "Name", name, "Code", code, "Level", level));
-                summary = statementResult.summary();
-                if (summary.counters().nodesCreated() != 1) {
+                try {
+                    cmd = "create (item:" + Neo4jDBNodeType.CIType + " {title:{Title}, name:{Name}, code:{Code}, level:{Level}, businessCodes:[], icon:'default.png'})";
+                    statementResult = transaction.run(cmd, Values.parameters("Title", title, "Name", name, "Code", code, "Level", level));
+                    summary = statementResult.summary();
+                    if (summary.counters().nodesCreated() != 1) {
+                        transaction.failure();
+                        result.setInfo("CI类型创建失败，新增节点失败");
+                        return result;
+                    }
+                } catch (ClientException e) {
                     transaction.failure();
-                    result.setInfo("CI类型创建失败，新增节点失败");
-                    return result;
+                    if (e.getMessage().contains("already exists with label `CIType` and property")) {
+                        result.setInfo("CI类型创建失败，英文名或类型编码重复");
+                        return result;
+                    } else {
+                        throw e;
+                    }
                 }
 
                 if (level > 1) {
