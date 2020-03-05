@@ -32,6 +32,7 @@ public class DeviceEntity implements Serializable {
 	private int id; //主键ID
 
 	private String tierCode;	//区域编码
+	private String siteCode;	//站点编码
 	private int siteId;	//站点ID
 	private String type;	//设备类型名称
 	private String typeCode;	//设备类型编码
@@ -65,6 +66,14 @@ public class DeviceEntity implements Serializable {
 
 	public void setTierCode(String tierCode) {
 		this.tierCode = tierCode;
+	}
+
+	public String getSiteCode() {
+		return siteCode;
+	}
+
+	public void setSiteCode(String siteCode) {
+		this.siteCode = siteCode;
 	}
 
 	public int getSiteId() {

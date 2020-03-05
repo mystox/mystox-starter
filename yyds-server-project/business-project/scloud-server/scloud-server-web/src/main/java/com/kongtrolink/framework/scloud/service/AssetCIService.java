@@ -14,44 +14,49 @@ public interface AssetCIService {
 
     //-----------------------站点----------------------
     /**
-     * 从【中台-资管】 获取站点（基本信息）
+     * 从【中台-资管】 获取区域下所有站点（基本信息）
      */
-    MsgResult getSiteCI(String uniqueCode, SiteQuery siteQuery);
+    MsgResult getAssetSitesInTier(String uniqueCode, SiteQuery siteQuery);
+
+    /**
+     * 从【中台-资管】获取单个站点（基本信息）
+     */
+    MsgResult getAssetSiteByCode(String uniqueCode, SiteQuery siteQuery);
 
     /**
      * 向【中台-资管】 添加站点
      */
-    MsgResult addSiteCI(String uniqueCode, SiteModel siteModel);
+    MsgResult addAssetSite(String uniqueCode, SiteModel siteModel);
 
     /**
      * 向【中台-资管】 删除站点
      */
-    MsgResult deleteSiteCI(String uniqueCode, SiteQuery siteQuery);
+    MsgResult deleteAssetSite(String uniqueCode, SiteQuery siteQuery);
 
     /**
      * 向【中台-资管】 修改站点
      */
-    MsgResult modifySiteCI(String uniqueCode, SiteModel siteModel);
+    MsgResult modifyAssetSite(String uniqueCode, SiteModel siteModel);
 
 
     //-----------------------设备----------------------
     /**
-     * 从【中台-资管】 获取设备（基本信息）
+     * 从【中台-资管】 获取站点下设备（基本信息）列表
      */
-    MsgResult getDeviceCI(String uniqueCode, DeviceQuery deviceQuery);
+    MsgResult getAssetDeviceList(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * 向【中台-资管】 添加设备
      */
-    MsgResult addDeviceCI();
+    MsgResult addAssetDevice();
 
     /**
      * 向【中台-资管】 删除设备
      */
-    MsgResult deleteDeviceCI();
+    MsgResult deleteAssetDevice();
 
     /**
      * 向【中台-资管】 修改设备
      */
-    MsgResult modifyDeviceCI();
+    MsgResult modifyAssetDevice();
 }

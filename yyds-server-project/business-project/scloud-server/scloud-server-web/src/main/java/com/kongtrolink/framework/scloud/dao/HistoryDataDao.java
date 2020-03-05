@@ -59,7 +59,6 @@ public class HistoryDataDao{
         String cntbId = historyDataQuery.getCntbId();//需要查询的具体信号点ID
         Criteria criteria = Criteria.where("time").gte(startTime).lte(endTime)
                 .and("value."+cntbId).exists(true)
-                .and("fsuCode").is(fsuCode)
                 .and("deviceCode").is(deviceCode);
         return criteria;
     }

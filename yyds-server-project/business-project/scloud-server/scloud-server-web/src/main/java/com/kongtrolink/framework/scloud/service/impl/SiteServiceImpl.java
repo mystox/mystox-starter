@@ -84,7 +84,7 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setFileId(siteModel.getFileId());
 
         //向【资管】下发添加（批量）站点的MQTT消息
-        MsgResult msgResult = assetCIService.addSiteCI(uniqueCode, siteModel);
+        MsgResult msgResult = assetCIService.addAssetSite(uniqueCode, siteModel);
         int stateCode = msgResult.getStateCode();
         if (stateCode == CommonConstant.SUCCESSFUL){    //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
@@ -101,14 +101,14 @@ public class SiteServiceImpl implements SiteService {
     }
 
     /**
-     * 获取站点列表
+     * 获取所有站点列表
      */
     @Override
     public List<SiteModel> findSiteList(String uniqueCode, SiteQuery siteQuery) {
         List<SiteModel> list = new ArrayList<>();
 
         //从【资管】获取站点基本信息
-        MsgResult msgResult = assetCIService.getSiteCI(uniqueCode, siteQuery);
+        MsgResult msgResult = assetCIService.getAssetSitesInTier(uniqueCode, siteQuery);
         int stateCode = msgResult.getStateCode();
         if (stateCode == CommonConstant.SUCCESSFUL){    //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
@@ -180,7 +180,7 @@ public class SiteServiceImpl implements SiteService {
         Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称
         if (isModified) {   //如果修改了站点的基本属性(即站点名称)
             //向【资管】下发修改站点的MQTT消息
-            MsgResult msgResult = assetCIService.modifySiteCI(uniqueCode, siteModel);
+            MsgResult msgResult = assetCIService.modifyAssetSite(uniqueCode, siteModel);
             int stateCode = msgResult.getStateCode();
             if (stateCode == CommonConstant.SUCCESSFUL) {   //通信成功
                 CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
@@ -206,7 +206,7 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void deleteSite(String uniqueCode, SiteQuery siteQuery) {
         //向【资管】下发删除（批量）站点的MQTT消息
-        MsgResult msgResult = assetCIService.deleteSiteCI(uniqueCode, siteQuery);
+        MsgResult msgResult = assetCIService.deleteAssetSite(uniqueCode, siteQuery);
         int stateCode = msgResult.getStateCode();
         if (stateCode == CommonConstant.SUCCESSFUL) {   //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);

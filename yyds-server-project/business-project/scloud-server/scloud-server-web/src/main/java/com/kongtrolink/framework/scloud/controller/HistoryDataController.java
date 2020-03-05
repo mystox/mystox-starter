@@ -1,15 +1,21 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.dao.HistoryDataDao;
 import com.kongtrolink.framework.scloud.entity.HistoryDataEntity;
+import com.kongtrolink.framework.scloud.entity.his.JobMessageAckEntity;
+import com.kongtrolink.framework.scloud.entity.his.JobMessageEntity;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.query.HistoryDataQuery;
 import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
 import com.kongtrolink.framework.scloud.service.HistoryDataService;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
@@ -32,6 +38,8 @@ public class HistoryDataController  extends ExportController {
 
     @Autowired
     HistoryDataService historyDataService;
+    @Autowired
+    MqttOpera mqttOpera;
     /**
      * 根据查询条件获取 历史数据列表 - 分页
      *
@@ -66,5 +74,20 @@ public class HistoryDataController  extends ExportController {
         String[] headsName = { "时间", "值"};
         String[] propertiesName = { "time", "value"};
         export(response,list,propertiesName, headsName, title);
+    }
+
+    @RequestMapping(value = "/config", method = RequestMethod.POST)
+    public  @ResponseBody JsonResult  exportSignalDiInfo(@RequestBody JobMessageEntity jobMessageEntity) {
+        try{
+            String uniqueCode = getUniqueCode();
+            jobMessageEntity.setUniqueCode(uniqueCode);
+            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.UPDATE_FSU_POLLING, JSONObject.toJSONString(jobMessageEntity));
+            String value  = result.getMsg();
+            JobMessageAckEntity jobMessageAckEntity = JSONObject.parseObject(value,JobMessageAckEntity.class);
+            return new JsonResult(jobMessageAckEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("设置失败",false);
     }
 }
