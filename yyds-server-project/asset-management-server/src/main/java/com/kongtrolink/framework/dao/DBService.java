@@ -2,60 +2,61 @@ package com.kongtrolink.framework.dao;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.entity.DBResult;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface DBService {
 
-    boolean addCIType(JSONObject jsonObject);
+    DBResult addCIType(JSONObject jsonObject);
 
-    boolean deleteCIType(String name);
+    DBResult deleteCIType(String name);
 
-    boolean modifyCIType(JSONObject jsonObject);
+    DBResult modifyCIType(JSONObject jsonObject);
 
-    boolean modifyCITypeIcon(String name, String icon);
+    DBResult modifyCITypeIcon(String name, String icon);
 
-    JSONArray searchCIType(JSONObject jsonObject);
+    DBResult searchCIType(JSONObject jsonObject);
 
-    JSONArray searchCITypeByName(String name);
+    DBResult searchCITypeByName(String name);
 
-    boolean bindCITypeBusinessCode(JSONObject jsonObject);
+    DBResult bindCITypeBusinessCode(JSONObject jsonObject);
 
-    boolean unbindCITypeBusinessCode(JSONObject jsonObject);
+    DBResult unbindCITypeBusinessCode(JSONObject jsonObject);
 
-    boolean addCIConnectionType(JSONObject jsonObject);
+    DBResult addCIConnectionType(JSONObject jsonObject);
 
-    JSONArray searchCIConnectionType();
+    DBResult searchCIConnectionType();
 
-    boolean addCITypeConnectionRelationship(JSONObject jsonObject);
+    DBResult addCITypeConnectionRelationship(JSONObject jsonObject);
 
-    boolean deleteCITypeConnectionRelationship(JSONObject jsonObject);
+    DBResult deleteCITypeConnectionRelationship(JSONObject jsonObject);
 
-    JSONArray searchCITypeConnectionRelationship(JSONObject jsonObject);
+    DBResult searchCITypeConnectionRelationship(JSONObject jsonObject);
 
-    boolean addCIProp(JSONObject jsonObject);
+    DBResult addCIProp(JSONObject jsonObject);
 
-    boolean deleteCIProp(JSONObject jsonObject);
+    DBResult deleteCIProp(JSONObject jsonObject);
 
-    boolean modifyCIProp(JSONObject jsonObject);
+    DBResult modifyCIProp(JSONObject jsonObject);
 
-    JSONObject searchCIProp(JSONObject jsonObject);
+    DBResult searchCIProp(JSONObject jsonObject);
 
-    String addCI(JSONObject jsonObject);
+    DBResult addCI(JSONObject jsonObject);
 
-    boolean deleteCI(JSONObject jsonObject);
+    DBResult deleteCI(JSONObject jsonObject);
 
-    boolean modifyCI(JSONObject jsonObject);
+    DBResult modifyCI(JSONObject jsonObject);
 
-    JSONObject searchCI(JSONObject jsonObject);
+    DBResult searchCI(JSONObject jsonObject);
 
-    boolean addCIRelationship(JSONObject jsonObject);
+    DBResult addCIRelationship(JSONObject jsonObject);
 
-    JSONObject searchCIRelationship(JSONObject jsonObject);
+    DBResult searchCIRelationship(JSONObject jsonObject);
 
-    boolean deleteCIRelationship(JSONObject jsonObject);
+    DBResult deleteCIRelationship(JSONObject jsonObject);
 
-    JSONArray searchCIModel(JSONObject jsonObject);
+    DBResult searchCIModel(JSONObject jsonObject);
 
-    JSONArray searchCIIds(JSONObject jsonObject);
+    DBResult searchCIIds(JSONObject jsonObject);
 }

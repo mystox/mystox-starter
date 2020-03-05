@@ -2,6 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
+import com.kongtrolink.framework.entity.DBResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -88,9 +89,17 @@ public class TestController {
             jsonObjectPW.put("sn", "406" + sn);
             jsonObjectENV.put("sn", "418" + sn);
 
-            String fsuId = neo4jDBService.addCI(jsonObjectFsu);
-            String powerId = neo4jDBService.addCI(jsonObjectPW);
-            String envId = neo4jDBService.addCI(jsonObjectENV);
+            DBResult dbResult;
+
+            dbResult = neo4jDBService.addCI(jsonObjectFsu);
+            String fsuId = dbResult.getJsonObject().getString("id");
+
+            dbResult = neo4jDBService.addCI(jsonObjectPW);
+            String powerId = dbResult.getJsonObject().getString("id");
+
+
+            dbResult = neo4jDBService.addCI(jsonObjectENV);
+            String envId = dbResult.getJsonObject().getString("id");
 
             JSONObject relationship = new JSONObject();
 
