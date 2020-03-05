@@ -5,8 +5,10 @@ import com.kongtrolink.framework.scloud.query.ShieldAlarmQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import com.mongodb.BulkWriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -29,6 +31,15 @@ public class ShieldAlarmDao {
     public boolean add(String uniqueCode, ShieldAlarm shieldAlarm) {
         mongoTemplate.save(shieldAlarm, uniqueCode + table);
         return StringUtil.isNUll(shieldAlarm.getId()) ? false : true;
+    }
+
+    public int add(String uniqueCode, List<ShieldAlarm> shieldAlarmList) {
+        BulkOperations operations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, uniqueCode + table);
+        for(ShieldAlarm shieldAlarm : shieldAlarmList){
+            operations.insert(shieldAlarm);
+        }
+        BulkWriteResult execute = operations.execute();
+        return execute.getInsertedCount();
     }
 
     public List<ShieldAlarm> list(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery) {

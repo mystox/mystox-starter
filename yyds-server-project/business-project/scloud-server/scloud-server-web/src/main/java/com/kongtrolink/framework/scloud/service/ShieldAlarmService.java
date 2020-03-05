@@ -14,6 +14,8 @@ public interface ShieldAlarmService {
 
     boolean add(String uniqueCode, ShieldAlarm shieldAlarm);
 
+    int add(String uniqueCode, List<ShieldAlarm> shieldAlarmList);
+
     List<ShieldAlarm> list(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery);
 
     int count(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery);

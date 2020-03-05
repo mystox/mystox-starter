@@ -95,4 +95,10 @@ public class ShieldRuleDao {
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, ShieldRule.class, uniqueCode + table);
     }
+
+    public List<ShieldRule> getEnables(String uniqueCode){
+        Criteria criteria = Criteria.where("enabled").is(true);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, ShieldRule.class, uniqueCode + table);
+    }
 }

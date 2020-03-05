@@ -35,6 +35,11 @@ public class ShieldAlarmServiceImpl implements ShieldAlarmService{
     }
 
     @Override
+    public int add(String uniqueCode, List<ShieldAlarm> shieldAlarmList) {
+        return shieldAlarmDao.add(uniqueCode, shieldAlarmList);
+    }
+
+    @Override
     public List<ShieldAlarm> list(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery) {
         return shieldAlarmDao.list(uniqueCode, shieldAlarmQuery);
     }
