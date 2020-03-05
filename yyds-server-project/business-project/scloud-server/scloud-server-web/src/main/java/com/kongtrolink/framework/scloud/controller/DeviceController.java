@@ -34,7 +34,7 @@ public class DeviceController extends BaseController{
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceController.class);
 
     /**
-     * 获取设备列表
+     * 获取单个站点下设备列表
      */
     @RequestMapping(value = "getDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceList(@RequestBody DeviceQuery deviceQuery){
