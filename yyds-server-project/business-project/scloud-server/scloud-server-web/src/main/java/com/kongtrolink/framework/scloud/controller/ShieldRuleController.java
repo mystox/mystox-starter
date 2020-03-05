@@ -3,17 +3,19 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
+import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
+import com.kongtrolink.framework.scloud.query.ShieldAlarmQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
+import com.kongtrolink.framework.scloud.service.AlarmService;
+import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +31,10 @@ public class ShieldRuleController extends BaseController{
 
     @Autowired
     ShieldRuleService ruleService;
+    @Autowired
+    AlarmService alarmService;
+    @Autowired
+    ShieldAlarmService shieldAlarmService;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -79,6 +85,17 @@ public class ShieldRuleController extends BaseController{
         }
         ruleService.initInfo(uniqueCode, shieldRule);
         return new JsonResult(shieldRule);
+    }
+
+    @ResponseBody
+    @RequestMapping("/getShieldAlarm")
+    public JsonResult getShieldAlarm(@RequestBody ShieldAlarmQuery shieldAlarmQuery){
+        String uniqueCode = getUniqueCode();
+        List<ShieldAlarm> list = shieldAlarmService.list(uniqueCode, shieldAlarmQuery);
+        int count = shieldAlarmService.count(uniqueCode, shieldAlarmQuery);
+        shieldAlarmService.initInfo(uniqueCode, list);
+        JsonResult jsonResult = new JsonResult(list, count);
+        return jsonResult;
     }
 
     @RequestMapping("/updateState")

@@ -54,7 +54,6 @@ public class AlarmController extends BaseController{
     @Value("${alarmModule.check:alarmRemoteOperate}")
     private String remoteOperate;
 
-
     /**
      * @auther: liudd
      * @date: 2020/2/26 14:59
@@ -73,8 +72,6 @@ public class AlarmController extends BaseController{
             return new JsonResult(e.getMessage(), false);
         }
     }
-
-
 
     /**
      * @auther: liudd

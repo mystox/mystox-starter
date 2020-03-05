@@ -35,6 +35,12 @@ public class JsonResult {
         printResult();
     }
 
+    public JsonResult(Object data, int count){
+        this.data = data;
+        this.count = count;
+        printResult();
+    }
+
     public JsonResult(String info, Boolean success) {
         this.info = info;
         this.success = success;
