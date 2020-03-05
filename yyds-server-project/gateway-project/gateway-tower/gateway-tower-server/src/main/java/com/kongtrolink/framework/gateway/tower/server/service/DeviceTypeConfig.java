@@ -3,6 +3,7 @@ package com.kongtrolink.framework.gateway.tower.server.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.gateway.tower.core.constant.RedisKey;
 import com.kongtrolink.framework.gateway.tower.server.entity.DeviceConfigEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,11 +116,11 @@ public class DeviceTypeConfig {
     }
 
     public String getDeviceTypeRedisKey(){
-        return "gw_"+businessCode+"_"+enterpriseCode+"_devType";
+        return RedisKey.ASSENT_DEVICE_TYPE+"_"+enterpriseCode;
     }
 
     public String getDeviceRedisKey(){
-        return "gw_"+businessCode+"_"+enterpriseCode+"_device";
+        return RedisKey.ASSENT_DEVICE_INFO+"_"+enterpriseCode;
     }
 
 }
