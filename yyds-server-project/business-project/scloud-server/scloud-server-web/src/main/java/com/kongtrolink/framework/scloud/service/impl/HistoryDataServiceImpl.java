@@ -21,6 +21,19 @@ public class HistoryDataServiceImpl implements HistoryDataService {
 
     @Autowired
     HistoryDataDao historyDataDao;
+
+    /**
+     * 根据查询条件获取 所有遥测信号点  历史数据列表 - 分页
+     *
+     * @param uniqueCode
+     * @param historyDataQuery 查询条件
+     * @return 列表
+     */
+    @Override
+    public List<HistoryDataEntity> getHisAllList(String uniqueCode, HistoryDataQuery historyDataQuery) {
+        return historyDataDao.getHisList(uniqueCode,historyDataQuery);
+    }
+
     /**
      * 根据查询条件获取 历史数据列表 - 分页
      *

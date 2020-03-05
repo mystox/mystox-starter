@@ -50,7 +50,13 @@ public class HistoryDataController  extends ExportController {
     public @ResponseBody JsonResult getHisList(@RequestBody HistoryDataQuery historyDataQuery){
         try{
             String uniqueCode = getUniqueCode();
-            List<HistoryDataModel> list = historyDataService.getHisList(uniqueCode,historyDataQuery);
+            String cntbId = historyDataQuery.getCntbId();
+            List list;
+            if(cntbId==null || "".equals(cntbId)){
+                list = historyDataService.getHisAllList(uniqueCode,historyDataQuery);
+            }else{
+                list = historyDataService.getHisList(uniqueCode,historyDataQuery);
+            }
             int count  =  historyDataService.getHisCount(uniqueCode,historyDataQuery);
             ListResult value = new ListResult(list,count);
             return new JsonResult(value);
