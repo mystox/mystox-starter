@@ -54,12 +54,13 @@ public class HistoryDataDao{
     private Criteria getQueryCriteria(HistoryDataQuery historyDataQuery){
         long startTime = historyDataQuery.getStartTime(); //开始时间
         long endTime = historyDataQuery.getEndTime();   //结束时间
-        String fsuCode = historyDataQuery.getFsuCode();
         String deviceCode = historyDataQuery.getDeviceCode();
         String cntbId = historyDataQuery.getCntbId();//需要查询的具体信号点ID
         Criteria criteria = Criteria.where("time").gte(startTime).lte(endTime)
-                .and("value."+cntbId).exists(true)
                 .and("deviceCode").is(deviceCode);
+        if(cntbId !=null && !"".equals(cntbId)){
+            criteria.and("value."+cntbId).exists(true);
+        }
         return criteria;
     }
 }
