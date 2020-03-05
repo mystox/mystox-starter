@@ -44,6 +44,15 @@ public class AlarmQuery extends Paging {
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
+    private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+    public List<String> getEntDevSigList() {
+        return entDevSigList;
+    }
+
+    public void setEntDevSigList(List<String> entDevSigList) {
+        this.entDevSigList = entDevSigList;
+    }
 
     public Date getTrecover() {
         return trecover;

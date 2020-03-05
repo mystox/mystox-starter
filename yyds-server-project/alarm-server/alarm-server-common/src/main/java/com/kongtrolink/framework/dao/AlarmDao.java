@@ -150,6 +150,10 @@ public class AlarmDao {
                 criteria.and("checkTime").exists(true);
             }
         }
+        List<String> entDevSigList = alarmQuery.getEntDevSigList();
+        if(null != entDevSigList){
+            criteria.and("entDevSig").in(entDevSigList);
+        }
         return criteria;
     }
 
