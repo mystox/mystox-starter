@@ -11,10 +11,7 @@ import com.kongtrolink.framework.scloud.entity.AlarmFocus;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
-import com.kongtrolink.framework.scloud.service.AlarmFocusService;
-import com.kongtrolink.framework.scloud.service.AlarmService;
-import com.kongtrolink.framework.scloud.service.DeviceService;
-import com.kongtrolink.framework.scloud.service.SiteService;
+import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
@@ -48,6 +45,8 @@ public class AlarmController extends BaseController{
     MqttOpera mqttOpera;
     @Autowired
     AlarmFocusService alarmFocusService;
+    @Autowired
+    FilterRuleService filterRuleService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;

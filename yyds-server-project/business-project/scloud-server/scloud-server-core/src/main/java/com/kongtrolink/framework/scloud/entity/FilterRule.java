@@ -16,16 +16,16 @@ public class FilterRule {
     private String remarks;
     private Date updateTime;
 
+    private String alarmName;
+    private List<String> alarmLevelList;
     private boolean siteBased; // 条件是否基于站点
     private List<String> siteId;
     private List<String> tierCode;
-    private String alarmName;
-    private List<String> alarmLevel;
     private List<String> deviceTypeCode;
-    private String reportStartTime;
-    private String reportEndTime;
-    private String recoverStartTime;
-    private String recoverEndTime;
+    private Date startBeginTime;                //发生开始时间
+    private Date startEndTime;                  //发生结束时间
+    private Date clearBeginTime;                //清除开始时间
+    private Date clearEndTime;                  //清除结束时间
     private Boolean state;
 
     public Boolean getState() {
@@ -108,12 +108,12 @@ public class FilterRule {
         this.alarmName = alarmName;
     }
 
-    public List<String> getAlarmLevel() {
-        return alarmLevel;
+    public List<String> getAlarmLevelList() {
+        return alarmLevelList;
     }
 
-    public void setAlarmLevel(List<String> alarmLevel) {
-        this.alarmLevel = alarmLevel;
+    public void setAlarmLevelList(List<String> alarmLevelList) {
+        this.alarmLevelList = alarmLevelList;
     }
 
     public List<String> getDeviceTypeCode() {
@@ -124,35 +124,35 @@ public class FilterRule {
         this.deviceTypeCode = deviceTypeCode;
     }
 
-    public String getReportStartTime() {
-        return reportStartTime;
+    public Date getStartBeginTime() {
+        return startBeginTime;
     }
 
-    public void setReportStartTime(String reportStartTime) {
-        this.reportStartTime = reportStartTime;
+    public void setStartBeginTime(Date startBeginTime) {
+        this.startBeginTime = startBeginTime;
     }
 
-    public String getReportEndTime() {
-        return reportEndTime;
+    public Date getStartEndTime() {
+        return startEndTime;
     }
 
-    public void setReportEndTime(String reportEndTime) {
-        this.reportEndTime = reportEndTime;
+    public void setStartEndTime(Date startEndTime) {
+        this.startEndTime = startEndTime;
     }
 
-    public String getRecoverStartTime() {
-        return recoverStartTime;
+    public Date getClearBeginTime() {
+        return clearBeginTime;
     }
 
-    public void setRecoverStartTime(String recoverStartTime) {
-        this.recoverStartTime = recoverStartTime;
+    public void setClearBeginTime(Date clearBeginTime) {
+        this.clearBeginTime = clearBeginTime;
     }
 
-    public String getRecoverEndTime() {
-        return recoverEndTime;
+    public Date getClearEndTime() {
+        return clearEndTime;
     }
 
-    public void setRecoverEndTime(String recoverEndTime) {
-        this.recoverEndTime = recoverEndTime;
+    public void setClearEndTime(Date clearEndTime) {
+        this.clearEndTime = clearEndTime;
     }
 }

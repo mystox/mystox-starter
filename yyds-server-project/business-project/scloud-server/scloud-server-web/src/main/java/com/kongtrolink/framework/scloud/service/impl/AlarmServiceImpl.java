@@ -8,15 +8,13 @@ import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.dao.AlarmDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.FilterRule;
 import com.kongtrolink.framework.scloud.entity.SignalType;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
-import com.kongtrolink.framework.scloud.service.AlarmService;
-import com.kongtrolink.framework.scloud.service.DeviceService;
-import com.kongtrolink.framework.scloud.service.SignalService;
-import com.kongtrolink.framework.scloud.service.SiteService;
+import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
@@ -45,6 +43,8 @@ public class AlarmServiceImpl implements AlarmService {
     SiteService siteService;
     @Autowired
     SignalService signalService;
+    @Autowired
+    FilterRuleService filterRuleService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
@@ -205,6 +205,50 @@ public class AlarmServiceImpl implements AlarmService {
         deviceQuery.setOperationState(alarmQuery.getOperationState());
         List<DeviceEntity> deviceEntityList = deviceService.list(deviceQuery);
         List<String> deviceCodeList = deviceService.list2CodeList(deviceEntityList);
+        //累加告警过滤功能
+        FilterRule filterRule = filterRuleService.getUserInUse(alarmQuery.getEnterpriseCode(), alarmQuery.getOperateUserId());
+        if(null != filterRule){
+            //告警名称
+            String alarmName = filterRule.getAlarmName();
+            if(!StringUtil.isNUll(alarmName)){  //告警过滤规则中有告警名称
+                String name = alarmQuery.getName();
+                if(StringUtil.contant(name, alarmName)){
+
+                }else if(StringUtil.contant(alarmName, name)){
+                    alarmQuery.setName(alarmName);
+                }else{
+                    alarmQuery.setName(name + "特殊字符@特殊字符" + alarmName); //  如果告警列表与告警过滤的告警名称排斥，必然无法获取到任何告警数据
+                }
+            }
+            //告警等级
+            List<String> alarmLevelList = filterRule.getAlarmLevelList();
+            if(null != alarmLevelList){
+                String targetLevelName = alarmQuery.getTargetLevelName();
+                if(StringUtil.isNUll(targetLevelName)){
+                    alarmQuery.setTargetLevelNameList(alarmLevelList);
+                }else{
+                    if(alarmLevelList.contains(targetLevelName)){
+
+                    }else{
+                        alarmQuery.setTargetLevelName(targetLevelName + "特殊等级@特殊等级");
+                    }
+                }
+            }
+            //比较时间
+            Date startBeginTime = filterRule.getStartBeginTime();
+            if(null != startBeginTime){
+                Date sourStartBeginTime = alarmQuery.getStartBeginTime();
+                if(null == sourStartBeginTime){
+                    alarmQuery.setStartBeginTime(startBeginTime);
+                }else{
+                    if(startBeginTime.getTime() > sourStartBeginTime.getTime()){
+                        alarmQuery.setStartBeginTime(startBeginTime);
+                    }
+                }
+            }
+
+
+        }
         alarmQuery.setDeviceCodeList(deviceCodeList);
     }
 

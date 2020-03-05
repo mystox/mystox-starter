@@ -95,4 +95,17 @@ public class FilterRuleDao {
         WriteResult result = mongoTemplate.updateFirst(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
     }
+
+    /**
+     * @param uniqueCode
+     * @param creatorId
+     * @auther: liudd
+     * @date: 2020/3/5 15:49
+     * 功能描述:获取用户正在启用的过滤规则
+     */
+    public FilterRule getUserInUse(String uniqueCode, String creatorId) {
+        Criteria criteria = Criteria.where("creator.strId").is(creatorId);
+        criteria.and("state").is(true);
+        return mongoTemplate.findOne(Query.query(criteria), FilterRule.class, uniqueCode + table);
+    }
 }

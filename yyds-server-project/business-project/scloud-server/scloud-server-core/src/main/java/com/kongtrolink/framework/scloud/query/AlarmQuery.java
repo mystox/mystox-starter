@@ -17,6 +17,7 @@ public class AlarmQuery extends Paging{
     private String name;                //告警名称
     private Integer targetLevel;         //目标等级
     private String targetLevelName;         //目标等级名称
+    private List<String> targetLevelNameList;   //目标等级名称列表，用于告警过滤功能
     private String state;               //告警状态(待处理，已消除)
     private Boolean isCheck;              //是否确认
     private String deviceType;          //设备型号，设备类型，与资管一致
@@ -26,6 +27,8 @@ public class AlarmQuery extends Paging{
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
+    private Date clearBeginTime;                //清除开始时间
+    private Date clearEndTime;                  //清除结束时间
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
     private List<String> tierCodeList;  //区域层级编码列表
     private List<Integer> siteIdList;    //站点编码列表
@@ -39,6 +42,30 @@ public class AlarmQuery extends Paging{
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+    public List<String> getTargetLevelNameList() {
+        return targetLevelNameList;
+    }
+
+    public void setTargetLevelNameList(List<String> targetLevelNameList) {
+        this.targetLevelNameList = targetLevelNameList;
+    }
+
+    public Date getClearBeginTime() {
+        return clearBeginTime;
+    }
+
+    public void setClearBeginTime(Date clearBeginTime) {
+        this.clearBeginTime = clearBeginTime;
+    }
+
+    public Date getClearEndTime() {
+        return clearEndTime;
+    }
+
+    public void setClearEndTime(Date clearEndTime) {
+        this.clearEndTime = clearEndTime;
+    }
 
     public List<String> getEntDevSigList() {
         return entDevSigList;

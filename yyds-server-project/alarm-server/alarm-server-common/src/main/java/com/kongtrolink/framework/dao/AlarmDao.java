@@ -84,6 +84,7 @@ public class AlarmDao {
     }
 
     Criteria baseCriteria(Criteria criteria, AlarmQuery alarmQuery){
+        criteria.and("shield").ne(true);
         String id = alarmQuery.getId();
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);

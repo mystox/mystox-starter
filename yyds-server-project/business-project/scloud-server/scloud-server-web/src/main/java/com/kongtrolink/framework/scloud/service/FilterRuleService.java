@@ -24,6 +24,13 @@ public interface FilterRuleService {
 
     boolean updateState(String uniqueCode, FilterRuleQuery ruleQuery);
 
+    /**
+     * @auther: liudd
+     * @date: 2020/3/5 15:49
+     * 功能描述:获取用户正在启用的过滤规则
+     */
+    FilterRule getUserInUse(String uniqueCode, String creatorId);
+
 
 
 }

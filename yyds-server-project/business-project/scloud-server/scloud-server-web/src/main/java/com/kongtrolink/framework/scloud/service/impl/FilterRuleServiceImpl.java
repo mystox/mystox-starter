@@ -53,4 +53,16 @@ public class FilterRuleServiceImpl implements FilterRuleService {
         }
         return filterRuleDao.use(uniqueCode, ruleQuery);
     }
+
+    /**
+     * @param uniqueCode
+     * @param creatorId
+     * @auther: liudd
+     * @date: 2020/3/5 15:49
+     * 功能描述:获取用户正在启用的过滤规则
+     */
+    @Override
+    public FilterRule getUserInUse(String uniqueCode, String creatorId) {
+        return filterRuleDao.getUserInUse(uniqueCode, uniqueCode);
+    }
 }
