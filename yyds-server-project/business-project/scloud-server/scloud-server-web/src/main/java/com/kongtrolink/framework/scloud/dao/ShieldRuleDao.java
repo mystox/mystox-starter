@@ -25,7 +25,7 @@ public class ShieldRuleDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = "_alarm_focus";
+    private String table = "_shield_rule";
 
     public boolean add(String uniqueCode, ShieldRule shieldRule) {
         mongoTemplate.save(shieldRule, uniqueCode + table);

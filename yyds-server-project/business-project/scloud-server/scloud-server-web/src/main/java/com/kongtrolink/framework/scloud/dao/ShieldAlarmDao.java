@@ -26,7 +26,7 @@ public class ShieldAlarmDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = "_alarm_focus";
+    private String table = "_shield_alarm";
 
     public boolean add(String uniqueCode, ShieldAlarm shieldAlarm) {
         mongoTemplate.save(shieldAlarm, uniqueCode + table);
