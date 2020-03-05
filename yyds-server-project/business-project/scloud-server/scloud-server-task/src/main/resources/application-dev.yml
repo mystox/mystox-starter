@@ -1,10 +1,10 @@
 spring:
   redis:
-    host: 172.16.5.26
-    port: 6379
-    database: 2
+    host: 172.16.6.37
+    port: 7006
+    database: 5
 server:
-  host: 172.16.6.143
+  host: 172.16.6.16
   groupCode: GROUP
   port: 59001 #服务占用web端口
 mqtt:

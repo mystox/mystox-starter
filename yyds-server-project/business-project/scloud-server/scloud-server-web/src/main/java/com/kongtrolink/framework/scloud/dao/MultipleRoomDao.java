@@ -32,7 +32,7 @@ public class MultipleRoomDao {
          mongoTemplate.save(config,uniqueCode+ CollectionSuffix.MULTIPLE_ROOM_SIGNAL_CONFIG);
     }
 
-    public  void delShowSignalConfig(String uniqueCode,String deviceId){
+    public  void delShowSignalConfig(String uniqueCode,int deviceId){
         Criteria criteria = Criteria.where("deviceId").is(deviceId);
         Query query = new Query(criteria);
         mongoTemplate.remove(query,uniqueCode+CollectionSuffix.MULTIPLE_ROOM_SIGNAL_CONFIG);

@@ -3,12 +3,14 @@ package com.kongtrolink.framework.business.scloud.his.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.business.scloud.his.dao.HistoryDao;
+import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.RedisFsuInfo;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.dto.HistoryModuleDto;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
 import com.kongtrolink.framework.scloud.entity.FocusSignalEntity;
 import com.kongtrolink.framework.scloud.entity.HistoryDataEntity;
@@ -21,6 +23,7 @@ import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -36,9 +39,11 @@ public class HistoryService {
     @Autowired
     private RedisUtils redisUtils;
     @Autowired
-    MqttOpera mqttOpera;
+    MqttSender mqttSender;
     @Autowired
     HistoryDao historyDao;
+    @Value("${server.group}")
+    private String group;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryService.class);
 
@@ -49,13 +54,15 @@ public class HistoryService {
             RedisFsuInfo fsu = dto.getRedisFsuInfo();
             String uniqueCode = dto.getUniqueCode();
             String fsuShortCode = fsu.getShortCode();
+            String gatewayCode = fsu.getGatewayServerCode();
             GetDataMessage getDataMessage = getGetDataMessage(fsuShortCode);
             //下发到网关获取实时数据
-            MsgResult result = mqttOpera.opera(ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
+            String serverCode = MqttUtils.preconditionGroupServerCode(group,gatewayCode);
+            MsgResult result = mqttSender.sendToMqttSync(serverCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             saveData(uniqueCode,fsuShortCode,getDataAckMessage);
-            LOGGER.info("开始轮询:fsu fsuShortCode:{} ID:{}  心跳检测...");
+            LOGGER.info("开始轮询:fsu :{} 历史数据完成...",fsuShortCode);
         }catch (Exception e){
             e.printStackTrace();
         }
