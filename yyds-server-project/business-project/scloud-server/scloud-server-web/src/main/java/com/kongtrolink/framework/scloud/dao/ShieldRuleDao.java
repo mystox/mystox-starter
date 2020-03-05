@@ -89,4 +89,10 @@ public class ShieldRuleDao {
         Query query = Query.query(criteria);
         return (int)mongoTemplate.count(query, uniqueCode + table);
     }
+
+    public ShieldRule get(String uniqueCode, String ruleId) {
+        Criteria criteria = Criteria.where("_id").is(ruleId);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, ShieldRule.class, uniqueCode + table);
+    }
 }

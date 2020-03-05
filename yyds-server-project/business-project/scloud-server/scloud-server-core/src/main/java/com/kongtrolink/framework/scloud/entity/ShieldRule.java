@@ -1,5 +1,9 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +22,33 @@ public class ShieldRule {
     private FacadeView creator;
     private Date updateTime;
     private Boolean enabled = false;
+    //前端详情展示用
+    private List<SiteModel> siteModelList = new ArrayList<>();
+    private List<DeviceModel> deviceModelList = new ArrayList<>();
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public List<SiteModel> getSiteModelList() {
+        return siteModelList;
+    }
+
+    public void setSiteModelList(List<SiteModel> siteModelList) {
+        this.siteModelList = siteModelList;
+    }
+
+    public List<DeviceModel> getDeviceModelList() {
+        return deviceModelList;
+    }
+
+    public void setDeviceModelList(List<DeviceModel> deviceModelList) {
+        this.deviceModelList = deviceModelList;
+    }
 
     public String getId() {
         return id;

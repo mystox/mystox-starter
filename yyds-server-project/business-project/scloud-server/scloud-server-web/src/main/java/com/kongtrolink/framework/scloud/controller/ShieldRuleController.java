@@ -69,6 +69,18 @@ public class ShieldRuleController extends BaseController{
         return jsonResult;
     }
 
+    @RequestMapping("/detail")
+    @ResponseBody
+    public JsonResult detail(@RequestBody ShieldRuleQuery shieldRuleQuery){
+        String uniqueCode = getUniqueCode();
+        ShieldRule shieldRule = ruleService.get(uniqueCode, shieldRuleQuery.getId());
+        if(null == shieldRule){
+            return new JsonResult("规则不存在", false);
+        }
+        ruleService.initInfo(uniqueCode, shieldRule);
+        return new JsonResult(shieldRule);
+    }
+
     @RequestMapping("/updateState")
     @ResponseBody
     public JsonResult updateState(ShieldRuleQuery ruleQuery){

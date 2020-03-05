@@ -23,6 +23,15 @@ public interface ShieldRuleService {
 
     int count(String uniqueCode, ShieldRuleQuery ruleQuery);
 
+    ShieldRule get(String uniqueCode, String ruleId);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/5 8:48
+     * 功能描述:填充信息
+     */
+    void initInfo(String uniqueCode, ShieldRule shieldRule);
+
     /**
      * @auther: liudd
      * @date: 2020/3/4 16:08
