@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
+import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -28,6 +29,8 @@ import java.util.List;
 public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
+    DeviceMongo deviceMongo;
+    @Autowired
     MqttOpera mqttOpera;
     @Autowired
     AssetCIService assetCIService;
@@ -35,21 +38,32 @@ public class DeviceServiceImpl implements DeviceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
     /**
-     * 获取设备列表
+     * 获取单个站点下设备列表
      */
     @Override
     public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
         List<DeviceModel> list = new ArrayList<>();
+        String siteCode = deviceQuery.getSiteCode();
 
-        //从【资管】获取设备基本信息
-        MsgResult msgResult = assetCIService.getDeviceCI(uniqueCode, deviceQuery);
-        int stateCode = msgResult.getStateCode();
-        if (stateCode == 1){
-            LOGGER.info("【设备管理】，从【资管】获取设备基本信息成功");
-            CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+        //获取（业务平台端）单个站点下所有设备
+        List<DeviceEntity> devices = deviceMongo.findAllDevicesBySiteCode(uniqueCode, siteCode);
+        if (devices != null && devices.size() > 0) {
+            List<String> deviceCodes = new ArrayList<>();   //设备编码
+            for (DeviceEntity device : devices){
+                deviceCodes.add(device.getCode());
+            }
+            deviceQuery.setDeviceCodes(deviceCodes);
 
-        }else {
-            LOGGER.error("【设备管理】,从【资管】获取设备基本信息失败");
+            //从【资管】获取设备(基本信息)列表
+            MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
+            int stateCode = msgResult.getStateCode();
+            if (stateCode == 1) {
+                LOGGER.info("【设备管理】，从【资管】获取设备基本信息成功");
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+
+            } else {
+                LOGGER.error("【设备管理】,从【资管】获取设备基本信息失败");
+            }
         }
 
         return list;
@@ -57,14 +71,13 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     /**
-     * @param deviceQuery
      * @auther: liudd
      * @date: 2020/2/28 9:48
-     * 功能描述:列表
+     * 功能描述:获取设备实体类表，不包含名字，无语远程调用
      */
     @Override
-    public List<DeviceEntity> list(DeviceQuery deviceQuery) {
-        return null;
+    public List<DeviceEntity> listEntity(String uniqueCode, DeviceQuery deviceQuery) {
+        return deviceMongo.listEntity(uniqueCode, deviceQuery);
     }
 
     /**
@@ -73,26 +86,8 @@ public class DeviceServiceImpl implements DeviceService {
      * 功能描述:统计设备列表数量
      */
     @Override
-    public int count(DeviceQuery deviceQuery) {
+    public int countEntity(String uniqueCode, DeviceQuery deviceQuery) {
         return 0;
-    }
-
-    /**
-     * @param deviceEntityList
-     * @auther: liudd
-     * @date: 2020/2/26 16:35
-     * 功能描述:列表转换成编码列表
-     */
-    @Override
-    public List<String> list2CodeList(List<DeviceEntity> deviceEntityList) {
-        if(null == deviceEntityList){
-            return null;
-        }
-        List<String> deviceCodeList = new ArrayList<>();
-        for(DeviceEntity deviceEntity : deviceEntityList){
-            deviceCodeList.add(deviceEntity.getCode());
-        }
-        return deviceCodeList;
     }
 
     /**
@@ -115,5 +110,17 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList) {
         return null;
+    }
+
+    @Override
+    public List<String> entityList2CodeList(List<DeviceEntity> deviceEntityList) {
+        if(null == deviceEntityList){
+            return null;
+        }
+        List<String> deviceCodeList = new ArrayList<>();
+        for(DeviceEntity deviceEntity : deviceEntityList){
+            deviceCodeList.add(deviceEntity.getCode());
+        }
+        return deviceCodeList;
     }
 }

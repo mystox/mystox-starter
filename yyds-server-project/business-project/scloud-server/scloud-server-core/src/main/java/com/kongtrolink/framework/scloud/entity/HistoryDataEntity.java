@@ -10,7 +10,7 @@ public class HistoryDataEntity implements Serializable {
     private static final long serialVersionUID = -7100654366177772785L;
 
     private long time;
-    private String fsuCode;
+//    private String fsuCode; //单个企业deviceCode能确定唯一 那就不需要这个字段了
     private String deviceCode;
     private Map<String,Object> value;
 
@@ -20,14 +20,6 @@ public class HistoryDataEntity implements Serializable {
 
     public void setTime(long time) {
         this.time = time;
-    }
-
-    public String getFsuCode() {
-        return fsuCode;
-    }
-
-    public void setFsuCode(String fsuCode) {
-        this.fsuCode = fsuCode;
     }
 
     public String getDeviceCode() {

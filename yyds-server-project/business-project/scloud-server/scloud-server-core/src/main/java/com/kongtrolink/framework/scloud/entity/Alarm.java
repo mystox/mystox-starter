@@ -39,6 +39,15 @@ public class Alarm {
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
+    private Boolean shield;             //是否屏蔽
+
+    public Boolean getShield() {
+        return shield;
+    }
+
+    public void setShield(Boolean shield) {
+        this.shield = shield;
+    }
 
     public String getSignalName() {
         return signalName;

@@ -3,20 +3,19 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.kongtrolink.framework.core.entity.Const;
 import com.kongtrolink.framework.scloud.dao.ShieldRuleDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
+import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -28,6 +27,8 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
 
     @Autowired
     ShieldRuleDao shieldRuleDao;
+    @Autowired
+    ShieldAlarmService shieldAlarmService;
     @Autowired
     DeviceService deviceService;
     @Autowired
@@ -70,16 +71,8 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
      */
     @Override
     public void initInfo(String uniqueCode, ShieldRule shieldRule) {
-
-        List<String> entDevList = shieldRule.getEntDevList();
         //获取设备列表
-        List<String> deviceCodeList = new ArrayList<>();
-        for(String entDev : entDevList){
-            String[] split = entDev.split("_");
-            if(split.length == 2){
-                deviceCodeList.add(split[1]);
-            }
-        }
+        List<String> deviceCodeList = shieldRule.getDeviceIdList();
         List<DeviceModel> deviceList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
         Map<Integer, List<DeviceModel>> siteIdDeviceListMap = new HashMap<>();
         List<Integer> siteIdList = new ArrayList<>();
@@ -114,7 +107,25 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
      * 功能描述:匹配告警屏蔽规则
      */
     @Override
-    public void matchRule(List<Alarm> alarmList) {
-
+    public void matchRule(String uniqueCode, List<Alarm> alarmList) {
+        List<ShieldRule> rules = shieldRuleDao.getEnables(uniqueCode);
+        List<ShieldAlarm> shieldAlarmList = new ArrayList<>();
+        for (Alarm alarm : alarmList) {
+            for (ShieldRule rule : rules) {
+                String deviceId = alarm.getDeviceId();
+                if (rule.getDeviceIdList().contains(deviceId) && rule.getAlarmlevel().contains(alarm.getLevel())) {
+                    ShieldAlarm shieldAlarm = new ShieldAlarm();
+                    shieldAlarm.setRuleId(rule.getId());
+                    shieldAlarm.setAlarmId(alarm.getId());
+                    shieldAlarm.setAlarmLevel(alarm.getTargetLevelName());
+                    shieldAlarm.setTreport(alarm.getTreport());
+                    shieldAlarm.setSignalId(alarm.getSignalId());
+                    shieldAlarm.setDeviceId(alarm.getDeviceId());
+                    shieldAlarmList.add(shieldAlarm);
+                    alarm.setShield(true);
+                }
+            }
+        }
+        shieldAlarmService.add(uniqueCode, shieldAlarmList);
     }
 }

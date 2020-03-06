@@ -20,6 +20,7 @@ public class AlarmQuery extends Paging {
     private String serverCode;                  //服务编码
     private String name;                        //告警名称
     private String deviceType;                  //设备型号
+    private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备类型
     private List<String> deviceCodeList;        //设备编码列表，需要统一
     private String state;                       //告警状态
@@ -44,6 +45,23 @@ public class AlarmQuery extends Paging {
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
+    private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+    public List<String> getDeviceTypeList() {
+        return deviceTypeList;
+    }
+
+    public void setDeviceTypeList(List<String> deviceTypeList) {
+        this.deviceTypeList = deviceTypeList;
+    }
+
+    public List<String> getEntDevSigList() {
+        return entDevSigList;
+    }
+
+    public void setEntDevSigList(List<String> entDevSigList) {
+        this.entDevSigList = entDevSigList;
+    }
 
     public Date getTrecover() {
         return trecover;

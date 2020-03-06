@@ -195,6 +195,7 @@ public class AlarmFocusController extends BaseController {
         alarmQuery.setEnterpriseCode(focusQuery.getEnterpriseCode());
         alarmQuery.setServerCode(focusQuery.getServerCode());
         alarmQuery.setType(focusQuery.getType());
+        alarmQuery.setEntDevSigList(entDevSigList);
         try {
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
             JsonResult jsonResult = alarmService.list(alarmQuery);

@@ -37,5 +37,5 @@ public interface ShieldRuleService {
      * @date: 2020/3/4 16:08
      * 功能描述:匹配告警屏蔽规则
      */
-    void matchRule(List<Alarm> alarmList);
+    void matchRule(String uniqueCode, List<Alarm> alarmList);
 }

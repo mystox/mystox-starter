@@ -25,7 +25,7 @@ public class ShieldRuleDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = "_alarm_focus";
+    private String table = "_shield_rule";
 
     public boolean add(String uniqueCode, ShieldRule shieldRule) {
         mongoTemplate.save(shieldRule, uniqueCode + table);
@@ -94,5 +94,11 @@ public class ShieldRuleDao {
         Criteria criteria = Criteria.where("_id").is(ruleId);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, ShieldRule.class, uniqueCode + table);
+    }
+
+    public List<ShieldRule> getEnables(String uniqueCode){
+        Criteria criteria = Criteria.where("enabled").is(true);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, ShieldRule.class, uniqueCode + table);
     }
 }

@@ -6,9 +6,9 @@ spring:
   session:
     store-type: redis
   redis:
-    host: 172.16.5.26
-    port: 6379
-    database: 2
+    host: 172.16.6.37
+    port: 7006
+    database: 5
 ###########服务及消息框架相关配置#############
 server:
   name: SCLOUD_SERVER_TASK #服务编码

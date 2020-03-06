@@ -1,19 +1,30 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.scloud.constant.RedisKey;
 import com.kongtrolink.framework.scloud.dao.FocusSignalDao;
 import com.kongtrolink.framework.scloud.entity.FocusSignalEntity;
 import com.kongtrolink.framework.scloud.query.FocusSignalQuery;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
+import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FocusSignalServiceImpl implements FocusSignalService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FocusSignalServiceImpl.class);
+
     @Autowired
     FocusSignalDao focusSignalDao;
+    @Autowired
+    RedisUtils redisUtils;
     /**
      * 保存信息
      *
@@ -45,7 +56,22 @@ public class FocusSignalServiceImpl implements FocusSignalService {
      */
     @Override
     public List<FocusSignalEntity> getList(FocusSignalQuery query) {
-        return focusSignalDao.getList(query);
+        List<FocusSignalEntity> list = focusSignalDao.getList(query);
+        if(list!=null){
+            for(FocusSignalEntity signalEntity:list){
+                String redisKey = RedisUtil.getRealDataKey(signalEntity.getUniqueCode(),signalEntity.getDeviceCode());
+                Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
+                try{
+                    Map<String,Object> redisValue = JSONObject.parseObject(String.valueOf(value));
+                    if(redisValue!=null && redisValue.containsKey(signalEntity.getCntbId())){
+                        signalEntity.setValue(String.valueOf(redisValue.get(signalEntity.getCntbId())));
+                    }
+                }catch (Exception e){
+                    LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
+                }
+            }
+        }
+        return list;
     }
 
     /**

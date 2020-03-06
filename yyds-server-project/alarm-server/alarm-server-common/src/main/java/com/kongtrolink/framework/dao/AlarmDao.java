@@ -84,6 +84,7 @@ public class AlarmDao {
     }
 
     Criteria baseCriteria(Criteria criteria, AlarmQuery alarmQuery){
+        criteria.and("shield").ne(true);
         String id = alarmQuery.getId();
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
@@ -149,6 +150,10 @@ public class AlarmDao {
             }else{
                 criteria.and("checkTime").exists(true);
             }
+        }
+        List<String> entDevSigList = alarmQuery.getEntDevSigList();
+        if(null != entDevSigList){
+            criteria.and("entDevSig").in(entDevSigList);
         }
         return criteria;
     }

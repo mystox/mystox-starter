@@ -21,20 +21,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 
 /**
  * FSU 历史数据查询
  */
+@Service
 public class HistoryTask  implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryTask.class);
-    @Value("${gateway.enterpriseCode}")
-    private String uniqueCode; //必须配置
     @Autowired
     RedisUtils redisUtils;
     @Autowired
     @Lazy
-    MqttSender mqttSender;
+    MqttOpera mqttOpera;
 
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
@@ -53,7 +53,7 @@ public class HistoryTask  implements Job {
                 HeartModuleDto dto = new HeartModuleDto();
                 dto.setRedisFsuInfo(fsu);
                 dto.setUniqueCode(uniqueCode);
-                mqttSender.sendToMqtt(fsu.getGatewayServerCode(),ScloudBusinessOperate.HISTORY,JSONObject.toJSONString(dto));
+                mqttOpera.operaAsync(ScloudBusinessOperate.HISTORY,JSONObject.toJSONString(dto));
             }catch (Exception e){
                 e.printStackTrace();
                 LOGGER.error("心跳 redisKey:{} 处理异常 ",redisKey);

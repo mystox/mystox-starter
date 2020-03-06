@@ -11,10 +11,47 @@ public class ShieldAlarm {
     private String id;
     private String ruleId;
     private String alarmId;
-    private String deviceId;
-    private String signalId;
     private String alarmLevel;
+    private String signalId;
+    private String deviceId;
     private Date treport;
+    //前端展示数据
+    private String signalName;
+    private String deviceName;
+    private String siteName;
+    private String siteAddress;
+
+    public String getSignalName() {
+        return signalName;
+    }
+
+    public void setSignalName(String signalName) {
+        this.signalName = signalName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getSiteAddress() {
+        return siteAddress;
+    }
+
+    public void setSiteAddress(String siteAddress) {
+        this.siteAddress = siteAddress;
+    }
 
     public String getId() {
         return id;
@@ -72,12 +109,15 @@ public class ShieldAlarm {
         this.treport = treport;
     }
 
-    public void initInfo(ShieldRule shieldRule, Alarm alarm){
-        this.ruleId = shieldRule.getId();
+    public void initAlarmInfo(Alarm alarm){
         this.alarmId = alarm.getId();
-        this.deviceId = alarm.getDeviceId();
-        this.signalId = alarm.getSignalId();
         this.alarmLevel = alarm.getTargetLevelName();
+        this.signalId = alarm.getSignalId();
+        this.deviceId = alarm.getDeviceId();
         this.treport = alarm.getTreport();
+        this.signalName = alarm.getSignalName();
+        this.deviceName = alarm.getDeviceName();
+        this.siteName = alarm.getSiteName();
+        this.siteAddress = alarm.getSiteAddress();
     }
 }

@@ -16,7 +16,7 @@ public class ShieldRule {
 
     private String id;
     private String name;
-    private List<String> entDevList;
+    private List<String> deviceIdList;
     private List<String> alarmlevel;
     private String reason;
     private FacadeView creator;
@@ -66,12 +66,12 @@ public class ShieldRule {
         this.name = name;
     }
 
-    public List<String> getEntDevList() {
-        return entDevList;
+    public List<String> getDeviceIdList() {
+        return deviceIdList;
     }
 
-    public void setEntDevList(List<String> entDevList) {
-        this.entDevList = entDevList;
+    public void setDeviceIdList(List<String> deviceIdList) {
+        this.deviceIdList = deviceIdList;
     }
 
     public List<String> getAlarmlevel() {

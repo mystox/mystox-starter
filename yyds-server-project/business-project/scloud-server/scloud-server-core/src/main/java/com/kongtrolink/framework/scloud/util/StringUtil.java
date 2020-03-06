@@ -206,4 +206,25 @@ public class StringUtil {
     public static String getDateStr(Date date){
         return sdf.format(date);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/5 16:26
+     * 功能描述:判定soruStr是否包含targetStr
+     */
+    public static boolean contant(String sourStr, String targetStr){
+        if(StringUtil.isNUll(sourStr)){
+            if(StringUtil.isNUll(targetStr)) {
+                return true;
+            }
+            return false;
+        }
+        if(StringUtil.isNUll(targetStr)){
+            return true;
+        }
+        if(sourStr.indexOf(targetStr) >= 0){
+            return true;
+        }
+        return false;
+    }
 }
