@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 
 public class DBResult {
 
-    private boolean result;
+    private int result;
 
     private String info;
 
@@ -15,11 +15,11 @@ public class DBResult {
 
     private JSONObject jsonObject;
 
-    public boolean getResult() {
+    public int getResult() {
         return result;
     }
 
-    public void setResult(boolean result) {
+    public void setResult(int result) {
         this.result = result;
     }
 

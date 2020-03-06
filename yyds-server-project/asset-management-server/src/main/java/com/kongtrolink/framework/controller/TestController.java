@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.api.impl.MqttService;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.DBResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class TestController {
 
     @Autowired
     Neo4jDBService neo4jDBService;
+
+    @Autowired
+    MqttService mqttService;
 
     @Resource(name = "assetManagementExecutor")
     ThreadPoolTaskExecutor taskExecutor;
@@ -181,5 +186,28 @@ public class TestController {
 
         double average = sum * 1.0 / times / pageTotal;
         System.out.println("Thread-" + index + ",average-" + average);
+    }
+
+    @RequestMapping("/search_V2")
+    public String testSearchCI_V2(@RequestBody JSONObject requestBody) {
+
+        DBResult dbResult = neo4jDBService.searchCI_V2(requestBody);
+
+        return JSONObject.toJSONString(dbResult);
+    }
+
+    @RequestMapping("/addCI")
+    public String addCI(@RequestBody JSONArray requestBody) {
+        return mqttService.addCI(JSONObject.toJSONString(requestBody));
+    }
+
+    @RequestMapping("/deleteCI")
+    public String deleteCI(@RequestBody JSONArray requestBody) {
+        return mqttService.deleteCI(JSONObject.toJSONString(requestBody));
+    }
+
+    @RequestMapping("/modifyCI")
+    public String modifyCI(@RequestBody JSONObject requestBody) {
+        return mqttService.modifyCI(JSONObject.toJSONString(requestBody));
     }
 }

@@ -76,7 +76,7 @@ public class AssetManagementTask implements ApplicationRunner {
 
         try {
             DBResult dbResult = dbService.searchCI(request);
-            if (!dbResult.getResult() || dbResult.getCount() <= 0) {
+            if ((dbResult.getResult() == 0) || (dbResult.getCount() <= 0)) {
                 return;
             }
 

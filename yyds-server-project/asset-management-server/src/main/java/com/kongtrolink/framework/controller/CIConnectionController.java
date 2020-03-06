@@ -34,7 +34,7 @@ public class CIConnectionController {
 
         try {
             DBResult dbResult = dbService.addCIConnectionType(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -51,7 +51,7 @@ public class CIConnectionController {
 
         try {
             DBResult dbResult = dbService.searchCIConnectionType();
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 result = dbResult.getJsonArray();
             }
         } catch (Exception e) {

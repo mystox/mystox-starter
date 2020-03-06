@@ -49,6 +49,7 @@ public interface DBService {
     DBResult modifyCI(JSONObject jsonObject);
 
     DBResult searchCI(JSONObject jsonObject);
+    DBResult searchCI_V2(JSONObject jsonObject);
 
     DBResult addCIRelationship(JSONObject jsonObject);
 

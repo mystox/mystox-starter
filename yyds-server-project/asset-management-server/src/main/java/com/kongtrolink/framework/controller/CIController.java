@@ -35,7 +35,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.addCI(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("id", dbResult.getJsonObject().getString("id"));
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
@@ -55,7 +55,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.deleteCI(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -74,7 +74,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.modifyCI(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -94,7 +94,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.searchCI(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("count", dbResult.getCount());
             result.put("infos", dbResult.getJsonArray());
         } catch (Exception e) {
@@ -114,7 +114,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.addCIRelationship(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -133,7 +133,7 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.deleteCIRelationship(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -153,12 +153,12 @@ public class CIController {
 
         try {
             DBResult dbResult = dbService.searchCIRelationship(requestBody);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 result.put("id", dbResult.getJsonObject().getString("id"));
                 result.put("parent", dbResult.getJsonObject().getJSONArray("parent"));
                 result.put("children", dbResult.getJsonObject().getJSONArray("children"));
             }
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());

@@ -49,7 +49,7 @@ public class DeviceUtils {
 
             try {
                 DBResult dbResult = dbService.addCIRelationship(relationship);
-                if (!dbResult.getResult()) {
+                if (dbResult.getResult() == 0) {
                     logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed:" + dbResult.getInfo(), selfServerCode);
                 }
             } catch (Exception e) {
@@ -99,7 +99,7 @@ public class DeviceUtils {
             JSONArray array;
             try {
                 DBResult dbResult = dbService.searchCITypeConnectionRelationship(request);
-                if (!dbResult.getResult()) {
+                if (dbResult.getResult() == 0) {
                     continue;
                 }
 
@@ -109,7 +109,7 @@ public class DeviceUtils {
                     request.put("child", type1);
 
                     dbResult = dbService.searchCITypeConnectionRelationship(request);
-                    if (!dbResult.getResult()) {
+                    if (dbResult.getResult() == 0) {
                         continue;
                     }
                     array = dbResult.getJsonArray();
@@ -144,7 +144,7 @@ public class DeviceUtils {
 
             try {
                 DBResult dbResult = dbService.addCIRelationship(relationship);
-                if (!dbResult.getResult()) {
+                if (dbResult.getResult() == 0) {
                     logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed:" + dbResult.getInfo(), selfServerCode);
                 }
             } catch (Exception e) {
@@ -162,7 +162,7 @@ public class DeviceUtils {
 
         try {
             DBResult dbResult = dbService.searchCIRelationship(jsonObject);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 JSONObject response = dbResult.getJsonObject();
                 JSONArray parent = response.getJSONArray("parent");
                 for (int i = 0; i < parent.size(); ++i) {
@@ -175,7 +175,7 @@ public class DeviceUtils {
                         request.put("type", type);
 
                         dbResult = dbService.deleteCIRelationship(request);
-                        if (!dbResult.getResult()) {
+                        if (dbResult.getResult() == 0) {
                             logger.error(JSONObject.toJSONString(request) + " deleteCIRelationship failed", selfServerCode);
                         }
                     }
@@ -199,7 +199,7 @@ public class DeviceUtils {
         String id = "";
         try {
             DBResult dbResult = dbService.searchCI(request);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
 
                 JSONObject extend = jsonObject.getJSONObject("extend");
                 jsonObject.remove("extend");
@@ -211,12 +211,12 @@ public class DeviceUtils {
                 if (dbResult.getCount() == 1) {
                     id = dbResult.getJsonArray().getJSONObject(0).getString("id");
                     jsonObject.put("id", id);
-                    if (!dbService.modifyCI(jsonObject).getResult()) {
+                    if (dbService.modifyCI(jsonObject).getResult() == 0) {
                         id = "";
                     }
                 } else {
                     dbResult = dbService.addCI(request);
-                    if (dbResult.getResult()) {
+                    if (dbResult.getResult() != 0) {
                         id = dbResult.getJsonObject().getString("id");
                     }
                 }

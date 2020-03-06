@@ -35,7 +35,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.searchCIType(requestBody);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 for (int i = 0; i < dbResult.getJsonArray().size(); ++i) {
                     JSONObject jsonObject = dbResult.getJsonArray().getJSONObject(i);
                     String icon = jsonObject.getString("icon");
@@ -58,7 +58,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.addCIType(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("result", 0);
@@ -82,7 +82,7 @@ public class CITypeController {
             try {
                 multipartFile.transferTo(file);
                 DBResult dbResult = dbService.modifyCITypeIcon(name, multipartFile.getOriginalFilename());
-                result.put("result", dbResult.getResult() ? 1 : 0);
+                result.put("result", dbResult.getResult());
                 result.put("info", dbResult.getInfo());
             } catch (Exception e) {
                 result.put("info", e.getMessage());
@@ -105,7 +105,7 @@ public class CITypeController {
 
             DBResult dbResult = dbService.searchCITypeByName(name);
             JSONArray ciTypeList = dbResult.getJsonArray();
-            if (!dbResult.getResult() || ciTypeList.size() != 1) {
+            if (dbResult.getResult() == 0 || ciTypeList.size() != 1) {
                 result.put("info", "CI类型删除失败，无法查询到指定类型信息");
                 return JSONObject.toJSONString(result);
             }
@@ -120,7 +120,7 @@ public class CITypeController {
             JSONObject request = new JSONObject();
             request.put("type", name);
             dbResult = dbService.searchCI(request);
-            if (!dbResult.getResult()) {
+            if (dbResult.getResult() == 0) {
                 result.put("info", "CI类型删除失败，无法确认该类型下是否存在设备信息，无法删除");
                 return JSONObject.toJSONString(result);
             }else if (dbResult.getCount() > 0) {
@@ -129,7 +129,7 @@ public class CITypeController {
             }
 
             dbResult = dbService.deleteCIType(name);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -148,7 +148,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.modifyCIType(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -167,7 +167,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.bindCITypeBusinessCode(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -186,7 +186,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.unbindCITypeBusinessCode(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -205,7 +205,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.addCITypeConnectionRelationship(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -224,7 +224,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.deleteCITypeConnectionRelationship(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -241,7 +241,7 @@ public class CITypeController {
 
         try {
             DBResult dbResult = dbService.searchCITypeConnectionRelationship(requestBody);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 result = dbResult.getJsonArray();
             }
         } catch (Exception e) {

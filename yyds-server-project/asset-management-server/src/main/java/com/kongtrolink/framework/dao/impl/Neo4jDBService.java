@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 @Service("Neo4jDBService")
@@ -40,7 +41,7 @@ public class Neo4jDBService implements DBService {
     @Override
     public DBResult addCIType(JSONObject jsonObject) {
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型创建失败，未知错误");
 
         if (jsonObject == null) {
@@ -109,7 +110,7 @@ public class Neo4jDBService implements DBService {
 
                 transaction.success();
                 result.setInfo("CI类型创建成功");
-                result.setResult(true);
+                result.setResult(1);
             }
         }
 
@@ -125,7 +126,7 @@ public class Neo4jDBService implements DBService {
     public DBResult deleteCIType(String name) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型删除失败，未知错误");
 
         openDriver();
@@ -141,7 +142,7 @@ public class Neo4jDBService implements DBService {
 
                 if (summary.counters().nodesDeleted() == 1) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI类型删除成功");
                 } else {
                     transaction.failure();
@@ -161,7 +162,7 @@ public class Neo4jDBService implements DBService {
     @Override
     public DBResult modifyCIType(JSONObject jsonObject) {
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型修改失败，未知错误");
 
         if (jsonObject == null) {
@@ -190,7 +191,7 @@ public class Neo4jDBService implements DBService {
 
                 transaction.success();
                 result.setInfo("CI类型修改成功");
-                result.setResult(true);
+                result.setResult(1);
             }
         }
 
@@ -206,7 +207,7 @@ public class Neo4jDBService implements DBService {
     @Override
     public DBResult modifyCITypeIcon(String name, String icon) {
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型图标文件名称修改失败，未知错误");
 
         openDriver();
@@ -228,7 +229,7 @@ public class Neo4jDBService implements DBService {
 
                 transaction.success();
                 result.setInfo("CI类型图标文件名称修改成功");
-                result.setResult(true);
+                result.setResult(1);
             }
         }
 
@@ -243,7 +244,7 @@ public class Neo4jDBService implements DBService {
     @Override
     public DBResult searchCIType(JSONObject jsonObject) {
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -299,7 +300,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI类型查询成功");
             }
         }
@@ -315,7 +316,7 @@ public class Neo4jDBService implements DBService {
     @Override
     public DBResult searchCITypeByName(String name) {
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -338,7 +339,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI类型查询成功");
             }
         }
@@ -355,7 +356,7 @@ public class Neo4jDBService implements DBService {
     public DBResult bindCITypeBusinessCode(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型绑定失败，未知错误");
 
         if (jsonObject == null) {
@@ -395,7 +396,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI类型绑定成功");
             }
         }
@@ -412,7 +413,7 @@ public class Neo4jDBService implements DBService {
     public DBResult unbindCITypeBusinessCode(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型解绑失败，未知错误");
 
         if (jsonObject == null) {
@@ -459,7 +460,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI类型解绑成功");
             }
         }
@@ -476,7 +477,7 @@ public class Neo4jDBService implements DBService {
     public DBResult addCIConnectionType(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI连接关系新增失败，未知错误");
 
         if (jsonObject == null) {
@@ -497,7 +498,7 @@ public class Neo4jDBService implements DBService {
                 ResultSummary summary = statementResult.summary();
                 if (summary.counters().nodesCreated() == 1) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI连接关系新增成功");
                 } else {
                     transaction.failure();
@@ -517,7 +518,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCIConnectionType() {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI连接关系查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -537,7 +538,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI连接关系查询成功");
             }
         }
@@ -554,7 +555,7 @@ public class Neo4jDBService implements DBService {
     public DBResult addCITypeConnectionRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型之间的连接关系新增失败，未知错误");
 
         if (jsonObject == null) {
@@ -595,7 +596,7 @@ public class Neo4jDBService implements DBService {
                 ResultSummary summary = statementResult.summary();
                 if (summary.counters().relationshipsCreated() == 1 && summary.counters().propertiesSet() == 2) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI类型之间的连接关系新增成功");
                 } else {
                     transaction.failure();
@@ -616,7 +617,7 @@ public class Neo4jDBService implements DBService {
     public DBResult deleteCITypeConnectionRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型之间的连接关系删除失败，未知错误");
 
         openDriver();
@@ -638,7 +639,7 @@ public class Neo4jDBService implements DBService {
                 ResultSummary summary = statementResult.summary();
                 if (summary.counters().relationshipsDeleted() == 1) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI类型之间的连接关系删除成功");
                 } else {
                     transaction.failure();
@@ -659,7 +660,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCITypeConnectionRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI类型之间的连接关系查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -699,7 +700,7 @@ public class Neo4jDBService implements DBService {
                     result.getJsonArray().add(ciConnection);
                 }
 
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI类型之间的连接关系查询成功");
             }
         }
@@ -716,7 +717,7 @@ public class Neo4jDBService implements DBService {
     public DBResult addCIProp(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI属性新增失败，未知错误");
 
         if (jsonObject == null) {
@@ -766,7 +767,7 @@ public class Neo4jDBService implements DBService {
                 ResultSummary summary = statementResult.summary();
                 if (summary.counters().nodesCreated() == 1 && summary.counters().relationshipsCreated() == 1) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI属性新增成功");
                 } else {
                     transaction.failure();
@@ -787,7 +788,7 @@ public class Neo4jDBService implements DBService {
     public DBResult deleteCIProp(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI属性删除失败，未知错误");
 
         if (jsonObject == null) {
@@ -812,7 +813,7 @@ public class Neo4jDBService implements DBService {
 
                 if (summary.counters().nodesDeleted() == 1) {
                     transaction.success();
-                    result.setResult(true);
+                    result.setResult(1);
                     result.setInfo("CI属性删除成功");
                 } else {
                     transaction.failure();
@@ -833,7 +834,7 @@ public class Neo4jDBService implements DBService {
     public DBResult modifyCIProp(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI属性修改失败，未知错误");
 
         if (jsonObject == null) {
@@ -889,7 +890,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCIProp(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI属性查询失败，未知错误");
         result.setJsonObject(new JSONObject());
 
@@ -928,7 +929,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI属性查询成功");
             }
         }
@@ -945,7 +946,7 @@ public class Neo4jDBService implements DBService {
     public DBResult addCI(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI信息新增失败，未知错误");
         result.setJsonObject(new JSONObject());
 
@@ -1065,9 +1066,10 @@ public class Neo4jDBService implements DBService {
 
                 recordList = statementResult.list();
                 result.getJsonObject().put("id", recordList.get(0).values().get(0).asString());
+                result.getJsonObject().put("sn", sn);
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI信息新增成功");
             }
         }
@@ -1084,7 +1086,7 @@ public class Neo4jDBService implements DBService {
     public DBResult deleteCI(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI信息删除失败，未知错误");
 
         if (jsonObject == null) {
@@ -1107,7 +1109,7 @@ public class Neo4jDBService implements DBService {
                 if (summary.counters().nodesDeleted() > 0) {
                     transaction.success();
                     result.setInfo("CI信息删除成功");
-                    result.setResult(true);
+                    result.setResult(1);
                 } else {
                     transaction.failure();
                     result.setInfo("CI信息删除失败，删除节点失败");
@@ -1127,7 +1129,7 @@ public class Neo4jDBService implements DBService {
     public DBResult modifyCI(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI信息修改失败，未知错误");
 
         if (jsonObject == null) {
@@ -1206,7 +1208,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI信息修改成功");
             }
         }
@@ -1223,7 +1225,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCI(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI信息查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -1344,7 +1346,129 @@ public class Neo4jDBService implements DBService {
                 }
 
                 result.setCount(count);
-                result.setResult(true);
+                result.setResult(1);
+                result.setInfo("CI信息查询成功");
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 查询CI信息
+     * @param jsonObject 查询条件
+     * @return 查询结果
+     */
+    @Override
+    public DBResult searchCI_V2(JSONObject jsonObject) {
+
+        DBResult result = new DBResult();
+        result.setResult(0);
+        result.setInfo("CI信息查询失败，未知错误");
+        result.setJsonArray(new JSONArray());
+
+        if (jsonObject == null) {
+            result.setInfo("CI信息查询失败，无输入参数");
+            return result;
+        }
+
+        openDriver();
+
+        try (Session session = driver.session()) {
+            try (Transaction transaction = session.beginTransaction()) {
+
+                List<String> conditionList = new ArrayList<>();
+                conditionList.add("ci.id is not null");
+
+                String parent = "", page = "";
+                for (String propName : jsonObject.keySet()) {
+                    if (propName.equals("_parent")) {
+                        if (jsonObject.getJSONObject("_parent").keySet().size() > 0) {
+                            parent = "<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(parent:CI)";
+                        }
+                        for (String parentPropName : jsonObject.getJSONObject("_parent").keySet()) {
+                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_parent").getJSONObject(parentPropName)));
+                        }
+                    } else if (propName.equals("_page")) {
+                        int curPage = jsonObject.getJSONObject("_page").getJSONObject("curPage").getInteger("value");
+                        int pageNum = jsonObject.getJSONObject("_page").getJSONObject("pageNum").getInteger("value");
+                        page = " skip " + (curPage - 1) * pageNum + " limit " + pageNum;
+                    } else {
+                        conditionList.add("ci." + getCondition(propName, jsonObject.getJSONObject(propName)));
+                    }
+                }
+
+                StringBuilder condition = new StringBuilder();
+                if (conditionList.size() > 0) {
+                    condition = new StringBuilder(" where " + conditionList.get(0));
+                    for (int i = 1; i < conditionList.size(); ++i) {
+                        condition.append(" and ").append(conditionList.get(i));
+                    }
+                }
+
+                String cmd = "match (ci:" + Neo4jDBNodeType.CI + ")" + parent + condition;
+                StatementResult statementResult = transaction.run(cmd + " return count(distinct (ci))");
+                List<Record> recordList = statementResult.list();
+
+                int count = recordList.get(0).values().get(0).asInt();
+
+                cmd = "match (ci:" + Neo4jDBNodeType.CI + ")" + parent + condition +
+                        " return distinct (ci) " + (parent.equals("") ? "" : ", parent") + " order by id(ci)" + page;
+                statementResult = transaction.run(cmd);
+                recordList = statementResult.list();
+
+                HashMap<String, JSONObject> propMap = new HashMap<>();
+
+                for (Record record:recordList) {
+                    String type = record.values().get(0).get("type").asString();
+                    String enterpriseCode = record.values().get(0).get("enterpriseCode").asString();
+                    String serverCode = record.values().get(0).get("serverCode").asString();
+                    String businessCode = Neo4jUtils.getBusinessCode(enterpriseCode, serverCode);
+
+                    if (!propMap.containsKey(type)) {
+                        String searchProp = "match (:" + Neo4jDBNodeType.CIType + " {name:{Name}})" +
+                                "<-[:" + Neo4jDBRelationshipType.ATTACH + "]-" +
+                                "(prop:" + Neo4jDBNodeType.CIProp + ") " +
+                                "where prop.businessCode = '' or prop.businessCode = '" + businessCode + "' " +
+                                "return prop";
+                        statementResult = transaction.run(searchProp,
+                                Values.parameters("Name", type));
+                        List<Record> propList = statementResult.list();
+
+                        JSONArray nameArray = new JSONArray();
+                        JSONArray typeArray = new JSONArray();
+                        for (Record propRecord : propList) {
+                            JSONObject prop = getCIProp(propRecord);
+                            nameArray.addAll(prop.getJSONArray("name"));
+                            typeArray.addAll(prop.getJSONArray("type"));
+                        }
+                        JSONObject prop = new JSONObject();
+                        prop.put("name", nameArray);
+                        prop.put("type", typeArray);
+                        propMap.put(type, prop);
+                    }
+
+                    if (!propMap.containsKey(type)) {
+                        continue;
+                    }
+
+                    JSONObject ci = getCI(record, propMap.get(type));
+
+                    if (!parent.equals("")) {
+                        String parentType = record.values().get(1).get("type").asString();
+                        String parentSn = record.values().get(1).get("sn").asString();
+
+                        JSONObject jsonParent = new JSONObject();
+                        jsonParent.put("type", parentType);
+                        jsonParent.put("sn", parentSn);
+                        ci.put("_parent", jsonParent);
+                    }
+
+                    result.getJsonArray().add(ci);
+                }
+
+                result.setCount(count);
+                result.setResult(1);
                 result.setInfo("CI信息查询成功");
             }
         }
@@ -1361,7 +1485,7 @@ public class Neo4jDBService implements DBService {
     public DBResult addCIRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI关系添加失败，未知错误");
 
         if (jsonObject == null) {
@@ -1475,7 +1599,7 @@ public class Neo4jDBService implements DBService {
                         "Id2", id2));
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI关系添加成功");
             }
         }
@@ -1492,7 +1616,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCIRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI关系查询失败，未知错误");
         result.setJsonObject(new JSONObject());
 
@@ -1553,7 +1677,7 @@ public class Neo4jDBService implements DBService {
                 result.getJsonObject().put("children", children);
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI关系查询成功");
             }
         }
@@ -1570,7 +1694,7 @@ public class Neo4jDBService implements DBService {
     public DBResult deleteCIRelationship(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI关系删除失败，未知错误");
 
         if (jsonObject == null) {
@@ -1598,7 +1722,7 @@ public class Neo4jDBService implements DBService {
                 if (summary.counters().propertiesSet() == 1) {
                     transaction.success();
                     result.setInfo("CI关系删除成功");
-                    result.setResult(true);
+                    result.setResult(1);
                 } else {
                     transaction.failure();
                     result.setInfo("CI关系删除失败，节点状态修改失败");
@@ -1618,7 +1742,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCIModel(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI设备型号查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -1650,7 +1774,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI设备型号查询成功");
             }
         }
@@ -1667,7 +1791,7 @@ public class Neo4jDBService implements DBService {
     public DBResult searchCIIds(JSONObject jsonObject) {
 
         DBResult result = new DBResult();
-        result.setResult(false);
+        result.setResult(0);
         result.setInfo("CI id查询失败，未知错误");
         result.setJsonArray(new JSONArray());
 
@@ -1697,7 +1821,7 @@ public class Neo4jDBService implements DBService {
                 }
 
                 transaction.success();
-                result.setResult(true);
+                result.setResult(1);
                 result.setInfo("CI id查询成功");
             }
         }
@@ -1891,6 +2015,54 @@ public class Neo4jDBService implements DBService {
         readonlyFields.add("createTime");
 
         return readonlyFields.contains(propName);
+    }
+
+    /**
+     * 解析搜索条件
+     * @param propName 属性名称
+     * @param condition 输入条件
+     * @return 查询语句
+     */
+    private String getCondition(String propName, JSONObject condition) {
+
+        String result = "";
+
+        int searchType = condition.getInteger("searchType");
+        String dataType = "string";
+        if (condition.containsKey("dataType")) {
+            dataType = condition.getString("dataType").toLowerCase();
+        }
+        switch (searchType) {
+            case 0:
+                // 模糊搜索，默认数据类型为String
+                result = propName + " =~ '.*" + condition.getString("value") + ".*'";
+                break;
+            case 1:
+                // 精确搜索，需通过dataType字段确认数据类型，若该字段不存在，则认为是String
+                switch (dataType) {
+                    case "string":
+                        result = propName + " = '" + condition.getString("value") + "'";
+                        break;
+                    case "bool":
+                    case "boolean":
+                        result = propName + " = " + condition.getBoolean("value");
+                        break;
+                    case "number":
+                        result = propName + " = " + condition.getDouble("value");
+                        break;
+                    case "datetime":
+                    case "time":
+                        result = propName + " = " + condition.getLong("value");
+                        break;
+                }
+                break;
+            case 2:
+                // in搜索，需通过dataType字段确认数据类型，若该字段不存在，则认为是String
+                result = propName + " in " + JSONObject.toJSONString(condition.getJSONArray("value"));
+                break;
+        }
+
+        return result;
     }
 
     /**

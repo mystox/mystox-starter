@@ -38,10 +38,10 @@ public class CIPropController {
 
         try {
             DBResult dbResult = dbService.searchCIProp(requestBody);
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 result = dbResult.getJsonObject();
             }
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
         } catch (Exception e) {
             result.put("info", e.getMessage());
@@ -60,9 +60,9 @@ public class CIPropController {
 
         try {
             DBResult dbResult = dbService.addCIProp(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 publishCIProps(requestBody.getString("name"), requestBody.getJSONObject("prop"));
             }
         } catch (Exception e) {
@@ -82,9 +82,9 @@ public class CIPropController {
 
         try {
             DBResult dbResult = dbService.deleteCIProp(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 try {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("name", requestBody.getString("name"));
@@ -122,9 +122,9 @@ public class CIPropController {
 
         try {
             DBResult dbResult = dbService.modifyCIProp(requestBody);
-            result.put("result", dbResult.getResult() ? 1 : 0);
+            result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
-            if (dbResult.getResult()) {
+            if (dbResult.getResult() != 0) {
                 publishCIProps(requestBody.getString("name"), requestBody.getJSONObject("prop"));
             }
         } catch (Exception e) {
