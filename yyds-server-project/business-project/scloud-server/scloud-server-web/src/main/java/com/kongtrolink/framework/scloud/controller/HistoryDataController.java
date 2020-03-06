@@ -10,6 +10,7 @@ import com.kongtrolink.framework.scloud.dao.HistoryDataDao;
 import com.kongtrolink.framework.scloud.entity.HistoryDataEntity;
 import com.kongtrolink.framework.scloud.entity.his.JobMessageAckEntity;
 import com.kongtrolink.framework.scloud.entity.his.JobMessageEntity;
+import com.kongtrolink.framework.scloud.entity.model.HistoryDataDayModel;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
 import com.kongtrolink.framework.scloud.query.HistoryDataQuery;
@@ -66,6 +67,32 @@ public class HistoryDataController  extends ExportController {
         return new JsonResult("查询失败",false);
     }
 
+    @RequestMapping(value = "/getDayReport")
+    public @ResponseBody JsonResult getDayReport(@RequestBody HistoryDataQuery historyDataQuery){
+        try{
+            String uniqueCode = getUniqueCode();
+            List list = historyDataService.getDayReport(uniqueCode,historyDataQuery);
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
+    }
+
+    @RequestMapping(value = "/exportDayReport")
+    public void getDayReport(@RequestBody HistoryDataQuery historyDataQuery, HttpServletResponse response){
+        try{
+            String uniqueCode = getUniqueCode();
+            List< HistoryDataDayModel > list = historyDataService.getDayReport(uniqueCode,historyDataQuery);
+            String cntbId = historyDataQuery.getCntbId();
+            String title = cntbId+"历史数据按天统计";
+            String[] headsName = { "站点层级", "站点名称", "站点编码", "设备名称","设备编码","遥测信号","日期","最大值","最小值","平均值"};
+            String[] propertiesName = { "tierName", "siteName", "siteCode", "deviceName", "deviceCode", "signalName", "time", "maxValue", "minValue", "avgValue"};
+            export(response,list,propertiesName, headsName, title);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
      * 根据查询 某一个遥测信号值列表 导出
      */

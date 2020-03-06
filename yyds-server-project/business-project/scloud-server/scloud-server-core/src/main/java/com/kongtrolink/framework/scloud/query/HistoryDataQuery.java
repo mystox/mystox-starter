@@ -11,6 +11,12 @@ public class HistoryDataQuery  extends Paging{
     private String fsuCode;
     private String deviceCode;
     private String cntbId;//需要查询的具体信号点ID
+    //导出用
+    private String tierName;	//区域名称
+    private String siteName;	//站点名称
+    private String deviceName;	//设备名称
+    private String signalName;//遥测信号名称
+    private String siteCode;//站点编号
 
     public long getStartTime() {
         return startTime;
@@ -50,5 +56,45 @@ public class HistoryDataQuery  extends Paging{
 
     public void setCntbId(String cntbId) {
         this.cntbId = cntbId;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getSignalName() {
+        return signalName;
+    }
+
+    public void setSignalName(String signalName) {
+        this.signalName = signalName;
+    }
+
+    public String getSiteCode() {
+        return siteCode;
+    }
+
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
     }
 }

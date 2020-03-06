@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.HistoryDataEntity;
+import com.kongtrolink.framework.scloud.entity.model.HistoryDataDayModel;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataModel;
 import com.kongtrolink.framework.scloud.query.HistoryDataQuery;
 
@@ -28,4 +29,12 @@ public interface HistoryDataService {
      * @return 列表总数
      */
     int getHisCount(String uniqueCode,HistoryDataQuery historyDataQuery);
+
+    /**
+     * 根据查询条件获取历史数据统计数据 最大值 最小值 平均值
+     * @param uniqueCode 企业编码
+     * @param historyDataQuery 查询条件
+     * @return 统计数据
+     */
+    List<HistoryDataDayModel> getDayReport(String uniqueCode,HistoryDataQuery historyDataQuery);
 }
