@@ -198,16 +198,16 @@ public class TestController {
 
     @RequestMapping("/addCI")
     public String addCI(@RequestBody JSONArray requestBody) {
-        return mqttService.addCI(JSONObject.toJSONString(requestBody));
+        return mqttService.addCISCloud(JSONObject.toJSONString(requestBody));
     }
 
     @RequestMapping("/deleteCI")
     public String deleteCI(@RequestBody JSONArray requestBody) {
-        return mqttService.deleteCI(JSONObject.toJSONString(requestBody));
+        return mqttService.deleteCISCloud(JSONObject.toJSONString(requestBody));
     }
 
     @RequestMapping("/modifyCI")
     public String modifyCI(@RequestBody JSONObject requestBody) {
-        return mqttService.modifyCI(JSONObject.toJSONString(requestBody));
+        return mqttService.modifyCISCloud(JSONObject.toJSONString(requestBody));
     }
 }

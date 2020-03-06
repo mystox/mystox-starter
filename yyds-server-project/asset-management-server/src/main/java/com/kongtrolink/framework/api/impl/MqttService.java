@@ -88,6 +88,31 @@ public class MqttService implements Service {
         JSONObject result = new JSONObject();
 
         try {
+            DBResult dbResult = dbService.searchCI(jsonObject);
+            if (dbResult.getResult() != 0) {
+                result.put("count", dbResult.getCount());
+                result.put("infos", dbResult.getJsonArray());
+            }
+        } catch (Exception e) {
+            logger.error(JSONObject.toJSONString(e), serverCode);
+        }
+
+
+        return JSONObject.toJSONString(result);
+    }
+
+    public void deviceReport(String payload) {
+
+        deviceUtils.deviceReport(payload);
+    }
+
+    public String getCISCloud(String payload) {
+
+        JSONObject jsonObject = JSONObject.parseObject(payload);
+
+        JSONObject result = new JSONObject();
+
+        try {
             DBResult dbResult = dbService.searchCI_V2(jsonObject);
             result.put("result", dbResult.getResult());
             result.put("info", dbResult.getInfo());
@@ -102,12 +127,7 @@ public class MqttService implements Service {
         return JSONObject.toJSONString(result);
     }
 
-    public void deviceReport(String payload) {
-
-        deviceUtils.deviceReport(payload);
-    }
-
-    public String addCI(String payload) {
+    public String addCISCloud(String payload) {
 
         JSONObject result = new JSONObject();
         result.put("result", 0);
@@ -160,7 +180,7 @@ public class MqttService implements Service {
         return JSONObject.toJSONString(result);
     }
 
-    public String deleteCI(String payload) {
+    public String deleteCISCloud(String payload) {
         JSONObject result = new JSONObject();
         result.put("result", 0);
         result.put("count", 0);
@@ -202,7 +222,7 @@ public class MqttService implements Service {
         return JSONObject.toJSONString(result);
     }
 
-    public String modifyCI(String payload) {
+    public String modifyCISCloud(String payload) {
         JSONObject result = new JSONObject();
         result.put("result", 0);
         result.put("count", 0);

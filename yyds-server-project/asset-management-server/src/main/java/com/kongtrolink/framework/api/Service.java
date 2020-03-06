@@ -22,11 +22,14 @@ public interface Service {
     void deviceReport(String payload);
 
     @OperaCode
-    String addCI(String payload);
+    String getCISCloud(String payload);
 
     @OperaCode
-    String deleteCI(String payload);
+    String addCISCloud(String payload);
 
     @OperaCode
-    String modifyCI(String payload);
+    String deleteCISCloud(String payload);
+
+    @OperaCode
+    String modifyCISCloud(String payload);
 }
