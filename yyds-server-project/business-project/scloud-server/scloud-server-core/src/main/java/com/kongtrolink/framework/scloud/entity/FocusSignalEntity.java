@@ -30,6 +30,7 @@ public class FocusSignalEntity implements Serializable {
     private String measurement; //单位
     private String type;    //信号点类型。"0"-遥信信号(DI),"1"-遥测信号(AI),"2"-遥控信号(DO),"3"-遥调信号(AO)
     private String alarmLevel;//告警级别
+    private String value; //实时值
 
     public String getUniqueCode() {
         return uniqueCode;
@@ -149,5 +150,13 @@ public class FocusSignalEntity implements Serializable {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
