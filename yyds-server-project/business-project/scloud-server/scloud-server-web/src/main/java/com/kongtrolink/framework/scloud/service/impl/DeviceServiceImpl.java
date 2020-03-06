@@ -71,14 +71,13 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     /**
-     * @param deviceQuery
      * @auther: liudd
      * @date: 2020/2/28 9:48
-     * 功能描述:列表
+     * 功能描述:获取设备实体类表，不包含名字，无语远程调用
      */
     @Override
-    public List<DeviceEntity> list(DeviceQuery deviceQuery) {
-        return null;
+    public List<DeviceEntity> listEntity(String uniqueCode, DeviceQuery deviceQuery) {
+        return deviceMongo.listEntity(uniqueCode, deviceQuery);
     }
 
     /**
@@ -87,26 +86,8 @@ public class DeviceServiceImpl implements DeviceService {
      * 功能描述:统计设备列表数量
      */
     @Override
-    public int count(DeviceQuery deviceQuery) {
+    public int countEntity(String uniqueCode, DeviceQuery deviceQuery) {
         return 0;
-    }
-
-    /**
-     * @param deviceEntityList
-     * @auther: liudd
-     * @date: 2020/2/26 16:35
-     * 功能描述:列表转换成编码列表
-     */
-    @Override
-    public List<String> list2CodeList(List<DeviceEntity> deviceEntityList) {
-        if(null == deviceEntityList){
-            return null;
-        }
-        List<String> deviceCodeList = new ArrayList<>();
-        for(DeviceEntity deviceEntity : deviceEntityList){
-            deviceCodeList.add(deviceEntity.getCode());
-        }
-        return deviceCodeList;
     }
 
     /**
@@ -129,5 +110,17 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList) {
         return null;
+    }
+
+    @Override
+    public List<String> entityList2CodeList(List<DeviceEntity> deviceEntityList) {
+        if(null == deviceEntityList){
+            return null;
+        }
+        List<String> deviceCodeList = new ArrayList<>();
+        for(DeviceEntity deviceEntity : deviceEntityList){
+            deviceCodeList.add(deviceEntity.getCode());
+        }
+        return deviceCodeList;
     }
 }

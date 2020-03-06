@@ -20,23 +20,16 @@ public interface DeviceService {
     /**
      * @auther: liudd
      * @date: 2020/2/28 9:48
-     * 功能描述:获取设备列表
+     * 功能描述:获取设备实体类表，不包含名字，无语远程调用
      */
-    List<DeviceEntity> list(DeviceQuery deviceQuery);
+    List<DeviceEntity> listEntity(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * @auther: liudd
      * @date: 2020/2/28 9:48
      * 功能描述:统计设备列表数量
      */
-    int count(DeviceQuery deviceQuery);
-
-    /**
-     * @auther: liudd
-     * @date: 2020/2/26 16:35
-     * 功能描述:列表转换成编码列表
-     */
-    List<String> list2CodeList(List<DeviceEntity> deviceEntityList);
+    int countEntity(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * @auther: liudd
@@ -51,4 +44,6 @@ public interface DeviceService {
      * 功能描述:根据设备编码获取设备列表
      */
     List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList);
+
+    List<String> entityList2CodeList(List<DeviceEntity> deviceEntityList);
 }

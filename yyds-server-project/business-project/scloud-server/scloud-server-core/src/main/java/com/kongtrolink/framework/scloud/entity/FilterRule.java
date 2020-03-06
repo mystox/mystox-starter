@@ -18,10 +18,8 @@ public class FilterRule {
 
     private String alarmName;
     private List<String> alarmLevelList;
-    private boolean siteBased; // 条件是否基于站点
-    private List<String> siteId;
-    private List<String> tierCode;
-    private List<String> deviceTypeCode;
+    private List<String> siteCodeList;      //站点编码列表
+    private List<String> deviceTypeList;
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
@@ -76,28 +74,12 @@ public class FilterRule {
         this.updateTime = updateTime;
     }
 
-    public boolean isSiteBased() {
-        return siteBased;
+    public List<String> getSiteCodeList() {
+        return siteCodeList;
     }
 
-    public void setSiteBased(boolean siteBased) {
-        this.siteBased = siteBased;
-    }
-
-    public List<String> getSiteId() {
-        return siteId;
-    }
-
-    public void setSiteId(List<String> siteId) {
-        this.siteId = siteId;
-    }
-
-    public List<String> getTierCode() {
-        return tierCode;
-    }
-
-    public void setTierCode(List<String> tierCode) {
-        this.tierCode = tierCode;
+    public void setSiteCodeList(List<String> siteCodeList) {
+        this.siteCodeList = siteCodeList;
     }
 
     public String getAlarmName() {
@@ -116,12 +98,12 @@ public class FilterRule {
         this.alarmLevelList = alarmLevelList;
     }
 
-    public List<String> getDeviceTypeCode() {
-        return deviceTypeCode;
+    public List<String> getDeviceTypeList() {
+        return deviceTypeList;
     }
 
-    public void setDeviceTypeCode(List<String> deviceTypeCode) {
-        this.deviceTypeCode = deviceTypeCode;
+    public void setDeviceTypeList(List<String> deviceTypeList) {
+        this.deviceTypeList = deviceTypeList;
     }
 
     public Date getStartBeginTime() {

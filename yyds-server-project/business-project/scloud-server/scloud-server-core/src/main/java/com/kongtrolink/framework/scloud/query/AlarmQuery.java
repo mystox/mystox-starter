@@ -21,6 +21,7 @@ public class AlarmQuery extends Paging{
     private String state;               //告警状态(待处理，已消除)
     private Boolean isCheck;              //是否确认
     private String deviceType;          //设备型号，设备类型，与资管一致
+    private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;         //设备型号，设备型号，如果没有与deviceType一致
     private Date treport;             //告警发生时间
     private Date trecover;              //消除时间
@@ -31,7 +32,7 @@ public class AlarmQuery extends Paging{
     private Date clearEndTime;                  //清除结束时间
     private List<String> deviceCodeList;  //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
     private List<String> tierCodeList;  //区域层级编码列表
-    private List<Integer> siteIdList;    //站点编码列表
+    private List<String> siteCodeList;      //设备编码列表
     private String operationState;      //FSU运行状态
     private String type;                //告警类型（实时/历史）
     private String focus;              //告警关注操作(关注/取消关注)
@@ -42,6 +43,14 @@ public class AlarmQuery extends Paging{
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+    public List<String> getDeviceTypeList() {
+        return deviceTypeList;
+    }
+
+    public void setDeviceTypeList(List<String> deviceTypeList) {
+        this.deviceTypeList = deviceTypeList;
+    }
 
     public List<String> getTargetLevelNameList() {
         return targetLevelNameList;
@@ -291,11 +300,11 @@ public class AlarmQuery extends Paging{
         this.tierCodeList = tierCodeList;
     }
 
-    public List<Integer> getSiteIdList() {
-        return siteIdList;
+    public List<String> getSiteCodeList() {
+        return siteCodeList;
     }
 
-    public void setSiteIdList(List<Integer> siteIdList) {
-        this.siteIdList = siteIdList;
+    public void setSiteCodeList(List<String> siteCodeList) {
+        this.siteCodeList = siteCodeList;
     }
 }
