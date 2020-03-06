@@ -458,6 +458,33 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     }
 
     /**
+     * 根据设备类型获取遥测信号点列表
+     *
+     * @param uniqueCode 企业编码
+     * @param devType    设备类型
+     * @param type       具体哪一类信号点 不传全部
+     * @return 信号点列表
+     */
+    @Override
+    public DeviceType getDeviceType(String uniqueCode, String devType, String type) {
+        DeviceType deviceType = realTimeDataDao.queryDeviceType(uniqueCode,devType);
+        if(deviceType==null || deviceType.getSignalTypeList()==null || deviceType.getSignalTypeList().size()==0){
+            return null;
+        }
+        if(type!=null && !"".equals(type)){
+            List<SignalType> newList = new ArrayList<>();
+            List<SignalType> signalTypes = deviceType.getSignalTypeList();
+            for(SignalType signalType:signalTypes){
+                if(type.equals(signalType.getType())){
+                    newList.add(signalType);
+                }
+            }
+            deviceType.setSignalTypeList(newList);
+        }
+        return deviceType;
+    }
+
+    /**
      * 根据 区域数 返回需要查询的站点ID列表
 
      */

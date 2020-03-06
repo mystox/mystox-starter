@@ -4,6 +4,7 @@ import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetPointAckMessage;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.SetThresholdAckMessage;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.FsuDeviceEntity;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
@@ -70,4 +71,12 @@ public interface RealTimeDataService {
      */
     int getSignalDiInfoNum(String uniqueCode, SignalDiInfoQuery query);
 
+    /**
+     * 根据设备类型获取遥测信号点列表
+     * @param uniqueCode 企业编码
+     * @param devType 设备类型
+     * @param type 具体哪一类信号点 不传全部
+     * @return 信号点列表
+     */
+    DeviceType getDeviceType(String uniqueCode,String devType,String type);
 }
