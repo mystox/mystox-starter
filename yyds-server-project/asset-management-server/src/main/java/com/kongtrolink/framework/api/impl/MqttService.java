@@ -143,7 +143,7 @@ public class MqttService implements Service {
                         request = new JSONObject();
                         request.put("id1", parentId);
                         request.put("id2", id);
-                        request.put("type", "Logical");
+                        request.put("type", jsonObject.getJSONObject("_parent").getString("relationshipType"));
 
                         dbService.addCIRelationship(request);
                     }
