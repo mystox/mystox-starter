@@ -96,13 +96,11 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             month = 12;
             year -= 1;
         } else month -= 1;
-
-
         JSONObject stationCondition = new JSONObject();
         stationCondition.put("serverCode", serverCode);
         stationCondition.put("enterpriseCode", enterpriseCode);
         //todo 获取企业在该云平台下所有站点
-        MsgResult siteListResult = mqttOpera.opera("getStationListByEnterpriseCode", stationCondition.toJSONString());
+        MsgResult siteListResult = mqttOpera.opera("getCI", stationCondition.toJSONString());
         String siteListMsg = siteListResult.getMsg();
         List<JSONObject> siteList = JSONArray.parseArray(siteListMsg, JSONObject.class);
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -110,7 +108,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             int finalYear = year;
             siteList.forEach(s -> {
                 //todo 获取站点下所有fsu及其相关告警数据
-
                 String stationId = s.getString("siteId");
                 JSONObject fsuCondition = new JSONObject();
                 fsuCondition.put("stationId", stationId);
