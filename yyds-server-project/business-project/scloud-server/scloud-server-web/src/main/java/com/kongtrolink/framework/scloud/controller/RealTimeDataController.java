@@ -9,6 +9,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.FsuDeviceEntity;
 import com.kongtrolink.framework.scloud.entity.model.SignalModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfo;
@@ -88,6 +89,23 @@ public class RealTimeDataController extends ExportController {
             return new JsonResult("查询失败",false);
         }
     }
+
+    @RequestMapping(value = "/getSignalInfo")
+    public @ResponseBody JsonResult getSignalInfo(@RequestBody SignalQuery query) {
+        try{
+            String uniqueCode = getUniqueCode();
+            DeviceType deviceType = realTimeDataService.getDeviceType(uniqueCode, query.getDeviceType(),query.getType());
+            if(deviceType==null){
+                return new JsonResult("未查询到相关信息",false);
+            }
+            return new JsonResult(deviceType);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("查询失败",false);
+        }
+    }
+
+
     @RequestMapping(value = "/getDataDetail")
     public @ResponseBody JsonResult getDataDetail(@RequestBody SignalQuery query) {
         try{
@@ -106,6 +124,7 @@ public class RealTimeDataController extends ExportController {
     @RequestMapping(value = "/setPoint")
     public @ResponseBody JsonResult setPoint(@RequestBody SignalQuery query) {
         try{
+            query.setUniqueCode(getUniqueCode());
             SetPointAckMessage ack = realTimeDataService.setPoint(query);
             return new JsonResult(ack);
         }catch (Exception e){
@@ -121,6 +140,7 @@ public class RealTimeDataController extends ExportController {
     @RequestMapping(value = "/setThreshold")
     public @ResponseBody JsonResult setThreshold(@RequestBody SignalQuery query) {
         try{
+            query.setUniqueCode(getUniqueCode());
             SetThresholdAckMessage ack = realTimeDataService.setThreshold(query);
             return new JsonResult(ack);
         }catch (Exception e){

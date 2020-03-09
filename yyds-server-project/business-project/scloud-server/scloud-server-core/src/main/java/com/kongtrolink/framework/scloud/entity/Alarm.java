@@ -17,10 +17,16 @@ public class Alarm {
     private String name;                //告警名称
     private float value;                //告警值
     private Integer level;               //告警等级
+    private int siteId;
+    private String siteName;
+    private String tierName;
+    private String siteAddress;
     private String deviceType;          //设备类型，设备类型，与资管一致
     private String deviceModel;         //设备型号，设备型号，如果没有与deviceType一致
     private String deviceId;            //设备对应的编码，需要与资产管理对应，设备id，即SN
+    private String deviceName;
     private String signalId;            //信号点id，信号点id必须有，如果消息报文不包含信号点，则需要根据业务定义相关信号点
+    private String signalName;          //信号点名称（告警名称）
     private Integer targetLevel;         //目标等级
     private String targetLevelName;     //目标等级名称
     private String color;               //告警颜色
@@ -33,6 +39,64 @@ public class Alarm {
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
+    private Boolean shield;             //是否屏蔽
+
+    public Boolean getShield() {
+        return shield;
+    }
+
+    public void setShield(Boolean shield) {
+        this.shield = shield;
+    }
+
+    public String getSignalName() {
+        return signalName;
+    }
+
+    public void setSignalName(String signalName) {
+        this.signalName = signalName;
+    }
+
+    public int getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(int siteId) {
+        this.siteId = siteId;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public String getSiteAddress() {
+        return siteAddress;
+    }
+
+    public void setSiteAddress(String siteAddress) {
+        this.siteAddress = siteAddress;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
     public String getId() {
         return id;
     }
@@ -215,5 +279,26 @@ public class Alarm {
 
     public void setChecker(FacadeView checker) {
         this.checker = checker;
+    }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "enterpriseCode='" + enterpriseCode + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", name='" + name + '\'' +
+                ", value=" + value +
+                ", level=" + level +
+                ", deviceType='" + deviceType + '\'' +
+                ", deviceModel='" + deviceModel + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", signalId='" + signalId + '\'' +
+                ", targetLevel=" + targetLevel +
+                ", targetLevelName='" + targetLevelName + '\'' +
+                ", color='" + color + '\'' +
+                ", treport=" + treport +
+                ", state='" + state + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

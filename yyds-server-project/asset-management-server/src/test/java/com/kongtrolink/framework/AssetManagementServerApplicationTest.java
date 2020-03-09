@@ -54,8 +54,8 @@ public class AssetManagementServerApplicationTest {
         jsonObject.put("title", "");
         jsonObject.put("name", "BusinessDevice");
         jsonObject.put("code", "");
-        JSONArray array = neo4jDBService.searchCIType(jsonObject);
-        System.out.println(array);
+//        JSONArray array = neo4jDBService.searchCIType(jsonObject);
+        System.out.println(neo4jDBService.searchCIType(jsonObject).getJsonArray());
     }
 
     @Test
@@ -162,9 +162,9 @@ public class AssetManagementServerApplicationTest {
             jsonObjectPW.put("sn", "406" + sn);
             jsonObjectENV.put("sn", "418" + sn);
 
-            String fsuId = neo4jDBService.addCI(jsonObjectFsu);
-            String powerId = neo4jDBService.addCI(jsonObjectPW);
-            String envId = neo4jDBService.addCI(jsonObjectENV);
+            String fsuId = neo4jDBService.addCI(jsonObjectFsu).getJsonObject().getString("id");
+            String powerId = neo4jDBService.addCI(jsonObjectPW).getJsonObject().getString("id");
+            String envId = neo4jDBService.addCI(jsonObjectENV).getJsonObject().getString("id");
 
             JSONObject relationship = new JSONObject();
 
@@ -235,7 +235,7 @@ public class AssetManagementServerApplicationTest {
                 jsonObject.put("curPage", i);
 
                 Date startDate = new Date();
-                JSONObject result = neo4jDBService.searchCI(jsonObject);
+//                JSONObject result = neo4jDBService.searchCI(jsonObject);
                 Date endDate = new Date();
 
                 long diff = endDate.getTime() - startDate.getTime();

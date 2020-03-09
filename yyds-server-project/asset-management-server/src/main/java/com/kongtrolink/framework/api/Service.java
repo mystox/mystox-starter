@@ -20,4 +20,16 @@ public interface Service {
 
     @OperaCode
     void deviceReport(String payload);
+
+    @OperaCode
+    String getCISCloud(String payload);
+
+    @OperaCode
+    String addCISCloud(String payload);
+
+    @OperaCode
+    String deleteCISCloud(String payload);
+
+    @OperaCode
+    String modifyCISCloud(String payload);
 }

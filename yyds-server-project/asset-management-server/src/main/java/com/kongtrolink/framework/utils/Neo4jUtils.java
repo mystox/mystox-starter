@@ -21,7 +21,7 @@ public class Neo4jUtils {
      * @return 第一个是企业编码，第二个是服务编码
      */
     public static List<String> getEnterpriseCodeAndServerCode(String businessCode) {
-        List<String> result = new ArrayList();
+        ArrayList<String> result = new ArrayList<>();
         String[] codes = businessCode.split("-");
         result.add(codes[0]);
         result.add(codes[1]);
@@ -59,7 +59,7 @@ public class Neo4jUtils {
     }
 
     /**
-     * 获取CIID
+     * 获取CI ID
      * @param ciTypeCode CI的类型编码，从1级到3级，通过‘-’分隔
      * @param sn ci的SN
      * @param enterpriseCode 企业编码

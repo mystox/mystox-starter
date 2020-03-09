@@ -28,4 +28,18 @@ public interface AlarmService {
      * 功能描述:确认告警
      */
     boolean check(String key, String table, Date date, String checkContant, FacadeView checker);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/2 13:28
+     * 功能描述:告警确认，后期将中台的告警确认方法合并过来
+     */
+    boolean check(AlarmQuery alarmQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/2 16:57
+     * 功能描述:告警消除
+     */
+    boolean resolve(AlarmQuery alarmQuery);
 }

@@ -8,20 +8,28 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class BasicDeviceEntity {
 
+    @JSONField(name = "serverCode")
+    private String serverCode;
     @JSONField(name = "enterpriseCode")
     private String uniqueCode;  //企业识别码
-    @JSONField(name = "address")
-    private String tierCode;    //区域编码
-    @JSONField(name = "siteCode")
-    private String siteCode;    //站点编码
+    @JSONField(name = "type")
+    private String assetType;   //资产类型
     @JSONField(name = "sn")
-    private String deviceCode;  //设备编码
-    @JSONField(name = "name")
-    private String name;    //设备名称
+    private String code;    //设备编码
+    @JSONField(name = "deviceName")
+    private String deviceName;  //设备名称
     @JSONField(name = "model")
     private String model;   //设备型号
-    @JSONField(name = "type")
-    private String type;    //资产类型
+    @JSONField(name = "_parent")
+    private BasicParentEntity _parent;  //父资产
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public String getUniqueCode() {
         return uniqueCode;
@@ -31,36 +39,28 @@ public class BasicDeviceEntity {
         this.uniqueCode = uniqueCode;
     }
 
-    public String getTierCode() {
-        return tierCode;
+    public String getAssetType() {
+        return assetType;
     }
 
-    public void setTierCode(String tierCode) {
-        this.tierCode = tierCode;
+    public void setAssetType(String assetType) {
+        this.assetType = assetType;
     }
 
-    public String getSiteCode() {
-        return siteCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setSiteCode(String siteCode) {
-        this.siteCode = siteCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getDeviceCode() {
-        return deviceCode;
+    public String getDeviceName() {
+        return deviceName;
     }
 
-    public void setDeviceCode(String deviceCode) {
-        this.deviceCode = deviceCode;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getModel() {
@@ -71,11 +71,11 @@ public class BasicDeviceEntity {
         this.model = model;
     }
 
-    public String getType() {
-        return type;
+    public BasicParentEntity get_parent() {
+        return _parent;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void set_parent(BasicParentEntity _parent) {
+        this._parent = _parent;
     }
 }

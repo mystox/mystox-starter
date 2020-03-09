@@ -3,6 +3,7 @@ package com.kongtrolink.framework.utils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.dao.DBService;
+import com.kongtrolink.framework.entity.DBResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,8 +46,14 @@ public class DeviceUtils {
             relationship.put("id1", id);
             relationship.put("id2", childId);
             relationship.put("type", "Logical");
-            if (!dbService.addCIRelationship(relationship)) {
-                logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed", selfServerCode);
+
+            try {
+                DBResult dbResult = dbService.addCIRelationship(relationship);
+                if (dbResult.getResult() == 0) {
+                    logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed:" + dbResult.getInfo(), selfServerCode);
+                }
+            } catch (Exception e) {
+                logger.error(JSONObject.toJSONString(e), selfServerCode);
             }
         }
 
@@ -89,16 +96,30 @@ public class DeviceUtils {
             request.put("parent", type1);
             request.put("child", type2);
 
-            JSONArray array = dbService.searchCITypeConnectionRelationship(request);
+            JSONArray array;
+            try {
+                DBResult dbResult = dbService.searchCITypeConnectionRelationship(request);
+                if (dbResult.getResult() == 0) {
+                    continue;
+                }
 
-            if (array.size() == 0) {
-                request.put("parent", type2);
-                request.put("child", type1);
+                array = dbResult.getJsonArray();
+                if (array.size() == 0) {
+                    request.put("parent", type2);
+                    request.put("child", type1);
 
-                array = dbService.searchCITypeConnectionRelationship(request);
-            }
+                    dbResult = dbService.searchCITypeConnectionRelationship(request);
+                    if (dbResult.getResult() == 0) {
+                        continue;
+                    }
+                    array = dbResult.getJsonArray();
+                }
 
-            if (array.size() == 0) {
+                if (array.size() == 0) {
+                    continue;
+                }
+            } catch (Exception e) {
+                logger.error(JSONObject.toJSONString(e), selfServerCode);
                 continue;
             }
 
@@ -120,8 +141,14 @@ public class DeviceUtils {
             relationship.put("id1", id);
             relationship.put("id2", childId);
             relationship.put("type", type);
-            if (!dbService.addCIRelationship(relationship)) {
-                logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed", selfServerCode);
+
+            try {
+                DBResult dbResult = dbService.addCIRelationship(relationship);
+                if (dbResult.getResult() == 0) {
+                    logger.error(JSONObject.toJSONString(relationship) + " addCIRelationship failed:" + dbResult.getInfo(), selfServerCode);
+                }
+            } catch (Exception e) {
+                logger.error(JSONObject.toJSONString(e), selfServerCode);
             }
         }
     }
@@ -133,20 +160,29 @@ public class DeviceUtils {
         jsonObject.put("enterpriseCode", enterpriseCode);
         jsonObject.put("serverCode", serverCode);
 
-        JSONObject response = dbService.searchCIRelationship(jsonObject);
-        JSONArray parent = response.getJSONArray("parent");
-        for (int i = 0; i < parent.size(); ++i) {
-            JSONObject relationship = parent.getJSONObject(i);
-            String type = relationship.getString("relationshipType");
-            if (!type.equals("Logical")) {
-                JSONObject request = new JSONObject();
-                request.put("id1", id);
-                request.put("id2", response.getString("id"));
-                request.put("type", type);
-                if (!dbService.deleteCIRelationship(request)) {
-                    logger.error(JSONObject.toJSONString(request) + " deleteCIRelationship failed", selfServerCode);
+        try {
+            DBResult dbResult = dbService.searchCIRelationship(jsonObject);
+            if (dbResult.getResult() != 0) {
+                JSONObject response = dbResult.getJsonObject();
+                JSONArray parent = response.getJSONArray("parent");
+                for (int i = 0; i < parent.size(); ++i) {
+                    JSONObject relationship = parent.getJSONObject(i);
+                    String type = relationship.getString("relationshipType");
+                    if (!type.equals("Logical")) {
+                        JSONObject request = new JSONObject();
+                        request.put("id1", id);
+                        request.put("id2", response.getString("id"));
+                        request.put("type", type);
+
+                        dbResult = dbService.deleteCIRelationship(request);
+                        if (dbResult.getResult() == 0) {
+                            logger.error(JSONObject.toJSONString(request) + " deleteCIRelationship failed", selfServerCode);
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            logger.error(JSONObject.toJSONString(e), selfServerCode);
         }
     }
 
@@ -159,24 +195,34 @@ public class DeviceUtils {
         request.put("sns", array);
         request.put("enterpriseCode", jsonObject.getString("enterpriseCode"));
         request.put("serverCode", jsonObject.getString("serverCode"));
-        JSONObject response = dbService.searchCI(request);
 
-        JSONObject extend = jsonObject.getJSONObject("extend");
-        jsonObject.remove("extend");
-        jsonObject.putAll(extend);
+        String id = "";
+        try {
+            DBResult dbResult = dbService.searchCI(request);
+            if (dbResult.getResult() != 0) {
 
-        jsonObject.put("address", jsonObject.getString("regionCode"));
-        jsonObject.remove("regionCode");
+                JSONObject extend = jsonObject.getJSONObject("extend");
+                jsonObject.remove("extend");
+                jsonObject.putAll(extend);
 
-        String id;
-        if (response.getInteger("count") == 1) {
-            id = response.getJSONArray("infos").getJSONObject(0).getString("id");
-            jsonObject.put("id", id);
-            if (!dbService.modifyCI(jsonObject)) {
-                id = "";
+                jsonObject.put("address", jsonObject.getString("regionCode"));
+                jsonObject.remove("regionCode");
+
+                if (dbResult.getCount() == 1) {
+                    id = dbResult.getJsonArray().getJSONObject(0).getString("id");
+                    jsonObject.put("id", id);
+                    if (dbService.modifyCI(jsonObject).getResult() == 0) {
+                        id = "";
+                    }
+                } else {
+                    dbResult = dbService.addCI(request);
+                    if (dbResult.getResult() != 0) {
+                        id = dbResult.getJsonObject().getString("id");
+                    }
+                }
             }
-        } else {
-            id = dbService.addCI(jsonObject);
+        } catch (Exception e) {
+            logger.error(JSONObject.toJSONString(e), selfServerCode);
         }
 
         return id;

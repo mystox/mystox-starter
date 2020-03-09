@@ -1,7 +1,10 @@
 package com.kongtrolink.framework.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.api.impl.MqttService;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
+import com.kongtrolink.framework.entity.DBResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +21,9 @@ public class TestController {
 
     @Autowired
     Neo4jDBService neo4jDBService;
+
+    @Autowired
+    MqttService mqttService;
 
     @Resource(name = "assetManagementExecutor")
     ThreadPoolTaskExecutor taskExecutor;
@@ -88,9 +94,17 @@ public class TestController {
             jsonObjectPW.put("sn", "406" + sn);
             jsonObjectENV.put("sn", "418" + sn);
 
-            String fsuId = neo4jDBService.addCI(jsonObjectFsu);
-            String powerId = neo4jDBService.addCI(jsonObjectPW);
-            String envId = neo4jDBService.addCI(jsonObjectENV);
+            DBResult dbResult;
+
+            dbResult = neo4jDBService.addCI(jsonObjectFsu);
+            String fsuId = dbResult.getJsonObject().getString("id");
+
+            dbResult = neo4jDBService.addCI(jsonObjectPW);
+            String powerId = dbResult.getJsonObject().getString("id");
+
+
+            dbResult = neo4jDBService.addCI(jsonObjectENV);
+            String envId = dbResult.getJsonObject().getString("id");
 
             JSONObject relationship = new JSONObject();
 
@@ -172,5 +186,28 @@ public class TestController {
 
         double average = sum * 1.0 / times / pageTotal;
         System.out.println("Thread-" + index + ",average-" + average);
+    }
+
+    @RequestMapping("/search_V2")
+    public String testSearchCI_V2(@RequestBody JSONObject requestBody) {
+
+        DBResult dbResult = neo4jDBService.searchCI_V2(requestBody);
+
+        return JSONObject.toJSONString(dbResult);
+    }
+
+    @RequestMapping("/addCI")
+    public String addCI(@RequestBody JSONArray requestBody) {
+        return mqttService.addCISCloud(JSONObject.toJSONString(requestBody));
+    }
+
+    @RequestMapping("/deleteCI")
+    public String deleteCI(@RequestBody JSONArray requestBody) {
+        return mqttService.deleteCISCloud(JSONObject.toJSONString(requestBody));
+    }
+
+    @RequestMapping("/modifyCI")
+    public String modifyCI(@RequestBody JSONObject requestBody) {
+        return mqttService.modifyCISCloud(JSONObject.toJSONString(requestBody));
     }
 }

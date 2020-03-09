@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -97,4 +99,52 @@ public class SiteMongo {
 
         return mongoTemplate.find(query, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
     }
+
+    /**
+     * 修改站点
+     */
+    public void modifySite(String uniqueCode, SiteModel siteModel){
+        int siteId = siteModel.getSiteId(); //站点主键Id
+        String coordinate = siteModel.getCoordinate();	//站点经纬度
+        String address = siteModel.getAddress();	//站点地址
+        String respName = siteModel.getRespName();	//资产管理员名称
+        String respPhone = siteModel.getRespPhone();	//联系电话
+        String towerHeight = siteModel.getTowerHeight();//铁塔高度
+        String towerType = siteModel.getTowerType();//铁塔类型
+        String shareInfo = siteModel.getShareInfo();//共享信息
+        String assetNature = siteModel.getAssetNature();	//产权性质（自建、社会资源、注入）
+        String areaCovered = siteModel.getAreaCovered();	//占地面积
+        int fileId = siteModel.getFileId();	//站点图纸文件Id
+
+        Criteria criteria = Criteria.where("id").is(siteId);
+        Update update = new Update();
+        update.set("address", address);
+        update.set("respName", respName);
+        update.set("respPhone", respPhone);
+        update.set("towerHeight", towerHeight);
+        update.set("towerType", towerType);
+        update.set("shareInfo", shareInfo);
+        update.set("assetNature", assetNature);
+        update.set("areaCovered", areaCovered);
+        update.set("fileId", fileId);
+        if (coordinate != null){
+            update.set("coordinate", coordinate);
+        }
+
+        mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+    }
+
+    /**
+     * （批量）删除站点
+     */
+    public void deleteSites(String uniqueCode, SiteQuery siteQuery){
+        List<String> siteCodes = siteQuery.getSiteCodes();
+
+        Criteria criteria = new Criteria();
+        if (siteCodes != null && siteCodes.size() > 0){
+            criteria.and("code").in(siteCodes);
+        }
+        mongoTemplate.remove(new Query(criteria), SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+    }
+
 }

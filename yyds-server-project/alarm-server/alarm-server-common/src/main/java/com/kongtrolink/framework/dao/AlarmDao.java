@@ -84,6 +84,7 @@ public class AlarmDao {
     }
 
     Criteria baseCriteria(Criteria criteria, AlarmQuery alarmQuery){
+        criteria.and("shield").ne(true);
         String id = alarmQuery.getId();
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
@@ -150,6 +151,10 @@ public class AlarmDao {
                 criteria.and("checkTime").exists(true);
             }
         }
+        List<String> entDevSigList = alarmQuery.getEntDevSigList();
+        if(null != entDevSigList){
+            criteria.and("entDevSig").in(entDevSigList);
+        }
         return criteria;
     }
 
@@ -192,13 +197,13 @@ public class AlarmDao {
      * @date: 2019/9/26 10:29
      * 功能描述:告警消除
      */
-    public boolean resolve(AlarmQuery alarmQuery, String table, Date trecover) {
+    public boolean resolve(String table, AlarmQuery alarmQuery) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", alarmQuery.getState());
-        update.set("trecover", trecover);
+        update.set("trecover", alarmQuery.getTrecover());
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -321,6 +326,24 @@ public class AlarmDao {
         update.set("checkTime", date);
         update.set("checkContant", checkContant);
         update.set("checker", checker);
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
+
+    /**
+     * @param table
+     * @param alarmQuery
+     * @auther: liudd
+     * @date: 2020/3/2 13:28
+     * 功能描述:告警确认，后期将中台的告警确认方法合并过来
+     */
+    public boolean check(String table, AlarmQuery alarmQuery) {
+        Criteria criteria = Criteria.where("_id").is(alarmQuery.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("checkTime", alarmQuery.getOperateTime());
+        update.set("checkContant", alarmQuery.getOperateDesc());
+        update.set("checker",new FacadeView(alarmQuery.getOperateUserId(), alarmQuery.getOperateUsername()));
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }

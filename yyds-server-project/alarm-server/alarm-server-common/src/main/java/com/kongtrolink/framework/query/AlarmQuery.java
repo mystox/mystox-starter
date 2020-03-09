@@ -15,10 +15,12 @@ import java.util.Map;
 public class AlarmQuery extends Paging {
 
     private String id;
+    private List<String> idList;
     private String enterpriseCode;              //企业编码
     private String serverCode;                  //服务编码
     private String name;                        //告警名称
     private String deviceType;                  //设备型号
+    private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备类型
     private List<String> deviceCodeList;        //设备编码列表，需要统一
     private String state;                       //告警状态
@@ -34,12 +36,56 @@ public class AlarmQuery extends Paging {
     private Integer realLimit;                  //真实分页大小
     private Boolean isCheck;                    //是否确认
     private Date treport;                       //上报时间
+    private Date trecover;              //消除时间
+
     //远程调用需要参数
     private String operate;             //操作，告警确认，取消确认，告警消除
     private Date operateTime;         //操作对应的时间，方便远程接口参数解析
     private String operateUserId;           //操作用户id
     private String operateUsername;         //操作用户名
     private String operateDesc;             //操作描述
+    private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
+    private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+    public List<String> getDeviceTypeList() {
+        return deviceTypeList;
+    }
+
+    public void setDeviceTypeList(List<String> deviceTypeList) {
+        this.deviceTypeList = deviceTypeList;
+    }
+
+    public List<String> getEntDevSigList() {
+        return entDevSigList;
+    }
+
+    public void setEntDevSigList(List<String> entDevSigList) {
+        this.entDevSigList = entDevSigList;
+    }
+
+    public Date getTrecover() {
+        return trecover;
+    }
+
+    public void setTrecover(Date trecover) {
+        this.trecover = trecover;
+    }
+
+    public List<String> getIdList() {
+        return idList;
+    }
+
+    public void setIdList(List<String> idList) {
+        this.idList = idList;
+    }
+
+    public List<Date> getTreportList() {
+        return treportList;
+    }
+
+    public void setTreportList(List<Date> treportList) {
+        this.treportList = treportList;
+    }
 
     public String getOperateDesc() {
         return operateDesc;

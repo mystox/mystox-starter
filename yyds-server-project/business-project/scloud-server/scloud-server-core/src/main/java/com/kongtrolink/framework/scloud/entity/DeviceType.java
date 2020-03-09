@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.entity;
 
 import com.kongtrolink.framework.scloud.base.GeneratedValue;
+import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
@@ -57,5 +58,20 @@ public class DeviceType implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public SignalType getSignalTypeByCntbId(String cntbId){
+        if(StringUtil.isNUll(cntbId)){
+            return null;
+        }
+        if(null == signalTypeList || signalTypeList.size()==0){
+            return null;
+        }
+        for(SignalType signalType : signalTypeList){
+            if(cntbId.equals(signalType.getCntbId())){
+                return signalType;
+            }
+        }
+        return null;
     }
 }

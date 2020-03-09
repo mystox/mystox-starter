@@ -34,6 +34,7 @@ public class SiteEntity implements Serializable {
 	private String tierCode;	//区域编码
 	private String tierName;	//区域名称(中间用"-"隔开)
 	private String code;	//站点编码
+	private String siteType;	//站点类型
 	private String coordinate;	//站点经纬度
 	private String address;	//站点地址
 	private String respName;	//资产管理员名称
@@ -44,7 +45,7 @@ public class SiteEntity implements Serializable {
 	private String assetNature;	//产权性质（自建、社会资源、注入）
 	private Long createTime;	//投入使用时间
 	private String areaCovered;	//占地面积
-	private String imgId;	//站点图片Id
+	private int fileId;	//站点图纸文件Id
 
 	public int getId() {
 		return id;
@@ -60,6 +61,14 @@ public class SiteEntity implements Serializable {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public String getSiteType() {
+		return siteType;
+	}
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
 	}
 
 	public String getTierCode() {
@@ -158,11 +167,11 @@ public class SiteEntity implements Serializable {
 		this.areaCovered = areaCovered;
 	}
 
-	public String getImgId() {
-		return imgId;
+	public int getFileId() {
+		return fileId;
 	}
 
-	public void setImgId(String imgId) {
-		this.imgId = imgId;
+	public void setFileId(int fileId) {
+		this.fileId = fileId;
 	}
 }

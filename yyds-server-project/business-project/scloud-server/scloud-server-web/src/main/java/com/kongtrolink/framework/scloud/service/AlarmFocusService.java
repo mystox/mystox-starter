@@ -18,7 +18,4 @@ public interface AlarmFocusService {
     List<AlarmFocus> list(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
 
     int count(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
-
-    List<String> list2AlarmIdList(List<AlarmFocus> alarmFocusList);
-
 }

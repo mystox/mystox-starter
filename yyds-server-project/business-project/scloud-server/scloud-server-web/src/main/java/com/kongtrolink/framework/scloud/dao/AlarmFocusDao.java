@@ -73,17 +73,4 @@ public class AlarmFocusDao {
         Query query = Query.query(criteria);
         return (int)mongoTemplate.count(query, uniqueCode + table);
     }
-
-
-
-    public List<String> list2AlarmIdList(List<AlarmFocus> alarmFocusList) {
-        if(null == alarmFocusList){
-            return null;
-        }
-        List<String> alarmIdList = new ArrayList<>();
-        for(AlarmFocus alarmFocus : alarmFocusList){
-            alarmIdList.add(alarmFocus.getAlarmId());
-        }
-        return alarmIdList;
-    }
 }

@@ -21,12 +21,16 @@ public class FocusSignalEntity implements Serializable {
     private String deviceType; //设备类型
     private String fsuCode; //FSU code
     private String deviceCode; //设备code
-    private String cntbId;//信号灯的cntbId
+    private String tierName;	//区域名称
+    private String siteName;	//站点名称
+    private String deviceName;	//设备名称
+    private String cntbId;//信号点的cntbId
     private String userId; //用户ID
     private String typeName;  //信号点名称
     private String measurement; //单位
     private String type;    //信号点类型。"0"-遥信信号(DI),"1"-遥测信号(AI),"2"-遥控信号(DO),"3"-遥调信号(AO)
     private String alarmLevel;//告警级别
+    private String value; //实时值
 
     public String getUniqueCode() {
         return uniqueCode;
@@ -122,5 +126,37 @@ public class FocusSignalEntity implements Serializable {
 
     public void setAlarmLevel(String alarmLevel) {
         this.alarmLevel = alarmLevel;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

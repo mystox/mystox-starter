@@ -1,17 +1,15 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.scloud.constant.AssetTypeConstant;
-import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
-import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
-import com.kongtrolink.framework.scloud.mqtt.query.BasicSiteQuery;
+import com.kongtrolink.framework.scloud.service.AssetCIService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -35,6 +33,8 @@ public class SiteServiceImpl implements SiteService {
     SiteMongo siteMongo;
     @Autowired
     MqttOpera mqttOpera;
+    @Autowired
+    AssetCIService assetCIService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteServiceImpl.class);
 
@@ -71,6 +71,7 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setTierCode(siteModel.getTierCode());
         siteEntity.setTierName(siteModel.getTierName());
         siteEntity.setCode(siteModel.getCode());
+        siteEntity.setSiteType(siteModel.getSiteType());
         siteEntity.setCoordinate(siteModel.getCoordinate());
         siteEntity.setAddress(siteModel.getAddress());
         siteEntity.setRespName(siteModel.getRespName());
@@ -81,87 +82,80 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setAssetNature(siteModel.getAssetNature());
         siteEntity.setCreateTime(siteModel.getCreateTime());
         siteEntity.setAreaCovered(siteModel.getAreaCovered());
-        siteEntity.setImgId(siteModel.getImgId());
+        siteEntity.setFileId(siteModel.getFileId());
 
-        List<BasicSiteEntity> basicSiteEntityList = new ArrayList<>();
-        BasicSiteEntity basicSiteEntity = new BasicSiteEntity();
-        basicSiteEntity.setUniqueCode(uniqueCode);
-        basicSiteEntity.setTierCode(siteModel.getTierCode());
-        basicSiteEntity.setCode(siteModel.getCode());
-        basicSiteEntity.setName(siteModel.getName());
-        basicSiteEntity.setSiteType(siteModel.getSiteType());
-        basicSiteEntity.setAssetType(AssetTypeConstant.ASSET_TYPE_SITE);
-        basicSiteEntityList.add(basicSiteEntity);
-
-        //向【资管】下发添加站点的MQTT消息（批量导入的时候也要下发，所以要考虑好下发的数据结构（集合））
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI_MSG, JSON.toJSONString(basicSiteEntityList));
+        //向【资管】下发添加（批量）站点的MQTT消息
+        MsgResult msgResult = assetCIService.addAssetSite(uniqueCode, siteModel);
         int stateCode = msgResult.getStateCode();
-        if (1 == stateCode){
-            //保存站点（扩展信息）
-            siteMongo.addSite(uniqueCode, siteEntity);
-
-            LOGGER.info("向【资管】发送添加站点MQTT消息成功");
+        if (stateCode == CommonConstant.SUCCESSFUL){    //通信成功
+            CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
+                LOGGER.info("向【资管】发送添加站点MQTT 请求成功");
+                //保存站点（扩展信息）
+                siteMongo.addSite(uniqueCode, siteEntity);
+            }else {
+                LOGGER.error("向【资管】发送添加站点MQTT 请求失败");
+            }
         }else {
-            LOGGER.error("向【资管】发送添加站点MQTT消息失败");
+            LOGGER.error("向【资管】发送添加站点MQTT 通信失败");
         }
     }
 
     /**
-     * 获取站点列表
+     * 获取所有站点列表
      */
     @Override
     public List<SiteModel> findSiteList(String uniqueCode, SiteQuery siteQuery) {
         List<SiteModel> list = new ArrayList<>();
 
-        BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
-        basicSiteQuery.setEnterpriseCode(uniqueCode);
-        basicSiteQuery.setType(AssetTypeConstant.ASSET_TYPE_SITE);
-        basicSiteQuery.setAddressCodes(siteQuery.getTierCodes());
-        basicSiteQuery.setName(siteQuery.getSiteName());
-        basicSiteQuery.setSiteType(siteQuery.getSiteType());
         //从【资管】获取站点基本信息
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
+        MsgResult msgResult = assetCIService.getAssetSitesInTier(uniqueCode, siteQuery);
         int stateCode = msgResult.getStateCode();
-        if (1 == stateCode){
-            LOGGER.info("【站点管理】，从【资管】获取站点基本信息成功");
+        if (stateCode == CommonConstant.SUCCESSFUL){    //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
-            List<String> siteCodes = new ArrayList<>();
-            Map<String, BasicSiteEntity> map = new HashMap<>();
-            for (JSONObject jsonObject : response.getInfos()){
-                BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
-                siteCodes.add(basicSiteEntity.getCode());
-                map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
-            }
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
+                LOGGER.info("【站点管理】，从【资管】获取站点基本信息成功");
+                List<String> siteCodes = new ArrayList<>();
+                Map<String, BasicSiteEntity> map = new HashMap<>();
+                for (JSONObject jsonObject : response.getInfos()) {
+                    BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
+                    siteCodes.add(basicSiteEntity.getCode());
+                    map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
+                }
 
-            if (siteCodes.size() > 0) { //如果从资管中查出的站点不为空
-                siteQuery.setSiteCodes(siteCodes);
-                List<SiteEntity> siteEntityList = siteMongo.findSiteList(uniqueCode, siteQuery);
-                if (siteEntityList != null && siteEntityList.size() > 0) {
-                    for (SiteEntity siteEntity : siteEntityList) {
-                        SiteModel siteModel = new SiteModel();
-                        siteModel.setSiteId(siteEntity.getId());
-                        siteModel.setTierCode(siteEntity.getTierCode());
-                        siteModel.setTierName(siteEntity.getTierName());
-                        siteModel.setName(map.get(siteEntity.getCode()).getName());
-                        siteModel.setCode(siteEntity.getCode());
-                        siteModel.setSiteType(map.get(siteEntity.getCode()).getSiteType());
-                        siteModel.setCoordinate(siteEntity.getCoordinate());
-                        siteModel.setAddress(siteEntity.getAddress());
-                        siteModel.setRespName(siteEntity.getRespName());
-                        siteModel.setRespPhone(siteEntity.getRespPhone());
-                        siteModel.setTowerHeight(siteEntity.getTowerHeight());
-                        siteModel.setTowerType(siteEntity.getTowerType());
-                        siteModel.setShareInfo(siteEntity.getShareInfo());
-                        siteModel.setAssetNature(siteEntity.getAssetNature());
-                        siteModel.setCreateTime(siteEntity.getCreateTime());
-                        siteModel.setAreaCovered(siteEntity.getAreaCovered());
-                        siteModel.setImgId(siteEntity.getImgId());
-                        list.add(siteModel);
+                if (siteCodes.size() > 0) { //如果从资管中查出的站点不为空
+                    siteQuery.setSiteCodes(siteCodes);
+                    List<SiteEntity> siteEntityList = siteMongo.findSiteList(uniqueCode, siteQuery);
+                    if (siteEntityList != null && siteEntityList.size() > 0) {
+                        for (SiteEntity siteEntity : siteEntityList) {
+                            SiteModel siteModel = new SiteModel();
+                            siteModel.setSiteId(siteEntity.getId());
+                            siteModel.setTierCode(siteEntity.getTierCode());
+                            siteModel.setTierName(siteEntity.getTierName());
+                            siteModel.setName(map.get(siteEntity.getCode()).getName());
+                            siteModel.setCode(siteEntity.getCode());
+                            siteModel.setSiteType(map.get(siteEntity.getCode()).getSiteType());
+                            siteModel.setCoordinate(siteEntity.getCoordinate());
+                            siteModel.setAddress(siteEntity.getAddress());
+                            siteModel.setRespName(siteEntity.getRespName());
+                            siteModel.setRespPhone(siteEntity.getRespPhone());
+                            siteModel.setTowerHeight(siteEntity.getTowerHeight());
+                            siteModel.setTowerType(siteEntity.getTowerType());
+                            siteModel.setShareInfo(siteEntity.getShareInfo());
+                            siteModel.setAssetNature(siteEntity.getAssetNature());
+                            siteModel.setCreateTime(siteEntity.getCreateTime());
+                            siteModel.setAreaCovered(siteEntity.getAreaCovered());
+                            siteModel.setFileId(siteEntity.getFileId());
+
+                            list.add(siteModel);
+                        }
                     }
                 }
+            }else {
+                LOGGER.error("【站点管理】，从【资管】获取站点 请求失败");
             }
         }else {
-            LOGGER.error("【站点管理】，从【资管】获取站点失败");
+            LOGGER.error("【站点管理】，从【资管】获取站点 MQTT通信失败");
         }
 
         return list;
@@ -184,31 +178,54 @@ public class SiteServiceImpl implements SiteService {
      */
     @Override
     public void modifySite(String uniqueCode, SiteModel siteModel) {
-        Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称或站点类型
-        if (isModified) {   //如果修改了站点的基本属性(即站点名称和站点类型)，则向【资管】下发修改站点的MQTT消息
-            // TODO: 2020/2/12 向【资管】下发修改站点的MQTT消息
-
-            // TODO: 2020/2/12 只有下发并响应成功了，才可对平台端数据库中保存的站点扩展信息进行修改
-
+        Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称
+        if (isModified) {   //如果修改了站点的基本属性(即站点名称)
+            //向【资管】下发修改站点的MQTT消息
+            MsgResult msgResult = assetCIService.modifyAssetSite(uniqueCode, siteModel);
+            int stateCode = msgResult.getStateCode();
+            if (stateCode == CommonConstant.SUCCESSFUL) {   //通信成功
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
+                    LOGGER.info("向【资管】发送修改站点MQTT 请求成功");
+                    //对平台端数据库中保存的站点扩展信息进行修改
+                    siteMongo.modifySite(uniqueCode, siteModel);
+                }else {
+                    LOGGER.error("向【资管】发送修改站点MQTT 请求失败");
+                }
+            }else {
+                LOGGER.error("向【资管】发送修改站点MQTT 通信失败");
+            }
         }else {
-            // TODO: 2020/2/12 对保存的站点扩展信息进行修改
-
+            //对保存的站点扩展信息进行修改
+            siteMongo.modifySite(uniqueCode, siteModel);
         }
     }
 
     /**
      * 删除站点
-     *
-     * @param uniqueCode 企业识别码
-     * @param code       站点编码
      */
     @Override
-    public void deleteSite(String uniqueCode, String code) {
-        // TODO: 2020/2/12 向资管下发删除站点的MQTT消息（集合）
+    public void deleteSite(String uniqueCode, SiteQuery siteQuery) {
+        //向【资管】下发删除（批量）站点的MQTT消息
+        MsgResult msgResult = assetCIService.deleteAssetSite(uniqueCode, siteQuery);
+        int stateCode = msgResult.getStateCode();
+        if (stateCode == CommonConstant.SUCCESSFUL) {   //通信成功
+            CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {
+                LOGGER.info("向【资管】发送删除站点MQTT 请求成功");
+                //（批量）删除站点
+                siteMongo.deleteSites(uniqueCode, siteQuery);
 
-        // TODO: 2020/2/12 删除站点下FSU及FSU下所有设备
+                // TODO: 2020/2/2 删除每个站点下设备（包含FSU）
 
-        // TODO: 2020/2/12 修改系统用户和维护用户的站点权限
+                // TODO: 2020/2/12 修改系统用户和维护用户的站点权限
+
+            }else {
+                LOGGER.error("向【资管】发送删除站点MQTT 请求失败");
+            }
+        }else {
+            LOGGER.error("向【资管】发送删除站点MQTT 通信失败");
+        }
     }
 
     /**
@@ -265,5 +282,17 @@ public class SiteServiceImpl implements SiteService {
             }
         }
         return tableDatas;
+    }
+
+    /**
+     * @param uniqueCode
+     * @param siteIdList
+     * @auther: liudd
+     * @date: 2020/3/3 13:44
+     * 功能描述:根据id列表获取
+     */
+    @Override
+    public List<SiteModel> getByIdList(String uniqueCode, List<Integer> siteIdList) {
+        return null;
     }
 }

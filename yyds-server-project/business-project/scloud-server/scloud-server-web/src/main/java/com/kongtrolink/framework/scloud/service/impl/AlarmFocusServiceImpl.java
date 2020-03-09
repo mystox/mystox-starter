@@ -39,9 +39,4 @@ public class AlarmFocusServiceImpl implements AlarmFocusService {
     public int count(String uniqueCode, AlarmFocusQuery alarmFocusQuery) {
         return alarmFocusDao.count(uniqueCode, alarmFocusQuery);
     }
-
-    @Override
-    public List<String> list2AlarmIdList(List<AlarmFocus> alarmFocusList) {
-        return alarmFocusDao.list2AlarmIdList(alarmFocusList);
-    }
 }

@@ -13,9 +13,10 @@ history:
 
 ###########消息框架相关配置#############
 server:
+  group: GROUP
   name: SCLOUD_${history.businessCode}_SERVER #服务编码
   version: 2.0.0 #服务版本
-  host: 172.16.6.14
+  host: 172.16.6.16
 
 register:
   scanBasePackage: com.kongtrolink.framework #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -44,14 +45,18 @@ public interface SiteService {
 
     /**
      * 删除站点
-     *
-     * @param uniqueCode 企业识别码
-     * @param code 站点编码
      */
-    void deleteSite(String uniqueCode, String code);
+    void deleteSite(String uniqueCode, SiteQuery siteQuery);
 
     /**
      * 获取资产管理员列表
      */
     List<String> getRespList(String uniqueCode, SiteQuery siteQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/3/3 13:44
+     * 功能描述:根据id列表获取
+     */
+    List<SiteModel> getByIdList(String uniqueCode, List<Integer> siteIdList);
 }
