@@ -8,5 +8,5 @@ package com.kongtrolink.framework.reports.entity;
  */
 public class ReportsOpera {
 
-    public final static String GETCI_SCLOUD = "getCISCloud"; //服务注册登录
+    public final static String GETCI_SCLOUD = "getCISCloud"; //获取资产信息接口
 }
