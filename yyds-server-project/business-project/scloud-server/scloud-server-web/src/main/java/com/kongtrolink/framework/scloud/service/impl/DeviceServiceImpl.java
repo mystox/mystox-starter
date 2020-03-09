@@ -52,58 +52,46 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
         List<DeviceModel> list = new ArrayList<>();
-        String siteCode = deviceQuery.getSiteCode();
-        String deviceCode = deviceQuery.getDeviceCode();    //模糊搜索条件
 
-        //获取（业务平台端）单个站点下所有设备
-        List<DeviceEntity> devices = deviceMongo.findAllDevicesBySiteCode(uniqueCode, siteCode);
+        //获取（业务平台端）站点下所有设备
+        List<DeviceEntity> devices = deviceMongo.findDevicesBySiteCodes(uniqueCode, deviceQuery);
         if (devices != null && devices.size() > 0) {
             List<String> deviceCodes = new ArrayList<>();   //设备编码
-            if (deviceCode != null && !deviceCode.equals("")) { //如果有通过设备编码进行模糊搜索，则需再进行一次过滤
-                for (DeviceEntity device : devices) {
-                    if (deviceCode.startsWith(deviceCode)) {
-                        deviceCodes.add(device.getCode());
-                    }
-                }
-            }else {
-                for (DeviceEntity device : devices) {
-                    deviceCodes.add(device.getCode());
-                }
+            for (DeviceEntity device : devices) {
+                deviceCodes.add(device.getCode());
             }
             deviceQuery.setDeviceCodes(deviceCodes);
 
-            if (deviceCodes.size() > 0) {
-                //从【中台-资管】获取设备(基本信息)列表
-                MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
-                int stateCode = msgResult.getStateCode();
-                if (stateCode == 1) {   //通信成功
-                    CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
-                    if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
-                        LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
-                        Map<String, BasicDeviceEntity> map = new HashMap<>();
-                        for (JSONObject jsonObject : response.getInfos()) {
-                            BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
-                            map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
+            //从【中台-资管】获取设备(基本信息)列表
+            MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
+            int stateCode = msgResult.getStateCode();
+            if (stateCode == 1) {   //通信成功
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                    LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
+                    Map<String, BasicDeviceEntity> map = new HashMap<>();
+                    for (JSONObject jsonObject : response.getInfos()) {
+                        BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
+                        map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
+                    }
+
+                    List<DeviceEntity> deviceEntityList = deviceMongo.findDeviceList(uniqueCode, deviceQuery);
+                    Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery, deviceEntityList);
+                    for (DeviceEntity deviceEntity : deviceEntityList){
+                        DeviceModel deviceModel = new DeviceModel();
+                        deviceModel.setName(map.get(deviceEntity.getCode()).getDeviceName());
+                        deviceModel.setModel(map.get(deviceEntity.getCode()).getModel());
+                        if (siteEntityMap != null && siteEntityMap.containsKey(deviceEntity.getSiteCode())) {
+                            deviceModel.setSiteName(siteEntityMap.get(deviceEntity.getSiteCode()).getName());
                         }
 
-                        List<DeviceEntity> deviceEntityList = deviceMongo.findDeviceList(uniqueCode, deviceQuery);
-                        Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery, deviceEntityList);
-                        for (DeviceEntity deviceEntity : deviceEntityList){
-                            DeviceModel deviceModel = new DeviceModel();
-                            deviceModel.setName(map.get(deviceEntity.getCode()).getDeviceName());
-                            deviceModel.setModel(map.get(deviceEntity.getCode()).getModel());
-                            if (siteEntityMap != null && siteEntityMap.containsKey(deviceEntity.getSiteCode())) {
-                                deviceModel.setSiteName(siteEntityMap.get(deviceEntity.getSiteCode()).getName());
-                            }
-
-                            list.add(deviceModel);
-                        }
-                    } else {
-                        LOGGER.error("【设备管理】，从【资管】获取设备列表失败");
+                        list.add(deviceModel);
                     }
                 } else {
-                    LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
+                    LOGGER.error("【设备管理】，从【资管】获取设备列表失败");
                 }
+            } else {
+                LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
             }
         }
 

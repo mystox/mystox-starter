@@ -9,7 +9,6 @@ import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicDeviceQuery;
-import com.kongtrolink.framework.scloud.mqtt.query.BasicParentQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicSiteQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
@@ -42,22 +41,22 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
         basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
-        if (siteQuery.getTierCodes() != null && siteQuery.getTierCodes().size() > 0) {  //如果选择区域为空的话，则不必向【中台-资管】发送请求获取区域下所有站点
-            basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
-            if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
-                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //模糊搜索
-            }
-            if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
-                basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //模糊搜索
-            }
-            if (siteQuery.getSiteType() != null && !siteQuery.getSiteType().equals("")) {
-                basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
-            }
 
-            MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
-            return msgResult;
+        if (siteQuery.getTierCodes() != null) {  //如果选择区域为空的话，则不必向【中台-资管】发送请求获取区域下所有站点
+            basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
         }
-        return new MsgResult(CommonConstant.FAILED, null);
+        if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //模糊搜索
+        }
+        if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
+            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //模糊搜索
+        }
+        if (siteQuery.getSiteType() != null) {
+            basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
+        }
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
+        return msgResult;
     }
 
     /**

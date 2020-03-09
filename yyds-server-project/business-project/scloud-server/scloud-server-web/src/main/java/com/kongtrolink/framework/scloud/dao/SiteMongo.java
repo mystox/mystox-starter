@@ -104,7 +104,7 @@ public class SiteMongo {
      * 修改站点
      */
     public void modifySite(String uniqueCode, SiteModel siteModel){
-        int siteId = siteModel.getSiteId(); //站点主键Id
+        String siteCode = siteModel.getCode(); //站点编码
         String coordinate = siteModel.getCoordinate();	//站点经纬度
         String address = siteModel.getAddress();	//站点地址
         String respName = siteModel.getRespName();	//资产管理员名称
@@ -116,7 +116,7 @@ public class SiteMongo {
         String areaCovered = siteModel.getAreaCovered();	//占地面积
         int fileId = siteModel.getFileId();	//站点图纸文件Id
 
-        Criteria criteria = Criteria.where("id").is(siteId);
+        Criteria criteria = Criteria.where("code").is(siteCode);
         Update update = new Update();
         update.set("address", address);
         update.set("respName", respName);

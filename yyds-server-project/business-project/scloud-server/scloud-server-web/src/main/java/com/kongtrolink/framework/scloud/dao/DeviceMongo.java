@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,23 +23,17 @@ public class DeviceMongo {
     MongoTemplate mongoTemplate;
 
     /**
-     * 获取单个站点下所有设备
+     * 获取站点下设备
      */
-    public List<DeviceEntity> findAllDevicesBySiteCode(String uniqueCode, String siteCode){
-        Criteria criteria = new Criteria();
-        if (siteCode != null){
-            criteria.and("siteCode").is(siteCode);
-        }
-
-        return mongoTemplate.find(new Query(criteria), DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    public List<DeviceEntity> findDevicesBySiteCodes(String uniqueCode, DeviceQuery deviceQuery){
+        return null;
     }
 
     /**
      * 根据查询条件，获取设备列表
      */
     public List<DeviceEntity> findDeviceList(String uniqueCode, DeviceQuery deviceQuery){
-        // TODO: 2020/3/9
-        return new ArrayList<>();
+        return null;
     }
 
     /**
