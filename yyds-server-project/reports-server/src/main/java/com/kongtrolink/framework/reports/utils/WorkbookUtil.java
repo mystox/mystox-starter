@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.reports.utils;
 
 import com.kongtrolink.framework.exception.ExcelParseException;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.poifs.filesystem.OfficeXmlFileException;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -269,10 +267,39 @@ public class WorkbookUtil {
     {
         HSSFWorkbook hssfWorkbook = new HSSFWorkbook();
         String[] arr = new String[]{"abc","123"};
-        String[][] table = new String[][]{arr,arr};
+        String[][] table = new String[7][13];
         String[][] table2 = new String[][]{arr,arr,arr};
         String[][][] tables = new String[][][]{table,table2};
         HSSFWorkbook workBook = WorkbookUtil.createWorkBook(new String[]{"站点停电明细表","123"}, tables);
+        HSSFSheet sheet = workBook.getSheet("站点停电明细表");
+
+        HSSFCellStyle cellStyle = workBook.createCellStyle();
+        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        cellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+        sheet.addMergedRegion(new CellRangeAddress(0, 1, 0, 0));
+        HSSFCell cell1 = sheet.getRow(0).getCell(0);
+        cell1.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 1, 1, 1));
+        HSSFCell cell2 = sheet.getRow(0).getCell(1);
+        cell2.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 1, 2, 2));
+        HSSFCell cell3 = sheet.getRow(0).getCell(2);
+        cell3.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 1, 3, 3));
+        HSSFCell cell4 = sheet.getRow(0).getCell(3);
+        cell4.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 1, 4, 4));
+        HSSFCell cell5 = sheet.getRow(0).getCell(4);
+        cell5.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 5, 7));
+        HSSFCell cell6 = sheet.getRow(0).getCell(5);
+        cell6.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 8, 10));
+        HSSFCell cell7 = sheet.getRow(0).getCell(8);
+        cell7.setCellStyle(cellStyle);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 11, 13));
+        HSSFCell cell8 = sheet.getRow(0).getCell(11);
+        cell8.setCellStyle(cellStyle);
         String test = save("./reportsResources/abc/", "test", workBook);
         System.out.println(test);
     }

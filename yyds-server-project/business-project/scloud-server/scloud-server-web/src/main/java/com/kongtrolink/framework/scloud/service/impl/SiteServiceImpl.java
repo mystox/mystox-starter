@@ -156,7 +156,6 @@ public class SiteServiceImpl implements SiteService {
                         siteModel.setCreateTime(siteEntity.getCreateTime());
                         siteModel.setAreaCovered(siteEntity.getAreaCovered());
                         siteModel.setImgId(siteEntity.getImgId());
-
                         list.add(siteModel);
                     }
                 }

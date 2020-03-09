@@ -10,6 +10,7 @@ public class DataType {
     public final static String JSON = "json";
     public final static String TEXT = "text";
     public final static String FORM = "form";
+    public final static String TABLE = "table";
     public final static String GRAPH = "graph";
     public final static String FILE = "file";
     public final static String ERROR = "error";

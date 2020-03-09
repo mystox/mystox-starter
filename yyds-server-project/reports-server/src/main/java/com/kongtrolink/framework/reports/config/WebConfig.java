@@ -18,7 +18,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/AppResources/**").addResourceLocations(ResourceUtils.FILE_URL_PREFIX + "./AppResources/");
+        registry.addResourceHandler("/reportsResources/**").addResourceLocations(ResourceUtils.FILE_URL_PREFIX + "./reportsResources/");
     }
 
 //    @Bean(name = "multipartResolver")

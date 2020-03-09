@@ -33,7 +33,7 @@ public class ReportsServiceImpl extends ReportsHandlerAdapter implements Reports
     ReportTaskResultDao reportTaskResultDao;
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "config", rhythm = 20, resultType = {DataType.JSON}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "config", rhythm = 20, dataType = {DataType.JSON}, extend = {
             @ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "startTime", name = "开始时间", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query), //时间类型是否需要(查询用)
             @ReportExtend(field = "endTime", name = "结束时间", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query), //时间类型是否需要（查询用）
@@ -48,7 +48,7 @@ public class ReportsServiceImpl extends ReportsHandlerAdapter implements Reports
     }
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "report1", rhythm = 10, resultType = {DataType.JSON}, extend =
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "report1", rhythm = 10, dataType = {DataType.JSON}, extend =
             {
                     @ReportExtend(field = "executor", name = "执行时间时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
                     @ReportExtend(field = "startTime", name = "开始时间", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query), //时间类型是否需要(查询用)

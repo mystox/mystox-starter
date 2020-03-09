@@ -2,6 +2,7 @@ package com.kongtrolink.framework.reports.dao;
 
 import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.fsuOfflineDetails.FsuOfflineDetailsTemp;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * \* Description:
  * \
  */
+@Service
 public class FsuOfflineDetailsTempDao extends MongoBaseDao {
 
 

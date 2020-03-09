@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.reports.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -28,7 +27,9 @@ public class ReportsOperaController extends BaseController {
     public JsonResult getAlarmLevel() {
         MsgResult result = mqttOpera.opera("getAlarmLevel","");
         String alarmLevels = result.getMsg();
-        return new JsonResult(JSONObject.parseArray(alarmLevels));
+//        JSONArray jsonArray = JSONObject.parseArray(alarmLevels);
+
+        return new JsonResult(new String[]{"紧急告警","一级告警","二级告警","三级告警","四级告警"});
     }
 
 

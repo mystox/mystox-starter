@@ -1,0 +1,303 @@
+privFunc:
+  type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+  name: ${server.title} #权限名称 必填
+  code: ${server.name}_${server.version} #权限编码 必填同级不可重复
+  remark: 云平台 #备注 可填
+  children:
+  - type: ROOT
+    name: 权限管理
+    code: SCLOUD_PAGE
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: home
+      code: home
+      uri: /SDGD/home
+    - type: PAGE
+      name: list
+      code: list
+      uri: /SDGD/privilege/list
+    - type: PAGE
+      name: config
+      code: config
+      uri: /SDGD/privilege/config
+    - type: PAGE
+      name: depList
+      code: depList
+      uri: /SDGD/privilege/depList
+    - type: PAGE
+      name: positionList
+      code: positionList
+      uri: /SDGD/privilege/positionList
+    - type: PAGE
+      name: userList
+      code: userList
+      uri: /SDGD/privilege/userList
+    - type: PAGE
+      name: dictionary
+      code: dictionary
+      uri: /SDGD/privilege/dictionary
+  - type: ROOT
+    name: scene
+    code: scene
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: site
+      code: site
+      uri: /SDGD/scene/site
+    - type: PAGE
+      name: alarmStatistic
+      code: alarmStatistic
+      uri: /SDGD/scene/alarmStatistic
+  - type: ROOT
+    name: data
+    code: data
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: focus
+      code: focus
+      uri: /SDGD/data/focus
+    - type: PAGE
+      name: site
+      code: site
+      uri: /SDGD/data/site
+    - type: PAGE
+      name: device
+      code: device
+      uri: /SDGD/data/device
+      root: true
+    - type: PAGE
+      name: history
+      code: history
+      uri: /SDGD/data/history
+    - type: PAGE
+      name: debug
+      code: debug
+      uri: /SDGD/data/debug
+  - type: ROOT
+    name: battery
+    code: battery
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: dashboard
+      code: dashboard
+      uri: /SDGD/battery/dashboard
+    - type: PAGE
+      name: site
+      code: site
+      uri: /SDGD/battery/site
+    - type: PAGE
+      name: device
+      code: device
+      uri: /SDGD/battery/device
+    - type: PAGE
+      name: alarm
+      code: alarm
+      uri: /SDGD/battery/alarm
+    - type: PAGE
+      name: config
+      code: config
+      uri: /SDGD/battery/config
+  - type: ROOT
+    name: alarm
+    code: alarm
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: focus
+      code: focus
+      uri: /SDGD/alarm/focus
+    - type: PAGE
+      name: list
+      code: list
+      uri: /SDGD/alarm/list
+    - type: PAGE
+      name: setting
+      code: setting
+      uri: /SDGD/alarm/setting
+    - type: PAGE
+      name: server
+      code: server
+      uri: /SDGD/alarm/server
+    - type: PAGE
+      name: link
+      code: link
+      uri: /SDGD/alarm/link
+    - type: PAGE
+      name: inform
+      code: inform
+      uri: /SDGD/alarm/inform
+  - type: ROOT
+    name: configuration
+    code: configuration
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: manager
+      code: manager
+      uri: /SDGD/configuration/manager
+    - type: PAGE
+      name: picture
+      code: picture
+      uri: /SDGD/configuration/picture
+  - type: ROOT
+    name: operation
+    code: operation
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: project
+      code: project
+      uri: /SDGD/operation/project
+    - type: PAGE
+      name: project
+      code: project
+      uri: /SDGD/operation/project
+    - type: PAGE
+      name: workList
+      code: workList
+      uri: /SDGD/operation/workList
+    - type: PAGE
+      name: examine
+      code: examine
+      uri: /SDGD/operation/examine
+    - type: PAGE
+      name: map
+      code: map
+      uri: /SDGD/operation/map
+  - type: ROOT
+    name: log
+    code: log
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: list
+      code: list
+      uri: /SDGD/log/list
+  - type: ROOT
+    name: report
+    code: report
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: setting
+      code: setting
+      uri: /SDGD/report/setting
+    - type: PAGE
+      name: system
+      code: system
+      uri: /SDGD/report/system
+    - type: PAGE
+      name: alarm
+      code: alarm
+      uri: /SDGD/report/alarm
+  - type: ROOT
+    name: config
+    code: config
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: site
+      code: site
+      uri: /SDGD/config/site
+    - type: PAGE
+      name: fsu
+      code: fsu
+      uri: /SDGD/config/fsu
+    - type: PAGE
+      name: user
+      code: user
+      uri: /SDGD/config/user
+  - type: ROOT
+    name: setting
+    code: setting
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: basic
+      code: basic
+      uri: /SDGD/setting/basic
+    - type: PAGE
+      name: user
+      code: user
+      uri: /SDGD/setting/user
+    - type: PAGE
+      name: privilege
+      code: privilege
+      uri: /SDGD/setting/privilege
+    - type: PAGE
+      name: enterprise
+      code: enterprise
+      uri: /SDGD/setting/enterprise
+  - type: ROOT
+    name: monitor
+    code: monitor
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: list
+      code: list
+      uri: /SDGD/monitor/list
+  - type: ROOT
+    name: entrance
+    code: entrance
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: list
+      code: list
+      uri: /SDGD/entrance/list
+    - type: PAGE
+      name: log
+      code: log
+      uri: /SDGD/entrance/log
+    - type: PAGE
+      name: authorize
+      code: authorize
+      uri: /SDGD/entrance/authorize
+  - type: ROOT
+    name: other
+    code: other
+    routeMark: proxy_scloud
+    pageRoute: proxy_scloud
+    children:
+    - type: PAGE
+      name: shield
+      code: shield
+      uri: /SDGD/shield
+    - type: PAGE
+      name: delay
+      code: delay
+      uri: /SDGD/delay
+    - type: PAGE
+      name: filter
+      code: filter
+      uri: /SDGD/filter
+    - type: PAGE
+      name: major
+      code: major
+      uri: /SDGD/major
+    - type: PAGE
+      name: redefine
+      code: redefine
+      uri: /SDGD/redefine
+    - type: PAGE
+      name: config
+      code: config
+      uri: /SDGD/config

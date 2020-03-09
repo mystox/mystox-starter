@@ -115,9 +115,9 @@ public class MqttOperaImpl implements MqttOpera {
             }
             //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
             if (CollectionUtils.isEmpty(topicArr)) {
-                logger.error("route topic list size is null error...");
+                logger.error("[{}] route topic list size is null error...", operaCode);
                 mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
-                return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "route topic list size is null error...");
+                return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] route topic list size is null error...");
             }
             int size = topicArr.size();
             String groupServerCode = "";

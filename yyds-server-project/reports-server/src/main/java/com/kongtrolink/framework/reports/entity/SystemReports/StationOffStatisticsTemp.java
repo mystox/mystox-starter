@@ -1,14 +1,14 @@
-package com.kongtrolink.framework.reports.entity.alarmCount;
+package com.kongtrolink.framework.reports.entity.SystemReports;
 
 import java.util.Date;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/2/23 19:19
+ * \* Date: 2020/3/3 10:52
  * \* Description:
  * \
  */
-public class AlarmCountTemp {
+public class StationOffStatisticsTemp {
     private String id;
     private Integer year;
     private Integer month;
@@ -17,13 +17,12 @@ public class AlarmCountTemp {
     private String municipality; //市
     private String county; //县|区
     private String stationName; //站点名称
-    private String stationId; //站点id
+    private String stationId; //站点id 站点编号
     private String stationType;//站点类型
-    private String alarmLevel;
-    private String alarmState; //告警状态： 历史告警
-    private Long alarmCount; //告警总数
-    private Long alarmRecoveryCount; //告警恢复数
-    private Boolean deleteFlag = false;
+    private String fsuManufactory; //生产厂家
+    private Double sumDuration; //停电时长
+    private Integer times; //停电次数
+    private Double avgDuration;//平均站点停电时长（分钟）
 
 
     public String getStationId() {
@@ -34,38 +33,6 @@ public class AlarmCountTemp {
         this.stationId = stationId;
     }
 
-    public Date getTempDate() {
-        return tempDate;
-    }
-
-    public void setTempDate(Date tempDate) {
-        this.tempDate = tempDate;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public Integer getMonth() {
-        return month;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public void setMonth(Integer month) {
-        this.month = month;
-    }
-
-    public Boolean getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(Boolean deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
-
     public String getId() {
         return id;
     }
@@ -74,6 +41,29 @@ public class AlarmCountTemp {
         this.id = id;
     }
 
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public Date getTempDate() {
+        return tempDate;
+    }
+
+    public void setTempDate(Date tempDate) {
+        this.tempDate = tempDate;
+    }
 
     public String getProvince() {
         return province;
@@ -115,35 +105,35 @@ public class AlarmCountTemp {
         this.stationType = stationType;
     }
 
-    public String getAlarmLevel() {
-        return alarmLevel;
+    public String getFsuManufactory() {
+        return fsuManufactory;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
-        this.alarmLevel = alarmLevel;
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
     }
 
-    public String getAlarmState() {
-        return alarmState;
+    public Double getSumDuration() {
+        return sumDuration;
     }
 
-    public void setAlarmState(String alarmState) {
-        this.alarmState = alarmState;
+    public void setSumDuration(Double sumDuration) {
+        this.sumDuration = sumDuration;
     }
 
-    public Long getAlarmCount() {
-        return alarmCount;
+    public Integer getTimes() {
+        return times;
     }
 
-    public void setAlarmCount(Long alarmCount) {
-        this.alarmCount = alarmCount;
+    public void setTimes(Integer times) {
+        this.times = times;
     }
 
-    public Long getAlarmRecoveryCount() {
-        return alarmRecoveryCount;
+    public Double getAvgDuration() {
+        return avgDuration;
     }
 
-    public void setAlarmRecoveryCount(Long alarmRecoveryCount) {
-        this.alarmRecoveryCount = alarmRecoveryCount;
+    public void setAvgDuration(Double avgDuration) {
+        this.avgDuration = avgDuration;
     }
 }

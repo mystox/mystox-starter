@@ -39,15 +39,15 @@ public class FsuReportsServiceImpl implements FsuReportsService {
     FsuOfflineDetailsTempDao fsuOfflineDetailsTempDao;
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuRunning", rhythm = 20, resultType = {DataType.JSON}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuRunning", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList", hide = true), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, value = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
-            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
-            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "义益钛迪"}),
-            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "交维态", "工程态", "测试态"}),
-            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"月报表", "季报表", "年报表"}),
+            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
+            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
+            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
+            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}),
             @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query),
     })
     public ReportData fsuOffLine(String reportConfigStr) {
@@ -100,7 +100,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         resultData[0][length - 2] = new String[]{"时间段:"};
         resultData[0][length - 1] = new String[]{"操作人员:"};
         String excelUri = fsuOfflineExcelCreate("FSU离线统计表-" + statisticLevel, resultData);
-        ReportData reportData = new ReportData(DataType.FORM, excelUri);
+        ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
 
@@ -112,9 +112,9 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         } else {
             tableHead = new String[]{"区域层级", "站点名称", "累计离线时长（分钟）", "离线次数", "平均离线时长（分钟）"};
         }
-        int colLength = tableHead.length; // 行
-        int rowLength = siteFsuResult.size() + 1; //列
-        String[][] sheetData = new String[colLength + 4][rowLength];
+        int colLength = tableHead.length; // 列
+        int rowLength = siteFsuResult.size() + 1; //行
+        String[][] sheetData = new String[rowLength+4][colLength];
 
         for (int i = 0; i < rowLength; i++) {
             String[] row = sheetData[i];
@@ -129,32 +129,31 @@ public class FsuReportsServiceImpl implements FsuReportsService {
             } else {
                 row[1 + a] = jsonObject.getString("");//站点名称
             }
-//            row[1 + a] = jsonObject.getString("");
             row[2 + a] = jsonObject.getString("");
             row[3 + a] = jsonObject.getString("");
             row[4 + a] = jsonObject.getString("");
-            row[5 + a] = jsonObject.getString("");
-            row[6 + a] = jsonObject.getString("");
-            row[7 + a] = jsonObject.getString("");
-            row[8 + a] = jsonObject.getString("");
         }
         return new String[][][]{sheetData};
     }
 
-    private String fsuOfflineExcelCreate(String s, String[][][] resultData) {
-        return null;
+    private String fsuOfflineExcelCreate(String sheetName, String[][][] resultData) {
+        long currentTime = System.currentTimeMillis();
+        String path = "/reportsResources/report_fsuOffLine";
+        String filename = "FSU离线统计表_" + currentTime + ".xls";
+        WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
+        return path + "/" + filename;
     }
 
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuRunning", rhythm = 20, resultType = {DataType.JSON}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuRunning", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList", hide = true), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, value = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
-            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
-            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "义益钛迪"}),
-            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "交维态", "工程态", "测试态"}),
+            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
+            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
+            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
     })
     public ReportData fsuRunning(String reportConfigStr) {
         ReportConfig reportConfig = JSONObject.parseObject(reportConfigStr, ReportConfig.class);
@@ -188,7 +187,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         resultData[0][length] = new String[]{""};
         resultData[0][length] = new String[]{"操作人员:"};
         String excelUri = fsuRunningExcelCreate("FSU离线统计表-" + statisticLevel, resultData);
-        ReportData reportData = new ReportData(DataType.FORM, excelUri);
+        ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
 
@@ -226,15 +225,15 @@ public class FsuReportsServiceImpl implements FsuReportsService {
 
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuOffLineDetails", rhythm = 20, resultType = {DataType.JSON}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuOffLineDetails", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList", hide = true), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, value = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
-            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "义益钛迪"}),
-            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
-            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"全部", "交维态", "工程态", "测试态"}),
-            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, choices = {"月报表", "季报表", "年报表"}),
+            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
+            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
+            @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
+            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}),
             @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query),
     })
     public ReportData fsuOffLineDetails(String reportConfigStr) {
@@ -313,16 +312,24 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         //todo  根据站点分别获取分类获取fsu设备列表
         String siteFsuResultStr = mqttOpera.opera("getFsuListBySiteList", JSONArray.toJSONString(siteList)).getMsg();
         List<JSONObject> siteFsuResult = JSONArray.parseArray(siteFsuResultStr, JSONObject.class);
-        //统计告警量
+        //统计离线明细，生成excel数据表
         String[][][] resultData = fsuOfflineDetailsDataCreate(siteFsuResult, statisticLevel);
         int length = resultData[1].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:"};
         resultData[0][length - 2] = new String[]{"时间段:"};
         resultData[0][length - 1] = new String[]{"操作人员:"};
-        String excelUri = fsuOfflineExcelCreate("FSU离线统计表-" + statisticLevel, resultData);
-        ReportData reportData = new ReportData(DataType.FORM, excelUri);
+        String excelUri = fsuOfflineDetailsExcelCreate("FSU离线明细表-" + statisticLevel, resultData);
+        ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
+    }
+
+    private String fsuOfflineDetailsExcelCreate(String sheetName, String[][][] resultData) {
+        long currentTime = System.currentTimeMillis();
+        String path = "/reportsResources/report_fsuOffLineDetails";
+        String filename = "FSU离线明细表_" + currentTime + ".xls";
+        WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
+        return path + "/" + filename;
     }
 
     private String[][][] fsuOfflineDetailsDataCreate(List<JSONObject> fsuOfflineDetailsResult, String statisticLevel) {
