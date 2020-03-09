@@ -870,6 +870,7 @@ public class Neo4jDBService implements DBService {
                 ResultSummary summary = statementResult.summary();
                 if (summary.counters().propertiesSet() == 3) {
                     transaction.success();
+                    result.setResult(true);
                     result.setInfo("CI属性修改成功");
                 } else {
                     transaction.failure();
