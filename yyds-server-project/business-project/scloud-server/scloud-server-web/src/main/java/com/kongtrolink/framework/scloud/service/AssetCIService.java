@@ -46,6 +46,11 @@ public interface AssetCIService {
     MsgResult getAssetDeviceList(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
+     * 从【中台-资管】 获取单个设备（基本信息）
+     */
+    MsgResult getAssetDeviceByCode(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
      * 向【中台-资管】 添加设备
      */
     MsgResult addAssetDevice();

@@ -14,7 +14,7 @@ public class BasicSiteEntity {
     private String uniqueCode;  //企业识别码
     @JSONField(name = "address")
     private String tierCode;    //区域层级编码
-    @JSONField(name = "name")
+    @JSONField(name = "type")
     private String assetType;    //资产类型
     @JSONField(name = "sn")
     private String code;    //站点编码

@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.service;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.util.List;
 
@@ -16,6 +17,16 @@ public interface DeviceService {
      * 获取设备列表
      */
     List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 导出设备列表
+     */
+    HSSFWorkbook exportDeviceList(List<DeviceModel> list);
+
+    /**
+     * 生成设备编码
+     */
+    String createDeviceCode(String uniqueCode, DeviceModel deviceModel);
 
     /**
      * @auther: liudd

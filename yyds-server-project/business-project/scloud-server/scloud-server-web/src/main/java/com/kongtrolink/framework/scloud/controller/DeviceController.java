@@ -7,6 +7,7 @@ import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.kongtrolink.framework.scloud.controller.base.ExportController.export;
 
 /**
  * 资产管理-设备资产管理 控制器
@@ -53,9 +57,12 @@ public class DeviceController extends BaseController{
      * 导出设备列表
      */
     @RequestMapping(value = "exportDeviceList", method = RequestMethod.POST)
-    public void exportDeviceList(@RequestBody DeviceQuery deviceQuery){
+    public void exportDeviceList(@RequestBody DeviceQuery deviceQuery, HttpServletResponse response){
         try{
             String uniqueCode = getUniqueCode();
+            List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, deviceQuery);
+            HSSFWorkbook workbook = deviceService.exportDeviceList(list);
+            export(response, workbook, "站点资产信息列表");
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -66,9 +73,14 @@ public class DeviceController extends BaseController{
      */
     @RequestMapping(value = "createDeviceCode", method = RequestMethod.POST)
     public @ResponseBody JsonResult createDeviceCode(@RequestBody DeviceModel deviceModel){
-        // TODO: 2020/2/27 要判断资产类型是否为FSU动环主机还是其他类型设备，从而生成对应的设备编码
-        String code = "";
-        return new JsonResult(code);
+        try {
+            String uniqueCode = getUniqueCode();
+            String code = deviceService.createDeviceCode(uniqueCode, deviceModel);
+            return new JsonResult(code);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("生成设备编码失败", false);
+        }
     }
 
     /**
@@ -77,6 +89,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "addDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult addDevice(@RequestBody DeviceModel deviceModel){
         try{
+            String uniqueCode = getUniqueCode();
 
             return new JsonResult("添加成功", true);
         }catch (Exception e){

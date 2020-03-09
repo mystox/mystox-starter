@@ -7,15 +7,15 @@ package com.kongtrolink.framework.scloud.mqtt.query;
  */
 public class BasicParentQuery {
 
-    private BasicCommonQuery name;  //父资产类型
+    private BasicCommonQuery type;  //父资产类型
     private BasicCommonQuery sn;    //父资产SN
 
-    public BasicCommonQuery getName() {
-        return name;
+    public BasicCommonQuery getType() {
+        return type;
     }
 
-    public void setName(BasicCommonQuery name) {
-        this.name = name;
+    public void setType(BasicCommonQuery type) {
+        this.type = type;
     }
 
     public BasicCommonQuery getSn() {

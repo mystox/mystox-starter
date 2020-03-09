@@ -71,6 +71,7 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setTierCode(siteModel.getTierCode());
         siteEntity.setTierName(siteModel.getTierName());
         siteEntity.setCode(siteModel.getCode());
+        siteEntity.setSiteType(siteModel.getSiteType());
         siteEntity.setCoordinate(siteModel.getCoordinate());
         siteEntity.setAddress(siteModel.getAddress());
         siteEntity.setRespName(siteModel.getRespName());
@@ -154,7 +155,7 @@ public class SiteServiceImpl implements SiteService {
                 LOGGER.error("【站点管理】，从【资管】获取站点 请求失败");
             }
         }else {
-            LOGGER.error("从【资管】获取站点 MQTT通信失败");
+            LOGGER.error("【站点管理】，从【资管】获取站点 MQTT通信失败");
         }
 
         return list;

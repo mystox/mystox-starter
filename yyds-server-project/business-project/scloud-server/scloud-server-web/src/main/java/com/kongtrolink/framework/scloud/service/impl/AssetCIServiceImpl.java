@@ -41,20 +41,20 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicSiteQuery.setName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
+        basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
         if (siteQuery.getTierCodes() != null && siteQuery.getTierCodes().size() > 0) {  //如果选择区域为空的话，则不必向【中台-资管】发送请求获取区域下所有站点
             basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
             if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
-                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));
+                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //模糊搜索
             }
             if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
-                basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));
+                basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //模糊搜索
             }
             if (siteQuery.getSiteType() != null && !siteQuery.getSiteType().equals("")) {
                 basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
             }
 
-            MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
+            MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
             return msgResult;
         }
         return new MsgResult(CommonConstant.FAILED, null);
@@ -71,10 +71,15 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicSiteQuery.setName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
-        basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
+        basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
+        if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
+        }
+        if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0){
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getSiteCodes()));
+        }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
         return msgResult;
     }
 
@@ -95,7 +100,7 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteEntity.setSiteType(siteModel.getSiteType());
         basicSiteEntityList.add(basicSiteEntity);
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI, JSON.toJSONString(basicSiteEntityList));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI_SCLOUD, JSON.toJSONString(basicSiteEntityList));
         return msgResult;
     }
 
@@ -115,7 +120,7 @@ public class AssetCIServiceImpl implements AssetCIService{
             basicSiteEntityList.add(basicSiteEntity);
         }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI, JSON.toJSONString(basicSiteEntityList));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI_SCLOUD, JSON.toJSONString(basicSiteEntityList));
         return msgResult;
     }
 
@@ -131,7 +136,7 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteEntity.setCode(siteModel.getCode());
         basicSiteEntity.setName(siteModel.getName());
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI, JSON.toJSONString(basicSiteEntity));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI_SCLOUD, JSON.toJSONString(basicSiteEntity));
         return msgResult;
     }
 
@@ -151,7 +156,21 @@ public class AssetCIServiceImpl implements AssetCIService{
             basicDeviceQuery.setModel(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, deviceQuery.getModel()));
         }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicDeviceQuery));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
+    }
+
+    /**
+     * 从【中台-资管】 获取单个设备（基本信息）
+     */
+    @Override
+    public MsgResult getAssetDeviceByCode(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+        basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
+        basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+        basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getDeviceCode()));
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
         return msgResult;
     }
 

@@ -50,6 +50,7 @@ public class DeviceEntity implements Serializable {
 	private String gatewayServerCode;
 	//下面为FSU动环主机设备特有属性
 	private String state = CommonConstant.OFFLINE;	//注册状态（FSU类型、摄像机类型）：在线、离线
+	private Long offlineTime;	//离线时间
 	private String operationState = FsuOperationState.PROJECT;	//运行状态（FSU类型）：工程态、测试态、交维态
 
 	public int getId() {
@@ -162,6 +163,14 @@ public class DeviceEntity implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public Long getOfflineTime() {
+		return offlineTime;
+	}
+
+	public void setOfflineTime(Long offlineTime) {
+		this.offlineTime = offlineTime;
 	}
 
 	public String getOperationState() {

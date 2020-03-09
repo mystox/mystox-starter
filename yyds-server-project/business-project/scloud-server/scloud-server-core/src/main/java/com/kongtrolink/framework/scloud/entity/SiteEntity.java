@@ -34,6 +34,7 @@ public class SiteEntity implements Serializable {
 	private String tierCode;	//区域编码
 	private String tierName;	//区域名称(中间用"-"隔开)
 	private String code;	//站点编码
+	private String siteType;	//站点类型
 	private String coordinate;	//站点经纬度
 	private String address;	//站点地址
 	private String respName;	//资产管理员名称
@@ -60,6 +61,14 @@ public class SiteEntity implements Serializable {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public String getSiteType() {
+		return siteType;
+	}
+
+	public void setSiteType(String siteType) {
+		this.siteType = siteType;
 	}
 
 	public String getTierCode() {

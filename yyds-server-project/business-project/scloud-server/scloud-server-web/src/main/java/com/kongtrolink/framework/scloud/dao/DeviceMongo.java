@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,6 @@ public class DeviceMongo {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = CollectionSuffix.DEVICE;
 
     /**
      * 获取单个站点下所有设备
@@ -36,6 +36,33 @@ public class DeviceMongo {
     }
 
     /**
+     * 根据查询条件，获取设备列表
+     */
+    public List<DeviceEntity> findDeviceList(String uniqueCode, DeviceQuery deviceQuery){
+        // TODO: 2020/3/9
+        return new ArrayList<>();
+    }
+
+    /**
+     * 统计设备数量
+     */
+    public Integer countDeviceShortCode(String uniqueCode, String preCode) {
+        Criteria criteria = Criteria.where("code").regex("^" + preCode + ".*?");
+        Query query = new Query(criteria);
+        return (int)mongoTemplate.count(query, DeviceEntity.class,
+                uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 通过设备编码查找设备
+     */
+    public DeviceEntity findDeviceByShortCode(String uniqueCode, String deviceCode) {
+        return mongoTemplate.findOne(
+                new Query(Criteria.where("code").is(deviceCode)),
+                DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
      * @auther: liudd
      * @date: 2020/2/28 9:48
      * 功能描述:获取设备实体类表，不包含名字，无语远程调用
@@ -45,7 +72,7 @@ public class DeviceMongo {
         baseCriteria(criteria, deviceQuery);
         Query query = Query.query(criteria);
         query.skip( (deviceQuery.getCurrentPage()-1) * deviceQuery.getPageSize() ).limit(deviceQuery.getPageSize());
-        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + table);
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 
     /**
@@ -57,7 +84,7 @@ public class DeviceMongo {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, deviceQuery);
         Query query = Query.query(criteria);
-        return (int)mongoTemplate.count(query, uniqueCode + table);
+        return (int)mongoTemplate.count(query, uniqueCode + CollectionSuffix.DEVICE);
     }
 
     Criteria baseCriteria(Criteria criteria, DeviceQuery deviceQuery){
@@ -86,6 +113,6 @@ public class DeviceMongo {
     public List<DeviceEntity> getBySiteCodeList(String uniqueCode, List<String> siteCodeList) {
         Criteria criteria = Criteria.where("siteCode").in(siteCodeList);
         Query query = Query.query(criteria);
-        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + table);
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 }

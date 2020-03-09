@@ -13,15 +13,15 @@ public class OperaCodeConstant {
     public static final String GET_USER_LIST_BY_ENTERPRISE_CODE = "getUserListByEnterpriseCode";
 
     //获取CI
-    public static final String GET_CI = "getCI";
+    public static final String GET_CI_SCLOUD = "getCISCloud";
 
     //添加CI
-    public static final String ADD_CI = "addCI";
+    public static final String ADD_CI_SCLOUD = "addCISCloud";
 
     //修改CI
-    public static final String MODIFY_CI = "modifyCI";
+    public static final String MODIFY_CI_SCLOUD = "modifyCISCloud";
 
     //删除CI
-    public static final String DELETE_CI = "deleteCI";
+    public static final String DELETE_CI_SCLOUD = "deleteCISCloud";
 
 }
