@@ -42,7 +42,7 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
         basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
 
-        if (siteQuery.getTierCodes() != null) {  //如果选择区域为空的话，则不必向【中台-资管】发送请求获取区域下所有站点
+        if (siteQuery.getTierCodes() != null) {
             basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
         }
         if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
