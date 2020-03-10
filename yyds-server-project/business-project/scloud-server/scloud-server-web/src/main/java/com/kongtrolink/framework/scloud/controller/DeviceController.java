@@ -38,7 +38,7 @@ public class DeviceController extends BaseController{
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceController.class);
 
     /**
-     * 获取单个站点下设备列表
+     * 获取站点下设备列表
      */
     @RequestMapping(value = "getDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceList(@RequestBody DeviceQuery deviceQuery){
@@ -90,6 +90,7 @@ public class DeviceController extends BaseController{
     public @ResponseBody JsonResult addDevice(@RequestBody DeviceModel deviceModel){
         try{
             String uniqueCode = getUniqueCode();
+
 
             return new JsonResult("添加成功", true);
         }catch (Exception e){
