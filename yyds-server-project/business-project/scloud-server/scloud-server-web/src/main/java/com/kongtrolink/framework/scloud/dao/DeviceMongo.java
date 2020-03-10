@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
@@ -91,6 +92,19 @@ public class DeviceMongo {
         return mongoTemplate.findOne(
                 new Query(Criteria.where("code").is(deviceCode)),
                 DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 查找获取特殊设备的特殊属性
+     */
+    public DeviceSpecialInfoEntity findDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        int deviceId = deviceSpecialInfoEntity.getDeviceId();
+        String deviceCode = deviceSpecialInfoEntity.getDeviceCode();
+
+        Criteria criteria = Criteria.where("deviceId").is(deviceId)
+                .and("deviceCode").is(deviceCode);
+
+        return mongoTemplate.findOne(new Query(criteria), DeviceSpecialInfoEntity.class, uniqueCode + CollectionSuffix.DEVICE_SPECIAL_INFO);
     }
 
     /**

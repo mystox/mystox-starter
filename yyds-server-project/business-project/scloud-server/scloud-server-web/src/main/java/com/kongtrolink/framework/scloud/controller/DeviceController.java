@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
@@ -51,6 +52,16 @@ public class DeviceController extends BaseController{
             e.printStackTrace();
             return new JsonResult("获取设备列表异常", false);
         }
+    }
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    @RequestMapping(value = "getDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        String uniqueCode = getUniqueCode();
+        DeviceSpecialInfoEntity entity = deviceService.getDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+        return new JsonResult(entity);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
@@ -101,6 +102,15 @@ public class DeviceServiceImpl implements DeviceService {
             }
         }
         return list;
+    }
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    @Override
+    public DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity) {
+        DeviceSpecialInfoEntity entity = deviceMongo.findDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+        return entity;
     }
 
     /**

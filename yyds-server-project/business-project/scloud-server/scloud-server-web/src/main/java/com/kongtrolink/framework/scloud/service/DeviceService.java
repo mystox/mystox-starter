@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -17,6 +18,11 @@ public interface DeviceService {
      * 获取设备列表
      */
     List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
 
     /**
      * 导出设备列表
