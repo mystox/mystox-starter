@@ -23,7 +23,7 @@ public class DeviceQuery extends Paging {
 	 */
 	private static final long serialVersionUID = 201367096037913874L;
 	private String serverCode;
-	private List<String> tierCodes;	//区域Code
+	private List<String> tierCodes;	//区域Code（选择了整个区域的情况）
 	private String siteName;	//站点名称
 	private String siteCode;	//站点编码
 	private List<String> siteCodes;	//站点编码（集合）

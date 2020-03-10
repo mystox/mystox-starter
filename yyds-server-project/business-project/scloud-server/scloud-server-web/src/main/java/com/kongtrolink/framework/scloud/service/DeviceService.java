@@ -16,7 +16,7 @@ public interface DeviceService {
     /**
      * 获取设备列表
      */
-    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
 
     /**
      * 导出设备列表

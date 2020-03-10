@@ -46,10 +46,10 @@ public class AssetCIServiceImpl implements AssetCIService{
             basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
         }
         if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
-            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //模糊搜索
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //站点编码-模糊搜索
         }
         if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
-            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //模糊搜索
+            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //站点名称-模糊搜索
         }
         if (siteQuery.getSiteType() != null) {
             basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
@@ -71,11 +71,15 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
         basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
-        if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
-            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
-        }
-        if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0){
+        if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0){   //站点编码-IN搜索
             basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getSiteCodes()));
+        }else {
+            if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {   //站点编码-精确搜索
+                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
+            }
+        }
+        if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
+            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //站点名称模糊搜索
         }
 
         MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
@@ -147,7 +151,9 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
         basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
         basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceCodes()));
+        if (deviceQuery.getDeviceCodes() != null) {
+            basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceCodes()));
+        }
         if (deviceQuery.getDeviceName() != null && !deviceQuery.getDeviceName().equals("")) {
             basicDeviceQuery.setDeviceName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, deviceQuery.getDeviceName()));
         }

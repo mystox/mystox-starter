@@ -57,7 +57,7 @@ public class SiteMongo {
     public List<SiteEntity> findSiteList(String uniqueCode, SiteQuery siteQuery){
         String address = siteQuery.getAddress(); //站点地址
         String towerType = siteQuery.getTowerType();   //铁塔类型
-        String respName = siteQuery.getRespName();    //资产管理员名称
+        String respName = siteQuery.getRespName();    //资产管理员名称(模糊搜索)
         Long startTime = siteQuery.getStartTime(); //开始时间
         Long endTime = siteQuery.getEndTime();   //结束时间
         String siteCode = siteQuery.getSiteCode();  //站点编码（模糊搜索）
@@ -68,8 +68,8 @@ public class SiteMongo {
             criteria.and("towerType").is(towerType);
         }
         if (siteCode != null && !siteCode.equals("")){
-            address = MongoRegexUtil.escapeExprSpecialWord(address);
-            criteria.and("address").regex("^" + address + ".*?");
+            siteCode = MongoRegexUtil.escapeExprSpecialWord(address);
+            criteria.and("code").regex("^" + siteCode + ".*?");
         }
         if (siteCodes != null){
             criteria.and("code").in(siteCodes);
@@ -145,6 +145,14 @@ public class SiteMongo {
             criteria.and("code").in(siteCodes);
         }
         mongoTemplate.remove(new Query(criteria), SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+    }
+
+    /**
+     * 根据区域编码，获取站点
+     */
+    public List<SiteEntity> findSitesByTierCodes(String uniqueCode, List<String> tierCodes){
+        Criteria criteria = Criteria.where("tierCode").in(tierCodes);
+        return mongoTemplate.find(new Query(criteria), SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
     }
 
 }
