@@ -2,6 +2,7 @@ package com.kongtrolink.framework.reports.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.ReflectionUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.entity.StateCode;
@@ -12,12 +13,19 @@ import com.kongtrolink.framework.reports.dao.ReportTaskDao;
 import com.kongtrolink.framework.reports.entity.*;
 import com.kongtrolink.framework.reports.entity.alarmCategory.AlarmCategoryTemp;
 import com.kongtrolink.framework.reports.entity.alarmCount.AlarmCountTemp;
+import com.kongtrolink.framework.reports.entity.query.DeviceEntity;
+import com.kongtrolink.framework.reports.entity.query.FsuEntity;
+import com.kongtrolink.framework.reports.entity.query.SiteEntity;
+import com.kongtrolink.framework.reports.service.MqttCommonInterface;
 import com.kongtrolink.framework.reports.stereotype.ReportExtend;
 import com.kongtrolink.framework.reports.stereotype.ReportOperaCode;
+import com.kongtrolink.framework.reports.utils.CommonCheck;
 import com.kongtrolink.framework.reports.utils.DateUtil;
 import com.kongtrolink.framework.reports.utils.WorkbookUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -33,10 +41,12 @@ import java.util.*;
  */
 @Service
 public class AlarmReportsServiceImpl implements AlarmReportsService {
+    private Logger logger = LoggerFactory.getLogger(AlarmReportsServiceImpl.class);
 
     @Autowired
     MqttOpera mqttOpera;
-
+    @Autowired
+    MqttCommonInterface mqttCommonInterface;
     @Autowired
     AlarmCountTempDao alarmCountTempDao;
 
@@ -99,33 +109,30 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         JSONObject stationCondition = new JSONObject();
         stationCondition.put("serverCode", serverCode);
         stationCondition.put("enterpriseCode", enterpriseCode);
-        //todo 获取企业在该云平台下所有站点
-        MsgResult siteListResult = mqttOpera.opera("getCI", stationCondition.toJSONString());
-        String siteListMsg = siteListResult.getMsg();
-        List<JSONObject> siteList = JSONArray.parseArray(siteListMsg, JSONObject.class);
+        // 获取企业在该云平台下所有站点
+        List<SiteEntity> siteList = mqttCommonInterface.getSiteList(enterpriseCode, serverCode);
         if (!CollectionUtils.isEmpty(siteList)) {
             int finalMonth = month;
             int finalYear = year;
             siteList.forEach(s -> {
                 //todo 获取站点下所有fsu及其相关告警数据
-                String stationId = s.getString("siteId");
+                String stationId = s.getSiteId();
                 JSONObject fsuCondition = new JSONObject();
-                fsuCondition.put("stationId", stationId);
-                fsuCondition.put("enterpriseCode", enterpriseCode);
-                MsgResult getFsuListByStationId = mqttOpera.opera("getFsuListByStationId", fsuCondition.toJSONString());
-                String fsuListMsg = getFsuListByStationId.getMsg();
-                List<JSONObject> fsuList = JSONArray.parseArray(fsuListMsg, JSONObject.class);
-                fsuList.forEach(f -> {
-                    //todo 获取设备id
-                    String fsuId = "";
-                    MsgResult getDeviceListByFsuId = mqttOpera.opera("getDeviceListByFsuId", fsuId);
-                    List<String> deviceList = new ArrayList<>();
-                    //todo 添加fsuId
-                    deviceList.add("fsuDeviceId");
+//                fsuCondition.put("stationId", stationId);
+//                fsuCondition.put("enterpriseCode", enterpriseCode);
+                List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, enterpriseCode,serverCode);
+                //判断交维态
+                String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
+
+                List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, enterpriseCode, serverCode);
+//                MsgResult getFsuListByStationId = mqttOpera.opera("getFsuListByStationId", fsuCondition.toJSONString());
+//                List<JSONObject> fsuList = JSONArray.parseArray(fsuListMsg, JSONObject.class);
+                List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                //todo 添加fsuId
+                deviceIds.addAll(fsuIds);
                     //todo 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
-                    MsgResult getAlarmCountByDeviceIdList = mqttOpera.opera("getAlarmCountByDeviceIdListLastMonth", JSONArray.toJSONString(deviceList));
-                    String alarmCountListMsg = getAlarmCountByDeviceIdList.getMsg();
-                    List<JSONObject> jsonObjects = JSONArray.parseArray(alarmCountListMsg, JSONObject.class);
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds);
                     jsonObjects.forEach(c -> {
                         AlarmCountTemp alarmCountTemp = new AlarmCountTemp();
                         alarmCountTemp.setYear(finalYear);
@@ -134,7 +141,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                         alarmCountTempList.add(alarmCountTemp);
                     });
                 });
-            });
+        } else {
+            logger.error("返回站点结果为空");
         }
         alarmCountTempDao.save(alarmCountTempList, reportTask.getId());
         JSONObject jsonObject = new JSONObject();

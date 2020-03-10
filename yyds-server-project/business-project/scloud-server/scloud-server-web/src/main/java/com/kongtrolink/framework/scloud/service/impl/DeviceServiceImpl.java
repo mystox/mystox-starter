@@ -8,7 +8,6 @@ import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
-import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -57,7 +55,7 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceEntity> devices = deviceMongo.findDevicesBySiteCodes(uniqueCode, deviceQuery);
         if (devices != null && devices.size() > 0) {
             List<String> deviceCodes = new ArrayList<>();   //设备编码
-            for (DeviceEntity device : devices) {
+                for (DeviceEntity device : devices) {
                 deviceCodes.add(device.getCode());
             }
             deviceQuery.setDeviceCodes(deviceCodes);
