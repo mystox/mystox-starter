@@ -59,9 +59,14 @@ public class DeviceController extends BaseController{
      */
     @RequestMapping(value = "getDeviceSpecialInfo", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
-        String uniqueCode = getUniqueCode();
-        DeviceSpecialInfoEntity entity = deviceService.getDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
-        return new JsonResult(entity);
+        try {
+            String uniqueCode = getUniqueCode();
+            DeviceSpecialInfoEntity entity = deviceService.getDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+            return new JsonResult(entity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取特殊设备的特殊属性失败", false);
+        }
     }
 
     /**
@@ -101,12 +106,29 @@ public class DeviceController extends BaseController{
     public @ResponseBody JsonResult addDevice(@RequestBody DeviceModel deviceModel){
         try{
             String uniqueCode = getUniqueCode();
-
-
-            return new JsonResult("添加成功", true);
+            Integer deviceId = deviceService.addDevice(uniqueCode, deviceModel);
+            if (deviceId != null) {
+                return new JsonResult(deviceId);
+            }else {
+                return new JsonResult("添加失败", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("添加失败", false);
+            return new JsonResult("添加异常", false);
+        }
+    }
+
+    /**
+     * 保存特殊设备的特殊属性
+     *  注：该接口在调用为特殊设备“添加设备”接口后调用
+     */
+    @RequestMapping(value = "saveDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody void saveDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity entity){
+        try {
+            String uniqueCode = getUniqueCode();
+            deviceService.saveDeviceSpecialInfo(uniqueCode, entity);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -130,11 +152,30 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "modifyDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyDevice(@RequestBody DeviceModel deviceModel){
         try{
-
-            return new JsonResult("修改成功", true);
+            String uniqueCode = getUniqueCode();
+            boolean modifyResult = deviceService.modifyDevice(uniqueCode, deviceModel);
+            if (modifyResult) {
+                return new JsonResult("修改成功", true);
+            }else {
+                return new JsonResult("修改失败", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("修改失败", false);
+            return new JsonResult("修改设备异常", false);
+        }
+    }
+
+    /**
+     * 修改特殊设备特殊属性
+     *  注：该接口在调用为特殊设备“修改设备”接口后调用
+     */
+    @RequestMapping(value = "modifyDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody void modifyDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        try{
+            String uniqueCode = getUniqueCode();
+            deviceService.modifyDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -142,10 +183,15 @@ public class DeviceController extends BaseController{
      * 删除设备
      */
     @RequestMapping(value = "deleteDevice", method = RequestMethod.POST)
-    public @ResponseBody JsonResult deleteDevice(@RequestBody DeviceEntity deviceEntity){
+    public @ResponseBody JsonResult deleteDevice(@RequestBody DeviceQuery deviceQuery){
         try{
-
-            return new JsonResult("删除成功", true);
+            String uniqueCode = getUniqueCode();
+            if (deviceQuery.getDeviceCodes() != null && deviceQuery.getDeviceCodes().size() > 0) {
+                deviceService.deleteDevice(uniqueCode, deviceQuery);
+                return new JsonResult("删除成功", true);
+            }else {
+                return new JsonResult("未选中设备", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("删除失败", false);

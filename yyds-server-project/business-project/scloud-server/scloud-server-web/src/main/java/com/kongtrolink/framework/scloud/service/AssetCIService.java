@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
@@ -19,7 +20,7 @@ public interface AssetCIService {
     MsgResult getAssetSitesInTier(String uniqueCode, SiteQuery siteQuery);
 
     /**
-     * 从【中台-资管】获取单个站点（基本信息）
+     * 从【中台-资管】获取站点（基本信息）
      */
     MsgResult getAssetSiteByCode(String uniqueCode, SiteQuery siteQuery);
 
@@ -46,22 +47,22 @@ public interface AssetCIService {
     MsgResult getAssetDeviceList(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
-     * 从【中台-资管】 获取单个设备（基本信息）
+     * 从【中台-资管】 获取设备（基本信息）
      */
     MsgResult getAssetDeviceByCode(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * 向【中台-资管】 添加设备
      */
-    MsgResult addAssetDevice();
+    MsgResult addAssetDevice(String uniqueCode, DeviceModel deviceModel);
 
     /**
      * 向【中台-资管】 删除设备
      */
-    MsgResult deleteAssetDevice();
+    MsgResult deleteAssetDevice(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * 向【中台-资管】 修改设备
      */
-    MsgResult modifyAssetDevice();
+    MsgResult modifyAssetDevice(String uniqueCode, DeviceModel deviceModel);
 }

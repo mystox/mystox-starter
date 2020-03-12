@@ -41,7 +41,7 @@ public interface SiteService {
     /**
      * 修改站点
      */
-    void modifySite(String uniqueCode, SiteModel siteModel);
+    boolean modifySite(String uniqueCode, SiteModel siteModel);
 
     /**
      * 删除站点

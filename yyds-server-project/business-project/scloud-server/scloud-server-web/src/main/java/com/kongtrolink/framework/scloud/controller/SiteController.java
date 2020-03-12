@@ -184,11 +184,15 @@ public class SiteController extends BaseController{
     public @ResponseBody JsonResult modifySite(@RequestBody SiteModel siteModel){
         try {
             String uniqueCode = getUniqueCode();
-            siteService.modifySite(uniqueCode, siteModel);
-            return new JsonResult("修改成功", true);
+            boolean modifyResult = siteService.modifySite(uniqueCode, siteModel);
+            if (modifyResult) {
+                return new JsonResult("修改成功", true);
+            }else {
+                return new JsonResult("修改失败", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("修改异常，修改失败", false);
+            return new JsonResult("修改站点异常", false);
         }
     }
 
@@ -204,7 +208,7 @@ public class SiteController extends BaseController{
 
                 return new JsonResult("删除成功", true);
             }else {
-                return new JsonResult("未选中站点", true);
+                return new JsonResult("未选中站点", false);
             }
         }catch (Exception e){
             e.printStackTrace();

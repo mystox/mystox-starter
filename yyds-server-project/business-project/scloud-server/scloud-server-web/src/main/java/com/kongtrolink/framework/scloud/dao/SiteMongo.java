@@ -5,6 +5,7 @@ import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -103,7 +104,7 @@ public class SiteMongo {
     /**
      * 修改站点
      */
-    public void modifySite(String uniqueCode, SiteModel siteModel){
+    public boolean modifySite(String uniqueCode, SiteModel siteModel){
         String siteCode = siteModel.getCode(); //站点编码
         String coordinate = siteModel.getCoordinate();	//站点经纬度
         String address = siteModel.getAddress();	//站点地址
@@ -131,7 +132,8 @@ public class SiteMongo {
             update.set("coordinate", coordinate);
         }
 
-        mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        return result.getN() >0;
     }
 
     /**

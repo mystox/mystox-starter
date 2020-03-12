@@ -20,11 +20,6 @@ public interface DeviceService {
     List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
 
     /**
-     * 获取特殊设备的特殊属性
-     */
-    DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
-
-    /**
      * 导出设备列表
      */
     HSSFWorkbook exportDeviceList(List<DeviceModel> list);
@@ -33,6 +28,38 @@ public interface DeviceService {
      * 生成设备编码
      */
     String createDeviceCode(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 添加设备
+     *
+     * @return 设备ID
+     */
+    Integer addDevice(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 修改设备
+     */
+    boolean modifyDevice(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 删除设备
+     */
+    void deleteDevice(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
+
+    /**
+     * 修改特殊设备特殊属性
+     */
+    void modifyDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
+
+    /**
+     * 保存特殊设备的特殊属性
+     */
+    void saveDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
 
     /**
      * @auther: liudd
