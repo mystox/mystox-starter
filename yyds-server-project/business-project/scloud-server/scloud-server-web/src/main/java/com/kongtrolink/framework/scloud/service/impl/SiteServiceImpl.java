@@ -118,7 +118,7 @@ public class SiteServiceImpl implements SiteService {
                 List<String> siteCodes = new ArrayList<>();
                 Map<String, BasicSiteEntity> map = new HashMap<>();
                 for (JSONObject jsonObject : response.getInfos()) {
-                    BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
+                    BasicSiteEntity basicSiteEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicSiteEntity.class);
                     siteCodes.add(basicSiteEntity.getCode());
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }

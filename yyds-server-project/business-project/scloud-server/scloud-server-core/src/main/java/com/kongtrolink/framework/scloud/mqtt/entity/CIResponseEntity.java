@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.mqtt.entity;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;

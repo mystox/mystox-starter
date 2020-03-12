@@ -7,7 +7,7 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP
+  groupCode: GROUP_DADD_TEST
   host: 172.16.5.62
   port: 52202
 mqtt:

@@ -9,7 +9,6 @@ import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
-import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -78,7 +76,7 @@ public class DeviceServiceImpl implements DeviceService {
                         LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
                         Map<String, BasicDeviceEntity> map = new HashMap<>();
                         for (JSONObject jsonObject : response.getInfos()) {
-                            BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
+                            BasicDeviceEntity basicDeviceEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicDeviceEntity.class);
                             map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
                         }
                         if (map.size() > 0){
@@ -342,7 +340,7 @@ public class DeviceServiceImpl implements DeviceService {
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                 for (JSONObject jsonObject : response.getInfos()) {
-                    BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
+                    BasicSiteEntity basicSiteEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicSiteEntity.class);
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }
             }else {
