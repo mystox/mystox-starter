@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.ComAttachmentsEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.kongtrolink.framework.scloud.controller.base.ExportController.export;
@@ -225,19 +227,14 @@ public class SiteController extends BaseController{
     }
 
     /**
-     * 获取企业区域树（去除没有站点的区域）
-     */
-    @RequestMapping(value = "getTierTree", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getTierTree(){
-        return null;
-    }
-
-    /**
      * 获取简化版站点列表
      *  根据query.getSimplifiedSitekeys()获取到的简化版站点所需参数的key，删减Site中不需要的参数，仅保留Site中所传需要的参数
      */
     @RequestMapping(value = "/getSimplifiedSiteList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getSimplifiedSiteList(@RequestBody SiteQuery query){
-        return null;
+    public @ResponseBody JsonResult getSimplifiedSiteList(@RequestBody SiteQuery siteQuery){
+        String uniqueCode = getUniqueCode();
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
+        List<JSONObject> objectList = siteService.getSimplifiedSiteList(siteModelList,siteQuery);
+        return new JsonResult(objectList);
     }
 }

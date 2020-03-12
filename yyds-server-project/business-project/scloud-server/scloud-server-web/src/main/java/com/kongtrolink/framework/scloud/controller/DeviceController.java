@@ -198,20 +198,4 @@ public class DeviceController extends BaseController{
         }
     }
 
-    /**
-     * 获取企业所有设备类型
-     */
-    @RequestMapping(value = "getDeviceTypeList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getDeviceTypeList(@RequestBody DeviceEntity deviceEntity){
-        try {
-            String uniqueCode = getUniqueCode();
-            List<DeviceType> list = new ArrayList<>();
-
-            return new JsonResult(list);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("获取设备类型列表失败", false);
-        }
-    }
-
 }

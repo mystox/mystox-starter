@@ -162,6 +162,78 @@ public class SiteServiceImpl implements SiteService {
     }
 
     /**
+     * 获取简化版站点列表
+     * 根据query.getSimplifiedSitekeys()获取到的简化版站点所需参数的key，删减Site中不需要的参数，仅保留Site中所传需要的参数
+     */
+    @Override
+    public List<JSONObject> getSimplifiedSiteList(List<SiteModel> siteModelList, SiteQuery query) {
+        List<JSONObject> objectList = new ArrayList<>();
+        for (SiteModel siteModel : siteModelList) {
+            JSONObject jsonObject = new JSONObject();
+            for (int i = 0; i < query.getSimplifiedSitekeys().size(); i++) {
+                switch (query.getSimplifiedSitekeys().get(i)) {
+                    case "siteId":
+                        jsonObject.put("siteId", siteModel.getSiteId());
+                        break;
+                    case "tierCode":
+                        jsonObject.put("tierCode", siteModel.getTierCode());
+                        break;
+                    case "tierName":
+                        jsonObject.put("tierName", siteModel.getTierName());
+                        break;
+                    case "name":
+                        jsonObject.put("name", siteModel.getName());
+                        break;
+                    case "code":
+                        jsonObject.put("code", siteModel.getCode());
+                        break;
+                    case "siteType":
+                        jsonObject.put("siteType", siteModel.getSiteType());
+                        break;
+                    case "coordinate":
+                        jsonObject.put("coordinate", siteModel.getCoordinate());
+                        break;
+                    case "address":
+                        jsonObject.put("address", siteModel.getAddress());
+                        break;
+                    case "respName":
+                        jsonObject.put("respName", siteModel.getRespName());
+                        break;
+                    case "respPhone":
+                        jsonObject.put("respPhone", siteModel.getRespPhone());
+                        break;
+                    case "towerHeight":
+                        jsonObject.put("towerHeight", siteModel.getTowerHeight());
+                        break;
+                    case "towerType":
+                        jsonObject.put("towerType", siteModel.getTowerType());
+                        break;
+                    case "shareInfo":
+                        jsonObject.put("shareInfo", siteModel.getShareInfo());
+                        break;
+                    case "assetNature":
+                        jsonObject.put("assetNature", siteModel.getAssetNature());
+                        break;
+                    case "createTime":
+                        jsonObject.put("createTime", siteModel.getCreateTime());
+                        break;
+                    case "areaCovered":
+                        jsonObject.put("areaCovered", siteModel.getAreaCovered());
+                        break;
+                    case "fileId":
+                        jsonObject.put("fileId", siteModel.getFileId());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            objectList.add(jsonObject);
+        }
+
+        return objectList;
+    }
+
+    /**
      * 导出站点列表
      */
     @Override

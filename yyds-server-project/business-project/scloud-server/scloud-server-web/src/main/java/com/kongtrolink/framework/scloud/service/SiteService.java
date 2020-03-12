@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
@@ -32,6 +33,12 @@ public interface SiteService {
      * 获取站点列表
      */
     List<SiteModel> findSiteList(String uniqueCode, SiteQuery siteQuery);
+
+    /**
+     * 获取简化版站点列表
+     *  根据query.getSimplifiedSitekeys()获取到的简化版站点所需参数的key，删减Site中不需要的参数，仅保留Site中所传需要的参数
+     */
+    List<JSONObject> getSimplifiedSiteList(List<SiteModel> siteModelList, SiteQuery siteQuery);
 
     /**
      * 导出站点列表
