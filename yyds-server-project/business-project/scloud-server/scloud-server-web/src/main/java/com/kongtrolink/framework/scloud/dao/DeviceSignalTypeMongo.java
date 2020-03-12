@@ -18,11 +18,10 @@ import java.util.List;
  * Created by Eric on 2020/2/10.
  */
 @Repository
-public class SignalMongo  {
+public class DeviceSignalTypeMongo {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = CollectionSuffix.SIGNAL_TYPE;
 
     /**
      * 修改信号类型映射表
@@ -69,7 +68,7 @@ public class SignalMongo  {
                 Aggregation.unwind("signalTypeList"),
                 Aggregation.match(cntbIdCri)
         );
-        AggregationResults<SignalType> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + table, SignalType.class);
+        AggregationResults<SignalType> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + CollectionSuffix.SIGNAL_TYPE, SignalType.class);
         return aggregate.getMappedResults();
     }
 }

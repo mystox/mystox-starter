@@ -10,7 +10,7 @@ import java.util.List;
 public class BasicSiteQuery {
     private BasicCommonQuery serverCode;
     private BasicCommonQuery enterpriseCode;  //企业识别码
-    private BasicCommonQuery name;    //资产类型
+    private BasicCommonQuery type;    //资产类型
     private BasicCommonQuery address;   //区域编码
     private BasicCommonQuery sn;  //父资产SN：此时为 站点编码（模糊搜索）
     private BasicCommonQuery siteName;    //站点名称（模糊搜索）
@@ -32,12 +32,12 @@ public class BasicSiteQuery {
         this.enterpriseCode = enterpriseCode;
     }
 
-    public BasicCommonQuery getName() {
-        return name;
+    public BasicCommonQuery getType() {
+        return type;
     }
 
-    public void setName(BasicCommonQuery name) {
-        this.name = name;
+    public void setType(BasicCommonQuery type) {
+        this.type = type;
     }
 
     public BasicCommonQuery getAddress() {

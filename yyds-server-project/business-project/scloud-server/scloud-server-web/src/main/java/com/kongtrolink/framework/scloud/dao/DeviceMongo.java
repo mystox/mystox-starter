@@ -2,14 +2,21 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,18 +28,193 @@ public class DeviceMongo {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = CollectionSuffix.DEVICE;
 
     /**
-     * 获取单个站点下所有设备
+     * 根据查询条件，获取设备列表
      */
-    public List<DeviceEntity> findAllDevicesBySiteCode(String uniqueCode, String siteCode){
-        Criteria criteria = new Criteria();
-        if (siteCode != null){
-            criteria.and("siteCode").is(siteCode);
+    public List<DeviceEntity> findDeviceList(String uniqueCode, DeviceQuery deviceQuery){
+        List<String> siteCodes = deviceQuery.getSiteCodes();    //站点编码
+        String deviceTypeCode = deviceQuery.getDeviceTypeCode();	//设备类型编码
+        String deviceCode = deviceQuery.getDeviceCode();	//设备编码（模糊搜索）
+        String manufacturer = deviceQuery.getManufacturer();	//设备厂家(模糊搜索)
+        Long startTime = deviceQuery.getStartTime();	//开始时间
+        Long endTime = deviceQuery.getEndTime();	//结束时间
+        String state = deviceQuery.getState();	//注册状态（FSU类型、摄像机类型）：在线、离线
+        String operationState = deviceQuery.getOperationState();	//运行状态（FSU类型）：工程态、测试态、交维态
+
+        Criteria criteria = Criteria.where("siteCode").in(siteCodes);
+        if (!StringUtil.isNUll(deviceTypeCode)){
+            criteria.and("typeCode").is(deviceTypeCode);
+        }
+        if (!StringUtil.isNUll(deviceCode)){
+            deviceCode = MongoRegexUtil.escapeExprSpecialWord(deviceCode);
+            criteria.and("code").is(deviceCode);
+        }
+        if (!StringUtil.isNUll(manufacturer)){
+            manufacturer = MongoRegexUtil.escapeExprSpecialWord(manufacturer);
+            criteria.and("manufacturer").is(manufacturer);
+        }
+        if (!StringUtil.isNUll(state)){
+            criteria.and("state").is(state);
+        }
+        if (!StringUtil.isNUll(operationState)){
+            criteria.and("operationState").is(operationState);
+        }
+        if (startTime != null){
+            if (endTime == null){
+                criteria.and("createTime").gte(new Date(startTime));
+            }else {
+                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
+            }
+        }else {
+            if (endTime != null){
+                criteria.and("createTime").lte(new Date(endTime));
+            }
         }
 
-        return mongoTemplate.find(new Query(criteria), DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+        Query query = new Query(criteria);
+        query.with(new Sort(Sort.Direction.DESC, "createTime"));
+
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 统计设备数量
+     */
+    public Integer countDeviceShortCode(String uniqueCode, String preCode) {
+        Criteria criteria = Criteria.where("code").regex("^" + preCode + ".*?");
+        Query query = new Query(criteria);
+        return (int)mongoTemplate.count(query, DeviceEntity.class,
+                uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 通过设备编码查找设备
+     */
+    public DeviceEntity findDeviceByCode(String uniqueCode, String deviceCode) {
+        return mongoTemplate.findOne(
+                new Query(Criteria.where("code").is(deviceCode)),
+                DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 添加保存设备
+     */
+    public Integer saveDevice(String uniqueCode, DeviceEntity deviceEntity){
+        mongoTemplate.save(deviceEntity, uniqueCode + CollectionSuffix.DEVICE);
+        return deviceEntity.getId();
+    }
+
+    /**
+     * 修改设备
+     */
+    public boolean modifyDevice(String uniqueCode, DeviceModel deviceModel){
+        Criteria criteria = Criteria.where("code").is(deviceModel.getCode());
+
+        Update update = new Update();
+        update.set("shelfLife", deviceModel.getShelfLife());
+        update.set("isInsurance", deviceModel.getIsInsurance());
+        update.set("manufacturer", deviceModel.getManufacturer());
+        update.set("brand", deviceModel.getBrand());
+        update.set("deviceDesc", deviceModel.getDeviceDesc());
+
+
+        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, uniqueCode + CollectionSuffix.DEVICE);
+        return result.getN()>0;
+    }
+
+    /**
+     * （批量）删除设备
+     */
+    public void deleteDevices(String uniqueCode, DeviceQuery deviceQuery){
+        List<String> deviceCodes = deviceQuery.getDeviceCodes();
+
+        Criteria criteria = new Criteria();
+        if (deviceCodes != null && deviceCodes.size() > 0){
+            criteria.and("code").in(deviceCodes);
+        }
+        mongoTemplate.remove(new Query(criteria), DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * （批量）删除特殊设备特殊属性
+     */
+    public void deleteDeviceSpecialInfo(String uniqueCode, DeviceQuery deviceQuery){
+        List<String> deviceCodes = deviceQuery.getDeviceCodes();
+
+        Criteria criteria = new Criteria();
+        if (deviceCodes != null && deviceCodes.size() > 0){
+            criteria.and("deviceCode").in(deviceCodes);
+        }
+        mongoTemplate.remove(new Query(criteria), DeviceSpecialInfoEntity.class, uniqueCode + CollectionSuffix.DEVICE_SPECIAL_INFO);
+    }
+
+    /**
+     * 修改特殊设备特殊属性
+     */
+    public void modifyDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        Criteria criteria = Criteria.where("deviceId").is(deviceSpecialInfoEntity.getDeviceId())
+                .and("deviceCode").is(deviceSpecialInfoEntity.getDeviceCode());
+
+        Update update = new Update();
+        //FSU动环主机("038")属性
+        update.set("adaptation", deviceSpecialInfoEntity.getAdaptation());
+        update.set("engine", deviceSpecialInfoEntity.getEngine());
+        update.set("sMinitor", deviceSpecialInfoEntity.getsMinitor());
+
+        //开关电源("006")属性
+        update.set("rectifacationCount", deviceSpecialInfoEntity.getRectifacationCount());
+        update.set("rectifacationModel", deviceSpecialInfoEntity.getRectifacationModel());
+        update.set("outVoltage", deviceSpecialInfoEntity.getOutVoltage());
+        update.set("monitorState", deviceSpecialInfoEntity.getMonitorState());
+        update.set("antiThunderState", deviceSpecialInfoEntity.getAntiThunderState());
+        update.set("moduleState", deviceSpecialInfoEntity.getModuleState());
+
+        //油机（柴油发电机组）("005")
+        update.set("ratedVoltage", deviceSpecialInfoEntity.getRatedVoltage());
+        update.set("ratedPower", deviceSpecialInfoEntity.getRatedPower());
+        update.set("startMode", deviceSpecialInfoEntity.getStartMode());
+        update.set("coolingMode", deviceSpecialInfoEntity.getCoolingMode());
+        update.set("tankVolume", deviceSpecialInfoEntity.getTankVolume());
+
+        //蓄电池组("007")
+        update.set("groupCapacity", deviceSpecialInfoEntity.getGroupCapacity());
+        update.set("monVoltageLevel", deviceSpecialInfoEntity.getMonVoltageLevel());
+        update.set("groupCellCount", deviceSpecialInfoEntity.getGroupCellCount());
+
+        //普通空调("015")
+        update.set("refrigerationEffect", deviceSpecialInfoEntity.getRefrigerationEffect());
+        update.set("unitState", deviceSpecialInfoEntity.getUnitState());
+        update.set("drainpipeState", deviceSpecialInfoEntity.getDrainpipeState());
+        update.set("selfStart", deviceSpecialInfoEntity.getSelfStart());
+        update.set("refrigeratingCapacity", deviceSpecialInfoEntity.getRefrigeratingCapacity());
+        update.set("inputRatedPower", deviceSpecialInfoEntity.getInputRatedPower());
+
+        //UPS设备("008")
+        update.set("inputRatedVoltage", deviceSpecialInfoEntity.getInputRatedVoltage());
+        update.set("outputRatedVoltage", deviceSpecialInfoEntity.getOutputRatedVoltage());
+
+        mongoTemplate.updateFirst(new Query(criteria), update, uniqueCode + CollectionSuffix.DEVICE_SPECIAL_INFO);
+    }
+
+    /**
+     * 查找获取特殊设备的特殊属性
+     */
+    public DeviceSpecialInfoEntity findDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        int deviceId = deviceSpecialInfoEntity.getDeviceId();
+        String deviceCode = deviceSpecialInfoEntity.getDeviceCode();
+
+        Criteria criteria = Criteria.where("deviceCode").is(deviceCode)
+                .and("deviceId").is(deviceId);
+
+        return mongoTemplate.findOne(new Query(criteria), DeviceSpecialInfoEntity.class, uniqueCode + CollectionSuffix.DEVICE_SPECIAL_INFO);
+    }
+
+    /**
+     * 保存特殊设备特殊属性
+     */
+    public void saveDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        mongoTemplate.save(deviceSpecialInfoEntity, uniqueCode + CollectionSuffix.DEVICE_SPECIAL_INFO);
     }
 
     /**
@@ -45,7 +227,7 @@ public class DeviceMongo {
         baseCriteria(criteria, deviceQuery);
         Query query = Query.query(criteria);
         query.skip( (deviceQuery.getCurrentPage()-1) * deviceQuery.getPageSize() ).limit(deviceQuery.getPageSize());
-        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + table);
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 
     /**
@@ -57,7 +239,7 @@ public class DeviceMongo {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, deviceQuery);
         Query query = Query.query(criteria);
-        return (int)mongoTemplate.count(query, uniqueCode + table);
+        return (int)mongoTemplate.count(query, uniqueCode + CollectionSuffix.DEVICE);
     }
 
     Criteria baseCriteria(Criteria criteria, DeviceQuery deviceQuery){
@@ -86,6 +268,6 @@ public class DeviceMongo {
     public List<DeviceEntity> getBySiteCodeList(String uniqueCode, List<String> siteCodeList) {
         Criteria criteria = Criteria.where("siteCode").in(siteCodeList);
         Query query = Query.query(criteria);
-        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + table);
+        return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 }

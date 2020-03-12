@@ -103,7 +103,7 @@ public class ReportsHandler implements ApplicationRunner {
 //        String value = reportOperaCode.value();//此处配置额外的配置项
 
         ReportExtend[] extend = reportOperaCode.extend();
-        String[] resultTypes = reportOperaCode.resultType();
+        String[] resultTypes = reportOperaCode.dataType();
         List<ReportExtendProperties> extendPropertiesList = new ArrayList<>();
         for (ReportExtend reportExtend : extend) {
             ReportExtendProperties e = new ReportExtendProperties();
@@ -114,6 +114,10 @@ public class ReportsHandler implements ApplicationRunner {
             ReportExtend.FieldType type = reportExtend.type();
             e.setType(type.name());
             e.setBelongs(reportExtend.belong().name());
+            e.setHide(reportExtend.hide());
+            e.setSelect(Arrays.asList(reportExtend.select()));
+            e.setValue(reportExtend.value());
+            e.setUri(reportExtend.uri());
             extendPropertiesList.add(e);
         }
 

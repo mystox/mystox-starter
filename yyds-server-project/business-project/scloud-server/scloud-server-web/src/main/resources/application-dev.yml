@@ -4,6 +4,7 @@ spring:
     port: 6379
     database: 2
 server:
+  name: SCLOUD_SERVER_WEB2 #服务编码
   host: 172.16.6.143
   groupCode: GROUP_DADD_TEST
   port: 59002 #服务占用web端口

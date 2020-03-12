@@ -17,6 +17,7 @@ public class AlarmCountTemp {
     private String municipality; //市
     private String county; //县|区
     private String stationName; //站点名称
+    private String stationId; //站点id
     private String stationType;//站点类型
     private String alarmLevel;
     private String alarmState; //告警状态： 历史告警
@@ -25,6 +26,13 @@ public class AlarmCountTemp {
     private Boolean deleteFlag = false;
 
 
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
 
     public Date getTempDate() {
         return tempDate;

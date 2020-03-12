@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.util.List;
 
@@ -15,7 +17,49 @@ public interface DeviceService {
     /**
      * 获取设备列表
      */
-    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+    List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
+
+    /**
+     * 导出设备列表
+     */
+    HSSFWorkbook exportDeviceList(List<DeviceModel> list);
+
+    /**
+     * 生成设备编码
+     */
+    String createDeviceCode(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 添加设备
+     *
+     * @return 设备ID
+     */
+    Integer addDevice(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 修改设备
+     */
+    boolean modifyDevice(String uniqueCode, DeviceModel deviceModel);
+
+    /**
+     * 删除设备
+     */
+    void deleteDevice(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
+
+    /**
+     * 修改特殊设备特殊属性
+     */
+    void modifyDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
+
+    /**
+     * 保存特殊设备的特殊属性
+     */
+    void saveDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
 
     /**
      * @auther: liudd

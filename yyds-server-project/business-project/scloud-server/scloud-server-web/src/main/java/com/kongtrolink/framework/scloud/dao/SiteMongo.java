@@ -5,6 +5,7 @@ import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -57,7 +58,7 @@ public class SiteMongo {
     public List<SiteEntity> findSiteList(String uniqueCode, SiteQuery siteQuery){
         String address = siteQuery.getAddress(); //站点地址
         String towerType = siteQuery.getTowerType();   //铁塔类型
-        String respName = siteQuery.getRespName();    //资产管理员名称
+        String respName = siteQuery.getRespName();    //资产管理员名称(模糊搜索)
         Long startTime = siteQuery.getStartTime(); //开始时间
         Long endTime = siteQuery.getEndTime();   //结束时间
         String siteCode = siteQuery.getSiteCode();  //站点编码（模糊搜索）
@@ -68,8 +69,8 @@ public class SiteMongo {
             criteria.and("towerType").is(towerType);
         }
         if (siteCode != null && !siteCode.equals("")){
-            address = MongoRegexUtil.escapeExprSpecialWord(address);
-            criteria.and("address").regex("^" + address + ".*?");
+            siteCode = MongoRegexUtil.escapeExprSpecialWord(address);
+            criteria.and("code").regex("^" + siteCode + ".*?");
         }
         if (siteCodes != null){
             criteria.and("code").in(siteCodes);
@@ -103,8 +104,8 @@ public class SiteMongo {
     /**
      * 修改站点
      */
-    public void modifySite(String uniqueCode, SiteModel siteModel){
-        int siteId = siteModel.getSiteId(); //站点主键Id
+    public boolean modifySite(String uniqueCode, SiteModel siteModel){
+        String siteCode = siteModel.getCode(); //站点编码
         String coordinate = siteModel.getCoordinate();	//站点经纬度
         String address = siteModel.getAddress();	//站点地址
         String respName = siteModel.getRespName();	//资产管理员名称
@@ -116,7 +117,7 @@ public class SiteMongo {
         String areaCovered = siteModel.getAreaCovered();	//占地面积
         int fileId = siteModel.getFileId();	//站点图纸文件Id
 
-        Criteria criteria = Criteria.where("id").is(siteId);
+        Criteria criteria = Criteria.where("code").is(siteCode);
         Update update = new Update();
         update.set("address", address);
         update.set("respName", respName);
@@ -131,7 +132,8 @@ public class SiteMongo {
             update.set("coordinate", coordinate);
         }
 
-        mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        return result.getN() >0;
     }
 
     /**
@@ -145,6 +147,14 @@ public class SiteMongo {
             criteria.and("code").in(siteCodes);
         }
         mongoTemplate.remove(new Query(criteria), SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+    }
+
+    /**
+     * 根据区域编码，获取站点
+     */
+    public List<SiteEntity> findSitesByTierCodes(String uniqueCode, List<String> tierCodes){
+        Criteria criteria = Criteria.where("tierCode").in(tierCodes);
+        return mongoTemplate.find(new Query(criteria), SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
     }
 
 }

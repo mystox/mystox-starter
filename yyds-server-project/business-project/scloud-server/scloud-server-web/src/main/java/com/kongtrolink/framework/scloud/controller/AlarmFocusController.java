@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.scloud.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
-import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -37,7 +35,7 @@ public class AlarmFocusController extends BaseController {
     @Autowired
     SiteService siteService;
     @Autowired
-    SignalService signalService;
+    DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     AlarmService alarmService;
 
@@ -75,7 +73,7 @@ public class AlarmFocusController extends BaseController {
             }
             alarmFocus.initDeviceInfo(deviceModel);
             //获取设备类型
-            DeviceType deviceType = signalService.getByCode(uniqueCode, deviceModel.getTypeCode());
+            DeviceType deviceType = deviceSignalTypeService.getByCode(uniqueCode, deviceModel.getTypeCode());
             if(null == deviceType){
                 throw new ParameterException("设备类型" + deviceModel.getTypeCode() + "不存在");
             }

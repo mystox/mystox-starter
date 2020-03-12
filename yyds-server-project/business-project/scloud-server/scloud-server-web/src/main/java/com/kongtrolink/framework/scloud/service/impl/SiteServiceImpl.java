@@ -71,6 +71,7 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setTierCode(siteModel.getTierCode());
         siteEntity.setTierName(siteModel.getTierName());
         siteEntity.setCode(siteModel.getCode());
+        siteEntity.setSiteType(siteModel.getSiteType());
         siteEntity.setCoordinate(siteModel.getCoordinate());
         siteEntity.setAddress(siteModel.getAddress());
         siteEntity.setRespName(siteModel.getRespName());
@@ -89,14 +90,14 @@ public class SiteServiceImpl implements SiteService {
         if (stateCode == CommonConstant.SUCCESSFUL){    //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
-                LOGGER.info("向【资管】发送添加站点MQTT 请求成功");
+                LOGGER.info("【站点管理】,向【资管】发送添加站点MQTT 请求成功");
                 //保存站点（扩展信息）
                 siteMongo.addSite(uniqueCode, siteEntity);
             }else {
-                LOGGER.error("向【资管】发送添加站点MQTT 请求失败");
+                LOGGER.error("【站点管理】,向【资管】发送添加站点MQTT 请求失败");
             }
         }else {
-            LOGGER.error("向【资管】发送添加站点MQTT 通信失败");
+            LOGGER.error("【站点管理】,向【资管】发送添加站点MQTT 通信失败");
         }
     }
 
@@ -117,7 +118,7 @@ public class SiteServiceImpl implements SiteService {
                 List<String> siteCodes = new ArrayList<>();
                 Map<String, BasicSiteEntity> map = new HashMap<>();
                 for (JSONObject jsonObject : response.getInfos()) {
-                    BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
+                    BasicSiteEntity basicSiteEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicSiteEntity.class);
                     siteCodes.add(basicSiteEntity.getCode());
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }
@@ -154,10 +155,82 @@ public class SiteServiceImpl implements SiteService {
                 LOGGER.error("【站点管理】，从【资管】获取站点 请求失败");
             }
         }else {
-            LOGGER.error("从【资管】获取站点 MQTT通信失败");
+            LOGGER.error("【站点管理】，从【资管】获取站点 MQTT通信失败");
         }
 
         return list;
+    }
+
+    /**
+     * 获取简化版站点列表
+     * 根据query.getSimplifiedSitekeys()获取到的简化版站点所需参数的key，删减Site中不需要的参数，仅保留Site中所传需要的参数
+     */
+    @Override
+    public List<JSONObject> getSimplifiedSiteList(List<SiteModel> siteModelList, SiteQuery query) {
+        List<JSONObject> objectList = new ArrayList<>();
+        for (SiteModel siteModel : siteModelList) {
+            JSONObject jsonObject = new JSONObject();
+            for (int i = 0; i < query.getSimplifiedSitekeys().size(); i++) {
+                switch (query.getSimplifiedSitekeys().get(i)) {
+                    case "siteId":
+                        jsonObject.put("siteId", siteModel.getSiteId());
+                        break;
+                    case "tierCode":
+                        jsonObject.put("tierCode", siteModel.getTierCode());
+                        break;
+                    case "tierName":
+                        jsonObject.put("tierName", siteModel.getTierName());
+                        break;
+                    case "name":
+                        jsonObject.put("name", siteModel.getName());
+                        break;
+                    case "code":
+                        jsonObject.put("code", siteModel.getCode());
+                        break;
+                    case "siteType":
+                        jsonObject.put("siteType", siteModel.getSiteType());
+                        break;
+                    case "coordinate":
+                        jsonObject.put("coordinate", siteModel.getCoordinate());
+                        break;
+                    case "address":
+                        jsonObject.put("address", siteModel.getAddress());
+                        break;
+                    case "respName":
+                        jsonObject.put("respName", siteModel.getRespName());
+                        break;
+                    case "respPhone":
+                        jsonObject.put("respPhone", siteModel.getRespPhone());
+                        break;
+                    case "towerHeight":
+                        jsonObject.put("towerHeight", siteModel.getTowerHeight());
+                        break;
+                    case "towerType":
+                        jsonObject.put("towerType", siteModel.getTowerType());
+                        break;
+                    case "shareInfo":
+                        jsonObject.put("shareInfo", siteModel.getShareInfo());
+                        break;
+                    case "assetNature":
+                        jsonObject.put("assetNature", siteModel.getAssetNature());
+                        break;
+                    case "createTime":
+                        jsonObject.put("createTime", siteModel.getCreateTime());
+                        break;
+                    case "areaCovered":
+                        jsonObject.put("areaCovered", siteModel.getAreaCovered());
+                        break;
+                    case "fileId":
+                        jsonObject.put("fileId", siteModel.getFileId());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            objectList.add(jsonObject);
+        }
+
+        return objectList;
     }
 
     /**
@@ -176,8 +249,9 @@ public class SiteServiceImpl implements SiteService {
      * 修改站点
      */
     @Override
-    public void modifySite(String uniqueCode, SiteModel siteModel) {
+    public boolean modifySite(String uniqueCode, SiteModel siteModel) {
         Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称
+        boolean modifyResult = false;
         if (isModified) {   //如果修改了站点的基本属性(即站点名称)
             //向【资管】下发修改站点的MQTT消息
             MsgResult msgResult = assetCIService.modifyAssetSite(uniqueCode, siteModel);
@@ -187,7 +261,7 @@ public class SiteServiceImpl implements SiteService {
                 if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                     LOGGER.info("向【资管】发送修改站点MQTT 请求成功");
                     //对平台端数据库中保存的站点扩展信息进行修改
-                    siteMongo.modifySite(uniqueCode, siteModel);
+                    modifyResult = siteMongo.modifySite(uniqueCode, siteModel);
                 }else {
                     LOGGER.error("向【资管】发送修改站点MQTT 请求失败");
                 }
@@ -195,9 +269,11 @@ public class SiteServiceImpl implements SiteService {
                 LOGGER.error("向【资管】发送修改站点MQTT 通信失败");
             }
         }else {
-            //对保存的站点扩展信息进行修改
-            siteMongo.modifySite(uniqueCode, siteModel);
+            //对平台端数据库中保存的站点扩展信息进行修改
+            modifyResult = siteMongo.modifySite(uniqueCode, siteModel);
         }
+
+        return modifyResult;
     }
 
     /**

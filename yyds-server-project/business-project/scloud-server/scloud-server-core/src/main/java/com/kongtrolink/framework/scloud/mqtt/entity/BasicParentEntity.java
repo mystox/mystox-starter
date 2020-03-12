@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.mqtt.entity;
 
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
+
 /**
  * 获取到的父资产 信息
  *  中台资管->SCloud
@@ -7,15 +9,22 @@ package com.kongtrolink.framework.scloud.mqtt.entity;
  */
 public class BasicParentEntity {
 
-    private String name;    //父资产类型
+    private String type;    //父资产类型
     private String sn;  //父资产SN
+    private String relationshipType = CommonConstant.RELATIONSHIP_TYPE_INSTALL; //连接类型，Install为安装于
 
-    public String getName() {
-        return name;
+    public BasicParentEntity(String type, String sn, String relationshipType) {
+        this.type = type;
+        this.sn = sn;
+        this.relationshipType = relationshipType;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getSn() {
@@ -24,5 +33,13 @@ public class BasicParentEntity {
 
     public void setSn(String sn) {
         this.sn = sn;
+    }
+
+    public String getRelationshipType() {
+        return relationshipType;
+    }
+
+    public void setRelationshipType(String relationshipType) {
+        this.relationshipType = relationshipType;
     }
 }

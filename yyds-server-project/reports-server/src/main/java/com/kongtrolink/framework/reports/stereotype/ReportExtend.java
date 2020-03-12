@@ -10,7 +10,7 @@ import com.kongtrolink.framework.reports.entity.ExecutorType;
  */
 public @interface ReportExtend {
 
-    enum FieldType {DATE, STRING, NUMBER,DISTRICT,URI,MQTT,DATE_PERIOD}
+    enum FieldType {DATE, STRING, NUMBER,DISTRICT,URI,MQTT,DATE_PERIOD,JSON}
 
     enum DateType {HOUR, DAY, WEEK, MONTH, YEAR}
 
@@ -22,10 +22,12 @@ public @interface ReportExtend {
 
     ExecutorType belong() default ExecutorType.execute;
 
-    String[] choices() default {};
+    String[] select() default {};
 
     String value() default "";
 
     boolean hide() default false;
+
+    String uri() default "";
 
 }

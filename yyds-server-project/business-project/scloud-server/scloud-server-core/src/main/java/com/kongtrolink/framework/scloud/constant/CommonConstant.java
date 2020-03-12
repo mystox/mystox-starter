@@ -18,4 +18,7 @@ public class CommonConstant {
     public static final int SEARCH_TYPE_EXACT = 1;  //精确搜索
     public static final int SEARCH_TYPE_IN = 2;  //IN搜索
 
+    //--------------------连接类型----------------------
+    public static final String RELATIONSHIP_TYPE_INSTALL = "Install";   //安装于
+
 }

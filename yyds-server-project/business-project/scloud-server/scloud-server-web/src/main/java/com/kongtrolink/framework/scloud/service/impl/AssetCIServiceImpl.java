@@ -5,11 +5,13 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.AssetTypeConstant;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicParentEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicDeviceQuery;
-import com.kongtrolink.framework.scloud.mqtt.query.BasicParentQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicSiteQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
@@ -41,23 +43,23 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicSiteQuery.setName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
-        if (siteQuery.getTierCodes() != null && siteQuery.getTierCodes().size() > 0) {  //如果选择区域为空的话，则不必向【中台-资管】发送请求获取区域下所有站点
-            basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
-            if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
-                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));
-            }
-            if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
-                basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));
-            }
-            if (siteQuery.getSiteType() != null && !siteQuery.getSiteType().equals("")) {
-                basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
-            }
+        basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
 
-            MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
-            return msgResult;
+        if (siteQuery.getTierCodes() != null) {
+            basicSiteQuery.setAddress(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getTierCodes()));
         }
-        return new MsgResult(CommonConstant.FAILED, null);
+        if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //站点编码-模糊搜索
+        }
+        if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
+            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //站点名称-模糊搜索
+        }
+        if (siteQuery.getSiteType() != null) {
+            basicSiteQuery.setSiteType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteType()));
+        }
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
+        return msgResult;
     }
 
     /**
@@ -71,10 +73,19 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicSiteQuery basicSiteQuery = new BasicSiteQuery();
         basicSiteQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getServerCode()));
         basicSiteQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicSiteQuery.setName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
-        basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
+        basicSiteQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));
+        if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0){   //站点编码-IN搜索
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getSiteCodes()));
+        }else {
+            if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {   //站点编码-精确搜索
+                basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, siteQuery.getSiteCode()));
+            }
+        }
+        if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
+            basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //站点名称模糊搜索
+        }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicSiteQuery));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicSiteQuery));
         return msgResult;
     }
 
@@ -95,7 +106,7 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteEntity.setSiteType(siteModel.getSiteType());
         basicSiteEntityList.add(basicSiteEntity);
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI, JSON.toJSONString(basicSiteEntityList));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI_SCLOUD, JSON.toJSONString(basicSiteEntityList));
         return msgResult;
     }
 
@@ -115,7 +126,7 @@ public class AssetCIServiceImpl implements AssetCIService{
             basicSiteEntityList.add(basicSiteEntity);
         }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI, JSON.toJSONString(basicSiteEntityList));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI_SCLOUD, JSON.toJSONString(basicSiteEntityList));
         return msgResult;
     }
 
@@ -131,7 +142,7 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicSiteEntity.setCode(siteModel.getCode());
         basicSiteEntity.setName(siteModel.getName());
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI, JSON.toJSONString(basicSiteEntity));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI_SCLOUD, JSON.toJSONString(basicSiteEntity));
         return msgResult;
     }
 
@@ -143,7 +154,9 @@ public class AssetCIServiceImpl implements AssetCIService{
         BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
         basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
         basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
-        basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceCodes()));
+        if (deviceQuery.getDeviceCodes() != null) {
+            basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceCodes()));
+        }
         if (deviceQuery.getDeviceName() != null && !deviceQuery.getDeviceName().equals("")) {
             basicDeviceQuery.setDeviceName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, deviceQuery.getDeviceName()));
         }
@@ -151,7 +164,21 @@ public class AssetCIServiceImpl implements AssetCIService{
             basicDeviceQuery.setModel(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, deviceQuery.getModel()));
         }
 
-        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI, JSON.toJSONString(basicDeviceQuery));
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
+    }
+
+    /**
+     * 从【中台-资管】 获取单个设备（基本信息）
+     */
+    @Override
+    public MsgResult getAssetDeviceByCode(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+        basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
+        basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+        basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getDeviceCode()));
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
         return msgResult;
     }
 
@@ -159,23 +186,59 @@ public class AssetCIServiceImpl implements AssetCIService{
      * 向【中台-资管】 添加设备
      */
     @Override
-    public MsgResult addAssetDevice() {
-        return null;
+    public MsgResult addAssetDevice(String uniqueCode, DeviceModel deviceModel) {
+        List<BasicDeviceEntity> basicDeviceEntityList = new ArrayList<>();
+
+        BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+        basicDeviceEntity.setServerCode(deviceModel.getServerCode());
+        basicDeviceEntity.setUniqueCode(uniqueCode);
+        basicDeviceEntity.setAssetType(deviceModel.getType());
+        basicDeviceEntity.setCode(deviceModel.getCode());
+        basicDeviceEntity.setDeviceName(deviceModel.getName());
+        basicDeviceEntity.setModel(deviceModel.getModel());
+        BasicParentEntity basicParentEntity = new BasicParentEntity(AssetTypeConstant.ASSET_TYPE_SITE, deviceModel.getSiteCode(), CommonConstant.RELATIONSHIP_TYPE_INSTALL);
+        basicDeviceEntity.set_parent(basicParentEntity);
+
+        basicDeviceEntityList.add(basicDeviceEntity);
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI_SCLOUD, JSON.toJSONString(basicDeviceEntityList));
+        return msgResult;
     }
 
     /**
      * 向【中台-资管】 删除设备
      */
     @Override
-    public MsgResult deleteAssetDevice() {
-        return null;
+    public MsgResult deleteAssetDevice(String uniqueCode, DeviceQuery deviceQuery) {
+        List<String> deviceCodes = deviceQuery.getDeviceCodes();
+        List<BasicDeviceEntity> basicDeviceEntityList = new ArrayList<>();
+        for (String deviceCode : deviceCodes){
+            BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+            basicDeviceEntity.setServerCode(deviceQuery.getServerCode());
+            basicDeviceEntity.setUniqueCode(uniqueCode);
+            basicDeviceEntity.setCode(deviceCode);
+
+            basicDeviceEntityList.add(basicDeviceEntity);
+        }
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI_SCLOUD, JSON.toJSONString(basicDeviceEntityList));
+        return msgResult;
     }
 
     /**
      * 向【中台-资管】 修改设备
      */
     @Override
-    public MsgResult modifyAssetDevice() {
-        return null;
+    public MsgResult modifyAssetDevice(String uniqueCode, DeviceModel deviceModel) {
+        BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+        basicDeviceEntity.setServerCode(deviceModel.getServerCode());
+        basicDeviceEntity.setUniqueCode(uniqueCode);
+        basicDeviceEntity.setAssetType(deviceModel.getType());
+        basicDeviceEntity.setCode(deviceModel.getCode());
+        basicDeviceEntity.setDeviceName(deviceModel.getName());
+        basicDeviceEntity.setModel(deviceModel.getModel());
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI_SCLOUD, JSON.toJSONString(basicDeviceEntity));
+        return msgResult;
     }
 }
