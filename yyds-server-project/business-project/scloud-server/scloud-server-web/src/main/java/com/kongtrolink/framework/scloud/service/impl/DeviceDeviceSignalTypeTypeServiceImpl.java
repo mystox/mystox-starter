@@ -1,10 +1,10 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.kongtrolink.framework.scloud.dao.SignalMongo;
+import com.kongtrolink.framework.scloud.dao.DeviceSignalTypeMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.DeviceTypeExport;
 import com.kongtrolink.framework.scloud.entity.SignalType;
-import com.kongtrolink.framework.scloud.service.SignalService;
+import com.kongtrolink.framework.scloud.service.DeviceSignalTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,17 +16,17 @@ import java.util.List;
  * Created by Eric on 2020/2/10.
  */
 @Service
-public class SignalServiceImpl implements SignalService{
+public class DeviceDeviceSignalTypeTypeServiceImpl implements DeviceSignalTypeService {
 
     @Autowired
-    SignalMongo signalMongo;
+    DeviceSignalTypeMongo deviceSignalTypeMongo;
 
     /**
      * 修改或保存信号类型映射表
      */
     @Override
     public void modifySignalType(String uniqueCode, List<DeviceType> deviceTypes) {
-        signalMongo.modifyTypeList(uniqueCode, deviceTypes);
+        deviceSignalTypeMongo.modifyTypeList(uniqueCode, deviceTypes);
         // TODO: 2020/2/11 发送更新信号映射表MQTT消息
 
     }
@@ -36,7 +36,7 @@ public class SignalServiceImpl implements SignalService{
      */
     @Override
     public List<DeviceType> querySignalType(String uniqueCode) {
-        return signalMongo.findSignalTypeList(uniqueCode);
+        return deviceSignalTypeMongo.findSignalTypeList(uniqueCode);
     }
 
     /**
@@ -45,7 +45,7 @@ public class SignalServiceImpl implements SignalService{
     @Override
     public List<DeviceTypeExport> getDeviceTypeExport(String uniqueCode) {
         List<DeviceTypeExport> value = new ArrayList<>();
-        List<DeviceType> typeList = signalMongo.findSignalTypeList(uniqueCode);
+        List<DeviceType> typeList = deviceSignalTypeMongo.findSignalTypeList(uniqueCode);
         if (typeList == null || typeList.size() == 0){
             return value;
         }
@@ -74,7 +74,7 @@ public class SignalServiceImpl implements SignalService{
      */
     @Override
     public DeviceType getByCode(String uniqueCode, String typeCode) {
-        return signalMongo.getByCode(uniqueCode, typeCode);
+        return deviceSignalTypeMongo.getByCode(uniqueCode, typeCode);
     }
 
     /**
@@ -87,6 +87,6 @@ public class SignalServiceImpl implements SignalService{
      */
     @Override
     public List<SignalType> getByCodeListCntbIdList(String uniqueCode, List<String> codeList, List<String> cntbIdList) {
-        return signalMongo.getByCodeListCntbIdList(uniqueCode, codeList, cntbIdList);
+        return deviceSignalTypeMongo.getByCodeListCntbIdList(uniqueCode, codeList, cntbIdList);
     }
 }

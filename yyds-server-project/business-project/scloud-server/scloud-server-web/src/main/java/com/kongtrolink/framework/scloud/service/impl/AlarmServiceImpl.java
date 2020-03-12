@@ -42,7 +42,7 @@ public class AlarmServiceImpl implements AlarmService {
     @Autowired
     SiteService siteService;
     @Autowired
-    SignalService signalService;
+    DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     FilterRuleService filterRuleService;
 
@@ -157,7 +157,7 @@ public class AlarmServiceImpl implements AlarmService {
             cntbIdAlarmList.add(alarm);
             cntbIdAlarmListMap.put(signalId, cntbIdAlarmList);
         }
-        List<SignalType> signalTypeList = signalService.getByCodeListCntbIdList(uniqueCode, typeCodeList, cntbIdList);
+        List<SignalType> signalTypeList = deviceSignalTypeService.getByCodeListCntbIdList(uniqueCode, typeCodeList, cntbIdList);
         for(SignalType signalType : signalTypeList){
             String cntbId = signalType.getCntbId();
             List<Alarm> cntbIdAlarmList = cntbIdAlarmListMap.get(cntbId);

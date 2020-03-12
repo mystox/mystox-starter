@@ -10,7 +10,7 @@ import java.util.List;
  * 信号点接口类
  * Created by Eric on 2020/2/10.
  */
-public interface SignalService {
+public interface DeviceSignalTypeService {
 
     /**
      * 修改或保存信号类型映射表

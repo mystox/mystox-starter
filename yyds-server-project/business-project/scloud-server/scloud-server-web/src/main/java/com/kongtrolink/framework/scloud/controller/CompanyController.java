@@ -13,7 +13,7 @@ import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 import com.kongtrolink.framework.scloud.entity.model.CompanyModel;
 import com.kongtrolink.framework.scloud.exception.ExcelParseException;
 import com.kongtrolink.framework.scloud.service.CompanyService;
-import com.kongtrolink.framework.scloud.service.SignalService;
+import com.kongtrolink.framework.scloud.service.DeviceSignalTypeService;
 import com.kongtrolink.framework.scloud.service.TypeMappingExcelService;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -49,7 +49,7 @@ public class CompanyController extends BaseController{
     @Autowired
     CompanyService companyService;
     @Autowired
-    SignalService signalService;
+    DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     TypeMappingExcelService typeMappingExcelService;
     @Autowired
@@ -113,7 +113,7 @@ public class CompanyController extends BaseController{
         }
 
         if(list != null && list.size() > 0){
-            signalService.modifySignalType(uniqueCode, list);
+            deviceSignalTypeService.modifySignalType(uniqueCode, list);
             return new JsonResult(list);
         }else{
             return new JsonResult("Excel 文件解析结果为空", false);
@@ -149,7 +149,7 @@ public class CompanyController extends BaseController{
     public @ResponseBody JsonResult getSignalType(){
         try {
 //            String uniqueCode = getUniqueCode();
-            List<DeviceType> deviceTypes = signalService.querySignalType(uniqueCode);
+            List<DeviceType> deviceTypes = deviceSignalTypeService.querySignalType(uniqueCode);
             return new JsonResult(deviceTypes);
         }catch (Exception e){
             e.printStackTrace();
@@ -164,7 +164,7 @@ public class CompanyController extends BaseController{
     public @ResponseBody void exportSignalType(HttpServletResponse response){
         try{
 //            String uniqueCode = getUniqueCode();
-            List<DeviceTypeExport> list = signalService.getDeviceTypeExport(uniqueCode);
+            List<DeviceTypeExport> list = deviceSignalTypeService.getDeviceTypeExport(uniqueCode);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             String title = "信号点映射表"+sdf.format(new Date());
             String[] headsName = {"设备类型","设备类型编号","信号名称","信号类型编号","单位（遥测/遥调）","信号ID","信号类型","通信故障告警标识"};
