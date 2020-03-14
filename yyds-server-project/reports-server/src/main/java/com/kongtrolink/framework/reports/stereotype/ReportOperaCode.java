@@ -19,7 +19,7 @@ public @interface ReportOperaCode {
 
     ReportExtend[] extend() default {};
 
-    int rhythm() default 1;
+    int rhythm() default 1; //-1 dayOfWeek -2 dayOfMonth -3 dayOfYear
 
     String[] dataType() default {};
 

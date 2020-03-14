@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.query;
 
 import com.kongtrolink.framework.base.Paging;
-import com.kongtrolink.framework.enttiy.Alarm;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -23,6 +21,7 @@ public class AlarmQuery extends Paging {
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备类型
     private List<String> deviceCodeList;        //设备编码列表，需要统一
+    private List<String> deviceIdList;          //设备id
     private String state;                       //告警状态
     private Integer level;
     private Integer targetLevel;
@@ -46,6 +45,15 @@ public class AlarmQuery extends Paging {
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+
+
+    public List<String> getDeviceIdList() {
+        return deviceIdList;
+    }
+
+    public void setDeviceIdList(List<String> deviceIdList) {
+        this.deviceIdList = deviceIdList;
+    }
 
     public List<String> getDeviceTypeList() {
         return deviceTypeList;

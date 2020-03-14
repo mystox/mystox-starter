@@ -118,6 +118,7 @@ public class ReportsHandler implements ApplicationRunner {
             e.setSelect(Arrays.asList(reportExtend.select()));
             e.setValue(reportExtend.value());
             e.setUri(reportExtend.uri());
+            e.setDescription(reportExtend.description());
             extendPropertiesList.add(e);
         }
 

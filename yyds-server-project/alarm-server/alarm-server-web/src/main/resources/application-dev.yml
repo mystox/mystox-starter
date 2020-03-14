@@ -7,7 +7,7 @@ spring:
     database: 2
 
 server:
-  groupCode: GROUP_DADD_TEST
+  groupCode: GROUP
   port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #  serverUri: /home #首页名
   pageRoute: proxy_alarm
@@ -83,5 +83,18 @@ level:
   serverVersion: ALARM_SERVER_LEVEL_V1.0.0
   updateEnterpriseLevelMap: updateEnterpriseLevelMap
   useAlarmLevel: false
+###########日志配置###########
+logging:
+  level:
+    root: info
+    com.kongtrolink.framework: INFO
+    com.kongtrolink.framework.dao.AlarmReduceDao: DEBUG
+    com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 
 

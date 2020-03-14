@@ -36,4 +36,10 @@ public class ReportsInterfaceImpl implements ReportsInterface{
         return null;
     }
 
+    @Override
+    public List<JSONObject> getFsuSCloud(String msg) {
+
+        return null;
+    }
+
 }

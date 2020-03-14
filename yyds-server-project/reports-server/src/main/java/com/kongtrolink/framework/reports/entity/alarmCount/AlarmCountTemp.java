@@ -17,14 +17,32 @@ public class AlarmCountTemp {
     private String municipality; //市
     private String county; //县|区
     private String stationName; //站点名称
+    private String operationState; //站点状态
     private String stationId; //站点id
     private String stationType;//站点类型
-    private String alarmLevel;
+    private String alarmLevel; //告警等级
     private String alarmState; //告警状态： 历史告警
     private Long alarmCount; //告警总数
     private Long alarmRecoveryCount; //告警恢复数
+    private String fsuManufactory; //fsu 厂家
     private Boolean deleteFlag = false;
 
+
+    public String getFsuManufactory() {
+        return fsuManufactory;
+    }
+
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public String getStationId() {
         return stationId;

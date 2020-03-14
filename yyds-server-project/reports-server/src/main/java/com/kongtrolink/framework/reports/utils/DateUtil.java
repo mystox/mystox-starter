@@ -67,10 +67,34 @@ public class DateUtil {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
+    public  Date getFirstDayOfMonth(int year, int month)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH,month-1);
+        calendar.set(Calendar.YEAR,year);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
     public  Date getLastDayOfMonth()
     {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH,0);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, -1);
+        return calendar.getTime();
+    }
+    public  Date getLastDayOfMonth(int year, int month)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH,month);
+        calendar.set(Calendar.YEAR,year);
         calendar.set(Calendar.DAY_OF_MONTH,1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
@@ -84,6 +108,8 @@ public class DateUtil {
         Date time = DateUtil.getInstance().getLastDayOfMonth();
         System.out.println(format.format(time));
         System.out.println(time.getTime());
+        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfMonth(2020,1)));
+        System.out.println(format.format(DateUtil.getInstance().getLastDayOfMonth(2020,1)));
 
 
     }

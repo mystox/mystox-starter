@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.reports.entity.query;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * \* @Author: mystox
  * \* Date: 2020/3/9 16:35
@@ -7,6 +9,7 @@ package com.kongtrolink.framework.reports.entity.query;
  * \
  */
 public class SiteEntity {
+    @JSONField(name = "sn")
     private String siteId; //站点id 即sn
     private String siteName;
     private String address;
