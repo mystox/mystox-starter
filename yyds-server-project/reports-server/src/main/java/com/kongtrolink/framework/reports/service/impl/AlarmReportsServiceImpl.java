@@ -139,7 +139,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                     logger.error("get fsu list is null:[{}]",JSONObject.toJSONString(s));
                     return;
                 }
-
                 FsuEntity fsuEntity = fsuList.get(0);
                 String manufacturer = fsuEntity.getManufacturer();
                 String operationState = CommonCheck.fsuOperaStateCheck(fsuList);

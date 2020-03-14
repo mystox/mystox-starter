@@ -49,7 +49,7 @@ public class DeviceServiceImpl implements DeviceService {
      * 获取站点下设备列表
      */
     @Override
-    public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
+    public List<DeviceModel>  findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
         List<DeviceModel> list = new ArrayList<>();
         //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
         Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery);
