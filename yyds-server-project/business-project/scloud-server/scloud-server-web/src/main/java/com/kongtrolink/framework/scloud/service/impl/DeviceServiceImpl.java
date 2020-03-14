@@ -8,6 +8,7 @@ import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -45,54 +47,59 @@ public class DeviceServiceImpl implements DeviceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
     /**
-     * 获取单个站点下设备列表
+     * 获取站点下设备列表
      */
     @Override
-    public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
+    public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
         List<DeviceModel> list = new ArrayList<>();
+        //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
+        Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery);
+        if (siteEntityMap.size() > 0) {
+            List<String> siteCodes = new ArrayList<>(siteEntityMap.keySet());
+            deviceQuery.setSiteCodes(siteCodes);
 
-        //获取（业务平台端）站点下所有设备
-        List<DeviceEntity> devices = deviceMongo.findDevicesBySiteCodes(uniqueCode, deviceQuery);
-        if (devices != null && devices.size() > 0) {
-            List<String> deviceCodes = new ArrayList<>();   //设备编码
+            //获取（业务平台数据库）站点下所有设备
+            List<DeviceEntity> devices = deviceMongo.findDeviceList(uniqueCode, deviceQuery);
+            if (devices != null && devices.size() > 0){
+                List<String> deviceCodes = new ArrayList<>();   //设备编码
+                Map<String, DeviceEntity> deviceEntityMap = new HashMap<>();
                 for (DeviceEntity device : devices) {
-                deviceCodes.add(device.getCode());
-            }
-            deviceQuery.setDeviceCodes(deviceCodes);
-
-            //从【中台-资管】获取设备(基本信息)列表
-            MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
-            int stateCode = msgResult.getStateCode();
-            if (stateCode == 1) {   //通信成功
-                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
-                if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
-                    LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
-                    Map<String, BasicDeviceEntity> map = new HashMap<>();
-                    for (JSONObject jsonObject : response.getInfos()) {
-                        BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
-                        map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
-                    }
-
-                    List<DeviceEntity> deviceEntityList = deviceMongo.findDeviceList(uniqueCode, deviceQuery);
-                    Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery, deviceEntityList);
-                    for (DeviceEntity deviceEntity : deviceEntityList){
-                        DeviceModel deviceModel = new DeviceModel();
-                        deviceModel.setName(map.get(deviceEntity.getCode()).getDeviceName());
-                        deviceModel.setModel(map.get(deviceEntity.getCode()).getModel());
-                        if (siteEntityMap != null && siteEntityMap.containsKey(deviceEntity.getSiteCode())) {
-                            deviceModel.setSiteName(siteEntityMap.get(deviceEntity.getSiteCode()).getName());
-                        }
-
-                        list.add(deviceModel);
-                    }
-                } else {
-                    LOGGER.error("【设备管理】，从【资管】获取设备列表失败");
+                    deviceCodes.add(device.getCode());
+                    deviceEntityMap.put(device.getCode(), device);  //key:设备编码，value：设备（扩展）信息
                 }
-            } else {
-                LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
+                deviceQuery.setDeviceCodes(deviceCodes);
+
+                //从【中台-资管】获取设备(基本信息)列表
+                MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
+                if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
+                    CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                    if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                        LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
+                        Map<String, BasicDeviceEntity> map = new HashMap<>();
+                        for (JSONObject jsonObject : response.getInfos()) {
+                            BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
+                            map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
+                        }
+                        if (map.size() > 0){
+                            for (String deviceCode : map.keySet()){
+                                DeviceEntity device = deviceEntityMap.get(deviceCode);
+
+                                DeviceModel deviceModel = getDeviceModel(device);
+                                deviceModel.setName(map.get(deviceCode).getDeviceName());
+                                deviceModel.setModel(map.get(deviceCode).getModel());
+                                deviceModel.setSiteName(siteEntityMap.get(device.getSiteCode()).getName());
+
+                                list.add(deviceModel);
+                            }
+                        }
+                    } else {
+                        LOGGER.error("【设备管理】，从【资管】获取设备列表失败");
+                    }
+                }else {
+                    LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
+                }
             }
         }
-
         return list;
     }
 
@@ -138,7 +145,6 @@ public class DeviceServiceImpl implements DeviceService {
         }else{
             return typeCode.substring(1,3);
         }
-
     }
 
     private boolean checkCodeExisted(String uniqueCode,String deviceCode){
@@ -184,36 +190,74 @@ public class DeviceServiceImpl implements DeviceService {
         return tableDatas;
     }
 
-    //从【中台-资管】获取站点信息
-    private Map<String, BasicSiteEntity> getAssetSiteByCodes(String uniqueCode, DeviceQuery deviceQuery, List<DeviceEntity> deviceEntityList){
-        List<String> siteCodes = new ArrayList<>();
-        for(DeviceEntity deviceEntity : deviceEntityList){
-            siteCodes.add(deviceEntity.getSiteCode());
+    //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
+    private Map<String, BasicSiteEntity> getAssetSiteByCodes(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
+        List<String> siteCodes = deviceQuery.getSiteCodes() == null? deviceQuery.getSiteCodes() : new ArrayList<>();
+        List<String> tierCodes = deviceQuery.getTierCodes();
+        List<String> siteCodeList = new ArrayList<>();
+        if (tierCodes != null && tierCodes.size() > 0){ //如果用户选择了整个区域，查询区域下的站点
+            List<SiteEntity> siteEntities = siteMongo.findSitesByTierCodes(uniqueCode, tierCodes);
+            if (siteEntities != null && siteEntities.size() > 0){
+                for (SiteEntity siteEntity : siteEntities){
+                    siteCodeList.add(siteEntity.getCode()); //区域下站点的站点编码
+                }
+            }
         }
+        if (siteCodeList.size() > 0){
+            for (String code : siteCodeList){
+                siteCodes.add(code);    //整合站点编码
+            }
+        }
+
+        Map<String, BasicSiteEntity> map = new HashMap<>();
         SiteQuery siteQuery = new SiteQuery();
         siteQuery.setServerCode(deviceQuery.getServerCode());
+        if (deviceQuery.getSiteName() != null && !deviceQuery.getSiteName().equals("")) {   //存在站点名称模糊搜索条件
+            siteQuery.setSiteName(deviceQuery.getSiteName());
+        }
         siteQuery.setSiteCodes(siteCodes);
-
-        //向【中台-资管】请求获取站点信息
+        //从【中台-资管】获取站点信息
         MsgResult msgResult = assetCIService.getAssetSiteByCode(uniqueCode, siteQuery);
-        int stateCode = msgResult.getStateCode();
-        if (stateCode == CommonConstant.SUCCESSFUL) {    //通信成功
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
-                Map<String, BasicSiteEntity> map = new HashMap<>();
                 for (JSONObject jsonObject : response.getInfos()) {
                     BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }
-                return map;
             }else {
-                return null;
+                throw new Exception("从资管获取站点,请求失败");
             }
-        }else{
-            return null;
+        }else {
+            throw new Exception("从资管获取站点,通信失败");
         }
+
+        return map;
     }
 
+    //将设备属性赋值给返回给前端的设备数据模型
+    private DeviceModel getDeviceModel(DeviceEntity device){
+        DeviceModel deviceModel = new DeviceModel();
+        deviceModel.setId(device.getId());
+        deviceModel.setTierCode(device.getTierCode());
+        deviceModel.setSiteCode(device.getSiteCode());
+        deviceModel.setSiteId(device.getSiteId());
+        deviceModel.setType(device.getType());
+        deviceModel.setTypeCode(device.getTypeCode());
+        deviceModel.setCode(device.getCode());
+        deviceModel.setCreateTime(device.getCreateTime());
+        deviceModel.setShelfLife(device.getShelfLife());
+        deviceModel.setIsInsurance(device.getIsInsurance());
+        deviceModel.setManufacturer(device.getManufacturer());
+        deviceModel.setBrand(device.getBrand());
+        deviceModel.setDeviceDesc(device.getDeviceDesc());
+        deviceModel.setIp(device.getIp());
+        deviceModel.setState(device.getState());
+        deviceModel.setOfflineTime(device.getOfflineTime());
+        deviceModel.setOperationState(device.getOperationState());
+
+        return deviceModel;
+    }
 
     /**
      * @auther: liudd
