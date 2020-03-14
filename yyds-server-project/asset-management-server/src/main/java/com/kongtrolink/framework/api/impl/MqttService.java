@@ -144,7 +144,9 @@ public class MqttService implements Service {
                 DBResult dbResult = dbService.addCI(jsonObject);
                 if (dbResult.getResult() != 0) {
                     count++;
-                    result.getJSONArray("infos").add(jsonObject.getString("sn"));
+                    JSONObject info = new JSONObject();
+                    info.put("sn", jsonObject.getString("sn"));
+                    result.getJSONArray("infos").add(info);
                 }
 
                 if (jsonObject.containsKey("_parent")) {
@@ -208,7 +210,9 @@ public class MqttService implements Service {
                     dbResult = dbService.deleteCI(request);
                     if (dbResult.getResult() != 0) {
                         count++;
-                        result.getJSONArray("infos").add(id);
+                        JSONObject info = new JSONObject();
+                        info.put("sn", jsonObject.getString("sn"));
+                        result.getJSONArray("infos").add(info);
                     }
                 }
             } catch (Exception e) {

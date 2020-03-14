@@ -7,7 +7,7 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP_DADD_TEST
+  groupCode: GROUP
   host: 172.16.5.62
   port: 52202
 mqtt:
@@ -29,6 +29,8 @@ logging:
     console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 
+neo4jDBService:
+  defaultPageNum: 2000 #当搜索条件中没有分页项时的默认每页数量
 taskInterval:
   deviceGet: 6000 #获取设备列表时间间隔，秒
 appResources: #资源目录

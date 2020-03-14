@@ -13,6 +13,12 @@ public class BasicParentEntity {
     private String sn;  //父资产SN
     private String relationshipType = CommonConstant.RELATIONSHIP_TYPE_INSTALL; //连接类型，Install为安装于
 
+    public BasicParentEntity(String type, String sn, String relationshipType) {
+        this.type = type;
+        this.sn = sn;
+        this.relationshipType = relationshipType;
+    }
+
     public String getType() {
         return type;
     }

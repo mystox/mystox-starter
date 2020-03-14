@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
@@ -35,6 +36,7 @@ public class DeviceController extends BaseController{
     @Autowired
     DeviceService deviceService;
 
+    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceController.class);
 
     /**
@@ -43,7 +45,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceList(@RequestBody DeviceQuery deviceQuery){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
             List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, deviceQuery);
 
             return new JsonResult(list);
@@ -54,12 +56,27 @@ public class DeviceController extends BaseController{
     }
 
     /**
+     * 获取特殊设备的特殊属性
+     */
+    @RequestMapping(value = "getDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        try {
+//            String uniqueCode = getUniqueCode();
+            DeviceSpecialInfoEntity entity = deviceService.getDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+            return new JsonResult(entity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取特殊设备的特殊属性失败", false);
+        }
+    }
+
+    /**
      * 导出设备列表
      */
     @RequestMapping(value = "exportDeviceList", method = RequestMethod.POST)
     public void exportDeviceList(@RequestBody DeviceQuery deviceQuery, HttpServletResponse response){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
             List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, deviceQuery);
             HSSFWorkbook workbook = deviceService.exportDeviceList(list);
             export(response, workbook, "站点资产信息列表");
@@ -74,7 +91,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "createDeviceCode", method = RequestMethod.POST)
     public @ResponseBody JsonResult createDeviceCode(@RequestBody DeviceModel deviceModel){
         try {
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
             String code = deviceService.createDeviceCode(uniqueCode, deviceModel);
             return new JsonResult(code);
         }catch (Exception e){
@@ -89,13 +106,30 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "addDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult addDevice(@RequestBody DeviceModel deviceModel){
         try{
-            String uniqueCode = getUniqueCode();
-
-
-            return new JsonResult("添加成功", true);
+//            String uniqueCode = getUniqueCode();
+            Integer deviceId = deviceService.addDevice(uniqueCode, deviceModel);
+            if (deviceId != null) {
+                return new JsonResult(deviceId);
+            }else {
+                return new JsonResult("添加失败", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("添加失败", false);
+            return new JsonResult("添加异常", false);
+        }
+    }
+
+    /**
+     * 保存特殊设备的特殊属性
+     *  注：该接口在调用为特殊设备“添加设备”接口后调用
+     */
+    @RequestMapping(value = "saveDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody void saveDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity entity){
+        try {
+//            String uniqueCode = getUniqueCode();
+            deviceService.saveDeviceSpecialInfo(uniqueCode, entity);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -119,11 +153,30 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "modifyDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyDevice(@RequestBody DeviceModel deviceModel){
         try{
-
-            return new JsonResult("修改成功", true);
+//            String uniqueCode = getUniqueCode();
+            boolean modifyResult = deviceService.modifyDevice(uniqueCode, deviceModel);
+            if (modifyResult) {
+                return new JsonResult("修改成功", true);
+            }else {
+                return new JsonResult("修改失败", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("修改失败", false);
+            return new JsonResult("修改设备异常", false);
+        }
+    }
+
+    /**
+     * 修改特殊设备特殊属性
+     *  注：该接口在调用为特殊设备“修改设备”接口后调用
+     */
+    @RequestMapping(value = "modifyDeviceSpecialInfo", method = RequestMethod.POST)
+    public @ResponseBody void modifyDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
+        try{
+//            String uniqueCode = getUniqueCode();
+            deviceService.modifyDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -131,29 +184,18 @@ public class DeviceController extends BaseController{
      * 删除设备
      */
     @RequestMapping(value = "deleteDevice", method = RequestMethod.POST)
-    public @ResponseBody JsonResult deleteDevice(@RequestBody DeviceEntity deviceEntity){
+    public @ResponseBody JsonResult deleteDevice(@RequestBody DeviceQuery deviceQuery){
         try{
-
-            return new JsonResult("删除成功", true);
+//            String uniqueCode = getUniqueCode();
+            if (deviceQuery.getDeviceCodes() != null && deviceQuery.getDeviceCodes().size() > 0) {
+                deviceService.deleteDevice(uniqueCode, deviceQuery);
+                return new JsonResult("删除成功", true);
+            }else {
+                return new JsonResult("未选中设备", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("删除失败", false);
-        }
-    }
-
-    /**
-     * 获取企业所有设备类型
-     */
-    @RequestMapping(value = "getDeviceTypeList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getDeviceTypeList(@RequestBody DeviceEntity deviceEntity){
-        try {
-            String uniqueCode = getUniqueCode();
-            List<DeviceType> list = new ArrayList<>();
-
-            return new JsonResult(list);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("获取设备类型列表失败", false);
         }
     }
 

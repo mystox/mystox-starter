@@ -6,22 +6,22 @@ package com.kongtrolink.framework.scloud.constant;
  */
 public class OperaCodeConstant {
 
-    //获取企业信息
+    //获取云管企业信息
     public static final String GET_ENTERPRISE_MSG = "getEnterpriseMsg";
 
-    //获取企业下所有用户
+    //获取云管企业下所有用户
     public static final String GET_USER_LIST_BY_ENTERPRISE_CODE = "getUserListByEnterpriseCode";
 
-    //获取CI
+    //获取资管信息
     public static final String GET_CI_SCLOUD = "getCISCloud";
 
-    //添加CI
+    //添加资管信息
     public static final String ADD_CI_SCLOUD = "addCISCloud";
 
-    //修改CI
+    //修改资管信息
     public static final String MODIFY_CI_SCLOUD = "modifyCISCloud";
 
-    //删除CI
+    //删除资管信息
     public static final String DELETE_CI_SCLOUD = "deleteCISCloud";
 
 }

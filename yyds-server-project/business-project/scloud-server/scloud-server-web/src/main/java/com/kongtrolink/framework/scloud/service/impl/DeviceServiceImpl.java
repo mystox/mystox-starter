@@ -6,6 +6,7 @@ import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
+import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
@@ -75,7 +76,7 @@ public class DeviceServiceImpl implements DeviceService {
                         LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
                         Map<String, BasicDeviceEntity> map = new HashMap<>();
                         for (JSONObject jsonObject : response.getInfos()) {
-                            BasicDeviceEntity basicDeviceEntity = JSONObject.toJavaObject(jsonObject, BasicDeviceEntity.class);
+                            BasicDeviceEntity basicDeviceEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicDeviceEntity.class);
                             map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
                         }
                         if (map.size() > 0){
@@ -99,6 +100,15 @@ public class DeviceServiceImpl implements DeviceService {
             }
         }
         return list;
+    }
+
+    /**
+     * 获取特殊设备的特殊属性
+     */
+    @Override
+    public DeviceSpecialInfoEntity getDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity) {
+        DeviceSpecialInfoEntity entity = deviceMongo.findDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+        return entity;
     }
 
     /**
@@ -135,6 +145,116 @@ public class DeviceServiceImpl implements DeviceService {
         return deviceCode;
     }
 
+    /**
+     * 添加设备
+     *
+     * @return 设备ID
+     */
+    @Override
+    public Integer addDevice(String uniqueCode, DeviceModel deviceModel) {
+        DeviceEntity deviceEntity = new DeviceEntity();
+        deviceEntity.setTierCode(deviceModel.getTierCode());
+        deviceEntity.setSiteCode(deviceModel.getSiteCode());
+        deviceEntity.setSiteId(deviceModel.getSiteId());
+        deviceEntity.setType(deviceModel.getType());
+        deviceEntity.setTypeCode(deviceModel.getTypeCode());
+        deviceEntity.setCode(deviceModel.getCode());
+        deviceEntity.setCreateTime(deviceModel.getCreateTime());
+        deviceEntity.setShelfLife(deviceModel.getShelfLife());
+        deviceEntity.setIsInsurance(deviceModel.getIsInsurance());
+        deviceEntity.setManufacturer(deviceModel.getManufacturer());
+        deviceEntity.setBrand(deviceModel.getBrand());
+        deviceEntity.setDeviceDesc(deviceModel.getDeviceDesc());
+
+        //向【资管】下发（批量）添加设备的MQTT消息
+        MsgResult msgResult = assetCIService.addAssetDevice(uniqueCode, deviceModel);
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
+            CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {
+                LOGGER.info("【设备管理】,向【资管】发送添加设备MQTT 请求成功");
+                //保存设备（扩展信息）
+                Integer deviceId = deviceMongo.saveDevice(uniqueCode, deviceEntity);
+                return deviceId;
+            }else {
+                LOGGER.error("【设备管理】,向【资管】发送添加设备MQTT 请求失败");
+                return null;
+            }
+        }else {
+            LOGGER.error("【设备管理】,向【资管】发送添加设备MQTT 通信失败");
+            return null;
+        }
+    }
+
+    /**
+     * 修改设备
+     */
+    @Override
+    public boolean modifyDevice(String uniqueCode, DeviceModel deviceModel) {
+        Boolean isModified = deviceModel.getModified(); //修改设备时，是否修改了设备名称和设备型号
+        boolean modifyResult = false;
+        if (isModified){    //如果修改了设备的基本属性（即设备名称和设备型号）
+            //向【资管】下发修改设备的MQTT消息
+            MsgResult msgResult = assetCIService.modifyAssetDevice(uniqueCode, deviceModel);
+            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) {
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
+                    LOGGER.info("向【资管】发送修改设备MQTT 请求成功");
+                    //对平台端数据库中保存的设备扩展信息进行修改
+                    modifyResult = deviceMongo.modifyDevice(uniqueCode, deviceModel);
+                }else {
+                    LOGGER.error("向【资管】发送修改设备MQTT 请求失败");
+                }
+            }else {
+                LOGGER.error("向【资管】发送修改设备MQTT 通信失败");
+            }
+        }else {
+            //对平台端数据库中保存的设备扩展信息进行修改
+            modifyResult = deviceMongo.modifyDevice(uniqueCode, deviceModel);
+        }
+
+        return modifyResult;
+    }
+
+    /**
+     * 删除设备
+     */
+    @Override
+    public void deleteDevice(String uniqueCode, DeviceQuery deviceQuery) {
+        //向【资管】下发删除（批量）设备的MQTT消息
+        MsgResult msgResult = assetCIService.deleteAssetDevice(uniqueCode, deviceQuery);
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){
+            CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {
+                LOGGER.info("向【资管】发送删除设备MQTT 请求成功");
+                //（批量）删除平台端数据库中保存的站点
+                deviceMongo.deleteDevices(uniqueCode, deviceQuery);
+
+                //将设备从设备特殊属性表中(批量)删除
+                deviceMongo.deleteDeviceSpecialInfo(uniqueCode, deviceQuery);
+            }else {
+                LOGGER.error("向【资管】发送删除设备MQTT 请求失败");
+            }
+        }else {
+            LOGGER.error("向【资管】发送删除设备MQTT 通信失败");
+        }
+    }
+
+    /**
+     * 修改特殊设备特殊属性
+     */
+    @Override
+    public void modifyDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity) {
+        deviceMongo.modifyDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+    }
+
+    /**
+     * 保存特殊设备的特殊属性
+     */
+    @Override
+    public void saveDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity) {
+        deviceMongo.saveDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
+    }
+
     private String getTypeCode(String typeCode){
         if(typeCode==null || typeCode.length()<=2){
             return typeCode;
@@ -146,7 +266,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     private boolean checkCodeExisted(String uniqueCode,String deviceCode){
-        return deviceMongo.findDeviceByShortCode(uniqueCode, deviceCode) != null;
+        return deviceMongo.findDeviceByCode(uniqueCode, deviceCode) != null;
     }
 
     private String[][] getDeviceListAsTable(List<DeviceModel> list) {
@@ -220,7 +340,7 @@ public class DeviceServiceImpl implements DeviceService {
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                 for (JSONObject jsonObject : response.getInfos()) {
-                    BasicSiteEntity basicSiteEntity = JSONObject.toJavaObject(jsonObject, BasicSiteEntity.class);
+                    BasicSiteEntity basicSiteEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicSiteEntity.class);
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }
             }else {

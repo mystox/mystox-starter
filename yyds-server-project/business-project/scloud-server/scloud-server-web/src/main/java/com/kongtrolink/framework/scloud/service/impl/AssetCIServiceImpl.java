@@ -5,7 +5,10 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.AssetTypeConstant;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicParentEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicDeviceQuery;
@@ -183,23 +186,59 @@ public class AssetCIServiceImpl implements AssetCIService{
      * 向【中台-资管】 添加设备
      */
     @Override
-    public MsgResult addAssetDevice() {
-        return null;
+    public MsgResult addAssetDevice(String uniqueCode, DeviceModel deviceModel) {
+        List<BasicDeviceEntity> basicDeviceEntityList = new ArrayList<>();
+
+        BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+        basicDeviceEntity.setServerCode(deviceModel.getServerCode());
+        basicDeviceEntity.setUniqueCode(uniqueCode);
+        basicDeviceEntity.setAssetType(deviceModel.getType());
+        basicDeviceEntity.setCode(deviceModel.getCode());
+        basicDeviceEntity.setDeviceName(deviceModel.getName());
+        basicDeviceEntity.setModel(deviceModel.getModel());
+        BasicParentEntity basicParentEntity = new BasicParentEntity(AssetTypeConstant.ASSET_TYPE_SITE, deviceModel.getSiteCode(), CommonConstant.RELATIONSHIP_TYPE_INSTALL);
+        basicDeviceEntity.set_parent(basicParentEntity);
+
+        basicDeviceEntityList.add(basicDeviceEntity);
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_CI_SCLOUD, JSON.toJSONString(basicDeviceEntityList));
+        return msgResult;
     }
 
     /**
      * 向【中台-资管】 删除设备
      */
     @Override
-    public MsgResult deleteAssetDevice() {
-        return null;
+    public MsgResult deleteAssetDevice(String uniqueCode, DeviceQuery deviceQuery) {
+        List<String> deviceCodes = deviceQuery.getDeviceCodes();
+        List<BasicDeviceEntity> basicDeviceEntityList = new ArrayList<>();
+        for (String deviceCode : deviceCodes){
+            BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+            basicDeviceEntity.setServerCode(deviceQuery.getServerCode());
+            basicDeviceEntity.setUniqueCode(uniqueCode);
+            basicDeviceEntity.setCode(deviceCode);
+
+            basicDeviceEntityList.add(basicDeviceEntity);
+        }
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_CI_SCLOUD, JSON.toJSONString(basicDeviceEntityList));
+        return msgResult;
     }
 
     /**
      * 向【中台-资管】 修改设备
      */
     @Override
-    public MsgResult modifyAssetDevice() {
-        return null;
+    public MsgResult modifyAssetDevice(String uniqueCode, DeviceModel deviceModel) {
+        BasicDeviceEntity basicDeviceEntity = new BasicDeviceEntity();
+        basicDeviceEntity.setServerCode(deviceModel.getServerCode());
+        basicDeviceEntity.setUniqueCode(uniqueCode);
+        basicDeviceEntity.setAssetType(deviceModel.getType());
+        basicDeviceEntity.setCode(deviceModel.getCode());
+        basicDeviceEntity.setDeviceName(deviceModel.getName());
+        basicDeviceEntity.setModel(deviceModel.getModel());
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.MODIFY_CI_SCLOUD, JSON.toJSONString(basicDeviceEntity));
+        return msgResult;
     }
 }

@@ -47,6 +47,14 @@ public class BasicSiteEntity {
         this.tierCode = tierCode;
     }
 
+    public String getAssetType() {
+        return assetType;
+    }
+
+    public void setAssetType(String assetType) {
+        this.assetType = assetType;
+    }
+
     public String getCode() {
         return code;
     }
@@ -69,13 +77,5 @@ public class BasicSiteEntity {
 
     public void setSiteType(String siteType) {
         this.siteType = siteType;
-    }
-
-    public String getAssetType() {
-        return assetType;
-    }
-
-    public void setAssetType(String assetType) {
-        this.assetType = assetType;
     }
 }
