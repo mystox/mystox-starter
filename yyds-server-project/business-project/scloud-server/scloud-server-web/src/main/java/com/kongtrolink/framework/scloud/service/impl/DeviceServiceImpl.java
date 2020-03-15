@@ -226,7 +226,7 @@ public class DeviceServiceImpl implements DeviceService {
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {
                 LOGGER.info("向【资管】发送删除设备MQTT 请求成功");
-                //（批量）删除平台端数据库中保存的站点
+                //（批量）删除平台端数据库中保存的设备
                 deviceMongo.deleteDevices(uniqueCode, deviceQuery);
 
                 //将设备从设备特殊属性表中(批量)删除
