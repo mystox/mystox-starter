@@ -110,6 +110,7 @@ public class UserController extends BaseController{
     public @ResponseBody JsonResult deleteUser(@RequestBody UserEntity userEntity){
         try{
             String uniqueCode = getUniqueCode();
+
             return new JsonResult("删除成功", true);
         }catch (Exception e){
             e.printStackTrace();

@@ -26,7 +26,7 @@ public class SiteModel{
     private String areaCovered;	//占地面积
     private int fileId;	//站点图纸文件Id
 
-    private Boolean isModified; //修改站点时，是否修改了站点名称
+    private String isModified; //修改站点时，是否修改了站点名称,"0"-未修改，"1"-修改
 
     public String getServerCode() {
         return serverCode;
@@ -172,11 +172,11 @@ public class SiteModel{
         this.fileId = fileId;
     }
 
-    public Boolean getModified() {
+    public String getIsModified() {
         return isModified;
     }
 
-    public void setModified(Boolean modified) {
-        isModified = modified;
+    public void setIsModified(String isModified) {
+        this.isModified = isModified;
     }
 }

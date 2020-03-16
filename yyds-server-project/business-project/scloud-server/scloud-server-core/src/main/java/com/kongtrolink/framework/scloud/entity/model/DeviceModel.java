@@ -32,7 +32,7 @@ public class DeviceModel extends DeviceEntity {
 	private String fsuCode; //fsuCode
 	private Integer countSignal;
 
-	private Boolean isModified; //修改设备时，是否修改了设备名称和设备型号
+	private String isModified; //修改设备时，是否修改了设备名称和设备型号,"0"-未修改，"1"-修改
 
 	public String getTierName() {
 		return tierName;
@@ -90,11 +90,11 @@ public class DeviceModel extends DeviceEntity {
 		this.fsuId = fsuId;
 	}
 
-	public Boolean getModified() {
+	public String getIsModified() {
 		return isModified;
 	}
 
-	public void setModified(Boolean modified) {
-		isModified = modified;
+	public void setIsModified(String isModified) {
+		this.isModified = isModified;
 	}
 }

@@ -85,13 +85,13 @@ public class SiteMongo {
         }
         if (startTime != null){
             if (endTime != null){
-                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
+                criteria.and("createTime").gte(startTime).lte(endTime);
             }else {
-                criteria.and("createTime").gte(new Date(startTime));
+                criteria.and("createTime").gte(startTime);
             }
         }else {
             if (endTime != null){
-                criteria.and("createTime").lte(new Date(endTime));
+                criteria.and("createTime").lte(endTime);
             }
         }
 

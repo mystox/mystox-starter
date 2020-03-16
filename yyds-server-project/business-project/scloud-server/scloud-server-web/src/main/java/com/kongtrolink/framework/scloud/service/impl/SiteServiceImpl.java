@@ -258,9 +258,9 @@ public class SiteServiceImpl implements SiteService {
      */
     @Override
     public boolean modifySite(String uniqueCode, SiteModel siteModel) {
-        Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称
+        String isModified = siteModel.getIsModified();   //修改站点时，是否修改了站点名称
         boolean modifyResult = false;
-        if (isModified) {   //如果修改了站点的基本属性(即站点名称)
+        if (isModified.equals(CommonConstant.MODIFIED)) {   //如果修改了站点的基本属性(即站点名称)
             //向【资管】下发修改站点的MQTT消息
             MsgResult msgResult = assetCIService.modifyAssetSite(uniqueCode, siteModel);
             int stateCode = msgResult.getStateCode();
