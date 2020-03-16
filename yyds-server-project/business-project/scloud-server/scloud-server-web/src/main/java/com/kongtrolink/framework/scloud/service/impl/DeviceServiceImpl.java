@@ -330,7 +330,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
     private Map<String, BasicSiteEntity> getAssetSiteByCodes(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
-        List<String> siteCodes = deviceQuery.getSiteCodes() == null? deviceQuery.getSiteCodes() : new ArrayList<>();
+        List<String> siteCodes = deviceQuery.getSiteCodes() != null? deviceQuery.getSiteCodes() : new ArrayList<>();
         List<String> tierCodes = deviceQuery.getTierCodes();
         List<String> siteCodeList = new ArrayList<>();
         if (tierCodes != null && tierCodes.size() > 0){ //如果用户选择了整个区域，查询区域下的站点

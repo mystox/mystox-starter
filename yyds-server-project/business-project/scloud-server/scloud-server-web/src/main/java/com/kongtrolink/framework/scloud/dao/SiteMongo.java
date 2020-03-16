@@ -132,7 +132,7 @@ public class SiteMongo {
             update.set("coordinate", coordinate);
         }
 
-        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, uniqueCode + CollectionSuffix.SITE);
         return result.getN() >0;
     }
 
