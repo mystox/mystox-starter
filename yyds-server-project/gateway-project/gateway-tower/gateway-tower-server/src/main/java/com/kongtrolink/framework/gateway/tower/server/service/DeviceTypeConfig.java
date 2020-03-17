@@ -119,8 +119,4 @@ public class DeviceTypeConfig {
         return RedisKey.ASSENT_DEVICE_TYPE+"_"+enterpriseCode;
     }
 
-    public String getDeviceRedisKey(){
-        return RedisKey.ASSENT_DEVICE_INFO+"_"+enterpriseCode;
-    }
-
 }

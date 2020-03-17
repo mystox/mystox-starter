@@ -40,6 +40,7 @@ public class DeviceQuery extends Paging {
 	private String state;	//注册状态（FSU类型、摄像机类型）：在线、离线
 	private String operationState;	//运行状态（FSU类型）：工程态、测试态、交维态
 	private List<String> deviceCodes;	//设备编码（集合）
+	private String signalCode;
 
 	public String getServerCode() {
 		return serverCode;
@@ -183,5 +184,13 @@ public class DeviceQuery extends Paging {
 
 	public void setDeviceCodes(List<String> deviceCodes) {
 		this.deviceCodes = deviceCodes;
+	}
+
+	public String getSignalCode() {
+		return signalCode;
+	}
+
+	public void setSignalCode(String signalCode) {
+		this.signalCode = signalCode;
 	}
 }

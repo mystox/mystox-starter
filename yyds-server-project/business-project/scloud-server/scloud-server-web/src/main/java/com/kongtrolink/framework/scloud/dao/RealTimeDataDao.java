@@ -93,27 +93,18 @@ public class RealTimeDataDao{
      * @param param 查询条件
      * @return list
      */
-    public List<SiteEntity> findSite(String uniqueCode, SignalDiInfoQuery param) {
+    public List<SiteEntity> findSite(String uniqueCode, DeviceQuery param) {
         List<String> tierCodes = param.getTierCodes();// 区域codes
-        List<String> siteIds2 = param.getSiteIds2();
+        List<Integer> siteIds = param.getSiteIds();
         Criteria criteria = new Criteria();
         if (tierCodes != null && tierCodes.size()>0) {
-            if (siteIds2 != null && siteIds2.size()>0) {
-                criteria.orOperator(Criteria.where("tierCode").in(tierCodes),Criteria.where("_id").in(siteIds2));
+            if (siteIds != null && siteIds.size()>0) {
+                criteria.orOperator(Criteria.where("tierCode").in(tierCodes),Criteria.where("id").in(siteIds));
             }else{
                 criteria.and("tierCode").in(tierCodes);
             }
         }
-//        DBObject dbObject = new BasicDBObject();
-//        DBObject fieldObject = new BasicDBObject();
-//        fieldObject.put("_id", true);
-//        fieldObject.put("id", true);
-//        fieldObject.put("tier", true);
-//        fieldObject.put("name", true);
-//        fieldObject.put("code", true);
-//        fieldObject.put("stationType", true);
         Query query = new Query(criteria);
-//        query.addCriteria(criteria);
         List<SiteEntity> siteEntityList = mongoTemplate.find(query, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
         return siteEntityList;
     }
@@ -124,7 +115,7 @@ public class RealTimeDataDao{
      * @param param 站点列表
      * @return list
      */
-    public List<DeviceEntity> findDeviceDiList(String uniqueCode, List<Integer> siteIds, SignalDiInfoQuery param) {
+    public List<DeviceEntity> findDeviceDiList(String uniqueCode, List<Integer> siteIds, DeviceQuery param) {
         Criteria criteria = getDeviceDiCriteria(siteIds, param);
         int currentPage = param.getCurrentPage();
         int pageSize = param.getPageSize();
@@ -141,20 +132,16 @@ public class RealTimeDataDao{
     }
 
 
-    public int findDeviceDiCount(String uniqueCode,List<Integer> siteIds, SignalDiInfoQuery param) {
+    public int findDeviceDiCount(String uniqueCode,List<Integer> siteIds, DeviceQuery param) {
         Criteria criteria = getDeviceDiCriteria(siteIds, param);
         Query query = new Query(criteria);
         return (int)mongoTemplate.count(query, uniqueCode + CollectionSuffix.DEVICE);
     }
 
-    private Criteria getDeviceDiCriteria(List<Integer> siteIds, SignalDiInfoQuery param){
-        Criteria criteria = Criteria.where("siteId").in(siteIds).and("typeCode").is(param.getTypeCode());
-        String systemName = param.getSystemName();//所属系统
+    private Criteria getDeviceDiCriteria(List<Integer> siteIds, DeviceQuery param){
+        Criteria criteria = Criteria.where("siteId").in(siteIds).and("typeCode").is(param.getDeviceTypeCode());
         String deviceName = param.getDeviceName();//设备名称
         String deviceCode = param.getDeviceCode();//设备编码
-        if(systemName!=null && !"".equals(systemName)){
-            criteria.and("systemName").regex(".*?" + systemName + ".*?");
-        }
         if(deviceName!=null && !"".equals(deviceName)){
             criteria.and("name").regex(".*?" + deviceName + ".*?");
         }

@@ -45,7 +45,7 @@ public class SiteEntity implements Serializable {
 	private String assetNature;	//产权性质（自建、社会资源、注入）
 	private Long createTime;	//投入使用时间
 	private String areaCovered;	//占地面积
-	private int fileId;	//站点图纸文件Id
+	private Integer fileId;	//站点图纸文件Id
 
 	public int getId() {
 		return id;
@@ -167,11 +167,11 @@ public class SiteEntity implements Serializable {
 		this.areaCovered = areaCovered;
 	}
 
-	public int getFileId() {
+	public Integer getFileId() {
 		return fileId;
 	}
 
-	public void setFileId(int fileId) {
+	public void setFileId(Integer fileId) {
 		this.fileId = fileId;
 	}
 }

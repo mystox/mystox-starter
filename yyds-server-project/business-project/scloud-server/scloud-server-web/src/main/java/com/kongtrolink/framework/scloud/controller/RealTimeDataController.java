@@ -154,7 +154,7 @@ public class RealTimeDataController extends ExportController {
      * @param query 查询参数
      */
     @RequestMapping(value = "/getSignalDiInfo", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getSignalDiInfo(@RequestBody SignalDiInfoQuery query) {
+    public @ResponseBody JsonResult getSignalDiInfo(@RequestBody DeviceQuery query) {
         try {
             String uniqueCode = getUniqueCode();
             List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
@@ -171,45 +171,50 @@ public class RealTimeDataController extends ExportController {
      * 根据查询 某一个遥测信号值列表 导出
      */
     @RequestMapping(value = "/exportSignalDiInfo", method = RequestMethod.POST)
-    public void exportSignalDiInfo(@RequestBody SignalDiInfoQuery query, HttpServletResponse response) {
-        String uniqueCode = getUniqueCode();
-        query.setPageSize(Integer.MAX_VALUE);
-        query.setCurrentPage(1);
-        List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
-        String title = "遥测信号点统计表";
-        String[] headsName = { "站点层级", "站点名称", "站点类型", "站点编号", "设备名称", "设备编号", "信号点值"};
-        String[] propertiesName = { "tier", "siteName", "siteType", "siteCode", "deviceName", "deviceCode","value"};
-        export(response,list,propertiesName, headsName, title);
+    public void exportSignalDiInfo(@RequestBody DeviceQuery query, HttpServletResponse response) {
+        try {
+            String uniqueCode = getUniqueCode();
+            query.setPageSize(Integer.MAX_VALUE);
+            query.setCurrentPage(1);
+            List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
+            String title = "遥测信号点统计表";
+            String[] headsName = { "站点层级", "站点名称", "站点类型", "站点编号", "设备名称", "设备编号", "信号点值"};
+            String[] propertiesName = { "tier", "siteName", "siteType", "siteCode", "deviceName", "deviceCode","value"};
+            export(response,list,propertiesName, headsName, title);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
      * 导出遥测信号值列表pdf
      */
     @RequestMapping(value = "/exportSignalDiInfoPDF", method = RequestMethod.POST)
-    public void exportSignalDiInfoPDF(@RequestBody SignalDiInfoQuery query, HttpServletRequest request,HttpServletResponse response){
-        String uniqueCode = getUniqueCode();
-        query.setPageSize(Integer.MAX_VALUE);
-        query.setCurrentPage(1);
-        List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
-
-        String fileName = "遥测信号统计表.pdf";
-        String[] headsName = { "站点层级", "站点名称", "站点类型", "站点编号", "设备名称", "设备编号", "信号点值"};
-        String[] propertiesName = { "tier", "siteName", "siteType", "siteCode", "deviceName", "deviceCode","value"};
-        List<Object> signalDiInfoList = new ArrayStack();
-
-        for(SignalDiInfo signalDiInfo : list){
-            signalDiInfo.setTier(signalDiInfo.getTier());
-            signalDiInfo.setSiteName(signalDiInfo.getSiteName());
-            signalDiInfo.setSiteType(signalDiInfo.getSiteType());
-            signalDiInfo.setSiteCode(signalDiInfo.getSiteCode());
-            signalDiInfo.setDeviceName(signalDiInfo.getDeviceName());
-            signalDiInfo.setDeviceCode(signalDiInfo.getDeviceCode());
-            signalDiInfo.setValue(signalDiInfo.getValue());
-
-            signalDiInfoList.add(signalDiInfo);
-        }
+    public void exportSignalDiInfoPDF(@RequestBody DeviceQuery query,HttpServletResponse response){
         OutputStream outputStream ;
         try {
+            String uniqueCode = getUniqueCode();
+            query.setPageSize(Integer.MAX_VALUE);
+            query.setCurrentPage(1);
+            List<SignalDiInfo> list = realTimeDataService.getSignalDiInfo(uniqueCode,query);
+
+            String fileName = "遥测信号统计表.pdf";
+            String[] headsName = { "站点层级", "站点名称", "站点类型", "站点编号", "设备名称", "设备编号", "信号点值"};
+            String[] propertiesName = { "tier", "siteName", "siteType", "siteCode", "deviceName", "deviceCode","value"};
+            List<Object> signalDiInfoList = new ArrayStack();
+
+            for(SignalDiInfo signalDiInfo : list){
+                signalDiInfo.setTier(signalDiInfo.getTier());
+                signalDiInfo.setSiteName(signalDiInfo.getSiteName());
+                signalDiInfo.setSiteType(signalDiInfo.getSiteType());
+                signalDiInfo.setSiteCode(signalDiInfo.getSiteCode());
+                signalDiInfo.setDeviceName(signalDiInfo.getDeviceName());
+                signalDiInfo.setDeviceCode(signalDiInfo.getDeviceCode());
+                signalDiInfo.setValue(signalDiInfo.getValue());
+
+                signalDiInfoList.add(signalDiInfo);
+            }
             fileName = URLEncoder.encode(fileName, "UTF-8");
             response.setContentType("application/pdf");
             response.addHeader("Content-Disposition", "attachment;filename=" + fileName+".pdf");

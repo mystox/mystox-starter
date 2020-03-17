@@ -23,7 +23,7 @@ public interface RealTimeDataService {
     /**
      * 实时数据-获取设备列表
      */
-    ListResult<DeviceModel> getDeviceList(String uniqueCode, DeviceQuery query);
+    ListResult<DeviceModel> getDeviceList(String uniqueCode, DeviceQuery query) throws Exception;
 
     /**
      * 根据 设备code 获取 该设备所属的FSU
@@ -61,7 +61,7 @@ public interface RealTimeDataService {
      * @param query 查询参数
      * @return 信号值列表
      */
-    List<SignalDiInfo> getSignalDiInfo(String uniqueCode, SignalDiInfoQuery query);
+    List<SignalDiInfo> getSignalDiInfo(String uniqueCode, DeviceQuery query) throws Exception;
 
     /**
      * 根据查询 某一个遥测信号值列表 - 取得总数
@@ -69,7 +69,7 @@ public interface RealTimeDataService {
      * @param query 查询参数
      * @return 信号值列表
      */
-    int getSignalDiInfoNum(String uniqueCode, SignalDiInfoQuery query);
+    int getSignalDiInfoNum(String uniqueCode, DeviceQuery query) throws Exception;
 
     /**
      * 根据设备类型获取遥测信号点列表
