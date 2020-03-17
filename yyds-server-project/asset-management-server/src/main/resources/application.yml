@@ -26,7 +26,7 @@ management:
     enabled: false
 
 server:
-  name: ASSET_MANAGEMENT_SERV
+  name: ASSET_MANAGEMENT_SERVER
   version: 1.0.0
   port: 52202
   title: 资产管理服务
