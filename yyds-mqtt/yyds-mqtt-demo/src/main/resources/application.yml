@@ -21,7 +21,7 @@ management:
   security:
     enabled: false
 server:
-  groupCode: GROUP
+  groupCode: GROUP_DEMO
   name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000

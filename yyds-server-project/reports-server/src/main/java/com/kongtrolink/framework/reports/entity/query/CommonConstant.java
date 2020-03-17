@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.scloud.constant;
+package com.kongtrolink.framework.reports.entity.query;
 
 /**
  * 通用常量类
@@ -12,8 +12,6 @@ public class CommonConstant {
     public static final String NO = "否";
     public static final int FAILED = 0; //失败
     public static final int SUCCESSFUL = 1; //成功
-    public static final String NOT_MODIFIED = "0";  //未修改
-    public static final String MODIFIED = "1";  //已修改
 
     //--------------------搜索类型----------------------
     public static final int SEARCH_TYPE_FUZZY = 0;  //模糊搜索

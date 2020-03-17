@@ -21,16 +21,15 @@ import java.net.UnknownHostException;
  * update record:
  */
 @Configuration
-public class MongoConfig
-{
+public class MongoConfig {
     @Value("${mongodb.uri}")
     private String uri;
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,MappingMongoConverter converter) throws Exception {
+    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory, MappingMongoConverter converter) throws Exception {
 
         //额外连接参数设置
-        return new MongoTemplate(mongoDbFactory,converter);
+        return new MongoTemplate(mongoDbFactory, converter);
     }
 
     @Bean

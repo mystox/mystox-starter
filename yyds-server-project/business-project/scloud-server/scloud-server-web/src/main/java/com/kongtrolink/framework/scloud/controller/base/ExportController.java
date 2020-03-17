@@ -50,6 +50,7 @@ public abstract class ExportController extends BaseController {
 		OutputStream out = null;
 		try {
 			fileName = URLEncoder.encode(fileName, "UTF-8");
+			response.setCharacterEncoding("UTF-8");
 			response.setContentType("application/x-download");
 			response.addHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 			out = response.getOutputStream();

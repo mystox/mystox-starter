@@ -85,13 +85,13 @@ public class SiteMongo {
         }
         if (startTime != null){
             if (endTime != null){
-                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
+                criteria.and("createTime").gte(startTime).lte(endTime);
             }else {
-                criteria.and("createTime").gte(new Date(startTime));
+                criteria.and("createTime").gte(startTime);
             }
         }else {
             if (endTime != null){
-                criteria.and("createTime").lte(new Date(endTime));
+                criteria.and("createTime").lte(endTime);
             }
         }
 
@@ -132,7 +132,7 @@ public class SiteMongo {
             update.set("coordinate", coordinate);
         }
 
-        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+        WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, uniqueCode + CollectionSuffix.SITE);
         return result.getN() >0;
     }
 

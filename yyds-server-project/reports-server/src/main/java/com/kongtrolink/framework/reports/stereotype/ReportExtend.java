@@ -30,4 +30,6 @@ public @interface ReportExtend {
 
     String uri() default "";
 
+    String description() default "";
+
 }

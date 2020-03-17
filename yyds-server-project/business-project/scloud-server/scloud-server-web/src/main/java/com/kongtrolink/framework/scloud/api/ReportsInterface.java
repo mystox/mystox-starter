@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.api;
 
+import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
@@ -18,4 +19,5 @@ public interface ReportsInterface {
     @OperaCode
     public List<SiteModel> getSiteListByEnterpriseCode(String msg);
 
+    List<DeviceModel> getFsuSCloud(String msg);
 }

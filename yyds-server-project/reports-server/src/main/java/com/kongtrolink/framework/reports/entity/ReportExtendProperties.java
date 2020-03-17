@@ -17,6 +17,15 @@ public class ReportExtendProperties {
     private List<String> select;
     private String value;
     private String uri;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getUri() {
         return uri;

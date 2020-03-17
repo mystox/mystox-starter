@@ -3,13 +3,17 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
+import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AssetCIService;
+import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -32,9 +36,13 @@ public class SiteServiceImpl implements SiteService {
     @Autowired
     SiteMongo siteMongo;
     @Autowired
+    DeviceMongo deviceMongo;
+    @Autowired
     MqttOpera mqttOpera;
     @Autowired
     AssetCIService assetCIService;
+    @Autowired
+    DeviceService deviceService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteServiceImpl.class);
 
@@ -238,10 +246,10 @@ public class SiteServiceImpl implements SiteService {
      */
     @Override
     public HSSFWorkbook exportSiteList(List<SiteModel> list) {
-        String[][] userSheet = getSiteListAsTable(list);
+        String[][] siteSheet = getSiteListAsTable(list);
 
         HSSFWorkbook workBook = ExcelUtil.getInstance().createWorkBook(
-                new String[] {"站点资产信息列表"}, new String[][][] { userSheet });
+                new String[] {"站点资产信息列表"}, new String[][][] { siteSheet });
         return workBook;
     }
 
@@ -250,9 +258,9 @@ public class SiteServiceImpl implements SiteService {
      */
     @Override
     public boolean modifySite(String uniqueCode, SiteModel siteModel) {
-        Boolean isModified = siteModel.getModified();   //修改站点时，是否修改了站点名称
+        String isModified = siteModel.getIsModified();   //修改站点时，是否修改了站点名称
         boolean modifyResult = false;
-        if (isModified) {   //如果修改了站点的基本属性(即站点名称)
+        if (isModified.equals(CommonConstant.MODIFIED)) {   //如果修改了站点的基本属性(即站点名称)
             //向【资管】下发修改站点的MQTT消息
             MsgResult msgResult = assetCIService.modifyAssetSite(uniqueCode, siteModel);
             int stateCode = msgResult.getStateCode();
@@ -291,10 +299,23 @@ public class SiteServiceImpl implements SiteService {
                 //（批量）删除站点
                 siteMongo.deleteSites(uniqueCode, siteQuery);
 
-                // TODO: 2020/2/2 删除每个站点下设备（包含FSU）
+                DeviceQuery deviceQuery = new DeviceQuery();
+                deviceQuery.setSiteCodes(siteQuery.getSiteCodes());
+                List<DeviceEntity> devices = deviceMongo.findDeviceList(uniqueCode, deviceQuery);   //查询站点下的所有设备
+                if (devices != null && devices.size() > 0){
+                    List<String> deletedDeviceCodes = new ArrayList<>();
+                    for (DeviceEntity deviceEntity :devices){
+                        deletedDeviceCodes.add(deviceEntity.getCode());
+                    }
 
-                // TODO: 2020/2/12 修改系统用户和维护用户的站点权限
+                    //1.删除每个站点下设备（包含FSU）及设备特殊属性
+                    deviceQuery.setServerCode(siteQuery.getServerCode());
+                    deviceQuery.setDeviceCodes(deletedDeviceCodes);
+                    deviceService.deleteDevice(uniqueCode, deviceQuery);
 
+                    // TODO: 2020/2/12 2.修改系统用户和维护用户的站点权限
+
+                }
             }else {
                 LOGGER.error("向【资管】发送删除站点MQTT 请求失败");
             }
