@@ -60,6 +60,11 @@ public class HistoryService {
             String serverCode = MqttUtils.preconditionGroupServerCode(group,gatewayCode);
             MsgResult result = mqttSender.sendToMqttSync(serverCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
+            int state = result.getStateCode();
+            if(state!=1){
+                LOGGER.info("轮询:fsu :{} 历史数据 mqtt接口返回失败:{} ...",fsuShortCode,ack);
+                return;
+            }
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             saveData(uniqueCode,fsuShortCode,getDataAckMessage);
             LOGGER.info("开始轮询:fsu :{} 历史数据完成...",fsuShortCode);

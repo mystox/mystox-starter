@@ -67,7 +67,7 @@ public abstract class BaseController {
      * @return 企业唯一码。
      */
     public String getUniqueCode() {
-        return "dadongdong";//(String) getSession().getAttribute(Const.SESSION_CURRENT_STAMP);
+        return "YYDS";//(String) getSession().getAttribute(Const.SESSION_CURRENT_STAMP);
     }
 
     /**

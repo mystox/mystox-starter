@@ -1388,14 +1388,19 @@ public class Neo4jDBService implements DBService {
                             parent = "<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(parent:CI)";
                         }
                         for (String parentPropName : jsonObject.getJSONObject("_parent").keySet()) {
-                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_parent").getJSONObject(parentPropName)));
+                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_parent").getJSONObject(parentPropName), true));
+                        }
+                    } else if (propName.equals("_notParent")) {
+                        parent = "<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(parent:CI)";
+                        for (String parentPropName : jsonObject.getJSONObject("_notParent").keySet()) {
+                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_notParent").getJSONObject(parentPropName), false));
                         }
                     } else if (propName.equals("_page")) {
                         int curPage = jsonObject.getJSONObject("_page").getJSONObject("curPage").getInteger("value");
                         int pageNum = jsonObject.getJSONObject("_page").getJSONObject("pageNum").getInteger("value");
                         page = " skip " + (curPage - 1) * pageNum + " limit " + pageNum;
                     } else {
-                        conditionList.add("ci." + getCondition(propName, jsonObject.getJSONObject(propName)));
+                        conditionList.add("ci." + getCondition(propName, jsonObject.getJSONObject(propName), true));
                     }
                 }
 
@@ -2022,9 +2027,10 @@ public class Neo4jDBService implements DBService {
      * 解析搜索条件
      * @param propName 属性名称
      * @param condition 输入条件
+     * @param isEqual 是否相等
      * @return 查询语句
      */
-    private String getCondition(String propName, JSONObject condition) {
+    private String getCondition(String propName, JSONObject condition, boolean isEqual) {
 
         String result = "";
 
@@ -2033,6 +2039,7 @@ public class Neo4jDBService implements DBService {
         if (condition.containsKey("dataType")) {
             dataType = condition.getString("dataType").toLowerCase();
         }
+        String operator = isEqual ? " = " : " <> ";
         switch (searchType) {
             case 0:
                 // 模糊搜索，默认数据类型为String
@@ -2042,24 +2049,28 @@ public class Neo4jDBService implements DBService {
                 // 精确搜索，需通过dataType字段确认数据类型，若该字段不存在，则认为是String
                 switch (dataType) {
                     case "string":
-                        result = propName + " = '" + condition.getString("value") + "'";
+                        result = propName + operator + "'" + condition.getString("value") + "'";
                         break;
                     case "bool":
                     case "boolean":
-                        result = propName + " = " + condition.getBoolean("value");
+                        result = propName + operator + condition.getBoolean("value");
                         break;
                     case "number":
-                        result = propName + " = " + condition.getDouble("value");
+                        result = propName + operator + condition.getDouble("value");
                         break;
                     case "datetime":
                     case "time":
-                        result = propName + " = " + condition.getLong("value");
+                        result = propName + operator + condition.getLong("value");
                         break;
                 }
                 break;
             case 2:
                 // in搜索，需通过dataType字段确认数据类型，若该字段不存在，则认为是String
-                result = propName + " in " + JSONObject.toJSONString(condition.getJSONArray("value"));
+                if (isEqual) {
+                    result = propName + " in " + JSONObject.toJSONString(condition.getJSONArray("value"));
+                } else {
+                    result = propName + " not in " + JSONObject.toJSONString(condition.getJSONArray("value"));
+                }
                 break;
         }
 

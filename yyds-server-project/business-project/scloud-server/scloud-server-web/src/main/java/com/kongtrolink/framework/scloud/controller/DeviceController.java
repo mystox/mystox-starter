@@ -124,12 +124,14 @@ public class DeviceController extends BaseController{
      *  注：该接口在调用为特殊设备“添加设备”接口后调用
      */
     @RequestMapping(value = "saveDeviceSpecialInfo", method = RequestMethod.POST)
-    public @ResponseBody void saveDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity entity){
+    public @ResponseBody JsonResult saveDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity entity){
         try {
 //            String uniqueCode = getUniqueCode();
             deviceService.saveDeviceSpecialInfo(uniqueCode, entity);
+            return new JsonResult("保存设备特殊属性成功", true);
         }catch (Exception e){
             e.printStackTrace();
+            return new JsonResult("保存设备特殊属性异常", false);
         }
     }
 

@@ -48,11 +48,11 @@ public class DeviceMongo {
         }
         if (!StringUtil.isNUll(deviceCode)){
             deviceCode = MongoRegexUtil.escapeExprSpecialWord(deviceCode);
-            criteria.and("code").is(deviceCode);
+            criteria.and("code").regex("^" + deviceCode + ".*?");
         }
         if (!StringUtil.isNUll(manufacturer)){
             manufacturer = MongoRegexUtil.escapeExprSpecialWord(manufacturer);
-            criteria.and("manufacturer").is(manufacturer);
+            criteria.and("manufacturer").regex(".*?" + manufacturer + ".*?");
         }
         if (!StringUtil.isNUll(state)){
             criteria.and("state").is(state);
@@ -62,13 +62,13 @@ public class DeviceMongo {
         }
         if (startTime != null){
             if (endTime == null){
-                criteria.and("createTime").gte(new Date(startTime));
+                criteria.and("createTime").gte(startTime);
             }else {
-                criteria.and("createTime").gte(new Date(startTime)).lte(new Date(endTime));
+                criteria.and("createTime").gte(startTime).lte(endTime);
             }
         }else {
             if (endTime != null){
-                criteria.and("createTime").lte(new Date(endTime));
+                criteria.and("createTime").lte(endTime);
             }
         }
 

@@ -17,13 +17,11 @@ import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalDiInfoKo;
 import com.kongtrolink.framework.scloud.entity.realtime.SignalInfoEntity;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
-import com.kongtrolink.framework.scloud.query.SignalDiInfoQuery;
 import com.kongtrolink.framework.scloud.query.SignalQuery;
+import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
 import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
-import com.kongtrolink.framework.service.MqttOpera;
-import com.sun.xml.xsom.impl.UName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +51,15 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     MqttSender mqttSender;
     @Value("${server.groupCode}")
     private String groupCode;
-
+    @Autowired
+    DeviceService deviceService;
     /**
      * 实时数据-获取设备列表
      *
      */
     @Override
-    public ListResult<DeviceModel> getDeviceList(String uniqueCode, DeviceQuery query) {
-        List<DeviceModel> list = realTimeDataDao.getDeviceList(uniqueCode,query);
+    public ListResult<DeviceModel> getDeviceList(String uniqueCode, DeviceQuery query) throws Exception{
+        List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, query);
         if(list!=null && list.size()>0){
             Map<String,Integer> deviceTypeMap = realTimeDataDao.queryDeviceType(uniqueCode);
             //根据设备类型取得该设备类型有多少信号点
@@ -85,13 +84,19 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      */
     @Override
     public DeviceEntity getFsuInfoByDeviceCode(String uniqueCode, DeviceQuery query) {
-        FsuDeviceEntity fsuDeviceEntity = realTimeDataDao.getFsuInfoByDeviceCode(uniqueCode,query.getDeviceCode());
-        if(fsuDeviceEntity==null || fsuDeviceEntity.getFsuCode()==null){
-            LOGGER.error("根据deviceCode:{} 未找到关联的FSU信息",query.getDeviceCode());
-            return null;
+        try{
+            String redisKey = RedisUtil.getRealDataKey(uniqueCode,query.getDeviceCode());
+            Object value = redisUtils.hget(com.kongtrolink.framework.gateway.tower.core.constant.RedisKey.ASSENT_DEVICE_INFO,redisKey);
+            if(value==null){
+                LOGGER.error("根据deviceCode:{} 未找到关联的FSU信息",query.getDeviceCode());
+                return null;
+            }
+            return realTimeDataDao.getFsuInfo(uniqueCode,String.valueOf(value));
+        }catch (Exception e){
+            e.printStackTrace();
         }
+        return null;
 
-        return realTimeDataDao.getFsuInfo(uniqueCode,fsuDeviceEntity.getFsuCode());
     }
 
     /**
@@ -407,15 +412,15 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * @return 信号值列表
      */
     @Override
-    public List<SignalDiInfo> getSignalDiInfo(String uniqueCode, SignalDiInfoQuery query) {
+    public List<SignalDiInfo> getSignalDiInfo(String uniqueCode, DeviceQuery query) throws Exception{
         List<SignalDiInfo> list = new ArrayList<>();
         //根据区域数查询获取站点ID列表和局站类型 封装在SignalDiInfoKo对象中
-        SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
+        SignalDiInfoKo ko = getSiteList(uniqueCode,query);
         Map<String, SiteEntity> siteMap =ko.getSiteMap();//局站类型Map
         List<Integer> siteIds = ko.getSiteIds();//站点ID列表
         String signalCntbId = query.getSignalCode(); //遥测信号点ID
-        List<DeviceModel> deviceList =null;// todo 采用晓龙的获取设备方法
-        //realTimeDataDao.findDeviceDiList(uniqueCode,siteIds,query);
+        query.setSiteIds(siteIds);
+        List<DeviceModel> deviceList = deviceService.findDeviceList(uniqueCode, query);// 采用晓龙的获取设备方法
         for(DeviceModel device:deviceList){
             SignalDiInfo info = new SignalDiInfo();
             int siteId = device.getSiteId();
@@ -451,9 +456,11 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * @return 信号值列表
      */
     @Override
-    public int getSignalDiInfoNum(String uniqueCode, SignalDiInfoQuery query) {
-        SignalDiInfoKo ko = getDeviceList(uniqueCode,query);
-        List<Integer> siteIds = ko.getSiteIds();
+    public int getSignalDiInfoNum(String uniqueCode, DeviceQuery query) throws Exception{
+        //根据区域数查询获取站点ID列表和局站类型 封装在SignalDiInfoKo对象中
+        SignalDiInfoKo ko = getSiteList(uniqueCode,query);
+        List<Integer> siteIds = ko.getSiteIds();//站点ID列表
+        query.setSiteIds(siteIds);
         return realTimeDataDao.findDeviceDiCount(uniqueCode,siteIds,query);
     }
 
@@ -488,7 +495,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
      * 根据 区域数 返回需要查询的站点ID列表
 
      */
-    private SignalDiInfoKo getDeviceList(String uniqueCode, SignalDiInfoQuery query){
+    private SignalDiInfoKo getSiteList(String uniqueCode, DeviceQuery query){
         Map<String,SiteEntity> siteMap = new HashMap<>();
         List<Integer> siteIds = new ArrayList<>();
         List<SiteEntity> siteEntityList = realTimeDataDao.findSite(uniqueCode,query);

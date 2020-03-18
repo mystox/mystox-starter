@@ -129,7 +129,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public String createDeviceCode(String uniqueCode, DeviceModel deviceModel) {
         SiteEntity site = siteMongo.findSiteByCode(uniqueCode, deviceModel.getSiteCode());
-        String pre = site.getTierCode()+site.getSiteType()+getTypeCode(deviceModel.getTypeCode());
+        String pre = site.getTierCode() + getSiteTypeIntVal(site.getSiteType()) + getTypeCode(deviceModel.getTypeCode());
         // 生成设备流水号
         Integer num = deviceMongo.countDeviceShortCode(uniqueCode, pre);
         String deviceCode = "";
@@ -190,9 +190,9 @@ public class DeviceServiceImpl implements DeviceService {
      */
     @Override
     public boolean modifyDevice(String uniqueCode, DeviceModel deviceModel) {
-        Boolean isModified = deviceModel.getModified(); //修改设备时，是否修改了设备名称和设备型号
+        String isModified = deviceModel.getIsModified(); //修改设备时，是否修改了设备名称和设备型号
         boolean modifyResult = false;
-        if (isModified){    //如果修改了设备的基本属性（即设备名称和设备型号）
+        if (isModified.equals(CommonConstant.MODIFIED)){    //如果修改了设备的基本属性（即设备名称和设备型号）
             //向【资管】下发修改设备的MQTT消息
             MsgResult msgResult = assetCIService.modifyAssetDevice(uniqueCode, deviceModel);
             if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) {
@@ -226,7 +226,7 @@ public class DeviceServiceImpl implements DeviceService {
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {
                 LOGGER.info("向【资管】发送删除设备MQTT 请求成功");
-                //（批量）删除平台端数据库中保存的站点
+                //（批量）删除平台端数据库中保存的设备
                 deviceMongo.deleteDevices(uniqueCode, deviceQuery);
 
                 //将设备从设备特殊属性表中(批量)删除
@@ -263,6 +263,26 @@ public class DeviceServiceImpl implements DeviceService {
         }else{
             return typeCode.substring(1,3);
         }
+    }
+
+    //获取站点类型对应
+    private int getSiteTypeIntVal(String siteType){
+        int siteTypeIntVal = 0;
+        switch (siteType){
+            case "A级机房":
+                siteTypeIntVal = 1;
+                break;
+            case "B级机房":
+                siteTypeIntVal = 2;
+                break;
+            case "C级机房":
+                siteTypeIntVal = 3;
+                break;
+            case "D级机房":
+                siteTypeIntVal = 4;
+                break;
+        }
+        return siteTypeIntVal;
     }
 
     private boolean checkCodeExisted(String uniqueCode,String deviceCode){
@@ -302,7 +322,7 @@ public class DeviceServiceImpl implements DeviceService {
                 row[7] = deviceModel.getState();
                 row[8] = deviceModel.getOperationState();
                 row[9] = deviceModel.getIp();
-                row[10] = dateUtil.format(new Date(deviceModel.getOfflineTime()));
+                row[10] = deviceModel.getOfflineTime() != null? dateUtil.format(new Date(deviceModel.getOfflineTime())) : "-";
             }
         }
         return tableDatas;
@@ -310,7 +330,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
     private Map<String, BasicSiteEntity> getAssetSiteByCodes(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
-        List<String> siteCodes = deviceQuery.getSiteCodes() == null? deviceQuery.getSiteCodes() : new ArrayList<>();
+        List<String> siteCodes = deviceQuery.getSiteCodes() != null? deviceQuery.getSiteCodes() : new ArrayList<>();
         List<String> tierCodes = deviceQuery.getTierCodes();
         List<String> siteCodeList = new ArrayList<>();
         if (tierCodes != null && tierCodes.size() > 0){ //如果用户选择了整个区域，查询区域下的站点
