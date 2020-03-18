@@ -18,4 +18,11 @@ public interface ReportsInterface {
     @OperaCode
     public List<JSONObject> getAlarmCountByDeviceIdList(String msg);
 
+
+    @OperaCode
+    public List<JSONObject> getAlarmsByDeviceList(String msg);
+
+
+    public List<JSONObject> getAlarmCategoryByDeviceIdList(String msg);
+
 }

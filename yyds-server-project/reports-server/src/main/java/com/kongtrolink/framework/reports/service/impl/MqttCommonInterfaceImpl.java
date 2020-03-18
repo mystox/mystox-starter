@@ -74,6 +74,42 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
     }
 
     @Override
+    public List<JSONObject> getAlarmDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+        alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+        MsgResult opera = mqttOpera.opera("getAlarmsByDeviceIdList", baseCondition.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
+        } else {
+            logger.error("get fsu list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public List<JSONObject> getAlarmCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+        alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+        MsgResult opera = mqttOpera.opera("getAlarmCategoryByDeviceIdList", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        String alarmCountListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(alarmCountListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
+
+    }
+
+    @Override
     public List<FsuEntity> getFsuList(String stationId, JSONObject baseCondition) {
         baseCondition.put("stationId", stationId);
         MsgResult opera = mqttOpera.opera(GET_FSU_SCLOUD, baseCondition.toJSONString());
@@ -130,14 +166,6 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
             logger.error("get alarm count list error[mqtt]");
         }
         return null;
-    }
-    public static void main(String[] args)
-    {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("a", 1);
-        jsonObject.put("date", DateUtil.getInstance().getFirstDayOfMonth(2020, 3));
-        jsonObject.put("date1", DateUtil.getInstance().getLastDayOfMonth(2020, 3));
-        System.out.println(jsonObject);
     }
 
 

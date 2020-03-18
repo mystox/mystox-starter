@@ -10,6 +10,16 @@ public class FsuEntity {
     private String fsuId;
     private String operationState;
     private String manufacturer;
+    private String state;
+
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
 
     public String getFsuId() {
         return fsuId;

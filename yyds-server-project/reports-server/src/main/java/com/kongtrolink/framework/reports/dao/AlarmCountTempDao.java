@@ -37,8 +37,8 @@ public class AlarmCountTempDao extends MongoBaseDao {
         if (StringUtils.isBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
         if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
-        String runningSate = condition.getString("runningSate");
-        if (!"全部".equals(runningSate)) criteria.and("runningSate").is(runningSate);
+        String runningSate = condition.getString("operationState");
+        if (!"全部".equals(runningSate)) criteria.and("operationState").is(runningSate);
         String fsuManufactory = condition.getString("fsuManufactory");
         if (!"全部".equals(fsuManufactory)) criteria.and("fsuManufactory").is(fsuManufactory);
         JSONArray stationList = condition.getJSONArray("stationList");

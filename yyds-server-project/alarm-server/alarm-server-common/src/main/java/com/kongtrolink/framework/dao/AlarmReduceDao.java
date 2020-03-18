@@ -84,7 +84,6 @@ public class AlarmReduceDao {
             String key = mapResult.getString("_id");
             Long value = mapResult.getLong("value");
             Long count = countMap.get(key);
-
             if (count != null)
                 count += value;
             else
@@ -102,7 +101,7 @@ public class AlarmReduceDao {
         if (!StringUtil.isNUll(serverCode)) {
             criteria.and("serverCode").is(serverCode);
         }
-        List<String> deviceIdList = alarmQuery.getDeviceIdList();
+        List<String> deviceIdList = alarmQuery.getDeviceIds();
         if (deviceIdList != null && deviceIdList.size() > 0)
             criteria.and("deviceId").in(deviceIdList);
         Date startBeginTime = alarmQuery.getStartBeginTime();
@@ -138,6 +137,126 @@ public class AlarmReduceDao {
             weekList.add(endWeek);
         }
         return weekList;
+    }
+
+    /**
+     * @Date 9:09 2020/3/16
+     * @Param No such property: code for class: Script1
+     * @return java.util.List<com.alibaba.fastjson.JSONObject>
+     * @Author mystox
+     * @Description //获取一个月内历史告警
+     **/
+    public List<JSONObject> getAlarmHistory(AlarmQuery alarmQuery) {
+        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
+                + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
+        //2，获取时间跨度内各个时间点的年周数，生成对应的表
+        List<String> weeks = getWeeks(alarmQuery);
+        List<JSONObject> alarmHistory = new ArrayList<>();
+        for (int i = weeks.size() - 1; i >= 0; i--) {
+            String week = weeks.get(i);
+            logger.debug("get alarmHistory weeks data:[{}]", week);
+            String table = tablePrefix + week;
+            Criteria criteria = new Criteria();
+            criteria = commonQuery(criteria, alarmQuery);
+            List<JSONObject> jsonObjects = mongoTemplate.find(Query.query(criteria), JSONObject.class, table);
+            alarmHistory.addAll(jsonObjects);
+        }
+        logger.info("get alarm history count is [{}]", alarmHistory.size());
+        return alarmHistory;
+    }
+
+    public List<JSONObject> getAlarmCategory(AlarmQuery alarmQuery) {
+        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
+                + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
+        //2，获取时间跨度内各个时间点的年周数，生成对应的表
+        List<String> weeks = getWeeks(alarmQuery);
+        //从各个表获取数据
+        String map = "function(){\n" +
+                "        var type = this.deviceInfos.type + '';\n" +
+                "        emit(this.targetLevelName,\n" +
+                "        {arr:[{deviceType:type,count:1}]}\n" +
+                "        )}";
+        String reduce = "function (key,values){\n" +
+                "            var ret = {arr:[]};\n" +
+                "            var deviceTypeMap = {};\n" +
+                "            for(var i = 0; i<values.length;i++){\n" +
+                "                var ia = values[i];\n" +
+                "                for(var j in ia.arr){\n" +
+                "                    var deviceType = ia.arr[j].deviceType;\n" +
+                "                    var count = ia.arr[j].count;\n" +
+                "                    deviceType in deviceTypeMap?deviceTypeMap[deviceType] += count:deviceTypeMap[deviceType] = count;\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            for(var d in deviceTypeMap){\n" +
+                "                var entity = {deviceType:d,count:deviceTypeMap[d]};\n" +
+                "                ret.arr.push(entity);\n" +
+                "            }\n" +
+                "            return ret;\n" +
+                "        }";
+        List<JSONObject> alarmCategoryList = new ArrayList<>();
+        Map<String, JSONObject> resultMap = new HashMap<>();
+        for (int i = weeks.size() - 1; i >= 0; i--) {
+            String week = weeks.get(i);
+            logger.debug("map reduce weeks data:[{}]", week);
+            String table = tablePrefix + week;
+            Criteria criteria = new Criteria();
+            criteria = commonQuery(criteria, alarmQuery);
+            boolean b = mongoTemplate.collectionExists(table);
+            if (!b) continue;
+
+            MapReduceResults<JSONObject> mapReduceResults = mongoTemplate.mapReduce(
+                    Query.query(criteria), table, map, reduce, JSONObject.class);
+            logger.debug("table:{}, reduceResult:[{}]",table,JSONObject.toJSONString(mapReduceResults.iterator()));
+            for (JSONObject result : mapReduceResults)
+            {
+                String levelName = result.getString("_id");
+                JSONObject deviceMap = resultMap.get(levelName);
+                List<JSONObject> arr = result.getJSONArray("arr").toJavaList(JSONObject.class);
+                long sum = 0L;
+                for (JSONObject deviceCount: arr)
+                {
+                    String deviceType = deviceCount.getString("deviceType");
+                    Long count = deviceCount.getLong("count");
+                    if (count==null) count = 0L;
+                    sum += count;
+                    Long countOld = deviceMap.getLong(deviceType);
+                    if (countOld!=null) countOld += count;
+                    else countOld = count;
+                    deviceMap.put(deviceType, countOld);
+                }
+                Long sumOld = deviceMap.getLong("sum");
+                sumOld += sum;
+                deviceMap.put("sum", sumOld);
+            }
+
+        }
+        resultMap.forEach((alarmLevel, deviceMap) -> {
+            JSONObject entity = new JSONObject();
+            entity.put("alarmLevel", alarmLevel);
+            entity.put("alarmCount", deviceMap.getLong("sum"));
+            entity.put("fsuOffline", 0L); //todo fsu离线告警待实现
+            Long smokeSensation = deviceMap.getLong("烟感");
+            entity.put("smokeSensation", smokeSensation);
+            Long sensirion = deviceMap.getLong("温湿度");
+            entity.put("sensirion", sensirion);
+            Long switchPower = deviceMap.getLong("开关电源");
+            entity.put("switchPower", switchPower);
+            Long battery = deviceMap.getLong("蓄电池");
+            entity.put("battery", battery);
+            Long infrared = deviceMap.getLong("红外设备");
+            entity.put("infrared", infrared);
+            Long gateMagnetism = deviceMap.getLong("门磁");
+            entity.put("gateMagnetism", gateMagnetism);
+            Long waterImmersion = deviceMap.getLong("水浸");
+            entity.put("waterImmersion", waterImmersion);
+            Long airConditioning = deviceMap.getLong("空调");
+            entity.put("airConditioning", airConditioning);
+            alarmCategoryList.add(entity);
+        });
+
+        logger.info("map reduce result:[{}]", JSONObject.toJSONString(alarmCategoryList));
+        return alarmCategoryList;
+
     }
 
 

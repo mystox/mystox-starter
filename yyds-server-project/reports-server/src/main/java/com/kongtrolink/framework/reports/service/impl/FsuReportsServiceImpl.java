@@ -2,6 +2,7 @@ package com.kongtrolink.framework.reports.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.ReflectionUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.OperaCodePrefix;
 import com.kongtrolink.framework.reports.api.FsuReportsService;
@@ -10,11 +11,19 @@ import com.kongtrolink.framework.reports.dao.ReportTaskDao;
 import com.kongtrolink.framework.reports.entity.*;
 import com.kongtrolink.framework.reports.entity.alarmCount.AlarmCountTemp;
 import com.kongtrolink.framework.reports.entity.fsuOfflineDetails.FsuOfflineDetailsTemp;
+import com.kongtrolink.framework.reports.entity.query.DeviceEntity;
+import com.kongtrolink.framework.reports.entity.query.FsuEntity;
+import com.kongtrolink.framework.reports.entity.query.FsuOperationState;
+import com.kongtrolink.framework.reports.entity.query.SiteEntity;
+import com.kongtrolink.framework.reports.service.MqttCommonInterface;
 import com.kongtrolink.framework.reports.stereotype.ReportExtend;
 import com.kongtrolink.framework.reports.stereotype.ReportOperaCode;
+import com.kongtrolink.framework.reports.utils.CommonCheck;
 import com.kongtrolink.framework.reports.utils.WorkbookUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -31,8 +40,13 @@ import java.util.List;
  */
 @Service
 public class FsuReportsServiceImpl implements FsuReportsService {
-    @Autowired
+
+    Logger logger = LoggerFactory.getLogger(FsuReportsServiceImpl.class);
+
+
     MqttOpera mqttOpera;
+    @Autowired
+    MqttCommonInterface mqttCommonInterface;
     @Autowired
     ReportTaskDao reportTaskDao;
     @Autowired
@@ -53,33 +67,89 @@ public class FsuReportsServiceImpl implements FsuReportsService {
     public ReportData fsuOffLine(String reportConfigStr) {
         ReportConfig reportConfig = JSONObject.parseObject(reportConfigStr, ReportConfig.class);
         ExecutorType executorType = reportConfig.getExecutorType();
-        if (ExecutorType.query.equals(executorType))
-            return fsuOffLineQuery(reportConfig);
-        else return fsuOffLineExecutor(reportConfig);
-    }
-
-    private ReportData fsuOffLineExecutor(ReportConfig reportConfig) {
         ReportTask reportTask = reportTaskDao.findByByUniqueCondition(
                 reportConfig.getServerCode(), reportConfig.getEnterpriseCode(), reportConfig.getOperaCode(), reportConfig.getReportServerCode());
         if (reportTask == null)
-            return null;
-        JSONObject condition = reportConfig.getCondition();
+            return new ReportData(DataType.ERROR, "report task is not exists [" + JSONObject.toJSONString(reportTask) + "]");
+        if (ExecutorType.query.equals(executorType))
+            return fsuOffLineQuery(reportConfig,reportTask);
+        else return fsuOffLineExecutor(reportConfig,reportTask);
+    }
+
+    /**
+     * @Date 20:21 2020/3/17
+     * @Param No such property: code for class: Script1
+     * @return com.kongtrolink.framework.reports.entity.ReportData
+     * @Author mystox
+     * @Description //每月月底统计当前月的fsu运行状态信息
+     **/
+    private ReportData fsuOffLineExecutor(ReportConfig reportConfig, ReportTask reportTask) {
         String serverCode = reportConfig.getServerCode();
         String enterpriseCode = reportConfig.getEnterpriseCode();
-        List<AlarmCountTemp> alarmCountTempList = new ArrayList<AlarmCountTemp>();
-
-        //获取时间信息
+        JSONObject baseCondition = new JSONObject();
+        baseCondition.put("serverCode", serverCode);
+        baseCondition.put("enterpriseCode", enterpriseCode);
+        // 获取企业在该云平台下所有站点
+        List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
 
-        if (month == 1) {
-            month = 12;
-            year -= 1;
-        } else month -= 1;
+        if (!CollectionUtils.isEmpty(siteList)) {
+            int finalMonth = month;
+            int finalYear = year;
+            siteList.forEach(s -> {
+                // 获取站点名称
+                String address = s.getAddress();
+                String addressName = mqttCommonInterface.getRegionName(address);
+                List<String> addressArr = JSONArray.parseArray(addressName, String.class);
+                String province = addressArr.get(0); //省
+                String municipality = addressArr.get(1); //市
+                String county = addressArr.get(2); //县|区
+                // 获取站点下所有fsu及其相关告警数据
+                String stationId = s.getSiteId();
+                String stationName = s.getSiteName();
+                String siteType = s.getSiteType();
+                baseCondition.put("operationState", FsuOperationState.MAINTENANCE);
+                List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
+                //判断交维态
+                if (fsuList == null) {
+                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    return;
+                }
+                FsuEntity fsuEntity = fsuList.get(0);
+                String manufacturer = fsuEntity.getManufacturer();
+                String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
+                List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
+                List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                deviceIds.addAll(fsuIds);
+                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
+                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
+               /* / Test
+                List<String> deviceIds = new ArrayList<>();
+                String operationState = "交维态";
+                deviceIds.add("10010_1021006");
+                deviceIds.add("10010_1021015");
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, finalYear, finalMonth, baseCondition);
+                jsonObjects.forEach(entity -> {
+                    //填充站点告警统计信息
+                });
+            });
+        } else {
+            logger.error("返回站点结果为空");
+        }
+
+
+
+
+
+
+
         return null;
     }
 
-    private ReportData fsuOffLineQuery(ReportConfig reportConfig) {
+    private ReportData fsuOffLineQuery(ReportConfig reportConfig, ReportTask reportTask) {
         JSONObject condition = reportConfig.getCondition();//获取查询条件
         String statisticLevel = condition.getString("statisticLevel");
         //todo 根据条件获取层级下的站点列表
