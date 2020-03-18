@@ -4,8 +4,10 @@ import com.kongtrolink.framework.scloud.dao.DeviceSignalTypeMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.DeviceTypeExport;
 import com.kongtrolink.framework.scloud.entity.SignalType;
+import com.kongtrolink.framework.scloud.entity.model.DeviceTypeModel;
 import com.kongtrolink.framework.scloud.service.DeviceSignalTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ import java.util.List;
  * Created by Eric on 2020/2/10.
  */
 @Service
-public class DeviceDeviceSignalTypeTypeServiceImpl implements DeviceSignalTypeService {
+public class DeviceSignalTypeServiceImpl implements DeviceSignalTypeService {
 
     @Autowired
     DeviceSignalTypeMongo deviceSignalTypeMongo;
@@ -64,6 +66,15 @@ public class DeviceDeviceSignalTypeTypeServiceImpl implements DeviceSignalTypeSe
             }
         }
         return value;
+    }
+
+    /**
+     * 获取存在的设备类型
+     */
+    @Override
+    public List<DeviceTypeModel> getExistedDeviceType(String uniqueCode, Criteria criteria) {
+        List<DeviceTypeModel> list = deviceSignalTypeMongo.findExistedDeviceType(uniqueCode, criteria);
+        return list;
     }
 
     /**

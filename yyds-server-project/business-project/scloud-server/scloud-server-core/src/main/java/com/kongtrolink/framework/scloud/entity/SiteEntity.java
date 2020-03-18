@@ -46,6 +46,7 @@ public class SiteEntity implements Serializable {
 	private Long createTime;	//投入使用时间
 	private String areaCovered;	//占地面积
 	private Integer fileId;	//站点图纸文件Id
+	private String fileName;	//站点图纸文件名称
 
 	public int getId() {
 		return id;
@@ -173,5 +174,13 @@ public class SiteEntity implements Serializable {
 
 	public void setFileId(Integer fileId) {
 		this.fileId = fileId;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 }

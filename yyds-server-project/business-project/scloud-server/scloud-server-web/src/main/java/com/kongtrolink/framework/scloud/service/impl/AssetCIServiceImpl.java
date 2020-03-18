@@ -12,6 +12,7 @@ import com.kongtrolink.framework.scloud.mqtt.entity.BasicParentEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicCommonQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicDeviceQuery;
+import com.kongtrolink.framework.scloud.mqtt.query.BasicParentQuery;
 import com.kongtrolink.framework.scloud.mqtt.query.BasicSiteQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
@@ -177,6 +178,65 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
         basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
         basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getDeviceCode()));
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
+    }
+
+    /**
+     * 从【中台-资管】获取站点下FSU 列表
+     */
+    @Override
+    public MsgResult getAssetFsuList(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+        basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
+        basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+        basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, "FSU动环主机"));
+        BasicParentQuery basicParentQuery = new BasicParentQuery();
+        basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));    //父资产类型：site
+        basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getSiteCodes()));    //父资产SN：站点编码（集合）
+        basicDeviceQuery.set_parent(basicParentQuery);
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
+    }
+
+    /**
+     * 从【中台-资管】获取FSU下的关联设备
+     */
+    @Override
+    public MsgResult getRelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+        basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
+        basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+
+        BasicParentQuery basicParentQuery = new BasicParentQuery();
+        basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, "FSU动环主机"));    //父资产类型：FSU动环主机
+        basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getDeviceCode()));    //父资产SN：FSU编码
+        basicDeviceQuery.set_parent(basicParentQuery);
+
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        return msgResult;
+    }
+
+    /**
+     * 从【中台-资管】获取站点下未关联FSU的设备 列表
+     */
+    @Override
+    public MsgResult getUnrelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
+        BasicDeviceQuery basicDeviceQuery = new BasicDeviceQuery();
+        basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
+        basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
+        basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceTypes()));    //所有非FSU动环主机设备类型
+
+        BasicParentQuery basicParentQuery = new BasicParentQuery(); //父资产信息
+        basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));    //父资产类型：site
+        basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getSiteCode()));  //父资产SN：站点编码
+        basicDeviceQuery.set_parent(basicParentQuery);
+
+        BasicParentQuery basicNotParentQuery = new BasicParentQuery();  //未关联的资产信息
+        basicNotParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, "FSU动环主机")); //未关联资产类型：FSU动环主机
+        basicDeviceQuery.set_notParent(basicNotParentQuery);
 
         MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
         return msgResult;

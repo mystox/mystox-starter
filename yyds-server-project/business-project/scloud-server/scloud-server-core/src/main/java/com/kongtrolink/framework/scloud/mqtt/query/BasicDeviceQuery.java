@@ -10,6 +10,7 @@ public class BasicDeviceQuery {
     private BasicCommonQuery enterpriseCode;  //企业识别码
     private BasicCommonQuery type;    //资产类型
     private BasicParentQuery _parent;   //父资产信息
+    private BasicParentQuery _notParent;    //未关联的资产信息
     private BasicCommonQuery sn;    //资产SN:此时为 设备编码
     private BasicCommonQuery deviceName;    //设备名称
     private BasicCommonQuery model; //设备型号
@@ -44,6 +45,14 @@ public class BasicDeviceQuery {
 
     public void set_parent(BasicParentQuery _parent) {
         this._parent = _parent;
+    }
+
+    public BasicParentQuery get_notParent() {
+        return _notParent;
+    }
+
+    public void set_notParent(BasicParentQuery _notParent) {
+        this._notParent = _notParent;
     }
 
     public BasicCommonQuery getSn() {

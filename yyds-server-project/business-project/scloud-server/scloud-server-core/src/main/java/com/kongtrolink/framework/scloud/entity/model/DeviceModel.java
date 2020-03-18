@@ -24,7 +24,6 @@ public class DeviceModel extends DeviceEntity {
 	 */
 	private static final long serialVersionUID = 3878090092310831714L;
 
-	private String tierName;	//区域名称
 	private String siteName;	//站点名称
 	private String name;	//设备名称
 	private String model;	//设备型号
@@ -33,14 +32,6 @@ public class DeviceModel extends DeviceEntity {
 	private Integer countSignal;
 
 	private String isModified; //修改设备时，是否修改了设备名称和设备型号,"0"-未修改，"1"-修改
-
-	public String getTierName() {
-		return tierName;
-	}
-
-	public void setTierName(String tierName) {
-		this.tierName = tierName;
-	}
 
 	public String getSiteName() {
 		return siteName;

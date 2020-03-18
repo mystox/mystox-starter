@@ -5,6 +5,7 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
+import com.kongtrolink.framework.scloud.entity.RelatedDeviceInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
@@ -201,4 +202,50 @@ public class DeviceController extends BaseController{
         }
     }
 
+    /**
+     * 获取站点下FSU 列表
+     *  [使用场景]：站点列表和设备列表 点击显示关联设备
+     */
+    @RequestMapping(value = "getFsuList", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getFsuList(@RequestBody DeviceQuery deviceQuery){
+        try{
+//            String uniqueCode = getUniqueCode();
+            List<RelatedDeviceInfo> list = deviceService.findFsuList(uniqueCode, deviceQuery);
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取关联设备列表失败", false);
+        }
+    }
+
+    /**
+     * 获取FSU下的关联设备
+     */
+    @RequestMapping(value = "getRelatedDeviceList", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getRelatedDeviceList(@RequestBody DeviceQuery deviceQuery){
+        try{
+//            String uniqueCode = getUniqueCode();
+            List<RelatedDeviceInfo> list = deviceService.findRelatedDeviceList(uniqueCode, deviceQuery);
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取FSU下关联设备失败", false);
+        }
+    }
+
+    /**
+     * 获取站点下未关联FSU的设备 列表
+     *  [使用场景]：站点列表和设备列表 点击显示关联设备
+     */
+    @RequestMapping(value = "getUnrelatedDeviceList", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getUnrelatedDeviceList(@RequestBody DeviceQuery deviceQuery){
+        try {
+//            String uniqueCode = getUniqueCode();
+            List<RelatedDeviceInfo> list = deviceService.findUnrelatedDeviceList(uniqueCode, deviceQuery);
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取未关联设备列表", false);
+        }
+    }
 }

@@ -91,6 +91,7 @@ public class SiteServiceImpl implements SiteService {
         siteEntity.setCreateTime(siteModel.getCreateTime());
         siteEntity.setAreaCovered(siteModel.getAreaCovered());
         siteEntity.setFileId(siteModel.getFileId());
+        siteEntity.setFileName(siteModel.getFileName());
 
         //向【资管】下发添加（批量）站点的MQTT消息
         MsgResult msgResult = assetCIService.addAssetSite(uniqueCode, siteModel);
@@ -154,6 +155,7 @@ public class SiteServiceImpl implements SiteService {
                             siteModel.setCreateTime(siteEntity.getCreateTime());
                             siteModel.setAreaCovered(siteEntity.getAreaCovered());
                             siteModel.setFileId(siteEntity.getFileId());
+                            siteModel.setFileName(siteEntity.getFileName());
 
                             list.add(siteModel);
                         }
