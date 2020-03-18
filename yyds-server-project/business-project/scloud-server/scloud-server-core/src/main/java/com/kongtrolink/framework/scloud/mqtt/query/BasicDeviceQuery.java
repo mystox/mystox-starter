@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.mqtt.query;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * 设备基本信息 查询类
  *  SCloud->中台资管
@@ -9,7 +11,9 @@ public class BasicDeviceQuery {
     private BasicCommonQuery serverCode;
     private BasicCommonQuery enterpriseCode;  //企业识别码
     private BasicCommonQuery type;    //资产类型
+    @JSONField(name = "_parent")
     private BasicParentQuery _parent;   //父资产信息
+    @JSONField(name = "_notParent")
     private BasicParentQuery _notParent;    //未关联的资产信息
     private BasicCommonQuery sn;    //资产SN:此时为 设备编码
     private BasicCommonQuery deviceName;    //设备名称
