@@ -219,9 +219,9 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         }
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
-        resultData[0][length - 3] = new String[]{"统计周期:"};
-        resultData[0][length - 2] = new String[]{"时间段:"};
-        resultData[0][length - 1] = new String[]{"操作人员:"};
+        resultData[0][length - 3] = new String[]{"统计周期:" + period};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = fsuOfflineExcelCreate("FSU离线统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
@@ -575,9 +575,9 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         }
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
-        resultData[0][length - 3] = new String[]{"统计周期:"};
-        resultData[0][length - 2] = new String[]{"时间段:"};
-        resultData[0][length - 1] = new String[]{"操作人员:"};
+        resultData[0][length - 3] = new String[]{"统计周期:" + period};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = fsuOfflineDetailsExcelCreate("FSU离线明细表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
