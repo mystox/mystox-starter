@@ -11,6 +11,7 @@ public class HistoryDataQuery  extends Paging{
     private String fsuCode;
     private String deviceCode;
     private String cntbId;//需要查询的具体信号点ID
+    private String deviceType;//设备类型
     //导出用
     private String tierName;	//区域名称
     private String siteName;	//站点名称
@@ -96,5 +97,13 @@ public class HistoryDataQuery  extends Paging{
 
     public void setSiteCode(String siteCode) {
         this.siteCode = siteCode;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 }

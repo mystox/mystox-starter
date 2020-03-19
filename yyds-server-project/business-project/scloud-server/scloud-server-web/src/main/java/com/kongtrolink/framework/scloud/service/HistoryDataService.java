@@ -5,6 +5,7 @@ import com.kongtrolink.framework.scloud.entity.model.HistoryDataDayModel;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataModel;
 import com.kongtrolink.framework.scloud.query.HistoryDataQuery;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -37,4 +38,13 @@ public interface HistoryDataService {
      * @return 统计数据
      */
     List<HistoryDataDayModel> getDayReport(String uniqueCode,HistoryDataQuery historyDataQuery);
+
+    /**
+     * 导出数据
+     */
+    void exportMap(HttpServletResponse response,
+                                 List<HistoryDataEntity> data,
+                                   String uniqueCode,
+                                   String devType,
+                                    String fileName);
 }
