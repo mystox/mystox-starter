@@ -8,6 +8,7 @@ import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.iaiot.core.assent.DeviceReport;
 import com.kongtrolink.framework.gateway.iaiot.core.assent.DeviceReportExtend;
 import com.kongtrolink.framework.gateway.iaiot.core.assent.DeviceReportExtendInfo;
+import com.kongtrolink.framework.gateway.tower.core.constant.RedisKey;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.Device;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.XmlList;
 import com.kongtrolink.framework.gateway.tower.core.util.GatewayTowerUtil;
@@ -77,7 +78,7 @@ public class AssetTransverter extends TransverterHandler {
             extend.setModel(deviceReport.getType());
             deviceReport.setExtend(extend);
             List<DeviceReport> childDevices = new ArrayList<>();
-            String redisKey = deviceTypeConfig.getDeviceRedisKey(); //获取设备存储的redisKey
+            List<String> deviceCodes = new ArrayList<>();
             for(Device device:deviceList.getDeviceList()){
                 DeviceReport deviceReportChild = new DeviceReport();
                 deviceReportChild.setSn(sn +"_" + device.getId());
@@ -97,10 +98,12 @@ public class AssetTransverter extends TransverterHandler {
                 extendInfo.setModel(type);
                 deviceReportChild.setExtend(extendInfo);
                 childDevices.add(deviceReportChild);
-                //将上报的设备保持到redis中 key是 sn_deviceId
-                redisUtils.hset(redisKey,sn +"_" + device.getId(),device);
+                deviceCodes.add(device.getId());
+                //将上报的设备保持到redis中 key是 uniqueCode#deviceId value是：fsuID
+                redisUtils.hset(RedisKey.ASSENT_DEVICE_INFO,getEnterpriseCode() +"#" + device.getId(),sn);
             }
             deviceReport.setChildDevices(childDevices);
+            redisUtils.hset(RedisKey.ASSENT_FSU_INFO,getEnterpriseCode() +"#" + sn,deviceCodes);
             logger.debug("上报资管的 数据: \n");
             logger.debug(JSONObject.toJSONString(deviceReport));
             logger.debug("\n");

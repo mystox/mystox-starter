@@ -41,4 +41,19 @@ public class MultipleRoomController  extends BaseController {
             return new JsonResult("保存失败", false);
         }
     }
+    /**
+     * 根据设备查询信号点配置包含默认值 前天界面用
+     */
+    @RequestMapping(value = "/queryRoomConfigShow", method = RequestMethod.POST)
+    public @ResponseBody JsonResult queryRoomConfigShow(@RequestBody RoomSignalTypeConfig config) {
+        try{
+            String uniqueCode = getUniqueCode();
+            int deviceId = config.getDeviceId();
+            RoomSignalTypeConfig result = multipleRoomService.queryRoomSignalTypeConfigShow(uniqueCode,deviceId);
+            return new JsonResult(result);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("查询失败", false);
+        }
+    }
 }

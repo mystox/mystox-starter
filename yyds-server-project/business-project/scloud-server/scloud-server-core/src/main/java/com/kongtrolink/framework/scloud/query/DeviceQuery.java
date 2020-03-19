@@ -29,7 +29,9 @@ public class DeviceQuery extends Paging {
 	private List<String> siteCodes;	//站点编码（集合）
 	private List<Integer> siteIds;	//站点Id（集合）
 	private String deviceCode;	//设备编码
+	private List<String> deviceCodes;	//设备编码（集合）
 	private String deviceType;	//设备类型
+	private List<String> deviceTypes;	//设备类型（集合）
 	private String deviceTypeCode;	//设备类型编码
 	private String deviceName;	//设备名称
 	private String signalType;	//信号类型（AI,AO,DI,DO）
@@ -39,7 +41,7 @@ public class DeviceQuery extends Paging {
 	private Long endTime;	//结束时间
 	private String state;	//注册状态（FSU类型、摄像机类型）：在线、离线
 	private String operationState;	//运行状态（FSU类型）：工程态、测试态、交维态
-	private List<String> deviceCodes;	//设备编码（集合）
+	private String signalCode;
 
 	public String getServerCode() {
 		return serverCode;
@@ -103,6 +105,14 @@ public class DeviceQuery extends Paging {
 
 	public void setDeviceType(String deviceType) {
 		this.deviceType = deviceType;
+	}
+
+	public List<String> getDeviceTypes() {
+		return deviceTypes;
+	}
+
+	public void setDeviceTypes(List<String> deviceTypes) {
+		this.deviceTypes = deviceTypes;
 	}
 
 	public String getDeviceTypeCode() {
@@ -183,5 +193,13 @@ public class DeviceQuery extends Paging {
 
 	public void setDeviceCodes(List<String> deviceCodes) {
 		this.deviceCodes = deviceCodes;
+	}
+
+	public String getSignalCode() {
+		return signalCode;
+	}
+
+	public void setSignalCode(String signalCode) {
+		this.signalCode = signalCode;
 	}
 }

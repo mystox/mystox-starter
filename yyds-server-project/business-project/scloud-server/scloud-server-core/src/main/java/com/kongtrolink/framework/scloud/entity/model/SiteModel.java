@@ -24,7 +24,8 @@ public class SiteModel{
     private String assetNature;	//产权性质（自建、社会资源、注入）
     private Long createTime;	//投入使用时间
     private String areaCovered;	//占地面积
-    private int fileId;	//站点图纸文件Id
+    private Integer fileId;	//站点图纸文件Id
+    private String fileName;    //站点图纸文件名称
 
     private String isModified; //修改站点时，是否修改了站点名称,"0"-未修改，"1"-修改
 
@@ -164,12 +165,20 @@ public class SiteModel{
         this.areaCovered = areaCovered;
     }
 
-    public int getFileId() {
+    public Integer getFileId() {
         return fileId;
     }
 
-    public void setFileId(int fileId) {
+    public void setFileId(Integer fileId) {
         this.fileId = fileId;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getIsModified() {

@@ -52,6 +52,6 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
      */
     @Override
     public RoomSignalTypeConfig queryRoomSignalTypeConfigShow(String uniqueCode, int deviceId) {
-        return null;
+        return multipleRoomDao.queryRoomSignalTypeConfig(uniqueCode, deviceId);
     }
 }

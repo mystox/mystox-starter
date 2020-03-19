@@ -1,17 +1,24 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.SignalType;
+import com.kongtrolink.framework.scloud.entity.model.DeviceTypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 
 /**
  * 信号点数据操作类
@@ -38,6 +45,22 @@ public class DeviceSignalTypeMongo {
      */
     public List<DeviceType> findSignalTypeList(String uniqueCode){
         return mongoTemplate.findAll(DeviceType.class, uniqueCode + CollectionSuffix.SIGNAL_TYPE);
+    }
+
+    /**
+     * 获取存在的设备类型
+     */
+    public List<DeviceTypeModel> findExistedDeviceType(String uniqueCode, Criteria criteria){
+        TypedAggregation<DeviceEntity> agg = Aggregation.newAggregation(DeviceEntity.class,
+                match(criteria),  // 查询条件
+                group("type","typeCode").count().as("sum"),
+                project("sum").and("key").previousOperation(),  //将前面查询结果_id替换诚 key
+                project("sum").and("key.type").as("type").and("key.typeCode").as("typeCode"),
+                project("type","typeCode")
+        );
+        AggregationResults<DeviceTypeModel> result = mongoTemplate.aggregate(agg,uniqueCode + CollectionSuffix.DEVICE,
+                DeviceTypeModel.class);
+        return  result.getMappedResults();
     }
 
     /**
