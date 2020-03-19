@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
+import com.kongtrolink.framework.scloud.entity.RelatedDeviceInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -60,6 +61,21 @@ public interface DeviceService {
      * 保存特殊设备的特殊属性
      */
     void saveDeviceSpecialInfo(String uniqueCode, DeviceSpecialInfoEntity deviceSpecialInfoEntity);
+
+    /**
+     * 获取站点下FSU 列表
+     */
+    List<RelatedDeviceInfo> findFsuList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 获取FSU下的关联设备
+     */
+    List<RelatedDeviceInfo> findRelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 获取站点下未关联FSU的设备 列表
+     */
+    List<RelatedDeviceInfo> findUnrelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
      * @auther: liudd

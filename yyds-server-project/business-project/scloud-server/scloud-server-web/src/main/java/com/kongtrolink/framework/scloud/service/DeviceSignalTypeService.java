@@ -3,6 +3,8 @@ package com.kongtrolink.framework.scloud.service;
 import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.DeviceTypeExport;
 import com.kongtrolink.framework.scloud.entity.SignalType;
+import com.kongtrolink.framework.scloud.entity.model.DeviceTypeModel;
+import org.springframework.data.mongodb.core.query.Criteria;
 
 import java.util.List;
 
@@ -26,6 +28,11 @@ public interface DeviceSignalTypeService {
      * 导出信号类型映射表
      */
     List<DeviceTypeExport> getDeviceTypeExport(String uniqueCode);
+
+    /**
+     * 获取存在的设备类型
+     */
+    List<DeviceTypeModel> getExistedDeviceType(String uniqueCode, Criteria criteria);
 
     /**
      * @auther: liudd

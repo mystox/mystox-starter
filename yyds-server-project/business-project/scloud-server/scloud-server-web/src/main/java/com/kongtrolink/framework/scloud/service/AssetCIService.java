@@ -52,6 +52,21 @@ public interface AssetCIService {
     MsgResult getAssetDeviceByCode(String uniqueCode, DeviceQuery deviceQuery);
 
     /**
+     * 从【中台-资管】获取站点下FSU 列表
+     */
+    MsgResult getAssetFsuList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 从【中台-资管】获取FSU下的关联设备
+     */
+    MsgResult getRelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
+     * 从【中台-资管】获取站点下未关联FSU的设备 列表
+     */
+    MsgResult getUnrelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery);
+
+    /**
      * 向【中台-资管】 添加设备
      */
     MsgResult addAssetDevice(String uniqueCode, DeviceModel deviceModel);

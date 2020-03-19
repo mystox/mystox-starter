@@ -1391,10 +1391,12 @@ public class Neo4jDBService implements DBService {
                             conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_parent").getJSONObject(parentPropName), true));
                         }
                     } else if (propName.equals("_notParent")) {
-                        parent = "<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(parent:CI)";
-                        for (String parentPropName : jsonObject.getJSONObject("_notParent").keySet()) {
-                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_notParent").getJSONObject(parentPropName), false));
-                        }
+                        conditionList.add("not (ci:" + Neo4jDBNodeType.CI + ")<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-" +
+                                "(:" + Neo4jDBNodeType.CI + " {type:'" + jsonObject.getJSONObject("_notParent").getJSONObject("type").getString("value") + "'})");
+//                        parent = "<-[:" + Neo4jDBRelationshipType.RELATIONSHIP + "]-(parent:CI)";
+//                        for (String parentPropName : jsonObject.getJSONObject("_notParent").keySet()) {
+//                            conditionList.add("parent." + getCondition(parentPropName, jsonObject.getJSONObject("_notParent").getJSONObject(parentPropName), false));
+//                        }
                     } else if (propName.equals("_page")) {
                         int curPage = jsonObject.getJSONObject("_page").getJSONObject("curPage").getInteger("value");
                         int pageNum = jsonObject.getJSONObject("_page").getJSONObject("pageNum").getInteger("value");
@@ -2066,11 +2068,7 @@ public class Neo4jDBService implements DBService {
                 break;
             case 2:
                 // in搜索，需通过dataType字段确认数据类型，若该字段不存在，则认为是String
-                if (isEqual) {
-                    result = propName + " in " + JSONObject.toJSONString(condition.getJSONArray("value"));
-                } else {
-                    result = propName + " not in " + JSONObject.toJSONString(condition.getJSONArray("value"));
-                }
+                result = propName + " in " + JSONObject.toJSONString(condition.getJSONArray("value"));
                 break;
         }
 

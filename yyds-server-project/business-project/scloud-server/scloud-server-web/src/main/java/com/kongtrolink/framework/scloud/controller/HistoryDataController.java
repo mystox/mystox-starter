@@ -101,12 +101,19 @@ public class HistoryDataController  extends ExportController {
         String uniqueCode = getUniqueCode();
         historyDataQuery.setPageSize(Integer.MAX_VALUE);
         historyDataQuery.setCurrentPage(1);
-        List<HistoryDataModel> list = historyDataService.getHisList(uniqueCode,historyDataQuery);
         String cntbId = historyDataQuery.getCntbId();
-        String title = cntbId+"历史数据";
-        String[] headsName = { "时间", "值"};
-        String[] propertiesName = { "time", "value"};
-        export(response,list,propertiesName, headsName, title);
+        List list;
+        if(cntbId==null || "".equals(cntbId)){
+            list = historyDataService.getHisAllList(uniqueCode,historyDataQuery);
+            historyDataService.exportMap(response,list,uniqueCode,historyDataQuery.getDeviceType(),"历史数据");
+        }else{
+            list = historyDataService.getHisList(uniqueCode,historyDataQuery);
+            String title = cntbId+"历史数据";
+            String[] headsName = { "时间", "值"};
+            String[] propertiesName = { "time", "value"};
+            export(response,list,propertiesName, headsName, title);
+        }
+
     }
 
     @RequestMapping(value = "/config", method = RequestMethod.POST)

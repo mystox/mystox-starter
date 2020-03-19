@@ -64,36 +64,39 @@ public class SiteMongo {
         String siteCode = siteQuery.getSiteCode();  //站点编码（模糊搜索）
         List<String> siteCodes = siteQuery.getSiteCodes(); //站点编码集合(资管获取的)
 
-        Criteria criteria = new Criteria();
+        Criteria criteria = Criteria.where("code").in(siteCodes);
+        /*if (siteCodes != null){
+            criteria.and("code").in(siteCodes);
+        }*/
+        Criteria criteria1 = new Criteria();
         if (towerType != null){
-            criteria.and("towerType").is(towerType);
+            criteria1.and("towerType").is(towerType);
         }
         if (siteCode != null && !siteCode.equals("")){
-            siteCode = MongoRegexUtil.escapeExprSpecialWord(address);
-            criteria.and("code").regex("^" + siteCode + ".*?");
-        }
-        if (siteCodes != null){
-            criteria.and("code").in(siteCodes);
+            siteCode = MongoRegexUtil.escapeExprSpecialWord(siteCode);
+            criteria1.and("code").regex("^" + siteCode + ".*?");
         }
         if (address != null && !address.equals("")){
             address = MongoRegexUtil.escapeExprSpecialWord(address);
-            criteria.and("address").regex(".*?" + address + ".*?");
+            criteria1.and("address").regex(".*?" + address + ".*?");
         }
         if (respName != null && !respName.equals("")){
             respName = MongoRegexUtil.escapeExprSpecialWord(respName);
-            criteria.and("respName").regex(".*?" + respName + ".*?");
+            criteria1.and("respName").regex(".*?" + respName + ".*?");
         }
         if (startTime != null){
             if (endTime != null){
-                criteria.and("createTime").gte(startTime).lte(endTime);
+                criteria1.and("createTime").gte(startTime).lte(endTime);
             }else {
-                criteria.and("createTime").gte(startTime);
+                criteria1.and("createTime").gte(startTime);
             }
         }else {
             if (endTime != null){
-                criteria.and("createTime").lte(endTime);
+                criteria1.and("createTime").lte(endTime);
             }
         }
+
+        criteria.andOperator(criteria1);
 
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "createTime"));
@@ -115,7 +118,8 @@ public class SiteMongo {
         String shareInfo = siteModel.getShareInfo();//共享信息
         String assetNature = siteModel.getAssetNature();	//产权性质（自建、社会资源、注入）
         String areaCovered = siteModel.getAreaCovered();	//占地面积
-        int fileId = siteModel.getFileId();	//站点图纸文件Id
+        Integer fileId = siteModel.getFileId();	//站点图纸文件Id
+        String fileName = siteModel.getFileName();  //站点图纸文件名称
 
         Criteria criteria = Criteria.where("code").is(siteCode);
         Update update = new Update();
@@ -128,6 +132,7 @@ public class SiteMongo {
         update.set("assetNature", assetNature);
         update.set("areaCovered", areaCovered);
         update.set("fileId", fileId);
+        update.set("fileName", fileName);
         if (coordinate != null){
             update.set("coordinate", coordinate);
         }

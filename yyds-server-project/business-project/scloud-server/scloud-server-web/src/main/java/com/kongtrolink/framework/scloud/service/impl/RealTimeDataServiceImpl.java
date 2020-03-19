@@ -6,6 +6,7 @@ import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.*;
 import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.scloud.constant.RedisKey;
@@ -121,6 +122,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             ;
             MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
+            if(StateCode.SUCCESS!=result.getStateCode()){
+                LOGGER.error("获取实时数据失败:{}",result.getMsg());
+                return null;
+            }
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             //获取阈值
             GetThresholdMessage getThresholdMessage = new GetThresholdMessage();
@@ -157,6 +162,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             //下发到网关获取实时数据
             MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.GET_DATA,JSONObject.toJSONString(getDataMessage));
             String ack = result.getMsg();//消息返回内容
+            if(StateCode.SUCCESS!=result.getStateCode()){
+                LOGGER.error("获取实时数据失败:{}",result.getMsg());
+                return null;
+            }
             GetDataAckMessage getDataAckMessage = JSONObject.parseObject(ack,GetDataAckMessage.class);
             Map<String,Object> valueMap = null ;//存放信号点数据 key:cntbId value:值
             if(getDataAckMessage!=null
@@ -210,6 +219,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         //下发到网关
         MsgResult result =  mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_POINT,JSONObject.toJSONString(setPointMessage));
         String ack = result.getMsg();//消息返回内容
+        if(StateCode.SUCCESS!=result.getStateCode()){
+            LOGGER.error("设置数据失败:{}",result.getMsg());
+            return null;
+        }
         SetPointAckMessage setPointAckMessage = JSONObject.parseObject(ack,SetPointAckMessage.class);
         return setPointAckMessage;
     }
@@ -232,6 +245,10 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         //下发到网关
         MsgResult result = mqttSender.sendToMqttSync(gatewayServerCode,ScloudBusinessOperate.SET_THRESHOLD,JSONObject.toJSONString(setThresholdMessage));
         String ack = result.getMsg();//消息返回内容
+        if(StateCode.SUCCESS!=result.getStateCode()){
+            LOGGER.error("设置阈值失败:{}",result.getMsg());
+            return null;
+        }
         SetThresholdAckMessage setThresholdAckMessage = JSONObject.parseObject(ack,SetThresholdAckMessage.class);
         return setThresholdAckMessage;
 }

@@ -2,14 +2,23 @@ package com.kongtrolink.framework.scloud.service.impl;
 
 import com.kongtrolink.framework.scloud.dao.FocusSignalDao;
 import com.kongtrolink.framework.scloud.dao.HistoryDataDao;
+import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.HistoryDataEntity;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataDayModel;
 import com.kongtrolink.framework.scloud.entity.model.HistoryDataModel;
 import com.kongtrolink.framework.scloud.query.HistoryDataQuery;
 import com.kongtrolink.framework.scloud.service.HistoryDataService;
+import com.kongtrolink.framework.scloud.service.RealTimeDataService;
+import com.kongtrolink.framework.scloud.util.HistoryMapXlsExporter;
+import com.kongtrolink.framework.scloud.util.XlsExporter;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +31,8 @@ public class HistoryDataServiceImpl implements HistoryDataService {
 
     @Autowired
     HistoryDataDao historyDataDao;
-
+    @Autowired
+    RealTimeDataService realTimeDataService;
     /**
      * 根据查询条件获取 所有遥测信号点  历史数据列表 - 分页
      *
@@ -96,5 +106,45 @@ public class HistoryDataServiceImpl implements HistoryDataService {
             }
         }
         return list;
+    }
+
+    //List->不固定数据
+    @Override
+    public  void exportMap(HttpServletResponse response,
+                                 List<HistoryDataEntity> data,
+                                 String uniqueCode,
+                                 String devType,
+                                 String fileName) {
+        OutputStream out = null;
+        try {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setContentType("application/x-download");
+            response.addHeader("Content-Disposition", "attachment;filename=" + fileName+".xlsx");
+            out= response.getOutputStream();
+            DeviceType deviceType = realTimeDataService.getDeviceType(uniqueCode,devType,"遥测");
+            if(deviceType==null || deviceType.getSignalTypeList()==null || deviceType.getSignalTypeList().size()==0){
+                return;
+            }
+            String[] properiesName = new String[deviceType.getSignalTypeList().size()];//存cntbId
+            String[] headsName = new String[deviceType.getSignalTypeList().size()]; //存信号点名称
+            for(int i =0;i<deviceType.getSignalTypeList().size();i++){
+                properiesName[i] = deviceType.getSignalTypeList().get(i).getCntbId();
+                headsName[i] = deviceType.getSignalTypeList().get(i).getTypeName();
+            }
+            SXSSFWorkbook wb = HistoryMapXlsExporter.exportMap(data,properiesName, headsName, fileName);
+            wb.write(out);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }finally{
+            if(out!=null){
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

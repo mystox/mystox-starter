@@ -118,7 +118,6 @@ public class DeviceMongo {
         update.set("brand", deviceModel.getBrand());
         update.set("deviceDesc", deviceModel.getDeviceDesc());
 
-
         WriteResult result = mongoTemplate.updateFirst(new Query(criteria), update, uniqueCode + CollectionSuffix.DEVICE);
         return result.getN()>0;
     }

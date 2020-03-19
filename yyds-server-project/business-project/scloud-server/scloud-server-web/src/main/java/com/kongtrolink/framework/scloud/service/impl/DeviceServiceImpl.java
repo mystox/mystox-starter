@@ -7,8 +7,10 @@ import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
+import com.kongtrolink.framework.scloud.entity.RelatedDeviceInfo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
+import com.kongtrolink.framework.scloud.entity.model.DeviceTypeModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicDeviceEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
@@ -16,6 +18,7 @@ import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AssetCIService;
 import com.kongtrolink.framework.scloud.service.DeviceService;
+import com.kongtrolink.framework.scloud.service.DeviceSignalTypeService;
 import com.kongtrolink.framework.scloud.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -23,6 +26,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,6 +46,8 @@ public class DeviceServiceImpl implements DeviceService {
     MqttOpera mqttOpera;
     @Autowired
     AssetCIService assetCIService;
+    @Autowired
+    DeviceSignalTypeService deviceSignalTypeService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
@@ -49,7 +55,7 @@ public class DeviceServiceImpl implements DeviceService {
      * 获取站点下设备列表
      */
     @Override
-    public List<DeviceModel>  findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
+    public List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception{
         List<DeviceModel> list = new ArrayList<>();
         //根据条件，获取站点Map(key：站点编码，value：站点基本信息)
         Map<String, BasicSiteEntity> siteEntityMap = getAssetSiteByCodes(uniqueCode, deviceQuery);
@@ -103,6 +109,116 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     /**
+     * 获取站点下FSU 列表
+     */
+    @Override
+    public List<RelatedDeviceInfo> findFsuList(String uniqueCode, DeviceQuery deviceQuery) {
+        List<RelatedDeviceInfo> list = new ArrayList<>();
+        List<String> siteCodes = deviceQuery.getSiteCodes();
+        if (siteCodes != null && siteCodes.size() > 0) {
+            //从【中台-资管】获取站点下FSU列表
+            MsgResult msgResult = assetCIService.getAssetFsuList(uniqueCode, deviceQuery);
+            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                    LOGGER.info("从【资管】获取站点下FSU列表 成功");
+                    //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
+                    list = getRelatedDeviceInfoList(response, list);
+                } else {
+                    LOGGER.error("从【资管】获取站点下FSU列表 失败");
+                }
+            }else {
+                LOGGER.error("从【资管】获取站点下FSU列表 MQTT通信失败");
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * 获取FSU下的关联设备
+     */
+    @Override
+    public List<RelatedDeviceInfo> findRelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
+        List<RelatedDeviceInfo> list = new ArrayList<>();
+        String deviceCode = deviceQuery.getDeviceCode();
+        if (deviceCode != null && !deviceCode.equals("")){
+            //从【中台-资管】获取FSU下的关联设备
+            MsgResult msgResult = assetCIService.getRelatedDeviceList(uniqueCode, deviceQuery);
+            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                    LOGGER.info("从【资管】获取FSU下的关联设备 成功");
+                    //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
+                    list = getRelatedDeviceInfoList(response, list);
+                } else {
+                    LOGGER.error("从【资管】获取FSU下的关联设备 失败");
+                }
+            }else {
+                LOGGER.error("从【资管】获取FSU下的关联设备 MQTT通信失败");
+            }
+        }
+
+        return list;
+    }
+
+    /**
+     * 获取站点下未关联FSU的设备 列表
+     */
+    @Override
+    public List<RelatedDeviceInfo> findUnrelatedDeviceList(String uniqueCode, DeviceQuery deviceQuery) {
+        List<RelatedDeviceInfo> list = new ArrayList<>();
+        String siteCode = deviceQuery.getSiteCode();
+        if (siteCode != null && !siteCode.equals("")) {
+
+            Criteria criteria = createFindUnrelatedDeviceCriteria(deviceQuery);
+            //根据条件,获取站点下存在的非FSU动环主机设备类型
+            List<DeviceTypeModel> deviceTypeModelList = deviceSignalTypeService.getExistedDeviceType(uniqueCode, criteria);
+            if (deviceTypeModelList != null && deviceTypeModelList.size() > 0) {
+                List<String> deviceTypes = new ArrayList<>();
+                for (DeviceTypeModel deviceTypeModel : deviceTypeModelList) {
+                    deviceTypes.add(deviceTypeModel.getType());
+                }
+                deviceQuery.setDeviceTypes(deviceTypes);
+
+                //从【中台-资管】获取站点下未关联FSU的设备 列表
+                MsgResult msgResult = assetCIService.getUnrelatedDeviceList(uniqueCode, deviceQuery);
+                if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) { //通信成功
+                    CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                    if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                        LOGGER.info("从【资管】获取站点下未关联FSU的设备列表 成功");
+
+                        //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
+                        list = getRelatedDeviceInfoList(response, list);
+                    } else {
+                        LOGGER.error("从【资管】获取站点下未关联FSU的设备列表 失败");
+                    }
+                } else {
+                    LOGGER.error("从【资管】获取站点下未关联FSU的设备列表 MQTT通信失败");
+                }
+            }
+        }
+
+        return list;
+    }
+
+    //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
+    private List<RelatedDeviceInfo> getRelatedDeviceInfoList(CIResponseEntity response, List<RelatedDeviceInfo> list){
+        for (JSONObject jsonObject : response.getInfos()) {
+            BasicDeviceEntity basicDeviceEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicDeviceEntity.class);
+
+            RelatedDeviceInfo relatedDeviceInfo = new RelatedDeviceInfo();
+            relatedDeviceInfo.setDeviceName(basicDeviceEntity.getDeviceName());
+            relatedDeviceInfo.setDeviceCode(basicDeviceEntity.getCode());
+            relatedDeviceInfo.setType(basicDeviceEntity.getAssetType());
+
+            list.add(relatedDeviceInfo);
+        }
+
+        return list;
+    }
+
+    /**
      * 获取特殊设备的特殊属性
      */
     @Override
@@ -117,7 +233,6 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public HSSFWorkbook exportDeviceList(List<DeviceModel> list) {
         String[][] userSheet = getDeviceListAsTable(list);
-
         HSSFWorkbook workBook = ExcelUtil.getInstance().createWorkBook(
                 new String[] {"设备信息列表"}, new String[][][] { userSheet });
         return workBook;
@@ -154,6 +269,7 @@ public class DeviceServiceImpl implements DeviceService {
     public Integer addDevice(String uniqueCode, DeviceModel deviceModel) {
         DeviceEntity deviceEntity = new DeviceEntity();
         deviceEntity.setTierCode(deviceModel.getTierCode());
+        deviceEntity.setTierName(deviceModel.getTierName());
         deviceEntity.setSiteCode(deviceModel.getSiteCode());
         deviceEntity.setSiteId(deviceModel.getSiteId());
         deviceEntity.setType(deviceModel.getType());
@@ -285,6 +401,7 @@ public class DeviceServiceImpl implements DeviceService {
         return siteTypeIntVal;
     }
 
+    //查看编码是否存在
     private boolean checkCodeExisted(String uniqueCode,String deviceCode){
         return deviceMongo.findDeviceByCode(uniqueCode, deviceCode) != null;
     }
@@ -378,6 +495,7 @@ public class DeviceServiceImpl implements DeviceService {
         DeviceModel deviceModel = new DeviceModel();
         deviceModel.setId(device.getId());
         deviceModel.setTierCode(device.getTierCode());
+        deviceModel.setTierName(device.getTierName());
         deviceModel.setSiteCode(device.getSiteCode());
         deviceModel.setSiteId(device.getSiteId());
         deviceModel.setType(device.getType());
@@ -396,6 +514,16 @@ public class DeviceServiceImpl implements DeviceService {
 
         return deviceModel;
     }
+
+    //生成查找站点下未关联FSU的设备 查询条件
+    private Criteria createFindUnrelatedDeviceCriteria(DeviceQuery deviceQuery){
+        Criteria criteria = Criteria.where("siteCode").is(deviceQuery.getSiteCode())
+                .and("typeCode").ne("038"); //非FSU动环主机
+
+        return criteria;
+    }
+
+    //
 
     /**
      * @auther: liudd
