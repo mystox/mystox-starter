@@ -1,0 +1,100 @@
+<section id="alarmFocusPage">
+    <div class="_left card-bg">
+        <div class="page-header">
+            <h3>关注告警
+                <small>
+                    <i class="ic ic-help" scloud-tooltip data-content = "可以点击【告警管理-告警查询】页中的添加关注按钮，关注该告警关联遥信信号所产生的实时告警，也可以在【数据监控-实时数据】页面关注遥信信号。
+                       被关注的告警会显示在【告警管理-关注告警】页面。" ></i>
+                </small>
+            </h3>
+        </div>
+        <div class="table-box table-complicate scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>告警名称</th><th>告警等级</th><th>告警值</th><th>告警设备</th><th>站点名称</th><th>站点分级</th><th>开始时间</th><th>状态</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="a in focusAlarmList" ng-class="CONST.animation.list">
+                    <tr>
+                        <td ng-bind="a.alarm.signal.name"></td>
+                        <td ng-style="util.alarmColor(a.alarm.level);">
+                            <i class="ic ic-alarm"></i>
+                            <span ng-bind="a.alarm.level | alarmLevelFilter"></span>
+                        </td>
+                        <td ng-bind="a.alarm.value | nullFilter"></td>
+                        <td ng-bind="a.alarm.device.name"></td>
+                        <td ng-bind="a.alarm.site.name"></td>
+                        <td ng-bind="a.alarm.siteTierString"></td>
+                        <td ng-bind="a.alarm.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td>
+                            <label class="label" ng-class="util.alarmStateColor(a.alarm.tCheck);" ng-bind="a.alarm.tCheck | alarmCheckFilter | date: 'yyyy-MM-dd HH:mm:ss'"></label>
+                        </td>
+                        <td>
+                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(1009)" ng-click="removeFocus(a.alarm.signal.strId,$event);"></a>
+                            <a title="确认" class="ic ic-check" ng-if="util.checkPrivilege(1010) && !a.alarm.tCheck" ng-click="checkAlarm(a.alarm,$event);"></a>
+                            <a title="取消确认" class="ic ic-times" ng-if="util.checkPrivilege(1010) && a.alarm.tCheck" ng-click="checkAlarm(a.alarm,$event);"></a>
+                            <a title="详情" class="ic ic-detail" ng-click="openDetailTab($index);"></a>
+                        </td>
+                    </tr>
+                    <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
+                        <td colspan="11" class="detail">
+                            <ul>
+                                <li>恢复时间：<span ng-bind="a.alarm.tRecover| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>告警详情：<span ng-bind="a.alarm.details"></span></li>
+                            </ul>
+                            <ul>
+                                <li>确认时间：<span ng-bind="a.alarm.tCheck| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>确认人：<span ng-bind="a.alarm.checkOperator.name | nullFilter"></span></li>
+                            </ul>
+                            <ul>
+                                <li>消除时间：<span ng-bind="a.alarm.tClear| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>消除人：<span ng-bind="a.alarm.clearOperator.name | nullFilter"></span></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+        
+    <div class="_right card-bg">
+        <div class="page-header">
+            <h3>关注数据<small>（关注的遥信信号）</small></h3>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>信号名称</th><th>所属设备</th><th>站点名称</th><th>站点位置</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in focusDIModelList" ng-class="CONST.animation.list">
+                        <td ng-bind="item.signal.name"></td>
+                        <td ng-bind="item.device.name"></td>
+                        <td ng-bind="item.site.name"></td>
+                        <td ng-bind="item.tierString"></td>
+                        <td>
+                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(409)" ng-click="removeFocus(item.signal.id,$event);"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading2">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading2 || paginationConf2.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf2"></tm-pagination>
+    </div>
+</section>

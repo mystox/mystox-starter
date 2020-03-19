@@ -1,0 +1,109 @@
+<section id="logListPage">
+    <div class="_bg card-bg"></div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>日志类型</label>
+            <select ng-model="logQuery.logType" 
+                    ng-options="item as item for item in loggerType"
+                    ng-change="query();">
+                <!--<option ng-bind="'全部'"></option>-->
+            </select>
+            
+            <label>操作人</label>
+            <input type="text" ng-model="logQuery.userName">
+            
+            <label>关键字</label>
+            <input type="text" ng-model="logQuery.keyword">
+        </div>
+        
+        <div class="form-inline">
+            <label>记录时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="logQuery.tStart">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="logQuery.tEnd">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default"  ng-click="reset();">清除</button>
+        </div>
+    </form>
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>日志管理</h3>
+        </div>
+        <div class="table-box scroll">
+            <!--访问日志、门禁日志、业务日志-->
+            <table class="table table-bordered table-hover" ng-hide="logQuery.logType === '设备操作日志'">
+                <thead>
+                    <tr>
+                        <th>类型</th>
+                        <th>操作人</th>
+                        <th>操作内容</th>
+                        <th>操作对象</th>
+                        <th>操作结果</th>
+                        <th>记录时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="log in logList" ng-class="CONST.animation.list">
+                        <td ng-bind="log.logType"></td>
+                        <td ng-bind="log.user.name"></td>
+                        <td>
+                            <span ng-bind="log.operate"></span>
+                            <span ng-if="log.ip" ng-bind="'(' + log.ip + ')'"></span>
+                        </td>
+                        <td>
+                            <span class="title-tip" scloud-tooltip data-content = "{{log.target.name}}" name = "log.target.name | nullFilter"></span>
+                        </td>
+                        <td>
+                            <span class="title-tip" scloud-tooltip data-content = "{{log.result}}" name = "log.result | nullFilter"></span>
+                        </td>
+                        <td ng-bind="log.tRecord | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!--设备的操作日志-->
+            <table class="table table-bordered table-hover" ng-show="logQuery.logType === '设备操作日志'">
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>操作人</th>
+                    <th>操作内容</th>
+                    <th>站点层级</th>
+                    <th>站点名称</th>
+                    <th>操作设备</th>
+                    <th>信号标准名</th>
+                    <th>操作模块</th>
+                    <th>操作时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="log in logList" ng-class="CONST.animation.list">
+                    <td ng-bind="log.logType | nullFilter"></td>
+                    <td ng-bind="log.userName | nullFilter"></td>
+                    <td ng-bind="log.operate | nullFilter"></td>
+                    <td ng-bind="log.tierName | nullFilter"></td>
+                    <td ng-bind="log.siteName | nullFilter"></td>
+                    <td ng-bind="log.deviceName | nullFilter"></td>
+                    <td ng-bind="log.signalName | nullFilter"></td>
+                    <td ng-bind="log.model | nullFilter"></td>
+                    <td ng-bind="log.ctime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+</section>

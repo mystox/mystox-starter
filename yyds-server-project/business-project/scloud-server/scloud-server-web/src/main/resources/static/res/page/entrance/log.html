@@ -1,0 +1,58 @@
+<section id="entranceLogPage">
+    <form class="top card-bg">
+        <div class="query-form">
+            <div class="form-inline">
+                <label>操作人</label>
+                <input type="text" ng-model="logQuery.userName">
+                    
+                <label>关键字</label>
+                <input type="text" ng-model="logQuery.keyword">
+                <label>记录时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="logQuery.tStart">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="logQuery.tEnd">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <button class="btn btn-primary" ng-click="query();">查询</button>
+                <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+            </div>            
+        </div>
+    </form>
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>门禁日志管理</h3>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>类型</th><th>操作人</th><th>操作内容</th><th>操作对象</th><th>操作结果</th><th>记录时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="log in logList" ng-class="CONST.animation.list">
+                        <td ng-class="util.logTypeColor(log.logType);" ng-bind="log.logType"></td>
+                        <td ng-bind="log.user.name"></td>
+                        <td>
+                            <span ng-bind="log.operate"></span>
+                        </td>
+                        <td ng-bind="log.target.name | nullFilter"></td>
+                        <td ng-bind="log.result"></td>
+                        <td ng-bind="log.tRecord | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+</section>

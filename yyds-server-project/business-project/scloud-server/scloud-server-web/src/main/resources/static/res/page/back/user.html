@@ -1,0 +1,449 @@
+<section id="backUserPage">
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>用户角色</label>
+            <select ng-model="userQuery.type"
+                    ng-options="item as item for item in typeList"
+                    ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>用户信息</h3>
+            <button class="btn btn-primary" ng-disabled="isExportUserListLoading" ng-click="exportBackUserList();">
+                <i ng-class="{'ic ic-spinner ic-spin':isExportUserListLoading}"></i>导出
+            </button>
+            <button class="btn btn-primary" ng-click="addUser.toModal();">添加用户</button>
+            <button ng-if="user.classes === CONST.userClasses.techSupport" class="btn btn-primary" ng-click="addAgency.toModal();">添加代理商企业</button>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>账号</th><th>姓名</th><th>用户类型</th><th>用户角色</th><th>用户组</th><th>联系电话</th><th>电子邮箱</th><th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="u in userList" ng-class="CONST.animation.list">
+                    <td ng-bind="u.username"></td>
+                    <td ng-bind="u.name"></td>
+                    <td ng-bind="u.classes"></td>
+                    <td ng-bind="u.type"></td>
+                    <td ng-bind="u.userGroup | nullFilter"></td>
+                    <td ng-bind="u.phone | nullFilter"></td>
+                    <td ng-bind="u.email | nullFilter"></td>
+                    <td>
+                        <a title="修改" class="ic ic-edit" ng-if="u.type === CONST.userType.ordinary" ng-click="modifyUser.toModal(u);"></a>
+                        <a title="管辖企业" class="ic ic-company" ng-if="u.classes === user.classes && u.type === CONST.userType.ordinary" ng-click="updateUserEnterprise.toModal(u);"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+    <div>
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addAgencyModal"
+              name="addAgency.form" novalidate ng-submit="addAgency.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addAgency.clear();"><i class="ic ic-close"></i></button>
+                <h3>添加代理商</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group" ng-class="getValidClass(addAgency.form.name);">
+                    <label class="control-label">代理商名称</label>
+                    <div class="controls">
+                        <input type="text" name="name" required
+                               placeholder="{{REGEX.enterpriseNameDesc}}"
+                               ng-model="addAgency.obj.name"
+                               ng-pattern="REGEX.enterpriseName">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addAgency.form.contactsName);">
+                    <label class="control-label">联系人</label>
+                    <div class="controls">
+                        <input type="text" name="contactsName" required
+                               placeholder="{{REGEX.personNameDesc}}"
+                               ng-model="addAgency.obj.contactsName"
+                               ng-pattern="REGEX.personName">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addAgency.form.contactsPhone);">
+                    <label class="control-label">手机号码</label>
+                    <div class="controls">
+                        <input type="text" name="contactsPhone" required
+                               ng-model="addAgency.obj.contactsPhone"
+                               ng-change="addAgency.form.contactsPhone.$valid && checkPhoneExist(addAgency.obj.contactsPhone);"
+                               ng-pattern="REGEX.cellphone" >
+                        <span class="help-inline">
+                        <span ng-if="addAgency.form.contactsPhone.$valid" ng-bind="phoneExistInfo"></span>
+                    </span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addAgency.form.contactsEmail);">
+                    <label class="control-label">电子邮箱</label>
+                    <div class="controls">
+                        <input type="text" name="contactsEmail"
+                               ng-model="addAgency.obj.contactsEmail"
+                               ng-pattern="REGEX.email">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">是否接收告警短信</label>
+                    <div class="controls">
+                        <a ng-click = "addAgency.obj.receiveAlarmMsg = addAgency.obj.receiveAlarmMsg === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmMsg-angency" ifchecked="addAgency.obj.receiveAlarmMsg == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警邮件</label>
+                    <div class="controls">
+                        <a ng-click = "addAgency.obj.receiveAlarmEmail = addAgency.obj.receiveAlarmEmail === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmEmail-angency" ifchecked="addAgency.obj.receiveAlarmEmail == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警推送</label>
+                    <div class="controls">
+                        <a ng-click = "addAgency.obj.receiveAlarmPush = addAgency.obj.receiveAlarmPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmPush-angency" ifchecked="addAgency.obj.receiveAlarmPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收工单推送</label>
+                    <div class="controls">
+                        <a ng-click = "addAgency.obj.receiveWorkPush = addAgency.obj.receiveWorkPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveWorkPush-angency" ifchecked="addAgency.obj.receiveWorkPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="addAgency.form.$invalid || isPhoneExist">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="addAgency.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addUserModal"
+              name="addUser.form" novalidate ng-submit="addUser.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addUser.clear();"><i class="ic ic-close"></i></button>
+                <h3>添加用户</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="control-group" ng-class="getValidClass(addUser.form.username);">
+                    <label class="control-label">账号</label>
+                    <div class="controls">
+                        <input type="text" name="username" required
+                               ng-model='addUser.obj.username'
+                               placeholder="{{REGEX.usernameDesc}}"
+                               ng-pattern="REGEX.username">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addUser.form.password);">
+                    <label class="control-label">密码</label>
+                    <div class="controls">
+                        <input type="text" name="password" required
+                               ng-model='addUser.obj.password'
+                               placeholder="{{REGEX.passwordDesc}}"
+                               ng-pattern="REGEX.password">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addUser.form.name);">
+                    <label class="control-label">姓名</label>
+                    <div class="controls">
+                        <input type="text" name="name" required
+                               ng-model='addUser.obj.name'
+                               placeholder="{{REGEX.personNameDesc}}"
+                               ng-pattern="REGEX.personName">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">用户类型</label>
+                    <div class="controls">
+                        <select name="type" required
+                                ng-model="addUser.obj.classes"
+                                ng-options="item as item for item in classesList">
+                        </select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if="addUser.obj.classes === CONST.userClasses.agency && user.classes === CONST.userClasses.techSupport">
+                    <label class="control-label">代理商</label>
+                    <div class="controls">
+                        <select name="type" required
+                                ng-model="addUser.obj.companyId"
+                                ng-options="item.strId as item.name for item in agencyList">
+                        </select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addUser.form.type);">
+                    <label class="control-label">用户角色</label>
+                    <div class="controls">
+                        <select name="type" required
+                                ng-model="addUser.obj.type"
+                                ng-options="item as item for item in typeList">
+                        </select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addUser.form.phone);">
+                    <label class="control-label">手机号码</label>
+                    <div class="controls">
+                        <input type="text" name="phone" required
+                               ng-model='addUser.obj.phone'
+                               ng-change="addUser.form.phone.$valid && checkPhoneExist(addUser.obj.phone);"
+                               ng-pattern="REGEX.cellphone" >
+                        <span class="help-inline">
+                            <span ng-if="addUser.form.phone.$valid" ng-bind="phoneExistInfo"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addUser.form.email);">
+                    <label class="control-label">电子邮箱</label>
+                    <div class="controls">
+                        <input type="text" name="email"
+                               ng-model='addUser.obj.email'
+                               ng-pattern="REGEX.email">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">是否接收告警短信</label>
+                    <div class="controls">
+                        <a ng-click = "addUser.obj.receiveAlarmMsg = addUser.obj.receiveAlarmMsg === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmMsg" ifchecked="addUser.obj.receiveAlarmMsg == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警邮件</label>
+                    <div class="controls">
+                        <a ng-click = "addUser.obj.receiveAlarmEmail = addUser.obj.receiveAlarmEmail === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmEmail" ifchecked="addUser.obj.receiveAlarmEmail == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警推送</label>
+                    <div class="controls">
+                        <a ng-click = "addUser.obj.receiveAlarmPush = addUser.obj.receiveAlarmPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmPush" ifchecked="addUser.obj.receiveAlarmPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收工单推送</label>
+                    <div class="controls">
+                        <a ng-click = "addUser.obj.receiveWorkPush = addUser.obj.receiveWorkPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveWorkPush" ifchecked="addUser.obj.receiveWorkPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="addUser.form.$invalid || isPhoneExist">生成账号并通知</button>
+                <button type="reset" class="btn btn-default" ng-click="addUser.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="modifyUserModal"
+              name="modifyUser.form" novalidate ng-submit="modifyUser.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="modifyUser.clear();"><i class="ic ic-close"></i></button>
+                <h3>修改用户</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="control-group">
+                    <label class="control-label">账号</label>
+                    <div class="controls">
+                        <input type="text" name="username" readonly required
+                               ng-model='modifyUser.obj.username'
+                               placeholder="{{REGEX.usernameDesc}}"
+                               ng-pattern="REGEX.username">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyUser.form.password);">
+                    <label class="control-label">密码</label>
+                    <div class="controls">
+                        <input type="text" name="password"
+                               ng-model='modifyUser.obj.password'
+                               placeholder="密码不修改则不填写"
+                               ng-pattern="REGEX.password">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyUser.form.name);">
+                    <label class="control-label">姓名</label>
+                    <div class="controls">
+                        <input type="text" name="name" required
+                               ng-model="modifyUser.obj.name"
+                               placeholder="{{REGEX.personNameDesc}}"
+                               ng-pattern="REGEX.personName" >
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">用户类型</label>
+                    <div class="controls">
+                        <input type="text" name="classes" required readonly
+                               ng-model='modifyUser.obj.classes'>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">用户角色</label>
+                    <div class="controls">
+                        <input type="text" name="type" readonly required
+                               ng-model="modifyUser.obj.type">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyUser.form.phone);">
+                    <label class="control-label">手机号码</label>
+                    <div class="controls">
+                        <input type="text" name="phone" required
+                               ng-model="modifyUser.obj.phone"
+                               ng-change="modifyUser.form.phone.$valid && modifyUser.originalUser.phone !== modifyUser.obj.phone && checkPhoneExist(modifyUser.obj.phone);"
+                               ng-pattern="REGEX.cellphone" >
+                        <span class="help-inline">
+                            <span ng-if="modifyUser.form.phone.$valid" ng-bind="modifyUser.originalUser.phone !== modifyUser.obj.phone ? phoneExistInfo : '手机号可用'"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyUser.form.email);">
+                    <label class="control-label">电子邮箱</label>
+                    <div class="controls">
+                        <input type="text" name="email"
+                               ng-model='modifyUser.obj.email'
+                               ng-pattern="REGEX.email">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">是否接收告警短信</label>
+                    <div class="controls">
+                        <a ng-click = "modifyUser.obj.receiveAlarmMsg = modifyUser.obj.receiveAlarmMsg === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmMsg-modify" ifchecked="modifyUser.obj.receiveAlarmMsg == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警邮件</label>
+                    <div class="controls">
+                        <a ng-click = "modifyUser.obj.receiveAlarmEmail = modifyUser.obj.receiveAlarmEmail === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmEmail-modify" ifchecked="modifyUser.obj.receiveAlarmEmail == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收告警推送</label>
+                    <div class="controls">
+                        <a ng-click = "modifyUser.obj.receiveAlarmPush = modifyUser.obj.receiveAlarmPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveAlarmPush-modify" ifchecked="modifyUser.obj.receiveAlarmPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-if='false'>
+                    <label class="control-label">是否接收工单推送</label>
+                    <div class="controls">
+                        <a ng-click = "modifyUser.obj.receiveWorkPush = modifyUser.obj.receiveWorkPush === '1' ? '0' : '1'">
+                            <scloudMytarget hint="true" myid="receiveWorkPush-modify" ifchecked="modifyUser.obj.receiveWorkPush == '1'"></scloudMytarget>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="modifyUser.form.$invalid || isPhoneExist">确定</button>
+                <button type="button" class="btn btn-default" ng-click="modifyUser.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="updateUserEnterpriseModal"
+              name="updateUserEnterprise.form" novalidate ng-submit="updateUserEnterprise.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="updateUserEnterprise.clear();"><i class="ic ic-close"></i></button>
+                <h3>管辖企业</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">姓名</label>
+                    <div class="controls">
+                        <input type="text" name="name" readonly
+                               ng-model='updateUserEnterprise.obj.name'>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">选择企业</label>
+                    <div class="controls">
+                        <input type="text" class="form-control" multiple
+                               select2 config="enterpriseList"
+                               select2-model="updateUserEnterprise.obj.enterprises" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="updateUserEnterprise.form.$invalid">确定</button>
+                <button type="reset" class="btn btn-default" ng-click="updateUserEnterprise.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+
+</section>

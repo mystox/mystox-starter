@@ -1,0 +1,108 @@
+<section id="noticePage">
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>主题</label>
+            <input type="text" ng-model="noticeQuery.title">
+
+            <label>发布时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="noticeQuery.startTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="noticeQuery.endTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>公告列表</h3>
+            <!--企业管理员可以在后台、企业内发布公告，企业管理员、代理商管理员只能在企业内发布公告、普通用户不能发公告-->
+            <button class="btn btn-primary" ng-if="user.classes !== CONST.userClasses.agency && user.type !== CONST.userType.ordinary" ng-click="addNotice.toModal();">添加</button>
+            <button class="btn btn-primary" ng-if="user.classes === CONST.userClasses.agency && user.type !== CONST.userType.ordinary && enterprise" ng-click="addNotice.toModal();">添加</button>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>状态</th><th>主题</th><th>摘要</th><th>发布人</th><th>发布时间</th><th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="n in noticeList" ng-class="CONST.animation.list">
+                    <td>
+                        <label class="label" ng-bind="n.read ? '已读' : '未读'" ng-class="{true:'font-white',false:'font-danger'}[n.read]"></label>
+                    </td>
+                    <td ng-bind="n.title"></td>
+                    <td ng-bind="n.abstracts"></td>
+                    <td ng-bind="n.user"></td>
+                    <td ng-bind="n.time | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td>
+                        <a title="查看" class="ic ic-detail" ng-click="showNotice.toModal(n);"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+    <div>
+        <form class="modal hide form-horizontal" id="showNoticeModal">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="showNotice.clear();"><i class="ic ic-close"></i></button>
+                <h3>公告内容</h3>
+            </div>
+            <div class="modal-body scroll">
+                <h3 ng-bind="showNotice.obj.title" class="font-primary"></h3>
+                <p class="info">
+                    发布人：<span ng-bind="showNotice.obj.user"></span>
+                </p>
+                <p class="info">
+                    发布时间：<span ng-bind="showNotice.obj.time | date:'yyyy-MM-dd HH:mm:ss'"></span>
+                </p>
+                <pre class="content" ng-bind="showNotice.obj.content"></pre>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addNoticeModal"
+              name="addNotice.form" novalidate ng-submit="addNotice.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addNotice.clear();"><i class="ic ic-close"></i></button>
+                <h3>发布公告</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="control-group" ng-class="getValidClass(addNotice.form.title);">
+                    <label class="control-label">主题</label>
+                    <div class="controls">
+                        <input type="text" name="title" ng-model="addNotice.obj.title" required>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addNotice.form.content);">
+                    <label class="control-label">正文</label>
+                    <div class="controls">
+                        <textarea name="content" class="scroll" ng-model="addNotice.obj.content" required></textarea>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="addNotice.form.$invalid">发布</button>
+                <button type="reset" class="btn btn-default" ng-click="addNotice.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+</section>

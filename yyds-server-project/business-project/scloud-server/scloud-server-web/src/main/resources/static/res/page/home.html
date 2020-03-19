@@ -1,0 +1,164 @@
+<section id="homePage" scloud-fullscreen="true">
+    <div class="left1 card-bg card-transparent cursor-point" ui-sref="config/site">
+        <div class="page-header left-bar">
+            <h4>站点数量(交维态/所有)</h4>
+        </div>
+        <div class="page-body">
+            <div class="led">
+                <div class="value-wrapper">
+                    <span class="count count-left" ng-style="getFontSize('l', maintenanceSiteCount)" ng-bind="maintenanceSiteCount"></span>
+                </div><!--
+             --><small>/</small><!--
+             --><div class="value-wrapper">
+                    <span class="count count-right" ng-style="getFontSize('r', siteCount)" ng-bind="siteCount"></span>
+                </div>
+                <div class="corner corner-lt"></div>
+                <div class="corner corner-rt"></div>
+                <div class="corner corner-lb"></div>
+                <div class="corner corner-rb"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="left2 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>FSU实时在线情况</h4>
+        </div>
+        <div class="page-body">
+            <div id="{{fsuPieId}}" class = 'fsuPie'></div>
+            <p class="check text-center mgt">
+                在线：
+                <span ng-bind="fsu.onlineCount" class="cursor-point font-important" ui-sref="config/fsu({state:'在线'})"></span> 个
+                <span class="mgl">离线：</span>
+                <span ng-bind="fsu.offlineCount" class="cursor-point font-important" ui-sref="config/fsu({state:'离线'})"></span> 个
+            </p>
+        </div>
+    </div>
+
+    <div class="left3 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>FSU在线趋势(72小时)</h4>
+        </div>
+        <div class="page-body">
+            <div id="{{fsuStatId}}" class="fsuStat"></div>
+        </div>
+    </div>
+
+    <div class="left4 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>实时告警统计</h4>
+            <small ui-sref="alarm/list">查看更多</small>
+        </div>
+        <div class="page-body">
+            <div class="unit cursor-point" ng-repeat="item in alarmLevelList track by $index" ui-sref="alarm/list({alarmLevel:item.key})" title="{{item.key | alarmLevelFilter}}">
+                <span ng-bind="item.key | alarmLevelFilter"></span>
+                <div class="progress-box">
+                    <div class="progress">
+                        <div class="bar" ng-style="util.progressStyle(item.percent, item.color);"></div>
+                    </div>
+                </div>
+                <span ng-bind="item.value"></span>
+            </div>
+            <p class="check mgt text-center">
+                <span class="">                        
+                    已确认：<span ng-bind="checkedCounts" class="cursor-point font-important" ui-sref="alarm/list({checkedState:true})"></span> 个
+                </span>
+                <span class="">
+                    未确认：<span ng-bind="uncheckedCounts" class="cursor-point font-important" ui-sref="alarm/list({checkedState:false})"></span> 个
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="center">
+        <div id="{{alarmMapId}}" class="alarmMap"></div>
+        <div id="location"></div>
+        <div id="filter">
+            <div class="alarm cursor-point" ng-click="mapFilter.alarm[1] = !mapFilter.alarm[1] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[1] ? CONST.alarmColorList[0] : '#999'}"></div>一级告警
+            </div>
+            <div class="alarm cursor-point" ng-click="mapFilter.alarm[2] = !mapFilter.alarm[2] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[2] ? CONST.alarmColorList[1] : '#999'}"></div>二级告警
+            </div>
+            <div class="alarm cursor-point" ng-click="mapFilter.alarm[3] = !mapFilter.alarm[3] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[3] ? CONST.alarmColorList[2] : '#999'}"></div>三级告警
+            </div>
+            <div class="alarm cursor-point" ng-click="mapFilter.alarm[4] = !mapFilter.alarm[4] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[4] ? CONST.alarmColorList[3] : '#999'}"></div>四级告警
+            </div>
+            <div class="alarm cursor-point" ng-click="mapFilter.alarm[0] = !mapFilter.alarm[0] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[0] ? '#38C2FF' : '#999'}"></div>站点
+            </div>
+        </div>
+        <div id="site-detail">
+            
+        </div>
+    </div>
+
+    <div class="bottom card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>实时告警</h4>
+        </div>
+        <div class="page-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>告警名称</th>
+                        <th>告警等级</th>
+                        <th>站点名称</th>
+                        <th>告警设备</th>
+                        <th width="150">告警时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat = 'item in alarmList' class="cursor-point" ui-sref="scene/site({siteId: item.site.strId})">
+                        <td><span ng-bind="item.signal.name"></span></td>
+                        <td><span ng-bind="item.level | alarmLevelFilter" ng-style="{color: CONST.alarmColorList[item.level - 1]}"></span></td>
+                        <td><span ng-bind="item.site.name"></span></td>
+                        <td><span ng-bind="item.device.name"></span></td>
+                        <td><span ng-bind="item.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="right1 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>告警频发站点Top5(近7天)</h4>
+            <small ui-sref="alarm/list">查看更多</small>
+        </div>
+        <div class="page-body">
+            <p class="line" ng-repeat="item in alarmSiteList" 
+                ng-class="item.value && 'cursor-point'" 
+                ng-style="{pointerEvents: item.value? 'auto' : 'none'}" 
+                ui-sref="alarm/list({siteId:item.id, startView: 'list'})">
+                <span class="number" ng-bind="$index + 1"></span>
+                <span class="key-value-wrapper">
+                    <span class="key" ng-bind="item.key" title={{item.key}}></span>
+                    <span class="value" ng-bind="item.value + ' 条'" class="font-important"></span> 
+                </span>
+               
+            </p>
+            <div class="top3-wrapper">
+                <div id="{{alarmSiteBarId}}" class="alarmSiteBar"></div>
+                <p class="top3 value" ng-repeat="item in alarmSiteList" ng-if="$index < 3" ng-bind="item.value"></p>
+                <p class="top3 key" ng-repeat="item in alarmSiteList" ng-if="$index < 3" ng-bind="item.key" title="{{item.key}}"  
+                    ng-class="item.value && 'cursor-point'" 
+                    ng-style="{pointerEvents: item.value? 'auto' : 'none'}" 
+                    ui-sref="alarm/list({siteId:item.id, startView: 'list'})"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="right2 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>历史告警统计</h4>
+            <small ui-sref="alarm/list({alarmState:'已消除'})">查看更多</small>
+        </div>
+        <div class="page-body">
+            <div id="{{alarmLineId}}" class="alarmLine"></div>
+            <div id="{{alarmTop3LineId}}" class="alarmTop3Line"></div>
+        </div>
+    </div>
+</section>

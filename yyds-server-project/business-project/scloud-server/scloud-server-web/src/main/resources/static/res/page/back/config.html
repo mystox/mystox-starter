@@ -1,0 +1,250 @@
+<section id="backConfigPage">
+    <div class="left card-bg">
+        <div class="page-header">
+            <h3>企业列表</h3>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    配置 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{{CONST.ctx}}/res/doc/template/defaultTier.xls">下载系统默认站点分级表</a>
+                        <a ng-click="importTierTree.toModal(true);">设置系统默认站点分级</a>
+                        <a ng-click="importDeviceSignalType.toModal(true);">设置系统默认映射表</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+            
+        <div class="table-box scroll">
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>企业名称</th><th>企业唯一码</th><th>平台类型</th><th>模块开关</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="e in enterpriseList" ng-click="getCurrentEnterprise(e.enterprise);" class="cursor-point {{CONST.animation.list}}" ng-class="{'focusLine':currentEnterprise.id === e.enterprise.id}">
+                        <td ng-bind="e.enterprise.name"></td>
+                        <td ng-bind="e.enterprise.uniqueCode"></td>
+                        <td ng-bind="e.enterprise.platform"></td>
+                        <td>
+                            <span ng-if="e.enterprise.platform === CONST.platformList[0]">
+                                <a ng-click="setModuleEnbale(e,'MONITOR',$event);">
+                                    <scloudMytarget myid="{{e.enterprise.uniqueCode}}_MONITOR" ifchecked="e.enableMonitor"></scloudMytarget>
+                                    监控
+                                </a>
+                                <a ng-click="setModuleEnbale(e,'ENTRANCE',$event);">
+                                    <scloudMytarget myid="{{e.enterprise.uniqueCode}}_ENTRANCE" ifchecked="e.enableEntrance"></scloudMytarget>
+                                    门禁
+                                </a>
+                                <a ng-click="setModuleEnbale(e,'BATTERY',$event);">
+                                    <scloudMytarget myid="{{e.enterprise.uniqueCode}}_BATTERY" ifchecked="e.enableBattery"></scloudMytarget>
+                                    蓄电池
+                                </a>
+                                <a ng-click="setModuleEnbale(e,'WORK',$event);">
+                                    <scloudMytarget myid="{{e.enterprise.uniqueCode}}_WORK" ifchecked="e.enableWork"></scloudMytarget>
+                                    工单
+                                </a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+            
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || enterpriseList">
+            <div class="img img-2x"></div>
+        </div>
+    </div>
+        
+    <div class="middle card-bg">
+        <div class="page-header">
+            <h3>站点层级</h3>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" ng-disabled="currentEnterprise === undefined || isLoading2" data-toggle="dropdown">
+                    配置 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{{CONST.ctx}}/res/doc/template/customizeTier.xls">下载自定义Excel模板</a>
+                        <a ng-click="importTierTree.toModal(false);">导入自定义分级</a>
+                        <a ng-click="setDefaultTier.toModal();">使用默认分级</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+            
+        <div class="nav-tree">
+            <input type="text" placeholder="搜索站点位置" ng-model="searchKey" ng-change="zTree.getNodesByParamFuzzy(searchKey,'areaTree','simpleTierTree');">
+            <div class="scroll-wrap">
+                <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+                <div ng-show="zTree.isEmpty" class="no-data">
+                    <div class="img img-2x"></div>
+                </div>
+            </div>
+        </div>
+            
+        <div class="loader" ng-show="isLoading2">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading2 || zTree.zNodes">
+            <div class="img img-2x"></div>
+        </div>
+    </div>
+        
+    <div class="right card-bg">
+        <div class="page-header">
+            <h3>设备信号类型映射表
+                <small>（<div scloud-checkbox selected="isShowSignal" ng-init="isShowSignal=true;"></div>是否显示信号类型数据）</small>
+            </h3>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" ng-disabled="currentEnterprise === undefined || isLoading3" data-toggle="dropdown">
+                    配置 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{{CONST.ctx}}/res/doc/template/deviceSignal.xls">下载模板</a>
+                        <a ng-click="importDeviceSignalType.toModal(false);">导入设备信号量类型</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+            
+        <div class="table-box scroll">
+            <table ng-show="isShowSignal" class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>设备类型</th><th>设备类型编号</th><th>信号类型</th><th>信号类型编号</th><th>信号单位</th><th>告警等级</th>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="d in deviceTypeList">
+                    <tr>
+                        <td ng-bind="d.typeName"></td>
+                        <td ng-bind="d.code"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr ng-repeat="s in d.signalTypeList">
+                        <td></td>
+                        <td></td>
+                        <td ng-bind="s.typeName"></td>
+                        <td ng-bind="s.code"></td>
+                        <td ng-bind="s.measurement | nullFilter"></td>
+                        <td ng-bind="s.alarmLevel"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <table ng-hide="isShowSignal" class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>设备类型</th><th>设备类型编号</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="d in deviceTypeList">
+                        <td ng-bind="d.typeName"></td>
+                        <td ng-bind="d.code"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+            
+        <div class="loader" ng-show="isLoading3">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading3 || deviceTypeList">
+            <div class="img img-2x"></div>
+        </div>
+            
+    </div>
+        
+    <form class="modal hide form-horizontal" data-backdrop="static" id="importTierTreeModal"
+          name="importTierTree.form" novalidate ng-submit="importTierTree.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="importTierTree.clear();"><i class="ic ic-close"></i></button>
+            <h3>
+                导入站点分级
+                <small ng-if="isImportDefaultTierTree">(系统默认)</small>
+                <small ng-if="!isImportDefaultTierTree">(<span class="font-danger" ng-bind="currentEnterprise.name"></span>)</small>
+            </h3>
+                
+        </div>
+        <div class="modal-body scroll">
+            <button type="button" class="btn btn-primary" ng-click="importTierTree.select();">选择文件</button>
+                
+            <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.name" class="label label-info"></span>
+            <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.size" class="label label-info"></span>
+            <span ng-show="!fileUpload.files" class="label label-default"><i class="ic ic-paperclip"></i> 未选择任何文件</span>
+                
+            <input id="fileUploadBtn" name="file" type="file" accept=".xls,.xlsx" ng-file-select="fileUpload.onFileSelect($files, 'excel');"/>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" 
+                    ng-disabled="!fileUpload.files || importTierTree.loading">
+                <i ng-class="{'ic ic-spinner ic-spin':importTierTree.loading}"></i>确认
+            </button>
+            <button type="reset" class="btn btn-default" ng-click="importTierTree.clear();">取消</button>
+        </div>
+    </form>
+    
+    <form class="modal hide form-horizontal" data-backdrop="static" id="setDefaultTierModal"
+          name="setDefaultTier.form" novalidate ng-submit="setDefaultTier.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="setDefaultTier.clear();"><i class="ic ic-close"></i></button>
+            <h3>设置默认分级</h3>
+        </div>
+        <div class="modal-body scroll">
+            <div class="notification">
+                <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要使用默认站点分级吗？</h4>
+                <p class="content">
+                    您将要为
+                    <strong class="font-danger" ng-bind="currentEnterprise.name"></strong>
+                    设置默认站点分级，默认站点分级采用的是全国三级行政区划。
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" 
+                    ng-disabled="setDefaultTier.loading">
+                <i ng-class="{'ic ic-spinner ic-spin':setDefaultTier.loading}"></i>确认
+            </button>
+            <button type="reset" class="btn btn-default" ng-click="setDefaultTier.clear();">取消</button>
+        </div>
+    </form>
+    
+    <form class="modal hide form-horizontal" data-backdrop="static" id="importDeviceSignalTypeModal"
+          name="importDeviceSignalType.form" novalidate ng-submit="importDeviceSignalType.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="importDeviceSignalType.clear();"><i class="ic ic-close"></i></button>
+            <h3>
+                导入设备信号量类型
+                <small ng-if="isImportDefaultDeviceSignalType">(系统默认)</small>
+                <small ng-if="!isImportDefaultDeviceSignalType">(<span class="font-danger" ng-bind="currentEnterprise.name"></span>)</small>
+            </h3>
+        </div>
+        <div class="modal-body scroll">
+            <button type="button" class="btn btn-primary" ng-click="importDeviceSignalType.select();">选择文件</button>
+                
+            <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.name" class="label label-info"></span>
+            <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.size" class="label label-info"></span>
+            <span ng-show="!fileUpload.files" class="label label-default"><i class="ic ic-paperclip"></i> 未选择任何文件</span>
+                
+            <input id="fileUploadBtn2" name="file" type="file" accept=".xls,.xlsx" ng-file-select="fileUpload.onFileSelect($files, 'excel');"/>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" 
+                    ng-disabled="!fileUpload.files || importDeviceSignalType.loading">
+                <i ng-class="{'ic ic-spinner ic-spin':importDeviceSignalType.loading}"></i>确认
+            </button>
+            <button type="reset" class="btn btn-default" ng-click="importDeviceSignalType.clear();">取消</button>
+        </div>
+    </form>
+
+</section>

@@ -1,0 +1,670 @@
+<section id="dataDevicePage">
+    <div class="_top">
+        <h4>
+            <a ng-click="back()">
+                <i class="ic ic-angle-left ic-1x"></i>
+                <span ng-bind="params.siteName | nullFilter"></span>
+            </a>
+        </h4>
+    </div>
+
+    <div class="_bottom card-bg card-transparent">
+        <img src="{{CONST.ctx}}/res/img/content/data/device/{{params.typeCode}}.png" alt="{{device.type}}">
+        <dl class="dl-horizontal info">
+            <dt>设备名称：</dt>
+            <dd>
+                <span ng-bind="params.name | nullFilter"></span>
+                <a class="ic ic-refresh cursor-point" title="刷新全部信号" ng-click="query(0);"></a>
+            </dd>
+
+            <dt>设备编号：</dt>
+            <dd ng-bind="params.code | nullFilter"></dd>
+
+            <dt>设备类型：</dt>
+            <dd ng-bind="params.type | nullFilter"></dd>
+
+            <dt>设备型号：</dt>
+            <dd ng-bind="params.model | nullFilter"></dd>
+        </dl>
+
+        <dl class="dl-horizontal device-control" ng-show="(signalDOList && signalDOList.length > 0) && device.typeCode !== '026'">
+            <!--遥控: 除了灯控-->
+            <div ng-repeat="s in signalDOList" ng-show="device.typeCode !== '026'">
+                <dt ng-bind="s.name"></dt>
+                <dd ng-hide="s.name === '时钟同步'">
+                    <scloudmytarget
+                        myid="{{s.cntbId}}"
+                        ifchecked="s.isChecked"
+                        item = 's'
+                        click="operateDevice.toModal">
+                    </scloudmytarget>
+                </dd>
+                <dd ng-show="s.name === '时钟同步'">
+                    <span class="ic ic-time" ng-click="operateDevice.toModal(s)"></span>
+                </dd>
+            </div>
+
+            <!--遥调: 目前只有智能空调-->
+            <div ng-repeat="s in signalAOList" ng-show="device.typeCode === '015'">
+                <dt ng-bind="s.name"></dt>
+                <dd>
+                    <span class="ic ic-temperature" ng-click="modifyTeleAdjust.toModal(s)"></span>
+                </dd>
+            </div>
+
+        </dl>
+
+        <!-- <dl class="dl-vertical stat">
+            <dt>通讯状态</dt>
+            <dt>轮询时间</dt>
+            <dt>告警数量</dt>
+
+            <dd ng-bind="communicationStateInfo | nullFilter"
+                ng-class="{true:'font-success',false:'font-danger'}[communicationState]"></dd>
+            <dd ng-bind="enterprise.pollingInterval * 60 | secondFilter | nullFilter" class="font-warning"></dd>
+            <dd ng-bind="alarmCount | nullFilter" class="font-info cursor-point" ui-sref="alarm/list({deviceCode:device.code})"></dd>
+        </dl> -->
+
+    </div>
+
+
+    <div class="right1 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>遥测信号</h4>
+            <a class="ic ic-print" ng-if="util.checkPrivilege(408)" ng-click="util.print('.right1 .table-box');"></a>
+            <a class="ic ic-refresh" ng-click="query(1);"></a>
+            <a class="ic ic-save" ng-click="addSignalConfig();"></a>
+            <input type="text" ng-model="searchKey1" placeholder="输入关键词">
+            <i class="ic ic-search font-default"></i>
+        </div>
+
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>类型</th>
+                    <th>名称</th>
+                    <th>实时值</th>
+                    <th>采集时间</th>
+                    <th>详情</th>
+                    <th class="no-print">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in signalAIList | filter: searchKey1" ng-class="CONST.animation.list">
+                    <td>
+                        <div scloud-checkbox selected="s.isSelected" callback="selectCheckBox" self="s"></div>
+                    </td>
+                    <td ng-bind="s.type"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.code}} <i class='ic ic-copy clipboard' data-clipboard-text='{{s.code}}'></i>" name = "s.name"></span>
+                    </td>
+                    <td>
+                        <span ng-bind="s.name === '设备系统时间' ? (s.value | date: 'yyyy-MM-dd HH:mm:ss') : (s.value | nullFilter)"></span>
+                        <span ng-bind="s.measurement"></span>
+                    </td>
+                    <td ng-bind="s.tRecord | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.details}}" name = "s.details | nullFilter"></span>
+                    </td>
+                    <td class="no-print">
+                        <a title="监测" class="ic ic-unread" ng-click="realTimeMonitor.toModal(s)"></a>
+                        <a title="关注" class="ic ic-unfocus" ng-if="util.checkPrivilege(409) && s.focusId == null"
+                           ng-click="focusAI(s,$event);"></a>
+                        <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(409) && s.focusId != null"
+                           ng-click="removeFocusAI(s,$event);"></a>
+                        <a title="查看历史" class="ic ic-detail"
+                           ng-click="go('SDGD/data/history', {siteId:params.siteId,siteCode:params.siteCode,siteName:params.siteName,deviceCode: params.code,deviceId:params.id,signalId:s.cntbId})"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loader" ng-show="isLoading[0] || isLoading[1]">
+            <i class="ic ic-spinner ic-spin ic-4x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading[0] || isLoading[1] || signalAIList.length">
+            <div class="img img-1x"></div>
+        </div>
+    </div>
+
+    <div class="right2 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>遥信信号</h4>
+            <a class="ic ic-print" ng-if="util.checkPrivilege(408)" ng-click="util.print('.right2 .table-box');"></a>
+            <a class="ic ic-refresh" ng-click="query(2);"></a>
+            <input type="text" ng-model="searchKey2" placeholder="输入关键词">
+            <i class="ic ic-search font-default"></i>
+        </div>
+
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>名称</th>
+                    <th>实时值</th>
+                    <th>门限值</th>
+                    <th>采集时间</th>
+                    <th>详情</th>
+                    <th class="no-print">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in signalDIList | filter: searchKey2" ng-class="CONST.animation.list">
+                    <td ng-bind="s.type"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.code}} <i class='ic ic-copy clipboard' data-clipboard-text='{{s.code}}'></i>" name = "s.name"></span>
+                    </td>
+                    <td ng-bind="s.value | signalStateFilter | nullFilter" ng-class="{0:'font-success',1:'font-danger',2:'font-warning'}[s.value]"></td>
+                    <td>
+                        <span ng-bind="s.threshold | nullFilter"></span>
+                        <a title="修改门限" class="ic ic-edit" 
+                           ng-if="util.checkPrivilege(504)"
+                           ng-click="modifyTeleSignal.toModal(s);"></a>
+                    </td>
+                    <td ng-bind="s.tRecord | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.details}}" name = "s.details | nullFilter"></span>
+                    </td>
+                    <td class="no-print">
+                        <a title="关注" class="ic ic-unfocus" ng-if="util.checkPrivilege(409) && s.focusId == null"
+                           ng-click="focusDI(s,$event);"></a>
+                        <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(409) && s.focusId != null"
+                           ng-click="removeFocusDI(s,$event);"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loader" ng-show="isLoading[0] || isLoading[2]">
+            <i class="ic ic-spinner ic-spin ic-4x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading[0] || isLoading[2] || signalDIList.length">
+            <div class="img img-1x"></div>
+        </div>
+    </div>
+
+    <div class="right3 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>遥调信号</h4>
+            <a class="ic ic-print" ng-if="util.checkPrivilege(408)" ng-click="util.print('.right3 .table-box');"></a>
+            <a class="ic ic-refresh" ng-click="query(3);"></a>
+            <input type="text" ng-model="searchKey3" placeholder="输入关键词">
+            <i class="ic ic-search font-default"></i>
+        </div>
+
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>名称</th>
+                    <th>实时值</th>
+                    <th>详情</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in signalAOList | filter: searchKey3" ng-class="CONST.animation.list">
+                    <td ng-bind="s.type"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.code}} <i class='ic ic-copy clipboard' data-clipboard-text='{{s.code}}'></i>" name = "s.name"></span>
+                    </td>
+                    <td>
+                        <span ng-bind="s.value | nullFilter"></span>
+                        <span ng-bind="s.measurement"></span>
+                        <a title="设置遥调值" class="ic ic-edit no-print" 
+                           ng-if="util.checkPrivilege(604)"
+                           ng-click="modifyTeleAdjust.toModal(s);"></a>
+                    </td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.details}}" name = "s.details | nullFilter"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loader" ng-show="isLoading[0] || isLoading[3]">
+            <i class="ic ic-spinner ic-spin ic-4x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading[0] || isLoading[3] || signalAOList.length">
+            <div class="img img-1x"></div>
+        </div>
+    </div>
+
+    <div class="right4 card-bg card-transparent">
+        <div class="page-header left-bar">
+            <h4>遥控信号</h4>
+            <a class="ic ic-print" ng-if="util.checkPrivilege(408)" ng-click="util.print('.right4 .table-box');"></a>
+            <a class="ic ic-refresh" ng-click="query(4);"></a>
+            <input type="text" ng-model="searchKey4" placeholder="输入关键词">
+            <i class="ic ic-search font-default"></i>
+        </div>
+
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>名称</th>
+                    <th>实时值</th>
+                    <th>详情</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in signalDOList | filter: searchKey4" ng-class="CONST.animation.list">
+                    <td ng-bind="s.type"></td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.code}} <i class='ic ic-copy clipboard' data-clipboard-text='{{s.code}}'></i>" name = "s.name"></span>
+                    </td>
+                    <td>
+                        <span ng-bind="s.value | nullFilter"></span>
+                        <span ng-bind="s.measurement"></span>
+                        <a title="发送控制信号" class="ic ic-edit no-print" 
+                           ng-if="util.checkPrivilege(704)"
+                           ng-click="modifyTeleControl.toModal(s);"></a>
+                    </td>
+                    <td>
+                        <span scloud-tooltip data-content = "{{s.details}}" name = "s.details | nullFilter"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loader" ng-show="isLoading[0] || isLoading[4]">
+            <i class="ic ic-spinner ic-spin ic-4x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading[0] || isLoading[4] || signalDOList.length">
+            <div class="img img-1x"></div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <div>
+        <!--遥信-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="modifyTeleSignalModal"
+              name="modifyTeleSignal.form" novalidate ng-submit="modifyTeleSignal.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="modifyTeleSignal.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="modifyTeleSignal.obj.type">修改门限</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">站点层级:</label>
+                    <div class="controls">
+                        <span ng-bind="site.tierString | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="site.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作人员:</label>
+                    <div class="controls">
+                        <span ng-bind="user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作设备:</label>
+                    <div class="controls">
+                        <span ng-bind="device.name | nullFilter"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="currentTime | date: 'yyyyMMdd HH:mm:ss' | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">信号点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="modifyTeleSignal.obj.name | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">回差</label>
+                    <div class="controls">
+                        <span type="text" ng-bind="modifyTeleSignal.obj.backlash | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(modifyTeleSignal.form.threshold);">
+                    <label class="control-label">门限值</label>
+                    <div class="controls">
+                        <input type="text" name="threshold" ng-model="modifyTeleSignal.obj.threshold"
+                               ng-pattern="REGEX.threshold" required>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"
+                        ng-disabled="modifyTeleSignal.form.$invalid || modifyTeleSignal.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':modifyTeleSignal.loading}"></i>确认
+                </button>
+                <button type="button" class="btn btn-default" ng-click="modifyTeleSignal.clear();">取消</button>
+            </div>
+        </form>
+        <!--遥调-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="modifyTeleAdjustModal"
+              name="modifyTeleAdjust.form" novalidate ng-submit="modifyTeleAdjust.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="modifyTeleAdjust.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="modifyTeleAdjust.obj.type">设置遥调值</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">站点层级:</label>
+                    <div class="controls">
+                        <span ng-bind="site.tierString | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="site.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作人员:</label>
+                    <div class="controls">
+                        <span ng-bind="user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作设备:</label>
+                    <div class="controls">
+                        <span ng-bind="device.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="currentTime | date: 'yyyyMMdd HH:mm:ss' | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">信号点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="modifyTeleAdjust.obj.name | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyTeleAdjust.form.value);">
+                    <label class="control-label">遥调值</label>
+                    <div class="controls">
+                        <input type="text" name="value" ng-model="modifyTeleAdjust.obj.value"
+                               ng-pattern="REGEX.teleAdjustValue" required>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"
+                        ng-disabled="modifyTeleAdjust.form.$invalid || modifyTeleAdjust.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':modifyTeleAdjust.loading}"></i>确认
+                </button>
+                <button type="button" class="btn btn-default" ng-click="modifyTeleAdjust.clear();">取消</button>
+            </div>
+        </form>
+        <!--遥控-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="modifyTeleControlModal"
+              name="modifyTeleControl.form" novalidate ng-submit="modifyTeleControl.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="modifyTeleControl.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="modifyTeleControl.obj.type">发送控制信号</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">站点层级:</label>
+                    <div class="controls">
+                        <span ng-bind="site.tierString | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="site.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作人员:</label>
+                    <div class="controls">
+                        <span ng-bind="user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作设备:</label>
+                    <div class="controls">
+                        <span ng-bind="device.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="currentTime | date: 'yyyyMMdd HH:mm:ss' | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">信号点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="modifyTeleControl.obj.name | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(modifyTeleControl.form.value);">
+                    <label class="control-label">遥控值</label>
+                    <div class="controls">
+                        <input type="text" name="value" ng-model="modifyTeleControl.obj.value"
+                               ng-pattern="REGEX.teleControlValue" required>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"
+                        ng-disabled="modifyTeleControl.form.$invalid || modifyTeleControl.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':modifyTeleControl.loading}"></i>确认
+                </button>
+                <button type="button" class="btn btn-default" ng-click="modifyTeleControl.clear();">取消</button>
+            </div>
+        </form>
+
+        <!--左侧操纵遥控开关-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="operateDeviceModal"
+              name="operateDevice.form" novalidate ng-submit="operateDevice.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="operateDevice.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="operateDevice.obj.type">发送控制信号</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">站点层级:</label>
+                    <div class="controls">
+                        <span ng-bind="site.tierString | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="site.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作人员:</label>
+                    <div class="controls">
+                        <span ng-bind="user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作设备:</label>
+                    <div class="controls">
+                        <span ng-bind="device.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="currentTime | date: 'yyyyMMdd HH:mm:ss' | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">信号点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="operateDevice.obj.name | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(operateDevice.form.value);">
+                    <label class="control-label">遥控操作:</label>
+                    <div class="controls" ng-hide="operateDevice.obj.name === '时钟同步'">
+                        <span ng-hide="operateDevice.obj.name === '远程开机' || operateDevice.obj.name === '远程关机'"
+                              ng-bind="operateDevice.obj.isChecked | switchFilter">
+                        </span>
+                        <span ng-show="operateDevice.obj.name === '远程开机' || operateDevice.obj.name === '远程关机'">
+                            {{operateDevice.obj.name === '远程开机' ? "开机" : "关机"}}
+                        </span>
+                    </div>
+                    <div class="controls" ng-show="operateDevice.obj.name === '时钟同步'">
+                        <span>开始同步</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"
+                        ng-disabled="operateDevice.form.$invalid || operateDevice.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':operateDevice.loading}"></i>确认
+                </button>
+                <button type="button" class="btn btn-default" ng-click="operateDevice.clear();">取消</button>
+            </div>
+        </form>
+
+        <!--非智能门禁 单独接口-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="doorLockModal"
+              name="doorLock.form" novalidate ng-submit="doorLock.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="doorLock.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="doorLock.obj.type">发送控制信号</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">站点层级:</label>
+                    <div class="controls">
+                        <span ng-bind="site.tierString | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点名称:</label>
+                    <div class="controls">
+                        <span ng-bind="site.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作人员:</label>
+                    <div class="controls">
+                        <span ng-bind="user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作设备:</label>
+                    <div class="controls">
+                        <span ng-bind="device.name | nullFilter"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="currentTime | date: 'yyyyMMdd HH:mm:ss' | nullFilter "></span>
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(doorLock.form.value);">
+                    <label class="control-label">门禁复位:</label>
+                    <div class="controls">
+                        <span ng-bind="doorLock.obj.isChecked | switchFilter"></span>
+                        <!--<input type="text" name="value" ng-model="doorLock.obj.value"-->
+                        <!--ng-pattern="REGEX.teleControlValue" required>-->
+                        <!--<span class="help-inline"></span>-->
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">准进时间段:</label>
+                    <div class="controls">
+                        <!--<span>开始：</span>-->
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="doorLock.tStart">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                        </div>
+                        <!--<span>结束：</span>-->
+                        <div class="endTime input-append date">
+                            <input size="16" type="text" value="" ng-model="doorLock.tEnd">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(doorLock.form.delayTime);">
+                    <label class="control-label">开门超时时间：</label>
+                    <div class="controls">
+                        <input type="text" name="address" placeholder="{{REGEX.delayTImeDesc}}"
+                               ng-model="doorLock.obj.delayTime" ng-pattern="REGEX.address">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"
+                        ng-disabled="doorLock.form.$invalid || doorLock.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':doorLock.loading}"></i>确认
+                </button>
+                <button type="button" class="btn btn-default" ng-click="doorLock.clear();">取消</button>
+            </div>
+        </form>
+
+        <!--实时监测-->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="realTimeMonitorModal"
+            name="realTimeMonitor.form" novalidate ng-submit="realTimeMonitor.query();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="realTimeMonitor.clear();"><i class="ic ic-close"></i></button>
+                <h3>实时监测</h3>
+            </div>
+            <div class="modal-body" style="width: 530px;">
+                <div class="query-form">                    
+                    <div class="form-inline">
+                        <label>信号点名称</label>
+                        <select type="text" ng-change="realTimeMonitor.query()" ng-model="realTimeMonitor.obj.signalId" ng-options="item.cntbId as item.name for item in signalAIList"></select>
+                        
+                        <label>刷新间隔</label>
+                        <select type="text" ng-change="realTimeMonitor.query()" ng-model="realTimeMonitor.obj.refreshInterval" ng-options="item.value as item.name for item in realTimeMonitor.refreshList"></select>
+                    </div>
+                </div>
+                <div class="chart">
+                    <div id="realTimeMonitorChart"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
