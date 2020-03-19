@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.reports.entity.query;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * \* @Author: mystox
  * \* Date: 2020/3/10 10:45
@@ -7,6 +9,7 @@ package com.kongtrolink.framework.reports.entity.query;
  * \
  */
 public class FsuEntity {
+    @JSONField(name = "code")
     private String fsuId;
     private String operationState;
     private String manufacturer;

@@ -85,7 +85,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
         } else {
-            logger.error("get fsu list error[mqtt]");
+            logger.error("get alarm details list error[mqtt]");
         }
         return null;
     }
@@ -98,15 +98,63 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
         MsgResult opera = mqttOpera.opera("getAlarmCategoryByDeviceIdList", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
-        String alarmCountListMsg = opera.getMsg();
+        String alarmCategoryListMsg = opera.getMsg();
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
-            return JSONObject.parseArray(alarmCountListMsg, JSONObject.class);
+            return JSONObject.parseArray(alarmCategoryListMsg, JSONObject.class);
         } else {
             logger.error("get alarm category list error[mqtt]");
         }
         return null;
 
+    }
+
+    /**
+     * @Date 15:04 2020/3/18
+     * @Param No such property: code for class: Script1
+     * @return java.util.List<com.alibaba.fastjson.JSONObject>
+     * @Author mystox
+     * @Description //fsu离线告警统计表
+     **/
+    @Override
+    public JSONObject statisticFsuOfflineData(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", fsuIds);
+        alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+        alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+        MsgResult opera = mqttOpera.opera("getFsuOfflineStatistic", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseObject(opera.getMsg());
+        } else {
+            logger.error("get fsu offline alarm statistic list error[mqtt]");
+        }
+        return null;
+    }
+
+    /**
+     * @Date 15:46 2020/3/19
+     * @Param No such property: code for class: Script1
+     * @return com.alibaba.fastjson.JSONObject
+     * @Author mystox
+     * @Description //fsu离线明细表
+     **/
+    @Override
+    public List<JSONObject> getFsuOfflineDetails(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", fsuIds);
+        alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+        alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+        MsgResult opera = mqttOpera.opera("getFsuOfflineDetails", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
+        } else {
+            logger.error("get fsu offline alarm statistic list error[mqtt]");
+        }
+        return null;
     }
 
     @Override

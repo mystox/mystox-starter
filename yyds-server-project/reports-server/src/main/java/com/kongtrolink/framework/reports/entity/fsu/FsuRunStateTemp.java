@@ -1,14 +1,14 @@
-package com.kongtrolink.framework.reports.entity.alarmDetails;
+package com.kongtrolink.framework.reports.entity.fsu;
 
 import java.util.Date;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/3/14 17:40
- * \* Description:
+ * \* Date: 2020/3/18 9:51
+ * \* Description: fsu运行统计
  * \
  */
-public class AlarmDetailsTemp {
+public class FsuRunStateTemp {
     private String id;
     private Integer year;
     private Integer month;
@@ -16,27 +16,21 @@ public class AlarmDetailsTemp {
     private String province; //省
     private String municipality; //市
     private String county; //县|区
+
     private String stationName; //站点名称
     private String operationState; //站点状态
-    private String stationId; //站点id|站点编号
+    private String stationId; //站点id
     private String stationType;//站点类型
-    private String alarmLevel; //告警等级
-    private String alarmName; //告警名称
-    private String alarmState; //告警状态： 历史告警
-    private Date startTime; //告警开始时间
-    private Date recoveryTime; //恢复时间
-    private Double duration; //时长（分钟）
+
     private String fsuManufactory; //fsu 厂家
-    private Boolean deleteFlag = false;
+
+    private Integer fsuMaintenanceCount;
+
+    private Integer onlineCount;
+    private Integer offlineCount;
 
 
-    public String getFsuManufactory() {
-        return fsuManufactory;
-    }
-
-    public void setFsuManufactory(String fsuManufactory) {
-        this.fsuManufactory = fsuManufactory;
-    }
+    private Boolean deleteFlag;
 
     public Boolean getDeleteFlag() {
         return deleteFlag;
@@ -46,12 +40,7 @@ public class AlarmDetailsTemp {
         this.deleteFlag = deleteFlag;
     }
 
-    public Double getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Double duration) {
-        this.duration = duration;
+    public FsuRunStateTemp() {
     }
 
     public String getId() {
@@ -142,43 +131,35 @@ public class AlarmDetailsTemp {
         this.stationType = stationType;
     }
 
-    public String getAlarmLevel() {
-        return alarmLevel;
+    public String getFsuManufactory() {
+        return fsuManufactory;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
-        this.alarmLevel = alarmLevel;
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
     }
 
-    public String getAlarmName() {
-        return alarmName;
+    public Integer getFsuMaintenanceCount() {
+        return fsuMaintenanceCount;
     }
 
-    public void setAlarmName(String alarmName) {
-        this.alarmName = alarmName;
+    public void setFsuMaintenanceCount(Integer fsuMaintenanceCount) {
+        this.fsuMaintenanceCount = fsuMaintenanceCount;
     }
 
-    public String getAlarmState() {
-        return alarmState;
+    public Integer getOnlineCount() {
+        return onlineCount;
     }
 
-    public void setAlarmState(String alarmState) {
-        this.alarmState = alarmState;
+    public void setOnlineCount(Integer onlineCount) {
+        this.onlineCount = onlineCount;
     }
 
-    public Date getStartTime() {
-        return startTime;
+    public Integer getOfflineCount() {
+        return offlineCount;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getRecoveryTime() {
-        return recoveryTime;
-    }
-
-    public void setRecoveryTime(Date recoveryTime) {
-        this.recoveryTime = recoveryTime;
+    public void setOfflineCount(Integer offlineCount) {
+        this.offlineCount = offlineCount;
     }
 }

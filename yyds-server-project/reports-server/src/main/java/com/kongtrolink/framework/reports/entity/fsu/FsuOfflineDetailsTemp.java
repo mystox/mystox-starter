@@ -1,14 +1,14 @@
-package com.kongtrolink.framework.reports.entity.alarmDetails;
+package com.kongtrolink.framework.reports.entity.fsu;
 
 import java.util.Date;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/3/14 17:40
+ * \* Date: 2020/3/2 10:19
  * \* Description:
  * \
  */
-public class AlarmDetailsTemp {
+public class FsuOfflineDetailsTemp {
     private String id;
     private Integer year;
     private Integer month;
@@ -20,15 +20,12 @@ public class AlarmDetailsTemp {
     private String operationState; //站点状态
     private String stationId; //站点id|站点编号
     private String stationType;//站点类型
-    private String alarmLevel; //告警等级
-    private String alarmName; //告警名称
     private String alarmState; //告警状态： 历史告警
     private Date startTime; //告警开始时间
     private Date recoveryTime; //恢复时间
     private Double duration; //时长（分钟）
     private String fsuManufactory; //fsu 厂家
     private Boolean deleteFlag = false;
-
 
     public String getFsuManufactory() {
         return fsuManufactory;
@@ -44,46 +41,6 @@ public class AlarmDetailsTemp {
 
     public void setDeleteFlag(Boolean deleteFlag) {
         this.deleteFlag = deleteFlag;
-    }
-
-    public Double getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Double duration) {
-        this.duration = duration;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public Integer getMonth() {
-        return month;
-    }
-
-    public void setMonth(Integer month) {
-        this.month = month;
-    }
-
-    public Date getTempDate() {
-        return tempDate;
-    }
-
-    public void setTempDate(Date tempDate) {
-        this.tempDate = tempDate;
     }
 
     public String getProvince() {
@@ -142,22 +99,6 @@ public class AlarmDetailsTemp {
         this.stationType = stationType;
     }
 
-    public String getAlarmLevel() {
-        return alarmLevel;
-    }
-
-    public void setAlarmLevel(String alarmLevel) {
-        this.alarmLevel = alarmLevel;
-    }
-
-    public String getAlarmName() {
-        return alarmName;
-    }
-
-    public void setAlarmName(String alarmName) {
-        this.alarmName = alarmName;
-    }
-
     public String getAlarmState() {
         return alarmState;
     }
@@ -180,5 +121,45 @@ public class AlarmDetailsTemp {
 
     public void setRecoveryTime(Date recoveryTime) {
         this.recoveryTime = recoveryTime;
+    }
+
+    public Double getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Double duration) {
+        this.duration = duration;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public Date getTempDate() {
+        return tempDate;
+    }
+
+    public void setTempDate(Date tempDate) {
+        this.tempDate = tempDate;
     }
 }

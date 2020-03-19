@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.reports.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.reports.entity.query.FsuEntity;
 import com.kongtrolink.framework.reports.entity.query.FsuOperationState;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -32,5 +34,15 @@ public class CommonCheck {
                 return FsuOperationState.TEST;
         }
         return FsuOperationState.MAINTENANCE;
+    }
+
+    public static String aggregateTierName(JSONObject jsonObject) {
+        String province = jsonObject.getString("province");
+        String municipality = jsonObject.getString("municipality");
+        String county = jsonObject.getString("county");
+        String tierName = province;
+        if (StringUtils.isNotBlank(municipality)) tierName = tierName + "" + municipality;
+        if (StringUtils.isNotBlank(county)) tierName = tierName + "" + county;
+        return tierName;
     }
 }

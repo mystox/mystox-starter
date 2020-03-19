@@ -262,13 +262,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 continue;
             }
             JSONObject jsonObject = alarmCountList.get(i - 1);
-            String province = jsonObject.getString("province");
-            String municipality = jsonObject.getString("municipality");
-            String county = jsonObject.getString("county");
-            String tierName = province;
-            if (StringUtils.isNotBlank(municipality)) tierName = tierName + "" + municipality;
-            if (StringUtils.isNotBlank(county)) tierName = tierName + "" + county;
-            row[0] = tierName;
+            row[0] = CommonCheck.aggregateTierName(jsonObject);
             int a = 0;
             if (colLength > 3) {
                 row[1] = jsonObject.getString("stationName");
@@ -385,6 +379,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                     alarmDetailsTemp.setProvince(province);
                     alarmDetailsTemp.setMunicipality(municipality);
                     alarmDetailsTemp.setCounty(county);
+                    alarmDetailsTemp.setFsuManufactory(manufacturer);
                     alarmDetailsTemp.setAlarmName(entity.getString("name"));
                     Date treport = entity.getDate("treport");
                     alarmDetailsTemp.setStartTime(treport);
@@ -413,7 +408,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
 
         JSONObject condition = reportConfig.getCondition();//获取查询条件
         String taskId = reportTask.getId();
-
+        String period = condition.getString("period");
         String statisticLevel = condition.getString("statisticLevel");
         TimePeriod timePeriod = condition.getObject("timePeriod", TimePeriod.class);
         if (timePeriod == null) {
@@ -421,14 +416,30 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             timePeriod.setEndTime(new Date(System.currentTimeMillis()));
             timePeriod.setStartTime(DateUtil.getInstance().getFirstDayOfMonth());
         }
+        //根据用户id的区域权限及其搜索条件获取站点列表筛选
+        JSONObject currentUser = condition.getJSONObject("currentUser");
+        if (currentUser == null) currentUser = new JSONObject();
         //todo 当月的告警统计未实现
         List<AlarmDetailsTemp> alarmDetailsTemps = alarmDetailsDao.findAlarmDetailsList(taskId, condition, timePeriod);
         String[][][] resultData = alarmDetailsDataCreate(alarmDetailsTemps);
+        String resultType = reportConfig.getDataType();
+        if (!DataType.FILE.equals(resultType)) {
+            JsonData jsonData = new JsonData();
+            jsonData.setName("告警明细统计表");
+            List<String[]> dataArr = Arrays.asList(resultData[0]);
+            dataArr = new ArrayList<>(dataArr);
+            dataArr.remove(0);
+            jsonData.setData(dataArr.toArray(new String[dataArr.size()][]));
+            jsonData.setUnit("");
+            jsonData.setxAxis(resultData[0][0]);
+            ReportData reportData = new ReportData(DataType.TABLE, JSONObject.toJSONString(jsonData));
+            return reportData;
+        }
         int length = resultData[0].length;
-        resultData[0][length] = new String[]{""};
-        resultData[0][length] = new String[]{"统计周期:"};
-        resultData[0][length] = new String[]{"时间段:"};
-        resultData[0][length] = new String[]{"操作人员:"};
+        resultData[0][length - 4] = new String[]{""};
+        resultData[0][length - 3] = new String[]{"统计周期:" + period};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = alarmDetailsExcelCreate("告警量统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
@@ -456,13 +467,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 continue;
             }
             AlarmDetailsTemp alarmDetailsTemp = detailsList.get(i - 1);
-            String province = alarmDetailsTemp.getProvince();
-            String municipality = alarmDetailsTemp.getMunicipality();
-            String county = alarmDetailsTemp.getCounty();
-            String tierName = province;
-            if (StringUtils.isNotBlank(municipality)) tierName = tierName + "" + municipality;
-            if (StringUtils.isNotBlank(county)) tierName = tierName + "" + county;
-            row[0] = tierName;
+            row[0] = CommonCheck.aggregateTierName((JSONObject) JSONObject.toJSON(alarmDetailsTemp));
             int a = 0;
             row[1 + a] = alarmDetailsTemp.getStationName();
             row[2 + a] = alarmDetailsTemp.getStationId();
@@ -612,16 +617,29 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             timePeriod.setEndTime(new Date(System.currentTimeMillis()));
             timePeriod.setStartTime(DateUtil.getInstance().getFirstDayOfMonth());
         }
-//todo 当月的告警统计未实现
+        //todo 当月的告警统计未实现
         List<JSONObject> alarmCategoryDatas = alarmCategoryTempDao.getCategoryDataByCondition(taskId, condition, timePeriod);
         //统计告警分类
         String[][][] resultData = alarmCategoryDataCreate(alarmCategoryDatas, statisticLevel);
+        String resultType = reportConfig.getDataType();
+        if (!DataType.FILE.equals(resultType)) {
+            JsonData jsonData = new JsonData();
+            jsonData.setName("告警分类统计表");
+            List<String[]> dataArr = Arrays.asList(resultData[0]);
+            dataArr = new ArrayList<>(dataArr);
+            dataArr.remove(0);
+            jsonData.setData(dataArr.toArray(new String[dataArr.size()][]));
+            jsonData.setUnit("");
+            jsonData.setxAxis(resultData[0][0]);
+            ReportData reportData = new ReportData(DataType.TABLE, JSONObject.toJSONString(jsonData));
+            return reportData;
+        }
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:" + period};
         resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
-        String excelUri = AlarmCountExcelCreate("告警量统计表-" + statisticLevel, resultData);
+        String excelUri = alarmCategoryExcelCreate("告警分类统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
@@ -631,7 +649,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         if (StringUtils.equalsAny(statisticLevel, "省级", "市级", "区县级")) {
             tableHead = new String[]{"区域层级", "告警总数", "单站平均告警", "FSU离线", "烟感", "温湿度", "开关电源", "蓄电池", "红外设备", "门磁", "水浸", "空调", "其他"};
         } else
-            tableHead = new String[]{"区域层级", "站点名称", "站点类型", "生产厂家", "告警总数", "单站平均告警", "FSU离线", "烟感", "温湿度", "开关电源", "蓄电池", "红外设备", "门磁", "水浸", "空调", "其他"};
+            tableHead = new String[]{"区域层级", "站点名称", "站点类型", "生产厂家", "告警总数", "FSU离线", "烟感", "温湿度", "开关电源", "蓄电池", "红外设备", "门磁", "水浸", "空调", "其他"};
 
         int colLength = tableHead.length; // 列
         int rowLength = alarmCategoryList.size() + 1; //行
@@ -644,31 +662,48 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 continue;
             }
             JSONObject jsonObject = alarmCategoryList.get(i - 1);
-            String province = jsonObject.getString("province");
-            String municipality = jsonObject.getString("municipality");
-            String county = jsonObject.getString("county");
-            String tierName = province;
-            if (StringUtils.isNotBlank(municipality)) tierName = tierName + "" + municipality;
-            if (StringUtils.isNotBlank(county)) tierName = tierName + "" + county;
-            row[0] = tierName;
+            row[0] = CommonCheck.aggregateTierName(jsonObject);
             int a = 0;
+            Long otherCount = 0L;
+            Long alarmCount = jsonObject.getLong("alarmCount");
             if (colLength > 13) {
-                row[1] = jsonObject.getString("");
-                row[2] = jsonObject.getString("");
-                row[3] = jsonObject.getString("");
-                a = 3;
+                row[1] = jsonObject.getString("stationName");
+                row[2] = jsonObject.getString("stationType");
+                row[3] = jsonObject.getString("fsuManufactory");
+                row[4] = String.valueOf(alarmCount);
+                a = 4;
+            } else {
+                row[1] = String.valueOf(alarmCount);
+                row[2 + a] = jsonObject.getString("countAvg");
             }
-            row[1 + a] = jsonObject.getString("");
-            row[2 + a] = jsonObject.getString("");
-            row[3 + a] = jsonObject.getString("");
-            row[4 + a] = jsonObject.getString("");
-            row[5 + a] = jsonObject.getString("");
-            row[6 + a] = jsonObject.getString("");
-            row[7 + a] = jsonObject.getString("");
-            row[8 + a] = jsonObject.getString("");
-            row[9 + a] = jsonObject.getString("");
-            row[10 + a] = jsonObject.getString("");
-            row[11 + a] = jsonObject.getString("");
+            Long fsuOffline = jsonObject.getLong("fsuOffline");
+            otherCount -= fsuOffline == null ? 0L : fsuOffline;
+            row[1 + a] = String.valueOf(fsuOffline);
+            Long smokeSensation = jsonObject.getLong("smokeSensation");
+            otherCount -= smokeSensation == null ? 0L : smokeSensation;
+            row[2 + a] = String.valueOf(smokeSensation);
+            Long sensirion = jsonObject.getLong("sensirion");
+            otherCount -= sensirion == null ? 0L : sensirion;
+            row[3 + a] = String.valueOf(sensirion);
+            Long switchPower = jsonObject.getLong("switchPower");
+            otherCount -= switchPower == null ? 0L : switchPower;
+            row[4 + a] = String.valueOf(switchPower);
+            Long battery = jsonObject.getLong("battery");
+            otherCount -= battery == null ? 0L : battery;
+            row[5 + a] = String.valueOf(battery);
+            Long infrared = jsonObject.getLong("infrared");
+            otherCount -= infrared == null ? 0L : infrared;
+            row[6 + a] = String.valueOf(infrared);
+            Long gateMagnetism = jsonObject.getLong("gateMagnetism");
+            otherCount -= gateMagnetism == null ? 0L : gateMagnetism;
+            row[7 + a] = String.valueOf(gateMagnetism);
+            Long waterImmersion = jsonObject.getLong("waterImmersion");
+            otherCount -= waterImmersion == null ? 0L : waterImmersion;
+            row[8 + a] = String.valueOf(gateMagnetism);
+            Long airConditioning = jsonObject.getLong("airConditioning");
+            otherCount -= airConditioning == null ? 0L : airConditioning;
+            row[9 + a] = String.valueOf(airConditioning);
+            row[10 + a] = String.valueOf(otherCount);
 
         }
         return new String[][][]{sheetData};

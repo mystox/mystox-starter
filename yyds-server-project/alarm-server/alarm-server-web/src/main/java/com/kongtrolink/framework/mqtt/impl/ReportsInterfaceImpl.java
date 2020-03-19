@@ -52,5 +52,20 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         return alarmReduceDao.getAlarmCategory(alarmQuery);
     }
 
+    @Override
+    public JSONObject getFsuOfflineStatistic(String msg) {
+        logger.info("fsu offline statistic report receive...[{}]",msg);
+        AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
+        return alarmReduceDao.fsuOfflineStatistic(alarmQuery);
+    }
+
+    @Override
+    public List<JSONObject> getFsuOfflineDetails(String msg) {
+        logger.info("alarm details report receive...[{}]",msg);
+        AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
+        alarmQuery.setName("FSU离线告警");
+        return alarmReduceDao.getAlarmHistory(alarmQuery);
+    }
+
 
 }

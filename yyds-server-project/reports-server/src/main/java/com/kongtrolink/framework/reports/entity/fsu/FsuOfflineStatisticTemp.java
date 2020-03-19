@@ -1,57 +1,68 @@
-package com.kongtrolink.framework.reports.entity.alarmDetails;
+package com.kongtrolink.framework.reports.entity.fsu;
 
 import java.util.Date;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/3/14 17:40
+ * \* Date: 2020/3/18 15:20
  * \* Description:
  * \
  */
-public class AlarmDetailsTemp {
+public class FsuOfflineStatisticTemp {
     private String id;
     private Integer year;
     private Integer month;
     private Date tempDate;
+
     private String province; //省
     private String municipality; //市
     private String county; //县|区
     private String stationName; //站点名称
     private String operationState; //站点状态
-    private String stationId; //站点id|站点编号
+    private String stationId; //站点id
     private String stationType;//站点类型
-    private String alarmLevel; //告警等级
-    private String alarmName; //告警名称
-    private String alarmState; //告警状态： 历史告警
-    private Date startTime; //告警开始时间
-    private Date recoveryTime; //恢复时间
-    private Double duration; //时长（分钟）
+
     private String fsuManufactory; //fsu 厂家
     private Boolean deleteFlag = false;
 
 
-    public String getFsuManufactory() {
-        return fsuManufactory;
+    private Integer offlineMark; //站点离线标记 1 0
+    private Integer times; //离线次数
+    private Double durationSum; //离线总时长
+
+    private Double durationAvg; //平均离线时长
+
+
+    public Integer getOfflineMark() {
+        return offlineMark;
     }
 
-    public void setFsuManufactory(String fsuManufactory) {
-        this.fsuManufactory = fsuManufactory;
+    public void setOfflineMark(Integer offlineMark) {
+        this.offlineMark = offlineMark;
     }
 
-    public Boolean getDeleteFlag() {
-        return deleteFlag;
+    public Double getDurationAvg() {
+        return durationAvg;
     }
 
-    public void setDeleteFlag(Boolean deleteFlag) {
-        this.deleteFlag = deleteFlag;
+    public void setDurationAvg(Double durationAvg) {
+        this.durationAvg = durationAvg;
     }
 
-    public Double getDuration() {
-        return duration;
+    public Integer getTimes() {
+        return times;
     }
 
-    public void setDuration(Double duration) {
-        this.duration = duration;
+    public void setTimes(Integer times) {
+        this.times = times;
+    }
+
+    public Double getDurationSum() {
+        return durationSum;
+    }
+
+    public void setDurationSum(Double durationSum) {
+        this.durationSum = durationSum;
     }
 
     public String getId() {
@@ -142,43 +153,19 @@ public class AlarmDetailsTemp {
         this.stationType = stationType;
     }
 
-    public String getAlarmLevel() {
-        return alarmLevel;
+    public String getFsuManufactory() {
+        return fsuManufactory;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
-        this.alarmLevel = alarmLevel;
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
     }
 
-    public String getAlarmName() {
-        return alarmName;
+    public Boolean getDeleteFlag() {
+        return deleteFlag;
     }
 
-    public void setAlarmName(String alarmName) {
-        this.alarmName = alarmName;
-    }
-
-    public String getAlarmState() {
-        return alarmState;
-    }
-
-    public void setAlarmState(String alarmState) {
-        this.alarmState = alarmState;
-    }
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getRecoveryTime() {
-        return recoveryTime;
-    }
-
-    public void setRecoveryTime(Date recoveryTime) {
-        this.recoveryTime = recoveryTime;
+    public void setDeleteFlag(Boolean deleteFlag) {
+        this.deleteFlag = deleteFlag;
     }
 }

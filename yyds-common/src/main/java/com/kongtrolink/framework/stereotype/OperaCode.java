@@ -14,4 +14,6 @@ import java.lang.annotation.*;
 public @interface OperaCode {
 
     String code() default "";
+
+    String description() default "";
 }

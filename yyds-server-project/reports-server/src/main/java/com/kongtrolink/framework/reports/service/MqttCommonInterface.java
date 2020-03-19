@@ -30,4 +30,7 @@ public interface MqttCommonInterface {
 
     List<JSONObject> getAlarmCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
+    JSONObject statisticFsuOfflineData(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getFsuOfflineDetails(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 }
