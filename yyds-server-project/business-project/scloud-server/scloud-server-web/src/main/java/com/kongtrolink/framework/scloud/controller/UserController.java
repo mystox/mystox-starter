@@ -32,7 +32,22 @@ public class UserController extends BaseController{
     @Autowired
     UserService userService;
 
+    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
+    /**
+     * 获取系统用户详情信息
+     */
+    @RequestMapping(value = "getUserDetail", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getUserDetail(@RequestBody UserQuery userQuery){
+        try{
+//            String uniqueCode = getUniqueCode();
+            return new JsonResult(null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取用户详情失败", false);
+        }
+    }
 
     /**
      * 获取系统用户列表
@@ -40,7 +55,7 @@ public class UserController extends BaseController{
     @RequestMapping(value = "getUserList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserList(@RequestBody UserQuery userQuery){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
             List<UserModel> list = new ArrayList<>();
             return new JsonResult(list);
         }catch (Exception e){
@@ -55,6 +70,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "exportUserList", method = RequestMethod.POST)
     public void exportUserList(@RequestBody UserQuery userQuery, HttpServletResponse response){
         try{
+//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
 
         }catch (Exception e){
             e.printStackTrace();
@@ -67,7 +84,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "addUser", method = RequestMethod.POST)
     public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
+
             return new JsonResult("添加成功", true);
         }catch (Exception e){
             e.printStackTrace();
@@ -81,7 +99,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "importUserList", method = RequestMethod.POST)
     public @ResponseBody JsonResult importUserList(@RequestBody MultipartFile multipartFile){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
+
             return new JsonResult(null);
         }catch (Exception e){
             e.printStackTrace();
@@ -95,7 +114,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "modifyUser", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUser(@RequestBody UserModel userModel){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
+
             return new JsonResult("修改用户信息成功", true);
         }catch (Exception e){
             e.printStackTrace();
@@ -109,7 +129,7 @@ public class UserController extends BaseController{
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST)
     public @ResponseBody JsonResult deleteUser(@RequestBody UserEntity userEntity){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
 
             return new JsonResult("删除成功", true);
         }catch (Exception e){
@@ -124,7 +144,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
+
             return new JsonResult("修改成功", true);
         }catch (Exception e){
             e.printStackTrace();
@@ -138,7 +159,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserSite(@RequestBody Integer userId){
         try{
-            String uniqueCode = getUniqueCode();
+//            String uniqueCode = getUniqueCode();
+
             return new JsonResult(null);
         }catch (Exception e){
             e.printStackTrace();
