@@ -286,10 +286,14 @@ public class DeviceServiceImpl implements DeviceService {
         MsgResult msgResult = assetCIService.addAssetDevice(uniqueCode, deviceModel);
         if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
-            if (response.getResult() == CommonConstant.SUCCESSFUL) {
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                 LOGGER.info("【设备管理】,向【资管】发送添加设备MQTT 请求成功");
                 //保存设备（扩展信息）
                 Integer deviceId = deviceMongo.saveDevice(uniqueCode, deviceEntity);
+                if (deviceModel.getType().equals(CommonConstant.DEVICE_TYPE_FSU)){   //如果添加的是FSU动环主机，则自动添加监控设备
+                    autoSaveMonitorDevice(uniqueCode, deviceModel);
+                }
+
                 return deviceId;
             }else {
                 LOGGER.error("【设备管理】,向【资管】发送添加设备MQTT 请求失败");
@@ -299,6 +303,26 @@ public class DeviceServiceImpl implements DeviceService {
             LOGGER.error("【设备管理】,向【资管】发送添加设备MQTT 通信失败");
             return null;
         }
+    }
+
+    //当添加FSU动环主机设备时，自动添加保存监控设备
+    private void autoSaveMonitorDevice(String uniqueCode, DeviceModel deviceModel){
+        DeviceEntity monitorDeviceEntity = new DeviceEntity();
+        monitorDeviceEntity.setTierCode(deviceModel.getTierCode());
+        monitorDeviceEntity.setTierName(deviceModel.getTierName());
+        monitorDeviceEntity.setSiteCode(deviceModel.getSiteCode());
+        monitorDeviceEntity.setSiteId(deviceModel.getSiteId());
+        monitorDeviceEntity.setType("监控设备");
+        monitorDeviceEntity.setTypeCode("019");
+
+        DeviceModel model = new DeviceModel();
+        model.setSiteCode(deviceModel.getSiteCode());
+        model.setTypeCode("019");   //监控设备类型编码
+        String monitorDeviceCode = createDeviceCode(uniqueCode, model);
+        monitorDeviceEntity.setCode(monitorDeviceCode);
+
+        monitorDeviceEntity.setCreateTime(new Date().getTime());
+        deviceMongo.saveDevice(uniqueCode, monitorDeviceEntity);
     }
 
     /**
@@ -311,7 +335,7 @@ public class DeviceServiceImpl implements DeviceService {
         if (isModified.equals(CommonConstant.MODIFIED)){    //如果修改了设备的基本属性（即设备名称和设备型号）
             //向【资管】下发修改设备的MQTT消息
             MsgResult msgResult = assetCIService.modifyAssetDevice(uniqueCode, deviceModel);
-            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) {
+            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) {    //通信成功
                 CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
                 if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                     LOGGER.info("向【资管】发送修改设备MQTT 请求成功");
@@ -338,9 +362,9 @@ public class DeviceServiceImpl implements DeviceService {
     public void deleteDevice(String uniqueCode, DeviceQuery deviceQuery) {
         //向【资管】下发删除（批量）设备的MQTT消息
         MsgResult msgResult = assetCIService.deleteAssetDevice(uniqueCode, deviceQuery);
-        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
-            if (response.getResult() == CommonConstant.SUCCESSFUL) {
+            if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                 LOGGER.info("向【资管】发送删除设备MQTT 请求成功");
                 //（批量）删除平台端数据库中保存的设备
                 deviceMongo.deleteDevices(uniqueCode, deviceQuery);
@@ -518,7 +542,7 @@ public class DeviceServiceImpl implements DeviceService {
     //生成查找站点下未关联FSU的设备 查询条件
     private Criteria createFindUnrelatedDeviceCriteria(DeviceQuery deviceQuery){
         Criteria criteria = Criteria.where("siteCode").is(deviceQuery.getSiteCode())
-                .and("typeCode").ne("038"); //非FSU动环主机
+                .and("type").ne(CommonConstant.DEVICE_TYPE_FSU); //非FSU动环主机
 
         return criteria;
     }
