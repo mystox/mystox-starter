@@ -203,6 +203,7 @@ public class MqttReceiverImpl implements MqttReceiver {
                     int size = resultArr.size();
                     for (int i = 0; i < size; i++) {
                         MqttResp resp = resultArr.get(i);
+                        Thread.sleep(10L);
                         iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
                     }
                 } else
