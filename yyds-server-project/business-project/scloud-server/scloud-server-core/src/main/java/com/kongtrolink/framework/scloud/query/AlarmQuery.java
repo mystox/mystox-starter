@@ -20,9 +20,9 @@ public class AlarmQuery extends Paging{
     private List<String> targetLevelNameList;   //目标等级名称列表，用于告警过滤功能
     private String state;               //告警状态(待处理，已消除)
     private Boolean isCheck;              //是否确认
-    private String deviceType;          //设备型号，设备类型，与资管一致
+    private String deviceType;          //设备类型，与资管一致
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
-    private String deviceModel;         //设备型号，设备型号，如果没有与deviceType一致
+    private String deviceModel;         //设备型号，如果没有与deviceType一致
     private Date treport;             //告警发生时间
     private Date trecover;              //消除时间
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除

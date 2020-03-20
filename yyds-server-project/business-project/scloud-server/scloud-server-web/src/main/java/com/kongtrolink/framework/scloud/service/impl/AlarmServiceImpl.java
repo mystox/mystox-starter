@@ -14,6 +14,7 @@ import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -102,7 +103,15 @@ public class AlarmServiceImpl implements AlarmService {
             deviceCodeAlarmList.add(alarm);
             deviceCodeAlarmListMap.put(deviceId, deviceCodeAlarmList);
         }
-        List<DeviceModel> deviceModelList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setPageSize(Integer.MAX_VALUE);
+        deviceQuery.setDeviceCodes(deviceCodeList);
+        List<DeviceModel> deviceModelList = new ArrayList<>();
+        try{
+            deviceModelList = deviceService.findDeviceList(uniqueCode, deviceQuery);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         List<String> typeCodeList = new ArrayList<>();
         for(DeviceModel deviceModel : deviceModelList){
             String code = deviceModel.getCode();
@@ -131,7 +140,10 @@ public class AlarmServiceImpl implements AlarmService {
             siteIdAlarmList.add(alarm);
             siteIdAlarmListMap.put(siteId, siteIdAlarmList);
         }
-        List<SiteModel> siteModelList = siteService.getByIdList(uniqueCode, siteIdList);
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setPageSize(Integer.MAX_VALUE);
+        siteQuery.setSiteIdList(siteIdList);
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         for(SiteModel siteModel : siteModelList){
             int siteId = siteModel.getSiteId();
             List<Alarm> siteIdAlarmList = siteIdAlarmListMap.get(siteId);
@@ -198,7 +210,7 @@ public class AlarmServiceImpl implements AlarmService {
 
     private void listCommon(AlarmQuery alarmQuery)throws ParameterException {
         checkPara(alarmQuery);
-        //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表
+        //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表，现假定前端将用户所管辖站点全部传递给后台
         List<String> siteCodeList = alarmQuery.getSiteCodeList();
         DeviceQuery deviceQuery = new DeviceQuery();
         deviceQuery.setSiteCodes(siteCodeList);

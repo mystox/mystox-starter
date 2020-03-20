@@ -545,28 +545,6 @@ public class DeviceServiceImpl implements DeviceService {
         return 0;
     }
 
-    /**
-     * @param uniqueCode
-     * @param code
-     * @auther: liudd
-     * @date: 2020/3/3 10:49
-     * 功能描述:根据设备编码获取单个设备
-     */
-    @Override
-    public DeviceModel getByCode(String uniqueCode, String code) {
-        return null;
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2020/3/3 10:49
-     * 功能描述:根据设备编码获取设备列表
-     */
-    @Override
-    public List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList) {
-        return null;
-    }
-
     @Override
     public List<String> entityList2CodeList(List<DeviceEntity> deviceEntityList) {
         if(null == deviceEntityList){

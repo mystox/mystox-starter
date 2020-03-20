@@ -1,21 +1,12 @@
 package com.kongtrolink.framework.scloud.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
-import com.kongtrolink.framework.scloud.entity.AlarmFocus;
-import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
-import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.service.*;
-import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -23,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @Auther: liudd
