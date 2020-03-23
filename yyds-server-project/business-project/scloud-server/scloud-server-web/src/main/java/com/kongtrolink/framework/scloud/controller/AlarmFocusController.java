@@ -10,8 +10,13 @@ import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmFocusQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.*;
+import com.kongtrolink.framework.scloud.service.impl.DeviceServiceImpl;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,7 +43,7 @@ public class AlarmFocusController extends BaseController {
     DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     AlarmService alarmService;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmFocusController.class);
     /**
      * @auther: liudd
      * @date: 2020/2/26 15:21
@@ -67,10 +72,13 @@ public class AlarmFocusController extends BaseController {
             }
             alarmFocus.setFocusTime(curTime);
             //填充信号点名称，设备名称，站点等信息
-            DeviceModel deviceModel = deviceService.getByCode(uniqueCode, alarmFocus.getDeviceId());
-            if(null == deviceModel){
+            DeviceQuery deviceQuery = new DeviceQuery();
+            deviceQuery.setDeviceCode(alarmFocus.getDeviceId());
+            List<DeviceModel> deviceModelList = deviceService.findDeviceList(uniqueCode, deviceQuery);
+            if(null == deviceModelList || deviceModelList.size() == 0){
                 throw new ParameterException("设备编码" + alarmFocus.getDeviceId()+ "对应的设备不存在");
             }
+            DeviceModel deviceModel = deviceModelList.get(0);
             alarmFocus.initDeviceInfo(deviceModel);
             //获取设备类型
             DeviceType deviceType = deviceSignalTypeService.getByCode(uniqueCode, deviceModel.getTypeCode());
@@ -88,6 +96,9 @@ public class AlarmFocusController extends BaseController {
             }
         }catch (ParameterException e){
             return new JsonResult(e.getMessage(), false);
+        }catch (Exception e){
+            LOGGER.error("获取设备信息失败");
+            return new JsonResult("获取设备信息失败", false);
         }
         return new JsonResult("关注成功", true);
     }
@@ -140,7 +151,10 @@ public class AlarmFocusController extends BaseController {
             deviceCodeFocusList.add(alarmFocus);
             deviceCodeFocusListMap.put(deviceId, deviceCodeFocusList);
         }
-        List<SiteModel> siteModelList = siteService.getByIdList(uniqueCode, siteIdList);
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setPageSize(Integer.MAX_VALUE);
+        siteQuery.setSiteIdList(siteIdList);
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         if(null != siteModelList){
             for(SiteModel siteModel : siteModelList){
                 int siteId = siteModel.getSiteId();
@@ -152,7 +166,17 @@ public class AlarmFocusController extends BaseController {
                 }
             }
         }
-        List<DeviceModel> deviceModelList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setCurrentPage(1);
+        deviceQuery.setPageSize(Integer.MAX_VALUE);
+        deviceQuery.setDeviceCodes(deviceCodeList);
+        List<DeviceModel> deviceModelList = new ArrayList<>();
+        try{
+            deviceModelList = deviceService.findDeviceList(uniqueCode, deviceQuery);
+        }catch (Exception e){
+            e.printStackTrace();
+            LOGGER.error("获取设备列表异常---" );
+        }
         if(null != deviceModelList){
             for(DeviceModel deviceModel : deviceModelList){
                 List<AlarmFocus> deviceCodeFocusList = deviceCodeFocusListMap.get(deviceModel.getCode());

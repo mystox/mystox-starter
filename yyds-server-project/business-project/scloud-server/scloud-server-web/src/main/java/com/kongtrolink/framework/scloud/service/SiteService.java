@@ -59,11 +59,4 @@ public interface SiteService {
      * 获取资产管理员列表
      */
     List<String> getRespList(String uniqueCode, SiteQuery siteQuery);
-
-    /**
-     * @auther: liudd
-     * @date: 2020/3/3 13:44
-     * 功能描述:根据id列表获取
-     */
-    List<SiteModel> getByIdList(String uniqueCode, List<Integer> siteIdList);
 }

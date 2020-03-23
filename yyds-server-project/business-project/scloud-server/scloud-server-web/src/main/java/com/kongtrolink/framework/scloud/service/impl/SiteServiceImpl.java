@@ -381,16 +381,4 @@ public class SiteServiceImpl implements SiteService {
         }
         return tableDatas;
     }
-
-    /**
-     * @param uniqueCode
-     * @param siteIdList
-     * @auther: liudd
-     * @date: 2020/3/3 13:44
-     * 功能描述:根据id列表获取
-     */
-    @Override
-    public List<SiteModel> getByIdList(String uniqueCode, List<Integer> siteIdList) {
-        return null;
-    }
 }
