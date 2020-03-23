@@ -233,7 +233,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         if (StringUtils.equalsAny(statisticLevel, "省级", "市级", "区县级")) {
             tableHead = new String[]{"区域层级", "站点总数", "离线站点数", "累计离线时长（分钟）", "离线次数", "平均离线时长（分钟）"};
         } else {
-            tableHead = new String[]{"区域层级", "站点名称", "累计离线时长（分钟）", "离线次数", "平均离线时长（分钟）"};
+            tableHead = new String[]{"区域层级", "站点名称", "站点类型", "生产厂家", "累计离线时长（分钟）", "离线次数", "平均离线时长（分钟）"};
         }
         int colLength = tableHead.length; // 列
         int rowLength = fsuOfflineDatas.size() + 1; //行
@@ -251,12 +251,15 @@ public class FsuReportsServiceImpl implements FsuReportsService {
                 a += 1;
             } else {
                 row[1 + a] = jsonObject.getString("stationName");//站点名称
+                row[2 + a] = jsonObject.getString("stationType");//站点类型
+                row[3 + a] = jsonObject.getString("fsuManufactory");//厂家
+                a = 3;
             }
             Double durationSum = jsonObject.getDouble("durationSum");
             Integer times = jsonObject.getInteger("times");
-            row[2 + a] = String.valueOf(durationSum);
-            row[3 + a] = String.valueOf(times);
-            row[4 + a] = String.valueOf(durationSum / times);
+            row[1 + a] = String.valueOf(durationSum);
+            row[2 + a] = String.valueOf(times);
+            row[3 + a] = String.valueOf(durationSum / times);
         }
         return new String[][][]{sheetData};
     }
@@ -605,7 +608,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
             int a = 0;
             row[1 + a] = fsuOfflineDetailsTemp.getStationName();
             row[2 + a] = fsuOfflineDetailsTemp.getStationId();
-            row[3 + a] =fsuOfflineDetailsTemp.getStationType();
+            row[3 + a] = fsuOfflineDetailsTemp.getStationType();
             row[4 + a] = fsuOfflineDetailsTemp.getOperationState();
             row[5 + a] = DateUtil.getInstance().format(fsuOfflineDetailsTemp.getStartTime());
             row[6 + a] = DateUtil.getInstance().format(fsuOfflineDetailsTemp.getRecoveryTime());

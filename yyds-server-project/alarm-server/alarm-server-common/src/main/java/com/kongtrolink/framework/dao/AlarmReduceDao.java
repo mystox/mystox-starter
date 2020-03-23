@@ -326,6 +326,103 @@ public class AlarmReduceDao {
         return fsuOfflineStatisticList;
     }
 
+    public JSONObject stationOffStatistic(AlarmQuery alarmQuery) {
+        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
+                + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
+        //2，获取时间跨度内各个时间点的年周数，生成对应的表
+        List<String> weeks = getWeeks(alarmQuery);
+        //从各个表获取数据
+        String map = "function(){\n" +
+                "        var duration = (this.trecover-this.treport)/1000/60;\n" +
+                "        emit(1,{duration:duration,count:1})\n" +
+                "        }";
+        String reduce = "function (key,values){\n" +
+                "            var ret = {};\n" +
+                "            var duration = 0;\n" +
+                "            var count = 0;\n" +
+                "            for(var i = 0; i<values.length;i++){\n" +
+                "                var value = values[i];\n" +
+                "                duration += value.duration;\n" +
+                "                count += value.count;\n" +
+                "            }\n" +
+                "            ret['duration'] = duration;\n" +
+                "            ret['count'] = count;\n" +
+                "            return ret;\n" +
+                "        }";
+        JSONObject stationOffStatistic = new JSONObject();
+        for (int i = weeks.size() - 1; i >= 0; i--) {
+            String week = weeks.get(i);
+            logger.debug("map reduce weeks data:[{}]", week);
+            String table = tablePrefix + week;
+            Criteria criteria = new Criteria();
+            criteria = commonQuery(criteria, alarmQuery);
+            criteria.and("name").and("交流输入XX停电告警");
+            criteria.and("state").is("已消除");
+            boolean b = mongoTemplate.collectionExists(table);
+            if (!b) continue;
+            MapReduceResults<JSONObject> mapReduceResults = mongoTemplate.mapReduce(
+                    Query.query(criteria), table, map, reduce, JSONObject.class);
+            logger.debug("table:{}, reduceResult:[{}]", table, JSONObject.toJSONString(mapReduceResults));
+            for (JSONObject result : mapReduceResults) {
+                JSONObject value = result.getJSONObject("value");
+                Double duration = value.getDouble("duration");
+                Integer count = value.getInteger("count");
+                stationOffStatistic.put("durationSum", duration);
+                stationOffStatistic.put("count", count);
+            }
+
+        }
+        return stationOffStatistic;
+    }
+
+    public JSONObject stationBreakStatistic(AlarmQuery alarmQuery) {
+        String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
+                + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
+        //2，获取时间跨度内各个时间点的年周数，生成对应的表
+        List<String> weeks = getWeeks(alarmQuery);
+        //从各个表获取数据
+        String map = "function(){\n" +
+                "        var duration = (this.trecover-this.treport)/1000/60;\n" +
+                "        emit(1,{duration:duration,count:1})\n" +
+                "        }";
+        String reduce = "function (key,values){\n" +
+                "            var ret = {};\n" +
+                "            var duration = 0;\n" +
+                "            for(var i = 0; i<values.length;i++){\n" +
+                "                var value = values[i];\n" +
+                "                duration += value.duration;\n" +
+                "                count += value.count;\n" +
+                "            }\n" +
+                "            ret['duration'] = duration;\n" +
+                "            return ret;\n" +
+                "        }";
+
+        JSONObject stationBreakStatistic = new JSONObject();
+        for (int i = weeks.size() - 1; i >= 0; i--) {
+            String week = weeks.get(i);
+            logger.debug("map reduce weeks data:[{}]", week);
+            String table = tablePrefix + week;
+            Criteria criteria = new Criteria();
+            criteria = commonQuery(criteria, alarmQuery);
+            criteria.and("name").and("一级低压脱离告警");
+            criteria.and("state").is("已消除");
+            boolean b = mongoTemplate.collectionExists(table);
+            if (!b) continue;
+            MapReduceResults<JSONObject> mapReduceResults = mongoTemplate.mapReduce(
+                    Query.query(criteria), table, map, reduce, JSONObject.class);
+            logger.debug("table:{}, reduceResult:[{}]", table, JSONObject.toJSONString(mapReduceResults));
+            for (JSONObject result : mapReduceResults) {
+                JSONObject value = result.getJSONObject("value");
+                Double duration = value.getDouble("duration");
+                stationBreakStatistic.put("durationSum", duration);
+            }
+
+        }
+
+
+        return stationBreakStatistic;
+    }
+
 
     class alarmCountEntity {
         private String alarmLevelName;

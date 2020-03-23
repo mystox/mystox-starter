@@ -80,7 +80,7 @@ public class FsuOfflineStatisticTempDao extends MongoBaseDao{
             fields = fields.and(Fields.fields("county"));
         }
         if (StatisticLevel.site.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("stationId", "stationName", "stationType"));
+            fields = fields.and(Fields.fields("stationId", "stationName", "stationType","fsuManufactory"));
         }
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
                 Aggregation.group(fields).sum("times").as("times")

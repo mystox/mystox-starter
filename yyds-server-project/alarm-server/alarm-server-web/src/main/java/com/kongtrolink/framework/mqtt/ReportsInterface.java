@@ -34,4 +34,14 @@ public interface ReportsInterface {
     @OperaCode(description = "fsu离线明细")
     public List<JSONObject> getFsuOfflineDetails(String msg);
 
+    @OperaCode(description = "站点停电统计表")
+    public JSONObject stationOffStatistic(String msg);
+
+
+    @OperaCode(description = "站点停电明细表")
+    public List<JSONObject> getStationOffDetails(String msg);
+
+
+    @OperaCode(description = "站点停电断站统计表")
+    public JSONObject getStationBreakStatistic(String msg);
 }

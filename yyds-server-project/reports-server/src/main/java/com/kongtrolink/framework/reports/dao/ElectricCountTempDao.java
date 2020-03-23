@@ -3,6 +3,9 @@ package com.kongtrolink.framework.reports.dao;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.SystemReports.ElectricCountTemp;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,5 +25,12 @@ public class ElectricCountTempDao extends MongoBaseDao {
 
     public List<JSONObject> getElectricCountByCondition(String id, List<JSONObject> jsonObjects, String period, JSONObject timePeriod) {
         return null;
+    }
+
+    public void updateDelete(int year, int month, String reportTaskId) {
+        Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
+        Update update = Update.update("deleteFlag", true);
+        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ELECTRIC_COUNT + reportTaskId);
+
     }
 }

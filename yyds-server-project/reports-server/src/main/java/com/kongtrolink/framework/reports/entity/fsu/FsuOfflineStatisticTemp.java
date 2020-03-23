@@ -18,10 +18,10 @@ public class FsuOfflineStatisticTemp {
     private String municipality; //市
     private String county; //县|区
     private String stationName; //站点名称
-    private String operationState; //站点状态
     private String stationId; //站点id
     private String stationType;//站点类型
 
+    private String operationState; //站点状态
     private String fsuManufactory; //fsu 厂家
     private Boolean deleteFlag = false;
 
