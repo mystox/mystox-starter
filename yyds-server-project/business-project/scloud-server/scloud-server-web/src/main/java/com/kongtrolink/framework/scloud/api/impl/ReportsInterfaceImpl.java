@@ -63,4 +63,16 @@ public class ReportsInterfaceImpl implements ReportsInterface{
         return null;
     }
 
+    @Override
+    public JSONObject stationElectricCountList(String msg) {
+        logger.info("用电量统计报表获取");
+        JSONObject condition = JSONObject.parseObject(msg);
+        String siteId = condition.getString("stationId");
+        String enterpriseCode = condition.getString("enterpriseCode");
+
+
+
+        return null;
+    }
+
 }

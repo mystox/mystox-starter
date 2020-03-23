@@ -683,7 +683,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
                 List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
                 // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
                 logger.debug("statistic station off ByDeviceIds, site reportTaskId is [{}]", stationId);
-                JSONObject jsonObjects = mqttCommonInterface.getStationBreakStatistic(fsuIds, finalYear, finalMonth, baseCondition);
+                JSONObject jsonObjects = mqttCommonInterface.getStationElectricCountList(fsuIds, finalYear, finalMonth, baseCondition);
                 ElectricCountTemp electricCountTemp = jsonObjects.toJavaObject(ElectricCountTemp.class);
                 electricCountTemp.setYear(finalYear);
                 electricCountTemp.setMonth(finalMonth);

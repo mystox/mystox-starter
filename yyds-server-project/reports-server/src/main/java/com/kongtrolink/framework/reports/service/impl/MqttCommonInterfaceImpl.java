@@ -211,6 +211,23 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
     }
 
     @Override
+    public JSONObject getStationElectricCountList(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject countCondition = new JSONObject();
+        countCondition.putAll(baseCondition);
+        countCondition.put("deviceIds", fsuIds);
+        countCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+        countCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+        MsgResult opera = mqttOpera.opera("stationElectricCountList", countCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseObject(opera.getMsg(), JSONObject.class);
+        } else {
+            logger.error("get station break statistic list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
     public List<FsuEntity> getFsuList(String stationId, JSONObject baseCondition) {
         baseCondition.put("stationId", stationId);
         MsgResult opera = mqttOpera.opera(GET_FSU_SCLOUD, baseCondition.toJSONString());
