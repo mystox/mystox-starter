@@ -4,41 +4,43 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.StatisticLevel;
-import com.kongtrolink.framework.reports.entity.TimePeriod;
-import com.kongtrolink.framework.reports.entity.alarmCount.AlarmCountTemp;
-import org.apache.commons.lang3.StringUtils;
+import com.kongtrolink.framework.reports.entity.fsu.FsuRunStateTemp;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/2/24 9:26
+ * \* Date: 2020/3/18 10:17
  * \* Description:
  * \
  */
-@Service
-public class AlarmCountTempDao extends MongoBaseDao {
+public class FsuRunStateDao extends MongoBaseDao {
+
+    public void save(List<FsuRunStateTemp> fsuRunStateTemps, String taskId) {
+        mongoTemplate.insert(fsuRunStateTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_RUNNING_STATE+taskId);
+    }
+
+    public void updateDelete(int year, int month, String taskId) {
+        Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
+        Update update = Update.update("deleteFlag", true);
+        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_RUNNING_STATE + taskId);
+    }
 
 
-    public List<JSONObject> getCountDataByCondition(String taskId, JSONObject condition, TimePeriod timePeriod) {
+    public List<JSONObject> getFsuRunStateData(String taskId, JSONObject condition) {
+        String monthStr = condition.getString("month");
+        String[] split = monthStr.split("-");
         Criteria criteria = Criteria.where("deleteFlag").is(false);
 
-        String alarmLevel = condition.getString("alarmLevel");
-        if (StringUtils.isBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
         if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
-        String runningSate = condition.getString("operationState");
-        if (!"全部".equals(runningSate)) criteria.and("operationState").is(runningSate);
         String fsuManufactory = condition.getString("fsuManufactory");
         if (!"全部".equals(fsuManufactory)) criteria.and("fsuManufactory").is(fsuManufactory);
         JSONArray stationList = condition.getJSONArray("stationList");
@@ -46,20 +48,7 @@ public class AlarmCountTempDao extends MongoBaseDao {
             List<String> siteIdList = stationList.toJavaList(String.class);
             criteria.and("stationId").in(siteIdList);
         }
-
-        Date startTime = timePeriod.getStartTime();
-        Date endTime = timePeriod.getEndTime();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startTime);
-        int year = calendar.get(Calendar.YEAR);
-        int startMonth = calendar.get(Calendar.MONTH);
-        calendar.setTime(endTime);
-        int endMonth = calendar.get(Calendar.MONTH);
-
-        criteria.and("year").is(year);
-        criteria.and("month").gte(startMonth).lte(endMonth);
-
-
+        criteria.and("year").is(Integer.valueOf(split[0])).and("month").is(Integer.valueOf(split[1]));
         String statisticLevel = condition.getString("statisticLevel");
 
         Fields fields = Fields.fields();
@@ -72,25 +61,21 @@ public class AlarmCountTempDao extends MongoBaseDao {
         if (StatisticLevel.county.equals(statisticLevel)) {
             fields = fields.and(Fields.fields("county"));
         }
-        if (StatisticLevel.site.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("stationId", "stationName", "stationType"));
-        }
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
-                Aggregation.group(fields).sum("alarmCount").as("alarmCount").sum("alarmRecoveryCount").as("alarmRecoveryCount"));
+                Aggregation.group(fields)
+                        .sum("fsuMaintenanceCount").as("fsuMaintenanceCount")
+                        .sum("onlineCount").as("onlineCount")
+                        .sum("offlineCount").as("offlineCount"));
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();
+        for (JSONObject fsuRunning : mappedResults) {
+            Integer fsuMaintenanceCount = fsuRunning.getInteger("fsuMaintenanceCount");
+            Integer onlineCount = fsuRunning.getInteger("onlineCount");
+            Integer offlineCount = fsuRunning.getInteger("offlineCount");
+            fsuRunning.put("onlineRate", String.format("%d%s", 100 * onlineCount / fsuMaintenanceCount, "%"));
+            fsuRunning.put("offlineRate", String.format("%d%s", 100 * offlineCount / fsuMaintenanceCount, "%"));
+        }
         return mappedResults;
-    }
 
-    public void save(List<AlarmCountTemp> alarmCountTemps, String taskId) {
-        mongoTemplate.insert(alarmCountTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId);
-    }
-
-
-    public void updateDelete(int year, int month, String taskId) {
-        Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
-
-        Update update = Update.update("deleteFlag", true);
-        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId);
     }
 }

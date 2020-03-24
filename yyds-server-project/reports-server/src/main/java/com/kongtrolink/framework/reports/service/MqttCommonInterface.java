@@ -25,4 +25,12 @@ public interface MqttCommonInterface {
     List<SiteEntity> getSiteList(JSONObject baseCondition);
 
     String getRegionName(String address);
+
+    List<JSONObject> getAlarmDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getAlarmCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    JSONObject statisticFsuOfflineData(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getFsuOfflineDetails(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 }

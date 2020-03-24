@@ -21,7 +21,7 @@ public class AlarmQuery extends Paging {
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备类型
     private List<String> deviceCodeList;        //设备编码列表，需要统一
-    private List<String> deviceIdList;          //设备id
+    private List<String> deviceIds;
     private String state;                       //告警状态
     private Integer level;
     private Integer targetLevel;
@@ -47,12 +47,12 @@ public class AlarmQuery extends Paging {
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
 
 
-    public List<String> getDeviceIdList() {
-        return deviceIdList;
+    public List<String> getDeviceIds() {
+        return deviceIds;
     }
 
-    public void setDeviceIdList(List<String> deviceIdList) {
-        this.deviceIdList = deviceIdList;
+    public void setDeviceIds(List<String> deviceIds) {
+        this.deviceIds = deviceIds;
     }
 
     public List<String> getDeviceTypeList() {

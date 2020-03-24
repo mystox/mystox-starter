@@ -55,6 +55,10 @@ reportOperate:
     enterServerCode: yytd_TOWER_SERVER
     serverVerson: ALARM_SERVER_DELIVER_V1.0.0
     operaCode: handleDeliver
+  operate[2]:
+    enterServerCode: yytd_TOWER_SERVER
+    serverVerson: SCLOUD_SERVER_WEB_V1.0.0
+    operaCode: sdgdScloudAlarmReport
 #告警消除操作流程
 resloveOperate:
   operate[0]:

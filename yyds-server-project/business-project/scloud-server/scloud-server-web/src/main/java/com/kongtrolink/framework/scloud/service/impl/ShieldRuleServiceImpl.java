@@ -7,7 +7,9 @@ import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
@@ -73,7 +75,15 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     public void initInfo(String uniqueCode, ShieldRule shieldRule) {
         //获取设备列表
         List<String> deviceCodeList = shieldRule.getDeviceIdList();
-        List<DeviceModel> deviceList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setPageSize(Integer.MAX_VALUE);
+        deviceQuery.setDeviceCodes(deviceCodeList);
+        List<DeviceModel> deviceList = new ArrayList<>();
+        try{
+            deviceList = deviceService.findDeviceList(uniqueCode, deviceQuery);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         Map<Integer, List<DeviceModel>> siteIdDeviceListMap = new HashMap<>();
         List<Integer> siteIdList = new ArrayList<>();
         for(DeviceModel deviceModel : deviceList){
@@ -88,7 +98,10 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
             siteIdDeviceList.add(deviceModel);
             siteIdDeviceListMap.put(siteId, siteIdDeviceList);
         }
-        List<SiteModel> siteList = siteService.getByIdList(uniqueCode, siteIdList);
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setPageSize(Integer.MAX_VALUE);
+        siteQuery.setSiteIdList(siteIdList);
+        List<SiteModel> siteList = siteService.findSiteList(uniqueCode, siteQuery);
         for(SiteModel siteModel : siteList){
             List<DeviceModel> siteIdDeviceList = siteIdDeviceListMap.get(siteModel.getSiteId());
             for(DeviceModel deviceModel : siteIdDeviceList){

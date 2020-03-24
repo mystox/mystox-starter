@@ -10,4 +10,6 @@ public class UserQuery extends Paging{
      */
     private static final long serialVersionUID = -5591511152856559674L;
 
+    private String userId;  //用户Id
+
 }

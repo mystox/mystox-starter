@@ -8,4 +8,6 @@ import com.kongtrolink.framework.scloud.entity.UserEntity;
  */
 public class UserModel extends UserEntity{
 
+    private String name;
+
 }

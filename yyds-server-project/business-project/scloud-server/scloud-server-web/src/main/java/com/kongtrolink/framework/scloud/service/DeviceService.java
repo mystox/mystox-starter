@@ -91,19 +91,5 @@ public interface DeviceService {
      */
     int countEntity(String uniqueCode, DeviceQuery deviceQuery);
 
-    /**
-     * @auther: liudd
-     * @date: 2020/3/3 10:49
-     * 功能描述:根据设备编码获取单个设备
-     */
-    DeviceModel getByCode(String uniqueCode, String code);
-
-    /**
-     * @auther: liudd
-     * @date: 2020/3/3 10:49
-     * 功能描述:根据设备编码获取设备列表
-     */
-    List<DeviceModel> getByCodeList(String uniqueCode, List<String> deviceCodeList);
-
     List<String> entityList2CodeList(List<DeviceEntity> deviceEntityList);
 }

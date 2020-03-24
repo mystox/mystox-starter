@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.TimePeriod;
-import com.kongtrolink.framework.reports.entity.fsu.FsuOfflineDetailsTemp;
+import com.kongtrolink.framework.reports.entity.alarmDetails.AlarmDetailsTemp;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Calendar;
@@ -17,27 +17,30 @@ import java.util.List;
 
 /**
  * \* @Author: mystox
- * \* Date: 2020/3/2 10:39
+ * \* Date: 2020/3/15 12:02
  * \* Description:
  * \
  */
-@Service
-public class FsuOfflineDetailsTempDao extends MongoBaseDao {
+public class AlarmDetailsDao extends MongoBaseDao {
 
 
-    public void save(List<FsuOfflineDetailsTemp> alarmCountTemps, String taskId) {
-        mongoTemplate.insert(alarmCountTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS+taskId);
+
+    public void save(List<AlarmDetailsTemp> alarmDetailsTemps, String taskId) {
+        mongoTemplate.insert(alarmDetailsTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS + taskId);
     }
+
 
     public void updateDelete(int year, int month, String taskId) {
         Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
         Update update = Update.update("deleteFlag", true);
-        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS + taskId);
-
+        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS + taskId);
     }
 
-    public List<FsuOfflineDetailsTemp>  findFsuOfflineDetailsList(String taskId, JSONObject condition, TimePeriod timePeriod) {
+    public List<AlarmDetailsTemp> findAlarmDetailsList(String taskId, JSONObject condition, TimePeriod timePeriod) {
+
         Criteria criteria = Criteria.where("deleteFlag").is(false);
+        String alarmLevel = condition.getString("alarmLevel");
+        if (StringUtils.isBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
         if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
         String runningSate = condition.getString("operationState");
@@ -50,6 +53,7 @@ public class FsuOfflineDetailsTempDao extends MongoBaseDao {
             List<String> siteIdList = stationList.toJavaList(String.class);
             criteria.and("stationId").in(siteIdList);
         }
+
         Date startTime = timePeriod.getStartTime();
         Date endTime = timePeriod.getEndTime();
         Calendar calendar = Calendar.getInstance();
@@ -62,7 +66,6 @@ public class FsuOfflineDetailsTempDao extends MongoBaseDao {
         criteria.and("year").is(year);
         criteria.and("month").gte(startMonth).lte(endMonth);
 
-        return mongoTemplate.find(Query.query(criteria), FsuOfflineDetailsTemp.class, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS + taskId);
-
+        return mongoTemplate.find(Query.query(criteria), AlarmDetailsTemp.class, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS + taskId);
     }
 }
