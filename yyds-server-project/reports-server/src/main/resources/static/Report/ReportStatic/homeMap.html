@@ -21,7 +21,7 @@
     font-size:36px;
     color:#fff;
   }
-  #siteEntity-detail {
+  #site-detail {
     display:none;
     position:fixed;
     width:300px;
@@ -66,12 +66,12 @@
   }
   .alarm-icon.level0:after { content:none; }
   .alarm-icon.level0:before { background-color:#38c2ff; }
-  .sigle-siteEntity { cursor:pointer; }
-  .sigle-siteEntity .alarm-icon {
+  .sigle-site { cursor:pointer; }
+  .sigle-site .alarm-icon {
     margin-left:-15px;
     margin-top:-15px;
   }
-  .sigle-siteEntity .name {
+  .sigle-site .name {
     position:absolute;
     top:8px;
     color:#fff;
@@ -81,7 +81,7 @@
     display:none;
     pointer-events:none;
   }
-  .sigle-siteEntity:hover .name { display:block; }
+  .sigle-site:hover .name { display:block; }
   @keyframes ripple {
     0% {
       left:50%;
@@ -126,7 +126,7 @@ var MAP = {
     // reportService.getCoordinateList(function(data) {
     (function () {
       var data = [{
-        "siteEntity": {
+        "site": {
           "strId": "5b3ed360563e7607d37bdc86",
           "name": "八拜西南",
           "phone": null,
@@ -183,10 +183,10 @@ var MAP = {
     };
     ;
 
-    function Marker(point, mouseoverText, alarmLevel, siteEntity) {
+    function Marker(point, mouseoverText, alarmLevel, site) {
       this._point = point;
       this._overText = mouseoverText;
-      this.siteEntity = siteEntity;
+      this.site = site;
       this.topAlarm = alarmLevel;
     }
 
@@ -202,7 +202,7 @@ var MAP = {
 
         var _div = document.createElement('div');
 
-        _div.innerHTML = '<div style="position:absolute;width:20px;height:20px;" class="sigle-siteEntity">' + '<div style="pointer-events:none" class="alarm-icon level' + this.topAlarm + '"></div>' + "</div>";
+        _div.innerHTML = '<div style="position:absolute;width:20px;height:20px;" class="sigle-site">' + '<div style="pointer-events:none" class="alarm-icon level' + this.topAlarm + '"></div>' + "</div>";
 
         var _this = this;
 
@@ -212,8 +212,8 @@ var MAP = {
           var detail = _this.detail;
 
           function updateView() {
-            document.getElementById("siteEntity-detail").innerHTML = "基站编号：" + (detail.baseStationNumber || "") + " <br/>" + "站点名称：" + detail.name + " <br/>" + "站点状态：FSU " + (detail.fsuState ? "在线" : "离线") + " <br/>" + "告警数量：" + detail.alarmNum + " <br/>" + "经纬度：" + (detail.coordinate || "-") + " <br/>" + "站点地址：" + (detail.address || "-") + "";
-            document.getElementById("siteEntity-detail").setAttribute('style', "\n                  left: ".concat(isResized ? (e.pageX - 0) / 1.3 + 10 : e.offsetX + e.pageX, "px;\n                  top: ").concat(isResized ? (e.pageY - 56) / 1.3 + 10 : e.offsetY + e.pageY - document.getElementById("siteEntity-detail").offsetHeight, "px;\n                  display: ").concat(div.isHide ? 'none' : 'block', ";\n                "));
+            document.getElementById("site-detail").innerHTML = "基站编号：" + (detail.baseStationNumber || "") + " <br/>" + "站点名称：" + detail.name + " <br/>" + "站点状态：FSU " + (detail.fsuState ? "在线" : "离线") + " <br/>" + "告警数量：" + detail.alarmNum + " <br/>" + "经纬度：" + (detail.coordinate || "-") + " <br/>" + "站点地址：" + (detail.address || "-") + "";
+            document.getElementById("site-detail").setAttribute('style', "\n                  left: ".concat(isResized ? (e.pageX - 0) / 1.3 + 10 : e.offsetX + e.pageX, "px;\n                  top: ").concat(isResized ? (e.pageY - 56) / 1.3 + 10 : e.offsetY + e.pageY - document.getElementById("site-detail").offsetHeight, "px;\n                  display: ").concat(div.isHide ? 'none' : 'block', ";\n                "));
           }
 
           if (!_this.detail) {
@@ -227,10 +227,10 @@ var MAP = {
         });
         div.addEventListener("mouseleave", function () {
           div.isHide = true;
-          document.getElementById("siteEntity-detail").setAttribute('style', 'display:none;');
+          document.getElementById("site-detail").setAttribute('style', 'display:none;');
         }); // div.addEventListener("click", function() {
-        //   $scope.go("scene/siteEntity", {
-        //     siteIdList: [_this.siteEntity.siteEntity.strId],
+        //   $scope.go("scene/site", {
+        //     siteIdList: [_this.site.site.strId],
         //     tier: $scope.curTier
         //   });
         // });
@@ -261,7 +261,7 @@ var MAP = {
       return v.longitude && v.latitude && (option.alarm[0] || option.alarm[1] && v.level1 || option.alarm[2] && v.level2 || option.alarm[3] && v.level3 || option.alarm[4] && v.level4);
     }).forEach(function (v) {
       pt = new BMap.Point(v.longitude, v.latitude);
-      var mark = new Marker(pt, v.siteEntity.name, v.level1 && option.alarm[1] ? 1 : v.level2 && option.alarm[2] ? 2 : v.level3 && option.alarm[3] ? 3 : v.level4 && option.alarm[4] ? 4 : 0, v); // mark = new BMap.Marker(pt)
+      var mark = new Marker(pt, v.site.name, v.level1 && option.alarm[1] ? 1 : v.level2 && option.alarm[2] ? 2 : v.level3 && option.alarm[3] ? 3 : v.level4 && option.alarm[4] ? 4 : 0, v); // mark = new BMap.Marker(pt)
 
       mark._domElement = document.createElement("div");
       mark._domElement.className = "alarm-icon level3";
@@ -297,7 +297,7 @@ setTimeout(function () {
 
   <div class="alarm-map"></div>
   <div id="location"></div>
-  <div id="siteEntity-detail"></div>
+  <div id="site-detail"></div>
 
 </body>
 </html>
