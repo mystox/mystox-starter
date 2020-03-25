@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
 
@@ -44,4 +45,9 @@ public interface ReportsInterface {
 
     @OperaCode(description = "站点停电断站统计表")
     public JSONObject getStationBreakStatistic(String msg);
+
+
+    @OperaCode(description = "获取企业下启用的告警等级分类数据")
+    public List<EnterpriseLevel> getAlarmLevel(String body);
+
 }

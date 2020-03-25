@@ -41,4 +41,6 @@ public interface MqttCommonInterface {
     JSONObject getStationBreakStatistic(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
     JSONObject getStationElectricCountList(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<String> getAlarmLevel(JSONObject query);
 }

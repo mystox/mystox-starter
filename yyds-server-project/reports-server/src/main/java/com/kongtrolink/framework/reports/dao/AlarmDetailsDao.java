@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Calendar;
@@ -21,6 +22,7 @@ import java.util.List;
  * \* Description:
  * \
  */
+@Service
 public class AlarmDetailsDao extends MongoBaseDao {
 
 

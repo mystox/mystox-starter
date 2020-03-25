@@ -3,6 +3,7 @@ package com.kongtrolink.framework.reports.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.ReflectionUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.reports.entity.query.*;
@@ -225,6 +226,29 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
             logger.error("get station break statistic list error[mqtt]");
         }
         return null;
+    }
+
+    @Override
+    public List<String> getAlarmLevel(JSONObject query) {
+        MsgResult opera = mqttOpera.opera("getAlarmLevel",query.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            List<Level> ts = JSONObject.parseArray(opera.getMsg(), Level.class);
+            return ReflectionUtils.convertElementPropertyToList(ts, "levelName");
+        } else {
+            logger.error("get station break statistic list error[mqtt]");
+        }
+        return null;
+    }
+
+    private class Level{
+        private String levelName;
+        public String getLevelName() {
+            return levelName;
+        }
+        public void setLevelName(String levelName) {
+            this.levelName = levelName;
+        }
     }
 
     @Override

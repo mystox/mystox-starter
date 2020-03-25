@@ -3,8 +3,11 @@ package com.kongtrolink.framework.mqtt.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.dao.AlarmReduceDao;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.mqtt.ReportsInterface;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.kongtrolink.framework.query.EnterpriseLevelQuery;
+import com.kongtrolink.framework.service.EnterpriseLevelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,8 @@ public class ReportsInterfaceImpl implements ReportsInterface {
     @Autowired
     AlarmDao alarmDao;
 
+    @Autowired
+    EnterpriseLevelService enterpriseLevelService;
 
     @Override
     public List<JSONObject> getAlarmCountByDeviceIdList(String msg) {
@@ -88,6 +93,13 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
         alarmQuery.setName("一级低压脱离告警");
         return alarmReduceDao.stationBreakStatistic(alarmQuery);
+    }
+
+    @Override
+    public List<EnterpriseLevel> getAlarmLevel(String body) {
+        EnterpriseLevelQuery enterpriseLevelQuery = JSONObject.parseObject(body, EnterpriseLevelQuery.class);
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        return lastUse;
     }
 
 

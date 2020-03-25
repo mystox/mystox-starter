@@ -30,11 +30,6 @@ import java.util.List;
 public class AlarmCategoryTempDao extends MongoBaseDao {
 
 
-    public List<JSONObject> getCategoryDataByCondition(String taskId, List<JSONObject> siteList, String alarmLevel, String statisticLevel, String period, JSONObject timePeriod) {
-
-        return null;
-//        mongoTemplate.aggregate()
-    }
 
     public void save(List<AlarmCategoryTemp> alarmCategoryTemps, String taskId) {
         mongoTemplate.insert(alarmCategoryTemps,MongoDocName.REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT+taskId);

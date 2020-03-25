@@ -114,7 +114,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             year -= 1;
         } else month -= 1;
 
-
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);

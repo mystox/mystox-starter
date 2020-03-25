@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
  * \* Description:
  * \
  */
+@Service
 public class FsuRunStateDao extends MongoBaseDao {
 
     public void save(List<FsuRunStateTemp> fsuRunStateTemps, String taskId) {
