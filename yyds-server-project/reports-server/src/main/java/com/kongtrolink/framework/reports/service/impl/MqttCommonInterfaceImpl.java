@@ -66,7 +66,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         MsgResult opera = mqttOpera.opera("getRegionCodeEntity", JSON.toJSONString(new String[]{address}));
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
-            List<JSONObject> jsonArray = JSONObject.parseArray(opera.getMsg(),JSONObject.class);
+            List<JSONObject> jsonArray = JSONObject.parseArray(opera.getMsg(), JSONObject.class);
             JSONObject jsonObject = jsonArray.get(0);
             String name = jsonObject.getString("name");
             return name;
@@ -98,7 +98,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", deviceIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getAlarmCategoryByDeviceIdList", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getAlarmCategoryByDeviceIdList", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         String alarmCategoryListMsg = opera.getMsg();
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
@@ -111,9 +111,9 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
     }
 
     /**
+     * @return java.util.List<com.alibaba.fastjson.JSONObject>
      * @Date 15:04 2020/3/18
      * @Param No such property: code for class: Script1
-     * @return java.util.List<com.alibaba.fastjson.JSONObject>
      * @Author mystox
      * @Description //fsu离线告警统计表
      **/
@@ -124,7 +124,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", fsuIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getFsuOfflineStatistic", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getFsuOfflineStatistic", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseObject(opera.getMsg());
@@ -135,9 +135,9 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
     }
 
     /**
+     * @return com.alibaba.fastjson.JSONObject
      * @Date 15:46 2020/3/19
      * @Param No such property: code for class: Script1
-     * @return com.alibaba.fastjson.JSONObject
      * @Author mystox
      * @Description //fsu离线明细表
      **/
@@ -148,7 +148,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", fsuIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getFsuOfflineDetails", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getFsuOfflineDetails", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
@@ -165,7 +165,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCondition.put("deviceIds", deviceIds);
         alarmCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("stationOffStatistic", alarmCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("stationOffStatistic", alarmCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseObject(opera.getMsg());
@@ -183,7 +183,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", fsuIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getStationOffDetails", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getStationOffDetails", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
@@ -200,7 +200,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         countCondition.put("deviceIds", fsuIds);
         countCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         countCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getStationBreakStatistic", countCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getStationBreakStatistic", countCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseObject(opera.getMsg(), JSONObject.class);
@@ -217,7 +217,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         countCondition.put("deviceIds", fsuIds);
         countCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         countCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("stationElectricCountList", countCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("stationElectricCountList", countCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseObject(opera.getMsg(), JSONObject.class);
@@ -247,7 +247,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, baseCondition.getString("enterpriseCode")));
         String deviceType = baseCondition.getString("deviceType");
         if (StringUtils.isNotBlank(deviceType))
-        basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT,deviceType));
+            basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceType));
         BasicParentQuery basicParentQuery = new BasicParentQuery();
         basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, fsuIds));
         basicDeviceQuery.set_parent(basicParentQuery);
@@ -278,7 +278,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", deviceIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getAlarmCountByDeviceIdList", alarmCountCondition.toJSONString(),2,3600L*2, TimeUnit.SECONDS);
+        MsgResult opera = mqttOpera.opera("getAlarmCountByDeviceIdList", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
         String alarmCountListMsg = opera.getMsg();
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {

@@ -439,6 +439,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         WorkbookUtil.save("." + path, filename, workBook);
         return path + "/" + filename;
     }
+
     /////////////////////////////         市电停电断站统计表         /////////////////////////////////////
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "stationOffStatistic", rhythm = 20, dataType = {DataType.JSON}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
@@ -493,48 +494,48 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         if (!CollectionUtils.isEmpty(siteList)) {
             int finalMonth = month;
             int finalYear = year;
-        siteList.forEach(s -> {
-            // 获取站点名称
-            String address = s.getAddress();
-            String addressName = mqttCommonInterface.getRegionName(address);
-            List<String> addressArr = JSONArray.parseArray(addressName, String.class);
-            String province = addressArr.get(0); //省
-            String municipality = addressArr.get(1); //市
-            String county = addressArr.get(2); //县|区
-            // 获取站点下所有fsu及其相关告警数据
-            String stationId = s.getSiteId();
-            String stationName = s.getSiteName();
-            String siteType = s.getSiteType();
+            siteList.forEach(s -> {
+                // 获取站点名称
+                String address = s.getAddress();
+                String addressName = mqttCommonInterface.getRegionName(address);
+                List<String> addressArr = JSONArray.parseArray(addressName, String.class);
+                String province = addressArr.get(0); //省
+                String municipality = addressArr.get(1); //市
+                String county = addressArr.get(2); //县|区
+                // 获取站点下所有fsu及其相关告警数据
+                String stationId = s.getSiteId();
+                String stationName = s.getSiteName();
+                String siteType = s.getSiteType();
 
-            List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-            //判断交维态
-            if (fsuList == null) {
-                logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
-                return;
-            }
-            //获取该站的断站统计信息
-            FsuEntity fsuEntity = fsuList.get(0);
-            String manufacturer = fsuEntity.getManufacturer();
-            String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
-            List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
-            // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
-            logger.debug("statistic station off ByDeviceIds, site reportTaskId is [{}]", stationId);
-            JSONObject jsonObjects = mqttCommonInterface.getStationBreakStatistic(fsuIds, finalYear, finalMonth, baseCondition);
+                List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
+                //判断交维态
+                if (fsuList == null) {
+                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    return;
+                }
+                //获取该站的断站统计信息
+                FsuEntity fsuEntity = fsuList.get(0);
+                String manufacturer = fsuEntity.getManufacturer();
+                String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
+                List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
+                logger.debug("statistic station off ByDeviceIds, site reportTaskId is [{}]", stationId);
+                JSONObject jsonObjects = mqttCommonInterface.getStationBreakStatistic(fsuIds, finalYear, finalMonth, baseCondition);
 
-            StationBreakTemp stationBreakTemp = new StationBreakTemp();
-            stationBreakTemp.setYear(finalYear);
-            stationBreakTemp.setMonth(finalMonth);
-            stationBreakTemp.setMunicipality(municipality);
-            stationBreakTemp.setProvince(province);
-            stationBreakTemp.setCounty(county);
-            stationBreakTemp.setStationId(stationId);
-            stationBreakTemp.setStationName(stationName);
-            stationBreakTemp.setStationType(siteType);
-            stationBreakTemp.setOperationState(operationState);
-            stationBreakTemp.setFsuManufactory(manufacturer);
-            stationBreakTemp.setAvgMonth(jsonObjects.getDouble("durationSum"));
-            stationBreakTemps.add(stationBreakTemp);
-        });
+                StationBreakTemp stationBreakTemp = new StationBreakTemp();
+                stationBreakTemp.setYear(finalYear);
+                stationBreakTemp.setMonth(finalMonth);
+                stationBreakTemp.setMunicipality(municipality);
+                stationBreakTemp.setProvince(province);
+                stationBreakTemp.setCounty(county);
+                stationBreakTemp.setStationId(stationId);
+                stationBreakTemp.setStationName(stationName);
+                stationBreakTemp.setStationType(siteType);
+                stationBreakTemp.setOperationState(operationState);
+                stationBreakTemp.setFsuManufactory(manufacturer);
+                stationBreakTemp.setAvgMonth(jsonObjects.getDouble("durationSum"));
+                stationBreakTemps.add(stationBreakTemp);
+            });
         } else {
             logger.error("返回站点结果为空");
         }
@@ -593,7 +594,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
 
         int colLength = tableHead.length; // 列
         int rowLength = stationBreakResult.size() + 1; //行
-        String[][] sheetData = new String[colLength][rowLength];
+        String[][] sheetData = new String[rowLength + 4][colLength];
 
         for (int i = 0; i < rowLength; i++) {
             String[] row = sheetData[i];
@@ -613,6 +614,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         }
         return new String[][][]{sheetData};
     }
+
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "stationOffStatistic", rhythm = 20, dataType = {DataType.JSON}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList"), //站点列表
@@ -694,6 +696,14 @@ public class SystemReportsServiceImpl implements SystemReportsService {
                 electricCountTemp.setStationType(siteType);
                 electricCountTemp.setOperationState(operationState);
                 electricCountTemp.setFsuManufactory(manufacturer);
+                electricCountTemp.setStartTime(DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
+                electricCountTemp.setEndTime(DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
+                electricCountTemp.setsMobileElecCount(jsonObjects.getDouble("sMobileElecCount"));
+                electricCountTemp.setsUnicomElecCount(jsonObjects.getDouble("sUnicomElecCount"));
+                electricCountTemp.setsTelecomElecCount(jsonObjects.getDouble("sTelecomElecCount"));
+                electricCountTemp.seteMobileElecCount(jsonObjects.getDouble("eMobileElecCount"));
+                electricCountTemp.seteUnicomElecCount(jsonObjects.getDouble("eUnicomElecCount"));
+                electricCountTemp.seteTelecomElecCount(jsonObjects.getDouble("eTelecomElecCount"));
                 electricCountTemps.add(electricCountTemp);
             });
         } else {
@@ -712,34 +722,40 @@ public class SystemReportsServiceImpl implements SystemReportsService {
     }
 
     private ReportData electricCountQuery(ReportConfig reportConfig, ReportTask reportTask) {
+
         JSONObject condition = reportConfig.getCondition();//获取查询条件
-
-        JSONArray regionArr = condition.getJSONArray("region");
-        String stationType = condition.getString("stationType");
-        String fsuManufactory = condition.getString("fsuManufactory");
-
-
-        //根据用户id的区域权限及其搜索条件获取站点列表筛选
-        JSONArray stationList = condition.getJSONArray("stationList");
-
+        String taskId = reportTask.getId();
+        String statisticLevel = condition.getString("statisticLevel");
+        JSONObject currentUser = condition.getJSONObject("currentUser");
+        if (currentUser == null) currentUser = new JSONObject();
         String period = condition.getString("period");
-        JSONObject timePeriod = condition.getJSONObject("timePeriod");
+        TimePeriod timePeriod = condition.getObject("timePeriod", TimePeriod.class);
+        if (timePeriod == null) {
+            timePeriod = new TimePeriod();
+            timePeriod.setEndTime(new Date(System.currentTimeMillis()));
+            timePeriod.setStartTime(DateUtil.getInstance().getFirstDayOfMonth());
+        }
 
-
-        List<JSONObject> electricCountResult = electricCountTempDao.getElectricCountByCondition(reportTask.getId(), regionArr.toJavaList(JSONObject.class), period, timePeriod);
-        String[][][] resultData = electricCountDataCreate(electricCountResult);
+        List<JSONObject> electricCountResult = electricCountTempDao.getElectricCountByCondition(taskId, condition, timePeriod);
+        String[][][] resultData = electricCountDataCreate(electricCountResult,timePeriod);
         //统计告警量
         String resultType = reportConfig.getDataType();
         if (!DataType.FILE.equals(resultType)) {
-            ReportData reportData = new ReportData(DataType.FORM, JSONObject.toJSONString(resultData));
+            JsonData jsonData = new JsonData();
+            jsonData.setName("用电量统计报表");
+            List<String[]> dataArr = Arrays.asList(resultData[0]);
+            dataArr = new ArrayList<>(dataArr);
+            dataArr.remove(0);
+            jsonData.setData(dataArr.toArray(new String[dataArr.size()][]));
+            jsonData.setUnit("");
+            jsonData.setxAxis(resultData[0][0]);
+            ReportData reportData = new ReportData(DataType.TABLE, JSONObject.toJSONString(jsonData));
             return reportData;
         }
-        JSONObject currentUser = condition.getJSONObject("currentUser");
-        if (currentUser == null) currentUser = new JSONObject();
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:" + period};
-        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getString("startTime") + "-" + timePeriod.getString("endTime")};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = electricCountExcelCreate("用电量统计报表", resultData);
         ReportData reportData = new ReportData(DataType.FORM, excelUri);
@@ -788,13 +804,13 @@ public class SystemReportsServiceImpl implements SystemReportsService {
 
     }
 
-    private String[][][] electricCountDataCreate(List<JSONObject> electricCountResult) {
+    private String[][][] electricCountDataCreate(List<JSONObject> electricCountResult, TimePeriod timePeriod) {
         String[] tableHead1 = new String[]{"站点层级", "站点名称", "站点类型", "开始时间", "结束时间", "移动租户电量(KW·h)", "联通租户电量(KW·h)", "电信租户电量(KW·h)"};
         String[] tableHead2 = new String[]{"站点层级", "站点名称", "站点类型", "开始时间", "结束时间", "开始电量", "结束电量", "用电量", "开始电量", "结束电量", "用电量", "开始电量", "结束电量", "用电量"};
 
         int colLength = tableHead2.length; // 列
         int rowLength = electricCountResult.size() + 1; //行
-        String[][] sheetData = new String[colLength][rowLength];
+        String[][] sheetData = new String[rowLength + 4][colLength];
 
         for (int i = 0; i < rowLength; i++) {
             String[] row = sheetData[i];
@@ -802,22 +818,39 @@ public class SystemReportsServiceImpl implements SystemReportsService {
                 sheetData[i] = tableHead1;
                 continue;
             }
+            if (i == 1) {
+                sheetData[i] = tableHead2;
+                continue;
+            }
             JSONObject jsonObject = electricCountResult.get(i - 1);
-            row[0] = jsonObject.getString("");
+            row[0] = CommonCheck.aggregateTierName(jsonObject);
             int a = 0;
-            row[1 + a] = jsonObject.getString("");
-            row[2 + a] = jsonObject.getString("");
-            row[3 + a] = jsonObject.getString("");
-            row[4 + a] = jsonObject.getString("");
-            row[5 + a] = jsonObject.getString("");
-            row[6 + a] = jsonObject.getString("");
-            row[7 + a] = jsonObject.getString("");
-            row[8 + a] = jsonObject.getString("");
-            row[9 + a] = jsonObject.getString("");
-            row[10 + a] = jsonObject.getString("");
-            row[11 + a] = jsonObject.getString("");
-            row[12 + a] = jsonObject.getString("");
-            row[13 + a] = jsonObject.getString("");
+            row[1 + a] = jsonObject.getString("stationName");
+            row[2 + a] = jsonObject.getString("stationType");
+            row[3 + a] = timePeriod.getStartTimeStr();
+            row[4 + a] = timePeriod.getEndTimeStr();
+            Double sMobileElecCount = jsonObject.getDouble("sMobileElecCount");
+            Double eMobileElecCount = jsonObject.getDouble("eMobileElecCount");
+
+            if (sMobileElecCount != null) row[5 + a] = String.valueOf(sMobileElecCount);
+            if (eMobileElecCount != null) row[6 + a] = String.valueOf(eMobileElecCount);
+            if (sMobileElecCount != null && eMobileElecCount != null)
+                row[7 + a] = String.valueOf(eMobileElecCount - sMobileElecCount);
+
+
+            Double sUnicomElecCount = jsonObject.getDouble("sUnicomElecCount");
+            Double eUnicomElecCount = jsonObject.getDouble("eUnicomElecCount");
+            if (sUnicomElecCount != null) row[8 + a] = String.valueOf(sUnicomElecCount);
+            if (eUnicomElecCount != null) row[9 + a] = String.valueOf(eUnicomElecCount);
+            if (sUnicomElecCount != null && eUnicomElecCount != null)
+                row[10 + a] = String.valueOf(sUnicomElecCount - eUnicomElecCount);
+
+            Double sTelecomElecCount = jsonObject.getDouble("sTelecomElecCount");
+            Double eTelecomElecCount = jsonObject.getDouble("eTelecomElecCount");
+            if (sTelecomElecCount != null) row[11 + a] = String.valueOf(eTelecomElecCount);
+            if (eTelecomElecCount != null) row[12 + a] = String.valueOf(eTelecomElecCount);
+            if (sTelecomElecCount != null && eTelecomElecCount != null)
+                row[13 + a] = String.valueOf(sTelecomElecCount - eTelecomElecCount);
         }
         return new String[][][]{sheetData};
     }
