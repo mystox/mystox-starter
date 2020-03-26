@@ -428,7 +428,13 @@ public class ReportsHandler implements ApplicationRunner {
             String reportTaskId = reportTask.getId();
             long currentTimeMillis = System.currentTimeMillis();
             long timeout3 = rhythm * 1000 * 3;
-//            if (currentTimeMillis - serverStartTimeStamp < timeout3) continue; //如果服务启动时间还未超过任务执行周期
+            //服务启动时处理被中断的任务
+            if (serverStartTimeStamp > startTime.getTime() && serverStartTimeStamp - startTime.getTime() > rhythm * 1000) {
+                reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
+                Date newStartTime = new Date(setNextStartTime(currentTimeMillis, startTime.getTime(), rhythm));
+                reportTask.setStartTime(newStartTime);
+                logger.warn("[{}]check running task restart...startTime is [{}]", reportTaskId,newStartTime);
+            }
             if (currentTimeMillis - startTime.getTime() > timeout3) { //如果任务三个周期内未改变运行状态，则该任务超时失效
                 logger.warn("[{}]check running task timeout 3 multiple rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
@@ -436,12 +442,7 @@ public class ReportsHandler implements ApplicationRunner {
                 logger.warn("[{}]check running task timeout 1 multiple rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
                 reportTask.setStartTime(new Date());
-            }*/ else if (serverStartTimeStamp > startTime.getTime() && serverStartTimeStamp - startTime.getTime() > rhythm * 1000) {
-                reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
-                Date newStartTime = new Date(setNextStartTime(currentTimeMillis, startTime.getTime(), rhythm));
-                reportTask.setStartTime(newStartTime);
-                logger.warn("[{}]check running task restart...startTime is [{}]", reportTaskId,newStartTime);
-            }
+            }*/
 
             reportTaskDao.save(reportTask);
 
