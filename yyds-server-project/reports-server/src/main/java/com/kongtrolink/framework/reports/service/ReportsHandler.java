@@ -184,7 +184,7 @@ public class ReportsHandler implements ApplicationRunner {
     }
 
 
-    private void resultSave(ReportTask reportTask, ReportData reportData) {
+    private synchronized void resultSave(ReportTask reportTask, ReportData reportData) {
         Date recordTime = new Date();
         reportTask.setEndTime(recordTime);
         Date startTime = reportTask.getStartTime();
@@ -193,6 +193,11 @@ public class ReportsHandler implements ApplicationRunner {
                 reportTask.getOperaCode(), preconditionServerCode(serverName, serverVersion));
         String reportTaskId = reportTask.getId();
         int taskStatus = task.getTaskStatus();
+        Date currentStartTime = task.getStartTime();
+        if (!currentStartTime.equals(startTime)) {
+            logger.warn("[{}]current task startTime[{}] was changed [{}], this task has been executed...", reportTaskId, startTime, currentStartTime);
+            return;
+        }
         if (TaskStatus.INVALID.getStatus() == taskStatus) {
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
             logger.warn("[{}]task use to be invalid...", reportTaskId);
@@ -206,7 +211,9 @@ public class ReportsHandler implements ApplicationRunner {
                 reportTask.setStartTime(reportData.getNextStartTime());
             else {
                 //如果下一次执行时间为空，则设置节拍周期为下一次开始时间
-                reportTask.setStartTime(new Date(System.currentTimeMillis() + (rhythm == 0 ? 1 : rhythm) * 1000));
+//                reportTask.setStartTime(new Date(System.currentTimeMillis() + (rhythm == 0 ? 1 : rhythm) * 1000));
+//                reportTask.setStartTime(new Date(startTime.getTime() + (rhythm == 0 ? 1 : rhythm) * 1000));
+                reportTask.setStartTime(new Date(setNextStartTime(System.currentTimeMillis(),startTime.getTime(), rhythm)));
             }
             logger.debug("[{}]next task start time is [{}]", reportTaskId, reportTask.getStartTime());
         } else {//如果结果为空或者结果类型为ERROR，说明任务执行失败，则以定时器三倍执行周期都为错误为超时
@@ -220,7 +227,7 @@ public class ReportsHandler implements ApplicationRunner {
         }
         if (TaskType.singleTask.name().equals(reportTask.getTaskType())) //如果为单次任务，则在任务完成后设置任务为无效
         {
-            logger.warn("[{}]task is singleTask, set [invalid] when task ending...", reportTaskId);
+            logger.warn("[{}]task type is singleTask, set [invalid] when task ending...", reportTaskId);
             reportTask.setTaskStatus(TaskStatus.INVALID.getStatus());
         }
 
@@ -244,7 +251,7 @@ public class ReportsHandler implements ApplicationRunner {
         Boolean validity = reportConfig.getValidity();
         Long startTime = reportConfig.getStartTime();
         startTime = startTime == null ? System.currentTimeMillis() :
-                (startTime<System.currentTimeMillis()?System.currentTimeMillis():startTime);//如果配置的生效时间早于当前时间，则设置当前时间
+                (startTime < System.currentTimeMillis() ? System.currentTimeMillis() : startTime);//如果配置的生效时间早于当前时间，则设置当前时间
         boolean isTaskExists = reportTaskDao.isExistsByOperaCode(serverCode, enterpriseCode, operaCode, preconditionServerCode(serverName, serverVersion));
         if (!isTaskExists) {
             //生成任务
@@ -381,15 +388,13 @@ public class ReportsHandler implements ApplicationRunner {
                 reportsExecutor.execute(futureTask);
                 result = futureTask.get(rhythm * 3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                result = new ReportData("error", "execute invalidity" + e.toString());
+                result = new ReportData(DataType.ERROR, "execute invalidity" + e.toString());
                 e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (ExecutionException | TimeoutException e) {
                 e.printStackTrace();
-                result = new ReportData("error", "execute invalidity" + e.toString());
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-                result = new ReportData("error", "execute invalidity" + e.toString());
+                result = new ReportData(DataType.ERROR, "execute invalidity" + e.toString());
             }
+            //保存执行结果
             resultSave(reportTask, result);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -404,6 +409,7 @@ public class ReportsHandler implements ApplicationRunner {
         for (int i = 0; i < 9; i++)
             reportsScheduled.scheduleWithFixedDelay(this::task
                     , 1, 1, TimeUnit.SECONDS);
+
         //启动任务扫描器
         final Long serverStartTimeStamp = System.currentTimeMillis();
         reportsScheduled.scheduleWithFixedDelay(() -> checkRunning(serverStartTimeStamp)
@@ -423,18 +429,29 @@ public class ReportsHandler implements ApplicationRunner {
             long currentTimeMillis = System.currentTimeMillis();
             long timeout3 = rhythm * 1000 * 3;
 //            if (currentTimeMillis - serverStartTimeStamp < timeout3) continue; //如果服务启动时间还未超过任务执行周期
-            if (currentTimeMillis - startTime.getTime() > timeout3) { //如果任务三个周期内为改变运行状态，则该任务超时失效
-                logger.warn("[{}]task timeout 3 rhythm[{}]", reportTaskId, rhythm);
+            if (currentTimeMillis - startTime.getTime() > timeout3) { //如果任务三个周期内未改变运行状态，则该任务超时失效
+                logger.warn("[{}]check running task timeout 3 multiple rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.TIMEOUT.getStatus());
-            } else if (currentTimeMillis - startTime.getTime() > rhythm * 1000) { //如果任务一个周期内，未改变任务状态，则该任务为一个周期超时，将任务状态置为有效，但不改变任务开始时间
-                logger.warn("[{}]task timeout 1 rhythm[{}]", reportTaskId, rhythm);
+            }/* else if (currentTimeMillis - startTime.getTime() > rhythm * 1000) { //如果任务一个周期外，未改变任务状态，则该任务为一个周期超时，将任务状态置为有效，但不改变任务开始时间, 此举是为解决服务重启带来的任务中断的超时问题
+                logger.warn("[{}]check running task timeout 1 multiple rhythm[{}]", reportTaskId, rhythm);
                 reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
                 reportTask.setStartTime(new Date());
+            }*/ else if (serverStartTimeStamp > startTime.getTime() && serverStartTimeStamp - startTime.getTime() > rhythm * 1000) {
+                reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
+                Date newStartTime = new Date(setNextStartTime(currentTimeMillis, startTime.getTime(), rhythm));
+                reportTask.setStartTime(newStartTime);
+                logger.warn("[{}]check running task restart...startTime is [{}]", reportTaskId,newStartTime);
             }
+
             reportTaskDao.save(reportTask);
 
         }
 
 
+    }
+
+    long setNextStartTime(long currentTimeMillis, long startTime, int rhythm) {
+        if (startTime > currentTimeMillis) return startTime; //获取服务启动时间的前一个节拍周期
+        return setNextStartTime(currentTimeMillis, startTime + (rhythm == 0 ? 1 : rhythm) *1000, rhythm);
     }
 }
