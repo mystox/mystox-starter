@@ -91,6 +91,36 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         }
         return null;
     }
+    @Override
+    public List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        MsgResult opera = mqttOpera.opera("getCurrentAlarmsByDeviceIdList", baseCondition.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
+        } else {
+            logger.error("get alarm details list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public List<JSONObject> getAlarmCurrentCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        MsgResult opera = mqttOpera.opera("getAlarmCurrentCategoryByDeviceIdList", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        String alarmCategoryListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(alarmCategoryListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
+    }
 
     @Override
     public List<JSONObject> getAlarmCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
@@ -233,7 +263,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         MsgResult opera = mqttOpera.opera("getAlarmLevel",query.toJSONString());
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
-            List<Level> ts = JSONObject.parseArray(opera.getMsg(), Level.class);
+            List<Level> ts = JSON.parseArray(opera.getMsg(), Level.class);
             return ReflectionUtils.convertElementPropertyToList(ts, "levelName");
         } else {
             logger.error("get station break statistic list error[mqtt]");
@@ -241,15 +271,21 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         return null;
     }
 
-    private class Level{
-        private String levelName;
-        public String getLevelName() {
-            return levelName;
+    @Override
+    public Integer getAlarmCycle(JSONObject baseCondition) {
+        MsgResult opera = mqttOpera.opera("getAlarmCycle",baseCondition.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            JSONObject jsonObject = JSON.parseObject(opera.getMsg());
+            Integer diffTime = jsonObject.getInteger("diffTime");
+            return diffTime;
+        } else {
+            logger.error("get station break statistic list error[mqtt]");
         }
-        public void setLevelName(String levelName) {
-            this.levelName = levelName;
-        }
+        return null;
+
     }
+
 
     @Override
     public List<FsuEntity> getFsuList(String stationId, JSONObject baseCondition) {

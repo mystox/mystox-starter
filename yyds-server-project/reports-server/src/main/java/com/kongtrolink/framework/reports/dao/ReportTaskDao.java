@@ -121,7 +121,7 @@ public class ReportTaskDao extends MongoBaseDao {
     }
 
     public ReportTask findExecuteReportTask(String reportServerCode) {
-        return mongoTemplate.findAndModify(Query.query(Criteria.where("taskStatus").is(1)
+        return mongoTemplate.findAndModify(Query.query(Criteria.where("taskStatus").is(TaskStatus.VALID.getStatus())
                         .and("reportServerCode").is(reportServerCode)
 //                        .and("taskType").is(TaskType.schecduled)
                         .and("startTime").lte(new Date())
@@ -150,7 +150,7 @@ public class ReportTaskDao extends MongoBaseDao {
 
     public List<ReportTask> findRunningReportTask(String reportServerCode) {
         return mongoTemplate.find(Query.query(
-                Criteria.where("taskStatus").is(2)
+                Criteria.where("taskStatus").is(TaskStatus.RUNNING.getStatus())
                         .and("reportServerCode").is(reportServerCode)
         ), ReportTask.class, MongoDocName.REPORT_TASK);
     }

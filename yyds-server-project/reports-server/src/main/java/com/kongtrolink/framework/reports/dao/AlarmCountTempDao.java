@@ -89,7 +89,6 @@ public class AlarmCountTempDao extends MongoBaseDao {
 
     public void updateDelete(int year, int month, String taskId) {
         Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
-
         Update update = Update.update("deleteFlag", true);
         mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId);
     }

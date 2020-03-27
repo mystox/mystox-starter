@@ -44,6 +44,7 @@ import java.util.*;
 @Service
 public class SystemReportsServiceImpl implements SystemReportsService {
     Logger logger = LoggerFactory.getLogger(SystemReportsServiceImpl.class);
+
     @Autowired
     MqttOpera mqttOpera;
 
@@ -95,10 +96,10 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
 
-        if (month == 1) {
+        /*if (month == 1) {
             month = 12;
             year -= 1;
-        } else month -= 1;
+        } else month -= 1;*/
 
 
         JSONObject baseCondition = new JSONObject();
@@ -294,10 +295,10 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
 
-        if (month == 1) {
+        /*if (month == 1) {
             month = 12;
             year -= 1;
-        } else month -= 1;
+        } else month -= 1;*/
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
@@ -480,10 +481,10 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
 
-        if (month == 1) {
+        /*if (month == 1) {
             month = 12;
             year -= 1;
-        } else month -= 1;
+        } else month -= 1;*/
 
         List<StationBreakTemp> stationBreakTemps = new ArrayList<>();
         JSONObject baseCondition = new JSONObject();
@@ -644,11 +645,13 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         List<StationOffDetailsTemp> stationOffDetailsTemps = new ArrayList<StationOffDetailsTemp>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
+/*
 
         if (month == 1) {
             month = 12;
             year -= 1;
         } else month -= 1;
+*/
 
         List<ElectricCountTemp> electricCountTemps = new ArrayList<>();
         JSONObject baseCondition = new JSONObject();

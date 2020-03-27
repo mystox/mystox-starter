@@ -168,7 +168,13 @@ public class AlarmReduceDao {
         logger.info("get alarm history count is [{}]", alarmHistory.size());
         return alarmHistory;
     }
-
+    public List<JSONObject> getAlarmCurrent(AlarmQuery alarmQuery) {
+        String table = "alarm_current";
+        Criteria criteria = new Criteria();
+        criteria = commonQuery(criteria, alarmQuery);
+        List<JSONObject> jsonObjects = mongoTemplate.find(Query.query(criteria), JSONObject.class, table);
+        return jsonObjects;
+    }
     public List<JSONObject> getAlarmCategory(AlarmQuery alarmQuery) {
         String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
                 + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
@@ -244,6 +250,98 @@ public class AlarmReduceDao {
             }
 
         }
+        resultMap.forEach((alarmLevel, deviceMap) -> {
+            JSONObject entity = new JSONObject();
+            entity.put("alarmLevel", alarmLevel);
+            entity.put("alarmCount", deviceMap.getLong("sum"));
+            entity.put("fsuOffline", deviceMap.get("fsuOfflineCount")); // fsu离线告警
+            Long smokeSensation = deviceMap.getLong("烟感");
+            entity.put("smokeSensation", smokeSensation);
+            Long sensirion = deviceMap.getLong("温湿度");
+            entity.put("sensirion", sensirion);
+            Long switchPower = deviceMap.getLong("开关电源");
+            entity.put("switchPower", switchPower);
+            Long battery = deviceMap.getLong("蓄电池");
+            entity.put("battery", battery);
+            Long infrared = deviceMap.getLong("红外设备");
+            entity.put("infrared", infrared);
+            Long gateMagnetism = deviceMap.getLong("门磁");
+            entity.put("gateMagnetism", gateMagnetism);
+            Long waterImmersion = deviceMap.getLong("水浸");
+            entity.put("waterImmersion", waterImmersion);
+            Long airConditioning = deviceMap.getLong("空调");
+            entity.put("airConditioning", airConditioning);
+            alarmCategoryList.add(entity);
+        });
+
+        logger.info("map reduce result:[{}]", JSONObject.toJSONString(alarmCategoryList));
+        return alarmCategoryList;
+
+    }
+    public List<JSONObject> getAlarmCurrentCategory(AlarmQuery alarmQuery) {
+        //从各个表获取数据
+        String keyName = "FSU离线告警";
+        String map = "function(){\n" +
+                "        var type = this.deviceInfos.type;\n" +
+                "        emit(this.targetLevelName,\n" +
+                "        {arr:[{deviceType:type,count:1}],name:this.name,fsuOfflineCount:1}\n" +
+                "        )}";
+        String reduce = "function (key,values){\n" +
+                "            var keyName = '" + keyName + "';\n" +
+                "            var ret = {arr:[]};\n" +
+                "            var deviceTypeMap = {};\n" +
+                "            var fsuOfflineCountTemp=0;\n" +
+                "            for(var i = 0; i<values.length;i++){\n" +
+                "                var ia = values[i];\n" +
+                "                for(var j in ia.arr){\n" +
+                "                    var deviceType = ia.arr[j].deviceType;\n" +
+                "                    var count = ia.arr[j].count;\n" +
+                "                    deviceType in deviceTypeMap?deviceTypeMap[deviceType] += count:deviceTypeMap[deviceType] = count;\n" +
+                "                    }\n" +
+                "                var name = ia.name;\n" +
+                "                var fsuOfflineCount = ia.fsuOfflineCount;\n" +
+                "                if(name == keyName) fsuOfflineCountTemp += fsuOfflineCount;\n" +
+                "                \n" +
+                "            }\n" +
+                "            ret['name'] = keyName;\n" +
+                "            ret['fsuOfflineCount'] = fsuOfflineCountTemp;\n" +
+                "            for(var d in deviceTypeMap){\n" +
+                "                var entity = {deviceType:d,count:deviceTypeMap[d]};\n" +
+                "                ret.arr.push(entity);\n" +
+                "            }\n" +
+                "//             if(key == '一级告警') {\n" +
+                "//             print(JSON.stringify(values));\n" +
+                "//             print('end------------- '+JSON.stringify(ret));\n" +
+                "            return ret;\n" +
+                "        }";
+        List<JSONObject> alarmCategoryList = new ArrayList<>();
+        Map<String, JSONObject> resultMap = new HashMap<>();
+            String table = "alarm_current";
+            Criteria criteria = new Criteria();
+            criteria = commonQuery(criteria, alarmQuery);
+            MapReduceResults<JSONObject> mapReduceResults = mongoTemplate.mapReduce(
+                    Query.query(criteria), table, map, reduce, JSONObject.class);
+            logger.debug("table:{}, reduceResult:[{}]", table, JSONObject.toJSONString(mapReduceResults.iterator()));
+            for (JSONObject result : mapReduceResults) {
+                String levelName = result.getString("_id");
+                JSONObject deviceMap = resultMap.get(levelName);
+                List<JSONObject> arr = result.getJSONArray("arr").toJavaList(JSONObject.class);
+                long sum = 0L;
+                for (JSONObject deviceCount : arr) {
+                    String deviceType = deviceCount.getString("deviceType");
+                    Long count = deviceCount.getLong("count");
+                    if (count == null) count = 0L;
+                    sum += count;
+                    Long countOld = deviceMap.getLong(deviceType);
+                    if (countOld != null) countOld += count;
+                    else countOld = count;
+                    deviceMap.put(deviceType, countOld);
+                }
+                Long sumOld = deviceMap.getLong("sum");
+                sumOld += sum;
+                deviceMap.put("sum", sumOld);
+            }
+
         resultMap.forEach((alarmLevel, deviceMap) -> {
             JSONObject entity = new JSONObject();
             entity.put("alarmLevel", alarmLevel);
@@ -422,6 +520,8 @@ public class AlarmReduceDao {
 
         return stationBreakStatistic;
     }
+
+
 
 
     class alarmCountEntity {

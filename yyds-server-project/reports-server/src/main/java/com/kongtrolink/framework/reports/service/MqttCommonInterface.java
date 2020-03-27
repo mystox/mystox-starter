@@ -43,4 +43,10 @@ public interface MqttCommonInterface {
     JSONObject getStationElectricCountList(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
     List<String> getAlarmLevel(JSONObject query);
+
+    Integer getAlarmCycle(JSONObject baseCondition);
+
+    List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getAlarmCurrentCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
 }

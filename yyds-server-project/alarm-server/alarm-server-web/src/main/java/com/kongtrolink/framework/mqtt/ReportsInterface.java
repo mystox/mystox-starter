@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.stereotype.OperaCode;
 import com.kongtrolink.framework.stereotype.Register;
@@ -20,12 +21,18 @@ public interface ReportsInterface {
     public List<JSONObject> getAlarmCountByDeviceIdList(String msg);
 
 
-    @OperaCode(description = "告警明细统计")
-    public List<JSONObject> getAlarmsByDeviceList(String msg);
+    @OperaCode(description = "历史告警明细统计")
+    public List<JSONObject> getAlarmsByDeviceIdList(String msg);
+
+  @OperaCode(description = "活动告警明细统计")
+    public List<JSONObject> getCurrentAlarmsByDeviceIdList(String msg);
 
 
     @OperaCode(description = "告警分类统计")
     public List<JSONObject> getAlarmCategoryByDeviceIdList(String msg);
+
+    @OperaCode(description = "活动告警分类统计")
+    public List<JSONObject> getAlarmCurrentCategoryByDeviceIdList(String msg);
 
 
     @OperaCode(description = "FSU离线告警统计")
@@ -49,5 +56,8 @@ public interface ReportsInterface {
 
     @OperaCode(description = "获取企业下启用的告警等级分类数据")
     public List<EnterpriseLevel> getAlarmLevel(String body);
+    @OperaCode(description = "获取企业下启用的告警等级分类数据")
+    public AlarmCycle getAlarmCycle(String body);
+
 
 }

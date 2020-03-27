@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,11 +35,14 @@ public class ReportsOperaController extends BaseController {
         query.put("enterpriseCode",uniqueCode);
         query.put("serverCode", currentServerCode);
         List<String> result = mqttCommonInterface.getAlarmLevel(query);
-        if (result != null)
-            return new JsonResult();
-        return new JsonResult(new ArrayList<>());
+        if (result != null) {
+            result.add(0, "全部");
+            return new JsonResult(result);
+        }
+        return new JsonResult(new String[]{"全部"});
 //        return new JsonResult(new String[]{"紧急告警","一级告警","二级告警","三级告警","四级告警"});
     }
+
 
 
 

@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -41,7 +42,9 @@ import java.util.*;
 public class AlarmReportsServiceImpl implements AlarmReportsService {
     private Logger logger = LoggerFactory.getLogger(AlarmReportsServiceImpl.class);
 
-//    @Autowired
+    @Value("${server.routeMark}")
+    private String routeMark;
+    //    @Autowired
 //    MqttOpera mqttOpera;
     @Autowired
     MqttCommonInterface mqttCommonInterface;
@@ -56,7 +59,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     ReportTaskDao reportTaskDao;
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24 * 30, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/region/getStationList", hide = true), //站点列表
@@ -77,9 +80,9 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 reportConfig.getServerCode(), reportConfig.getEnterpriseCode(), reportConfig.getOperaCode(), reportConfig.getReportServerCode());
         if (reportTask == null)
             return new ReportData(DataType.ERROR, "report task is not exists [" + JSONObject.toJSONString(reportTask) + "]");
-        if (ExecutorType.query.equals(executorType))
+        if (ExecutorType.query.equals(executorType)) {
             return AlarmCountQuery(reportConfig, reportTask);
-        else return alarmCountExecutor(reportConfig, reportTask);
+        } else return alarmCountExecutor(reportConfig, reportTask);
     }
 
     /**
@@ -108,15 +111,21 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         }*/
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-        if (month == 1) {
-            month = 12;
-            year -= 1;
-        } else month -= 1;
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
+        Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
+        if (alarmCycle != null) {
+            int cycleDay = alarmCycle / 24 + 1;
+            if (day <= cycleDay)  //每月前几天周期统计上月的历史数据
+                if (month == 1) {
+                    month = 12;
+                    year -= 1;
+                } else month -= 1;
+        }
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -217,7 +226,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         alarmCountList = alarmCountTempDao.getCountDataByCondition(taskId, condition, timePeriod);
         //统计告警量
 //        alarmCountList.add(new JSONObject());
-        if ( alarmCountList == null) alarmCountList = new ArrayList<>();
+        if (alarmCountList == null) alarmCountList = new ArrayList<>();
         String[][][] resultData = AlarmCountDataCreate(alarmCountList, statisticLevel);
         String resultType = reportConfig.getDataType();
         if (!DataType.FILE.equals(resultType)) {
@@ -235,7 +244,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:" + period};
-        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "至" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = AlarmCountExcelCreate("告警量统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
@@ -251,7 +260,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             tableHead = new String[]{"区域层级", "站点名称", "站点类型", "告警总数", "告警恢复数"};
 
         int colLength = tableHead.length; // 列
-        int rowLength = alarmCountList.size() + 1; //行数
+        int rowLength = alarmCountList.size() + 1; //行数 vc
         String[][] sheetData = new String[rowLength + 4][colLength];
 
         for (int i = 0; i < rowLength; i++) {
@@ -279,11 +288,11 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String path = "/reportsResources/report_alarmCount";
         String filename = "告警量统计表_" + currentTime;
         WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
-        return path + "/" + filename + ".xls";
+        return "/" + routeMark + path + "/" + filename + ".xls";
     }
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmDetails", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmDetails", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             //@ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/reportsOpera/getRegionCodeList"), //区域层级
@@ -318,14 +327,20 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         //获取时间信息
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
-        if (month == 1) {
-            month = 12;
-            year -= 1;
-        } else month -= 1;
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
+        Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
+        if (alarmCycle != null) {
+            int cycleDay = alarmCycle / 24 + 1;
+            if (day <= cycleDay)  //每月前两天统计上月的历史数据
+                if (month == 1) {
+                    month = 12;
+                    year -= 1;
+                } else month -= 1;
+        }
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -384,8 +399,99 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                     alarmDetailsTemp.setStartTime(treport);
                     Date trecover = entity.getDate("trecover");
                     alarmDetailsTemp.setRecoveryTime(trecover);
-                    Double duration = (double) (trecover.getTime() - treport.getTime()) / (1000 * 60);
-                    alarmDetailsTemp.setDuration(duration);//分钟
+                    if (trecover != null) {
+                        Double duration = (double) (trecover.getTime() - treport.getTime()) / (1000 * 60);
+                        alarmDetailsTemp.setDuration(duration);//分钟
+                    }
+                    alarmDetailsTempList.add(alarmDetailsTemp);
+                });
+            });
+        } else {
+            logger.error("返回站点结果为空");
+        }
+        String reportTaskId = reportTask.getId();
+        if (!CollectionUtils.isEmpty(alarmDetailsTempList)) {
+            alarmDetailsDao.updateDelete(year, month, reportTaskId);
+            alarmDetailsDao.save(alarmDetailsTempList, reportTaskId);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("executorTime", year + "-" + month);
+        jsonObject.put("executorResult", alarmDetailsTempList.size());
+        return new ReportData(DataType.TEXT, jsonObject.toJSONString());
+    }
+
+    private ReportData alarmDetailsExecutorCurrent(ReportConfig reportConfig, ReportTask reportTask) {
+        String serverCode = reportConfig.getServerCode();
+        String enterpriseCode = reportConfig.getEnterpriseCode();
+        List<AlarmDetailsTemp> alarmDetailsTempList = new ArrayList<AlarmDetailsTemp>();
+        //获取时间信息
+        int year = 0;
+        int month = 0;
+        JSONObject baseCondition = new JSONObject();
+        baseCondition.put("serverCode", serverCode);
+        baseCondition.put("enterpriseCode", enterpriseCode);
+        // 获取企业在该云平台下所有站点
+        List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
+        if (!CollectionUtils.isEmpty(siteList)) {
+            int finalMonth = month;
+            int finalYear = year;
+            siteList.forEach(s -> {
+                // 获取站点名称
+                String address = s.getAddress();
+                String addressName = mqttCommonInterface.getRegionName(address);
+                List<String> addressArr = JSONArray.parseArray(addressName, String.class);
+                String province = addressArr.get(0); //省
+                String municipality = addressArr.get(1); //市
+                String county = addressArr.get(2); //县|区
+                // 获取站点下所有fsu及其相关告警数据
+                String stationId = s.getSiteId();
+                String stationName = s.getSiteName();
+                String siteType = s.getSiteType();
+                List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
+                //判断交维态
+                if (fsuList == null) {
+                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    return;
+                }
+                FsuEntity fsuEntity = fsuList.get(0);
+                String manufacturer = fsuEntity.getManufacturer();
+                String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
+                List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
+                List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                deviceIds.addAll(fsuIds);
+                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
+                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
+               /* / Test
+                List<String> deviceIds = new ArrayList<>();
+                String operationState = "交维态";
+                deviceIds.add("10010_1021006");
+                deviceIds.add("10010_1021015");
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
+                List<JSONObject> jsonObjects = mqttCommonInterface.getAlarmCurrentDetails(deviceIds, finalYear, finalMonth, baseCondition);
+                jsonObjects.forEach(entity -> {
+                    //填充站点告警统计信息
+                    AlarmDetailsTemp alarmDetailsTemp = new AlarmDetailsTemp();
+                    alarmDetailsTemp.setYear(finalYear);
+                    alarmDetailsTemp.setMonth(finalMonth);
+                    alarmDetailsTemp.setAlarmLevel(entity.getString("targetLevelName"));
+                    alarmDetailsTemp.setStationId(stationId);
+                    alarmDetailsTemp.setStationName(stationName);
+                    alarmDetailsTemp.setStationType(siteType);
+                    alarmDetailsTemp.setOperationState(operationState);
+                    alarmDetailsTemp.setProvince(province);
+                    alarmDetailsTemp.setMunicipality(municipality);
+                    alarmDetailsTemp.setCounty(county);
+                    alarmDetailsTemp.setFsuManufactory(manufacturer);
+                    alarmDetailsTemp.setAlarmName(entity.getString("name"));
+                    Date treport = entity.getDate("treport");
+                    alarmDetailsTemp.setStartTime(treport);
+                    Date trecover = entity.getDate("trecover");
+                    alarmDetailsTemp.setRecoveryTime(trecover);
+                    if (trecover != null) {
+                        Double duration = (double) (trecover.getTime() - treport.getTime()) / (1000 * 60);
+                        alarmDetailsTemp.setDuration(duration);//分钟
+                    }
                     alarmDetailsTempList.add(alarmDetailsTemp);
                 });
             });
@@ -406,6 +512,10 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     private ReportData alarmDetailsQuery(ReportConfig reportConfig, ReportTask reportTask) {
 
         JSONObject condition = reportConfig.getCondition();//获取查询条件
+        String alarmStatus = condition.getString("alarmStatus");
+        if ("活动告警".equals(alarmStatus)) {
+            alarmDetailsExecutorCurrent(reportConfig, reportTask);
+        }
         String taskId = reportTask.getId();
         String period = condition.getString("period");
         String statisticLevel = condition.getString("statisticLevel");
@@ -437,19 +547,20 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:" + period};
-        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "至" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = alarmDetailsExcelCreate("告警量统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
 
+
     private String alarmDetailsExcelCreate(String sheetName, String[][][] resultData) {
         long currentTime = System.currentTimeMillis();
         String path = "/reportsResources/report_alarmDetails";
         String filename = "告警明细表_" + currentTime;
         WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
-        return path + "/" + filename + ".xls";
+        return "/" + routeMark + path + "/" + filename + ".xls";
     }
 
     private String[][][] alarmDetailsDataCreate(List<AlarmDetailsTemp> detailsList) {
@@ -476,13 +587,13 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             row[6 + a] = alarmDetailsTemp.getAlarmLevel();
             row[7 + a] = DateUtil.getInstance().format(alarmDetailsTemp.getStartTime());
             row[8 + a] = DateUtil.getInstance().format(alarmDetailsTemp.getRecoveryTime());
-            row[8 + a] = alarmDetailsTemp.getDuration()+"";
+            row[8 + a] = alarmDetailsTemp.getDuration() + "";
         }
         return new String[][][]{sheetData};
     }
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             //@ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/reportsOpera/getRegionCodeList"), //区域层级
@@ -504,8 +615,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         if (reportTask == null)
             return new ReportData(DataType.ERROR, "report task is not exists [" + JSONObject.toJSONString(reportTask) + "]");
         if (ExecutorType.query.equals(executorType))
-            return alarmCategoryQuery(reportConfig,reportTask);
-        else return alarmCategoryExecutor(reportConfig,reportTask);
+            return alarmCategoryQuery(reportConfig, reportTask);
+        else return alarmCategoryExecutor(reportConfig, reportTask);
 
     }
 
@@ -522,15 +633,20 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         List<AlarmCategoryTemp> alarmCountTempList = new ArrayList<>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
         int month = Calendar.getInstance().get(Calendar.MONTH);
-
-        if (month == 1) {
-            month = 12;
-            year -= 1;
-        } else month -= 1;
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
+        Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
+        if (alarmCycle != null) {
+            int cycleDay = alarmCycle / 24 + 1;
+            if (day <= cycleDay)  //每月前两天统计上月的历史数据
+                if (month == 1) {
+                    month = 12;
+                    year -= 1;
+                } else month -= 1;
+        }
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -600,11 +716,92 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         return new ReportData(DataType.TEXT, jsonObject.toJSONString());
     }
 
+    private ReportData alarmCategoryQueryCurrent(ReportConfig reportConfig, ReportTask reportTask) {
+        String serverCode = reportConfig.getServerCode();
+        String enterpriseCode = reportConfig.getEnterpriseCode();
+        List<AlarmCategoryTemp> alarmCountTempList = new ArrayList<>();
+        int year = 0;
+        int month = 0;
 
+        JSONObject baseCondition = new JSONObject();
+        baseCondition.put("serverCode", serverCode);
+        baseCondition.put("enterpriseCode", enterpriseCode);
+        // 获取企业在该云平台下所有站点
+        List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
+        if (!CollectionUtils.isEmpty(siteList)) {
+            int finalMonth = month;
+            int finalYear = year;
+            siteList.forEach(s -> {
+                // 获取站点名称
+                String address = s.getAddress();
+                String addressName = mqttCommonInterface.getRegionName(address);
+                List<String> addressArr = JSONArray.parseArray(addressName, String.class);
+                String province = addressArr.get(0); //省
+                String municipality = addressArr.get(1); //市
+                String county = addressArr.get(2); //县|区
+                // 获取站点下所有fsu及其相关告警数据
+                String stationId = s.getSiteId();
+                String stationName = s.getSiteName();
+                String siteType = s.getSiteType();
+                List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
+                //判断交维态
+                if (fsuList == null) {
+                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    return;
+                }
+                FsuEntity fsuEntity = fsuList.get(0);
+                String manufacturer = fsuEntity.getManufacturer();
+                String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
+                List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
+                List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                deviceIds.addAll(fsuIds);
+                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
+                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
+               /* / Test
+                List<String> deviceIds = new ArrayList<>();
+                String operationState = "交维态";
+                deviceIds.add("10010_1021006");
+                deviceIds.add("10010_1021015");
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
+                List<JSONObject> jsonObjects = mqttCommonInterface.getAlarmCurrentCategoryByDeviceIds(deviceIds, finalYear, finalMonth, baseCondition);
+                jsonObjects.forEach(entity -> {
+                    //填充站点告警明细统计信息
+                    AlarmCategoryTemp alarmCategoryTemp = JSONObject.toJavaObject(entity, AlarmCategoryTemp.class);
+                    alarmCategoryTemp.setYear(finalYear);
+                    alarmCategoryTemp.setMonth(finalMonth);
+                    alarmCategoryTemp.setStationId(stationId);
+                    alarmCategoryTemp.setStationName(stationName);
+                    alarmCategoryTemp.setStationType(siteType);
+                    alarmCategoryTemp.setOperationState(operationState);
+                    alarmCategoryTemp.setProvince(province);
+                    alarmCategoryTemp.setMunicipality(municipality);
+                    alarmCategoryTemp.setCounty(county);
+                    alarmCategoryTemp.setFsuManufactory(manufacturer);
+                    alarmCountTempList.add(alarmCategoryTemp);
+                });
+            });
+        } else {
+            logger.error("返回站点结果为空");
+        }
+        String reportTaskId = reportTask.getId();
+        if (!CollectionUtils.isEmpty(alarmCountTempList)) {
+            alarmCategoryTempDao.updateDelete(year, month, reportTaskId);
+            alarmCategoryTempDao.save(alarmCountTempList, reportTaskId);
+        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("executorTime", year + "-" + month);
+        jsonObject.put("executorResult", alarmCountTempList);
+        return new ReportData(DataType.TEXT, jsonObject.toJSONString());
+    }
     private ReportData alarmCategoryQuery(ReportConfig reportConfig, ReportTask reportTask) {
 
         String taskId = reportTask.getId();
         JSONObject condition = reportConfig.getCondition();//获取查询条件
+        String alarmStatus = condition.getString("alarmStatus");
+        if ("活动告警".equals(alarmStatus)) {
+            alarmCategoryQueryCurrent(reportConfig, reportTask);
+        }
         String statisticLevel = condition.getString("statisticLevel");
         //根据用户id的区域权限及其搜索条件获取站点列表筛选
         JSONObject currentUser = condition.getJSONObject("currentUser");
@@ -636,12 +833,14 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         int length = resultData[0].length;
         resultData[0][length - 4] = new String[]{""};
         resultData[0][length - 3] = new String[]{"统计周期:" + period};
-        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "-" + timePeriod.getEndTimeStr()};
+        resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "至" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = alarmCategoryExcelCreate("告警分类统计表-" + statisticLevel, resultData);
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
+
+
 
     private String[][][] alarmCategoryDataCreate(List<JSONObject> alarmCategoryList, String statisticLevel) {
         String[] tableHead = null;
@@ -713,6 +912,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String path = "/reportsResources/report_alarmCount";
         String filename = "告警分类统计表_" + currentTime + ".xls";
         WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
-        return path + "/" + filename;
+        return "/" + routeMark + path + "/" + filename + ".xls";
     }
 }
