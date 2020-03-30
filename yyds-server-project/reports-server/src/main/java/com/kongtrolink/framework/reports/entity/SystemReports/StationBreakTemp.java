@@ -19,10 +19,28 @@ public class StationBreakTemp {
     private String stationName; //站点名称
     private String stationId; //站点id 站点编号
     private String stationType;//站点类型
+    private String fsuManufactory; //fsu 厂家
+    private String operationState; //站点状态
 //    private Integer stationCount; //站点总数
 //    private Integer maintenanceCount; //交维站点数
-    private Double avgDay; //日普通站平均断站时长(分钟)
     private Double avgMonth; //月累计普通站平均断站时长(分钟)
+
+
+    public String getFsuManufactory() {
+        return fsuManufactory;
+    }
+
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public String getId() {
         return id;
@@ -119,13 +137,6 @@ public class StationBreakTemp {
 //        this.maintenanceCount = maintenanceCount;
 //    }
 
-    public Double getAvgDay() {
-        return avgDay;
-    }
-
-    public void setAvgDay(Double avgDay) {
-        this.avgDay = avgDay;
-    }
 
     public Double getAvgMonth() {
         return avgMonth;

@@ -19,11 +19,30 @@ public class StationOffStatisticsTemp {
     private String stationName; //站点名称
     private String stationId; //站点id 站点编号
     private String stationType;//站点类型
-    private String fsuManufactory; //生产厂家
+    private String operationState; //站点状态
+    private String fsuManufactory; //fsu 厂家
     private Double sumDuration; //停电时长
     private Integer times; //停电次数
     private Double avgDuration;//平均站点停电时长（分钟）
 
+
+    private Boolean deleteFlag = false;
+
+    public Boolean getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Boolean deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public String getStationId() {
         return stationId;

@@ -12,7 +12,7 @@ spring:
     database: 2
 ###########服务及消息框架相关配置#############
 server:
-  groupCode: GROUP
+  groupCode: GROUP_DEMO
   name: FOO_SERVER_DEMO2 #服务编码
   version: 1.0.0 #服务版本
   port: 58106 #服务占用web端口

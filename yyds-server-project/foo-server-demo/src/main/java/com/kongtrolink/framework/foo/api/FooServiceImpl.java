@@ -1,9 +1,6 @@
 package com.kongtrolink.framework.foo.api;
 
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.Charset;
 
 /**
  * Created by mystoxlol on 2019/9/9, 13:03.
@@ -20,7 +17,8 @@ public class FooServiceImpl implements FooService {
 
     @Override
     public String boo(String foo) {
-        JSONObject jsonObject = JSONObject.parseObject(foo);
+        return null;
+      /*  JSONObject jsonObject = JSONObject.parseObject(foo);
         Integer a = jsonObject.getInteger("a");
         String s = "你我他";
         StringBuilder buffer = new StringBuilder();
@@ -32,7 +30,7 @@ public class FooServiceImpl implements FooService {
         System.out.println(buffer.toString().getBytes(Charset.defaultCharset()).length / 1024);
 
 
-        return buffer.toString();
+        return buffer.toString();*/
     }
 
     @Override

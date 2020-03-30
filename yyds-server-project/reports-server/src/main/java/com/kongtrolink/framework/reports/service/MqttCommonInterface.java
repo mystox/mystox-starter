@@ -33,4 +33,12 @@ public interface MqttCommonInterface {
     JSONObject statisticFsuOfflineData(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
     List<JSONObject> getFsuOfflineDetails(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    JSONObject stationOffStatistic(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getStationOffDetails(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    JSONObject getStationBreakStatistic(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    JSONObject getStationElectricCountList(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 }

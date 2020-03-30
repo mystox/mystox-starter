@@ -148,15 +148,15 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
                 List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
                 deviceIds.addAll(fsuIds);
-                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
-                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
                /* / Test
                 List<String> deviceIds = new ArrayList<>();
                 String operationState = "交维态";
                 deviceIds.add("10010_1021006");
                 deviceIds.add("10010_1021015");
                 List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
+                // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
                 List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, finalYear, finalMonth, baseCondition);
+                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", reportTask.getId());
                 jsonObjects.forEach(entity -> {
                     //填充站点告警统计信息
                     AlarmCountTemp alarmCountTemp = new AlarmCountTemp();

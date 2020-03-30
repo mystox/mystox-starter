@@ -61,10 +61,33 @@ public class ReportsInterfaceImpl implements ReportsInterface {
 
     @Override
     public List<JSONObject> getFsuOfflineDetails(String msg) {
-        logger.info("alarm details report receive...[{}]",msg);
+        logger.info("fsu off statistic report receive...[{}]",msg);
         AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
         alarmQuery.setName("FSU离线告警");
         return alarmReduceDao.getAlarmHistory(alarmQuery);
+    }
+
+    @Override
+    public JSONObject stationOffStatistic(String msg) {
+        logger.info("station off statistic report receive...[{}]",msg);
+        AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
+        return alarmReduceDao.stationOffStatistic(alarmQuery);
+    }
+
+    @Override
+    public List<JSONObject> getStationOffDetails(String msg) {
+        logger.info("station off details report receive...[{}]",msg);
+        AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
+        alarmQuery.setName("交流输入XX停电告警");
+        return alarmReduceDao.getAlarmHistory(alarmQuery);
+    }
+
+    @Override
+    public JSONObject getStationBreakStatistic(String msg) {
+        logger.info("station beak statistic report receive...[{}]",msg);
+        AlarmQuery alarmQuery = JSONObject.parseObject(msg,AlarmQuery.class);
+        alarmQuery.setName("一级低压脱离告警");
+        return alarmReduceDao.stationBreakStatistic(alarmQuery);
     }
 
 
