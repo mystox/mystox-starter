@@ -20,14 +20,14 @@ public class Config3dScene  implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -6072993106286931298L;
-	private String siteId;
+	private int siteId;
     private Config3dObject object;
 
-    public String getSiteId() {
+    public int getSiteId() {
         return siteId;
     }
 
-    public void setSiteId(String siteId) {
+    public void setSiteId(int siteId) {
         this.siteId = siteId;
     }
 

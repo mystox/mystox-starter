@@ -11,7 +11,7 @@ package com.kongtrolink.framework.scloud.entity.config3d;
  */
 public class ConfigAppDeviceLocate {
     
-    private String id;  // 设备ID
+    private int id;  // 设备ID
     private String name;    // 设备名
     private String type;    // 设备类型名
     private String typeCode;    // 类型编码
@@ -19,11 +19,11 @@ public class ConfigAppDeviceLocate {
     private int room;   // 所属房间（区域）ID
     private ConfigAppCoord coord;   // 设备坐标
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

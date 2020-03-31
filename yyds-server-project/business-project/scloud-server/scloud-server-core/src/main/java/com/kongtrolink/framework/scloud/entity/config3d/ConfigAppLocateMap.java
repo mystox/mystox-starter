@@ -12,24 +12,24 @@ import java.util.List;
  */
 public class ConfigAppLocateMap {
     
-    private String siteId;
+    private int siteId;
     private List<ConfigAppDeviceLocate> devices;    // 站内设备及对应坐标
     private List<ConfigAppRoom> rooms;  // 背景房间（区域）划分
 
     public ConfigAppLocateMap() {
     }
 
-    public ConfigAppLocateMap(String siteId, List<ConfigAppDeviceLocate> devices, List<ConfigAppRoom> rooms) {
+    public ConfigAppLocateMap(int siteId, List<ConfigAppDeviceLocate> devices, List<ConfigAppRoom> rooms) {
         this.siteId = siteId;
         this.devices = devices;
         this.rooms = rooms;
     }
 
-    public String getSiteId() {
+    public int getSiteId() {
         return siteId;
     }
 
-    public void setSiteId(String siteId) {
+    public void setSiteId(int siteId) {
         this.siteId = siteId;
     }
 
