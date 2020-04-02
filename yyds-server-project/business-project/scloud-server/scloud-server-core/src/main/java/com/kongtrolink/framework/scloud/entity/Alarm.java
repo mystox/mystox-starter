@@ -17,8 +17,9 @@ public class Alarm {
     private String name;                //告警名称
     private float value;                //告警值
     private Integer level;               //告警等级
-    private int siteId;
+    private String siteCode;
     private String siteName;
+    private String siteType;	        //站点类型
     private String tierName;
     private String siteAddress;
     private String deviceType;          //设备类型，设备类型，与资管一致
@@ -41,6 +42,14 @@ public class Alarm {
     private FacadeView checker;         //确认人
     private Boolean shield;             //是否屏蔽
 
+    public String getSiteType() {
+        return siteType;
+    }
+
+    public void setSiteType(String siteType) {
+        this.siteType = siteType;
+    }
+
     public Boolean getShield() {
         return shield;
     }
@@ -57,12 +66,12 @@ public class Alarm {
         this.signalName = signalName;
     }
 
-    public int getSiteId() {
-        return siteId;
+    public String getSiteCode() {
+        return siteCode;
     }
 
-    public void setSiteId(int siteId) {
-        this.siteId = siteId;
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
     }
 
     public String getSiteName() {

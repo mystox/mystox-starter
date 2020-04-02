@@ -30,7 +30,7 @@ import java.util.*;
  * @Date: 2020/3/3 10:24
  * @Description:
  */
-@Controller("alarmFocus")
+@Controller("/alarmFocus")
 public class AlarmFocusController extends BaseController {
 
     @Autowired
@@ -100,7 +100,7 @@ public class AlarmFocusController extends BaseController {
             LOGGER.error("获取设备信息失败");
             return new JsonResult("获取设备信息失败", false);
         }
-        return new JsonResult("关注成功", true);
+        return new JsonResult("关注失败", false);
     }
 
     @RequestMapping("/delete")
@@ -187,8 +187,7 @@ public class AlarmFocusController extends BaseController {
                 }
             }
         }
-        ListResult<AlarmFocus> listResult = new ListResult<>(alarmFocusList, count);
-        return new JsonResult(listResult);
+        return new JsonResult(alarmFocusList, count);
     }
 
     /**

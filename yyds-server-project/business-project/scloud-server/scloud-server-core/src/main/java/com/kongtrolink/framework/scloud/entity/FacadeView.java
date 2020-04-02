@@ -17,10 +17,7 @@ import java.io.Serializable;
  * @author Mosaico
  */
 public class FacadeView implements Serializable{
-    
-    /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -5582784481982344034L;
 	private String strId;
     private String name;
