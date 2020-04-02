@@ -122,35 +122,36 @@ public class AlarmServiceImpl implements AlarmService {
             List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
             for(Alarm alarm : deviceCodeAlarmList){
                 alarm.setDeviceName(deviceModel.getName());
-                alarm.setSiteId(deviceModel.getSiteId());
+                alarm.setSiteCode(deviceModel.getSiteCode());
             }
         }
         //初始化站点信息
-        List<Integer> siteIdList = new ArrayList<>();
-        Map<Integer, List<Alarm>> siteIdAlarmListMap = new HashMap<>();
+        List<String> siteCodeList = new ArrayList<>();
+        Map<String, List<Alarm>> siteCodeAlarmListMap = new HashMap<>();
         for(Alarm alarm : alarmList){
-            int siteId = alarm.getSiteId();
-            if(!siteIdList.contains(siteId)){
-                siteIdList.add(siteId);
+            String siteCode = alarm.getSiteCode();
+            if(!siteCodeList.contains(siteCode)){
+                siteCodeList.add(siteCode);
             }
-            List<Alarm> siteIdAlarmList = siteIdAlarmListMap.get(siteId);
+            List<Alarm> siteIdAlarmList = siteCodeAlarmListMap.get(siteCode);
             if(null == siteIdAlarmList){
                 siteIdAlarmList = new ArrayList<>();
             }
             siteIdAlarmList.add(alarm);
-            siteIdAlarmListMap.put(siteId, siteIdAlarmList);
+            siteCodeAlarmListMap.put(siteCode, siteIdAlarmList);
         }
         SiteQuery siteQuery = new SiteQuery();
         siteQuery.setPageSize(Integer.MAX_VALUE);
-        siteQuery.setSiteIdList(siteIdList);
+        siteQuery.setSiteCodes(siteCodeList);
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         for(SiteModel siteModel : siteModelList){
-            int siteId = siteModel.getSiteId();
-            List<Alarm> siteIdAlarmList = siteIdAlarmListMap.get(siteId);
+            String code = siteModel.getCode();
+            List<Alarm> siteIdAlarmList = siteCodeAlarmListMap.get(code);
             for(Alarm alarm : siteIdAlarmList){
                 alarm.setSiteName(siteModel.getName());
                 alarm.setSiteAddress(siteModel.getAddress());
                 alarm.setTierName(siteModel.getTierName());
+                alarm.setSiteType(siteModel.getSiteType());
             }
         }
 

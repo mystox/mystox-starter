@@ -9,19 +9,19 @@ import java.util.Date;
  */
 public class WorkAlarm {
 
-    private String alarmId;     //告警id
+    private String alarmKey;     //告警Key，告警产生过程中，还没入库，不存在id
     private String alarmName;   //告警名称
     private String level;       //告警等级
     private String state;       //告警状态
     private Date tReport;       //告警时间
     private Date tRecover;      //告警清除时间
 
-    public String getAlarmId() {
-        return alarmId;
+    public String getAlarmKey() {
+        return alarmKey;
     }
 
-    public void setAlarmId(String alarmId) {
-        this.alarmId = alarmId;
+    public void setAlarmKey(String alarmKey) {
+        this.alarmKey = alarmKey;
     }
 
     public String getAlarmName() {
@@ -71,7 +71,7 @@ public class WorkAlarm {
      */
     public static WorkAlarm AlarmToWorkAlarm(Alarm alarm){
         WorkAlarm workAlarm = new WorkAlarm();
-        workAlarm.setAlarmId(alarm.getId());
+        workAlarm.setAlarmKey(alarm.initKey());
         workAlarm.setAlarmName(alarm.getName());
         workAlarm.setLevel(alarm.getTargetLevelName());
         workAlarm.setState(alarm.getState());

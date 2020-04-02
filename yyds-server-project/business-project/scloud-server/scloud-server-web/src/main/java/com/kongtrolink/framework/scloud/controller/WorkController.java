@@ -89,7 +89,7 @@ public class WorkController extends BaseController {
         //判定该设备是否有未回单的工单
         Work noOverWork = workService.getNotOverByDeviceCode(uniqueCode, workQuery.getDeviceCode());
         if(null != noOverWork){
-            noOverWork.getWorkAlarmList().add(workQuery.getWorkAlarm());
+            noOverWork.increateAlarm(workQuery.getWorkAlarm());
             boolean update = workService.update(uniqueCode, noOverWork);
             if(update){
                 return new JsonResult("派单成功", true);
@@ -112,7 +112,7 @@ public class WorkController extends BaseController {
      */
     private boolean createNewWork(String uniqueCode, WorkQuery workQuery, FacadeView operator, FacadeView receiver){
         //获取该告警对应的告警工单配置对应信息
-        WorkAlarmConfig alarmWorkConfig = workAlarmConfigService.findByAlarmId(uniqueCode, workQuery.getWorkAlarm().getAlarmId());
+        WorkAlarmConfig alarmWorkConfig = workAlarmConfigService.findByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         WorkConfig workConfig ;
         if(null != alarmWorkConfig) {
             //根据对应信息找到工单配置
@@ -131,7 +131,7 @@ public class WorkController extends BaseController {
                 null, work.getOperatorTime(), 0, WorkConstants.FTU_WEB, receiver);
         workRecordService.add(uniqueCode, workRecord);
         //删除数据库中告警工单配置对应信息
-        workAlarmConfigService.deleteByAlarmId(uniqueCode, workQuery.getWorkAlarm().getAlarmId());
+        workAlarmConfigService.deleteByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         //发送工单推送
 //        workJpushService.pushWork(uniqueCode, work, workRecord);
         //liuddtodo 修改告警的工单信息，需要调用远程方法

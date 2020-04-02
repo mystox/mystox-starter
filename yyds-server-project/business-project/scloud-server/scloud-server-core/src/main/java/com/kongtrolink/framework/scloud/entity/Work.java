@@ -39,7 +39,7 @@ public class Work {
     private List<WorkAlarm> workAlarmList = new ArrayList<>();
 
     private String alarmState = WorkConstants.ALARM_STATE_PENDING; //告警状态
-    private String resolveCount;                    //已解决的告警
+    private int pendingCount;                    //待处理告警数量
 
     //导出需要内容
     private Date alarmTime; //告警时间
@@ -91,12 +91,12 @@ public class Work {
         this.workRecordList = workRecordList;
     }
 
-    public String getResolveCount() {
-        return resolveCount;
+    public int getPendingCount() {
+        return pendingCount;
     }
 
-    public void setResolveCount(String resolveCount) {
-        this.resolveCount = resolveCount;
+    public void setPendingCount(int pendingCount) {
+        this.pendingCount = pendingCount;
     }
 
     public int getCsjdsc() {
@@ -333,5 +333,18 @@ public class Work {
         }
         int taskTime = (int)(curTime - this.getSentTime().getTime())/(1000*60*60);
         this.setTaskTime(taskTime);
+    }
+
+    public void increateAlarm(WorkAlarm workAlarm){
+        this.workAlarmList.add(workAlarm);
+        this.pendingCount ++;
+        this.alarmState = WorkConstants.ALARM_STATE_PENDING;
+    }
+
+    public void decreateAlarm(){
+        this.pendingCount --;
+        if(0 == pendingCount){
+            this.alarmState = WorkConstants.ALARM_STATE_RESOLVED;
+        }
     }
 }

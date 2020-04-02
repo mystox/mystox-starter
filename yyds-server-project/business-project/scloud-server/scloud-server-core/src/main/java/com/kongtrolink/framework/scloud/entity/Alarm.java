@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -41,6 +43,12 @@ public class Alarm {
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
     private Boolean shield;             //是否屏蔽
+    private String key ;                //唯一键，可作为索引
+
+    public String initKey(){
+        this.key = enterpriseCode + WorkConstants.UNDERLINE + serverCode + WorkConstants.COLON + deviceId + WorkConstants.UNDERLINE + serial;
+        return key;
+    }
 
     public String getSiteType() {
         return siteType;

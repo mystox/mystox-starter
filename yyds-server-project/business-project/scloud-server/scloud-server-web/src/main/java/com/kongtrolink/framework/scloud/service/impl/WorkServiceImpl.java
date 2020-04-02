@@ -12,8 +12,8 @@ import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -81,10 +81,10 @@ public class WorkServiceImpl implements WorkService{
         //设备信息
         work.setDevice(new FacadeView(workQuery.getDeviceCode(), workQuery.getDeviceName()));
         work.setDeviceType(workQuery.getDeviceType());
-        work.getWorkAlarmList().add(workQuery.getWorkAlarm());
         work.setState(WorkConstants.STATE_RECEIVE);
         work.initCSJDXX(curDate, workConfig);
         work.initCSHDXX(curDate, workConfig);
+        work.increateAlarm(workQuery.getWorkAlarm());
         return work;
     }
 
@@ -246,5 +246,34 @@ public class WorkServiceImpl implements WorkService{
         List<WorkRecord> workRecordList = recordService.getListByWorkId(uniqueCode, workId);
         work.setWorkRecordList(workRecordList);
         return new JsonResult(work);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param alarmList
+     * @auther: liudd
+     * @date: 2020/4/2 17:18
+     * 功能描述:告警消除，联动修改工单
+     */
+    @Override
+    public void resolveAlarm(String uniqueCode, List<Alarm> alarmList) {
+        //1，根据告警key，统一获取告警工单
+        List<String> keyList = new ArrayList<>();
+        Map<String, Alarm> keyAlarmMap = new HashMap<>();
+        for(Alarm alarm : alarmList){
+            keyList.add(alarm.initKey());
+            keyAlarmMap.put(alarm.initKey(), alarm);
+        }
+        List<Work> works = workDao.listByKeys(uniqueCode, keyList);
+        for(Work work : works){
+            List<WorkAlarm> workAlarmList = work.getWorkAlarmList();
+            for(WorkAlarm workAlarm : workAlarmList) {
+                Alarm alarm = keyAlarmMap.get(workAlarm.getAlarmKey());
+                workAlarm.setState(WorkConstants.ALARM_STATE_RESOLVED);
+                workAlarm.settRecover(alarm.getTrecover());
+                work.decreateAlarm();
+            }
+            workDao.updateAlarmInfo(uniqueCode, work);
+        }
     }
 }

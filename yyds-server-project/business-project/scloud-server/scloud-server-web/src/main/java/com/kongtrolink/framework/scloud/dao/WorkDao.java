@@ -7,8 +7,11 @@ import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -112,5 +115,21 @@ public class WorkDao {
         Criteria criteria = Criteria.where("device.strId").is(deviceCode);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, Work.class, uniqueCode + table);
+    }
+
+    public List<Work> listByKeys(String uniqueCode, List<String> keys){
+        Criteria criteria = Criteria.where("workAlarmList.alarmKey").in(keys);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, Work.class, uniqueCode + table);
+    }
+
+    public void updateAlarmInfo(String uniqueCode, Work work){
+        Criteria criteria = Criteria.where("_id").is(work.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("workAlarmList", work.getWorkAlarmList());
+        update.set("alarmState", work.getAlarmState());
+        update.set("pendingCount", work.getPendingCount());
+        mongoTemplate.updateFirst(query, update, uniqueCode + table);
     }
 }

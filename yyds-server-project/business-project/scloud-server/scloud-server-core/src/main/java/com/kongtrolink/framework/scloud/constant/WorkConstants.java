@@ -34,4 +34,7 @@ public class WorkConstants {
 
     public static String ALARM_STATE_PENDING = "待处理";
     public static String ALARM_STATE_RESOLVED = "已消除";
+
+    public static String UNDERLINE = "_";
+    public static String COLON = ":";
 }

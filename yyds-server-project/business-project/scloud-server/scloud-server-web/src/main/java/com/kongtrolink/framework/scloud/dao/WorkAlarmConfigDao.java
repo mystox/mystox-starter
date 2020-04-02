@@ -28,11 +28,10 @@ public class WorkAlarmConfigDao {
     /**
      * 根据企业编码和告警id获取记录
      * @param uniqueCode
-     * @param alarmId
      * @return
      */
-    public WorkAlarmConfig findByAlarmId(String uniqueCode, String alarmId){
-        Criteria criteria = Criteria.where("alarmId").is(alarmId);
+    public WorkAlarmConfig findByAlarmKey(String uniqueCode, String alarmKey){
+        Criteria criteria = Criteria.where("alarmKey").is(alarmKey);
         criteria.and("uniqueCode").is(uniqueCode);
         Query query = new Query(criteria);
         return mongoTemplate.findOne(query, WorkAlarmConfig.class, table);
@@ -41,11 +40,10 @@ public class WorkAlarmConfigDao {
     /**
      * 根据告警id删除数据，
      * @param uniqueCode
-     * @param alarmId
      * @return
      */
-    public void deleteByAlarmId(String uniqueCode, String alarmId){
-        Criteria criteria = Criteria.where("alarmId").is(alarmId);
+    public void deleteByAlarmKey(String uniqueCode, String alarmKey){
+        Criteria criteria = Criteria.where("alarmKey").is(alarmKey);
         criteria.and("uniqueCode").is(uniqueCode);
         Query query = new Query(criteria);
         mongoTemplate.remove(query, table);

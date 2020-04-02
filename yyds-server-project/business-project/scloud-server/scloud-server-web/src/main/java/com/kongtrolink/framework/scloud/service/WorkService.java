@@ -2,10 +2,7 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.scloud.entity.FacadeView;
-import com.kongtrolink.framework.scloud.entity.Work;
-import com.kongtrolink.framework.scloud.entity.WorkConfig;
-import com.kongtrolink.framework.scloud.entity.WorkRecord;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 
 import java.util.Date;
@@ -55,5 +52,12 @@ public interface WorkService {
     JsonResult cancelCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU);
 
     JsonResult detailCommon(String uniqueCode, String workId);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/2 17:18
+     * 功能描述:告警消除，联动修改工单
+     */
+    void resolveAlarm(String uniqueCode, List<Alarm> alarmList);
 
 }

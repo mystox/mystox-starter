@@ -62,11 +62,7 @@ public class WorkRecordServiceImpl implements WorkRecordService {
                                        float handleTime, String operateFTU, FacadeView receiver){
         WorkRecord workRecord = new WorkRecord();
         workRecord.setWorkId(work.getId());
-        if(null != maintainer) {
-            workRecord.setWorker(new FacadeView(maintainer.getStrId(), maintainer.getName()));
-            workRecord.setWorkerAccount(maintainer.getStrId());
-            workRecord.setWorkerPhone(maintainer.getPhone());
-        }
+        workRecord.setWorker(maintainer);
         workRecord.setOperateType(operateType);
         workRecord.setOperateDescribe(operateDescribe);
         workRecord.setOperateTime(operateTime);

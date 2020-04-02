@@ -14,10 +14,10 @@ public class WorkAlarmConfig {
 
     private String id;                                  //id
     private String uniqueCode;                          //企业编码
-    private String alarmId;                             //告警id
+    private String alarmKey;                             //告警key
     private String workConfigId;                        //工单配置id
-    private Date sendWorkTime;                          //派单时间
-    private String sendWorkType;                        //派单类型
+    private Date sendTime;                          //派单时间
+    private String sendType;                        //派单类型
 
     public String getId() {
         return id;
@@ -35,12 +35,12 @@ public class WorkAlarmConfig {
         this.uniqueCode = uniqueCode;
     }
 
-    public String getAlarmId() {
-        return alarmId;
+    public String getAlarmKey() {
+        return alarmKey;
     }
 
-    public void setAlarmId(String alarmId) {
-        this.alarmId = alarmId;
+    public void setAlarmKey(String alarmKey) {
+        this.alarmKey = alarmKey;
     }
 
     public String getWorkConfigId() {
@@ -51,19 +51,19 @@ public class WorkAlarmConfig {
         this.workConfigId = workConfigId;
     }
 
-    public Date getSendWorkTime() {
-        return sendWorkTime;
+    public Date getSendTime() {
+        return sendTime;
     }
 
-    public void setSendWorkTime(Date sendWorkTime) {
-        this.sendWorkTime = sendWorkTime;
+    public void setSendTime(Date sendTime) {
+        this.sendTime = sendTime;
     }
 
-    public String getSendWorkType() {
-        return sendWorkType;
+    public String getSendType() {
+        return sendType;
     }
 
-    public void setSendWorkType(String sendWorkType) {
-        this.sendWorkType = sendWorkType;
+    public void setSendType(String sendType) {
+        this.sendType = sendType;
     }
 }
