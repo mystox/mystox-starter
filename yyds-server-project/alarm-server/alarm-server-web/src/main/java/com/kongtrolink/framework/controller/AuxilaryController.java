@@ -7,6 +7,7 @@ import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AuxilaryQuery;
 import com.kongtrolink.framework.service.AuxilaryService;
+import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,34 +60,7 @@ public class AuxilaryController extends BaseController {
     @RequestMapping("/delete")
     @ResponseBody
     public JsonResult delete(@RequestBody AuxilaryQuery auxilaryQuery){
-        String enterpriseCode = auxilaryQuery.getEnterpriseCode();
-        String serverCode = auxilaryQuery.getServerCode();
-        Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
-        if(null == auxilary){
-            return new JsonResult(Contant.DELETED + Contant.RESULT_FAIL, false);
-        }
-        String proStr = auxilaryQuery.getProStr();
-        String proName = auxilaryQuery.getProName();
-        List<String> proStrList = auxilary.getProStrList();
-        List<String> proNameList = auxilary.getProNameList();
-        for(int i=0; i<proStrList.size(); i++){
-            String sourceStr = proStrList.get(i);
-            if(sourceStr.equals(proStr)){
-                proStrList.remove(i);
-                proNameList.remove(i);
-            }
-        }
-        boolean result;
-        if(proStrList.isEmpty()){
-            //如果没有任何附加属性，则直接删除该记录
-            result = auxilaryService.delete(auxilary.get_id());
-        }else{
-            result = auxilaryService.update(auxilary);
-        }
-        if(result){
-            return new JsonResult(Contant.DELETED + Contant.RESULT_SUC, true);
-        }
-        return new JsonResult(Contant.DELETED + Contant.RESULT_FAIL, false);
+        return auxilaryService.delete(auxilaryQuery);
     }
 
     @RequestMapping("/get")

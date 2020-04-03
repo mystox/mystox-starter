@@ -27,3 +27,11 @@ servlet:
 alarmModule:
   list: alarmRemoteList
   operate: alarmRemoteOperate
+  updateWorkInfo: alarmRemoteUpdateWork
+  level:
+    getLastUse: levelRemoteLastUse
+  auxilaryRemoteGet: auxilaryRemoteGet
+  auxilaryRemoteDel: auxilaryRemoteDel
+asset:
+  getCIModel: getCIModel
+

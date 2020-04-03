@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.service.impl;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.dao.AuxilaryDao;
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AuxilaryQuery;
 import com.kongtrolink.framework.service.AuxilaryService;
@@ -23,6 +25,37 @@ public class AuxilaryServiceImpl implements AuxilaryService {
     @Override
     public void save(Auxilary auxilary) {
         auxilaryDao.save(auxilary);
+    }
+
+    @Override
+    public JsonResult delete(AuxilaryQuery auxilaryQuery) {
+        String enterpriseCode = auxilaryQuery.getEnterpriseCode();
+        String serverCode = auxilaryQuery.getServerCode();
+        Auxilary auxilary = getByEnterServerCode(enterpriseCode, serverCode);
+        if(null == auxilary){
+            return new JsonResult(Contant.DELETED + Contant.RESULT_FAIL, false);
+        }
+        String proStr = auxilaryQuery.getProStr();
+        List<String> proStrList = auxilary.getProStrList();
+        List<String> proNameList = auxilary.getProNameList();
+        for(int i=0; i<proStrList.size(); i++){
+            String sourceStr = proStrList.get(i);
+            if(sourceStr.equals(proStr)){
+                proStrList.remove(i);
+                proNameList.remove(i);
+            }
+        }
+        boolean result;
+        if(proStrList.isEmpty()){
+            //如果没有任何附加属性，则直接删除该记录
+            result = delete(auxilary.get_id());
+        }else{
+            result = update(auxilary);
+        }
+        if(result){
+            return new JsonResult(Contant.DELETED + Contant.RESULT_SUC, true);
+        }
+        return new JsonResult(Contant.DELETED + Contant.RESULT_FAIL, false);
     }
 
     @Override

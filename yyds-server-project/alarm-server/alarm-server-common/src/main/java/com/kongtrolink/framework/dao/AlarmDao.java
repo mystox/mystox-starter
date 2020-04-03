@@ -343,7 +343,25 @@ public class AlarmDao {
         Update update = new Update();
         update.set("checkTime", alarmQuery.getOperateTime());
         update.set("checkContant", alarmQuery.getOperateDesc());
-        update.set("checker",new FacadeView(alarmQuery.getOperateUserId(), alarmQuery.getOperateUsername()));
+        update.set("checker",new FacadeView(alarmQuery.getOperateUsername(), alarmQuery.getOperateUsername()));
+        WriteResult result = mongoTemplate.updateMulti(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
+
+    /**
+     * @param table
+     * @param alarmQuery
+     * @auther: liudd
+     * @date: 2020/3/2 13:28
+     * 功能描述:告警确认，后期将中台的告警确认方法合并过来
+     */
+    public boolean nocheck(String table, AlarmQuery alarmQuery) {
+        Criteria criteria = Criteria.where("_id").is(alarmQuery.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.unset("checkTime");
+        update.unset("checkContant");
+        update.unset("checker");
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }

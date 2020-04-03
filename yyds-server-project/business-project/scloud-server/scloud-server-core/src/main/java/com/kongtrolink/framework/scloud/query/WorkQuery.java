@@ -13,6 +13,8 @@ import java.util.List;
 public class WorkQuery extends Paging{
 
     private String id;
+    private String enterpriseCode;              //企业编码
+    private String serverCode;                  //服务编码
     private String sendType;            //派单类型
     private String status;              //工单状态
     private String code;                //流水号
@@ -28,6 +30,41 @@ public class WorkQuery extends Paging{
     private Date sentTimeBegin;         //派单开始时间
     private Date sentTimeEnd;           //派单开始时间
     private WorkAlarm workAlarm;
+    private String alarmId;
+    private Date treport;
+
+    public Date getTreport() {
+        return treport;
+    }
+
+    public void setTreport(Date treport) {
+        this.treport = treport;
+    }
+
+    public String getAlarmId() {
+        return alarmId;
+    }
+
+    public void setAlarmId(String alarmId) {
+        this.alarmId = alarmId;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
+
+    public String getEnterpriseCode() {
+
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
 
     public String getDeviceName() {
         return deviceName;

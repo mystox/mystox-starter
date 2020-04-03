@@ -1,16 +1,19 @@
 package com.kongtrolink.framework.mqtt.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
+import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.mqtt.MqttService;
 import com.kongtrolink.framework.query.AlarmQuery;
+import com.kongtrolink.framework.query.AuxilaryQuery;
+import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.kongtrolink.framework.service.AuxilaryService;
+import com.kongtrolink.framework.service.EnterpriseLevelService;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +34,8 @@ public class MqttServiceImpl implements MqttService{
     AlarmService alarmService;
     @Autowired
     AuxilaryService auxilaryService;
+    @Autowired
+    EnterpriseLevelService enterpriseLevelService;
 
     private static final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);
 
@@ -129,6 +134,8 @@ public class MqttServiceImpl implements MqttService{
             alarmQuery.setTreport(treport);
             if(Const.ALARM_OPERATE_CHECK.equals(alarmQuery.getOperate())) {
                 check = alarmService.check(alarmQuery);
+            }else if(Const.ALARM_OPERATE_NOTCHECK.equals(alarmQuery.getOperate())){
+                check = alarmService.nocheck(alarmQuery);
             }else if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
                 check = alarmService.resolve(alarmQuery);
             }
@@ -144,5 +151,36 @@ public class MqttServiceImpl implements MqttService{
             jsonResult.setSuccess(false);
         }
         return JSONObject.toJSONString(jsonResult);
+    }
+
+    @Override
+    public String levelRemoteLastUse(String jsonStr) {
+        logger.info(jsonStr);
+        EnterpriseLevelQuery enterpriseLevelQuery = JSONObject.parseObject(jsonStr, EnterpriseLevelQuery.class);
+        List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        return JSONObject.toJSON(lastUse).toString();
+    }
+
+    @Override
+    public String auxilaryRemoteGet(String jsonStr) {
+        logger.info(jsonStr);
+        JSONObject jsonObject = new JSONObject();
+        AuxilaryQuery auxilaryQuery = JSONObject.parseObject(jsonStr, AuxilaryQuery.class);
+        Auxilary auxilary = auxilaryService.getByEnterServerCode(auxilaryQuery.getEnterpriseCode(), auxilaryQuery.getServerCode());
+        jsonObject.put("success",true);
+        jsonObject.put("data", auxilary);
+        if(null == auxilary){
+            jsonObject.put("success",true);
+            jsonObject.put("info", "无数据");
+        }
+        return jsonStr.toString();
+    }
+
+    @Override
+    public String auxilaryRemoteDel(String jsonStr) {
+        logger.info(jsonStr);
+        AuxilaryQuery auxilaryQuery = JSONObject.parseObject(jsonStr, AuxilaryQuery.class);
+        JsonResult delete = auxilaryService.delete(auxilaryQuery);
+        return JSONObject.toJSON(delete).toString();
     }
 }

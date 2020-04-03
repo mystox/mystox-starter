@@ -204,6 +204,18 @@ public class AlarmServiceImpl implements AlarmService{
     /**
      * @param alarmQuery
      * @auther: liudd
+     * @date: 2020/4/3 9:58
+     * 功能描述:取消确认
+     */
+    @Override
+    public boolean nocheck(AlarmQuery alarmQuery) {
+        String table = getTable(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode(), alarmQuery.getType(), alarmQuery.getTreport());
+        return alarmDao.nocheck(table, alarmQuery);
+    }
+
+    /**
+     * @param alarmQuery
+     * @auther: liudd
      * @date: 2020/3/2 16:57
      * 功能描述:告警消除
      */

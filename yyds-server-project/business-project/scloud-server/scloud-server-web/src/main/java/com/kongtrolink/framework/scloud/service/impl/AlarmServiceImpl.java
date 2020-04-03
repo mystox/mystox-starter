@@ -51,6 +51,8 @@ public class AlarmServiceImpl implements AlarmService {
     private String remoteList;
     @Value("${alarmModule.check:alarmRemoteOperate}")
     private String remoteOperate;
+    @Value("${alarmModule.updateWorkInfo:alarmRemoteUpdateWork}")
+    private String alarmRemoteUpdateWork;
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmServiceImpl.class);
     /**
@@ -340,5 +342,23 @@ public class AlarmServiceImpl implements AlarmService {
         if(StringUtil.isNUll(alarmQuery.getOperate())){
             throw new ParameterException("操作类型为空");
         }
+    }
+
+    @Override
+    public JSONObject updateWorkInfo(AlarmQuery alarmQuery) {
+        JSONObject jsonObject = new JSONObject();
+        //具体查询历史还是实时数据，由中台告警模块根据参数判定
+        try {
+            MsgResult msgResult = mqttOpera.opera(alarmRemoteUpdateWork, JSONObject.toJSONString(alarmQuery));
+            String msg = msgResult.getMsg();
+            jsonObject.put("success", true);
+            jsonObject.put("data", msg);
+
+        }catch (Exception e){
+            jsonObject.put("success", false);
+            jsonObject.put("info", "远程调用错误");
+            jsonObject.put("data", e.getMessage());
+        }
+        return jsonObject;
     }
 }

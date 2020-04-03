@@ -1,11 +1,13 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.*;
+import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +87,16 @@ public class WorkController extends BaseController {
         boolean result ;
         String uniqueCode = getUniqueCode();
         User user = getUser(request);
-
+        //先调用远程接口
+        AlarmQuery alarmQuery = new AlarmQuery();
+        alarmQuery.setEnterpriseCode(workQuery.getEnterpriseCode());
+        alarmQuery.setServerCode(workQuery.getServerCode());
+        alarmQuery.setId(workQuery.getAlarmId());
+        alarmQuery.setTreport(alarmQuery.getTreport());
+        JSONObject jsonObject = alarmService.updateWorkInfo(alarmQuery);
+        if(!jsonObject.getBoolean("success")){
+            return new JsonResult(jsonObject.getString("info"), false);
+        }
         //判定该设备是否有未回单的工单
         Work noOverWork = workService.getNotOverByDeviceCode(uniqueCode, workQuery.getDeviceCode());
         if(null != noOverWork){
@@ -134,8 +145,6 @@ public class WorkController extends BaseController {
         workAlarmConfigService.deleteByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         //发送工单推送
 //        workJpushService.pushWork(uniqueCode, work, workRecord);
-        //liuddtodo 修改告警的工单信息，需要调用远程方法
-//        alarmService.updateWorkInfo(uniqueCode, alarm.getId(), work.getId(), work.getCode(), EnumWorkStatus.SENDED.getName());
         return true;
     }
 

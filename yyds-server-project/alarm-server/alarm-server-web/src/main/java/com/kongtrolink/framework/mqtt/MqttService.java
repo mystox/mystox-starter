@@ -26,4 +26,13 @@ public interface MqttService {
      */
     @OperaCode
     String alarmRemoteOperate(String jsonStr);
+
+    @OperaCode
+    String levelRemoteLastUse(String jsonStr);
+
+    @OperaCode
+    String auxilaryRemoteGet(String jsonStr);
+
+    @OperaCode
+    String auxilaryRemoteDel(String jsonStr);
 }

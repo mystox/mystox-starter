@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.base.FacadeView;
+import com.kongtrolink.framework.core.entity.Alarm;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.mongodb.DBObject;
@@ -35,6 +36,13 @@ public interface AlarmService {
      * 功能描述:告警确认，后期将中台的告警确认方法合并过来
      */
     boolean check(AlarmQuery alarmQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/3 9:58
+     * 功能描述:取消确认
+     */
+    boolean nocheck(AlarmQuery alarmQuery);
 
     /**
      * @auther: liudd

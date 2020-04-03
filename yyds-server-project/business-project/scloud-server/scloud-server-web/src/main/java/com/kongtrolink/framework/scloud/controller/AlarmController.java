@@ -37,11 +37,6 @@ public class AlarmController extends BaseController{
     @Autowired
     FilterRuleService filterRuleService;
 
-    @Value("${alarmModule.list:alarmRemoteList}")
-    private String remoteList;
-    @Value("${alarmModule.check:alarmRemoteOperate}")
-    private String remoteOperate;
-
     /**
      * @auther: liudd
      * @date: 2020/2/26 14:59
@@ -83,8 +78,8 @@ public class AlarmController extends BaseController{
      * @auther: liudd
      * @date: 2020/3/2 13:12
      * 远程操作功能描述:
-     * 确认告警：enterpriseCode, serverCode, type, idList, treportList, operateTime，operateUserId, operateUsername, operateDesc
-     * 告警消除：enterpriseCode, serverCode, type, idList, treportList, operateTime
+     * 确认告警：enterpriseCode, serverCode, type, idList, treportList, operateTime，operateUserId, operateUsername, operateDesc,operate
+     * 告警消除：enterpriseCode, serverCode, type, idList, treportList, operateTime,operate
      */
     @RequestMapping("/operate")
     @ResponseBody
