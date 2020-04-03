@@ -6,7 +6,7 @@ spring:
 server:
   name: SCLOUD_SERVER_WEB #服务编码
   host: 172.16.6.143
-  groupCode: GROUP_LIUDD_TEST
+  groupCode: GROUP_LIUDD_TEST3
   port: 59002 #服务占用web端口
 mqtt:
   username: root #可选配置 mqtt配置相关
@@ -34,4 +34,6 @@ alarmModule:
   auxilaryRemoteDel: auxilaryRemoteDel
 asset:
   getCIModel: getCIModel
+deliver:
+  sender: handleSender
 

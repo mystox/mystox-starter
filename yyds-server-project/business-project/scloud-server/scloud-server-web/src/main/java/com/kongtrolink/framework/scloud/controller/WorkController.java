@@ -6,10 +6,12 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
+import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.service.*;
+import com.kongtrolink.framework.scloud.util.XlsExporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +30,8 @@ import java.util.List;
  * @Description:
  */
 @Controller
-public class WorkController extends BaseController {
+@RequestMapping("/work")
+public class WorkController extends ExportController {
 
     @Autowired
     WorkService workService;
@@ -42,7 +45,6 @@ public class WorkController extends BaseController {
     WorkConfigService workConfigService;
     @Autowired
     WorkRecordService workRecordService;
-
     /**
      * WEB端工单列表，只能获取当前用户管辖的站点
      * @param workQuery
@@ -87,6 +89,22 @@ public class WorkController extends BaseController {
         boolean result ;
         String uniqueCode = getUniqueCode();
         User user = getUser(request);
+        //判定该设备是否有未回单的工单
+        Work noOverWork = workService.getNotOverByDeviceCode(uniqueCode, workQuery.getDeviceCode());
+        if(null != noOverWork){
+            noOverWork.increateAlarm(workQuery.getWorkAlarm());
+            boolean update = workService.update(uniqueCode, noOverWork);
+            if(update){
+                //发送推送
+                JSONObject jpush = workService.createJpush(noOverWork, WorkConstants.OPERATE_SEND);
+
+                return new JsonResult("派单成功", true);
+            }
+            return new JsonResult("派单失败", false);
+        }else{  //该设备没有待回单工单
+            FacadeView operator = new FacadeView(user.getUsername(), user.getName(), user.getPhone());
+            result = createNewWork(uniqueCode, workQuery, operator, null);
+        }
         //先调用远程接口
         AlarmQuery alarmQuery = new AlarmQuery();
         alarmQuery.setEnterpriseCode(workQuery.getEnterpriseCode());
@@ -96,19 +114,6 @@ public class WorkController extends BaseController {
         JSONObject jsonObject = alarmService.updateWorkInfo(alarmQuery);
         if(!jsonObject.getBoolean("success")){
             return new JsonResult(jsonObject.getString("info"), false);
-        }
-        //判定该设备是否有未回单的工单
-        Work noOverWork = workService.getNotOverByDeviceCode(uniqueCode, workQuery.getDeviceCode());
-        if(null != noOverWork){
-            noOverWork.increateAlarm(workQuery.getWorkAlarm());
-            boolean update = workService.update(uniqueCode, noOverWork);
-            if(update){
-                return new JsonResult("派单成功", true);
-            }
-            return new JsonResult("派单失败", false);
-        }else{  //该设备没有待回单工单
-            FacadeView operator = new FacadeView(user.getUsername(), user.getName(), user.getPhone());
-            result = createNewWork(uniqueCode, workQuery, operator, null);
         }
         if(result){
             return new JsonResult("派单成功", true);
@@ -144,7 +149,8 @@ public class WorkController extends BaseController {
         //删除数据库中告警工单配置对应信息
         workAlarmConfigService.deleteByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         //发送工单推送
-//        workJpushService.pushWork(uniqueCode, work, workRecord);
+        JSONObject jpush = workService.createJpush(work, WorkConstants.OPERATE_SEND);
+
         return true;
     }
 
@@ -267,6 +273,6 @@ public class WorkController extends BaseController {
                 "告警状态","告警级别","告警名称", "接单人"};
         String[] properiesName = { "code", "sendType", "status" ,"alarmTime","sentTime", "taskTime", "site",
                 "alarmStatus","alarmLevel", "alarmName", "worker"};
-//        export(response, realList, properiesName, headsName, title);
+        export(response, realList, properiesName, headsName, title);
     }
 }

@@ -36,7 +36,7 @@ public class Alarm {
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
     private String state;               //告警状态
-    private Map<String, String> AuxilaryMap;    //附加属性列map
+    private Map<String, String> auxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private String status;              //告警状态（待处理，已消除）
@@ -184,11 +184,11 @@ public class Alarm {
     }
 
     public Map<String, String> getAuxilaryMap() {
-        return AuxilaryMap;
+        return auxilaryMap;
     }
 
     public void setAuxilaryMap(Map<String, String> auxilaryMap) {
-        AuxilaryMap = auxilaryMap;
+        this.auxilaryMap = auxilaryMap;
     }
 
     public String getId() {

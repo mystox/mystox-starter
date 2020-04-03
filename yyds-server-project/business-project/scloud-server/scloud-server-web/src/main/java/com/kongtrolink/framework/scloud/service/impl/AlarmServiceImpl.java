@@ -5,6 +5,7 @@ import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.dao.AlarmDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
@@ -94,6 +95,10 @@ public class AlarmServiceImpl implements AlarmService {
         List<String> deviceCodeList = new ArrayList<>();
         Map<String, List<Alarm>> deviceCodeAlarmListMap = new HashMap<>();
         for(Alarm alarm : alarmList){
+            alarm.setCheckState(BaseConstant.NOCHECK);
+            if(null != alarm.getCheckTime()){
+                alarm.setCheckState(BaseConstant.CHECKED);
+            }
             String deviceId = alarm.getDeviceId();
             if(!deviceCodeList.contains(deviceId)){
                 deviceCodeList.add(deviceId);

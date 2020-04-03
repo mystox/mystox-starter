@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.*;
@@ -59,5 +60,7 @@ public interface WorkService {
      * 功能描述:告警消除，联动修改工单
      */
     void resolveAlarm(String uniqueCode, List<Alarm> alarmList);
+
+    JSONObject createJpush(Work work, String operate, List<String> accountList);
 
 }

@@ -7,6 +7,7 @@ import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.mongodb.DBObject;
@@ -42,7 +43,7 @@ public class AlarmServiceImpl implements AlarmService{
      * 功能描述:获取列表
      */
     @Override
-    public List<DBObject> list(AlarmQuery alarmQuery) {
+    public List<Alarm> list(AlarmQuery alarmQuery) {
         if(Contant.CURR_ALARM.equals(alarmQuery.getType())){
             return listCurrent(alarmQuery);
         }else{
@@ -56,7 +57,7 @@ public class AlarmServiceImpl implements AlarmService{
      * @date: 2019/9/11 14:48
      * 功能描述:列表
      */
-    private List<DBObject> listCurrent(AlarmQuery alarmQuery) {
+    private List<Alarm> listCurrent(AlarmQuery alarmQuery) {
         return alarmDao.listCurrent(alarmQuery, MongTable.ALARM_CURRENT);
     }
 
@@ -66,7 +67,7 @@ public class AlarmServiceImpl implements AlarmService{
      * @date: 2019/12/5 19:20
      * 功能描述:历史告警伪分页
      */
-    public List<DBObject> listHistory(AlarmQuery alarmQuery) {
+    public List<Alarm> listHistory(AlarmQuery alarmQuery) {
         String tablePrefix = alarmQuery.getEnterpriseCode() + Contant.UNDERLINE + alarmQuery.getServerCode()
                 + Contant.UNDERLINE + history_table + Contant.UNDERLINE;
         //1，确定时间。如果开始接结束都没有选择，开始结束为今天到一个月前的今天
@@ -74,7 +75,7 @@ public class AlarmServiceImpl implements AlarmService{
         //2，获取时间跨度内各个时间点的年周数，生成对应的表
         List<String> weeks = getWeeks(alarmQuery);
         System.out.println(weeks.toString());
-        List<DBObject> allList = new ArrayList<>();
+        List<Alarm> allList = new ArrayList<>();
         int currentPage = alarmQuery.getCurrentPage();
         int pageSize = alarmQuery.getPageSize();
         int allSize = pageSize * (currentLimit+1);
@@ -89,7 +90,7 @@ public class AlarmServiceImpl implements AlarmService{
             String table = tablePrefix + weeks.get(i);
             alarmQuery.setRealBeginNum(nextBegin);
             alarmQuery.setRealLimit(nextSize);
-            List<DBObject> historyAlarmList = alarmDao.listHistory(alarmQuery, table);
+            List<Alarm> historyAlarmList = alarmDao.listHistory(alarmQuery, table);
             int tempCount = historyAlarmList.size();
             if(nextBegin > tempCount){
                 nextBegin = nextSize - tempCount;

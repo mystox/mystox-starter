@@ -1,11 +1,8 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.base.FacadeView;
-import com.kongtrolink.framework.core.entity.Alarm;
-import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
-import com.mongodb.DBObject;
-
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +18,7 @@ public interface AlarmService {
      * @date: 2020/2/28 13:54
      * 功能描述:获取列表
      */
-    List<DBObject> list(AlarmQuery alarmQuery);
+    List<Alarm> list(AlarmQuery alarmQuery);
 
     /**
      * @auther: liudd

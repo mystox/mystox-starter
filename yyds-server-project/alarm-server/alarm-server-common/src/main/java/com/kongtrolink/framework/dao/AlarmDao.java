@@ -56,7 +56,7 @@ public class AlarmDao {
         return result.getN()>0 ? true : false;
     }
 
-    public List<DBObject> listCurrent(AlarmQuery alarmQuery, String table) {
+    public List<Alarm> listCurrent(AlarmQuery alarmQuery, String table) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
@@ -64,16 +64,16 @@ public class AlarmDao {
         int pageSize = alarmQuery.getPageSize();
         query.with(new Sort(Sort.Direction.DESC, "treport"));
         query.skip( (currentPage-1)*pageSize ).limit(pageSize * (currentLimit+1));
-        return mongoTemplate.find(query, DBObject.class, table);
+        return mongoTemplate.find(query, Alarm.class, table);
     }
 
-    public List<DBObject> listHistory(AlarmQuery alarmQuery, String table) {
+    public List<Alarm> listHistory(AlarmQuery alarmQuery, String table) {
         Criteria criteria = new Criteria();
         baseCriteria(criteria, alarmQuery);
         Query query = Query.query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "treport"));
         query.skip(alarmQuery.getRealBeginNum()).limit(alarmQuery.getRealLimit());
-        return mongoTemplate.find(query, DBObject.class, table);
+        return mongoTemplate.find(query, Alarm.class, table);
     }
 
     public int count(AlarmQuery alarmQuery, String table) {
@@ -192,23 +192,6 @@ public class AlarmDao {
     }
 
     /**
-     * @param table
-     * @auther: liudd
-     * @date: 2019/9/26 10:29
-     * 功能描述:告警消除
-     */
-    public boolean resolve(String table, AlarmQuery alarmQuery) {
-        Criteria criteria = new Criteria();
-        baseCriteria(criteria, alarmQuery);
-        Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("state", alarmQuery.getState());
-        update.set("trecover", alarmQuery.getTrecover());
-        WriteResult result = mongoTemplate.updateFirst(query, update, table);
-        return result.getN()>0 ? true : false;
-    }
-
-    /**
      * @auther: liudd
      * @date: 2019/10/14 14:43
      * 功能描述:获取实时告警，用于周期管理。
@@ -278,9 +261,7 @@ public class AlarmDao {
         criteria.and("serial").is(serial);
         Query query = Query.query(criteria);
         Update update = new Update();
-        for(String key : updateMap.keySet()){
-            update.set(key, updateMap.get(key));
-        }
+        update.set("auxilaryMap", updateMap);
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -319,8 +300,8 @@ public class AlarmDao {
      * @date: 2019/12/28 15:06
      * 功能描述:确认告警
      */
-    public boolean check(String key,  String table, Date date, String checkContant, FacadeView checker) {
-        Criteria criteria = Criteria.where("key").is(key);
+    public boolean check(String alarmId,  String table, Date date, String checkContant, FacadeView checker) {
+        Criteria criteria = Criteria.where("_id").is(alarmId);
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("checkTime", date);
@@ -338,7 +319,7 @@ public class AlarmDao {
      * 功能描述:告警确认，后期将中台的告警确认方法合并过来
      */
     public boolean check(String table, AlarmQuery alarmQuery) {
-        Criteria criteria = Criteria.where("_id").is(alarmQuery.getId());
+        Criteria criteria = Criteria.where("_id").in(alarmQuery.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("checkTime", alarmQuery.getOperateTime());
@@ -356,13 +337,30 @@ public class AlarmDao {
      * 功能描述:告警确认，后期将中台的告警确认方法合并过来
      */
     public boolean nocheck(String table, AlarmQuery alarmQuery) {
-        Criteria criteria = Criteria.where("_id").is(alarmQuery.getId());
+        Criteria criteria = Criteria.where("_id").in(alarmQuery.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.unset("checkTime");
         update.unset("checkContant");
         update.unset("checker");
-        WriteResult result = mongoTemplate.updateMulti(query, update, table);
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
+
+
+    /**
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:29
+     * 功能描述:告警消除
+     */
+    public boolean resolve(String table, AlarmQuery alarmQuery) {
+        Criteria criteria = Criteria.where("_id").in(alarmQuery.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", alarmQuery.getState());
+        update.set("trecover", alarmQuery.getTrecover());
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
 }

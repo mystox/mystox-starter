@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.WorkDao;
 import com.kongtrolink.framework.scloud.entity.*;
@@ -9,8 +11,10 @@ import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.service.WorkRecordService;
 import com.kongtrolink.framework.scloud.service.WorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import com.kongtrolink.framework.service.MqttOpera;
 import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -27,6 +31,10 @@ public class WorkServiceImpl implements WorkService{
     WorkDao workDao;
     @Autowired
     WorkRecordService recordService;
+    @Value("${deliver.sender:handleSender}")
+    private String handleSender;
+    @Autowired
+    MqttOpera mqttOpera;
 
     @Override
     public void add(String uniqueCode, Work work) {
@@ -73,7 +81,6 @@ public class WorkServiceImpl implements WorkService{
         Date curDate = new Date();
         work.setSentTime(curDate);
         work.setOperatorTime(curDate);
-        work.setCode(StringUtil.createCodeByDate(curDate));
         work.setSendType(sendType);
         //site信息
         work.setSite(new FacadeView(workQuery.getSiteCode(), workQuery.getSiteName()));
@@ -214,6 +221,7 @@ public class WorkServiceImpl implements WorkService{
         recordService.add(uniqueCode, workRecord);
         //这里需要发送推送或者短信
 //        workJpushService.pushWork(uniqueCode, work, workRecord);
+
         return new JsonResult("回单成功", true);
     }
 
@@ -235,7 +243,6 @@ public class WorkServiceImpl implements WorkService{
         workRecord.setHandleTime(handleTime);
         workRecord.setOperateFTU(FTU);
         recordService.add(uniqueCode, workRecord);
-//        alarmService.updateWorkInfoByWorkId(uniqueCode, work.getId(), null);
         return new JsonResult("撤单成功", true);
     }
 
@@ -275,5 +282,18 @@ public class WorkServiceImpl implements WorkService{
             }
             workDao.updateAlarmInfo(uniqueCode, work);
         }
+    }
+
+    @Override
+    public JSONObject createJpush(Work work, String operate, List<String> accountList) {
+        JSONObject jsonObject = new JSONObject();
+        String title = "[工单通告--"+ operate +"]";
+        String content = "您有一条工单："+work.getDevice().getName() + "设备，请及时处理" ;
+        jsonObject.put("title", title);
+        jsonObject.put("content", content);
+        jsonObject.put("theKey", work.getId());
+        jsonObject.put("type", BaseConstant.TEMPLATE_APP);
+        jsonObject.put("accountList", accountList);
+        return jsonObject;
     }
 }

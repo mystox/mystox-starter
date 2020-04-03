@@ -11,7 +11,7 @@ spring:
     database: 2
 ###########服务及消息框架相关配置#############
 server:
-  groupCode: GROUP_LIUDD_TEST
+  groupCode: GROUP_LIUDD_TEST2
   name: SCLOUD_SERVER_WEB #服务编码
   version: 1.0.0 #服务版本
   port: 58202 #服务占用web端口

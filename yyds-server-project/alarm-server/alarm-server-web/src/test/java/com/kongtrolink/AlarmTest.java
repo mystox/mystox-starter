@@ -8,7 +8,7 @@ import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.query.AlarmQuery;
-import com.kongtrolink.framework.service.AlarmService;
+//import com.kongtrolink.framework.service.AlarmService;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.junit.Test;
@@ -43,8 +43,8 @@ public class AlarmTest {
     MongoTemplate mongoTemplate;
     @Autowired
     AlarmDao alarmDao;
-    @Autowired
-    AlarmService alarmService;
+//    @Autowired
+//    AlarmService alarmService;
 
     private String enterpriseCode = "meitainuo";
     private String serverCode = "zhyd";
@@ -91,7 +91,7 @@ public class AlarmTest {
         AlarmQuery alarmQuery = new AlarmQuery();
         alarmQuery.setEnterpriseCode(enterpriseCode);
         alarmQuery.setServerCode(serverCode);
-        List<DBObject> list = alarmDao.listCurrent(alarmQuery, currentTable);
+        List<Alarm> list = alarmDao.listCurrent(alarmQuery, currentTable);
         System.out.println(list);
     }
 
@@ -144,8 +144,8 @@ public class AlarmTest {
             alarmQuery.setServerCode("TOWER_SERVER");
             alarmQuery.setType(Contant.HIST_ALARM);
             alarmQuery.setStartBeginTime(beginTime);
-            List<DBObject> list = alarmService.list(alarmQuery);
-            System.out.println(list.toString());
+//            List<DBObject> list = alarmService.list(alarmQuery);
+//            System.out.println(list.toString());
         }catch (Exception e){
             e.printStackTrace();
             System.out.println("出异常罗");

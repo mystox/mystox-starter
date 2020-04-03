@@ -30,7 +30,8 @@ import java.util.*;
  * @Date: 2020/3/3 10:24
  * @Description:
  */
-@Controller("/alarmFocus")
+@Controller
+@RequestMapping("/alarmFocus")
 public class AlarmFocusController extends BaseController {
 
     @Autowired

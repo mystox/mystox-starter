@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.exception.ParameterException;
@@ -58,7 +59,7 @@ public class MqttServiceImpl implements MqttService{
             jsonResult.setInfo(e.getMessage());
             return JSONObject.toJSONString(jsonResult);
         }
-        List<DBObject> dbObjectList = alarmService.list(alarmQuery);
+        List<Alarm> dbObjectList = alarmService.list(alarmQuery);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode());
         jsonResult.setOtherInfo(auxilary);
         jsonResult.setSuccess(true);

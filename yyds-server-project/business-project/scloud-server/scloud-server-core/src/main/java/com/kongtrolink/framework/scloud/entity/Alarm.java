@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 
 import java.util.Date;
@@ -41,6 +42,7 @@ public class Alarm {
     private String type;                //告警类型（实时/历史）
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
+    private String checkState = BaseConstant.NOCHECK;          //告警确认状态
     private FacadeView checker;         //确认人
     private Boolean shield;             //是否屏蔽
     private String key ;                //唯一键，可作为索引
@@ -48,6 +50,23 @@ public class Alarm {
     public String initKey(){
         this.key = enterpriseCode + WorkConstants.UNDERLINE + serverCode + WorkConstants.COLON + deviceId + WorkConstants.UNDERLINE + serial;
         return key;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getCheckState() {
+
+        return checkState;
+    }
+
+    public void setCheckState(String checkState) {
+        this.checkState = checkState;
     }
 
     public String getSiteType() {

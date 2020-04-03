@@ -7,7 +7,7 @@ spring:
     database: 2
 
 server:
-  groupCode: GROUP_LIUDD_TEST
+  groupCode: GROUP_LIUDD_TEST3
   port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #  serverUri: /home #首页名
   pageRoute: proxy_alarm
