@@ -96,7 +96,7 @@ public class WorkController extends ExportController {
             boolean update = workService.update(uniqueCode, noOverWork);
             if(update){
                 //发送推送
-                JSONObject jpush = workService.createJpush(noOverWork, WorkConstants.OPERATE_SEND);
+                JSONObject jpush = workService.createJpush(noOverWork, WorkConstants.OPERATE_SEND, null);
 
                 return new JsonResult("派单成功", true);
             }
@@ -149,7 +149,7 @@ public class WorkController extends ExportController {
         //删除数据库中告警工单配置对应信息
         workAlarmConfigService.deleteByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         //发送工单推送
-        JSONObject jpush = workService.createJpush(work, WorkConstants.OPERATE_SEND);
+        JSONObject jpush = workService.createJpush(work, WorkConstants.OPERATE_SEND, null);
 
         return true;
     }
