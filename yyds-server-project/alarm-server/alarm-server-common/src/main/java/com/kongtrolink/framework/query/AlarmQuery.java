@@ -33,7 +33,7 @@ public class AlarmQuery extends Paging {
     private Date clearEndTime;                  //清除结束时间
     private Integer realBeginNum;               //真实分页起始数据
     private Integer realLimit;                  //真实分页大小
-    private Boolean isCheck;                    //是否确认
+    private String checkState;          //告警确认状态
     private Date treport;                       //上报时间
     private Date trecover;              //消除时间
 
@@ -175,12 +175,12 @@ public class AlarmQuery extends Paging {
         this.targetLevel = targetLevel;
     }
 
-    public Boolean getCheck() {
-        return isCheck;
+    public String getCheckState() {
+        return checkState;
     }
 
-    public void setCheck(Boolean check) {
-        isCheck = check;
+    public void setCheckState(String checkState) {
+        this.checkState = checkState;
     }
 
     public Integer getRealBeginNum() {

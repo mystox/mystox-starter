@@ -88,12 +88,10 @@ public class DeviceServiceImpl implements DeviceService {
                         if (map.size() > 0){
                             for (String deviceCode : map.keySet()){
                                 DeviceEntity device = deviceEntityMap.get(deviceCode);
-
                                 DeviceModel deviceModel = getDeviceModel(device);
                                 deviceModel.setName(map.get(deviceCode).getDeviceName());
                                 deviceModel.setModel(map.get(deviceCode).getModel());
                                 deviceModel.setSiteName(siteEntityMap.get(device.getSiteCode()).getName());
-
                                 list.add(deviceModel);
                             }
                         }
@@ -103,6 +101,56 @@ public class DeviceServiceImpl implements DeviceService {
                 }else {
                     LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
                 }
+            }
+        }
+        return list;
+    }
+
+    /**
+     * @param uniqueCode
+     * @param deviceQuery
+     * @auther: liudd
+     * @date: 2020/4/7 14:07
+     * 功能描述:获取设备列表
+     */
+    @Override
+    public List<DeviceModel> listDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception {
+        List<DeviceModel> list = new ArrayList<>();
+        //1，获取（业务平台数据库）站点下所有设备
+        List<DeviceEntity> devices = deviceMongo.findDeviceList(uniqueCode, deviceQuery);
+        if (devices != null && devices.size() > 0) {
+            List<String> deviceCodes = new ArrayList<>();   //设备编码
+            Map<String, DeviceEntity> deviceEntityMap = new HashMap<>();
+            for (DeviceEntity device : devices) {
+                deviceCodes.add(device.getCode());
+                deviceEntityMap.put(device.getCode(), device);  //key:设备编码，value：设备（扩展）信息
+            }
+            deviceQuery.setDeviceCodes(deviceCodes);
+            //从【中台-资管】获取设备(基本信息)列表
+            MsgResult msgResult = assetCIService.getAssetDeviceList(uniqueCode, deviceQuery);
+            if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){ //通信成功
+                CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
+                if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
+                    LOGGER.info("【设备管理】，从【资管】获取设备列表成功");
+                    Map<String, BasicDeviceEntity> map = new HashMap<>();
+                    for (JSONObject jsonObject : response.getInfos()) {
+                        BasicDeviceEntity basicDeviceEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicDeviceEntity.class);
+                        map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
+                    }
+                    if (map.size() > 0){
+                        for (String deviceCode : map.keySet()){
+                            DeviceEntity device = deviceEntityMap.get(deviceCode);
+                            DeviceModel deviceModel = getDeviceModel(device);
+                            deviceModel.setName(map.get(deviceCode).getDeviceName());
+                            deviceModel.setModel(map.get(deviceCode).getModel());
+                            list.add(deviceModel);
+                        }
+                    }
+                } else {
+                    LOGGER.error("【设备管理】，从【资管】获取设备列表失败");
+                }
+            }else {
+                LOGGER.error("【设备管理】，从【资管】获取设备列表 MQTT通信失败");
             }
         }
         return list;

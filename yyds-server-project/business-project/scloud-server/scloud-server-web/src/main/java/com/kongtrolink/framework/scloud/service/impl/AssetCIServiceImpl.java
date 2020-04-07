@@ -56,6 +56,9 @@ public class AssetCIServiceImpl implements AssetCIService{
         if (siteQuery.getSiteCode() != null && !siteQuery.getSiteCode().equals("")) {
             basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteCode()));  //站点编码-模糊搜索
         }
+        if(null != siteQuery.getSiteCodes()){
+            basicSiteQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, siteQuery.getSiteCodes()));
+        }
         if (siteQuery.getSiteName() != null && !siteQuery.getSiteName().equals("")) {
             basicSiteQuery.setSiteName(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_FUZZY, siteQuery.getSiteName()));    //站点名称-模糊搜索
         }

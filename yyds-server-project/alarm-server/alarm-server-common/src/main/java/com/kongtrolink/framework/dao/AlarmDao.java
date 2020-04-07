@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.dao;
 
+import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FacadeView;
 import com.kongtrolink.framework.base.MongoUtil;
 import com.kongtrolink.framework.base.StringUtil;
@@ -143,13 +144,9 @@ public class AlarmDao {
             name = MongoUtil.escapeExprSpecialWord(name);
             criteria.and("name").regex(".*?" + name + ".*?");
         }
-        Boolean check = alarmQuery.getCheck();
-        if(null != check){
-            if(false == check) {
-                criteria.and("checkTime").exists(false);
-            }else{
-                criteria.and("checkTime").exists(true);
-            }
+        String checkState = alarmQuery.getCheckState();
+        if(!StringUtil.isNUll(checkState)){
+            criteria.and("checkState").is(checkState);
         }
         List<String> entDevSigList = alarmQuery.getEntDevSigList();
         if(null != entDevSigList){
@@ -307,6 +304,7 @@ public class AlarmDao {
         update.set("checkTime", date);
         update.set("checkContant", checkContant);
         update.set("checker", checker);
+        update.set("checkState", "已确认");
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -325,6 +323,7 @@ public class AlarmDao {
         update.set("checkTime", alarmQuery.getOperateTime());
         update.set("checkContant", alarmQuery.getOperateDesc());
         update.set("checker",new FacadeView(alarmQuery.getOperateUsername(), alarmQuery.getOperateUsername()));
+        update.set("checkState", "已确认");
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -343,6 +342,7 @@ public class AlarmDao {
         update.unset("checkTime");
         update.unset("checkContant");
         update.unset("checker");
+        update.set("checkState", "未确认");
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }
@@ -358,7 +358,7 @@ public class AlarmDao {
         Criteria criteria = Criteria.where("_id").in(alarmQuery.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("state", alarmQuery.getState());
+        update.set("state", Contant.RESOLVE);
         update.set("trecover", alarmQuery.getTrecover());
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;

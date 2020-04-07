@@ -71,7 +71,9 @@ public class AlarmServiceImpl implements AlarmService {
             JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
             String dataStr = jsonResult.getData().toString();
             List<Alarm> alarmList = JSONObject.parseArray(dataStr, Alarm.class);
-            initInfo(alarmQuery.getEnterpriseCode(), alarmList);
+            if(null != alarmList && alarmList.size()>0) {
+                initInfo(alarmQuery.getEnterpriseCode(), alarmList);
+            }
             jsonResult.setData(alarmList);
             return jsonResult;
         }catch (Exception e){
@@ -94,6 +96,7 @@ public class AlarmServiceImpl implements AlarmService {
         //获取站点信息
         List<String> deviceCodeList = new ArrayList<>();
         Map<String, List<Alarm>> deviceCodeAlarmListMap = new HashMap<>();
+        String serverCode = alarmList.get(0).getServerCode();
         for(Alarm alarm : alarmList){
             alarm.setCheckState(BaseConstant.NOCHECK);
             if(null != alarm.getCheckTime()){
@@ -111,11 +114,12 @@ public class AlarmServiceImpl implements AlarmService {
             deviceCodeAlarmListMap.put(deviceId, deviceCodeAlarmList);
         }
         DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setServerCode(serverCode);
         deviceQuery.setPageSize(Integer.MAX_VALUE);
         deviceQuery.setDeviceCodes(deviceCodeList);
         List<DeviceModel> deviceModelList = new ArrayList<>();
         try{
-            deviceModelList = deviceService.findDeviceList(uniqueCode, deviceQuery);
+            deviceModelList = deviceService.listDeviceList(uniqueCode, deviceQuery);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -123,13 +127,14 @@ public class AlarmServiceImpl implements AlarmService {
         for(DeviceModel deviceModel : deviceModelList){
             String code = deviceModel.getCode();
             String typeCode = deviceModel.getTypeCode();
-            if(!typeCode.contains(typeCode)){
+            if(!typeCodeList.contains(typeCode)){
                 typeCodeList.add(typeCode);
             }
             List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
             for(Alarm alarm : deviceCodeAlarmList){
                 alarm.setDeviceName(deviceModel.getName());
                 alarm.setSiteCode(deviceModel.getSiteCode());
+                alarm.setTierName(deviceModel.getTierName());
             }
         }
         //初始化站点信息
@@ -148,6 +153,7 @@ public class AlarmServiceImpl implements AlarmService {
             siteCodeAlarmListMap.put(siteCode, siteIdAlarmList);
         }
         SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setServerCode(serverCode);
         siteQuery.setPageSize(Integer.MAX_VALUE);
         siteQuery.setSiteCodes(siteCodeList);
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);

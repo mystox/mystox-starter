@@ -113,6 +113,7 @@ public class MqttServiceImpl implements MqttService{
     @Override
     public String alarmRemoteOperate(String jsonStr) {
         logger.info(jsonStr);
+        Date curDate = new Date();
         //填充查询条件
         JsonResult jsonResult = new JsonResult();
         AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
@@ -138,6 +139,7 @@ public class MqttServiceImpl implements MqttService{
             }else if(Const.ALARM_OPERATE_NOTCHECK.equals(alarmQuery.getOperate())){
                 check = alarmService.nocheck(alarmQuery);
             }else if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
+                alarmQuery.setTrecover(curDate);
                 check = alarmService.resolve(alarmQuery);
             }
             if(check){
@@ -146,7 +148,7 @@ public class MqttServiceImpl implements MqttService{
                 failCount ++;
             }
         }
-        jsonResult.setData("共" + idList.size() + "个告警，成功" + succCount + "个， 失败" + failCount+"个");
+        jsonResult.setData("共" + idList.size() + "个告警" +alarmQuery.getOperate()+"，成功" + succCount + "个， 失败" + failCount+"个");
         jsonResult.setSuccess(true);
         if(succCount == 0){
             jsonResult.setSuccess(false);
