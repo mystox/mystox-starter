@@ -46,6 +46,15 @@ public class Alarm {
     private FacadeView checker;         //确认人
     private Boolean shield;             //是否屏蔽
     private String key ;                //唯一键，可作为索引
+    private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
+
+    public String getEntDevSig() {
+        return entDevSig;
+    }
+
+    public void setEntDevSig(String entDevSig) {
+        this.entDevSig = entDevSig;
+    }
 
     public String initKey(){
         this.key = enterpriseCode + WorkConstants.UNDERLINE + serverCode + WorkConstants.COLON + deviceId + WorkConstants.UNDERLINE + serial;
