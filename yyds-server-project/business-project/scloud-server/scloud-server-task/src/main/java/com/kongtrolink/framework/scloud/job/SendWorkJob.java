@@ -47,10 +47,14 @@ public class SendWorkJob {
         //判定该告警所在设备是否有未回单的工单
         Work noOverWork = jobWorkService.getNoOverWorkByDeviceCode(uniqueCode, alarmWorkConfig.getDeviceCode());
         WorkAlarm workAlarm = alarmWorkConfig.createWorkAlarm();
+
+        AlarmBusiness alarmBusiness = new AlarmBusiness();
+        alarmBusiness.setKey(alarmWorkConfig.getAlarmKey());
         if(null != noOverWork){
             //向工单中添加告警信息并保存
             noOverWork.getWorkAlarmList().add(workAlarm);
             jobWorkService.updateWork(uniqueCode, noOverWork);
+            alarmBusiness.setWorkCode(noOverWork.getCode());
         }else{
             //生成一条工单
             Work work = createWork(alarmWorkConfig, workConfig, workAlarm, WorkConstants.SEND_TYPE_AUTO, curDate);
@@ -59,14 +63,15 @@ public class SendWorkJob {
             WorkRecord workRecord = createWorkRecord(work, null, WorkConstants.OPERATE_SEND,
                     null, work.getOperatorTime(), 0, WorkConstants.FTU_WEB, null);
             jobWorkService.addWorkRecord(uniqueCode, workRecord);
+            alarmBusiness.setWorkCode(work.getCode());
             //liuddtodo 发送工单推送
 //            workJpushService.pushWork(uniqueCode, work, workRecord);
         }
 
         //删除该告警工单配置对应信息
         jobWorkService.deleteWorkAlarmConfigById(alarmWorkConfig.getId());
-        //liuddtodo 修改告警的工单状态
-//        alarmTaskMongo.updateWorkInfo(uniqueCode, alarm, workId, workCode, EnumWorkStatus.SENDED.getName());
+        //修改告警的工单状态
+        jobWorkService.addAlarmBusiness(uniqueCode, alarmBusiness);
     }
 
     private Work createWork(WorkAlarmConfig workAlarmConfig, WorkConfig workConfig, WorkAlarm workAlarm, String sentType, Date curDate){

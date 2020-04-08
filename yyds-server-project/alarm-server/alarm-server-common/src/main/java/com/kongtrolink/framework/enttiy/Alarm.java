@@ -46,6 +46,15 @@ public class Alarm {
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
+    private String workCode;            //工单编码，用于前端展示
+
+    public String getWorkCode() {
+        return workCode;
+    }
+
+    public void setWorkCode(String workCode) {
+        this.workCode = workCode;
+    }
 
     public String getCheckState() {
         return checkState;

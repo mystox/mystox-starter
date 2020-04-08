@@ -5,6 +5,8 @@ import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.exception.ParameterException;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.*;
@@ -45,6 +47,8 @@ public class WorkController extends ExportController {
     WorkConfigService workConfigService;
     @Autowired
     WorkRecordService workRecordService;
+    @Autowired
+    AlarmBusinessService businessService;
     /**
      * WEB端工单列表，只能获取当前用户管辖的站点
      * @param workQuery
@@ -86,7 +90,6 @@ public class WorkController extends ExportController {
      */
     @RequestMapping(value = "/sendWork", method = RequestMethod.POST)
     public @ResponseBody JsonResult add(@RequestBody WorkQuery workQuery, HttpServletRequest request){
-        boolean result ;
         String uniqueCode = getUniqueCode();
         User user = getUser(request);
         //判定该设备是否有未回单的工单
@@ -103,22 +106,13 @@ public class WorkController extends ExportController {
             return new JsonResult("派单失败", false);
         }else{  //该设备没有待回单工单
             FacadeView operator = new FacadeView(user.getUsername(), user.getName(), user.getPhone());
-            result = createNewWork(uniqueCode, workQuery, operator, null);
+            noOverWork = createNewWork(uniqueCode, workQuery, operator, null);
         }
-        //先调用远程接口
-        AlarmQuery alarmQuery = new AlarmQuery();
-        alarmQuery.setEnterpriseCode(workQuery.getEnterpriseCode());
-        alarmQuery.setServerCode(workQuery.getServerCode());
-        alarmQuery.setId(workQuery.getAlarmId());
-        alarmQuery.setTreport(alarmQuery.getTreport());
-        JSONObject jsonObject = alarmService.updateWorkInfo(alarmQuery);
-        if(!jsonObject.getBoolean("success")){
-            return new JsonResult(jsonObject.getString("info"), false);
-        }
-        if(result){
-            return new JsonResult("派单成功", true);
-        }
-        return new JsonResult("派单失败", false);
+        AlarmBusiness alarmBusiness = new AlarmBusiness();
+        alarmBusiness.setWorkCode(noOverWork.getCode());
+        alarmBusiness.setKey(workQuery.getWorkAlarm().getAlarmKey());
+        businessService.add(uniqueCode, CollectionSuffix.CUR_ALARM_BUSINESS, alarmBusiness);
+        return new JsonResult("派单成功", true);
     }
 
     /**
@@ -126,7 +120,7 @@ public class WorkController extends ExportController {
      * @date: 2020/4/2 14:12
      * 功能描述:生成新工单
      */
-    private boolean createNewWork(String uniqueCode, WorkQuery workQuery, FacadeView operator, FacadeView receiver){
+    private Work createNewWork(String uniqueCode, WorkQuery workQuery, FacadeView operator, FacadeView receiver){
         //获取该告警对应的告警工单配置对应信息
         WorkAlarmConfig alarmWorkConfig = workAlarmConfigService.findByAlarmKey(uniqueCode, workQuery.getWorkAlarm().getAlarmKey());
         WorkConfig workConfig ;
@@ -151,7 +145,7 @@ public class WorkController extends ExportController {
         //发送工单推送
         JSONObject jpush = workService.createJpush(work, WorkConstants.OPERATE_SEND, null);
 
-        return true;
+        return work;
     }
 
     /**
@@ -260,7 +254,7 @@ public class WorkController extends ExportController {
                 srcWork.setSentTime(work.getSentTime());
                 srcWork.setTaskTime(work.getTaskTime());
                 srcWork.setSite(work.getSite());
-                srcWork.setAlarmTime(workAlarm.gettReport());
+                srcWork.setAlarmTime(workAlarm.getTrecover());
                 srcWork.setAlarmStatus(workAlarm.getState());
                 srcWork.setAlarmLevel(workAlarm.getLevel());
                 srcWork.setAlarmName(workAlarm.getAlarmName());

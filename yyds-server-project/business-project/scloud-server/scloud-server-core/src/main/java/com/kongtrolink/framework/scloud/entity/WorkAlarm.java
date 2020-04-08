@@ -13,8 +13,8 @@ public class WorkAlarm {
     private String alarmName;   //告警名称
     private Integer level;       //告警等级
     private String state;       //告警状态
-    private Date tReport;       //告警时间
-    private Date tRecover;      //告警清除时间
+    private Date treport;       //告警时间
+    private Date trecover;      //告警清除时间
 
     public String getAlarmKey() {
         return alarmKey;
@@ -48,19 +48,20 @@ public class WorkAlarm {
         this.state = state;
     }
 
-    public Date gettReport() {
-        return tReport;
+    public Date getTrecover() {
+        return trecover;
     }
 
-    public void settReport(Date tReport) {
-        this.tReport = tReport;
+    public void setTrecover(Date trecover) {
+        this.trecover = trecover;
     }
 
-    public Date gettRecover() {
-        return tRecover;
+    public Date getTreport() {
+
+        return treport;
     }
 
-    public void settRecover(Date tRecover) {
-        this.tRecover = tRecover;
+    public void setTreport(Date treport) {
+        this.treport = treport;
     }
 }

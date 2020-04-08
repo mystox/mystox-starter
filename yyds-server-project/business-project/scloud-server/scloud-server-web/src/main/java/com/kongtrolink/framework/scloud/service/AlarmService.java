@@ -33,4 +33,8 @@ public interface AlarmService {
     JsonResult operate(AlarmQuery alarmQuery) throws Exception;
 
     JSONObject updateWorkInfo(AlarmQuery alarmQuery);
+
+
+
+
 }

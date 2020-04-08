@@ -6,11 +6,9 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.dao.AlarmDao;
-import com.kongtrolink.framework.scloud.entity.Alarm;
-import com.kongtrolink.framework.scloud.entity.DeviceEntity;
-import com.kongtrolink.framework.scloud.entity.FilterRule;
-import com.kongtrolink.framework.scloud.entity.SignalType;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
@@ -47,6 +45,8 @@ public class AlarmServiceImpl implements AlarmService {
     DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     FilterRuleService filterRuleService;
+    @Autowired
+    AlarmBusinessService businessService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
@@ -97,7 +97,11 @@ public class AlarmServiceImpl implements AlarmService {
         List<String> deviceCodeList = new ArrayList<>();
         Map<String, List<Alarm>> deviceCodeAlarmListMap = new HashMap<>();
         String serverCode = alarmList.get(0).getServerCode();
+        List<String> keyList = new ArrayList<>();
+        Map<String, Alarm> keyAlarmMap = new HashMap<>();
         for(Alarm alarm : alarmList){
+            keyList.add(alarm.getKey());
+            keyAlarmMap.put(alarm.getKey(), alarm);
             alarm.setCheckState(BaseConstant.NOCHECK);
             if(null != alarm.getCheckTime()){
                 alarm.setCheckState(BaseConstant.CHECKED);
@@ -112,6 +116,12 @@ public class AlarmServiceImpl implements AlarmService {
             }
             deviceCodeAlarmList.add(alarm);
             deviceCodeAlarmListMap.put(deviceId, deviceCodeAlarmList);
+        }
+        //获取工单信息
+        List<AlarmBusiness> businessList = businessService.listByKeyList(uniqueCode, CollectionSuffix.CUR_ALARM_BUSINESS, keyList);
+        for(AlarmBusiness alarmBusiness : businessList){
+            Alarm alarm = keyAlarmMap.get(alarmBusiness.getKey());
+            alarm.setWorkCode(alarmBusiness.getWorkCode());
         }
         DeviceQuery deviceQuery = new DeviceQuery();
         deviceQuery.setServerCode(serverCode);

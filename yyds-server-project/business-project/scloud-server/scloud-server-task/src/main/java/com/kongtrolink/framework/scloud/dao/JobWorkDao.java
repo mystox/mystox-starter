@@ -1,10 +1,7 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
-import com.kongtrolink.framework.scloud.entity.Work;
-import com.kongtrolink.framework.scloud.entity.WorkAlarmConfig;
-import com.kongtrolink.framework.scloud.entity.WorkConfig;
-import com.kongtrolink.framework.scloud.entity.WorkRecord;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -30,6 +27,7 @@ public class JobWorkDao {
     private String table_work_config = "_work_config";
     private String table_work = "_work";
     private String tabel_work_record = "_work_record";
+    private String table_cur_alarm_business = "_current_alarm_business";
 
     public List<WorkAlarmConfig> getAllWorkAlarmConfig(Date curDate) {
         Criteria criteria = Criteria.where("sendWorkTime").lte(curDate);
@@ -86,5 +84,16 @@ public class JobWorkDao {
         Criteria criteria = Criteria.where("_id").is(workAlarmConfigId);
         Query query = Query.query(criteria);
         mongoTemplate.remove(query, table_work_alarm_config);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param alarmBusiness
+     * @auther: liudd
+     * @date: 2020/4/8 19:05
+     * 功能描述:添加告警业务信息.如果告警消除时，该告警还未派单，则删除告警工单配置信息。杜绝派单时告警已消除情况
+     */
+    public void addAlarmBusiness(String uniqueCode, AlarmBusiness alarmBusiness) {
+        mongoTemplate.save(alarmBusiness, uniqueCode + table_cur_alarm_business);
     }
 }

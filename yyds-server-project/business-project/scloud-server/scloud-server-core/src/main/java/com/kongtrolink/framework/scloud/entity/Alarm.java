@@ -47,6 +47,15 @@ public class Alarm {
     private Boolean shield;             //是否屏蔽
     private String key ;                //唯一键，可作为索引
     private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
+    private String workCode;            //工单编码，用于前端展示
+
+    public String getWorkCode() {
+        return workCode;
+    }
+
+    public void setWorkCode(String workCode) {
+        this.workCode = workCode;
+    }
 
     public String getEntDevSig() {
         return entDevSig;

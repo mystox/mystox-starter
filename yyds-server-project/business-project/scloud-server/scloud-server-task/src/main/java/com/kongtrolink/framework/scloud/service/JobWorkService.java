@@ -1,9 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
-import com.kongtrolink.framework.scloud.entity.Work;
-import com.kongtrolink.framework.scloud.entity.WorkAlarmConfig;
-import com.kongtrolink.framework.scloud.entity.WorkConfig;
-import com.kongtrolink.framework.scloud.entity.WorkRecord;
+import com.kongtrolink.framework.scloud.entity.*;
 
 import java.util.Date;
 import java.util.List;
@@ -33,4 +30,11 @@ public interface JobWorkService {
     void addWorkRecord(String uniqueCode, WorkRecord workRecord);
 
     void deleteWorkAlarmConfigById(String workAlarmConfigId);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/8 19:05
+     * 功能描述:添加告警业务信息.如果告警消除时，该告警还未派单，则删除告警工单配置信息。杜绝派单时告警已消除情况
+     */
+    void addAlarmBusiness(String uniqueCode, AlarmBusiness alarmBusiness);
 }

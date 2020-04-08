@@ -1,10 +1,7 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
 import com.kongtrolink.framework.scloud.dao.JobWorkDao;
-import com.kongtrolink.framework.scloud.entity.Work;
-import com.kongtrolink.framework.scloud.entity.WorkAlarmConfig;
-import com.kongtrolink.framework.scloud.entity.WorkConfig;
-import com.kongtrolink.framework.scloud.entity.WorkRecord;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.service.JobWorkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,5 +60,17 @@ public class JobWorkServiceImpl implements JobWorkService {
     @Override
     public void deleteWorkAlarmConfigById(String workAlarmConfigId) {
         jobWorkDao.deleteWorkAlarmConfigById(workAlarmConfigId);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param alarmBusiness
+     * @auther: liudd
+     * @date: 2020/4/8 19:05
+     * 功能描述:添加告警业务信息.如果告警消除时，该告警还未派单，则删除告警工单配置信息。杜绝派单时告警已消除情况
+     */
+    @Override
+    public void addAlarmBusiness(String uniqueCode, AlarmBusiness alarmBusiness) {
+        jobWorkDao.addAlarmBusiness(uniqueCode, alarmBusiness);
     }
 }

@@ -17,6 +17,11 @@ mqtt:
 spring.data.mongodb:
   uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
 
+executor:
+  threadPool:
+    corePoolSize: 10 #\u6838\u5FC3\u6267\u884C\u7EBF\u7A0B\u6570
+    maxPoolSize: 1000 #\u6700\u5927\u7EF4\u62A4\u7EBF\u7A0B\u6570
+
 ###########上传文件配置###########
 servlet:
   multipart:
