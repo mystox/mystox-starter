@@ -78,6 +78,7 @@ public class WorkServiceImpl implements WorkService{
     @Override
     public Work createWork(WorkQuery workQuery, WorkConfig workConfig, String sendType) {
         Work work = new Work();
+        work.setCode(StringUtil.createCodeByDate(new Date()));
         Date curDate = new Date();
         work.setSentTime(curDate);
         work.setOperatorTime(curDate);
