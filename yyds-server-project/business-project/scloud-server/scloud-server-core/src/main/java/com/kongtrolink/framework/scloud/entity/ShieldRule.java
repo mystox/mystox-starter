@@ -1,8 +1,6 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
-import com.kongtrolink.framework.scloud.entity.model.SiteModel;
-
+import com.sun.istack.internal.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,16 +13,41 @@ import java.util.List;
 public class ShieldRule {
 
     private String id;
+    private String enterpriseCode;
+    private String serverCode;
+    @NotNull
     private String name;
-    private List<String> deviceIdList;
-    private List<String> alarmlevel;
+    private List<String> deviceCodeList;
+    private List<Integer> alarmlevel;
     private String reason;
     private FacadeView creator;
     private Date updateTime;
     private Boolean enabled = false;
-    //前端详情展示用
-    private List<SiteModel> siteModelList = new ArrayList<>();
-    private List<DeviceModel> deviceModelList = new ArrayList<>();
+    private List<String> deviceInfoList = new ArrayList<>();        //前端展示专用
+
+    public String getEnterpriseCode() {
+        return enterpriseCode;
+    }
+
+    public void setEnterpriseCode(String enterpriseCode) {
+        this.enterpriseCode = enterpriseCode;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
+
+    public List<String> getDeviceInfoList() {
+        return deviceInfoList;
+    }
+
+    public void setDeviceInfoList(List<String> deviceInfoList) {
+        this.deviceInfoList = deviceInfoList;
+    }
 
     public Boolean getEnabled() {
         return enabled;
@@ -32,22 +55,6 @@ public class ShieldRule {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public List<SiteModel> getSiteModelList() {
-        return siteModelList;
-    }
-
-    public void setSiteModelList(List<SiteModel> siteModelList) {
-        this.siteModelList = siteModelList;
-    }
-
-    public List<DeviceModel> getDeviceModelList() {
-        return deviceModelList;
-    }
-
-    public void setDeviceModelList(List<DeviceModel> deviceModelList) {
-        this.deviceModelList = deviceModelList;
     }
 
     public String getId() {
@@ -66,19 +73,19 @@ public class ShieldRule {
         this.name = name;
     }
 
-    public List<String> getDeviceIdList() {
-        return deviceIdList;
+    public List<String> getDeviceCodeList() {
+        return deviceCodeList;
     }
 
-    public void setDeviceIdList(List<String> deviceIdList) {
-        this.deviceIdList = deviceIdList;
+    public void setDeviceCodeList(List<String> deviceCodeList) {
+        this.deviceCodeList = deviceCodeList;
     }
 
-    public List<String> getAlarmlevel() {
+    public List<Integer> getAlarmlevel() {
         return alarmlevel;
     }
 
-    public void setAlarmlevel(List<String> alarmlevel) {
+    public void setAlarmlevel(List<Integer> alarmlevel) {
         this.alarmlevel = alarmlevel;
     }
 

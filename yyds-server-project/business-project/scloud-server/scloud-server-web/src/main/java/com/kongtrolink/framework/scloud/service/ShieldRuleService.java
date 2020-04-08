@@ -30,7 +30,7 @@ public interface ShieldRuleService {
      * @date: 2020/3/5 8:48
      * 功能描述:填充信息
      */
-    void initInfo(String uniqueCode, ShieldRule shieldRule);
+    void initInfo(String uniqueCode, ShieldRule shieldRule) throws Exception;
 
     /**
      * @auther: liudd
