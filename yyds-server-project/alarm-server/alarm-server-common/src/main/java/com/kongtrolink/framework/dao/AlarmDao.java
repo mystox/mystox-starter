@@ -103,6 +103,10 @@ public class AlarmDao {
             targetLevelName = MongoUtil.escapeExprSpecialWord(targetLevelName);
             criteria.and("targetLevelName").is(targetLevelName);
         }
+        List<String> targetLevelNameList = alarmQuery.getTargetLevelNameList();
+        if(null != targetLevelNameList){
+            criteria.and("targetLevelName").in(targetLevelNameList);
+        }
         String state = alarmQuery.getState();
         if(!StringUtil.isNUll(state)){
             criteria.and("state").is(state);
@@ -118,7 +122,10 @@ public class AlarmDao {
             deviceModel = MongoUtil.escapeExprSpecialWord(deviceModel);
             criteria.and("deviceModel").is(deviceModel);
         }
-
+        List<String> deviceCodeList = alarmQuery.getDeviceCodeList();
+        if(null != deviceCodeList){
+            criteria.and("deviceId").in(deviceCodeList);
+        }
         Date startBeginTime = alarmQuery.getStartBeginTime();
         Date startEndTime = alarmQuery.getStartEndTime();
         if(null != startBeginTime && null == startEndTime){

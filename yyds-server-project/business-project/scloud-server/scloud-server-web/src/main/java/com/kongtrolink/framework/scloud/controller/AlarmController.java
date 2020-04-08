@@ -50,6 +50,10 @@ public class AlarmController extends ExportController{
     @ResponseBody
     public JsonResult list(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
         try {
+            User user = getUser(request);
+            if(null != user){
+                alarmQuery.setOperateUserId(user.getId());
+            }
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
             JsonResult jsonResult = alarmService.list(alarmQuery);
             return jsonResult;

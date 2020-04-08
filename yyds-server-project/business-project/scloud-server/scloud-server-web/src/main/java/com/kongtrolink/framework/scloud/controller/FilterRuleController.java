@@ -8,6 +8,7 @@ import com.kongtrolink.framework.scloud.entity.FilterRule;
 import com.kongtrolink.framework.scloud.query.FilterRuleQuery;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,6 +21,7 @@ import java.util.List;
  * @Date: 2020/3/5 14:59
  * @Description:
  */
+@Controller
 @RequestMapping("/filterRule")
 public class FilterRuleController extends BaseController {
 
@@ -87,6 +89,9 @@ public class FilterRuleController extends BaseController {
     public JsonResult updateState(@RequestBody FilterRuleQuery ruleQuery){
         String uniqueCode = getUniqueCode();
         ruleQuery.setUpdateTime(new Date());
+        if(null == ruleQuery.getState()){
+            return new JsonResult("启用状态不能为空", false);
+        }
         User user = getUser();
         if(null != user){
             ruleQuery.setCreatorId(user.getId());
@@ -100,6 +105,5 @@ public class FilterRuleController extends BaseController {
             return new JsonResult(operate + "成功", true);
         }
         return new JsonResult(operate + "失败", false);
-
     }
 }

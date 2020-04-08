@@ -26,6 +26,7 @@ public class AlarmQuery extends Paging {
     private Integer level;
     private Integer targetLevel;
     private String targetLevelName;             //目标等级名称
+    private List<String> targetLevelNameList;   //目标等级名称列表，用于告警过滤功能
     private String type;                        //告警类型（实时告警/历史告警）
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
@@ -46,6 +47,14 @@ public class AlarmQuery extends Paging {
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
     private List<String> keys;         //告警键
+
+    public List<String> getTargetLevelNameList() {
+        return targetLevelNameList;
+    }
+
+    public void setTargetLevelNameList(List<String> targetLevelNameList) {
+        this.targetLevelNameList = targetLevelNameList;
+    }
 
     public List<String> getKeys() {
         return keys;
