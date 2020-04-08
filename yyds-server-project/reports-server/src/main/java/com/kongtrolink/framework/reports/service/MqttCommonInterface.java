@@ -5,6 +5,7 @@ import com.kongtrolink.framework.reports.entity.query.DeviceEntity;
 import com.kongtrolink.framework.reports.entity.query.FsuEntity;
 import com.kongtrolink.framework.reports.entity.query.SiteEntity;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,6 +22,8 @@ public interface MqttCommonInterface {
     List<DeviceEntity> getDeviceList(List<String> fsuIds, JSONObject baseCondition);
 
     List<JSONObject> countAlarmByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> countHomeAlarmByDeviceIds(List<String> deviceIds, Date start, Date end, JSONObject baseCondition);
 
     List<SiteEntity> getSiteList(JSONObject baseCondition);
 
