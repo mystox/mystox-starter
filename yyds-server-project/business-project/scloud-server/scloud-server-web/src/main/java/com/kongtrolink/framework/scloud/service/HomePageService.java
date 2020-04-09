@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.service;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 
 import java.util.List;
 
@@ -26,4 +27,13 @@ public interface HomePageService {
      * @return 站点总数
      */
     List<SiteEntity> getHomeSiteList(String uniqueCode, String userId, HomeQuery homeQuery);
+
+    /**
+     * 告警工单统计
+     * @param uniqueCode 企业编码
+     * @param userId  用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery);
 }

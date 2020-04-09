@@ -5,19 +5,17 @@ import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
-import com.kongtrolink.framework.scloud.query.SiteQuery;
-import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
@@ -101,11 +99,41 @@ public class HomePageMongo {
     }
 
     /**
+     * 告警工单统计
+     *
+     * @param uniqueCode 企业编码
+     * @param userId     用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    public List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Date startTime = homeQuery.getStartTime();//开始时间
+        Date endTime = homeQuery.getEndTime(); //结束时间
+        Criteria criteria = Criteria.where("sentTime").gte(endTime).lte(startTime);
+        if (code != null && !"".equals(code)) {
+            criteria.and("code").regex("^"+code);//模糊查询
+        }
+        DBObject lookupSql = getLookupSql(userId,"site.id");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true)),
+                group("state").count().as("count"),
+                project("count").and("state").previousOperation()
+        );
+        AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
+        return result.getMappedResults();
+    }
+
+    /**
      * 获取lookup 权限
      * @param userId 用户ID
      * @param localId 源数据保存站点的主键ID
      *                如：site 的 id
      *                   Device表的 siteId
+     *                   work表的 site.id
      * @return sql
      */
     private DBObject getLookupSql(String userId,String localId){
