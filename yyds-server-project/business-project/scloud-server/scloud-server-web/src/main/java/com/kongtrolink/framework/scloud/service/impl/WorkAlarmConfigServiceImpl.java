@@ -45,10 +45,18 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
     private WorkAlarmConfig createAlarmWorkConfig(String uniqueCode, WorkConfig workConfig, Alarm alarm){
         WorkAlarmConfig alarmWorkConfig = new WorkAlarmConfig();
         alarmWorkConfig.setUniqueCode(uniqueCode);
-        alarmWorkConfig.setAlarmKey(alarm.initKey());
         alarmWorkConfig.setWorkConfigId(workConfig.getId());
-        //告警上报时间
+        alarmWorkConfig.setSiteCode(alarm.getSiteCode());
+        alarmWorkConfig.setSiteName(alarm.getSiteName());
+        alarmWorkConfig.setDeviceCode(alarm.getDeviceId());
+        alarmWorkConfig.setDeviceName(alarm.getDeviceName());
+        alarmWorkConfig.setDeviceType(alarm.getDeviceType());
+        alarmWorkConfig.setAlarmName(alarm.getName());
+        alarmWorkConfig.setAlarmLevel(alarm.getLevel());
+        alarmWorkConfig.setTreport(alarm.getTreport());
+        alarmWorkConfig.setAlarmState(alarm.getState());
         Date tReport = alarm.getTreport();
+        alarmWorkConfig.setAlarmKey(alarm.initKey());
         //告警后启用时限毫秒值
         int alarmBeginTime = workConfig.getReportAfter() * 60 * 1000;
         Date sendWorkTime = new Date(tReport.getTime() + alarmBeginTime);

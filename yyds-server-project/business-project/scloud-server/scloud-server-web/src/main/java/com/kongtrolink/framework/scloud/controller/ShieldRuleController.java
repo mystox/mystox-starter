@@ -40,10 +40,17 @@ public class ShieldRuleController extends BaseController{
     @ResponseBody
     public JsonResult add(@RequestBody ShieldRule shieldRule, HttpServletRequest request){
         String uniqueCode = getUniqueCode();
-        User user = getUser(request);
         Date curDate = new Date();
-        shieldRule.setCreator(new FacadeView(user.getId(), user.getUsername()));
+        User user = getUser(request);
+        if(null != user) {
+            shieldRule.setCreator(new FacadeView(user.getId(), user.getUsername()));
+        }
         shieldRule.setUpdateTime(curDate);
+        try {
+            ruleService.initInfo(uniqueCode, shieldRule);
+        }catch (Exception e){
+            return new JsonResult("获取设备信息失败", false);
+        }
         boolean add = ruleService.add(uniqueCode, shieldRule);
         if(add){
             return new JsonResult("添加成功");
@@ -83,7 +90,6 @@ public class ShieldRuleController extends BaseController{
         if(null == shieldRule){
             return new JsonResult("规则不存在", false);
         }
-        ruleService.initInfo(uniqueCode, shieldRule);
         return new JsonResult(shieldRule);
     }
 
@@ -93,17 +99,20 @@ public class ShieldRuleController extends BaseController{
         String uniqueCode = getUniqueCode();
         List<ShieldAlarm> list = shieldAlarmService.list(uniqueCode, shieldAlarmQuery);
         int count = shieldAlarmService.count(uniqueCode, shieldAlarmQuery);
-        shieldAlarmService.initInfo(uniqueCode, list);
+//        shieldAlarmService.initInfo(uniqueCode, list);
         JsonResult jsonResult = new JsonResult(list, count);
         return jsonResult;
     }
 
     @RequestMapping("/updateState")
     @ResponseBody
-    public JsonResult updateState(ShieldRuleQuery ruleQuery){
+    public JsonResult updateState(@RequestBody ShieldRuleQuery ruleQuery){
         String uniqueCode = getUniqueCode();
         boolean result = ruleService.updateState(uniqueCode, ruleQuery.getId(), ruleQuery.getState());
         String operate = "禁用";
+        if(null == ruleQuery.getState()){
+            return new JsonResult("操作状态为空", false);
+        }
         if(ruleQuery.getState()){
             operate = "启用";
         }

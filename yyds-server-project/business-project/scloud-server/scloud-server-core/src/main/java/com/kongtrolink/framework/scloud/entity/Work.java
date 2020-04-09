@@ -37,15 +37,23 @@ public class Work {
     private String isReceOverTime = WorkConstants.JUDGE_NO;     //是否超时接单
     private String isBackOverTime = WorkConstants.JUDGE_NO;     //是否超时回单
     private List<WorkAlarm> workAlarmList = new ArrayList<>();
-
     private String alarmState = WorkConstants.ALARM_STATE_PENDING; //告警状态
     private int pendingCount;                    //待处理告警数量
 
     //导出需要内容
     private Date alarmTime; //告警时间
     private String alarmStatus;
-    private String alarmLevel;
+    private Integer alarmLevel;
+    private String targetLevelName;
     private String alarmName;
+
+    public String getTargetLevelName() {
+        return targetLevelName;
+    }
+
+    public void setTargetLevelName(String targetLevelName) {
+        this.targetLevelName = targetLevelName;
+    }
 
     //前端返回需要
     List<WorkRecord> workRecordList;
@@ -67,11 +75,11 @@ public class Work {
         this.alarmStatus = alarmStatus;
     }
 
-    public String getAlarmLevel() {
+    public Integer getAlarmLevel() {
         return alarmLevel;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
+    public void setAlarmLevel(Integer alarmLevel) {
         this.alarmLevel = alarmLevel;
     }
 

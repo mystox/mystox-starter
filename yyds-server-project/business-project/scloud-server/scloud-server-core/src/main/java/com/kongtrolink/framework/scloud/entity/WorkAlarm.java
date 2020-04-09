@@ -11,7 +11,7 @@ public class WorkAlarm {
 
     private String alarmKey;     //告警Key，告警产生过程中，还没入库，不存在id
     private String alarmName;   //告警名称
-    private String level;       //告警等级
+    private Integer level;       //告警等级
     private String state;       //告警状态
     private Date tReport;       //告警时间
     private Date tRecover;      //告警清除时间
@@ -32,11 +32,11 @@ public class WorkAlarm {
         this.alarmName = alarmName;
     }
 
-    public String getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
@@ -62,21 +62,5 @@ public class WorkAlarm {
 
     public void settRecover(Date tRecover) {
         this.tRecover = tRecover;
-    }
-
-    /**
-     * 告警转换成WorkAlarm
-     * @param alarm
-     * @return
-     */
-    public static WorkAlarm AlarmToWorkAlarm(Alarm alarm){
-        WorkAlarm workAlarm = new WorkAlarm();
-        workAlarm.setAlarmKey(alarm.initKey());
-        workAlarm.setAlarmName(alarm.getName());
-        workAlarm.setLevel(alarm.getTargetLevelName());
-        workAlarm.setState(alarm.getState());
-        workAlarm.settReport(alarm.getTreport());
-        workAlarm.settRecover(alarm.getTrecover());
-        return workAlarm;
     }
 }

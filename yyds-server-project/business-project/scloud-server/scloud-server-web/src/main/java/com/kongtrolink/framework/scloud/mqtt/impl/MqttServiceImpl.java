@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @Auther: liudd
@@ -47,7 +48,7 @@ public class MqttServiceImpl implements MqttService {
         //填充你设备信息
         alarmService.initInfo(enterpriseCode, alarmList);
 
-        //告警过滤功能
+        //告警屏蔽功能
         shieldRuleService.matchRule(enterpriseCode, alarmList);
         //匹配告警工单配置
         alarmConfigService.matchAutoConfig(alarmList);
