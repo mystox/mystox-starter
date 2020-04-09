@@ -158,7 +158,8 @@ public class AlarmFocusController extends BaseController {
 //                }
 //            }
 //        }
-        return new JsonResult(alarmFocusList, count);
+        ListResult<AlarmFocus> listResult = new ListResult<>(alarmFocusList, count);
+        return new JsonResult(listResult);
     }
 
     /**
@@ -190,7 +191,8 @@ public class AlarmFocusController extends BaseController {
         businessQuery.setEntDevSigList(entDevSigList);
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
         int count = businessService.count(uniqueCode, businessQuery);
-        JsonResult jsonResult =new JsonResult(list, count);
+        ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult =new JsonResult(listResult);
         return jsonResult;
     }
 }
