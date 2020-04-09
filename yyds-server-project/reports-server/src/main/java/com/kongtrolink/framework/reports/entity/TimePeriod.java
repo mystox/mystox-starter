@@ -16,6 +16,14 @@ public class TimePeriod {
     private Date endTime;
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
+    public TimePeriod() {
+    }
+
+    public TimePeriod(Date startTime, Date endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
     public Date getStartTime() {
         return startTime;
     }

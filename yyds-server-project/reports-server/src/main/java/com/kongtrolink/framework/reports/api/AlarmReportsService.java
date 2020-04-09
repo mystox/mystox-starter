@@ -23,7 +23,5 @@ public interface AlarmReportsService {
     @OperaCode(code = OperaCodePrefix.REPORTS+"alarmCategory")
     public ReportData alarmCategory(String reportConfigStr);
 
-    @OperaCode(code = OperaCodePrefix.REPORTS+"alarmReports")
-    public ReportData alarmReports(String reportConfigStr);
 
 }

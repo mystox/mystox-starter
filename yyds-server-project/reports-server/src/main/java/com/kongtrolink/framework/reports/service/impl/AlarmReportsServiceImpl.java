@@ -144,7 +144,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String stationName = s.getSiteName();
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                //判断交维态
                 if (fsuList == null) {
                     logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
@@ -917,40 +916,4 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     }
 
 
-    @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmReports", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
-//            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
-            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
-            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/region/getStationList", hide = true), //站点列表
-            @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.JSON, belong = ExecutorType.query, uri = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
-            @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
-            @ReportExtend(field = "operationState", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
-            @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
-            @ReportExtend(field = "alarmStatus", name = "告警状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"历史告警"}),
-            @ReportExtend(field = "alarmLevel", name = "告警等级", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, uri = "/reportsOpera/getAlarmLevel"),
-            @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "县级", "站点级"}),
-            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}),
-            @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE_PERIOD, belong = ExecutorType.query, description = "时间范围,返回格式为{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}"),
-    })
-    public ReportData alarmReports(String reportConfigStr) {
-        ReportConfig reportConfig = JSONObject.parseObject(reportConfigStr, ReportConfig.class);
-        ExecutorType executorType = reportConfig.getExecutorType();
-        ReportTask reportTask = reportTaskDao.findByByUniqueCondition(
-                reportConfig.getServerCode(), reportConfig.getEnterpriseCode(), reportConfig.getOperaCode(), reportConfig.getReportServerCode());
-        if (reportTask == null)
-            return new ReportData(DataType.ERROR, "report task is not exists [" + JSONObject.toJSONString(reportTask) + "]");
-        if (ExecutorType.query.equals(executorType))
-            return alarmReportsQuery(reportConfig, reportTask);
-        else return alarmReportsExecutor(reportConfig, reportTask);
-
-    }
-
-    private ReportData alarmReportsExecutor(ReportConfig reportConfig, ReportTask reportTask) {
-        return null;
-    }
-
-    private ReportData alarmReportsQuery(ReportConfig reportConfig, ReportTask reportTask) {
-        return null;
-
-    }
 }

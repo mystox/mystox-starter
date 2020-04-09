@@ -5,6 +5,7 @@ import com.kongtrolink.framework.reports.entity.query.DeviceEntity;
 import com.kongtrolink.framework.reports.entity.query.FsuEntity;
 import com.kongtrolink.framework.reports.entity.query.SiteEntity;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,4 +50,14 @@ public interface MqttCommonInterface {
     List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
     List<JSONObject> getAlarmCurrentCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    /**
+     * @Date 16:26 2020/4/8
+     * @Param No such property: code for class: Script1
+     * @return com.alibaba.fastjson.JSONObject
+     * @Author mystox
+     * @Description //告警服务生成历史报表
+     **/
+    JSONObject exportAlarmHistory(Date endTime, Date startTime, JSONObject baseCondition);
+
 }

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -120,6 +121,24 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
             logger.error("get alarm category list error[mqtt]");
         }
         return null;
+    }
+
+    @Override
+    public JSONObject exportAlarmHistory(Date endTime, Date startTime, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("startBeginTime", startTime);
+        alarmCountCondition.put("startEndTime", endTime);
+        MsgResult opera = mqttOpera.opera("exportAlarmHistory", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        String alarmCategoryListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseObject(alarmCategoryListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
+
     }
 
     @Override

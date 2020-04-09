@@ -42,7 +42,7 @@ public class AlarmDetailsDao extends MongoBaseDao {
 
         Criteria criteria = Criteria.where("deleteFlag").is(false);
         String alarmLevel = condition.getString("alarmLevel");
-        if (StringUtils.isBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
+        if (StringUtils.isNotBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
         if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
         String runningSate = condition.getString("operationState");

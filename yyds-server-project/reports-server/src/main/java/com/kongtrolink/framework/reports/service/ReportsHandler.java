@@ -405,15 +405,34 @@ public class ReportsHandler implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
+        final Long serverStartTimeStamp = System.currentTimeMillis();
+        startChecking(serverStartTimeStamp);
         //启动任务执行器
         for (int i = 0; i < 9; i++)
             reportsScheduled.scheduleWithFixedDelay(this::task
                     , 1, 1, TimeUnit.SECONDS);
 
         //启动任务扫描器
-        final Long serverStartTimeStamp = System.currentTimeMillis();
         reportsScheduled.scheduleWithFixedDelay(() -> checkRunning(serverStartTimeStamp)
                 , 1, 3, TimeUnit.SECONDS);
+
+    }
+
+    private void startChecking(Long serverStartTimeStamp) {
+        List<ReportTask> reportTasks = reportTaskDao.findRunningReportTask(preconditionServerCode(serverName, serverVersion));
+        if (CollectionUtils.isEmpty(reportTasks)) return;
+        for (ReportTask reportTask : reportTasks) {
+            Date startTime = reportTask.getStartTime();
+            String reportTaskId = reportTask.getId();
+            //服务启动时处理被中断的任务
+            if (serverStartTimeStamp > startTime.getTime()) {
+                reportTask.setTaskStatus(TaskStatus.VALID.getStatus());
+                logger.warn("[{}]check running task restart...", reportTaskId);
+            }
+
+            reportTaskDao.save(reportTask);
+
+        }
 
     }
 
