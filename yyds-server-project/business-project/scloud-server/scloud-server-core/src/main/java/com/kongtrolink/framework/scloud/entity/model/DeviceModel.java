@@ -33,6 +33,8 @@ public class DeviceModel extends DeviceEntity {
 	private String fsuCode; //fsuCode
 	private Integer countSignal;
 
+	private String isModified; //修改设备时，是否修改了设备名称和设备型号,"0"-未修改，"1"-修改
+
 	public String getSiteAddress() {
 		return siteAddress;
 	}
@@ -40,8 +42,6 @@ public class DeviceModel extends DeviceEntity {
 	public void setSiteAddress(String siteAddress) {
 		this.siteAddress = siteAddress;
 	}
-
-	private String isModified; //修改设备时，是否修改了设备名称和设备型号,"0"-未修改，"1"-修改
 
 	public String getSiteName() {
 		return siteName;

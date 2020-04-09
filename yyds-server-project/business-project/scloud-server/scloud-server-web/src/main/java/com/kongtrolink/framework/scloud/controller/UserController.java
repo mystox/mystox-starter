@@ -36,42 +36,12 @@ public class UserController extends BaseController{
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     /**
-     * 获取系统用户详情信息
-     */
-    @RequestMapping(value = "getUserDetail", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getUserDetail(@RequestBody UserQuery userQuery){
-        try{
-//            String uniqueCode = getUniqueCode();
-            return new JsonResult(null);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("获取用户详情失败", false);
-        }
-    }
-
-    /**
-     * 获取系统用户列表
-     */
-    @RequestMapping(value = "getUserList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getUserList(@RequestBody UserQuery userQuery){
-        try{
-//            String uniqueCode = getUniqueCode();
-            List<UserModel> list = new ArrayList<>();
-            return new JsonResult(list);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("获取系统用户列表异常", false);
-        }
-    }
-
-    /**
-     * 导出用户列表
+     * 导出系统用户列表
      */
     @RequestMapping(value = "exportUserList", method = RequestMethod.POST)
     public void exportUserList(@RequestBody UserQuery userQuery, HttpServletResponse response){
         try{
 //            String uniqueCode = getUniqueCode();
-            String uniqueCode = getUniqueCode();
 
         }catch (Exception e){
             e.printStackTrace();
@@ -79,22 +49,7 @@ public class UserController extends BaseController{
     }
 
     /**
-     * 添加用户
-     */
-    @RequestMapping(value = "addUser", method = RequestMethod.POST)
-    public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
-        try{
-//            String uniqueCode = getUniqueCode();
-
-            return new JsonResult("添加成功", true);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("添加失败", false);
-        }
-    }
-
-    /**
-     * 批量导入用户
+     * 批量导入系统用户
      */
     @RequestMapping(value = "importUserList", method = RequestMethod.POST)
     public @ResponseBody JsonResult importUserList(@RequestBody MultipartFile multipartFile){
@@ -109,12 +64,70 @@ public class UserController extends BaseController{
     }
 
     /**
-     * 修改用户
+     * 修改系统用户或维护用户 管辖站点
      */
+    @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
+    public @ResponseBody JsonResult modifyUserSite(@RequestBody UserSiteEntity userSiteEntity){
+        try{
+//            String uniqueCode = getUniqueCode();
+
+            return new JsonResult("修改管辖站点成功", true);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("修改管辖站点失败", false);
+        }
+    }
+
+    /**
+     * 获取系统用户或维护用户 管辖站点
+     */
+    @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
+        try{
+//            String uniqueCode = getUniqueCode();
+
+            return new JsonResult(null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取管辖站点失败", false);
+        }
+    }
+
+    //-----------------[Warning]获取、添加、修改、删除系统用户 目前前端直接调取云管接口，以下接口暂时注释掉-----------------
+
+    /*
+    //获取系统用户列表
+    @RequestMapping(value = "getUserList", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getUserList(@RequestBody UserQuery userQuery){
+        try{
+            //String uniqueCode = getUniqueCode();
+            List<UserModel> list = new ArrayList<>();
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取系统用户列表异常", false);
+        }
+    }
+
+    //添加系统用户
+    @RequestMapping(value = "addUser", method = RequestMethod.POST)
+    public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
+        try{
+            //String uniqueCode = getUniqueCode();
+
+            return new JsonResult("添加成功", true);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("添加失败", false);
+        }
+    }
+
+
+    //修改系统用户
     @RequestMapping(value = "modifyUser", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUser(@RequestBody UserModel userModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            //String uniqueCode = getUniqueCode();
 
             return new JsonResult("修改用户信息成功", true);
         }catch (Exception e){
@@ -123,13 +136,12 @@ public class UserController extends BaseController{
         }
     }
 
-    /**
-     * 删除用户
-     */
+
+    //删除系统用户
     @RequestMapping(value = "deleteUser", method = RequestMethod.POST)
     public @ResponseBody JsonResult deleteUser(@RequestBody UserEntity userEntity){
         try{
-//            String uniqueCode = getUniqueCode();
+            //String uniqueCode = getUniqueCode();
 
             return new JsonResult("删除成功", true);
         }catch (Exception e){
@@ -137,34 +149,6 @@ public class UserController extends BaseController{
             return new JsonResult("删除失败", false);
         }
     }
+    */
 
-    /**
-     * 修改用户管辖站点
-     */
-    @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
-    public @ResponseBody JsonResult modifyUserSite(@RequestBody UserSiteEntity userSiteEntity){
-        try{
-//            String uniqueCode = getUniqueCode();
-
-            return new JsonResult("修改成功", true);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("修改失败", false);
-        }
-    }
-
-    /**
-     * 获取用户管辖站点
-     */
-    @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getUserSite(@RequestBody Integer userId){
-        try{
-//            String uniqueCode = getUniqueCode();
-
-            return new JsonResult(null);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("获取用户管辖站点失败", false);
-        }
-    }
 }
