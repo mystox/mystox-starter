@@ -278,7 +278,7 @@ public class WorkServiceImpl implements WorkService{
             for(WorkAlarm workAlarm : workAlarmList) {
                 Alarm alarm = keyAlarmMap.get(workAlarm.getAlarmKey());
                 workAlarm.setState(WorkConstants.ALARM_STATE_RESOLVED);
-                workAlarm.settRecover(alarm.getTrecover());
+                workAlarm.setTreport(alarm.getTrecover());
                 work.decreateAlarm();
             }
             workDao.updateAlarmInfo(uniqueCode, work);

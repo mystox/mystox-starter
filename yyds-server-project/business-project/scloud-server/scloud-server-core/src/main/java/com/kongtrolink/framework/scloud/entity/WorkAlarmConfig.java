@@ -154,7 +154,7 @@ public class WorkAlarmConfig {
         workAlarm.setAlarmName(this.getAlarmName());
         workAlarm.setLevel(this.getAlarmLevel());
         workAlarm.setState(this.getAlarmState());
-        workAlarm.settReport(this.getTreport());
+        workAlarm.setTreport(this.getTreport());
         return workAlarm;
     }
 }
