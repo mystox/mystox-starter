@@ -1,22 +1,27 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.core.entity.User;
-import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.exception.ParameterException;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,6 +45,8 @@ public class AlarmController extends ExportController{
     AlarmFocusService alarmFocusService;
     @Autowired
     FilterRuleService filterRuleService;
+    @Autowired
+    AlarmBusinessService businessService;
 
     /**
      * @auther: liudd
@@ -94,22 +101,74 @@ public class AlarmController extends ExportController{
      */
     @RequestMapping("/operate")
     @ResponseBody
-    public JsonResult operate(@RequestBody AlarmQuery alarmQuery, HttpServletRequest request){
+    public JsonResult operate(@RequestBody AlarmBusinessQuery businessQuery, HttpServletRequest request){
+        JsonResult jsonResult = new JsonResult();
+        JSONObject jsonObject = new JSONObject();
+        String uniqueCode = getUniqueCode();
+        String table = CollectionSuffix.CUR_ALARM_BUSINESS;
+        String type = businessQuery.getType();
+        if(BaseConstant.ALARM_TYPE_HISTORY.equals(type)){
+            table = CollectionSuffix.HIS_ALARM_BUSINESS;
+        }
         User user = getUser(request);
+        businessQuery.setOperateTime(new Date());
         if(null != user){
-            alarmQuery.setOperateUserId(user.getId());
-            alarmQuery.setOperateUsername(user.getUsername());
+            businessQuery.setOperateUserId(user.getId());
+            businessQuery.setOperateUsername(user.getUsername());
         }else{
-            alarmQuery.setOperateUserId("admin");
-            alarmQuery.setOperateUsername("超级管理员");
+            businessQuery.setOperateUserId("admin");
+            businessQuery.setOperateUsername("超级管理员");
         }
-        try {
-            JsonResult jsonResult = alarmService.operate(alarmQuery);
-            return jsonResult;
-        }catch (ParameterException paraException){
-            return new JsonResult(paraException.getMessage(), false);
-        } catch (Exception e) {
-            return new JsonResult(e.getMessage(), false);
+        String operate = businessQuery.getOperate();
+        if(BaseConstant.ALARM_OPERATE_CHECK.equals(operate)){
+            jsonObject = businessService.check(uniqueCode, table, businessQuery);
+            jsonResult.setData(jsonObject);
+        }else if(BaseConstant.ALARM_OPERATE_NOTCHECK.equals(operate)){
+            jsonObject = businessService.unCheck(uniqueCode, table, businessQuery);
+            jsonResult.setData(jsonObject);
+        }else if(BaseConstant.ALARM_OPERATE_RESOLVE.equals(operate)){
+            List<String> realKeyList = new ArrayList<>();
+            List<Date> realReportList = new ArrayList<>();
+            List<String> keyList = businessQuery.getKeyList();
+            List<Date> treportList = businessQuery.getTreportList();
+            for(int i = 0; i< keyList.size(); i++){
+                String key = keyList.get(i);
+                businessQuery.setKey(key);
+                Date treport = treportList.get(i);
+                boolean resolve = businessService.resolve(uniqueCode, table, businessQuery);
+                if(resolve){
+                    realKeyList.add(key);
+                    realReportList.add(treport);
+                }
+            }
+            if(realKeyList.size() > 0){
+                AlarmQuery alarmQuery = new AlarmQuery();
+                alarmQuery.setEnterpriseCode(businessQuery.getEnterpriseCode());
+                alarmQuery.setServerCode(businessQuery.getServerCode());
+                alarmQuery.setType(businessQuery.getType());
+                alarmQuery.setOperate(businessQuery.getOperate());
+                alarmQuery.setOperateTime(businessQuery.getOperateTime());
+                alarmQuery.setTreportList(realReportList);
+                alarmQuery.setKeyList(realKeyList);
+                try {
+                    jsonObject = alarmService.operate(alarmQuery);
+                    String failKeyListStr = jsonObject.getString(BaseConstant.REMOTE_OPERATE_FAILKEYS);
+                    List<String> failKeyList = JSONObject.parseArray(failKeyListStr, String.class);
+                    String data = businessQuery.getOperate() + "成功" + (keyList.size() - failKeyList.size()) + "个，失败" + failKeyList.size() + "个";
+                    if(failKeyList.size() > 0){
+                        businessService.unResolveByKeys(uniqueCode, table, failKeyList);
+                    }
+                    jsonObject.put("data", data);
+                } catch (Exception e) {
+                    //回滚本地
+                    jsonObject.put("success", false);
+                    jsonObject.put("info", "远程调用失败");
+                    businessService.unResolveByKeys(uniqueCode, table, keyList);
+                    return new JsonResult(e.getMessage(), false);
+                }
+            }
         }
+        jsonResult.setData(jsonObject);
+        return jsonResult;
     }
 }

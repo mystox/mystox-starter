@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 
 import java.util.Date;
@@ -12,8 +13,11 @@ import java.util.Date;
 public class AlarmBusiness {
 
     private String id;      //与告警id无关
+    private float value;                //告警值
     private String siteCode;
     private String siteName;
+    private String siteType;	        //站点类型
+    private String siteAddress;
     private String deviceType;
     private String deviceModel;
     private String deviceCode;
@@ -23,14 +27,66 @@ public class AlarmBusiness {
     private String name;
     private Integer level;
     private String state;
-    private String checkState;          //告警确认状态
+    private String checkState = BaseConstant.NOCHECK;          //告警确认状态
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
     private Date treport;
     private Date trecover;
     private String key;     //对应告警表中key，可唯一性从告警表获取数据
+    private String entDevSig;           //enterprise_CodedeviceId_signalId,用于告警关注，屏蔽等功能
     private String workCode;
+    private Boolean shield;             //是否屏蔽
+    private FacadeView focuser;         //关注人
+    private Date focusTime;             //关注时间
+
+    public String getEntDevSig() {
+        return entDevSig;
+    }
+
+    public void setEntDevSig(String entDevSig) {
+        this.entDevSig = entDevSig;
+    }
+
+    public float getValue() {
+        return value;
+    }
+
+    public void setValue(float value) {
+        this.value = value;
+    }
+
+    public FacadeView getFocuser() {
+        return focuser;
+    }
+
+    public void setFocuser(FacadeView focuser) {
+        this.focuser = focuser;
+    }
+
+    public Date getFocusTime() {
+        return focusTime;
+    }
+
+    public void setFocusTime(Date focusTime) {
+        this.focusTime = focusTime;
+    }
+
+    public String getSiteType() {
+        return siteType;
+    }
+
+    public void setSiteType(String siteType) {
+        this.siteType = siteType;
+    }
+
+    public Boolean getShield() {
+        return shield;
+    }
+
+    public void setShield(Boolean shield) {
+        this.shield = shield;
+    }
 
     public String getWorkCode() {
         return workCode;
@@ -192,10 +248,21 @@ public class AlarmBusiness {
         this.key = key;
     }
 
+    public String getSiteAddress() {
+        return siteAddress;
+    }
+
+    public void setSiteAddress(String siteAddress) {
+        this.siteAddress = siteAddress;
+    }
+
     public static AlarmBusiness createByAlarm(Alarm alarm){
         AlarmBusiness business = new AlarmBusiness();
+        business.setValue(alarm.getValue());
         business.setSiteCode(alarm.getSiteCode());
         business.setSiteName(alarm.getSiteName());
+        business.setSiteType(alarm.getSiteType());
+        business.setSiteAddress(alarm.getSiteAddress());
         business.setDeviceType(alarm.getDeviceType());
         business.setDeviceModel(alarm.getDeviceModel());
         business.setDeviceCode(alarm.getDeviceId());
@@ -205,7 +272,9 @@ public class AlarmBusiness {
         business.setLevel(alarm.getLevel());
         business.setState("待处理");
         business.setTreport(alarm.getTreport());
+        business.setTrecover(alarm.getTrecover());
         business.setKey(alarm.getKey());
+        business.setEntDevSig(alarm.getEnterpriseCode() + WorkConstants.UNDERLINE + alarm.getDeviceId() + WorkConstants.UNDERLINE + alarm.getSignalId());
         return business;
     }
 }

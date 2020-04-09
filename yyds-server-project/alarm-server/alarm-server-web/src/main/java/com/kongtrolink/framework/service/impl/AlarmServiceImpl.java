@@ -225,4 +225,10 @@ public class AlarmServiceImpl implements AlarmService{
         String table = getTable(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode(), alarmQuery.getType(), alarmQuery.getTreport());
         return alarmDao.resolve(table, alarmQuery);
     }
+
+    @Override
+    public boolean resolveByKey(AlarmQuery alarmQuery) {
+        String table = getTable(alarmQuery.getEnterpriseCode(), alarmQuery.getServerCode(), alarmQuery.getType(), alarmQuery.getTreport());
+        return alarmDao.resolveByKey(table, alarmQuery);
+    }
 }

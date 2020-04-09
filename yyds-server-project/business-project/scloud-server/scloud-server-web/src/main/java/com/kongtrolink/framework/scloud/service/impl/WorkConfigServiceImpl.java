@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.service.impl;
 
 import com.kongtrolink.framework.scloud.dao.WorkConfigDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.WorkConfig;
 import com.kongtrolink.framework.scloud.query.WorkConfigQuery;
 import com.kongtrolink.framework.scloud.service.WorkConfigService;
@@ -61,22 +62,21 @@ public class WorkConfigServiceImpl implements WorkConfigService {
     /**
      * 获取告警最匹配的工单配置
      * @param uniqueCode
-     * @param alarm
      * @return
      */
     @Override
-    public WorkConfig matchAutoConfig(String uniqueCode, Alarm alarm, String siteType, String sendWorkType) {
-        Date tReport = alarm.getTreport();
+    public WorkConfig matchAutoConfig(String uniqueCode, AlarmBusiness alarmBusiness, String sendWorkType) {
+        Date tReport = alarmBusiness.getTreport();
         String format = StringUtil.sdf.format(tReport);
         //HH:mm:ss
         String date = format.substring(11);
         int intReportTime= StringUtil.dateToInt(date);
         WorkConfigQuery workConfigQuery = new WorkConfigQuery();
-        workConfigQuery.setSiteType(siteType);
+        workConfigQuery.setSiteType(alarmBusiness.getSiteType());
         workConfigQuery.setIntTreport(intReportTime);
-        workConfigQuery.setSiteCode(alarm.getSiteCode());
-        workConfigQuery.setAlarmLevel(alarm.getTargetLevelName());
-        workConfigQuery.setAlarmName(alarm.getName());
+        workConfigQuery.setSiteCode(alarmBusiness.getSiteCode());
+        workConfigQuery.setAlarmLevel(alarmBusiness.getLevel());
+        workConfigQuery.setAlarmName(alarmBusiness.getName());
         workConfigQuery.setSendType(sendWorkType);
         WorkConfig workConfig = workConfigDao.matchAutoConfig(uniqueCode, workConfigQuery);
         if(workConfig == null){
@@ -108,9 +108,9 @@ public class WorkConfigServiceImpl implements WorkConfigService {
     @Override
     public WorkConfig getDefaultConfig(String uniqueCode) {
         WorkConfig defaultConfig = workConfigDao.getDefaultConfig(uniqueCode);
-        if(null == defaultConfig){
-            defaultConfig = createDefaultConfig(uniqueCode);
-        }
+//        if(null == defaultConfig){
+//            defaultConfig = createDefaultConfig(uniqueCode);
+//        }
         return defaultConfig;
     }
 

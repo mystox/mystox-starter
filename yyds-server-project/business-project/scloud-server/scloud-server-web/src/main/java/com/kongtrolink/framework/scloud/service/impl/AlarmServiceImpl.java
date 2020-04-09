@@ -11,6 +11,7 @@ import com.kongtrolink.framework.scloud.dao.AlarmDao;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
@@ -65,15 +66,28 @@ public class AlarmServiceImpl implements AlarmService {
     @Override
     public JsonResult list(AlarmQuery alarmQuery) throws Exception {
         listCommon(alarmQuery);
+        //从告警业务信息表中获取数据
+        AlarmBusinessQuery businessQuery = AlarmBusinessQuery.createByAlarmQuery(alarmQuery);
+        List<AlarmBusiness> businessList = businessService.list(alarmQuery.getEnterpriseCode(), businessQuery);
+        Map<String, AlarmBusiness> keyBusinessMap = new HashMap<>();
+        List<String> keyList = new ArrayList<>();
+        for(AlarmBusiness alarmBusiness : businessList){
+            keyBusinessMap.put(alarmBusiness.getKey(), alarmBusiness);
+            keyList.add(alarmBusiness.getKey());
+        }
+        alarmQuery.setKeyList(keyList);
         //具体查询历史还是实时数据，由中台告警模块根据参数判定
         try {
             MsgResult msgResult = mqttOpera.opera(remoteList, JSONObject.toJSONString(alarmQuery));
             JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
             String dataStr = jsonResult.getData().toString();
             List<Alarm> alarmList = JSONObject.parseArray(dataStr, Alarm.class);
-            if(null != alarmList && alarmList.size()>0) {
-                initInfo(alarmQuery.getEnterpriseCode(), alarmList);
+            for(Alarm alarm : alarmList){
+                alarm.initByBusiness(keyBusinessMap.get(alarm.getKey()));
             }
+//            if(null != alarmList && alarmList.size()>0) {
+//                initInfo(alarmQuery.getEnterpriseCode(), alarmList);
+//            }
             jsonResult.setData(alarmList);
             return jsonResult;
         }catch (Exception e){
@@ -204,15 +218,13 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public JsonResult operate(AlarmQuery alarmQuery) throws Exception {
+    public JSONObject operate(AlarmQuery alarmQuery) throws Exception {
         checkOperatePara(alarmQuery);
         try {
-            Date curTime = new Date();
-            alarmQuery.setOperateTime(curTime);
             String jsonStr = JSONObject.toJSONString(alarmQuery);
             MsgResult msgResult = mqttOpera.opera(remoteOperate, jsonStr);
-            JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
-            return jsonResult;
+            JSONObject jsonObject = JSONObject.parseObject(msgResult.getMsg(), JSONObject.class);
+            return jsonObject;
         }catch (Exception e){
             logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSONString(alarmQuery), remoteOperate, e.getMessage());
             throw new Exception("连接超时");
@@ -296,16 +308,16 @@ public class AlarmServiceImpl implements AlarmService {
                 }
             }
             //告警等级
-            List<String> alarmLevelList = filterRule.getAlarmLevelList();
+            List<Integer> alarmLevelList = filterRule.getAlarmLevelList();
             if(null != alarmLevelList){
-                String targetLevelName = alarmQuery.getTargetLevelName();
-                if(StringUtil.isNUll(targetLevelName)){
-                    alarmQuery.setTargetLevelNameList(alarmLevelList);
+                Integer level = alarmQuery.getLevel();
+                if(null == level){
+                    alarmQuery.setLevelList(alarmLevelList);
                 }else{
-                    if(alarmLevelList.contains(targetLevelName)){
+                    if(alarmLevelList.contains(level)){
 
                     }else{
-                        alarmQuery.setTargetLevelName(targetLevelName + "特殊等级@特殊等级");
+                        alarmQuery.setLevel(level + 52014);
                     }
                 }
             }
@@ -349,16 +361,16 @@ public class AlarmServiceImpl implements AlarmService {
     private void checkOperatePara(AlarmQuery alarmQuery)throws ParameterException{
         checkPara(alarmQuery);
         //判定告警id，上报时间
-        List<String> idList = alarmQuery.getIdList();
+        List<String> keyList = alarmQuery.getKeyList();
         List<Date> treportList = alarmQuery.getTreportList();
-        if(null == idList || idList.size() == 0){
-            throw new ParameterException("告警id为空");
+        if(null == keyList || keyList.size() == 0){
+            throw new ParameterException("告警key为空");
         }
         if(null == treportList || treportList.size() == 0){
             throw new ParameterException("上报时间为空");
         }
-        if(idList.size() != treportList.size()){
-            throw new ParameterException("告警id和告警上报时间数量一致");
+        if(keyList.size() != treportList.size()){
+            throw new ParameterException("告警key和告警上报时间数量一致");
         }
         if(StringUtil.isNUll(alarmQuery.getOperate())){
             throw new ParameterException("操作类型为空");

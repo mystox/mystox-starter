@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.WorkAlarmConfigDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.WorkAlarmConfig;
 import com.kongtrolink.framework.scloud.entity.WorkConfig;
 import com.kongtrolink.framework.scloud.service.WorkAlarmConfigService;
@@ -25,11 +26,11 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
     WorkConfigService workConfigService;
 
     @Override
-    public void matchAutoConfig(List<Alarm> alarmList) {
-        for(Alarm alarm : alarmList) {
-            WorkConfig workConfig = workConfigService.matchAutoConfig(alarm.getEnterpriseCode(), alarm, alarm.getSiteType(), WorkConstants.SEND_TYPE_AUTO);
+    public void matchAutoConfig(String enterpriseCode,List<AlarmBusiness> businessList) {
+        for(AlarmBusiness alarm : businessList) {
+            WorkConfig workConfig = workConfigService.matchAutoConfig(enterpriseCode, alarm, WorkConstants.SEND_TYPE_AUTO);
             if (null != workConfig) {//20190404有些企业可能没有默认规则
-                WorkAlarmConfig alarmWorkConfig = createAlarmWorkConfig(alarm.getEnterpriseCode(), workConfig, alarm);
+                WorkAlarmConfig alarmWorkConfig = createAlarmWorkConfig(enterpriseCode, workConfig, alarm);
                 add(alarmWorkConfig);
             }
         }
@@ -39,16 +40,15 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
      * 生成AlarmWorkConfig
      * @param uniqueCode
      * @param workConfig
-     * @param alarm
      * @return
      */
-    private WorkAlarmConfig createAlarmWorkConfig(String uniqueCode, WorkConfig workConfig, Alarm alarm){
+    private WorkAlarmConfig createAlarmWorkConfig(String uniqueCode, WorkConfig workConfig, AlarmBusiness alarm){
         WorkAlarmConfig alarmWorkConfig = new WorkAlarmConfig();
         alarmWorkConfig.setUniqueCode(uniqueCode);
         alarmWorkConfig.setWorkConfigId(workConfig.getId());
         alarmWorkConfig.setSiteCode(alarm.getSiteCode());
         alarmWorkConfig.setSiteName(alarm.getSiteName());
-        alarmWorkConfig.setDeviceCode(alarm.getDeviceId());
+        alarmWorkConfig.setDeviceCode(alarm.getDeviceCode());
         alarmWorkConfig.setDeviceName(alarm.getDeviceName());
         alarmWorkConfig.setDeviceType(alarm.getDeviceType());
         alarmWorkConfig.setAlarmName(alarm.getName());
@@ -56,7 +56,7 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
         alarmWorkConfig.setTreport(alarm.getTreport());
         alarmWorkConfig.setAlarmState(alarm.getState());
         Date tReport = alarm.getTreport();
-        alarmWorkConfig.setAlarmKey(alarm.initKey());
+        alarmWorkConfig.setAlarmKey(alarm.getKey());
         //告警后启用时限毫秒值
         int alarmBeginTime = workConfig.getReportAfter() * 60 * 1000;
         Date sendWorkTime = new Date(tReport.getTime() + alarmBeginTime);

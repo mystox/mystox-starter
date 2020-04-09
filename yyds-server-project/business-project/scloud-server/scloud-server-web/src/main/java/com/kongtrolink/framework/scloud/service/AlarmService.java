@@ -30,7 +30,7 @@ public interface AlarmService {
      */
     void initInfo(String uniqueCode, List<Alarm> alarmList);
 
-    JsonResult operate(AlarmQuery alarmQuery) throws Exception;
+    JSONObject operate(AlarmQuery alarmQuery) throws Exception;
 
     JSONObject updateWorkInfo(AlarmQuery alarmQuery);
 

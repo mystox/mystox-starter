@@ -18,7 +18,7 @@ public class ShieldRule {
     @NotNull
     private String name;
     private List<String> deviceCodeList;
-    private List<Integer> alarmlevel;
+    private List<Integer> alarmlevel;       //原始告警等级
     private String reason;
     private FacadeView creator;
     private Date updateTime;

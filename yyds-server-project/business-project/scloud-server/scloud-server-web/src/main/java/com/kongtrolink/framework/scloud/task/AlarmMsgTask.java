@@ -2,13 +2,12 @@ package com.kongtrolink.framework.scloud.task;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.mqtt.impl.MqttServiceImpl;
-import com.kongtrolink.framework.scloud.service.AlarmService;
-import com.kongtrolink.framework.scloud.service.ShieldRuleService;
-import com.kongtrolink.framework.scloud.service.WorkAlarmConfigService;
-import com.kongtrolink.framework.scloud.service.WorkService;
+import com.kongtrolink.framework.scloud.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,18 +24,23 @@ public class AlarmMsgTask implements Runnable{
     private ShieldRuleService shieldRuleService;
     private WorkAlarmConfigService alarmConfigService;
     private AlarmService alarmService;
+    private AlarmBusinessService businessService;
     private WorkService workService;
     private ConcurrentLinkedQueue<JSONObject> msgQueue = new ConcurrentLinkedQueue<>();
+    private String cur_alarm_business = CollectionSuffix.CUR_ALARM_BUSINESS;
+    private String his_alarm_business = CollectionSuffix.HIS_ALARM_BUSINESS;
+    private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
 
     public AlarmMsgTask(ShieldRuleService shieldRuleService, WorkAlarmConfigService alarmConfigService,
-                        AlarmService alarmService, WorkService workService, ConcurrentLinkedQueue<JSONObject> msgQueue) {
+                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, ConcurrentLinkedQueue<JSONObject> msgQueue) {
         this.shieldRuleService = shieldRuleService;
         this.alarmConfigService = alarmConfigService;
         this.alarmService = alarmService;
+        this.businessService = businessService;
         this.workService = workService;
         this.msgQueue = msgQueue;
     }
-    private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
+
     @Override
     public void run() {
         JSONObject jsonObject = msgQueue.poll();
@@ -65,9 +69,10 @@ public class AlarmMsgTask implements Runnable{
         }
 
         //告警屏蔽功能
-        shieldRuleService.matchRule(enterpriseCode, alarmList);
+        shieldRuleService.matchRule(enterpriseCode, businessList);
         //匹配告警工单配置
-        alarmConfigService.matchAutoConfig(alarmList);
+        alarmConfigService.matchAutoConfig(enterpriseCode, businessList);
+        businessService.add(enterpriseCode, cur_alarm_business, businessList);
     }
 
     private void alarmResolve(String jsonStr){
@@ -75,7 +80,20 @@ public class AlarmMsgTask implements Runnable{
         if(null == alarmList || alarmList.size() == 0){
             return ;
         }
-        Alarm alarm = alarmList.get(0);
-        workService.resolveAlarm(alarm.getEnterpriseCode(), alarmList);
+        String enterpriseCode = alarmList.get(0).getEnterpriseCode();
+        List<AlarmBusiness> businessList = new ArrayList<>();
+        for(Alarm alarm : alarmList){
+            AlarmBusiness business = AlarmBusiness.createByAlarm(alarm);
+            business.setState(BaseConstant.ALARM_STATE_RESOLVE);
+            businessList.add(business);
+        }
+        workService.resolveAlarm(enterpriseCode, alarmList);
+        for(AlarmBusiness alarmBusiness : businessList) {
+            //修改实时告警表中告警状态
+            boolean result = businessService.resolveByKey(enterpriseCode, cur_alarm_business, alarmBusiness);
+            if(!result){
+                businessService.resolveByKey(enterpriseCode, his_alarm_business, alarmBusiness);
+            }
+        }
     }
 }

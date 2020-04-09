@@ -20,7 +20,7 @@ public class FilterRule {
     private Date updateTime;
 
     private String alarmName;
-    private List<String> alarmLevelList;
+    private List<Integer> alarmLevelList;
     private List<String> deviceTypeList;
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
@@ -94,11 +94,11 @@ public class FilterRule {
         this.alarmName = alarmName;
     }
 
-    public List<String> getAlarmLevelList() {
+    public List<Integer> getAlarmLevelList() {
         return alarmLevelList;
     }
 
-    public void setAlarmLevelList(List<String> alarmLevelList) {
+    public void setAlarmLevelList(List<Integer> alarmLevelList) {
         this.alarmLevelList = alarmLevelList;
     }
 

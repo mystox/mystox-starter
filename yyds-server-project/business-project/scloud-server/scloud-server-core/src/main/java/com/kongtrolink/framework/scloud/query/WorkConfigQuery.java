@@ -11,7 +11,7 @@ public class WorkConfigQuery extends Paging{
     private String siteCode;
     private String sendType;
     private String siteType;
-    private String alarmLevel;
+    private Integer alarmLevel;
     private String alarmName;
     private int intTreport;
 
@@ -55,11 +55,11 @@ public class WorkConfigQuery extends Paging{
         this.siteType = siteType;
     }
 
-    public String getAlarmLevel() {
+    public Integer getAlarmLevel() {
         return alarmLevel;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
+    public void setAlarmLevel(Integer alarmLevel) {
         this.alarmLevel = alarmLevel;
     }
 

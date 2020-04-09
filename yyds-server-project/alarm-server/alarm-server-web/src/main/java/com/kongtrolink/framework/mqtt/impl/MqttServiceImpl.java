@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -88,16 +90,16 @@ public class MqttServiceImpl implements MqttService{
     private void checkUpdatePara(AlarmQuery alarmQuery)throws ParameterException{
         checkPara(alarmQuery);
         //判定告警id，上报时间
-        List<String> idList = alarmQuery.getIdList();
+        List<String> keyList = alarmQuery.getKeyList();
         List<Date> treportList = alarmQuery.getTreportList();
-        if(null == idList || idList.size() == 0){
-            throw new ParameterException("告警id为空");
+        if(null == keyList || keyList.size() == 0){
+            throw new ParameterException("告警key为空");
         }
         if(null == treportList || treportList.size() == 0){
             throw new ParameterException("上报时间为空");
         }
-        if(idList.size() != treportList.size()){
-            throw new ParameterException("告警id和告警上报时间数量一致");
+        if(keyList.size() != treportList.size()){
+            throw new ParameterException("告警key和告警上报时间数量一致");
         }
         if(StringUtil.isNUll(alarmQuery.getOperate())){
             throw new ParameterException("操作类型为空");
@@ -113,47 +115,41 @@ public class MqttServiceImpl implements MqttService{
     @Override
     public String alarmRemoteOperate(String jsonStr) {
         logger.info(jsonStr);
-        Date curDate = new Date();
         //填充查询条件
-        JsonResult jsonResult = new JsonResult();
+        JSONObject jsonObject = new JSONObject();
         AlarmQuery alarmQuery = JSONObject.parseObject(jsonStr, AlarmQuery.class);
         try{
             checkUpdatePara(alarmQuery);
         }catch (ParameterException e){
-            jsonResult.setSuccess(false);
-            jsonResult.setInfo(e.getMessage());
-            return JSONObject.toJSONString(jsonResult);
+            jsonObject.put("success", false);
+            jsonObject.put("info", e.getMessage());
+            return jsonObject.toJSONString();
         }
         int succCount = 0;
         int failCount = 0;
-        List<String> idList = alarmQuery.getIdList();
+        List<String> keyList = alarmQuery.getKeyList();
         List<Date> treportList = alarmQuery.getTreportList();
+        List<String> succKeyList = new ArrayList<>();
+        List<String> failKeyList = new ArrayList<>();
         boolean check = false;
-        for(int i=0; i<idList.size(); i++){
-            String id = idList.get(i);
-            Date treport = treportList.get(i);
-            alarmQuery.setId(id);
-            alarmQuery.setTreport(treport);
-            if(Const.ALARM_OPERATE_CHECK.equals(alarmQuery.getOperate())) {
-                check = alarmService.check(alarmQuery);
-            }else if(Const.ALARM_OPERATE_NOTCHECK.equals(alarmQuery.getOperate())){
-                check = alarmService.nocheck(alarmQuery);
-            }else if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
-                alarmQuery.setTrecover(curDate);
-                check = alarmService.resolve(alarmQuery);
+        for(int i=0; i<keyList.size(); i++){
+            alarmQuery.setKey(keyList.get(i));
+            alarmQuery.setTreport(treportList.get(i));
+            if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
+                alarmQuery.setTrecover(alarmQuery.getOperateTime());
+                check = alarmService.resolveByKey(alarmQuery);
             }
             if(check){
-                succCount ++;
+                succKeyList.add(keyList.get(i));
             }else{
                 failCount ++;
+                failKeyList.add(keyList.get(i));
             }
         }
-        jsonResult.setData("共" + idList.size() + "个告警" +alarmQuery.getOperate()+"，成功" + succCount + "个， 失败" + failCount+"个");
-        jsonResult.setSuccess(true);
-        if(succCount == 0){
-            jsonResult.setSuccess(false);
-        }
-        return JSONObject.toJSONString(jsonResult);
+        jsonObject.put("success", true);
+        jsonObject.put("succKeyList", succKeyList);
+        jsonObject.put("failKeyList", failKeyList);
+        return jsonObject.toJSONString();
     }
 
     @Override

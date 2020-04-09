@@ -355,4 +355,21 @@ public class Alarm {
                 ", type='" + type + '\'' +
                 '}';
     }
+
+    public void initByBusiness(AlarmBusiness alarmBusiness){
+        if(null == alarmBusiness){
+            return;
+        }
+        this.setSiteCode(alarmBusiness.getSiteCode());
+        this.setSiteName(alarmBusiness.getSiteName());
+        this.setSiteType(alarmBusiness.getSiteType());
+        this.setDeviceName(alarmBusiness.getDeviceName());
+
+        this.setShield(alarmBusiness.getShield());
+        this.setCheckState(alarmBusiness.getCheckState());
+        this.setCheckContant(alarmBusiness.getCheckContant());
+        this.setChecker(alarmBusiness.getChecker());
+        this.setCheckTime(alarmBusiness.getCheckTime());
+        this.setWorkCode(alarmBusiness.getWorkCode());
+    }
 }

@@ -8,10 +8,7 @@ import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
-import com.kongtrolink.framework.scloud.query.AlarmFocusQuery;
-import com.kongtrolink.framework.scloud.query.AlarmQuery;
-import com.kongtrolink.framework.scloud.query.DeviceQuery;
-import com.kongtrolink.framework.scloud.query.SiteQuery;
+import com.kongtrolink.framework.scloud.query.*;
 import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.service.impl.DeviceServiceImpl;
 import com.kongtrolink.framework.scloud.util.StringUtil;
@@ -44,6 +41,9 @@ public class AlarmFocusController extends BaseController {
     DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     AlarmService alarmService;
+    @Autowired
+    AlarmBusinessService businessService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AlarmFocusController.class);
     /**
      * @auther: liudd
@@ -183,21 +183,14 @@ public class AlarmFocusController extends BaseController {
                 entDevSigList.add(entDevSig);
             }
         }
-        AlarmQuery alarmQuery = new AlarmQuery();
-        alarmQuery.setCurrentPage(focusQuery.getCurrentPage());
-        alarmQuery.setPageSize(focusQuery.getPageSize());
-        alarmQuery.setEnterpriseCode(focusQuery.getEnterpriseCode());
-        alarmQuery.setServerCode(focusQuery.getServerCode());
-        alarmQuery.setType(focusQuery.getType());
-        alarmQuery.setEntDevSigList(entDevSigList);
-        try {
-            //具体查询历史还是实时数据，由中台告警模块根据参数判定
-            JsonResult jsonResult = alarmService.list(alarmQuery);
-            return jsonResult;
-        }catch (ParameterException paraException){
-            return new JsonResult(paraException.getMessage(), false);
-        }catch (Exception e) {
-            return new JsonResult(e.getMessage(), false);
-        }
+        AlarmBusinessQuery businessQuery = new AlarmBusinessQuery();
+        businessQuery.setCurrentPage(focusQuery.getCurrentPage());
+        businessQuery.setPageSize(focusQuery.getPageSize());
+        businessQuery.setSkipSize(focusQuery.getPageSize());
+        businessQuery.setEntDevSigList(entDevSigList);
+        List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
+        int count = businessService.count(uniqueCode, businessQuery);
+        JsonResult jsonResult =new JsonResult(list, count);
+        return jsonResult;
     }
 }
