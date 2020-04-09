@@ -6,6 +6,7 @@ import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.kongtrolink.framework.scloud.service.HomePageService;
@@ -92,6 +93,30 @@ public class HomePageController extends ExportController {
         return new JsonResult("查询失败",false);
 
     }
+    /**
+     * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
+     */
+    @RequestMapping(value = "/fsuOnline", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getHomeFsuOnlineModel(@RequestBody HomeQuery homeQuery) {
+        try{
+            String uniqueCode = getUniqueCode();
+            String userId = getUserId();
+            //统计交维态的站点总数
+            List<HomeFsuOnlineModel> list = homePageService.getHomeFsuOnlineModel(uniqueCode,userId,homeQuery);
+            int total = 0;
+            if(list !=null){
+                for(HomeFsuOnlineModel fsuOnlineModel:list){
+                    total = total + fsuOnlineModel.getCount();
+                }
+            }
+            JsonResult value = new JsonResult(list);
+            value.setCount(total);
+            return value;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
 
+    }
 
 }

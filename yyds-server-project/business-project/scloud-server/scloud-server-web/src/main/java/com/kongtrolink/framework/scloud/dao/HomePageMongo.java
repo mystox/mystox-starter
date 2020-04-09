@@ -2,8 +2,10 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.base.CustomOperation;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.constant.FsuOperationState;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.mongodb.BasicDBObject;
@@ -124,6 +126,33 @@ public class HomePageMongo {
                 project("count").and("state").previousOperation()
         );
         AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
+        return result.getMappedResults();
+    }
+
+    /**
+     * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
+     *
+     * @param uniqueCode 企业编码
+     * @param userId     用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    public List<HomeFsuOnlineModel> getHomeFsuOnlineModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Criteria criteria = Criteria.where("typeCode").is("038").and("operationState").is(FsuOperationState.MAINTENANCE);
+        if (code != null && !"".equals(code)) {
+            criteria.and("code").regex("^"+code);//模糊查询
+        }
+        DBObject lookupSql = getLookupSql(userId,"siteId");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true)),
+                group("state").count().as("count"),
+                project("count").and("state").previousOperation()
+        );
+        AggregationResults<HomeFsuOnlineModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeFsuOnlineModel.class);
         return result.getMappedResults();
     }
 

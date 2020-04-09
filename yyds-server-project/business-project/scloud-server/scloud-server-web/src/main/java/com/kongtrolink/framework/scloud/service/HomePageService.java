@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 
@@ -36,4 +37,14 @@ public interface HomePageService {
      * @return 站点总数
      */
     List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery);
+
+    /**
+     * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
+     * @param uniqueCode 企业编码
+     * @param userId  用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    List<HomeFsuOnlineModel> getHomeFsuOnlineModel(String uniqueCode, String userId, HomeQuery homeQuery);
+
 }
