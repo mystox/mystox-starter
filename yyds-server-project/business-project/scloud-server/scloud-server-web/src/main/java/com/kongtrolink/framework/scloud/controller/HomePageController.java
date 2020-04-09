@@ -7,6 +7,7 @@ import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.kongtrolink.framework.scloud.service.HomePageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -64,5 +65,33 @@ public class HomePageController extends ExportController {
         return new JsonResult("查询失败",false);
 
     }
+
+    /**
+     * 告警工单统计
+     *
+     */
+    @RequestMapping(value = "/work", method = RequestMethod.POST)
+    public @ResponseBody JsonResult work(@RequestBody HomeQuery homeQuery) {
+        try{
+            String uniqueCode = getUniqueCode();
+            String userId = getUserId();
+            //统计交维态的站点总数
+            List<HomeWorkModel> list = homePageService.getHomeWorkModel(uniqueCode,userId,homeQuery);
+            int total = 0;
+            if(list !=null){
+                for(HomeWorkModel workModel:list){
+                    total = total + workModel.getCount();
+                }
+            }
+            JsonResult value = new JsonResult(list);
+            value.setCount(total);
+            return value;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
+
+    }
+
 
 }

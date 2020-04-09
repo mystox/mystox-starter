@@ -4,6 +4,7 @@ import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
 import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
+import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
 import com.kongtrolink.framework.scloud.service.HomePageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,5 +47,18 @@ public class HomePageServiceImpl implements HomePageService {
     @Override
     public List<SiteEntity> getHomeSiteList(String uniqueCode, String userId, HomeQuery homeQuery) {
         return homePageMongo.getHomeSiteList(uniqueCode,userId,homeQuery);
+    }
+
+    /**
+     * 告警工单统计
+     *
+     * @param uniqueCode 企业编码
+     * @param userId     用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    @Override
+    public List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        return homePageMongo.getHomeWorkModel(uniqueCode,userId,homeQuery);
     }
 }
