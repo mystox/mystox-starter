@@ -4,10 +4,7 @@ import com.kongtrolink.framework.scloud.base.CustomOperation;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.constant.FsuOperationState;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
+import com.kongtrolink.framework.scloud.entity.model.home.*;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +53,7 @@ public class HomePageMongo {
                 )
         )
         );
-        DBObject lookupSql = getLookupSql(userId,"siteId");
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 new CustomOperation(projectSql), //取得字段
@@ -75,7 +72,31 @@ public class HomePageMongo {
         }
         return homeFsuNumber;
     }
+    /**
+     * 首页 - FSU在线情况
+     * @param uniqueCode 企业编码
+     * @param userId   站点ID
+     * @param homeQuery  区域信息
+     * @return 返回
+     */
+    public List<HomeFsuOnlineInfo> getHomeFsuStateList(String uniqueCode,String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Criteria criteria = Criteria.where("typeCode").is("038");
+        if (code != null && !"".equals(code)) {
+            criteria.and("code").regex("^"+code);//模糊查询
+        }
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true)),
+                project("id","siteCode","code","state")
+        );
 
+        AggregationResults<HomeFsuOnlineInfo> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeFsuOnlineInfo.class);
+        return result.getMappedResults();
+    }
     /**
      * 根据区域 用户权限获取站点列表
      * @param uniqueCode 企业编码
@@ -83,23 +104,73 @@ public class HomePageMongo {
      * @param homeQuery 区域
      * @return 站点总数
      */
-    public List<SiteEntity> getHomeSiteList(String uniqueCode,String userId,HomeQuery homeQuery) {
+    public List<HomeSiteAlarmMap> getHomeSiteList(String uniqueCode,String userId,HomeQuery homeQuery) {
         //查询条件
         String code = homeQuery.getTierCode();
         Criteria criteria = new Criteria();
         if (code != null && !"".equals(code)) {
             criteria.and("code").regex("^"+code);//模糊查询
         }
-        DBObject lookupSql = getLookupSql(userId,"id");
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"id");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 new CustomOperation(lookupSql), //取得字段()
                 match(new Criteria("stockData.userId").exists(true))
         );
-        AggregationResults<SiteEntity> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.SITE, SiteEntity.class);
+        AggregationResults<HomeSiteAlarmMap> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.SITE, HomeSiteAlarmMap.class);
+        return result.getMappedResults();
+    }
+    /**
+     * 根据区域 用户权限获取  交维态 站点列表
+     * @param uniqueCode 企业编码
+     * @param userId 用户ID
+     * @param homeQuery 区域
+     * @return 站点总数
+     */
+    public List<HomeSiteInfo> getOperationSiteList(String uniqueCode,String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Criteria criteria = Criteria.where("typeCode").is("038");
+        if (code != null && !"".equals(code)) {
+            criteria.and("code").regex("^"+code);//模糊查询
+        }
+        DBObject projectSql = new BasicDBObject(
+                "$project", new BasicDBObject(
+                "siteId",1
+        ).append(
+                "siteCode",1
+        ).append(
+                "operationState",1
+        ).append(
+                "checkState", new BasicDBObject(
+                        "$cond", new Object[]{new BasicDBObject("$eq", new Object[]{ "$operationState", "交维态"}), 1, 0}
+                )
+        )
+        );
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(projectSql), //取得字段
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true)),
+                group("siteCode").min("checkState").as("siteState"),//group
+                match(new Criteria("siteState").is(1)),//只查询交维态的
+                project().and("siteCode").previousOperation()
+        );
+        AggregationResults<HomeSiteInfo> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeSiteInfo.class);
         return result.getMappedResults();
     }
 
+    public List<HomeReportModel> getHomeAlarmLevelNum(String uniqueCode,List<String> siteCodes) {
+        Criteria criteria = Criteria.where("state").is("待处理").and("siteCode").is(siteCodes);
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                group("level","checkState").count().as("count"),
+                project("count").and("state").previousOperation()
+        );
+        AggregationResults<HomeReportModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.CUR_ALARM_BUSINESS, HomeReportModel.class);
+        return result.getMappedResults();
+    }
     /**
      * 告警工单统计
      *
@@ -117,7 +188,7 @@ public class HomePageMongo {
         if (code != null && !"".equals(code)) {
             criteria.and("code").regex("^"+code);//模糊查询
         }
-        DBObject lookupSql = getLookupSql(userId,"site.id");
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"site.id");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 new CustomOperation(lookupSql), //取得字段()
@@ -129,6 +200,32 @@ public class HomePageMongo {
         return result.getMappedResults();
     }
 
+    /**
+     * 告警工单统计
+     *
+     * @param uniqueCode 企业编码
+     * @param userId     用户ID
+     * @param homeQuery  区域
+     * @return 站点总数
+     */
+    public List<HomeReportModel> getHomeReportModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Criteria criteria = new Criteria();
+        if (code != null && !"".equals(code)) {
+            criteria.and("siteCode").regex("^"+code);//模糊查询
+        }
+        DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"siteCode");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true)),
+                group("siteCode","level").count().as("count"),
+                project("count").and("_id.siteCode").as("siteCode").and("_id.level").as("level")
+        );
+        AggregationResults<HomeReportModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.CUR_ALARM_BUSINESS, HomeReportModel.class);
+        return result.getMappedResults();
+    }
     /**
      * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
      *
@@ -144,7 +241,7 @@ public class HomePageMongo {
         if (code != null && !"".equals(code)) {
             criteria.and("code").regex("^"+code);//模糊查询
         }
-        DBObject lookupSql = getLookupSql(userId,"siteId");
+        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 new CustomOperation(lookupSql), //取得字段()
@@ -165,10 +262,10 @@ public class HomePageMongo {
      *                   work表的 site.id
      * @return sql
      */
-    private DBObject getLookupSql(String userId,String localId){
+    private DBObject getLookupSqlId(String uniqueCode,String userId,String localId){
         DBObject lookupSql = new BasicDBObject(
                 "$lookup", new BasicDBObject(
-                "from","YYTD_user_site"
+                "from",uniqueCode+"_user_site"
         ).append(
                 "let",new BasicDBObject(
                         "siteId","$"+localId
@@ -178,6 +275,26 @@ public class HomePageMongo {
                         new BasicDBObject("$match", new BasicDBObject("$expr",new BasicDBObject("$and",new BasicDBObject("$and",new Object[]{
                                 new BasicDBObject("$eq", new Object[]{ "$userId", userId}),
                                 new BasicDBObject("$eq", new Object[]{ "$siteId", "$$siteId"})
+                        }))))}
+        ).append(
+                "as", "stockData"
+        )
+        );
+        return lookupSql;
+    }
+    private DBObject getLookupSqlCode(String uniqueCode,String userId,String localId){
+        DBObject lookupSql = new BasicDBObject(
+                "$lookup", new BasicDBObject(
+                "from",uniqueCode+"_user_site"
+        ).append(
+                "let",new BasicDBObject(
+                        "siteCode","$"+localId
+                )
+        ).append(
+                "pipeline", new Object[]{
+                        new BasicDBObject("$match", new BasicDBObject("$expr",new BasicDBObject("$and",new BasicDBObject("$and",new Object[]{
+                                new BasicDBObject("$eq", new Object[]{ "$userId", userId}),
+                                new BasicDBObject("$eq", new Object[]{ "$siteCode", "$$siteCode"})
                         }))))}
         ).append(
                 "as", "stockData"
