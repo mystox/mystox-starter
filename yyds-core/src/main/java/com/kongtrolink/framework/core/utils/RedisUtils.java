@@ -203,6 +203,20 @@ public class RedisUtils
         return redisTemplate.opsForValue().increment(key, -delta);
     }
 
+    public boolean mset(Map<String ,JSONObject> stringMap){
+        try{
+            redisTemplate.opsForValue().multiSet(stringMap);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    public  List<String> mget(List<String> keys){
+        List<String> list = redisTemplate.opsForValue().multiGet(keys);
+        return list;
+    }
+
     //================================Map=================================
     /**
      * HashGet

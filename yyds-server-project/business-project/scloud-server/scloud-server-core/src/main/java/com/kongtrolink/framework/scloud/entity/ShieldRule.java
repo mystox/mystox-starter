@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.sun.istack.internal.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +14,6 @@ public class ShieldRule {
     private String id;
     private String enterpriseCode;
     private String serverCode;
-    @NotNull
     private String name;
     private List<String> deviceCodeList;
     private List<Integer> alarmlevel;       //原始告警等级

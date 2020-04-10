@@ -1,7 +1,5 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +11,6 @@ import java.util.List;
 public class FilterRule {
 
     private String id;
-    @NotNull
     private String name;
     private FacadeView creator;
     private String remarks;
@@ -26,7 +23,6 @@ public class FilterRule {
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
     private Date clearEndTime;                  //清除结束时间
-    @NotNull
     private List<String> siteCodeList;          //站点编码列表，使用站点编码列表控制区域权限
     private Boolean state = false;
 

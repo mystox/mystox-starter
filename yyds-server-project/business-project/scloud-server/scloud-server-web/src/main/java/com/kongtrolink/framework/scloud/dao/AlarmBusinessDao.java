@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.scloud.dao;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
-import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.WriteResult;
@@ -16,7 +14,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-
 import java.util.Date;
 import java.util.List;
 
@@ -84,6 +81,8 @@ public class AlarmBusinessDao {
 
     private Criteria baseCriteria(AlarmBusinessQuery businessQuery){
         Criteria criteria = new Criteria();
+        Boolean shield = businessQuery.getShield();
+        criteria.and("shield").is(shield);
         String name = businessQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoRegexUtil.escapeExprSpecialWord(name);

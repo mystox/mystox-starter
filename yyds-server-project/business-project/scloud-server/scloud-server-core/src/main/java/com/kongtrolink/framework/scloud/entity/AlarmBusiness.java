@@ -36,9 +36,18 @@ public class AlarmBusiness {
     private String key;     //对应告警表中key，可唯一性从告警表获取数据
     private String entDevSig;           //enterprise_CodedeviceId_signalId,用于告警关注，屏蔽等功能
     private String workCode;
-    private Boolean shield;             //是否屏蔽
+    private boolean shield = false;             //是否屏蔽
+    private String shieldRuleId;        //屏蔽规则id
     private FacadeView focuser;         //关注人
     private Date focusTime;             //关注时间
+
+    public String getShieldRuleId() {
+        return shieldRuleId;
+    }
+
+    public void setShieldRuleId(String shieldRuleId) {
+        this.shieldRuleId = shieldRuleId;
+    }
 
     public String getEntDevSig() {
         return entDevSig;

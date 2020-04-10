@@ -37,6 +37,24 @@ public class AlarmBusinessQuery extends Paging {
     private String operateUsername;         //操作用户名
     private int skipSize;
     private List<String> entDevSigList;
+    private boolean shield=false;                 //是否屏蔽
+    private String shieldRuleId;            //屏蔽规则id
+
+    public Boolean getShield() {
+        return shield;
+    }
+
+    public void setShield(Boolean shield) {
+        this.shield = shield;
+    }
+
+    public String getShieldRuleId() {
+        return shieldRuleId;
+    }
+
+    public void setShieldRuleId(String shieldRuleId) {
+        this.shieldRuleId = shieldRuleId;
+    }
 
     public List<String> getEntDevSigList() {
         return entDevSigList;
