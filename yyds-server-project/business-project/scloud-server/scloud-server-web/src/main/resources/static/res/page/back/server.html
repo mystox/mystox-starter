@@ -1,0 +1,53 @@
+<section id="backServerPage">
+    <form class="top query-form" name="modifyServerThreshold.form" novalidate ng-submit="modifyServerThreshold.execute();">
+        <div class="form-inline">
+            <label>CPU占用率门限</label>
+            <input type="text" placeholder="{{REGEX.occupancyRateDesc}}"
+                   ng-model="modifyServerThreshold.obj.cpu" ng-pattern="REGEX.occupancyRate" required>
+
+            <label>内存占用率门限</label>
+            <input type="text" placeholder="{{REGEX.occupancyRateDesc}}"
+                   ng-model="modifyServerThreshold.obj.memory" ng-pattern="REGEX.occupancyRate" required>
+
+            <label>硬盘占用率门限</label>
+            <input type="text" placeholder="{{REGEX.occupancyRateDesc}}"
+                   ng-model="modifyServerThreshold.obj.disk" ng-pattern="REGEX.occupancyRate" required>
+
+            <button class="btn btn-primary" type="submit" ng-disabled="modifyServerThreshold.form.$invalid">保存</button>
+            <button class="btn btn-default" type="button" ng-click="modifyServerThreshold.clear();">恢复</button>
+            <button class="btn btn-primary" type="button" ng-click="resetServerThreshold();">设为默认</button>
+        </div>
+    </form>
+    <form class="middle query-form">
+        <div class="form-inline">
+
+            <label>开始时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="serverQuery.startTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <label>结束时间</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="serverQuery.endTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+    <div class="left card-bg">
+        <div class="page-header">
+            <h3>实时性能</h3>
+        </div>
+        <div id="serverDataGauge"></div>
+        <div id="serverDataLine"></div>
+    </div>
+    <div class="right card-bg">
+        <div class="page-header">
+            <h3>历史性能</h3>
+        </div>
+        <div id="serverHistoryData"></div>
+    </div>
+</section>

@@ -199,7 +199,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      * 功能描述:处理远程调用模块
      */
     private List<Alarm> handleRemoteOperate(String enterServerCode, List<Alarm> reportAlarmList, List<JSONObject> alarmJsonList) {
-
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
         List<OperateEntity> operate = reportOperateConfig.getOperate();
         logger.debug("ONE operate: " + operate);
@@ -209,7 +208,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         if (null != operateEntityList) {
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for (OperateEntity operateEntity : operateEntityList) {
-                String serverVerson = operateEntity.getServerVerson();
                 String operaCode = operateEntity.getOperaCode();
                 try {
                     //所有其他模块，都返回告警列表json字符串
@@ -231,7 +229,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         }
         return reportAlarmList;
     }
-
 
     /**
      * @auther: liudd

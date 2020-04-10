@@ -1,0 +1,442 @@
+<section id="backCenterPage">
+
+    <div class="top">
+        <div id="enterprise">
+            <i class="icon ic ic-enterprise ic-2x"></i>
+            <span class="name">企业数量</span>
+            <span class="number" ng-bind="counts[0] | number"></span>
+        </div>
+        <div id="user">
+            <i class="icon ic ic-user ic-2x"></i>
+            <span class="name">用户数量</span>
+            <span class="number" ng-bind="counts[1] | number"></span>
+        </div>
+        <div id="fsu">
+            <i class="icon ic ic-fsu ic-2x"></i>
+            <span class="name">FSU在线数/FSU录入数</span>
+            <span class="number">
+                <span ng-bind="counts[2] | number"></span>/<span ng-bind="counts[3] | number"></span>
+            </span>
+        </div>
+        <div id="device">
+            <i class="icon ic ic-device ic-2x"></i>
+            <span class="name">设备数量</span>
+            <span class="number" ng-bind="counts[4] | number"></span>
+        </div>
+    </div>
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>企业列表</h3>
+            <button class="btn btn-primary" ng-if="user.type === CONST.userType.manager" ng-click="addEnterprise.toModal();">添加新企业</button>
+        </div>
+            
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>企业名称</th><th>企业唯一码</th><th>平台类型</th>
+                        <th>联系人姓名</th><th>联系人电话</th><th>联系人邮箱</th>
+                        <th>用户人数</th><th>FSU在线数</th><th>FSU录入数</th><th>设备接入数</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="e in enterpriseList" ng-class="CONST.animation.list">
+                        <td ><a ng-bind="e.enterprise.name" ng-click="intoEnterprise(e.enterprise.uniqueCode);"></a></td>
+                        <td ng-bind="e.enterprise.uniqueCode"></td>
+                        <td ng-bind="e.enterprise.platform"></td>
+                        <td ng-bind="e.enterprise.contactsName"></td>
+                        <td ng-bind="e.enterprise.contactsPhone | nullFilter"></td>
+                        <td ng-bind="e.enterprise.contactsEmail | nullFilter"></td>
+                        <td ng-bind="e.countUser"></td>
+                        <td ng-bind="e.countOnlineFsu"></td>
+                        <td ng-bind="e.countFsu"></td>
+                        <td ng-bind="e.countPoint"></td>
+                        <td>
+                            <a class="ic ic-edit" ng-if="user.type === CONST.userType.manager" ng-click="modifyEnterprise.toModal(e.enterprise);"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+            
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || enterpriseList">
+            <div class="img img-2x"></div>
+        </div>
+    </div>
+
+    <form class="modal hide form-horizontal" data-backdrop="static" id="addEnterpriseModal"
+          name="addEnterprise.form" novalidate ng-submit="addEnterprise.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="addEnterprise.clear();"><i class="ic ic-close"></i></button>
+            <h3>添加新企业</h3>
+        </div>
+        <div class="modal-body scroll">
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.uniqueCode);">
+                <label class="control-label">企业唯一码</label>
+                <div class="controls">
+                    <input type="text" name="uniqueCode" required
+                           placeholder="{{REGEX.uniqueCodeDesc}}"
+                           ng-model="addEnterprise.obj.uniqueCode"
+                           ng-blur="addEnterprise.form.uniqueCode.$valid && checkUniqueCode(addEnterprise.obj.uniqueCode);"
+                           ng-pattern="REGEX.uniqueCode">
+                    <span class="help-inline">
+                        <span ng-if="addEnterprise.form.uniqueCode.$valid" ng-bind="uniqueCodeExistInfo"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.name);">
+                <label class="control-label">企业名称</label>
+                <div class="controls">
+                    <input type="text" name="name" required
+                           placeholder="{{REGEX.enterpriseNameDesc}}"
+                           ng-model="addEnterprise.obj.name"
+                           ng-pattern="REGEX.enterpriseName">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.platform);">
+                <label class="control-label">平台类型</label>
+                <div class="controls">
+                    <select name="platform" required
+                            ng-model="addEnterprise.obj.platform"
+                            ng-options="item as item for item in CONST.platformList">
+                    </select>
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group"
+                 ng-if="user.classes === CONST.userClasses.techSupport"
+                 ng-class="getValidClass(addEnterprise.form.agency);">
+                <label class="control-label">代理商</label>
+                <div class="controls">
+                    <select name="agency"
+                            ng-model="addEnterprise.obj.agency"
+                            ng-options="item as item.name for item in agencyList">
+                        <option></option>
+                    </select>
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="control-group">
+                <div class="controls">企业联系人信息（企业全局管理员）</div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.username);">
+                <label class="control-label">账号</label>
+                <div class="controls">
+                    <input type="text" name="username" required
+                           ng-model='addEnterprise.obj.username'
+                           ng-change="addEnterprise.form.username.$valid && checkUsername(addEnterprise.obj.username);"
+                           placeholder="{{REGEX.usernameDesc}}"
+                           ng-pattern="REGEX.username">
+                    <span class="help-inline">
+                        <span ng-if="addEnterprise.form.username.$valid" ng-bind="usernameExistInfo"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.password);">
+                <label class="control-label">密码</label>
+                <div class="controls">
+                    <input type="text" name="password" required
+                           ng-model='addEnterprise.obj.password'
+                           placeholder="{{REGEX.passwordDesc}}"
+                           ng-pattern="REGEX.password">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group"
+                 ng-class="getValidClass(addEnterprise.form.contactsName);">
+                <label class="control-label">姓名</label>
+                <div class="controls">
+                    <input type="text" name="contactsName" required
+                           placeholder="{{REGEX.personNameDesc}}"
+                           ng-model="addEnterprise.obj.contactsName"
+                           ng-pattern="REGEX.personName">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group"
+                 ng-class="getValidClass(addEnterprise.form.contactsPhone);">
+                <label class="control-label">手机号码</label>
+                <div class="controls">
+                    <input type="text" name="contactsPhone" required
+                           ng-model="addEnterprise.obj.contactsPhone"
+                           ng-change="addEnterprise.form.contactsPhone.$valid && checkPhoneExist(addEnterprise.obj.contactsPhone);"
+                           ng-pattern="REGEX.cellphone" >
+                    <span class="help-inline">
+                        <span ng-if="addEnterprise.form.contactsPhone.$valid" ng-bind="phoneExistInfo"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="control-group"
+                 ng-class="getValidClass(addEnterprise.form.contactsEmail);">
+                <label class="control-label">电子邮箱</label>
+                <div class="controls">
+                    <input type="text" name="contactsEmail"
+                           ng-model="addEnterprise.obj.contactsEmail"
+                           ng-pattern="REGEX.email">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+
+
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.pollingInterval);">
+                <label class="control-label">FSU轮巡间隔</label>
+                <div class="controls">
+                    <input type="text" name="pollingInterval" ng-model="addEnterprise.obj.pollingInterval"
+                        placeholder = "{{REGEX.pollingIntervalDesc}}"
+                        ng-pattern = "REGEX.pollingInterval" required>
+                    <span>分钟</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">页面刷新间隔</label>
+                <div class="controls">
+                    <select name="refreshInterval" required
+                        ng-model="addEnterprise.obj.refreshInterval"
+                        ng-options="item | secondFilter for item in refreshIntervals"></select>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.fsuOfflineDelayTime);">
+                <label class="control-label">FSU告警延时</label>
+                <div class="controls">
+                    <input type="text" name="fsuOfflineDelayTime" 
+                        placeholder = "{{REGEX.fsuOfflineDelayTimeDesc}}"
+                        ng-model="addEnterprise.obj.fsuOfflineDelayTime" required
+                        ng-pattern = "REGEX.fsuOfflineDelayTime">
+                    <span>分钟</span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.alarmReportTemp);">
+                <label class="control-label">告警上报模板</label>
+                <div class="controls">
+                    <input type="text" name="alarmReportTemp"
+                           ng-model="addEnterprise.obj.alarmReportTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.alarmRecoverTemp);">
+                <label class="control-label">告警消除模板</label>
+                <div class="controls">
+                    <input type="text" name="alarmRecoverTemp"
+                           ng-model="addEnterprise.obj.alarmRecoverTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.createUserTemp);">
+                <label class="control-label">添加用户模板</label>
+                <div class="controls">
+                    <input type="text" name="createUserTemp"
+                           ng-model="addEnterprise.obj.createUserTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.phoneCodeTemp);">
+                <label class="control-label">手机验证码模板</label>
+                <div class="controls">
+                    <input type="text" name="phoneCodeTemp"
+                           ng-model="addEnterprise.obj.phoneCodeTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addEnterprise.form.fsuOfflineTemp);">
+                <label class="control-label">FSU离线告警模板</label>
+                <div class="controls">
+                    <input type="text" name="fsuOfflineTemp"
+                           ng-model="addEnterprise.obj.fsuOfflineTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label">短信通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "addEnterprise.obj.msgAgentUser = !addEnterprise.obj.msgAgentUser">
+                        <scloudMytarget hint="true" myid="addEnterprise_msgAgentUser" ifchecked="addEnterprise.obj.msgAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">邮件通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "addEnterprise.obj.emailAgentUser = !addEnterprise.obj.emailAgentUser">
+                        <scloudMytarget hint="true" myid="addEnterprise_emailAgentUser" ifchecked="addEnterprise.obj.emailAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">APP通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "addEnterprise.obj.appAgentUser = !addEnterprise.obj.appAgentUser">
+                        <scloudMytarget hint="true" myid="addEnterprise_appAgentUser" ifchecked="addEnterprise.obj.appAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" ng-disabled="addEnterprise.form.$invalid || isPhoneExist || isUsernameExist || isUniqueCodeExist">确认</button>
+            <button type="reset" class="btn btn-default" ng-click="addEnterprise.clear();">取消</button>
+        </div>
+    </form>
+
+    <form class="modal hide form-horizontal" data-backdrop="static" id="modifyEnterpriseModal"
+          name="modifyEnterprise.form" novalidate ng-submit="modifyEnterprise.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="modifyEnterprise.clear();"><i class="ic ic-close"></i></button>
+            <h3>修改企业</h3>
+        </div>
+        <div class="modal-body scroll">
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.name);">
+                <label class="control-label">企业名称</label>
+                <div class="controls">
+                    <input type="text" name="name" required readonly
+                           ng-model="modifyEnterprise.obj.name">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.contactsName);">
+                <label class="control-label">联系人姓名</label>
+                <div class="controls">
+                    <input type="text" name="contactsName" required
+                           placeholder="{{REGEX.personNameDesc}}"
+                           ng-model="modifyEnterprise.obj.contactsName"
+                           ng-pattern="REGEX.personName">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.contactsPhone);">
+                <label class="control-label">手机号码</label>
+                <div class="controls">
+                    <input type="text" name="contactsPhone" required
+                           ng-model="modifyEnterprise.obj.contactsPhone"
+                           ng-pattern="REGEX.cellphone" >
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.contactsEmail);">
+                <label class="control-label">电子邮箱</label>
+                <div class="controls">
+                    <input type="text" name="contactsEmail"
+                           ng-model="modifyEnterprise.obj.contactsEmail"
+                           ng-pattern="REGEX.email">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.alarmReportTemp);">
+                <label class="control-label">告警上报模板</label>
+                <div class="controls">
+                    <input type="text" name="alarmReportTemp"
+                           ng-model="modifyEnterprise.obj.alarmReportTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.alarmRecoverTemp);">
+                <label class="control-label">告警消除模板</label>
+                <div class="controls">
+                    <input type="text" name="alarmRecoverTemp"
+                           ng-model="modifyEnterprise.obj.alarmRecoverTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.createUserTemp);">
+                <label class="control-label">添加用户模板</label>
+                <div class="controls">
+                    <input type="text" name="createUserTemp"
+                           ng-model="modifyEnterprise.obj.createUserTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.phoneCodeTemp);">
+                <label class="control-label">手机验证码模板</label>
+                <div class="controls">
+                    <input type="text" name="phoneCodeTemp"
+                           ng-model="modifyEnterprise.obj.phoneCodeTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(modifyEnterprise.form.fsuOfflineTemp);">
+                <label class="control-label">FSU离线告警模板</label>
+                <div class="controls">
+                    <input type="text" name="fsuOfflineTemp"
+                           ng-model="modifyEnterprise.obj.fsuOfflineTemp"
+                           ng-pattern="REGEX.one2hundredThousand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">短信通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "modifyEnterprise.obj.msgAgentUser = !modifyEnterprise.obj.msgAgentUser">
+                        <scloudMytarget hint="true" myid="modifyEnterprise_msgAgentUser" ifchecked="modifyEnterprise.obj.msgAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">邮件通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "modifyEnterprise.obj.emailAgentUser = !modifyEnterprise.obj.emailAgentUser">
+                        <scloudMytarget hint="true" myid="modifyEnterprise_emailAgentUser" ifchecked="modifyEnterprise.obj.emailAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">APP通知代理商</label>
+                <div class="controls">
+                    <a ng-click = "modifyEnterprise.obj.appAgentUser = !modifyEnterprise.obj.appAgentUser">
+                        <scloudMytarget hint="true" myid="modifyEnterprise_appAgentUser" ifchecked="modifyEnterprise.obj.appAgentUser"></scloudMytarget>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" ng-disabled="modifyEnterprise.form.$invalid">确认</button>
+            <button type="button" class="btn btn-default" ng-click="modifyEnterprise.clear();">取消</button>
+        </div>
+    </form>
+</section>

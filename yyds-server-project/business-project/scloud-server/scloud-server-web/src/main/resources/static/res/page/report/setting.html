@@ -1,0 +1,313 @@
+<section id="reportSettingPage">
+    <ul class="nav nav-tabs" ng-show="!showExamineDetail">
+        <li ng-repeat="item in tabPage.pageList" ng-class="{active:tabPage.isActive($index)}">
+            <a ng-click="tabPage.showPage($index);" ng-bind="item"></a>
+        </li>
+    </ul>
+    <div class="bottom">
+        <div ng-show="tabPage.currentIndex === 0" class="tab1 scroll">
+            <div class="wrapper">
+                <div class="left card-bg">
+                    <div class="page-header">
+                        <h3>订阅报表</h3>
+                    </div>                  
+                    <div class="table-box scroll">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>序号</th><th>订阅名称</th><th>订阅人</th><th>创建时间</th><th>编辑</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in subscribeList" ng-class="CONST.animation.list">
+                                    <td ng-bind="$index + 1"></td>
+                                    <td ng-bind="item.name"></td>
+                                    <td ng-bind="item.creator.name"></td>
+                                    <td ng-bind="item.tCreate | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                                    <td>
+                                        <a class="ic ic-edit" ng-if="util.checkPrivilege(8704)" title="编辑" ng-click="addTemplate.load(item)"></a>
+                                        <a class="ic ic-delete" ng-if="util.checkPrivilege(8705)" title="删除" ng-click="deleteSubscribe.toModal(item)"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="loader" ng-show="isLoading">
+                        <i class="ic ic-spinner ic-spin ic-5x"></i>
+                    </div>
+                    <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+                        <div class="img img-2x"></div>
+                    </div>
+                    <tm-pagination conf="paginationConf"></tm-pagination>
+                </div>
+                <div class="right card-bg">
+
+                    <div class="nav-tree">
+                        <div scloud-toggle target="target" position="right" init-state="true" handler="toggleNavTree" ng-style="{display: addTemplate.showToggleButton?'block':'none'}" callback="addTemplate.afterNavTreeClosed"></div>
+                        <input type="text" placeholder="搜索站点位置" ng-model="searchKey" ng-change="zTree.getNodesByParamFuzzy(searchKey,'areaTree','checkboxTierTree');siteTree.getNodesByParamFuzzy(searchKey,'siteTree','checkboxTierTree');">
+                        <div class="scroll-wrap" ng-show="addTemplate.showRadioTree">
+                            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+                            <div ng-show="zTree.isEmpty" class="no-data">
+                                <div class="img img-2x"></div>
+                            </div>
+                        </div>
+                        <div class="loader" ng-show="treeLoading">
+                            <i class="ic ic-spinner ic-spin ic-5x"></i>
+                        </div>        
+                        <div class="scroll-wrap" ng-show="!addTemplate.showRadioTree">
+                            <ul id="siteTree" class="ztree scroll" ng-hide="siteTree.isEmpty"></ul>
+                            <div ng-show="siteTree.isEmpty" class="no-data">
+                                <div class="img img-2x"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-header">
+                        <h3>订阅模板</h3>
+                    </div>
+                    <div class="page-body" ng-class="{'inset-shadow': addTemplate.status === 'modify'}">
+                        <table class="template">
+                            <thead>
+                                <tr>
+                                    <th>报表名称</th>
+                                    <th>站点层级</th>
+                                    <th>站点类型</th>
+                                    <th>FSU厂家</th>
+                                    <th>FSU状态</th>
+                                    <th>统计深度</th>
+                                    <th>告警状态</th>
+                                    <th>告警等级</th>
+                                    <th width="70"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in addTemplate.obj.list">
+                                    <td class="name">
+                                        <select ng-model="item.name" ng-change="addTemplate.obj.list[$index] = {name:addTemplate.obj.list[$index].name}" ng-options="option.name as option.name for option in reportList"></select>
+                                    </td>
+                                    <td class="tier">
+                                        <input class="cursor-point" ng-model="item.tierString" ng-click="addTemplate.toggleTree(item)" type="text" readonly ng-click="">
+                                    </td>
+                                    <td class="stationType">
+                                        <select ng-disabled="!reportFilterMap(item.name, '站点类型')" ng-class="!reportFilterMap(item.name, '站点类型') && 'gray'" ng-disabled="!item.name" ng-model="item.stationType" ng-options="option.key as option.value for option in CONST.stationTypeList"><option ng-bind="'全部'"></option></select>
+                                    </td>
+                                    <td class="fsuManu">
+                                        <select ng-disabled="!reportFilterMap(item.name, 'FSU厂家')" ng-class="!reportFilterMap(item.name, 'FSU厂家') && 'gray'" ng-disabled="!item.name" ng-model="item.fsuManufactory" ng-options="option for option in CONST.fsuManufactoryList"><option ng-bind="'全部'"></option></select>
+                                    </td>
+                                    <td class="fsuState">
+                                        <select ng-disabled="!reportFilterMap(item.name, 'FSU状态')" ng-class="!reportFilterMap(item.name, 'FSU状态') && 'gray'" ng-disabled="!item.name" ng-model="item.fsuState" ng-options="option for option in CONST.operationState.list"><option ng-bind="'全部'"></option></select>
+                                    </td>
+                                    <td class="statisticsDepth">
+                                        <select ng-disabled="!reportFilterMap(item.name, '统计深度')" ng-class="!reportFilterMap(item.name, '统计深度') && 'gray'" ng-disabled="!item.name" ng-model="item.statisticsDepth" ng-options="option.key as option.value for option in statisticsDepthList"></select>
+                                    </td>
+                                    <td class="alarmState">
+                                        <select ng-disabled="!reportFilterMap(item.name, '告警状态')" ng-class="!reportFilterMap(item.name, '告警状态') && 'gray'" ng-disabled="!item.name" ng-model="item.alarmState" ng-options="option.key as option.value for option in CONST.alarmStateList"></select>
+                                    </td>
+                                    <td class="level">
+                                        <select ng-disabled="!reportFilterMap(item.name, '告警等级')" ng-class="!reportFilterMap(item.name, '告警等级') && 'gray'" ng-disabled="!item.name" ng-model="item.level" ng-options="option.key as option.value for option in CONST.alarmLevelList"><option ng-bind="'全部'"></option></select>
+                                    </td>
+                                    <td>
+                                        <a ng-show="addTemplate.obj.list.length > 1" ng-click="addTemplate.remove($index)" class="ic ic-minus-square"></a>
+                                        <a ng-show="$index === addTemplate.obj.list.length - 1" ng-click="addTemplate.add()" class="ic ic-plus-square"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="subscriber">
+                            <label>订阅名称</label>
+                            <input type="text" maxlength="15" ng-model="addTemplate.obj.name">
+
+                    
+                            <label>订阅人</label>
+                            <input type="text" ng-model="user.name" readonly>
+
+                            <label>订阅间隔</label>
+                            <select ng-model="addTemplate.obj.subscribeInterval" ng-options="item for item in ['每周', '每月']"></select>
+                        </div>
+
+                        <div class="saver">
+                            <button class="btn btn-default" ng-click="addTemplate.clear()">取消</button>
+                            <button class="btn btn-primary" 
+                                ng-click="addTemplate.execute()" 
+                                ng-disabled="checkSubscribeInvalid()"
+                                ng-if="addTemplate.status == 'modify' ? util.checkPrivilege(8704) : util.checkPrivilege(8702)" 
+                                ng-bind="addTemplate.status == 'modify' ? '修改' : '确定'"></button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-show="tabPage.currentIndex === 1" class="tab2">
+            <div class="left card-bg">                
+                <div class="page-header">
+                    <h3>自定义报表</h3>
+                </div>                  
+                <div class="table-box scroll">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>序号</th><th>报表名称</th><th>报表类型</th><th>创建时间</th><th>创建人</th><th>编辑</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in customReportList" ng-class="CONST.animation.list">
+                                <td ng-bind="($index + 1).toString().prefixZero(3)"></td>
+                                <td ng-bind="item.name"></td>
+                                <td ng-bind="item.type"></td>
+                                <td ng-bind="item.tCreate | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                                <td ng-bind="item.creator.name"></td>
+                                <td>                                    
+                                    <a class="ic ic-edit" title="编辑" ng-if="util.checkPrivilege(8704)" ng-click="addDiyTemplate.load(item)"></a>
+                                    <a class="ic ic-delete" title="删除" ng-click="deleteDiyTemplate.toModal(item)"></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="loader" ng-show="isLoading2">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+                <div class="no-data" ng-hide="isLoading2 || paginationConf2.totalItems">
+                    <div class="img img-2x"></div>
+                </div>
+                <tm-pagination conf="paginationConf2"></tm-pagination>
+            </div>
+            <div class="right card-bg">         
+                <div class="page-header">
+                    <h3>自定义模板</h3>
+                </div>
+                <div class="page-body scroll" ng-class="{'inset-shadow': addDiyTemplate.status === 'modify'}">
+                    <form class="form-horizontal _top_left diy-form">
+                        <div class="control-group">
+                            <label class="control-label">报表名称</label>
+                            <div class="controls">
+                                <input class="duration" maxlength="15" type="text"  ng-model="addDiyTemplate.obj.name">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">报表类型</label>
+                            <div class="controls">
+                                <select ng-disabled="addDiyTemplate.status === 'modify'"><option value="告警报表" selected>告警报表</option></select>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">统计内容</label>
+                            <div class="controls">
+                                <select ng-model = "addDiyTemplate.obj.statisticsContent" 
+                                    ng-disabled="addDiyTemplate.status === 'modify'"
+                                    ng-options = "item for item in filterNameList"
+                                    ng-change = "addDiyTemplate.obj.filters = []; addDiyTemplate.obj.tableHeads = []"></select>
+                            </div>
+                        </div>
+
+                        <div class="control-group split">
+                            <div>
+                                <label class="control-label">显示字段</label>
+                                <div class="controls">
+                                    <div class="box">
+                                        <ul ng-show="addDiyTemplate.obj.statisticsContent != 'TOP告警统计'">
+                                            <li ng-repeat="item in addDiyTemplate.leftList1">
+                                                <scloud-checkbox 
+                                                    content="{{item}}" 
+                                                    selected = "addDiyTemplate.obj.tableHeads[$index]" >                                                        
+                                                </scloud-checkbox>
+                                            </li>
+                                        </ul>
+                                        <ul ng-show="addDiyTemplate.obj.statisticsContent == 'TOP告警统计'">
+                                            <li ng-repeat="item in addDiyTemplate.leftList2">
+                                                <scloud-checkbox 
+                                                    content="{{item}}" 
+                                                    selected = "addDiyTemplate.obj.tableHeads[$index]" >                                                        
+                                                </scloud-checkbox>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="control-label">筛选条件</label>
+                                <div class="controls">
+                                    <div class="box">
+                                        <ul ng-show="addDiyTemplate.obj.statisticsContent != 'TOP告警统计'">
+                                            <li ng-repeat="item in addDiyTemplate.rightList1">
+                                                <scloud-checkbox 
+                                                    content="{{item}}" 
+                                                    selected = "addDiyTemplate.obj.filters[$index]" >                                                        
+                                                </scloud-checkbox>
+                                            </li>
+                                        </ul>
+                                        <ul ng-show="addDiyTemplate.obj.statisticsContent == 'TOP告警统计'">
+                                            <li ng-repeat="item in addDiyTemplate.rightList2">
+                                                <scloud-checkbox 
+                                                    content="{{item}}" 
+                                                    selected = "addDiyTemplate.obj.filters[$index]" >                                                        
+                                                </scloud-checkbox>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls">
+                                <button class="btn btn-primary" 
+                                    ng-disabled="addDiyTemplate.checkInvalid()"
+                                    ng-if="addDiyTemplate.status == 'add' ? util.checkPrivilege(8702) : util.checkPrivilege(8704)" 
+                                    ng-bind="addDiyTemplate.status === 'add' ? '保存' : '修改'" 
+                                    ng-click="addDiyTemplate.execute();"
+                                ></button>
+                                <button class="btn btn-default" ng-click="addDiyTemplate.clear();">取消</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>        
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteDiyTemplateModal"
+              name="deleteDiyTemplate.form" novalidate ng-submit="deleteDiyTemplate.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteDiyTemplate.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除站点</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该自定义报表模板？</h4>
+                    <p class="content">
+                        注意，将要删除的自定义报表模板是
+                        <strong class="font-danger" ng-bind="deleteDiyTemplate.obj.name"></strong>
+                        。
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteDiyTemplate.form.$invalid">确认</button>
+                <button type="button" class="btn btn-default" ng-click="deleteDiyTemplate.clear();">取消</button>
+            </div>
+        </form>
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteSubscribeModal"
+              name="deleteSubscribe.form" novalidate ng-submit="deleteSubscribe.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteSubscribe.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除订阅规则</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该订阅规则？</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteSubscribe.form.$invalid">确认</button>
+                <button type="button" class="btn btn-default" ng-click="deleteSubscribe.clear();">取消</button>
+            </div>
+        </form>
+            
+    </div>
+    
+</section>

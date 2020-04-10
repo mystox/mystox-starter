@@ -1,0 +1,211 @@
+<section id="reportListPage" class="df dfv">
+    <div class="nav-tree cloak" ng-class="reportName.value == '站点用电负荷统计表' && 'filter-online'" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox ng-show="reportName.value == '站点用电负荷统计表'" selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox ng-show="reportName.value == '站点用电负荷统计表'" selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">
+        <div class="scroll-wrap" ng-show="reportName.value != '站点用电负荷统计表'">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>        
+        <div class="scroll-wrap" ng-show="reportName.value === '站点用电负荷统计表'">
+            <ul id="siteTree" class="ztree scroll" ng-hide="siteTree.isEmpty"></ul>
+            <div ng-show="siteTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+    </div>
+
+	<form class="top query-form card-bg">
+        <div class="form-inline">
+            <label>报表名称</label>
+            <select ng-model="reportName"
+                    ng-options="item as item.value for item in reportType.reportNameList">
+            </select>
+            <span ng-show="reportName.algorithm" style="margin-left: -10px;">
+                <i class="ic ic-help" scloud-tooltip data-content = "{{reportName.algorithm}}" ></i>
+            </span>
+
+            <label ng-show="!curCustomRerpot ||  customQuery('站点类型')">站点类型</label>
+            <select ng-show="!curCustomRerpot ||  customQuery('站点类型')" ng-model="reportQuery.stationType"
+                    ng-options="item.key as item.value for item in CONST.stationTypeList">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+
+            <label ng-show="!curCustomRerpot && !(reportName.value === '站点用电负荷统计表') || customQuery('FSU厂家')">
+                FSU厂家
+            </label>
+            <select ng-show="!curCustomRerpot && !(reportName.value === '站点用电负荷统计表') || customQuery('FSU厂家')"
+                    ng-model="reportQuery.fsuManufactory"
+                    ng-options="item as item for item in CONST.fsuManufactoryList">
+                <option ng-bind="'全部'"></option>
+            </select>
+            
+
+
+            <label ng-show="!curCustomRerpot && !(reportName.value === '站点统计表'
+                    || reportName.value === '站点用电负荷统计表' 
+                    || reportName.value === '市电停电断站情况统计表'
+                    || reportName.value === 'FSU运行统计表')  || customQuery('FSU状态')">
+                FSU状态
+            </label>
+            <select ng-show="!curCustomRerpot && !(reportName.value === '站点统计表'
+                    || reportName.value === '站点用电负荷统计表' 
+                    || reportName.value === '市电停电断站情况统计表'
+                    || reportName.value === 'FSU运行统计表')  || customQuery('FSU状态')"
+                    ng-model="reportQuery.fsuState"
+                    ng-options="item as item for item in CONST.operationState.list">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+            <label ng-show="!curCustomRerpot && !(reportName.value === '站点停电明细表'
+                        || reportName.value === 'FSU离线明细表'
+                        || reportName.value === '市电停电断站情况统计表'
+                        || reportName.value === '用电量统计报表'
+                        || reportName.value === '站点用电负荷统计表') || customQuery('统计深度')">
+                统计深度
+            </label>
+            <select ng-show="!curCustomRerpot && !(reportName.value === '站点停电明细表'
+                        || reportName.value === 'FSU离线明细表'
+                        || reportName.value === '市电停电断站情况统计表'
+                        || reportName.value === '用电量统计报表'
+                        || reportName.value === '站点用电负荷统计表') || customQuery('统计深度')"
+                    ng-model="reportQuery.statisticsDepth"
+                    ng-change="chooseDefTableOnChangeOption('reportQuery','statisticsDepth')"
+                    ng-options="v.key as v.value for v in statisticsDepthList">
+            </select>
+        
+            <label ng-show="reportName.value === '告警分类统计表' || customQuery('告警状态')">
+                告警状态
+            </label>
+            <select ng-show="reportName.value === '告警分类统计表' || customQuery('告警状态')"
+                    ng-model="reportQuery.alarmState"
+                    ng-options="item.key as item.value for item in CONST.alarmStateList">
+            </select>
+
+            <label ng-show="reportName.value === '告警分类统计表'">
+                告警等级
+            </label>
+            <select ng-show="reportName.value === '告警分类统计表'"
+                    ng-model="reportQuery.alarmLevel"
+                    ng-options="v.key as v.value for v in CONST.alarmLevelList">
+                    <option ng-bind="'全部'"></option>
+            </select>
+            
+            <label ng-show="reportName.value === '站点用电负荷统计表'">
+                设备名称
+            </label>
+            <select ng-show="reportName.value === '站点用电负荷统计表'"
+                    ng-model="reportQuery.deviceName"
+                    ng-change="chooseDefTableOnChangeOption('reportQuery', 'deviceName')"
+                    ng-options="v.key as v.value for v in CONST.deviceName">
+            </select>
+
+            <label ng-show="reportName.value === '站点用电负荷统计表' || customQuery('统计周期')">
+                统计周期
+            </label>
+            <select ng-show="(reportName.value === '站点用电负荷统计表' || customQuery('统计周期'))"
+                    ng-model="reportQuery.dateType"
+                    ng-options="v.key as v.value for v in CONST.dateTypeList">
+            </select>
+
+            <!-- <select ng-show="reportName.value === '站点用电负荷统计表'"
+                    ng-model="reportQuery.statisticalCycle"
+                    ng-hide="isShowTimeSelect"
+                    ng-options="v.key as v.value for v in statisticalCycles">
+                    <option ng-bind="'全部'"></option>
+            </select> -->
+
+            <input ng-show="(reportName.value === '站点用电负荷统计表' || customQuery('统计周期')) && !isShowTimeSelect"
+                   type="text" class="form-control report-select2" multiple
+                   select2 config="statisticalCycles"
+                   select2-model="reportQuery.statisticalCycle"/>
+            
+
+            <label ng-show="customQuery('TOP数量')">
+                TOP数量
+            </label>
+            <select ng-show="customQuery('TOP数量')"
+                    ng-model="reportQuery.top"
+                    ng-options="v as v for v in topList">
+            </select>
+
+            <div style="display: inline-block;" class="form-inline">
+                <label ng-show="isShowTimeSelect">开始时间</label>
+                <div ng-show="isShowTimeSelect"
+                     class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="reportQuery.tStart">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label ng-show="isShowTimeSelect">-</label>
+                <div ng-show="isShowTimeSelect"
+                    class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="reportQuery.tEnd">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" 
+                ng-disabled="!reportName || isLoading || isLoading2" 
+                ng-click="query();">
+                查询
+            </button>
+        </div>
+
+    </form>
+
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>报表</h3>
+            <div class="btn-group" ng-if="reportType.value=='告警报表' && util.checkPrivilege(9407) || reportType.value=='系统报表' && util.checkPrivilege(9307)" >
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" ng-disabled="!reportName || isLoading || isLoading2">
+                    <i class="ic ic-download" title="下载文件"></i> 导出 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <button 
+                            ng-if="reportType.value=='告警报表' && util.checkPrivilege(9407) || reportType.value=='系统报表' && util.checkPrivilege(9307)" 
+                            ng-click="export('excel');">
+                            导出Excel
+                        </button>
+                    </li>
+                    <li>
+                        <button 
+                            ng-if="reportType.value=='告警报表' && util.checkPrivilege(9407) || reportType.value=='系统报表' && util.checkPrivilege(9307)" 
+                            ng-click="export('pdf');">
+                            导出PDF
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="table-box scroll">
+            <table id="report" class="table table-bordered table-hover table-report table-border">
+                <thead>
+                    <tr ng-repeat="tr in table.thead">
+                        <th ng-repeat="th in tr" ng-bind="th.value" colspan="{{th.c}}" rowspan="{{th.r}}"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="tr in dataList" ng-class="CONST.animation.list">
+                    <td ng-bind="(paginationConf.currentPage - 1) * paginationConf.itemsPerPage + $index + 1"></td>
+                    <td ng-repeat="key in table.keyName track by $index" ng-bind="tr[key] | nullFilter"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+</section>

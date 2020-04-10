@@ -3,10 +3,8 @@ package com.kongtrolink;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.base.StringUtil;
-import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.enttiy.EnterpriseLevel;
 import com.kongtrolink.framework.query.EnterpriseLevelQuery;
-import com.kongtrolink.framework.service.EnterpriseLevelService;
 import com.mongodb.WriteResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,11 +18,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liudd
@@ -36,8 +31,8 @@ import java.util.Map;
 @SpringBootTest
 public class EnterpriseLevelTest {
 
-    @Autowired
-    EnterpriseLevelService enterpriseLevelService;
+//    @Autowired
+//    EnterpriseLevelService enterpriseLevelService;
     @Autowired
     MongoTemplate mongoTemplate;
     private String table = MongTable.ENTERPRISE_LEVEL;
@@ -57,7 +52,7 @@ public class EnterpriseLevelTest {
         enterpriseLevel.setLevel(2);
         enterpriseLevel.setLevelName(level + "级告警");
         enterpriseLevel.setColor("#993838");
-        enterpriseLevelService.add(enterpriseLevel);
+//        enterpriseLevelService.add(enterpriseLevel);
     }
 
     @Test
@@ -75,10 +70,10 @@ public class EnterpriseLevelTest {
 
     @Test
     public void nullMap(){
-        List<EnterpriseLevel> list = enterpriseLevelService.list(new EnterpriseLevelQuery());
-        for(EnterpriseLevel enterpriseLevel : list){
-            System.out.println(enterpriseLevel.getCode()+";"+enterpriseLevel.getLevels());
-        }
+//        List<EnterpriseLevel> list = enterpriseLevelService.list(new EnterpriseLevelQuery());
+//        for(EnterpriseLevel enterpriseLevel : list){
+//            System.out.println(enterpriseLevel.getCode()+";"+enterpriseLevel.getLevels());
+//        }
     }
 
     @Test

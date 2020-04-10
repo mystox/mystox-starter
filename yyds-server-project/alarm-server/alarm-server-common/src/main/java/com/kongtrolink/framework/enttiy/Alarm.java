@@ -35,17 +35,34 @@ public class Alarm {
     private String color;               //告警颜色
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
-    private String state;               //告警状态
-    private Map<String, String> AuxilaryMap;    //附加属性列map
+    private String state;               //告警状态（待处理，已消除）
+    private Map<String, String> auxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
-    private String status;              //告警状态（待处理，已消除）
     private Date hcTime;                //被周期处理时间
     private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
     private String key ;                //唯一键，可作为索引
+    private String checkState;          //告警确认状态
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
+    private String workCode;            //工单编码，用于前端展示
+
+    public String getWorkCode() {
+        return workCode;
+    }
+
+    public void setWorkCode(String workCode) {
+        this.workCode = workCode;
+    }
+
+    public String getCheckState() {
+        return checkState;
+    }
+
+    public void setCheckState(String checkState) {
+        this.checkState = checkState;
+    }
 
     public String getCheckContant() {
         return checkContant;
@@ -85,14 +102,6 @@ public class Alarm {
 
     public void setHcTime(Date hcTime) {
         this.hcTime = hcTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getFlag() {
@@ -184,11 +193,11 @@ public class Alarm {
     }
 
     public Map<String, String> getAuxilaryMap() {
-        return AuxilaryMap;
+        return auxilaryMap;
     }
 
     public void setAuxilaryMap(Map<String, String> auxilaryMap) {
-        AuxilaryMap = auxilaryMap;
+        this.auxilaryMap = auxilaryMap;
     }
 
     public String getId() {

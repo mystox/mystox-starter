@@ -14,9 +14,5 @@ public class Const {
     public static final String ALARM_LIST_TYPE = "type";
     public static final String ALARM_LIST_ENTERPRISECODE = "enterpriseCode";
     public static final String ALARM_LIST_SERVERCODE = "serverCode";
-    public static final String ALARM_OPERATE_RESOLVE = "消除";
-    public static final String ALARM_OPERATE_CHECK = "确认";
-
-
-
+    public static final String ALARM_OPERATE_RESOLVE = "告警消除";
 }

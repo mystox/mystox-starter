@@ -36,19 +36,25 @@ public class DeviceMongo {
         List<String> siteCodes = deviceQuery.getSiteCodes();    //站点编码
         String deviceTypeCode = deviceQuery.getDeviceTypeCode();	//设备类型编码
         String deviceCode = deviceQuery.getDeviceCode();	//设备编码（模糊搜索）
+        List<String> deviceCodeList = deviceQuery.getDeviceCodes();
         String manufacturer = deviceQuery.getManufacturer();	//设备厂家(模糊搜索)
         Long startTime = deviceQuery.getStartTime();	//开始时间
         Long endTime = deviceQuery.getEndTime();	//结束时间
         String state = deviceQuery.getState();	//注册状态（FSU类型、摄像机类型）：在线、离线
         String operationState = deviceQuery.getOperationState();	//运行状态（FSU类型）：工程态、测试态、交维态
-
-        Criteria criteria = Criteria.where("siteCode").in(siteCodes);
+        Criteria criteria = new Criteria();
+        if(null != siteCodes) {
+             criteria = Criteria.where("siteCode").in(siteCodes);
+        }
         if (!StringUtil.isNUll(deviceTypeCode)){
             criteria.and("typeCode").is(deviceTypeCode);
         }
         if (!StringUtil.isNUll(deviceCode)){
             deviceCode = MongoRegexUtil.escapeExprSpecialWord(deviceCode);
             criteria.and("code").regex("^" + deviceCode + ".*?");
+        }
+        if(null != deviceCodeList){
+            criteria.and("code").in(deviceCodeList);
         }
         if (!StringUtil.isNUll(manufacturer)){
             manufacturer = MongoRegexUtil.escapeExprSpecialWord(manufacturer);

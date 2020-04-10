@@ -23,6 +23,8 @@ public interface MqttCommonInterface {
 
     List<JSONObject> countAlarmByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
+    List<JSONObject> countHomeAlarmByDeviceIds(List<String> deviceIds, Date start, Date end, JSONObject baseCondition);
+
     List<SiteEntity> getSiteList(JSONObject baseCondition);
 
     String getRegionName(String address);

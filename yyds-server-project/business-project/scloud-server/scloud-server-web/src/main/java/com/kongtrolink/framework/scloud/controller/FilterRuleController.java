@@ -3,11 +3,13 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.FilterRule;
 import com.kongtrolink.framework.scloud.query.FilterRuleQuery;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,6 +22,7 @@ import java.util.List;
  * @Date: 2020/3/5 14:59
  * @Description:
  */
+@Controller
 @RequestMapping("/filterRule")
 public class FilterRuleController extends BaseController {
 
@@ -73,7 +76,8 @@ public class FilterRuleController extends BaseController {
         String uniqueCode = getUniqueCode();
         List<FilterRule> list = ruleService.list(uniqueCode, ruleQuery);
         int count = ruleService.count(uniqueCode, ruleQuery);
-        JsonResult jsonResult = new JsonResult(list, count);
+        ListResult<FilterRule> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 
@@ -87,6 +91,9 @@ public class FilterRuleController extends BaseController {
     public JsonResult updateState(@RequestBody FilterRuleQuery ruleQuery){
         String uniqueCode = getUniqueCode();
         ruleQuery.setUpdateTime(new Date());
+        if(null == ruleQuery.getState()){
+            return new JsonResult("启用状态不能为空", false);
+        }
         User user = getUser();
         if(null != user){
             ruleQuery.setCreatorId(user.getId());
@@ -100,6 +107,5 @@ public class FilterRuleController extends BaseController {
             return new JsonResult(operate + "成功", true);
         }
         return new JsonResult(operate + "失败", false);
-
     }
 }

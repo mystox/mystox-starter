@@ -16,15 +16,11 @@ import com.kongtrolink.framework.service.AuxilaryService;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -51,9 +47,9 @@ public class AlarmController extends BaseController {
     public JsonResult list(@RequestBody AlarmQuery alarmQuery){
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         String serverCode = alarmQuery.getServerCode();
-        List<DBObject> alarmList = alarmService.list(alarmQuery);
+        List<Alarm> alarmList = alarmService.list(alarmQuery);
         int count = alarmList.size();
-        ListResult<DBObject> listResult = new ListResult<>(alarmList, count);
+        ListResult<Alarm> listResult = new ListResult<>(alarmList, count);
         JsonResult jsonResult = new JsonResult(listResult);
         Auxilary auxilary = auxilaryService.getByEnterServerCode(enterpriseCode, serverCode);
         jsonResult.setOtherInfo(auxilary);

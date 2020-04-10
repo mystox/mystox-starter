@@ -97,6 +97,7 @@ public class AuxilaryDao {
         Criteria criteria = Criteria.where("enterpriseCode").is(enterpriseCode);
         criteria.and("serverCode").is(serverCode);
         Query query = Query.query(criteria);
-        return mongoTemplate.findOne(query, Auxilary.class, table);
+        Auxilary auxilary = mongoTemplate.findOne(query, Auxilary.class, table);
+        return auxilary;
     }
 }

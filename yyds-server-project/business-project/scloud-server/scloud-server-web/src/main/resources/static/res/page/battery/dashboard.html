@@ -1,0 +1,120 @@
+<section id="batteryDashboardPage">
+    <!--[if IE 9]>
+    <style>.vertical-center>div{position: absolute;top: 50%;transform: translateY(-50%);}</style>
+     <![endif]-->
+         
+        <div class="top-left card-bg card-transparent batteryGroupHealth">
+            <div class="page-header left-bar">
+                <h4>健康状态</h4>
+            </div>
+            <div class="page-body">
+                <div id="batteryGroupHealth" class="fill-all"></div>
+                <div class="chart-label vertical-center text-center  fill-all">
+                    <div class="row-fluid">
+                        <h2></h2><p></p>
+                    </div>
+                </div>
+                <div class="outer-label row-fluid text-center  fill-all">
+                    <div class="span4 vertical-center fill-height">
+                        <div class="row-fluid">
+                            <h1 ng-cloak ng-bind="batteryGroupHealth[0].count"></h1>
+                            <p>优</p>
+                            <hr>
+                            <h1 ng-cloak ng-bind="batteryGroupHealth[3].count"></h1>
+                            <p>差</p>
+                        </div>
+                    </div>
+                    <div class="span4"></div>
+                    <div class="span4 vertical-center fill-height">
+                        <div class="row-fluid">
+                            <h1 ng-cloak ng-bind="batteryGroupHealth[1].count"></h1>
+                            <p>良</p>
+                            <hr>
+                            <h1 ng-cloak ng-bind="batteryGroupHealth[2].count"></h1>
+                            <p>中</p>
+                        </div>                                            
+                    </div>
+                </div>
+            </div>          
+        </div>
+        <div class="top-right card-bg card-transparent system-distribute">
+            <div class="page-header left-bar">
+                <h4>系统分布</h4>
+            </div>
+            <div class="page-body vertical-center fill-all">
+                <div class="row-fluid">
+                    <div class="unit" ng-repeat="item in systemDistribution track by $index">
+                        <div class="cursor-point" ui-sref="battery/site({powerSysType:item.item})">
+                            <span ng-bind="item.item"></span>
+                            <span class="pull-right" ng-bind="item.count + ' 组'"></span>
+                        </div>
+                        <div class="progress">
+                            <div class="bar" ng-style="util.progressStyle(item.percent, null);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+     
+        <div class="bottom-left card-bg card-transparent batteryGroupStat">
+            <div class="page-header left-bar">
+                <h4>运行状态</h4>
+            </div>
+            <div class="page-body vertical-center fill-all">
+                <div class="row-fluid">
+                    <div class="unit" ng-repeat="item in batteryGroupStat track by $index">
+                        <p class="cursor-point" ui-sref="battery/site({status:$index})">
+                            <span ng-bind="item.item"></span>
+                            <span class="pull-right" ng-bind="item.count + ' 组'"></span>
+                        </p>
+                        <div class="progress">
+                            <div class="bar" ng-style="util.progressStyle(item.percent, item.bgColor);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-middle card-bg card-transparent alarmInfo">            
+            <div class="page-header left-bar">
+                <h4>告警分布</h4>
+            </div>
+            <div class="page-body vertical-center fill-all">
+                <div class="row-fluid wrapper text-center">
+                    <div class="col-6" ng-style="util.alarmColor(1);">
+                        <div class="alarm" id="alarmLevel1"></div>
+                        <div class="chartText">
+                            <div class="value cursor-point" ng-bind="alarm.num.level1" ui-sref="battery/alarm({alarmLevel:'1'})"></div>条
+                        </div>
+                        <p>一级告警</p>
+                    </div>
+                    <div class="col-6" ng-style="util.alarmColor(2);">
+                        <div class="alarm" id="alarmLevel2"></div>
+                        <div class="chartText">
+                            <div class="value cursor-point" ng-bind="alarm.num.level2" ui-sref="battery/alarm({alarmLevel:'2'})"></div>条
+                        </div>
+                        <p>二级告警</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-right  card-bg card-transparent batteryVolume">  
+            <div class="page-header left-bar">
+                <h4>容量状态</h4>
+            </div>
+            <div class="page-body vertical-center fill-all">
+                <div class="row-fluid">
+                    <div class="unit" ng-repeat="item in volumeStat track by $index">
+                        <div class="img {{item.img}}"></div>
+                        <p>
+                            <span ng-bind="item.item"></span>
+                            <span class="pull-right" ng-bind="item.count + ' 组'"></span>
+                        </p>
+                        <div class="progress">
+                            <div class="bar" ng-style="util.progressStyle(item.percent, item.bgColor);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</section>

@@ -368,5 +368,22 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         return null;
     }
 
+    @Override
+    public List<JSONObject> countHomeAlarmByDeviceIds(List<String> deviceIds, Date start, Date end, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        alarmCountCondition.put("startBeginTime", start);
+        alarmCountCondition.put("startEndTime", end);
+        MsgResult opera = mqttOpera.opera("getAlarmCountByDeviceIdList", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        String alarmCountListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(alarmCountListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm count list error[mqtt]");
+        }
+        return null;
+    }
 
 }

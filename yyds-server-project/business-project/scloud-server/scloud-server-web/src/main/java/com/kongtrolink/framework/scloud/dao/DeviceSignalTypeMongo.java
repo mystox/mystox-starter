@@ -85,11 +85,14 @@ public class DeviceSignalTypeMongo {
      */
     public List<SignalType> getByCodeListCntbIdList(String uniqueCode, List<String> codeList, List<String> cntbIdList) {
         Criteria codeCri = Criteria.where("code").in(codeList);
-        Criteria cntbIdCri = Criteria.where("cntbId").in(cntbIdList);
+        Criteria cntbIdCri = Criteria.where("signalTypeList.cntbId").in(cntbIdList);
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(codeCri),
                 Aggregation.unwind("signalTypeList"),
-                Aggregation.match(cntbIdCri)
+                Aggregation.match(cntbIdCri),
+                Aggregation.project().and("signalTypeList.code").as("code").and("signalTypeList.typeName").as("typeName")
+                .and("signalTypeList.cntbId").as("cntbId").and("signalTypeList.type").as("type")
+                .and("signalTypeList.measurement").as("measurement")
         );
         AggregationResults<SignalType> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + CollectionSuffix.SIGNAL_TYPE, SignalType.class);
         return aggregate.getMappedResults();

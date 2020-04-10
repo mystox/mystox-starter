@@ -1,0 +1,45 @@
+<div class="form-title">
+    <h3>云监控系统 - 登录</h3>
+</div>
+<form id="loginForm" class="form-horizontal" novalidate
+      ng-submit="login.execute();">
+    
+    <div class="control-group">
+        <label class="control-label">账号</label>
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="ic ic-person"></i></span>
+                <input type="text" name="loginName" placeholder="请输入账号" class="img-input"
+                       ng-model="login.obj.loginName">
+                <span class="help-inline"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <label class="control-label">密码</label>
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="ic ic-password"></i></span>
+                <input type="password" name="password" placeholder="请输入密码" class="img-input"
+                       ng-model="login.obj.password">
+                <span class="help-inline" ng-bind="pwdErrorInfo"></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <div class="controls">
+            <button class="btn btn-submit" type="submit">立即登录</button>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <div class="controls">
+            <p class="bottom-right">
+                <a ng-click="toForgetpwd();">忘记密码</a>
+            </p>
+        </div>
+    </div>
+    
+</form>

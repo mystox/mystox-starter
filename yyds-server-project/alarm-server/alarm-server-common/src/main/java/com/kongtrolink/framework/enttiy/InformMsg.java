@@ -4,6 +4,7 @@ import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.StringUtil;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: liudd
@@ -39,6 +40,43 @@ public class InformMsg {
     private int currentTime;            //当前次数
     private String alarmStateType;      //告警类型（告警产生，告警消除）
     private String result;             //发送结果
+
+    private String title;               //标题
+    private String content;             //内容
+    private String theKey;              //参数
+    private List<String> accountList;   //接收账号列表
+
+    public List<String> getAccountList() {
+        return accountList;
+    }
+
+    public void setAccountList(List<String> accountList) {
+        this.accountList = accountList;
+    }
+
+    public String getTheKey() {
+        return theKey;
+    }
+
+    public void setTheKey(String theKey) {
+        this.theKey = theKey;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     @Override
     public boolean equals(Object o) {

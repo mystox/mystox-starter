@@ -1,0 +1,11 @@
+<section id="alarmSettingPage" class="scroll">
+    
+    <ul class="nav nav-tabs">
+        <li ng-repeat="item in tabPage.pageList" ng-class="{active:tabPage.isActive($index)}">
+            <a ng-click="tabPage.showPage($index); tabChange($index)" ng-bind="item"></a>
+        </li>
+    </ul>
+    <div class="bottom" id="alarmSettingTabPages">
+        <div ui-view></div>        
+    </div>
+</section>

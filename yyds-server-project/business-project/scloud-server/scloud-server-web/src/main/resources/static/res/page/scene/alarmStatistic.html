@@ -1,0 +1,102 @@
+<section id="alarmStatisticPage">
+    <div class="nav-tree cloak filter-online" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+
+    <div class="_bg card-bg"></div>
+    <div class="return-to-page">
+        <a ui-sref="scene/site({siteId: params.siteId})"><span>< </span> <span>返回</span></a>
+    </div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>起止时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="query.tStart">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="query.tEnd">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <label>告警等级</label>
+            <select ng-model="query.alarmLevel"
+                    ng-options="item.value as item.name for item in alarmLevelList">
+                <option ng-bind="'全部'"></option>
+            </select>
+            <label>设备类型</label>
+            <select ng-model="query.deviceTypeCode"
+                    ng-options="item.code as item.typeName for item in deviceTypeList">
+                <option ng-bind="'全部'"></option>
+            </select>
+            <button class="btn btn-primary" ng-click="toQuery();">查询</button>
+            <!--<button class="btn btn-default" type="reset" ng-click="clear();">清除</button>-->
+        </div>
+    </form>
+
+    <div class="bottom card-bg" ng-hide="historyDataQuery.signalId">
+        <div class="page-header">
+            <h3>历史告警</h3>
+            <button class="btn btn-primary" ng-click="exportRoomHistoryAlarmList();">
+                <i class="ic ic-download" title="下载文件"></i>导出Excel
+            </button>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>告警序列号</th>
+                    <th>告警名称</th>
+                    <th>告警等级</th>
+                    <th>告警值</th>
+                    <th>站点层级</th>
+                    <th>站点名称</th>
+                    <th>告警设备</th>
+                    <th>开始时间</th>
+                    <th>恢复时间</th>
+                    <th>确认状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in roomHistoryAlarmList">
+                    <td ng-bind="s.alarmNo | nullFilter"></td>
+                    <td ng-bind="s.alarmName | nullFilter"></td>
+                    <td ng-style="{color: {'一级告警': '#FF005E', '二级告警': '#FFB700', '三级告警': '#FF8400', '四级告警': '#00B1FF'}[s.level]}">
+                        <i class="ic ic-alarm"></i>
+                        <span ng-bind="s.level | nullFilter"></span>
+                    </td>
+                    <td ng-bind="s.value | nullFilter"></td>
+                    <td ng-bind="s.siteTierString | nullFilter"></td>
+                    <td ng-bind="s.siteName | nullFilter"></td>
+                    <td ng-bind="s.deviceName | nullFilter"></td>
+                    <td ng-bind="s.reportTime | date: 'yyyy-MM-dd HH:mm:ss'| nullFilter"></td>
+                    <td ng-bind="s.recoverTime | date: 'yyyy-MM-dd hh-mm-ss' |nullFilter"></td>
+                    <td>
+                        <label class="label" ng-class="{'已确认': 'font-success', '待确认': 'font-white'}[s.checkState]" ng-bind="s.checkState | nullFilter"></label>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="isLoading || paginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+</section>

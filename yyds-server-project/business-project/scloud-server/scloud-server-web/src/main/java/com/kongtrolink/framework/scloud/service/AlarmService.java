@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.entity.Alarm;
@@ -29,5 +30,11 @@ public interface AlarmService {
      */
     void initInfo(String uniqueCode, List<Alarm> alarmList);
 
-    JsonResult operate(AlarmQuery alarmQuery) throws Exception;
+    JSONObject operate(AlarmQuery alarmQuery) throws Exception;
+
+    JSONObject updateWorkInfo(AlarmQuery alarmQuery);
+
+
+
+
 }

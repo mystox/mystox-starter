@@ -63,6 +63,6 @@ public class FilterRuleServiceImpl implements FilterRuleService {
      */
     @Override
     public FilterRule getUserInUse(String uniqueCode, String creatorId) {
-        return filterRuleDao.getUserInUse(uniqueCode, uniqueCode);
+        return filterRuleDao.getUserInUse(uniqueCode, creatorId);
     }
 }

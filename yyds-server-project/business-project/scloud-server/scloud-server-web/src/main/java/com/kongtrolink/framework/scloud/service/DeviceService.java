@@ -21,6 +21,13 @@ public interface DeviceService {
     List<DeviceModel> findDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
 
     /**
+     * @auther: liudd
+     * @date: 2020/4/7 14:07
+     * 功能描述:获取设备列表
+     */
+    List<DeviceModel> listDeviceList(String uniqueCode, DeviceQuery deviceQuery) throws Exception;
+
+    /**
      * 导出设备列表
      */
     HSSFWorkbook exportDeviceList(List<DeviceModel> list);

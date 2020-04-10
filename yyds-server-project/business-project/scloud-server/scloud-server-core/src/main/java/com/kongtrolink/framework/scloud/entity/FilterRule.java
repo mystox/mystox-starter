@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Date;
 import java.util.List;
 
@@ -11,20 +13,22 @@ import java.util.List;
 public class FilterRule {
 
     private String id;
+    @NotNull
     private String name;
     private FacadeView creator;
     private String remarks;
     private Date updateTime;
 
     private String alarmName;
-    private List<String> alarmLevelList;
-    private List<String> siteCodeList;      //站点编码列表
+    private List<Integer> alarmLevelList;
     private List<String> deviceTypeList;
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
     private Date clearEndTime;                  //清除结束时间
-    private Boolean state;
+    @NotNull
+    private List<String> siteCodeList;          //站点编码列表，使用站点编码列表控制区域权限
+    private Boolean state = false;
 
     public Boolean getState() {
         return state;
@@ -90,11 +94,11 @@ public class FilterRule {
         this.alarmName = alarmName;
     }
 
-    public List<String> getAlarmLevelList() {
+    public List<Integer> getAlarmLevelList() {
         return alarmLevelList;
     }
 
-    public void setAlarmLevelList(List<String> alarmLevelList) {
+    public void setAlarmLevelList(List<Integer> alarmLevelList) {
         this.alarmLevelList = alarmLevelList;
     }
 

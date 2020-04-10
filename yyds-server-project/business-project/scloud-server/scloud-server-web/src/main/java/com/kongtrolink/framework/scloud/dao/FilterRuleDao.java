@@ -104,7 +104,10 @@ public class FilterRuleDao {
      * 功能描述:获取用户正在启用的过滤规则
      */
     public FilterRule getUserInUse(String uniqueCode, String creatorId) {
-        Criteria criteria = Criteria.where("creator.strId").is(creatorId);
+        Criteria criteria = new Criteria();
+        if(!StringUtil.isNUll(creatorId)){
+            criteria.and("creator.strId").is(creatorId);
+        }
         criteria.and("state").is(true);
         return mongoTemplate.findOne(Query.query(criteria), FilterRule.class, uniqueCode + table);
     }

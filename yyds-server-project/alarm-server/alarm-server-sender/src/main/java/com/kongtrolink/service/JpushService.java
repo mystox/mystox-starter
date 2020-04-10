@@ -13,6 +13,7 @@ import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
 import com.kongtrolink.framework.base.Contant;
+import com.kongtrolink.framework.base.StringUtil;
 import com.kongtrolink.framework.dao.InformMsgDao;
 import com.kongtrolink.framework.enttiy.InformMsg;
 import org.slf4j.Logger;
@@ -76,8 +77,14 @@ public class JpushService {
         if (Contant.ALARM_STATE_REPORT.equals(informMsg.getAlarmStateType())) {
             title = "[新告警提醒]";
         }
+        if(!StringUtil.isNUll(informMsg.getTitle())){
+            title = informMsg.getTitle();
+        }
         StringBuilder builder = new StringBuilder();
         String titleInfo = informMsg.getAddressName() + "-" + informMsg.getAlarmName();
+        if(!StringUtil.isNUll(informMsg.getContent())){
+            titleInfo = informMsg.getContent();
+        }
         builder.append(title).append(titleInfo);
         // 是否向产品环境推送
         boolean apnsProduction = Boolean.parseBoolean(APNS_PRODUCTION);
