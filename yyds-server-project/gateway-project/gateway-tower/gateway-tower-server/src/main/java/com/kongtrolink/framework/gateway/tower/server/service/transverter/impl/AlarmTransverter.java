@@ -57,7 +57,7 @@ public class AlarmTransverter extends TransverterHandler {
             }
             List<AlarmReportInfo> alarmInfoList = new ArrayList<>();
             for(TAlarm pushAlarmInfo:tAlarmLists){
-                String deviceSn = pushAlarmInfo.getFsuId()+"_"+pushAlarmInfo.getDeviceId();
+                String deviceSn = pushAlarmInfo.getDeviceId();
                 AlarmReportInfo alarmInfo = new AlarmReportInfo();
                 String desc = pushAlarmInfo.getAlarmDesc();
                 alarmInfo.setName(desc);
