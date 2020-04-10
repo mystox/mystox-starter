@@ -26,6 +26,8 @@ public class CollectionSuffix {
     public static final String USER_SITE = "_user_site";
     // 附件表
     public static final String ATTACHMENTS = "_attachments";
+    // 综合机房 展现的信号点
+    public static final String MULTIPLE_ROOM_SIGNAL ="room_signalType";
     // 综合机房 展现的信号点-单个企业单个设备自定义设置
     public static final String MULTIPLE_ROOM_SIGNAL_CONFIG ="_room_signal_config";
     // 组态场景信息

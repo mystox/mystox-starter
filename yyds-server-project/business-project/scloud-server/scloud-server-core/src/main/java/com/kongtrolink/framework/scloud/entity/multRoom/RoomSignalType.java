@@ -4,17 +4,15 @@ import java.io.Serializable;
 
 /**
  * xx
- * by Mag on 2018/11/12.
+ * by Mag on 6/21/2018.
  */
-public class RoomSignalTypeDevice implements Serializable{
-
-    private static final long serialVersionUID = -6282190906871928409L;
-
+public class RoomSignalType implements Serializable,Comparable<RoomSignalType> {
+    private static final long serialVersionUID = 577978484905362374L;
     private String cntbId;
-    private String signalName;
+    private String typeName;
     private String measurement;
-    private int order;
     private String type;    //信号点类型。"0"-遥信信号(DI),"1"-遥测信号(AI),"2"-遥控信号(DO),"3"-遥调信号(AO)
+    private int order;
 
     public String getCntbId() {
         return cntbId;
@@ -24,12 +22,12 @@ public class RoomSignalTypeDevice implements Serializable{
         this.cntbId = cntbId;
     }
 
-    public String getSignalName() {
-        return signalName;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setSignalName(String signalName) {
-        this.signalName = signalName;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public String getMeasurement() {
@@ -54,5 +52,10 @@ public class RoomSignalTypeDevice implements Serializable{
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    @Override
+    public int compareTo(RoomSignalType o) {
+        return this.getOrder() - o.getOrder();
     }
 }

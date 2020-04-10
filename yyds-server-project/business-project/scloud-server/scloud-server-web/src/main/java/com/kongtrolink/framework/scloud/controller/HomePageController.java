@@ -5,10 +5,7 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuNumber;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeFsuOnlineModel;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeQuery;
-import com.kongtrolink.framework.scloud.entity.model.home.HomeWorkModel;
+import com.kongtrolink.framework.scloud.entity.model.home.*;
 import com.kongtrolink.framework.scloud.service.HomePageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,7 +26,23 @@ import java.util.List;
 public class HomePageController extends ExportController {
     @Autowired
     private HomePageService homePageService;
+    /**
+     * 首页 - 地图
+     * @param homeQuery 查询参数
+     */
+    @RequestMapping(value = "/siteMap", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getHomeSiteAlarmMap(@RequestBody HomeQuery homeQuery) {
+        try{
+            String uniqueCode = getUniqueCode();
+            String userId = getUserId();
+            List<HomeSiteAlarmMap> list = homePageService.getHomeSiteAlarmMap(uniqueCode,userId,homeQuery);
+            return new JsonResult(list);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
 
+    }
     /**
      * 首页 - 站点数量(交维态/所有)
      * @param homeQuery 查询参数
@@ -58,13 +71,31 @@ public class HomePageController extends ExportController {
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
             //统计交维态的站点总数
-            List<SiteEntity> list = homePageService.getHomeSiteList(uniqueCode,userId,homeQuery);
+            List<HomeSiteAlarmMap> list = homePageService.getHomeSiteList(uniqueCode,userId,homeQuery);
             return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();
         }
         return new JsonResult("查询失败",false);
 
+    }
+
+    /**
+     * 首页 - 实时告警统计
+     * 只统计交维态数量
+     * @param homeQuery 查询参数
+     */
+    @RequestMapping(value = "/alarmNum", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getHomeAlarmLevelNum(@RequestBody HomeQuery homeQuery,HttpServletRequest request) {
+        try{
+            String uniqueCode = getUniqueCode();
+            String userId = getUserId();
+            HomeAlarmLevelNum value = homePageService.getHomeAlarmLevelNum(uniqueCode,userId,homeQuery);
+            return new JsonResult(value);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
     }
 
     /**

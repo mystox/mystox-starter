@@ -79,4 +79,21 @@ public interface RealTimeDataService {
      * @return 信号点列表
      */
     DeviceType getDeviceType(String uniqueCode,String devType,String type);
+
+    /**
+     * 根据cntbId 取得实时数据
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @param cntbId 信号点code
+     * @return 实时数据
+     */
+    String getRealDateCntbId(String uniqueCode,String deviceCode,String cntbId);
+    /**
+     * 根据cntbId 取得 下发值
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @param cntbId 信号点code
+     * @return 实时数据
+     */
+    String getSetPointCntbId(String uniqueCode,String deviceCode,String cntbId);
 }
