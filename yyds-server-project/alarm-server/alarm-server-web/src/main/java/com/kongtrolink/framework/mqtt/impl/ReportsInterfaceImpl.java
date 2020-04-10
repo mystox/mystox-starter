@@ -47,6 +47,10 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         return result;
     }
 
+
+
+
+
     @Override
     public List<JSONObject> getAlarmsByDeviceIdList(String msg) {
         logger.info("alarm details report receive...[{}]", msg);

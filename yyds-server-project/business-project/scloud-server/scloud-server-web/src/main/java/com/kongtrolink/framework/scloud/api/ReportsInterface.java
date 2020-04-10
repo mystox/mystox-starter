@@ -24,4 +24,7 @@ public interface ReportsInterface {
 
     @OperaCode
     JSONObject stationElectricCountList(String msg);
+
+    @OperaCode(description = "历史告警导出统计")
+    public JSONObject exportAlarmHistory(String msg);
 }

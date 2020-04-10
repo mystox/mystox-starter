@@ -17,14 +17,14 @@ import java.util.List;
 @Register
 public interface ReportsInterface {
 
-    @OperaCode
+    @OperaCode(description = "告警量统计表")
     public List<JSONObject> getAlarmCountByDeviceIdList(String msg);
 
 
     @OperaCode(description = "历史告警明细统计")
     public List<JSONObject> getAlarmsByDeviceIdList(String msg);
 
-  @OperaCode(description = "活动告警明细统计")
+    @OperaCode(description = "活动告警明细统计")
     public List<JSONObject> getCurrentAlarmsByDeviceIdList(String msg);
 
 
@@ -56,6 +56,7 @@ public interface ReportsInterface {
 
     @OperaCode(description = "获取企业下启用的告警等级分类数据")
     public List<EnterpriseLevel> getAlarmLevel(String body);
+
     @OperaCode(description = "获取企业下启用的告警等级分类数据")
     public AlarmCycle getAlarmCycle(String body);
 
