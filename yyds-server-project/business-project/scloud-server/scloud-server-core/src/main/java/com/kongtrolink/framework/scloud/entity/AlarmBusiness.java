@@ -14,6 +14,8 @@ public class AlarmBusiness {
 
     private String id;      //与告警id无关
     private float value;                //告警值
+    private String tierCode;
+    private String tierName;
     private String siteCode;
     private String siteName;
     private String siteType;	        //站点类型
@@ -38,8 +40,48 @@ public class AlarmBusiness {
     private String workCode;
     private boolean shield = false;             //是否屏蔽
     private String shieldRuleId;        //屏蔽规则id
-    private FacadeView focuser;         //关注人
-    private Date focusTime;             //关注时间
+    int flag;
+    private String focusId;             //关注点id，用于前端取消关注
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public String getTierCode() {
+        return tierCode;
+    }
+
+    public void setTierCode(String tierCode) {
+        this.tierCode = tierCode;
+    }
+
+    public boolean isShield() {
+        return shield;
+    }
+
+    public void setShield(boolean shield) {
+        this.shield = shield;
+    }
+
+    public String getFocusId() {
+        return focusId;
+    }
+
+    public void setFocusId(String focusId) {
+        this.focusId = focusId;
+    }
 
     public String getShieldRuleId() {
         return shieldRuleId;
@@ -63,22 +105,6 @@ public class AlarmBusiness {
 
     public void setValue(float value) {
         this.value = value;
-    }
-
-    public FacadeView getFocuser() {
-        return focuser;
-    }
-
-    public void setFocuser(FacadeView focuser) {
-        this.focuser = focuser;
-    }
-
-    public Date getFocusTime() {
-        return focusTime;
-    }
-
-    public void setFocusTime(Date focusTime) {
-        this.focusTime = focusTime;
     }
 
     public String getSiteType() {

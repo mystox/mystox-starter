@@ -123,6 +123,12 @@ public class WorkDao {
         return mongoTemplate.find(query, Work.class, uniqueCode + table);
     }
 
+    public Work getByKey(String uniqueCode, String key){
+        Criteria criteria = Criteria.where("workAlarmList.alarmKey").is(key);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, Work.class, uniqueCode + table);
+    }
+
     public void updateAlarmInfo(String uniqueCode, Work work){
         Criteria criteria = Criteria.where("_id").is(work.getId());
         Query query = Query.query(criteria);

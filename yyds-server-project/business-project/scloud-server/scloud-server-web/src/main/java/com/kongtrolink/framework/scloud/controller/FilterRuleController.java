@@ -96,7 +96,7 @@ public class FilterRuleController extends BaseController {
         }
         User user = getUser();
         if(null != user){
-            ruleQuery.setCreatorId(user.getId());
+            ruleQuery.setOperatorId(user.getId());
         }
         boolean result = ruleService.updateState(uniqueCode, ruleQuery);
         String operate = "禁用";

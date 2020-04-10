@@ -26,5 +26,7 @@ public class BaseConstant {
     public static final String REMOTE_OPERATE_SUCCKEYS = "succKeyList";
     public static final String REMOTE_OPERATE_FAILKEYS = "failKeyList";
 
+    public static String UNDERLINE = "_";
+    public static String COLON = ":";
 
 }

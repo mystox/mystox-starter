@@ -30,13 +30,18 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     }
 
     @Override
-    public void add(String uniqueCode, String table, List<AlarmBusiness> businessList) {
-        businessDao.add(uniqueCode, table, businessList);
+    public boolean add(String uniqueCode, String table, List<AlarmBusiness> businessList) {
+        return businessDao.add(uniqueCode, table, businessList);
     }
 
     @Override
     public List<AlarmBusiness> listByKeyList(String uniqueCode, String table, List<String> keyList) {
         return businessDao.listByKeyList(uniqueCode, table, keyList);
+    }
+
+    @Override
+    public boolean deleteByKeyList(String uniqueCode, String table, List<String> keyList) {
+        return businessDao.deleteByKeyList(uniqueCode, table, keyList);
     }
 
     /**

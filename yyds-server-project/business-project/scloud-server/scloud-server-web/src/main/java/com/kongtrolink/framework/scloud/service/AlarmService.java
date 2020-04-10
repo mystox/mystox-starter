@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.mongodb.DBObject;
 
@@ -28,7 +29,7 @@ public interface AlarmService {
      * @date: 2020/3/3 15:59
      * 功能描述:填充设备，站点等信息
      */
-    void initInfo(String uniqueCode, List<Alarm> alarmList);
+    void initInfo(String uniqueCode, List<AlarmBusiness> businessList);
 
     JSONObject operate(AlarmQuery alarmQuery) throws Exception;
 

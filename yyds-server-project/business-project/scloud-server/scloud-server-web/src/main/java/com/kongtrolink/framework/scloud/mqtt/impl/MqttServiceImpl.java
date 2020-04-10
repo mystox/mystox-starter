@@ -1,8 +1,9 @@
 package com.kongtrolink.framework.scloud.mqtt.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.mqtt.MqttService;
 import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.task.AlarmMsgTask;
@@ -12,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @Auther: liudd
@@ -38,7 +41,7 @@ public class MqttServiceImpl implements MqttService {
     AlarmBusinessService businessService;
 
     private Logger LOGGER = LoggerFactory.getLogger(MqttServiceImpl.class);
-    private ConcurrentLinkedQueue<JSONObject> msgQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<AlarmBusiness> msgQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * @auther: liudd
@@ -47,11 +50,9 @@ public class MqttServiceImpl implements MqttService {
      */
     @Override
     public String sdgdScloudAlarmReport(String jsonStr) {
-        LOGGER.debug("receive:{}", jsonStr);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "1");
-        jsonObject.put("data", jsonObject);
-        msgQueue.add(jsonObject);
+        LOGGER.info("sdgdScloudAlarmReport--receive:{}", jsonStr);
+        List<AlarmBusiness> businessList = JSONObject.parseArray(jsonStr, AlarmBusiness.class);
+        msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, msgQueue));
 //        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
 //        if(null == alarmList || alarmList.size() == 0){
@@ -76,11 +77,9 @@ public class MqttServiceImpl implements MqttService {
      */
     @Override
     public String sdgdScloudAlarmResolve(String jsonStr) {
-        LOGGER.debug("receive:{}", jsonStr);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "0");
-        jsonObject.put("data", jsonObject);
-        msgQueue.add(jsonObject);
+        LOGGER.debug("sdgdScloudAlarmResolve--receive:{}", jsonStr);
+        List<AlarmBusiness> businessList = JSONObject.parseArray(jsonStr, AlarmBusiness.class);
+        msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, msgQueue));
 //        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
 //        if(null == alarmList || alarmList.size() == 0){
@@ -88,6 +87,32 @@ public class MqttServiceImpl implements MqttService {
 //        }
 //        Alarm alarm = alarmList.get(0);
 //        workService.resolveAlarm(alarm.getEnterpriseCode(), alarmList);
+        return jsonStr;
+    }
+
+    @Override
+    public String sdgdScloudAlarmHistory(String jsonStr) {
+        LOGGER.debug("sdgdScloudAlarmHistory--receive:{}", jsonStr);
+        List<String> keyList = JSONObject.parseArray(jsonStr, String.class);
+        Map<String, List<String>> enterpriseCodeKeyListMap = new HashMap<>();
+        for(String key : keyList){
+            String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+            List<String> enterpriseCodeKeyList = enterpriseCodeKeyListMap.get(enterpriseCode);
+            if(null == enterpriseCodeKeyList){
+                enterpriseCodeKeyList = new ArrayList<>();
+            }
+            enterpriseCodeKeyList.add(key);
+        }
+        //从实时表获取告警列表，然后删除
+        for(String enterpriseCode : enterpriseCodeKeyListMap.keySet()){
+            List<String> keys = enterpriseCodeKeyListMap.get(enterpriseCode);
+            List<AlarmBusiness> businessList = businessService.listByKeyList(enterpriseCode, CollectionSuffix.CUR_ALARM_BUSINESS, keys);
+            boolean addResult = businessService.add(enterpriseCode, CollectionSuffix.HIS_ALARM_BUSINESS, businessList);
+            if(addResult) {
+                businessService.deleteByKeyList(enterpriseCode, CollectionSuffix.CUR_ALARM_BUSINESS, keys);
+            }
+        }
+
         return jsonStr;
     }
 }

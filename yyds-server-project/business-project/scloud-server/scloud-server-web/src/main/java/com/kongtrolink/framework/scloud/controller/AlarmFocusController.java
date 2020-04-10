@@ -5,6 +5,7 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.exception.ParameterException;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
@@ -177,19 +178,29 @@ public class AlarmFocusController extends BaseController {
             focusQuery.setUserId(user.getId());
         }
         List<AlarmFocus> alarmFocusList = alarmFocusService.list(uniqueCode, focusQuery);
+        Map<String, AlarmFocus> entDevSigListFocusMap = new HashMap<>();
         List<String> entDevSigList = new ArrayList<>();
         for(AlarmFocus alarmFocus : alarmFocusList){
             String entDevSig = alarmFocus.initEntDevSig();
             if(!entDevSigList.contains(entDevSig)){
                 entDevSigList.add(entDevSig);
             }
+            entDevSigListFocusMap.put(entDevSig, alarmFocus);
         }
         AlarmBusinessQuery businessQuery = new AlarmBusinessQuery();
         businessQuery.setCurrentPage(focusQuery.getCurrentPage());
         businessQuery.setPageSize(focusQuery.getPageSize());
         businessQuery.setSkipSize(focusQuery.getPageSize());
         businessQuery.setEntDevSigList(entDevSigList);
+        businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
+        for(AlarmBusiness alarmBusiness : list){
+            String entDevSig = alarmBusiness.getEntDevSig();
+            AlarmFocus alarmFocus = entDevSigListFocusMap.get(entDevSig);
+            if(null != alarmFocus){
+                alarmBusiness.setFocusId(alarmFocus.getId());
+            }
+        }
         int count = businessService.count(uniqueCode, businessQuery);
         ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);
         JsonResult jsonResult =new JsonResult(listResult);

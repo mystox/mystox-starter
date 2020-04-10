@@ -16,9 +16,11 @@ public interface AlarmBusinessService {
 
     void add(String uniqueCode, String table, AlarmBusiness business);
 
-    void add(String uniqueCode, String table, List<AlarmBusiness> businessList);
+    boolean add(String uniqueCode, String table, List<AlarmBusiness> businessList);
 
     List<AlarmBusiness> listByKeyList(String uniqueCode, String table, List<String> keyList);
+
+    boolean deleteByKeyList(String uniqueCode, String table, List<String> keyList);
 
     /**
      * @auther: liudd

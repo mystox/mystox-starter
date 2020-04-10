@@ -20,6 +20,8 @@ public class AlarmBusinessQuery extends Paging {
     private List<Integer> levelList;            //等级列表
     private String state;                       //告警状态(待处理，已消除)
     private String checkState;                  //告警确认状态
+    private List<String> siteCodeList;
+    private List<String> tierCodeList;
     private String deviceType;                  //设备类型，与资管一致
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备型号，如果没有与deviceType一致
@@ -39,6 +41,30 @@ public class AlarmBusinessQuery extends Paging {
     private List<String> entDevSigList;
     private boolean shield=false;                 //是否屏蔽
     private String shieldRuleId;            //屏蔽规则id
+
+    public List<String> getSiteCodeList() {
+        return siteCodeList;
+    }
+
+    public void setSiteCodeList(List<String> siteCodeList) {
+        this.siteCodeList = siteCodeList;
+    }
+
+    public List<String> getTierCodeList() {
+        return tierCodeList;
+    }
+
+    public void setTierCodeList(List<String> tierCodeList) {
+        this.tierCodeList = tierCodeList;
+    }
+
+    public boolean isShield() {
+        return shield;
+    }
+
+    public void setShield(boolean shield) {
+        this.shield = shield;
+    }
 
     public Boolean getShield() {
         return shield;
@@ -271,6 +297,8 @@ public class AlarmBusinessQuery extends Paging {
         businessQuery.setLevelList(alarmQuery.getLevelList());
         businessQuery.setState(alarmQuery.getState());
         businessQuery.setCheckState(alarmQuery.getCheckState());
+        businessQuery.setTierCodeList(alarmQuery.getTierCodeList());
+        businessQuery.setSiteCodeList(alarmQuery.getSiteCodeList());
         businessQuery.setDeviceType(alarmQuery.getDeviceType());
         businessQuery.setDeviceTypeList(alarmQuery.getDeviceTypeList());
         businessQuery.setDeviceModel(alarmQuery.getDeviceModel());
@@ -288,6 +316,8 @@ public class AlarmBusinessQuery extends Paging {
         alarmQuery.setLevelList(null);
         alarmQuery.setState(null);
         alarmQuery.setCheckState(null);
+        alarmQuery.setTierCodeList(null);
+        alarmQuery.setSiteCodeList(null);
         alarmQuery.setDeviceType(null);
         alarmQuery.setDeviceTypeList(null);
         alarmQuery.setDeviceModel(null);

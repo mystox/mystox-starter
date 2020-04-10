@@ -99,7 +99,6 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     @Override
     public void matchRule(String uniqueCode, List<AlarmBusiness> alarmBusinessList) {
         List<ShieldRule> rules = shieldRuleDao.getEnables(uniqueCode);
-//        List<ShieldAlarm> shieldAlarmList = new ArrayList<>();
         for (AlarmBusiness alarm : alarmBusinessList) {
             for (ShieldRule rule : rules) {
                 String deviceId = alarm.getDeviceCode();

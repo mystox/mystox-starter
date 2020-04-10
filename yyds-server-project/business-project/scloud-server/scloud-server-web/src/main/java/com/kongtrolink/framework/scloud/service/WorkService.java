@@ -59,7 +59,7 @@ public interface WorkService {
      * @date: 2020/4/2 17:18
      * 功能描述:告警消除，联动修改工单
      */
-    void resolveAlarm(String uniqueCode, List<Alarm> alarmList);
+    void resolveAlarm(String uniqueCode, AlarmBusiness business);
 
     JSONObject createJpush(Work work, String operate, List<String> accountList);
 
