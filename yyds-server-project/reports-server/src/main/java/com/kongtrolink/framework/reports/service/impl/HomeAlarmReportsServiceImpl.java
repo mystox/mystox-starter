@@ -167,7 +167,6 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
         JSONObject currentUser = condition.getJSONObject("currentUser");
         if (currentUser == null) currentUser = new JSONObject();
         List<JSONObject> alarmCountList = new ArrayList<>();
-        String period = condition.getString("period");
         TimePeriod timePeriod = condition.getObject("timePeriod", TimePeriod.class);
         if (timePeriod == null) {
             timePeriod = new TimePeriod();
