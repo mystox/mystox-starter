@@ -293,6 +293,7 @@ public class AlarmBusiness {
 
     public static AlarmBusiness createByAlarm(Alarm alarm){
         AlarmBusiness business = new AlarmBusiness();
+        business.setFlag(alarm.getFlag());
         business.setValue(alarm.getValue());
         business.setSiteCode(alarm.getSiteCode());
         business.setSiteName(alarm.getSiteName());

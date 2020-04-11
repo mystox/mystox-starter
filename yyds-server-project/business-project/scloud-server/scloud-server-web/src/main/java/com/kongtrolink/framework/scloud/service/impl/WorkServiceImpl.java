@@ -266,6 +266,9 @@ public class WorkServiceImpl implements WorkService{
     @Override
     public void resolveAlarm(String uniqueCode, AlarmBusiness business) {
         Work work = workDao.getByKey(uniqueCode, business.getKey());
+        if(null == work){
+            return;
+        }
         List<WorkAlarm> workAlarmList = work.getWorkAlarmList();
         for(WorkAlarm workAlarm : workAlarmList) {
             if (workAlarm.getAlarmKey().equals(business.getKey())) {

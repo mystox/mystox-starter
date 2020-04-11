@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.mqtt.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.mqtt.MqttService;
 import com.kongtrolink.framework.scloud.service.*;
@@ -51,7 +52,12 @@ public class MqttServiceImpl implements MqttService {
     @Override
     public String sdgdScloudAlarmReport(String jsonStr) {
         LOGGER.info("sdgdScloudAlarmReport--receive:{}", jsonStr);
-        List<AlarmBusiness> businessList = JSONObject.parseArray(jsonStr, AlarmBusiness.class);
+        List<Alarm> alarmList = JSONObject.parseArray(jsonStr, Alarm.class);
+        List<AlarmBusiness> businessList = new ArrayList<>();
+        for(Alarm alarm : alarmList){
+            AlarmBusiness alarmBusiness = AlarmBusiness.createByAlarm(alarm);
+            businessList.add(alarmBusiness);
+        }
         msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, msgQueue));
 //        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
@@ -78,7 +84,12 @@ public class MqttServiceImpl implements MqttService {
     @Override
     public String sdgdScloudAlarmResolve(String jsonStr) {
         LOGGER.debug("sdgdScloudAlarmResolve--receive:{}", jsonStr);
-        List<AlarmBusiness> businessList = JSONObject.parseArray(jsonStr, AlarmBusiness.class);
+        List<Alarm> alarmList = JSONObject.parseArray(jsonStr, Alarm.class);
+        List<AlarmBusiness> businessList = new ArrayList<>();
+        for(Alarm alarm : alarmList){
+            AlarmBusiness alarmBusiness = AlarmBusiness.createByAlarm(alarm);
+            businessList.add(alarmBusiness);
+        }
         msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, msgQueue));
 //        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
