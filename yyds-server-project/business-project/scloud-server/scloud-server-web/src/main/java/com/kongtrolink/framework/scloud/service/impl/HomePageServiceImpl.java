@@ -171,7 +171,7 @@ public class HomePageServiceImpl implements HomePageService {
      * @return 站点总数
      *      告警工单统计
      *      未接： state 待接
-     *      在途工单: state 待办 待审批
+     *      在途工单: state 待处理
      *      超时工单:  isOverTime = 是 超时工单
      *      历史工单：state 已完成 已撤销
      */
