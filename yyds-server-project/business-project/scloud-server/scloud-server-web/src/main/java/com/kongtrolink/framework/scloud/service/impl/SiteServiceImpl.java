@@ -315,7 +315,7 @@ public class SiteServiceImpl implements SiteService {
                     deviceQuery.setDeviceCodes(deletedDeviceCodes);
                     deviceService.deleteDevice(uniqueCode, deviceQuery);
 
-                    // TODO: 2020/2/12 2.修改系统用户和维护用户的站点权限
+                    // TODO: 2020/2/12 2.修改系统用户和维护用户的管辖站点
 
                 }
             }else {
@@ -332,7 +332,7 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public List<String> getRespList(String uniqueCode, SiteQuery siteQuery) {
         int pageSize = siteQuery.getPageSize();
-        // TODO: 2020/2/12 获取前六页站点中存在的资产管理员列表
+        // TODO: 2020/2/12 获取前六页站点中存在的资产管理员列表(目前不需要实现该功能)
 
         return new ArrayList<>();
     }

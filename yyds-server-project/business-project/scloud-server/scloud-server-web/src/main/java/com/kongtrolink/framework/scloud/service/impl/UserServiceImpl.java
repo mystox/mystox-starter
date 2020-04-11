@@ -5,6 +5,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
 import com.kongtrolink.framework.scloud.dao.UserMongo;
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 import com.kongtrolink.framework.scloud.query.UserQuery;
@@ -32,5 +33,22 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
+    /**
+     * 保存或修改 用户管辖站点
+     *
+     * @param uniqueCode 企业唯一码
+     * @param userSiteEntity 用户管辖站点
+     */
+    @Override
+    public void upsertUserSite(String uniqueCode, UserSiteEntity userSiteEntity) {
+        userMongo.upsertUserSite(uniqueCode, userSiteEntity);
+    }
 
+    /**
+     * 获取用户管辖站点
+     */
+    @Override
+    public List<UserSiteEntity> getUserSite(String uniqueCode, UserSiteEntity userSiteEntity) {
+        return userMongo.findUserSite(uniqueCode, userSiteEntity);
+    }
 }
