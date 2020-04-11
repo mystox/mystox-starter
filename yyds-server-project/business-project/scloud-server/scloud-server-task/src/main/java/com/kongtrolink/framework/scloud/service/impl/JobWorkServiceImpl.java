@@ -58,19 +58,19 @@ public class JobWorkServiceImpl implements JobWorkService {
     }
 
     @Override
-    public void deleteWorkAlarmConfigById(String workAlarmConfigId) {
-        jobWorkDao.deleteWorkAlarmConfigById(workAlarmConfigId);
+    public void deleteWorkAlarmConfigById(String uniqueCode, String workAlarmConfigId) {
+        jobWorkDao.deleteWorkAlarmConfigById(uniqueCode, workAlarmConfigId);
     }
 
     /**
      * @param uniqueCode
      * @param alarmBusiness
      * @auther: liudd
-     * @date: 2020/4/8 19:05
-     * 功能描述:添加告警业务信息.如果告警消除时，该告警还未派单，则删除告警工单配置信息。杜绝派单时告警已消除情况
+     * @date: 2020/4/11 15:03
+     * 功能描述:修改告警的工单编码
      */
     @Override
-    public void addAlarmBusiness(String uniqueCode, AlarmBusiness alarmBusiness) {
-        jobWorkDao.addAlarmBusiness(uniqueCode, alarmBusiness);
+    public boolean updateAlarmWorkCode(String uniqueCode, AlarmBusiness alarmBusiness) {
+        return jobWorkDao.updateAlarmWorkCode(uniqueCode, alarmBusiness);
     }
 }

@@ -61,7 +61,8 @@ public class WorkController extends ExportController {
         String uniqueCode = getUniqueCode();
         List<Work> list = workService.list(uniqueCode, workQuery);
         int count = workService.count(uniqueCode, workQuery);
-        JsonResult jsonResult = new JsonResult(list, count);
+        ListResult<Work> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 

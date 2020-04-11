@@ -4,6 +4,7 @@ import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.service.JobWorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import java.util.List;
  * 派单任务，扫描alarmWorkConfig表
  */
 @Service
-public class SendWorkJob {
+public class SendWorkJob implements Job {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SendWorkJob.class);
     @Autowired
@@ -37,7 +38,7 @@ public class SendWorkJob {
         for(WorkAlarmConfig alarmWorkConfig : allAlarmWorkConfig){
             handleAlarm(alarmWorkConfig, curDate);
         }
-        LOGGER.info("企业:{} 开始进行自动派单轮询...",uniqueCode);
+        LOGGER.info("企业:{} 派单轮询结束...",uniqueCode);
     }
 
     /**
@@ -46,17 +47,17 @@ public class SendWorkJob {
      */
     private void handleAlarm(WorkAlarmConfig alarmWorkConfig, Date curDate){
         String uniqueCode = alarmWorkConfig.getUniqueCode();
-        //获取东单配置
+        //获取工单配置
         WorkConfig workConfig = jobWorkService.getWorkConfigById(uniqueCode, alarmWorkConfig.getWorkConfigId());
         //判定该告警所在设备是否有未回单的工单
         Work noOverWork = jobWorkService.getNoOverWorkByDeviceCode(uniqueCode, alarmWorkConfig.getDeviceCode());
-        WorkAlarm workAlarm = alarmWorkConfig.createWorkAlarm();
 
+        WorkAlarm workAlarm = alarmWorkConfig.createWorkAlarm();
         AlarmBusiness alarmBusiness = new AlarmBusiness();
         alarmBusiness.setKey(alarmWorkConfig.getAlarmKey());
         if(null != noOverWork){
             //向工单中添加告警信息并保存
-            noOverWork.getWorkAlarmList().add(workAlarm);
+            noOverWork.increateAlarm(workAlarm);
             jobWorkService.updateWork(uniqueCode, noOverWork);
             alarmBusiness.setWorkCode(noOverWork.getCode());
         }else{
@@ -73,9 +74,9 @@ public class SendWorkJob {
         }
 
         //删除该告警工单配置对应信息
-        jobWorkService.deleteWorkAlarmConfigById(alarmWorkConfig.getId());
+        jobWorkService.deleteWorkAlarmConfigById(uniqueCode, alarmWorkConfig.getId());
         //修改告警的工单状态
-        jobWorkService.addAlarmBusiness(uniqueCode, alarmBusiness);
+        jobWorkService.updateAlarmWorkCode(uniqueCode, alarmBusiness);
     }
 
     private Work createWork(WorkAlarmConfig workAlarmConfig, WorkConfig workConfig, WorkAlarm workAlarm, String sentType, Date curDate){

@@ -28,10 +28,10 @@ public class JobInitConfig {
 			return list;
 		}
 
-        list.add(new JobEntity("yytd", "HistoryTask", JonCron.everySe10,"yytd"));
-        list.add(new JobEntity("dadongdong", "HistoryTask", JonCron.everySe15,"dadongdong"));
-        list.add(new JobEntity("cntb", "HistoryTask", JonCron.everySe20,"cntb"));
-        list.add(new JobEntity("sendWorkJob", "SendWorkJob", JonCron.everySe20,"YYDS"));
+//        list.add(new JobEntity("yytd", "HistoryTask", JonCron.everySe10,"yytd"));
+//        list.add(new JobEntity("dadongdong", "HistoryTask", JonCron.everySe15,"dadongdong"));
+//        list.add(new JobEntity("cntb", "HistoryTask", JonCron.everySe20,"cntb"));
+        list.add(new JobEntity("sendWorkJob", "SendWorkJob", JonCron.everyMinute1,"YYDS"));
         return list;
 	}
 }

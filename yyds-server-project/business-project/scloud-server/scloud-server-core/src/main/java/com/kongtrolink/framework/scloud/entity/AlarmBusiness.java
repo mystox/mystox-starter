@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.entity;
 
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 
 import java.util.Date;
@@ -43,6 +44,15 @@ public class AlarmBusiness {
     private String shieldRuleId;        //屏蔽规则id
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
+    private String table;
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
 
     public String getFocusId() {
         return focusId;
@@ -321,6 +331,7 @@ public class AlarmBusiness {
         business.setTrecover(alarm.getTrecover());
         business.setKey(alarm.getKey());
         business.setEntDevSig(alarm.getEnterpriseCode() + WorkConstants.UNDERLINE + alarm.getDeviceId() + WorkConstants.UNDERLINE + alarm.getSignalId());
+        business.setTable(CollectionSuffix.CUR_ALARM_BUSINESS);
         return business;
     }
 }

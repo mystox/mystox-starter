@@ -39,6 +39,9 @@ public class Work {
     private List<WorkAlarm> workAlarmList = new ArrayList<>();
     private String alarmState = WorkConstants.ALARM_STATE_PENDING; //告警状态
     private int pendingCount;                    //待处理告警数量
+    //前端返回需要
+    List<WorkRecord> workRecordList;
+
 
     //导出需要内容
     private Date alarmTime; //告警时间
@@ -54,10 +57,6 @@ public class Work {
     public void setTargetLevelName(String targetLevelName) {
         this.targetLevelName = targetLevelName;
     }
-
-    //前端返回需要
-    List<WorkRecord> workRecordList;
-
 
     public Date getAlarmTime() {
         return alarmTime;
@@ -345,8 +344,11 @@ public class Work {
 
     public void increateAlarm(WorkAlarm workAlarm){
         this.workAlarmList.add(workAlarm);
-        this.pendingCount ++;
-        this.alarmState = WorkConstants.ALARM_STATE_PENDING;
+        String state = workAlarm.getState();
+        if(WorkConstants.ALARM_STATE_PENDING.equals(state)) {
+            this.pendingCount++;
+            this.alarmState = WorkConstants.ALARM_STATE_PENDING;
+        }
     }
 
     public void decreateAlarm(){
