@@ -509,7 +509,7 @@ public class DeviceServiceImpl implements DeviceService {
                 row[3] = deviceModel.getName();
                 row[4] = deviceModel.getTierName();
                 row[5] = deviceModel.getManufacturer();
-                row[6] = dateUtil.format(new Date(deviceModel.getCreateTime()), "yyyy-MM-dd");
+                row[6] = deviceModel.getCreateTime() != null?dateUtil.format(new Date(deviceModel.getCreateTime()), "yyyy-MM-dd"):"-";
                 row[7] = deviceModel.getState();
                 row[8] = deviceModel.getOperationState();
                 row[9] = deviceModel.getIp();

@@ -93,10 +93,10 @@ public class MaintainerController extends BaseController {
         try{
 //            String uniqueCode = getUniqueCode();
 
-            return new JsonResult(null);
+            return new JsonResult("批量导入维护用户成功", true);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("导入失败", false);
+            return new JsonResult("批量导入维护用户失败", false);
         }
     }
 

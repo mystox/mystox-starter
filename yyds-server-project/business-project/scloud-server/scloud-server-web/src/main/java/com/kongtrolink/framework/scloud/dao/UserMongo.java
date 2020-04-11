@@ -24,21 +24,16 @@ public class UserMongo {
     /**
      * 获取用户管辖站点
      */
-    public List<UserSiteEntity> findUserSite(String uniqueCode, UserSiteEntity userSiteEntity){
-        Criteria criteria = Criteria.where("userId").is(userSiteEntity.getUserId());
+    public List<UserSiteEntity> findUserSite(String uniqueCode, String userId){
+        Criteria criteria = Criteria.where("userId").is(userId);
         return mongoTemplate.find(new Query(criteria), UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
     }
 
     /**
-     * 保存或修改用户管辖站点
+     * 保存用户管辖站点
      */
-    public void upsertUserSite(String uniqueCode, UserSiteEntity userSiteEntity){
-        Criteria criteria = Criteria.where("userId").is(userSiteEntity.getUserId());
-
-        Update update = new Update();
-        update.set("siteCodes", userSiteEntity);
-
-        mongoTemplate.upsert(new Query(criteria), update, UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
+    public void saveUserSite(String uniqueCode, List<UserSiteEntity> userSites){
+        mongoTemplate.insert(userSites, uniqueCode + CollectionSuffix.USER_SITE);
     }
 
     /**

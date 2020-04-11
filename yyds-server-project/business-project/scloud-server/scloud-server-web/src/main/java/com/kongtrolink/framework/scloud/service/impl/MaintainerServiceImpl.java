@@ -57,24 +57,35 @@ public class MaintainerServiceImpl implements MaintainerService{
                 LOGGER.info("【维护用户管理】,从【云管】获取所有用户 成功");
                 List<BasicUserEntity> basicUserEntityList = JSONArray.parseArray(msgResult.getMsg(), BasicUserEntity.class);
                 if (basicUserEntityList.size() > 0) {
-                    //获取（业务平台数据库）所有维护人员(扩展信息)
-                    List<MaintainerEntity> maintainers = maintainerMongo.findMaintainerList(uniqueCode, maintainerQuery);
-                    Map<String, MaintainerEntity> maintainerEntityMap = new HashMap<>();    //key: 账号(唯一)，value:维护人员扩展信息
-                    if (maintainers != null && maintainers.size() > 0) {
-                        for (MaintainerEntity maintainer : maintainers) {
-                            maintainerEntityMap.put(maintainer.getUsername(), maintainer);
+
+                    //筛选出维护人员
+                    List<BasicUserEntity> basicMaintainerList = new ArrayList<>();
+                    for (BasicUserEntity basicMaintainer : basicUserEntityList){
+                        if (basicMaintainer.getCurrentRoleName().equals("维护人员")){
+                            basicMaintainerList.add(basicMaintainer);
                         }
                     }
 
-                    for (BasicUserEntity basicUserEntity : basicUserEntityList) {
-                        if (!StringUtil.isNUll(maintainerQuery.getName())) { //如果模糊搜索条件中姓名不为空，则筛选出满足条件的
-                            if (basicUserEntity.getName().contains(maintainerQuery.getName())) {
-                                MaintainerModel maintainerModel = getMaintainerModel(basicUserEntity, maintainerEntityMap.get(basicUserEntity.getUsername()));
+                    if (basicMaintainerList.size() > 0) {
+                        //获取（业务平台数据库）所有维护人员(扩展信息)
+                        List<MaintainerEntity> maintainers = maintainerMongo.findMaintainerList(uniqueCode, maintainerQuery);
+                        Map<String, MaintainerEntity> maintainerEntityMap = new HashMap<>();    //key: 账号(唯一)，value:维护人员扩展信息
+                        if (maintainers != null && maintainers.size() > 0) {
+                            for (MaintainerEntity maintainer : maintainers) {
+                                maintainerEntityMap.put(maintainer.getUsername(), maintainer);
+                            }
+                        }
+
+                        for (BasicUserEntity basicMaintainer : basicMaintainerList) {
+                            if (!StringUtil.isNUll(maintainerQuery.getName())) { //如果模糊搜索条件中姓名不为空，则筛选出满足条件的
+                                if (basicMaintainer.getName().contains(maintainerQuery.getName())) {
+                                    MaintainerModel maintainerModel = getMaintainerModel(basicMaintainer, maintainerEntityMap.get(basicMaintainer.getUsername()));
+                                    list.add(maintainerModel);
+                                }
+                            } else {
+                                MaintainerModel maintainerModel = getMaintainerModel(basicMaintainer, maintainerEntityMap.get(basicMaintainer.getUsername()));
                                 list.add(maintainerModel);
                             }
-                        } else {
-                            MaintainerModel maintainerModel = getMaintainerModel(basicUserEntity, maintainerEntityMap.get(basicUserEntity.getUsername()));
-                            list.add(maintainerModel);
                         }
                     }
                 }
@@ -107,6 +118,7 @@ public class MaintainerServiceImpl implements MaintainerService{
     public String addMaintainer(String uniqueCode, MaintainerModel maintainerModel) {
         //保存在业务平台数据库的维护人员扩展信息
         MaintainerEntity maintainerEntity = new MaintainerEntity();
+        maintainerEntity.setUsername(maintainerModel.getUsername());
         maintainerEntity.setCompanyName(maintainerModel.getCompanyName());
         maintainerEntity.setOrganizationId(maintainerModel.getOrganizationId());
         maintainerEntity.setStatus(maintainerModel.getStatus());
@@ -279,8 +291,8 @@ public class MaintainerServiceImpl implements MaintainerService{
                 row[4] = maintainerModel.getCompanyName();
                 row[5] = maintainerModel.getOrganizationId();
                 row[6] = maintainerModel.getStatus();
-                row[7] = sdf.format(new Date(maintainerModel.getHireDate()));
-                row[8] = sdf.format(new Date(maintainerModel.getExpireDate()));
+                row[7] = maintainerModel.getHireDate() != null?sdf.format(new Date(maintainerModel.getHireDate())):"-";
+                row[8] = maintainerModel.getExpireDate() != null?sdf.format(new Date(maintainerModel.getExpireDate())):"-";
                 row[9] = maintainerModel.getMajor();
                 row[10] = maintainerModel.getSkill();
                 row[11] = maintainerModel.getAddress();
@@ -289,15 +301,15 @@ public class MaintainerServiceImpl implements MaintainerService{
                 row[14] = maintainerModel.getEducation();
                 row[15] = maintainerModel.getAuthentication();
                 row[16] = maintainerModel.getAuthLevel();
-                row[17] = sdf.format(new Date(maintainerModel.getAuthDate()));
-                row[18] = sdf.format(new Date(maintainerModel.getAuthExpireDate()));
+                row[17] = maintainerModel.getAuthDate() != null?sdf.format(new Date(maintainerModel.getAuthDate())):"-";
+                row[18] = maintainerModel.getAuthExpireDate() != null?sdf.format(new Date(maintainerModel.getAuthExpireDate())):"-";
             }
         }
         return tableDatas;
     }
 
     //将维护人员扩展属性赋值给返回前端的数据模型
-    private MaintainerModel getMaintainerModel(BasicUserEntity basicUserEntity, MaintainerEntity entity){
+    private MaintainerModel getMaintainerModel(BasicUserEntity basicMaintainerEntity, MaintainerEntity entity){
         MaintainerModel model = new MaintainerModel();
         if (entity != null) {
             model.setUserId(entity.getUserId());
@@ -319,11 +331,11 @@ public class MaintainerServiceImpl implements MaintainerService{
             model.setAuthExpireDate(entity.getAuthExpireDate());
         }
 
-        model.setName(basicUserEntity.getName());
-        model.setPhone(basicUserEntity.getPhone());
-        model.setEmail(basicUserEntity.getEmail());
-        model.setCurrentPostId(basicUserEntity.getCurrentRoleId());
-        model.setCurrentPositionName(basicUserEntity.getCurrentRoleName());
+        model.setName(basicMaintainerEntity.getName());
+        model.setPhone(basicMaintainerEntity.getPhone());
+        model.setEmail(basicMaintainerEntity.getEmail());
+        model.setCurrentPostId(basicMaintainerEntity.getCurrentRoleId());
+        model.setCurrentPositionName(basicMaintainerEntity.getCurrentRoleName());
 
         return model;
     }

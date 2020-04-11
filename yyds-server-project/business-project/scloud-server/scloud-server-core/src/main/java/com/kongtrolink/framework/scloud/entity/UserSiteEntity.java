@@ -15,7 +15,8 @@ public class UserSiteEntity implements Serializable {
      */
     private static final long serialVersionUID = 8818076279243688716L;
     private String userId;  //用户ID
-    private List<String> siteCodes; //用户所管辖站点的站点编码
+    private String siteCode; //管辖站点的站点编码
+    private Integer siteId; //管辖站点的站点ID
 
     public String getUserId() {
         return userId;
@@ -25,11 +26,19 @@ public class UserSiteEntity implements Serializable {
         this.userId = userId;
     }
 
-    public List<String> getSiteCodes() {
-        return siteCodes;
+    public String getSiteCode() {
+        return siteCode;
     }
 
-    public void setSiteCodes(List<String> siteCodes) {
-        this.siteCodes = siteCodes;
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
+    }
+
+    public Integer getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
     }
 }

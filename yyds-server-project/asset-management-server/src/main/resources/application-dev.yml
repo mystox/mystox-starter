@@ -7,9 +7,9 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP_LIUDD_TEST3
+  groupCode: GROUP_DEMO_SE
   host: 172.16.5.62
-  port: 52202
+  port: 52204
 mqtt:
   username: root
   password: 123456
