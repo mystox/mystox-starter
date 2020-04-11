@@ -45,7 +45,7 @@ public interface HomePageService {
      * @param homeQuery  区域
      * @return 站点总数
      */
-    List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery);
+    HomeWorkDto getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery);
     /**
      * FSU在线状态统计 交维态FSU设备的实时在线情况百分比
      * @param uniqueCode 企业编码

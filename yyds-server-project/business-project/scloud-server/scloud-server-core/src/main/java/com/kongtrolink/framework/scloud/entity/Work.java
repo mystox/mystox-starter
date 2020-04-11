@@ -49,6 +49,7 @@ public class Work {
     private Integer alarmLevel;
     private String targetLevelName;
     private String alarmName;
+    private String isOverTime;//是/否 超时工单
 
     public String getTargetLevelName() {
         return targetLevelName;
@@ -356,5 +357,13 @@ public class Work {
         if(0 == pendingCount){
             this.alarmState = WorkConstants.ALARM_STATE_RESOLVED;
         }
+    }
+
+    public String getIsOverTime() {
+        return isOverTime;
+    }
+
+    public void setIsOverTime(String isOverTime) {
+        this.isOverTime = isOverTime;
     }
 }

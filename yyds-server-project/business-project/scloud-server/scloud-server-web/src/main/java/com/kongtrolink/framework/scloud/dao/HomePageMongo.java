@@ -200,6 +200,24 @@ public class HomePageMongo {
         return result.getMappedResults();
     }
 
+    public int getHomeWorkModelOverTime(String uniqueCode, String userId, HomeQuery homeQuery) {
+        //查询条件
+        String code = homeQuery.getTierCode();
+        Date startTime = homeQuery.getStartTime();//开始时间
+        Date endTime = homeQuery.getEndTime(); //结束时间
+        Criteria criteria = Criteria.where("sentTime").gte(endTime).lte(startTime).and("isOverTime").is("是");
+        if (code != null && !"".equals(code)) {
+            criteria.and("site.strId").regex("^"+code);//模糊查询
+        }
+        DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true))
+        );
+        AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
+        return result.getMappedResults().size();
+    }
     /**
      * 告警工单统计
      *

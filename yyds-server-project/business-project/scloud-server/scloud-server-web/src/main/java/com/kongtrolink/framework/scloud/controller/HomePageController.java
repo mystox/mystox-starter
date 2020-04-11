@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.controller;
 
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
@@ -100,24 +101,18 @@ public class HomePageController extends ExportController {
 
     /**
      * 告警工单统计
-     *
+     * 未接： state 待接
+     * 在途工单: state 待办 待审批
+     * 超时工单:  isOverTime 是/否 超时工单
+     * 历史工单：state 已完成 已撤销
      */
     @RequestMapping(value = "/work", method = RequestMethod.POST)
     public @ResponseBody JsonResult work(@RequestBody HomeQuery homeQuery) {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
-            //统计交维态的站点总数
-            List<HomeWorkModel> list = homePageService.getHomeWorkModel(uniqueCode,userId,homeQuery);
-            int total = 0;
-            if(list !=null){
-                for(HomeWorkModel workModel:list){
-                    total = total + workModel.getCount();
-                }
-            }
-            JsonResult value = new JsonResult(list);
-            value.setCount(total);
-            return value;
+            HomeWorkDto list = homePageService.getHomeWorkModel(uniqueCode,userId,homeQuery);
+            return  new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();
         }
