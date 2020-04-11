@@ -186,9 +186,9 @@ public class HomePageMongo {
         Date endTime = homeQuery.getEndTime(); //结束时间
         Criteria criteria = Criteria.where("sentTime").gte(endTime).lte(startTime);
         if (code != null && !"".equals(code)) {
-            criteria.and("code").regex("^"+code);//模糊查询
+            criteria.and("site.strId").regex("^"+code);//模糊查询
         }
-        DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"site.id");
+        DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 new CustomOperation(lookupSql), //取得字段()
@@ -275,7 +275,9 @@ public class HomePageMongo {
                         new BasicDBObject("$match", new BasicDBObject("$expr",new BasicDBObject("$and",new BasicDBObject("$and",new Object[]{
                                 new BasicDBObject("$eq", new Object[]{ "$userId", userId}),
                                 new BasicDBObject("$eq", new Object[]{ "$siteId", "$$siteId"})
-                        }))))}
+                        })))),
+                        new BasicDBObject("$project",new BasicDBObject("userId",1))
+                }
         ).append(
                 "as", "stockData"
         )
@@ -295,7 +297,8 @@ public class HomePageMongo {
                         new BasicDBObject("$match", new BasicDBObject("$expr",new BasicDBObject("$and",new BasicDBObject("$and",new Object[]{
                                 new BasicDBObject("$eq", new Object[]{ "$userId", userId}),
                                 new BasicDBObject("$eq", new Object[]{ "$siteCode", "$$siteCode"})
-                        }))))}
+                        })))),
+                        new BasicDBObject("$project",new BasicDBObject("userId",1))}
         ).append(
                 "as", "stockData"
         )
