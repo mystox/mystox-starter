@@ -49,6 +49,15 @@ public class Alarm {
     private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
     private String workCode;            //工单编码，用于前端展示
     private int flag;                //告警标志（0-结束；1-上报）
+    private String focusId;             //关注点id，用于前端取消关注
+
+    public String getFocusId() {
+        return focusId;
+    }
+
+    public void setFocusId(String focusId) {
+        this.focusId = focusId;
+    }
 
     public int getFlag() {
         return flag;
@@ -380,5 +389,6 @@ public class Alarm {
         this.setChecker(alarmBusiness.getChecker());
         this.setCheckTime(alarmBusiness.getCheckTime());
         this.setWorkCode(alarmBusiness.getWorkCode());
+        this.entDevSig = alarmBusiness.getEntDevSig();
     }
 }

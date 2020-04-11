@@ -73,4 +73,19 @@ public class AlarmFocusDao {
         Query query = Query.query(criteria);
         return (int)mongoTemplate.count(query, uniqueCode + table);
     }
+
+    /**
+     * @param uniqueCode
+     * @param userId
+     * @param entDevSigList
+     * @auther: liudd
+     * @date: 2020/4/11 14:19
+     * 功能描述:根据用户id和***获取告警关注列表
+     */
+    public List<AlarmFocus> listByUserIdEntDevSigs(String uniqueCode, String userId, List<String> entDevSigList) {
+        Criteria criteria = Criteria.where("userId").is(userId);
+        criteria.and("entDevSig").in(entDevSigList);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, AlarmFocus.class, uniqueCode + table);
+    }
 }

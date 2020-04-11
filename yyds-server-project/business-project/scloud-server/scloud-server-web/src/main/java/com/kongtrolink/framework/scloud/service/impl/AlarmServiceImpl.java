@@ -48,6 +48,8 @@ public class AlarmServiceImpl implements AlarmService {
     FilterRuleService filterRuleService;
     @Autowired
     AlarmBusinessService businessService;
+    @Autowired
+    AlarmFocusService focusService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
@@ -82,8 +84,28 @@ public class AlarmServiceImpl implements AlarmService {
             JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
             String dataStr = jsonResult.getData().toString();
             List<Alarm> alarmList = JSONObject.parseArray(dataStr, Alarm.class);
+            List<String> entDevSigList = new ArrayList<>();
+            Map<String, List<Alarm>> entDevSigAlarmListMap = new HashMap<>();
             for(Alarm alarm : alarmList){
                 alarm.initByBusiness(keyBusinessMap.get(alarm.getKey()));
+                String entDevSig = alarm.getEntDevSig();
+                entDevSigList.add(entDevSig);
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(entDevSig);
+                if(null == entDevSigAlarmList){
+                    entDevSigAlarmList = new ArrayList<>();
+                }
+                entDevSigAlarmList.add(alarm);
+                entDevSigAlarmListMap.put(entDevSig, entDevSigAlarmList);
+
+            }
+            //填充告警关注信息
+            String operateUserId = alarmQuery.getOperateUserId();
+            List<AlarmFocus> alarmFocusList = focusService.listByUserIdEntDevSigs(alarmQuery.getEnterpriseCode(), operateUserId, entDevSigList);
+            for(AlarmFocus alarmFocus : alarmFocusList){
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(alarmFocus.getEntDevSig());
+                for(Alarm alarm : entDevSigAlarmList){
+                    alarm.setFocusId(alarmFocus.getId());
+                }
             }
 //            if(null != alarmList && alarmList.size()>0) {
 //                initInfo(alarmQuery.getEnterpriseCode(), alarmList);

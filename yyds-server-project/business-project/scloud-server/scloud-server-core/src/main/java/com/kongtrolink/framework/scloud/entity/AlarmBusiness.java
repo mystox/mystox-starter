@@ -44,6 +44,14 @@ public class AlarmBusiness {
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
 
+    public String getFocusId() {
+        return focusId;
+    }
+
+    public void setFocusId(String focusId) {
+        this.focusId = focusId;
+    }
+
     public String getServerCode() {
         return serverCode;
     }
@@ -82,14 +90,6 @@ public class AlarmBusiness {
 
     public void setShield(boolean shield) {
         this.shield = shield;
-    }
-
-    public String getFocusId() {
-        return focusId;
-    }
-
-    public void setFocusId(String focusId) {
-        this.focusId = focusId;
     }
 
     public String getShieldRuleId() {
