@@ -19,7 +19,7 @@ public class MaintainerModel extends MaintainerEntity {
     private String currentPostId;   //角色Id
     private String currentPositionName; //角色名称
 
-    private String isModified;  //修改维护用户时，是否修改了姓名或手机号或邮箱,"0"-未修改，"1"-修改
+    private String isModified;  //修改维护用户时，是否修改了手机号||邮箱||密码,"0"-未修改，"1"-修改
 
     public String getPassword() {
         return password;
