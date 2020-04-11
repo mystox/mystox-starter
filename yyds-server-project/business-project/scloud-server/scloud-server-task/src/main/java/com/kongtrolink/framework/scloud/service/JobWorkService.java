@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface JobWorkService {
 
-    List<WorkAlarmConfig> getAllWorkAlarmConfig(Date curDate);
+    List<WorkAlarmConfig> getAllWorkAlarmConfig(String uniqueCode, Date curDate);
 
     WorkConfig getWorkConfigById(String uniqueCode, String workConfigId);
 

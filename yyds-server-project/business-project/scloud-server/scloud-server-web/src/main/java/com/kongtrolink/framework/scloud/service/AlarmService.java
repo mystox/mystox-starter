@@ -29,13 +29,9 @@ public interface AlarmService {
      * @date: 2020/3/3 15:59
      * 功能描述:填充设备，站点等信息
      */
-    void initInfo(String uniqueCode, List<AlarmBusiness> businessList);
+    void initInfo(String uniqueCode, String serverCode, List<AlarmBusiness> businessList);
 
     JSONObject operate(AlarmQuery alarmQuery) throws Exception;
 
     JSONObject updateWorkInfo(AlarmQuery alarmQuery);
-
-
-
-
 }

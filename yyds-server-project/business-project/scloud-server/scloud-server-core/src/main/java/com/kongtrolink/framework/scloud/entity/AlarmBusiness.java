@@ -13,6 +13,7 @@ import java.util.Date;
 public class AlarmBusiness {
 
     private String id;      //与告警id无关
+    private String serverCode;
     private float value;                //告警值
     private String tierCode;
     private String tierName;
@@ -42,6 +43,14 @@ public class AlarmBusiness {
     private String shieldRuleId;        //屏蔽规则id
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
 
     public int getFlag() {
         return flag;
@@ -293,6 +302,7 @@ public class AlarmBusiness {
 
     public static AlarmBusiness createByAlarm(Alarm alarm){
         AlarmBusiness business = new AlarmBusiness();
+        business.setServerCode(alarm.getServerCode());
         business.setFlag(alarm.getFlag());
         business.setValue(alarm.getValue());
         business.setSiteCode(alarm.getSiteCode());

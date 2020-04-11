@@ -12,7 +12,7 @@ public interface WorkAlarmConfigService {
     /**
      * 添加
      */
-    void add(WorkAlarmConfig workAlarmConfig);
+    void add(String uniqueCode, WorkAlarmConfig workAlarmConfig);
 
     /**
      * 根据企业编码和告警id获取记录

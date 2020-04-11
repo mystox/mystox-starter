@@ -54,10 +54,11 @@ public class AlarmMsgTask implements Runnable{
     private void alarmReport(AlarmBusiness alarmBusiness){
         String key = alarmBusiness.getKey();
         String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+        String serverCode = alarmBusiness.getServerCode();
         List<AlarmBusiness> businessList = new ArrayList<>();
         businessList.add(alarmBusiness);
-        //填充你设备信息
-        alarmService.initInfo(enterpriseCode, businessList);
+        //填充设备信息
+        alarmService.initInfo(enterpriseCode, serverCode, businessList);
         //告警屏蔽功能
         shieldRuleService.matchRule(enterpriseCode, businessList);
         //匹配告警工单配置

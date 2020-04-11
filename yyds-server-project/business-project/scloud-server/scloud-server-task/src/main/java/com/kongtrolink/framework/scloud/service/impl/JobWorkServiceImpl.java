@@ -21,8 +21,8 @@ public class JobWorkServiceImpl implements JobWorkService {
     JobWorkDao jobWorkDao;
 
     @Override
-    public List<WorkAlarmConfig> getAllWorkAlarmConfig(Date curDate) {
-        return jobWorkDao.getAllWorkAlarmConfig(curDate);
+    public List<WorkAlarmConfig> getAllWorkAlarmConfig(String uniqueCode, Date curDate) {
+        return jobWorkDao.getAllWorkAlarmConfig(uniqueCode, curDate);
     }
 
     @Override

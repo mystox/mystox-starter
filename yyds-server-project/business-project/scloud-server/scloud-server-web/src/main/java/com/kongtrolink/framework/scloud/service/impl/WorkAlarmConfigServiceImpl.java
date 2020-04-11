@@ -31,7 +31,7 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
             WorkConfig workConfig = workConfigService.matchAutoConfig(enterpriseCode, alarm, WorkConstants.SEND_TYPE_AUTO);
             if (null != workConfig) {//20190404有些企业可能没有默认规则
                 WorkAlarmConfig alarmWorkConfig = createAlarmWorkConfig(enterpriseCode, workConfig, alarm);
-                add(alarmWorkConfig);
+                add(enterpriseCode, alarmWorkConfig);
             }
         }
     }
@@ -71,8 +71,8 @@ public class WorkAlarmConfigServiceImpl implements WorkAlarmConfigService{
      * 否则不添加，在该工单中添加告警信息。并且将该工单id加入该告警数据中
      */
     @Override
-    public void add(WorkAlarmConfig workAlarmConfig) {
-        workAlarmConfigDao.add(workAlarmConfig);
+    public void add(String uniqueCode, WorkAlarmConfig workAlarmConfig) {
+        workAlarmConfigDao.add(uniqueCode, workAlarmConfig);
     }
 
     /**

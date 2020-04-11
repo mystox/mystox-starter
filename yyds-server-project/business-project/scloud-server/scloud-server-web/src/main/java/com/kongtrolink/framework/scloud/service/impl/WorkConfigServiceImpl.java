@@ -69,7 +69,7 @@ public class WorkConfigServiceImpl implements WorkConfigService {
         Date tReport = alarmBusiness.getTreport();
         String format = StringUtil.sdf.format(tReport);
         //HH:mm:ss
-        String date = format.substring(11);
+        String date = format.substring(11, 16);
         int intReportTime= StringUtil.dateToInt(date);
         WorkConfigQuery workConfigQuery = new WorkConfigQuery();
         workConfigQuery.setSiteType(alarmBusiness.getSiteType());

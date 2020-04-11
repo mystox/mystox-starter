@@ -17,7 +17,7 @@ public class WorkConfig {
     private String sendType = WorkConstants.SEND_TYPE_MANUAL;    //派单方式
     private List<String> siteCodeList;          //启用范围，站点编码列表
     private List<String> siteTypeList;          //局站类型集合
-    private List<String> alarmLevelList;        //告警级别
+    private List<Integer> alarmLevelList;        //告警级别
     private List<String> alarmNameList;        //告警名称
     private int reportAfter;                    //告警发生后多少分钟派单（用于自动派单）
     private String reportBegin;                 //告警产生时间开始时间
@@ -79,11 +79,11 @@ public class WorkConfig {
         this.siteTypeList = siteTypeList;
     }
 
-    public List<String> getAlarmLevelList() {
+    public List<Integer> getAlarmLevelList() {
         return alarmLevelList;
     }
 
-    public void setAlarmLevelList(List<String> alarmLevelList) {
+    public void setAlarmLevelList(List<Integer> alarmLevelList) {
         this.alarmLevelList = alarmLevelList;
     }
 
@@ -173,7 +173,9 @@ public class WorkConfig {
      * 功能描述:初始化开始时间和结束时间int型
      */
     public void initIntTime(){
-        this.reportBeginInt = StringUtil.HHMMSSToInt(this.reportBegin);
-        this.reportEndInt = StringUtil.HHMMSSToInt(this.reportEnd);
+        if(WorkConstants.SEND_TYPE_AUTO.equals(this.getSendType())) {
+            this.reportBeginInt = StringUtil.dateToInt(this.reportBegin);
+            this.reportEndInt = StringUtil.dateToInt(this.reportEnd);
+        }
     }
 }

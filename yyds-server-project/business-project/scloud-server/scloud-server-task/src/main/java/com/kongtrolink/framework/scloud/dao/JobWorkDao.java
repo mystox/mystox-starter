@@ -23,17 +23,17 @@ public class JobWorkDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table_work_alarm_config = "work_alarm_config";
+    private String table_work_alarm_config = "_work_alarm_config";
     private String table_work_config = "_work_config";
     private String table_work = "_work";
     private String tabel_work_record = "_work_record";
     private String table_cur_alarm_business = "_current_alarm_business";
 
-    public List<WorkAlarmConfig> getAllWorkAlarmConfig(Date curDate) {
+    public List<WorkAlarmConfig> getAllWorkAlarmConfig(String uniqueCode, Date curDate) {
         Criteria criteria = Criteria.where("sendWorkTime").lte(curDate);
         criteria.and("sendWorkType").is(WorkConstants.SEND_TYPE_AUTO);
         Query query = new Query(criteria);
-        return mongoTemplate.find(query, WorkAlarmConfig.class, table_work_alarm_config);
+        return mongoTemplate.find(query, WorkAlarmConfig.class, uniqueCode + table_work_alarm_config);
     }
 
     public WorkConfig getWorkConfigById(String uniqueCode, String workConfigId){

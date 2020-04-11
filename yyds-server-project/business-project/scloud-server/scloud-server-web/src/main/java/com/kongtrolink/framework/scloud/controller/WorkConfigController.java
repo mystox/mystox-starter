@@ -2,6 +2,8 @@ package com.kongtrolink.framework.scloud.controller;
 
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.WorkConfig;
 import com.kongtrolink.framework.scloud.query.WorkConfigQuery;
 import com.kongtrolink.framework.scloud.service.WorkConfigService;
@@ -44,7 +46,7 @@ public class WorkConfigController extends BaseController {
         return new JsonResult("删除失败", false);
     }
 
-    @RequestMapping("/udpate")
+    @RequestMapping("/update")
     @ResponseBody
     public JsonResult update(@RequestBody WorkConfig workConfig){
         String uniqueCode = getUniqueCode();
@@ -61,6 +63,7 @@ public class WorkConfigController extends BaseController {
         String uniqueCode = getUniqueCode();
         List<WorkConfig> list = workConfigService.list(uniqueCode, workConfigQuery);
         int count = workConfigService.count(uniqueCode, workConfigQuery);
-        return new JsonResult(list, count);
+        ListResult<WorkConfig> listResult = new ListResult<>(list, count);
+        return new JsonResult(listResult);
     }
 }

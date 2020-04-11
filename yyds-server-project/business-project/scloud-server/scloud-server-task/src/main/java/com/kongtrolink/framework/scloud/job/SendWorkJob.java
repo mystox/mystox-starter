@@ -4,6 +4,8 @@ import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.service.JobWorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,12 @@ public class SendWorkJob {
     @Autowired
     JobWorkService jobWorkService;
 
-    public void execute(){
-        LOGGER.info("扫描告警工单配置开始...");
+    public void execute(JobExecutionContext context) {
+        JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+        String uniqueCode = dataMap.getString("uniqueCode");
+        LOGGER.info("企业:{} 开始进行自动派单轮询...",uniqueCode);
         Date curDate = new Date();
-        List<WorkAlarmConfig> allAlarmWorkConfig = jobWorkService.getAllWorkAlarmConfig(curDate);
+        List<WorkAlarmConfig> allAlarmWorkConfig = jobWorkService.getAllWorkAlarmConfig(uniqueCode, curDate);
         if(allAlarmWorkConfig == null || allAlarmWorkConfig.size() == 0){
             LOGGER.info("没有需要自动派单的告警");
             return ;
@@ -33,7 +37,7 @@ public class SendWorkJob {
         for(WorkAlarmConfig alarmWorkConfig : allAlarmWorkConfig){
             handleAlarm(alarmWorkConfig, curDate);
         }
-        LOGGER.info("扫描告警工单配置结束");
+        LOGGER.info("企业:{} 开始进行自动派单轮询...",uniqueCode);
     }
 
     /**

@@ -102,7 +102,7 @@ public class AlarmServiceImpl implements AlarmService {
      * 功能描述:填充设备，站点等信息
      */
     @Override
-    public void initInfo(String uniqueCode, List<AlarmBusiness> businessList) {
+    public void initInfo(String uniqueCode, String serverCode, List<AlarmBusiness> businessList) {
         if(null == businessList){
             return ;
         }
@@ -128,7 +128,7 @@ public class AlarmServiceImpl implements AlarmService {
             deviceCodeAlarmListMap.put(deviceCode, deviceCodeAlarmList);
         }
         DeviceQuery deviceQuery = new DeviceQuery();
-        deviceQuery.setServerCode(uniqueCode);
+        deviceQuery.setServerCode(serverCode);
         deviceQuery.setPageSize(Integer.MAX_VALUE);
         deviceQuery.setDeviceCodes(deviceCodeList);
         List<DeviceModel> deviceModelList = new ArrayList<>();
@@ -166,7 +166,7 @@ public class AlarmServiceImpl implements AlarmService {
             siteCodeAlarmListMap.put(siteCode, siteIdAlarmList);
         }
         SiteQuery siteQuery = new SiteQuery();
-        siteQuery.setServerCode(uniqueCode);
+        siteQuery.setServerCode(serverCode);
         siteQuery.setPageSize(Integer.MAX_VALUE);
         siteQuery.setSiteCodes(siteCodeList);
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
