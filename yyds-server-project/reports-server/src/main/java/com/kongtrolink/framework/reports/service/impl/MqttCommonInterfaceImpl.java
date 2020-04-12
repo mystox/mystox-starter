@@ -344,8 +344,10 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
             basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceType));
         BasicParentQuery basicParentQuery = new BasicParentQuery();
         basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, fsuIds));
+        basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT,"FSU动环主机"));
         basicDeviceQuery.set_parent(basicParentQuery);
         MsgResult opera = mqttOpera.opera(GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        System.out.println(basicDeviceQuery);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             List<DeviceEntity> siteEntities = new ArrayList<>();

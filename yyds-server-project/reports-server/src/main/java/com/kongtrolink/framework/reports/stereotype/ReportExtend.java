@@ -10,7 +10,7 @@ import com.kongtrolink.framework.reports.entity.ExecutorType;
  */
 public @interface ReportExtend {
 
-    enum FieldType {DATE, STRING, NUMBER,DISTRICT,URI,MQTT,DATE_PERIOD,JSON}
+    enum FieldType {DATE, STRING, NUMBER,DISTRICT,URI,MQTT,DATE_PERIOD,STATISTIC_PERIOD,JSON}
 
     enum DateType {HOUR, DAY, WEEK, MONTH, YEAR}
 

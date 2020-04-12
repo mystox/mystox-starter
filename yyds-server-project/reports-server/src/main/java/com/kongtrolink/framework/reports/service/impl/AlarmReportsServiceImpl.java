@@ -70,8 +70,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             @ReportExtend(field = "alarmStatus", name = "告警状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"历史告警"}),
             @ReportExtend(field = "alarmLevel", name = "告警等级", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, uri = "/reportsOpera/getAlarmLevel"),
             @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "县级", "站点级"}),
-            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}),
-            @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE_PERIOD, belong = ExecutorType.query, description = "时间范围,返回格式为{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}"),
+            @ReportExtend(field = "statisticPeriod", name = "统计周期", type = ReportExtend.FieldType.STATISTIC_PERIOD, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}, description = "{dimension:月报表,timePeriod:{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}}"),
+//            @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE_PERIOD, belong = ExecutorType.query, description = "时间范围,返回格式为{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}"),
     })
     public ReportData alarmCount(String reportConfigStr) {
         ReportConfig reportConfig = JSONObject.parseObject(reportConfigStr, ReportConfig.class);
@@ -128,7 +128,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         }
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
-        logger.debug("get site list is:[{}]",JSONObject.toJSONString(siteList));
+        logger.debug("get site list is:[{}]", JSONObject.toJSONString(siteList));
         if (!CollectionUtils.isEmpty(siteList)) {
             int finalMonth = month;
             int finalYear = year;
@@ -153,10 +153,13 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String manufacturer = fsuEntity.getManufacturer();
                 String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
                 List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
-                logger.debug("get fsu list is:[{}]",JSONObject.toJSONString(fsuIds));
+                logger.debug("get fsu list is:[{}]", JSONObject.toJSONString(fsuIds));
                 List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
-                List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
-                logger.debug("get device list is:[{}]",JSONObject.toJSONString(deviceIds));
+                List<String> deviceIds = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(deviceList)) {
+                    deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                    logger.debug("get device list is:[{}]", JSONObject.toJSONString(deviceIds));
+                }
                 deviceIds.addAll(fsuIds);
                /* / Test
                 List<String> deviceIds = new ArrayList<>();
@@ -329,7 +332,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         List<AlarmDetailsTemp> alarmDetailsTempList = new ArrayList<AlarmDetailsTemp>();
         //获取时间信息
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH) +1;
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
         int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
@@ -795,6 +798,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         jsonObject.put("executorResult", alarmCountTempList);
         return new ReportData(DataType.TEXT, jsonObject.toJSONString());
     }
+
     private ReportData alarmCategoryQuery(ReportConfig reportConfig, ReportTask reportTask) {
 
         String taskId = reportTask.getId();
@@ -840,7 +844,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         ReportData reportData = new ReportData(DataType.TABLE, excelUri);
         return reportData;
     }
-
 
 
     private String[][][] alarmCategoryDataCreate(List<JSONObject> alarmCategoryList, String statisticLevel) {
