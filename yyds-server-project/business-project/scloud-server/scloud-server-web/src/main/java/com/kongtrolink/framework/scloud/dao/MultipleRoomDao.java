@@ -9,6 +9,7 @@ import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomDeviceType;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomSignalType;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomSignalTypeConfig;
+import com.kongtrolink.framework.scloud.entity.multRoom.RoomSiteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -33,10 +34,10 @@ public class MultipleRoomDao {
     /**
      * 查询站点信息
      */
-    public SiteEntity findSite(String uniqueCode, int siteId) {
+    public RoomSiteInfo findSite(String uniqueCode, int siteId) {
         return mongoTemplate.findOne(
                 new Query(Criteria.where("id").is(siteId)),
-                SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+                RoomSiteInfo.class, uniqueCode + CollectionSuffix.SITE);
     }
     /**
      * 获取 基本信息 中的 监控点设备数 和监控点数
