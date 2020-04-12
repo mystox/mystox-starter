@@ -117,6 +117,17 @@ public class MultipleRoomDao {
         mongoTemplate.save(roomDeviceType,CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
     }
 
+    public  int countRoomDeviceType(String uniqueCode){
+        Criteria criteria = Criteria.where("uniqueCode").is(uniqueCode);
+        return (int)mongoTemplate.count(new Query(criteria), RoomDeviceType.class, CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
+    }
+
+    public  void removeRoomDeviceType(String uniqueCode){
+        Criteria criteria = Criteria.where("uniqueCode").is(uniqueCode);
+        mongoTemplate.remove(new Query(criteria), CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
+    }
+
+
     public Map<String, Integer> deviceAlarmCountMap(String uniqueCode, String siteCode){
         Map<String, Integer> map = new HashMap<>();
         Criteria criteria = Criteria.where("siteCode").is(siteCode).and("state").is("待处理").and("shield").ne(true);

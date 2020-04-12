@@ -453,7 +453,7 @@ public class RegisterRunner implements ApplicationRunner {
                     if (StringUtils.isBlank(registerUrl)) {
                         String errorMsg = ((JSONObject) parse).getString("errorMsg");
                         logger.error("slogin failed state[{}], msg: [{}]", stateCode, errorMsg);
-                        return null;
+//                        return null;
                     }
                     logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
                 }
@@ -462,7 +462,7 @@ public class RegisterRunner implements ApplicationRunner {
                 if ("dev".equals(devFlag)) {
                     logger.warn("environment ${spring.profiles.active} is dev, set registerUrl is [{}]", registerUrl);
                 } else {
-                    return null;
+//                    return null;
                 }
             }
         }
