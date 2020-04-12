@@ -29,6 +29,7 @@ logging:
     root: info
     com.kongtrolink.framework: INFO
     com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    com.kongtrolink.framework.reports.service.impl: debug
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF

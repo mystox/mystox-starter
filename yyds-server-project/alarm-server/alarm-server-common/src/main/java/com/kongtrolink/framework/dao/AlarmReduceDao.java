@@ -232,7 +232,10 @@ public class AlarmReduceDao {
             for (JSONObject result : mapReduceResults) {
                 String levelName = result.getString("_id");
                 JSONObject deviceMap = resultMap.get(levelName);
-                List<JSONObject> arr = result.getJSONArray("arr").toJavaList(JSONObject.class);
+                if (deviceMap == null)
+                    deviceMap = new JSONObject();
+                resultMap.put(levelName, deviceMap);
+                List<JSONObject> arr = result.getJSONObject("value").getJSONArray("arr").toJavaList(JSONObject.class);
                 long sum = 0L;
                 for (JSONObject deviceCount : arr) {
                     String deviceType = deviceCount.getString("deviceType");
@@ -245,6 +248,7 @@ public class AlarmReduceDao {
                     deviceMap.put(deviceType, countOld);
                 }
                 Long sumOld = deviceMap.getLong("sum");
+                if (sumOld == null) sumOld = 0L;
                 sumOld += sum;
                 deviceMap.put("sum", sumOld);
             }
@@ -325,7 +329,10 @@ public class AlarmReduceDao {
             for (JSONObject result : mapReduceResults) {
                 String levelName = result.getString("_id");
                 JSONObject deviceMap = resultMap.get(levelName);
-                List<JSONObject> arr = result.getJSONArray("arr").toJavaList(JSONObject.class);
+                if (deviceMap == null)
+                    deviceMap = new JSONObject();
+                resultMap.put(levelName, deviceMap);
+                List<JSONObject> arr = result.getJSONObject("value").getJSONArray("arr").toJavaList(JSONObject.class);
                 long sum = 0L;
                 for (JSONObject deviceCount : arr) {
                     String deviceType = deviceCount.getString("deviceType");
@@ -338,6 +345,7 @@ public class AlarmReduceDao {
                     deviceMap.put(deviceType, countOld);
                 }
                 Long sumOld = deviceMap.getLong("sum");
+                if (sumOld == null) sumOld = 0L;
                 sumOld += sum;
                 deviceMap.put("sum", sumOld);
             }

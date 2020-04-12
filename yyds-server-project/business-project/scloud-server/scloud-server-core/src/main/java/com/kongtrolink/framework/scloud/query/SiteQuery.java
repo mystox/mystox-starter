@@ -11,6 +11,7 @@ public class SiteQuery extends Paging{
      *
      */
     private static final long serialVersionUID = -6757930718134122244L;
+    private String userId;
     private String serverCode;
     private List<Integer> siteIdList;   //站点id集合
     private List<String> tierCodes;    //区域Code
@@ -25,6 +26,15 @@ public class SiteQuery extends Paging{
     private List<String> siteCodes; //站点编码集合
 
     private List<String> simplifiedSitekeys;    //存储简化版站点的所有key
+
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getServerCode() {
         return serverCode;

@@ -61,8 +61,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
-            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
-            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/region/getStationList", hide = true), //站点列表
+//            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
+            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/reportsOpera/getStationList"), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.JSON, belong = ExecutorType.query, uri = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
             @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
             @ReportExtend(field = "operationState", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
@@ -110,7 +110,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
 
         }*/
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
         int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
 
@@ -128,6 +128,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         }
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
+        logger.debug("get site list is:[{}]",JSONObject.toJSONString(siteList));
         if (!CollectionUtils.isEmpty(siteList)) {
             int finalMonth = month;
             int finalYear = year;
@@ -144,7 +145,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String stationName = s.getSiteName();
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                if (fsuList == null) {
+                if (CollectionUtils.isEmpty(fsuList)) {
                     logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
@@ -152,8 +153,10 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String manufacturer = fsuEntity.getManufacturer();
                 String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
                 List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
+                logger.debug("get fsu list is:[{}]",JSONObject.toJSONString(fsuIds));
                 List<DeviceEntity> deviceList = mqttCommonInterface.getDeviceList(fsuIds, baseCondition);
                 List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
+                logger.debug("get device list is:[{}]",JSONObject.toJSONString(deviceIds));
                 deviceIds.addAll(fsuIds);
                /* / Test
                 List<String> deviceIds = new ArrayList<>();
@@ -180,6 +183,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                     alarmCountTemp.setMunicipality(municipality);
                     alarmCountTemp.setCounty(county);
                     alarmCountTemp.setFsuManufactory(manufacturer);
+                    alarmCountTemp.setTempDate(new Date());
                     alarmCountTempList.add(alarmCountTemp);
                 });
             });
@@ -292,7 +296,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
 
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmDetails", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
-            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
+//            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             //@ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/reportsOpera/getRegionCodeList"), //区域层级
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, value = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
@@ -325,7 +329,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         List<AlarmDetailsTemp> alarmDetailsTempList = new ArrayList<AlarmDetailsTemp>();
         //获取时间信息
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) +1;
         int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
@@ -358,9 +362,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String stationName = s.getSiteName();
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                //判断交维态
-                if (fsuList == null) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                if (CollectionUtils.isEmpty(fsuList)) {
+                    logger.warn("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);
@@ -447,9 +450,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String stationName = s.getSiteName();
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                //判断交维态
-                if (fsuList == null) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                if (CollectionUtils.isEmpty(fsuList)) {
+                    logger.warn("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);
@@ -527,7 +529,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         //根据用户id的区域权限及其搜索条件获取站点列表筛选
         JSONObject currentUser = condition.getJSONObject("currentUser");
         if (currentUser == null) currentUser = new JSONObject();
-        //todo 当月的告警统计未实现
+        // 当月的告警统计未实现
         List<AlarmDetailsTemp> alarmDetailsTemps = alarmDetailsDao.findAlarmDetailsList(taskId, condition, timePeriod);
         String[][][] resultData = alarmDetailsDataCreate(alarmDetailsTemps);
         String resultType = reportConfig.getDataType();
@@ -632,7 +634,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<AlarmCategoryTemp> alarmCountTempList = new ArrayList<>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
         int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
@@ -665,9 +667,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String stationName = s.getSiteName();
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                //判断交维态
-                if (fsuList == null) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                if (CollectionUtils.isEmpty(fsuList)) {
+                    logger.warn("get fsu list is null. site:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);

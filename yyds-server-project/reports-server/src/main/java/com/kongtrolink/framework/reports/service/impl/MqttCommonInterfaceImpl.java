@@ -83,7 +83,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", deviceIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getAlarmsByDeviceIdList", baseCondition.toJSONString());
+        MsgResult opera = mqttOpera.opera("getAlarmsByDeviceIdList", alarmCountCondition.toJSONString());
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
@@ -92,6 +92,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         }
         return null;
     }
+
     @Override
     public List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
         JSONObject alarmCountCondition = new JSONObject();
@@ -139,6 +140,20 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         }
         return null;
 
+    }
+
+
+    @Override
+    public List<JSONObject> getCurrentStationList(JSONObject query) {
+        MsgResult opera = mqttOpera.opera("getCurrentStationList", query.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            String siteListStr = opera.getMsg();
+            return JSONObject.parseArray(siteListStr, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
     }
 
     @Override
@@ -279,7 +294,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
 
     @Override
     public List<String> getAlarmLevel(JSONObject query) {
-        MsgResult opera = mqttOpera.opera("getAlarmLevel",query.toJSONString());
+        MsgResult opera = mqttOpera.opera("getAlarmLevel", query.toJSONString());
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             List<Level> ts = JSON.parseArray(opera.getMsg(), Level.class);
@@ -292,7 +307,7 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
 
     @Override
     public Integer getAlarmCycle(JSONObject baseCondition) {
-        MsgResult opera = mqttOpera.opera("getAlarmCycle",baseCondition.toJSONString());
+        MsgResult opera = mqttOpera.opera("getAlarmCycle", baseCondition.toJSONString());
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             JSONObject jsonObject = JSON.parseObject(opera.getMsg());
