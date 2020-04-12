@@ -4,11 +4,14 @@ import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
+import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.ShieldAlarmQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
+import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.AlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
@@ -36,6 +39,8 @@ public class ShieldRuleController extends BaseController{
     AlarmService alarmService;
     @Autowired
     ShieldAlarmService shieldAlarmService;
+    @Autowired
+    AlarmBusinessService businessService;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -97,9 +102,16 @@ public class ShieldRuleController extends BaseController{
     @RequestMapping("/getShieldAlarm")
     public JsonResult getShieldAlarm(@RequestBody ShieldAlarmQuery shieldAlarmQuery){
         String uniqueCode = getUniqueCode();
-        List<ShieldAlarm> list = shieldAlarmService.list(uniqueCode, shieldAlarmQuery);
-        int count = shieldAlarmService.count(uniqueCode, shieldAlarmQuery);
-        ListResult<ShieldAlarm> listResult = new ListResult<>(list, count);
+        AlarmBusinessQuery alarmBusinessQuery = new AlarmBusinessQuery();
+        alarmBusinessQuery.setShield(true);
+        alarmBusinessQuery.setShieldRuleId(shieldAlarmQuery.getRuleId());
+        alarmBusinessQuery.setType(shieldAlarmQuery.getType());
+        alarmBusinessQuery.setCurrentPage(shieldAlarmQuery.getCurrentPage());
+        alarmBusinessQuery.setPageSize(shieldAlarmQuery.getPageSize());
+        alarmBusinessQuery.setSkipSize(shieldAlarmQuery.getPageSize());
+        List<AlarmBusiness> list = businessService.list(uniqueCode, alarmBusinessQuery);
+        int count= businessService.count(uniqueCode, alarmBusinessQuery);
+        ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);
         JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }

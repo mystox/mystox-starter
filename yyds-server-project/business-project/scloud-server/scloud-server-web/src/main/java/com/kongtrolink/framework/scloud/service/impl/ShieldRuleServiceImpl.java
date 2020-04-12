@@ -99,27 +99,20 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     @Override
     public void matchRule(String uniqueCode, List<AlarmBusiness> alarmBusinessList) {
         List<ShieldRule> rules = shieldRuleDao.getEnables(uniqueCode);
-        List<ShieldAlarm> shieldAlarmList = new ArrayList<>();
         for (AlarmBusiness alarm : alarmBusinessList) {
             for (ShieldRule rule : rules) {
                 String deviceId = alarm.getDeviceCode();
-                if (rule.getDeviceCodeList().contains(deviceId) && rule.getAlarmlevel().contains(alarm.getLevel())) {
-                    ShieldAlarm shieldAlarm = new ShieldAlarm();
-                    shieldAlarm.setRuleId(rule.getId());
-                    shieldAlarm.setAlarmId(alarm.getId());
-                    shieldAlarm.setAlarmLevel(alarm.getLevel());
-                    shieldAlarm.setTreport(alarm.getTreport());
-                    shieldAlarm.setSiteName(alarm.getSiteName());
-                    shieldAlarm.setSiteAddress(alarm.getSiteAddress());
-                    shieldAlarm.setDeviceCode(alarm.getDeviceCode());
-                    shieldAlarm.setDeviceName(alarm.getDeviceName());
-                    shieldAlarm.setSignalId(alarm.getCntbId());
-                    shieldAlarm.setSignalName(alarm.getSignalName());
-                    shieldAlarmList.add(shieldAlarm);
+                if (rule.getDeviceCodeList().contains(deviceId)) {
                     alarm.setShield(true);
+                    alarm.setShieldRuleId(rule.getId());
+                    List<Integer> alarmlevelList = rule.getAlarmlevelList();
+                    if(null != alarmlevelList && !alarmlevelList.contains(alarm.getLevel())) {
+                        alarm.setShield(false);
+                        alarm.setShieldRuleId(null);
+                    }
                 }
             }
         }
-        shieldAlarmService.add(uniqueCode, shieldAlarmList);
+//        shieldAlarmService.add(uniqueCode, shieldAlarmList);
     }
 }

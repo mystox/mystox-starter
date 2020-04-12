@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.FixSizeArrayList;
 import com.kongtrolink.framework.base.MongTable;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.dao.AlarmCycleDao;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.enttiy.Alarm;
 import com.kongtrolink.framework.enttiy.AlarmCycle;
 import com.kongtrolink.framework.mqtt.CIResponseEntity;
-import com.kongtrolink.framework.util.RedisUtils;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 /**
@@ -34,8 +33,6 @@ public class CycleHandle{
     AlarmDao alarmDao;
     @Autowired
     AlarmCycleDao alarmCycleDao;
-//    @Autowired
-//    MqttSender mqttSender;
     @Autowired
     MqttOpera mqttOpera;
     @Autowired
@@ -55,7 +52,8 @@ public class CycleHandle{
     private int hcOverTime;
     @Value("${spring.redis.pendingAlarm}")
     private String pendingAlarm;
-
+    @Value("${sdgdScloud.alarmHistory:no}")
+    private String sdgdScloudAlarmHistory;
     private static int currentTime = 0;
 
     private static final Logger logger = LoggerFactory.getLogger(CycleHandle.class);
@@ -126,6 +124,8 @@ public class CycleHandle{
         Map<String, List<Alarm>> enterServerDeviceId_alarmListMap = new HashMap<>();   //enterServerDeviceId—历史告警列表map
         Map<String, JSONObject> redisAlarmMap = new HashMap<>();
         Date curTime = new Date();
+
+        List<String> historyKeyList = new ArrayList<>();
         for(String enterpirseServer : enterpirseServer_alarmListMap.keySet()){
             AlarmCycle alarmCycle = getAlarmCycle(enterpriseServer_cycleMap, enterpirseServer);
             if(null == alarmCycle){
@@ -146,6 +146,8 @@ public class CycleHandle{
                     tableHistoryAlarmListMap.put(table, tableHistoryAlarmList);
 
                     historyAlarmIdList.add(alarm.getId());
+                    alarm.initKey();
+                    historyKeyList.add(alarm.getKey());
                     //修改redis中所在表
                     String redisKey = pendingAlarm + Contant.COLON + alarm.getKey();
                     JSONObject redisJson = (JSONObject)redisUtils.get(redisKey);
@@ -216,6 +218,12 @@ public class CycleHandle{
         //删除实时告警
         logger.info("delete history alarm from current table, size:{}", historyAlarmIdList.size());
         alarmDao.deleteByIdList(currentTable, historyAlarmIdList);
+        //调用远程，通知业务服务告警转变为历史告警
+        if("no".equals(sdgdScloudAlarmHistory)){
+            logger.info("无需调用历史告警转化远程:{}", sdgdScloudAlarmHistory);
+            return;
+        }
+        mqttOpera.operaAsync(sdgdScloudAlarmHistory, JSONObject.toJSONString(historyKeyList));
     }
 
     /**

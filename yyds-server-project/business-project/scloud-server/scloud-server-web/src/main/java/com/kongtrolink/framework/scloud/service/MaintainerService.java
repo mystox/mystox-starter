@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
@@ -25,8 +26,9 @@ public interface MaintainerService {
 
     /**
      * 新增维护用户
+     * @return 用户Id
      */
-    void addMaintainer(String uniqueCode, MaintainerModel maintainerModel);
+    String addMaintainer(String uniqueCode, MaintainerModel maintainerModel);
 
     /**
      * 修改维护用户

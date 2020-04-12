@@ -223,6 +223,9 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             LOGGER.error("设置数据失败:{}",result.getMsg());
             return null;
         }
+        String redisKey = RedisUtil.getSetPointKey(signalQuery.getUniqueCode(),signalQuery.getDeviceCode(),signalQuery.getCntbId());
+        //更新redis里面的值
+        redisUtils.hset(RedisKey.DEVICE_SET_POINT,redisKey,signalQuery.getValue());
         SetPointAckMessage setPointAckMessage = JSONObject.parseObject(ack,SetPointAckMessage.class);
         return setPointAckMessage;
     }
@@ -450,21 +453,13 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
             info.setSiteName(device.getSiteName());
             info.setDeviceName(device.getName());
             info.setDeviceCode(device.getCode());
-            String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceCode);
-            Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
-            try{
-                Map<String,Object> redisValue = JSONObject.parseObject(String.valueOf(value));
-                if(redisValue!=null && redisValue.containsKey(signalCntbId)){
-                    info.setValue(String.valueOf(redisValue.get(signalCntbId)));
-                }
-            }catch (Exception e){
-                LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
-            }
+            info.setValue(getRealDateCntbId(uniqueCode,deviceCode,signalCntbId));
             list.add(info);
         }
 
         return list;
     }
+
     /**
      * 根据查询 某一个遥测信号值列表 - 取得总数
      *
@@ -508,6 +503,49 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
         return deviceType;
     }
 
+    /**
+     * 根据cntbId 取得实时数据
+     *
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @param cntbId     信号点code
+     * @return 实时数据
+     */
+    @Override
+    public String getRealDateCntbId(String uniqueCode, String deviceCode, String cntbId) {
+        String redisKey = RedisUtil.getRealDataKey(uniqueCode,deviceCode);
+        Object value = redisUtils.hget(RedisKey.DEVICE_REAL_DATA,redisKey);
+        try{
+            Map<String,Object> redisValue = JSONObject.parseObject(String.valueOf(value));
+            if(redisValue!=null && redisValue.containsKey(cntbId)){
+                return String.valueOf(redisValue.get(cntbId));
+            }
+        }catch (Exception e){
+            LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_REAL_DATA,redisKey);
+        }
+        return null;
+    }
+    /**
+     * 根据cntbId 取得下发数据
+     *
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @param cntbId     信号点code
+     * @return 实时数据
+     */
+    @Override
+    public String getSetPointCntbId(String uniqueCode, String deviceCode, String cntbId) {
+        String redisKey = RedisUtil.getSetPointKey(uniqueCode,deviceCode,cntbId);
+        Object value = redisUtils.hget(RedisKey.DEVICE_SET_POINT,redisKey);
+        try{
+            if(value!=null){
+                return String.valueOf(value);
+            }
+        }catch (Exception e){
+            LOGGER.error("获取redis数据异常 {} ,{} ",RedisKey.DEVICE_SET_POINT,redisKey);
+        }
+        return null;
+    }
     /**
      * 根据 区域数 返回需要查询的站点ID列表
 

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 
@@ -11,4 +12,13 @@ import java.util.List;
  */
 public interface UserService {
 
+    /**
+     * 保存或修改 用户管辖站点
+     */
+    void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites);
+
+    /**
+     * 获取用户管辖站点
+     */
+    List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
 }

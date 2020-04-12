@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.sun.istack.internal.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,10 +14,9 @@ public class ShieldRule {
     private String id;
     private String enterpriseCode;
     private String serverCode;
-    @NotNull
     private String name;
     private List<String> deviceCodeList;
-    private List<Integer> alarmlevel;       //原始告警等级
+    private List<Integer> alarmlevelList;       //原始告警等级
     private String reason;
     private FacadeView creator;
     private Date updateTime;
@@ -81,12 +79,12 @@ public class ShieldRule {
         this.deviceCodeList = deviceCodeList;
     }
 
-    public List<Integer> getAlarmlevel() {
-        return alarmlevel;
+    public List<Integer> getAlarmlevelList() {
+        return alarmlevelList;
     }
 
-    public void setAlarmlevel(List<Integer> alarmlevel) {
-        this.alarmlevel = alarmlevel;
+    public void setAlarmlevelList(List<Integer> alarmlevelList) {
+        this.alarmlevelList = alarmlevelList;
     }
 
     public String getReason() {

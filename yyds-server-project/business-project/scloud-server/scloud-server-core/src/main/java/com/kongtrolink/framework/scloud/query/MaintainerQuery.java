@@ -16,6 +16,8 @@ public class MaintainerQuery extends Paging{
     private String username;    //账号
     private String name;    //姓名
     private String companyName; //代维公司
+    private String currentPostId;   //角色Id
+    private String currentPositionName; //角色名称
 
     public String getUserId() {
         return userId;
@@ -55,5 +57,21 @@ public class MaintainerQuery extends Paging{
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getCurrentPostId() {
+        return currentPostId;
+    }
+
+    public void setCurrentPostId(String currentPostId) {
+        this.currentPostId = currentPostId;
+    }
+
+    public String getCurrentPositionName() {
+        return currentPositionName;
+    }
+
+    public void setCurrentPositionName(String currentPositionName) {
+        this.currentPositionName = currentPositionName;
     }
 }

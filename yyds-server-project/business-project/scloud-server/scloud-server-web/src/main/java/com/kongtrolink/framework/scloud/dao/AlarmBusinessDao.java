@@ -1,13 +1,12 @@
 package com.kongtrolink.framework.scloud.dao;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
-import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -16,7 +15,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-
 import java.util.Date;
 import java.util.List;
 
@@ -35,18 +33,27 @@ public class AlarmBusinessDao {
         mongoTemplate.save(business, uniqueCode + table );
     }
 
-    public void add(String uniqueCode, String table, List<AlarmBusiness> businessList) {
+    public boolean add(String uniqueCode, String table, List<AlarmBusiness> businessList) {
         BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, uniqueCode + table );
         for(AlarmBusiness business : businessList){
             bulkOperations.insert(business);
         }
-        bulkOperations.execute();
+        BulkWriteResult execute = bulkOperations.execute();
+        return execute.getInsertedCount()>0 ? true : false;
     }
 
     public List<AlarmBusiness> listByKeyList(String uniqueCode, String table, List<String> keyList) {
         Criteria criteria = Criteria.where("key").in(keyList);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, AlarmBusiness.class, uniqueCode + table);
+    }
+
+
+    public boolean deleteByKeyList(String uniqueCode, String table, List<String> keyList) {
+        Criteria criteria = Criteria.where("key").in(keyList);
+        Query query = Query.query(criteria);
+        WriteResult remove = mongoTemplate.remove(query, uniqueCode + table);
+        return remove.getN()>0 ? true : false;
     }
 
     /**
@@ -84,6 +91,8 @@ public class AlarmBusinessDao {
 
     private Criteria baseCriteria(AlarmBusinessQuery businessQuery){
         Criteria criteria = new Criteria();
+        Boolean shield = businessQuery.getShield();
+        criteria.and("shield").is(shield);
         String name = businessQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoRegexUtil.escapeExprSpecialWord(name);
@@ -104,6 +113,14 @@ public class AlarmBusinessDao {
         String checkState = businessQuery.getCheckState();
         if(!StringUtil.isNUll(checkState)){
             criteria.and("checkState").is(checkState);
+        }
+        List<String> tierCodeList = businessQuery.getTierCodeList();
+        if(null != tierCodeList){
+            criteria.and("tierCode").in(tierCodeList);
+        }
+        List<String> siteCodeList = businessQuery.getSiteCodeList();
+        if(null != siteCodeList){
+            criteria.and("siteCode").in(siteCodeList);
         }
         String deviceType = businessQuery.getDeviceType();
         if(!StringUtil.isNUll(deviceType)){

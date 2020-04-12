@@ -1,6 +1,5 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.sun.istack.internal.NotNull;
 import java.util.Date;
 
 /**
@@ -11,23 +10,14 @@ import java.util.Date;
 public class AlarmFocus {
 
     private String id;
-    @NotNull
     private String enterpriseCode;
-    @NotNull
     private String serverCode;
-    @NotNull
     private String siteCode;
-    @NotNull
     private String siteName;
-    @NotNull
     private String siteAddress;
-    @NotNull
     private String deviceCode;  //设备编码
-    @NotNull
     private String deviceName;
-    @NotNull
     private String cntbId;      //signalType中cntbId
-    @NotNull
     private String signalName;
     private String userId;
     private String username;

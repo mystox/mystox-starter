@@ -73,11 +73,15 @@ public class MaintainerController extends BaseController {
     public @ResponseBody JsonResult addMaintainer(@RequestBody MaintainerModel maintainerModel){
         try{
 //            String uniqueCode = getUniqueCode();
-            maintainerService.addMaintainer(uniqueCode, maintainerModel);
-            return new JsonResult("添加成功", true);
+            String userId = maintainerService.addMaintainer(uniqueCode, maintainerModel);
+            if (userId != null){
+                return new JsonResult(userId);
+            }else {
+                return new JsonResult("添加失败", true);
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("添加失败", false);
+            return new JsonResult("添加异常", false);
         }
     }
 
@@ -89,10 +93,10 @@ public class MaintainerController extends BaseController {
         try{
 //            String uniqueCode = getUniqueCode();
 
-            return new JsonResult(null);
+            return new JsonResult("批量导入维护用户成功", true);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("导入失败", false);
+            return new JsonResult("批量导入维护用户失败", false);
         }
     }
 
@@ -122,8 +126,12 @@ public class MaintainerController extends BaseController {
     public @ResponseBody JsonResult deleteMaintainer(@RequestBody MaintainerQuery maintainerQuery){
         try {
 //            String uniqueCode = getUniqueCode();
-            maintainerService.deleteMaintainer(uniqueCode, maintainerQuery);
-            return new JsonResult("删除成功", true);
+            if (maintainerQuery.getUserIds() != null && maintainerQuery.getUserIds().size() > 0) {
+                maintainerService.deleteMaintainer(uniqueCode, maintainerQuery);
+                return new JsonResult("删除成功", true);
+            }else {
+                return new JsonResult("未选择用户", false);
+            }
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("删除失败" ,false);

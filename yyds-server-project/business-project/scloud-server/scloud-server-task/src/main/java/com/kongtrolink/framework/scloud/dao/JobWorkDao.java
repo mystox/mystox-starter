@@ -3,10 +3,12 @@ package com.kongtrolink.framework.scloud.dao;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.mongodb.WriteResult;
+import com.sun.org.apache.bcel.internal.generic.ALOAD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -23,17 +25,16 @@ public class JobWorkDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table_work_alarm_config = "work_alarm_config";
+    private String table_work_alarm_config = "_work_alarm_config";
     private String table_work_config = "_work_config";
     private String table_work = "_work";
     private String tabel_work_record = "_work_record";
-    private String table_cur_alarm_business = "_current_alarm_business";
 
-    public List<WorkAlarmConfig> getAllWorkAlarmConfig(Date curDate) {
-        Criteria criteria = Criteria.where("sendWorkTime").lte(curDate);
-        criteria.and("sendWorkType").is(WorkConstants.SEND_TYPE_AUTO);
+    public List<WorkAlarmConfig> getAllWorkAlarmConfig(String uniqueCode, Date curDate) {
+        Criteria criteria = Criteria.where("sendTime").lte(curDate);
+        criteria.and("sendType").is(WorkConstants.SEND_TYPE_AUTO);
         Query query = new Query(criteria);
-        return mongoTemplate.find(query, WorkAlarmConfig.class, table_work_alarm_config);
+        return mongoTemplate.find(query, WorkAlarmConfig.class, uniqueCode + table_work_alarm_config);
     }
 
     public WorkConfig getWorkConfigById(String uniqueCode, String workConfigId){
@@ -80,20 +81,25 @@ public class JobWorkDao {
         mongoTemplate.save(workRecord, uniqueCode + tabel_work_record);
     }
 
-    public void deleteWorkAlarmConfigById(String workAlarmConfigId) {
+    public void deleteWorkAlarmConfigById(String uniqueCode, String workAlarmConfigId) {
         Criteria criteria = Criteria.where("_id").is(workAlarmConfigId);
         Query query = Query.query(criteria);
-        mongoTemplate.remove(query, table_work_alarm_config);
+        mongoTemplate.remove(query, uniqueCode + table_work_alarm_config);
     }
 
     /**
      * @param uniqueCode
      * @param alarmBusiness
      * @auther: liudd
-     * @date: 2020/4/8 19:05
-     * 功能描述:添加告警业务信息.如果告警消除时，该告警还未派单，则删除告警工单配置信息。杜绝派单时告警已消除情况
+     * @date: 2020/4/11 15:03
+     * 功能描述:修改告警的工单编码
      */
-    public void addAlarmBusiness(String uniqueCode, AlarmBusiness alarmBusiness) {
-        mongoTemplate.save(alarmBusiness, uniqueCode + table_cur_alarm_business);
+    public boolean updateAlarmWorkCode(String uniqueCode, AlarmBusiness alarmBusiness) {
+        Criteria criteria = Criteria.where("key").is(alarmBusiness.getKey());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("workCode", alarmBusiness.getWorkCode());
+        WriteResult result = mongoTemplate.updateFirst(query, update, uniqueCode + alarmBusiness);
+        return result.getN()>0 ? true : false;
     }
 }

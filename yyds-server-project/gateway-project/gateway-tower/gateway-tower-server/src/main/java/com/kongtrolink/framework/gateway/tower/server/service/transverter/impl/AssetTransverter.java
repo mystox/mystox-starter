@@ -81,7 +81,7 @@ public class AssetTransverter extends TransverterHandler {
             List<String> deviceCodes = new ArrayList<>();
             for(Device device:deviceList.getDeviceList()){
                 DeviceReport deviceReportChild = new DeviceReport();
-                deviceReportChild.setSn(sn +"_" + device.getId());
+                deviceReportChild.setSn(device.getId());
                 deviceReportChild.setEnterpriseCode(getEnterpriseCode());
                 deviceReportChild.setUser(getUser());
                 deviceReportChild.setServerCode(getBusinessCode());

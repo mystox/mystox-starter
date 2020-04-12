@@ -26,13 +26,13 @@ public class AlarmMsgTask implements Runnable{
     private AlarmService alarmService;
     private AlarmBusinessService businessService;
     private WorkService workService;
-    private ConcurrentLinkedQueue<JSONObject> msgQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<AlarmBusiness> msgQueue = new ConcurrentLinkedQueue<>();
     private String cur_alarm_business = CollectionSuffix.CUR_ALARM_BUSINESS;
     private String his_alarm_business = CollectionSuffix.HIS_ALARM_BUSINESS;
     private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
 
     public AlarmMsgTask(ShieldRuleService shieldRuleService, WorkAlarmConfigService alarmConfigService,
-                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, ConcurrentLinkedQueue<JSONObject> msgQueue) {
+                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, ConcurrentLinkedQueue<AlarmBusiness> msgQueue) {
         this.shieldRuleService = shieldRuleService;
         this.alarmConfigService = alarmConfigService;
         this.alarmService = alarmService;
@@ -43,31 +43,22 @@ public class AlarmMsgTask implements Runnable{
 
     @Override
     public void run() {
-        JSONObject jsonObject = msgQueue.poll();
-        LOGGER.info(jsonObject.toString());
-        String type = jsonObject.getString("type");
-        String data = jsonObject.getString("data");
-        if("1".equals(type)){
-            alarmReport(data);
+        AlarmBusiness alarmBusiness = msgQueue.poll();
+        if(1 == alarmBusiness.getFlag()){
+            alarmReport(alarmBusiness);
         }else{
-            alarmResolve(data);
+            alarmResolve(alarmBusiness);
         }
     }
 
-    private void alarmReport(String jsonStr){
-        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-        if(null == alarmList || alarmList.size() == 0){
-            return ;
-        }
-        String enterpriseCode = alarmList.get(0).getEnterpriseCode();
-        //填充你设备信息
-        alarmService.initInfo(enterpriseCode, alarmList);
+    private void alarmReport(AlarmBusiness alarmBusiness){
+        String key = alarmBusiness.getKey();
+        String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+        String serverCode = alarmBusiness.getServerCode();
         List<AlarmBusiness> businessList = new ArrayList<>();
-        for(Alarm alarm : alarmList){
-            AlarmBusiness business = AlarmBusiness.createByAlarm(alarm);
-            businessList.add(business);
-        }
-
+        businessList.add(alarmBusiness);
+        //填充设备信息
+        alarmService.initInfo(enterpriseCode, serverCode, businessList);
         //告警屏蔽功能
         shieldRuleService.matchRule(enterpriseCode, businessList);
         //匹配告警工单配置
@@ -75,25 +66,14 @@ public class AlarmMsgTask implements Runnable{
         businessService.add(enterpriseCode, cur_alarm_business, businessList);
     }
 
-    private void alarmResolve(String jsonStr){
-        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-        if(null == alarmList || alarmList.size() == 0){
-            return ;
-        }
-        String enterpriseCode = alarmList.get(0).getEnterpriseCode();
-        List<AlarmBusiness> businessList = new ArrayList<>();
-        for(Alarm alarm : alarmList){
-            AlarmBusiness business = AlarmBusiness.createByAlarm(alarm);
-            business.setState(BaseConstant.ALARM_STATE_RESOLVE);
-            businessList.add(business);
-        }
-        workService.resolveAlarm(enterpriseCode, alarmList);
-        for(AlarmBusiness alarmBusiness : businessList) {
-            //修改实时告警表中告警状态
-            boolean result = businessService.resolveByKey(enterpriseCode, cur_alarm_business, alarmBusiness);
-            if(!result){
-                businessService.resolveByKey(enterpriseCode, his_alarm_business, alarmBusiness);
-            }
+    private void alarmResolve(AlarmBusiness alarmBusiness){
+        String key = alarmBusiness.getKey();
+        String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+        workService.resolveAlarm(enterpriseCode, alarmBusiness);
+        //修改实时告警表中告警状态
+        boolean result = businessService.resolveByKey(enterpriseCode, cur_alarm_business, alarmBusiness);
+        if(!result){
+            businessService.resolveByKey(enterpriseCode, his_alarm_business, alarmBusiness);
         }
     }
 }

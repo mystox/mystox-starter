@@ -17,4 +17,7 @@ public interface MqttService {
 
     @OperaCode
     String sdgdScloudAlarmResolve(String jsonStr);
+
+    @OperaCode
+    String sdgdScloudAlarmHistory(String jsonStr);
 }

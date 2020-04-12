@@ -13,4 +13,13 @@ public class RedisUtil {
     public static String getRealDataKey(String uniqueCode,String deviceCode){
         return  uniqueCode+"#"+ deviceCode;
     }
+    /**
+     * 实时数据保存 企业编码+设备code
+     * @param uniqueCode 企业编码
+     * @param deviceCode 设备code
+     * @return key
+     */
+    public static String getSetPointKey(String uniqueCode,String deviceCode,String cntbId){
+        return  uniqueCode+"#"+ deviceCode+"#"+cntbId;
+    }
 }

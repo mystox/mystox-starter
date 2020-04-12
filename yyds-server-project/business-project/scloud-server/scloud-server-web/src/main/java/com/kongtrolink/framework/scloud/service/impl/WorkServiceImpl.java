@@ -13,6 +13,7 @@ import com.kongtrolink.framework.scloud.service.WorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.tools.ant.taskdefs.BUnzip2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -258,31 +259,25 @@ public class WorkServiceImpl implements WorkService{
 
     /**
      * @param uniqueCode
-     * @param alarmList
      * @auther: liudd
      * @date: 2020/4/2 17:18
      * 功能描述:告警消除，联动修改工单
      */
     @Override
-    public void resolveAlarm(String uniqueCode, List<Alarm> alarmList) {
-        //1，根据告警key，统一获取告警工单
-        List<String> keyList = new ArrayList<>();
-        Map<String, Alarm> keyAlarmMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
-            keyList.add(alarm.initKey());
-            keyAlarmMap.put(alarm.initKey(), alarm);
+    public void resolveAlarm(String uniqueCode, AlarmBusiness business) {
+        Work work = workDao.getByKey(uniqueCode, business.getKey());
+        if(null == work){
+            return;
         }
-        List<Work> works = workDao.listByKeys(uniqueCode, keyList);
-        for(Work work : works){
-            List<WorkAlarm> workAlarmList = work.getWorkAlarmList();
-            for(WorkAlarm workAlarm : workAlarmList) {
-                Alarm alarm = keyAlarmMap.get(workAlarm.getAlarmKey());
+        List<WorkAlarm> workAlarmList = work.getWorkAlarmList();
+        for(WorkAlarm workAlarm : workAlarmList) {
+            if (workAlarm.getAlarmKey().equals(business.getKey())) {
                 workAlarm.setState(WorkConstants.ALARM_STATE_RESOLVED);
-                workAlarm.setTreport(alarm.getTrecover());
+                workAlarm.setTreport(business.getTrecover());
                 work.decreateAlarm();
             }
-            workDao.updateAlarmInfo(uniqueCode, work);
         }
+        workDao.updateAlarmInfo(uniqueCode, work);
     }
 
     @Override

@@ -48,6 +48,8 @@ public class AlarmServiceImpl implements AlarmService {
     FilterRuleService filterRuleService;
     @Autowired
     AlarmBusinessService businessService;
+    @Autowired
+    AlarmFocusService focusService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
@@ -82,8 +84,28 @@ public class AlarmServiceImpl implements AlarmService {
             JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
             String dataStr = jsonResult.getData().toString();
             List<Alarm> alarmList = JSONObject.parseArray(dataStr, Alarm.class);
+            List<String> entDevSigList = new ArrayList<>();
+            Map<String, List<Alarm>> entDevSigAlarmListMap = new HashMap<>();
             for(Alarm alarm : alarmList){
                 alarm.initByBusiness(keyBusinessMap.get(alarm.getKey()));
+                String entDevSig = alarm.getEntDevSig();
+                entDevSigList.add(entDevSig);
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(entDevSig);
+                if(null == entDevSigAlarmList){
+                    entDevSigAlarmList = new ArrayList<>();
+                }
+                entDevSigAlarmList.add(alarm);
+                entDevSigAlarmListMap.put(entDevSig, entDevSigAlarmList);
+
+            }
+            //填充告警关注信息
+            String operateUserId = alarmQuery.getOperateUserId();
+            List<AlarmFocus> alarmFocusList = focusService.listByUserIdEntDevSigs(alarmQuery.getEnterpriseCode(), operateUserId, entDevSigList);
+            for(AlarmFocus alarmFocus : alarmFocusList){
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(alarmFocus.getEntDevSig());
+                for(Alarm alarm : entDevSigAlarmList){
+                    alarm.setFocusId(alarmFocus.getId());
+                }
             }
 //            if(null != alarmList && alarmList.size()>0) {
 //                initInfo(alarmQuery.getEnterpriseCode(), alarmList);
@@ -97,45 +119,35 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     /**
-     * @param alarmList
      * @auther: liudd
      * @date: 2020/3/3 15:59
      * 功能描述:填充设备，站点等信息
      */
     @Override
-    public void initInfo(String uniqueCode, List<Alarm> alarmList) {
-        if(null == alarmList){
-            return;
+    public void initInfo(String uniqueCode, String serverCode, List<AlarmBusiness> businessList) {
+        if(null == businessList){
+            return ;
         }
         //获取站点信息
         List<String> deviceCodeList = new ArrayList<>();
-        Map<String, List<Alarm>> deviceCodeAlarmListMap = new HashMap<>();
-        String serverCode = alarmList.get(0).getServerCode();
+        Map<String, List<AlarmBusiness>> deviceCodeAlarmListMap = new HashMap<>();
         List<String> keyList = new ArrayList<>();
-        Map<String, Alarm> keyAlarmMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
+        for(AlarmBusiness alarm : businessList){
             keyList.add(alarm.getKey());
-            keyAlarmMap.put(alarm.getKey(), alarm);
             alarm.setCheckState(BaseConstant.NOCHECK);
             if(null != alarm.getCheckTime()){
                 alarm.setCheckState(BaseConstant.CHECKED);
             }
-            String deviceId = alarm.getDeviceId();
-            if(!deviceCodeList.contains(deviceId)){
-                deviceCodeList.add(deviceId);
+            String deviceCode = alarm.getDeviceCode();
+            if(!deviceCodeList.contains(deviceCode)){
+                deviceCodeList.add(deviceCode);
             }
-            List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(deviceId);
+            List<AlarmBusiness> deviceCodeAlarmList = deviceCodeAlarmListMap.get(deviceCode);
             if(null == deviceCodeAlarmList){
                 deviceCodeAlarmList = new ArrayList<>();
             }
             deviceCodeAlarmList.add(alarm);
-            deviceCodeAlarmListMap.put(deviceId, deviceCodeAlarmList);
-        }
-        //获取工单信息
-        List<AlarmBusiness> businessList = businessService.listByKeyList(uniqueCode, CollectionSuffix.CUR_ALARM_BUSINESS, keyList);
-        for(AlarmBusiness alarmBusiness : businessList){
-            Alarm alarm = keyAlarmMap.get(alarmBusiness.getKey());
-            alarm.setWorkCode(alarmBusiness.getWorkCode());
+            deviceCodeAlarmListMap.put(deviceCode, deviceCodeAlarmList);
         }
         DeviceQuery deviceQuery = new DeviceQuery();
         deviceQuery.setServerCode(serverCode);
@@ -154,22 +166,21 @@ public class AlarmServiceImpl implements AlarmService {
             if(!typeCodeList.contains(typeCode)){
                 typeCodeList.add(typeCode);
             }
-            List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
-            for(Alarm alarm : deviceCodeAlarmList){
+            List<AlarmBusiness> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
+            for(AlarmBusiness alarm : deviceCodeAlarmList){
                 alarm.setDeviceName(deviceModel.getName());
                 alarm.setSiteCode(deviceModel.getSiteCode());
-                alarm.setTierName(deviceModel.getTierName());
             }
         }
-        //初始化站点信息
+//        初始化站点信息
         List<String> siteCodeList = new ArrayList<>();
-        Map<String, List<Alarm>> siteCodeAlarmListMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
+        Map<String, List<AlarmBusiness>> siteCodeAlarmListMap = new HashMap<>();
+        for(AlarmBusiness alarm : businessList){
             String siteCode = alarm.getSiteCode();
             if(!siteCodeList.contains(siteCode)){
                 siteCodeList.add(siteCode);
             }
-            List<Alarm> siteIdAlarmList = siteCodeAlarmListMap.get(siteCode);
+            List<AlarmBusiness> siteIdAlarmList = siteCodeAlarmListMap.get(siteCode);
             if(null == siteIdAlarmList){
                 siteIdAlarmList = new ArrayList<>();
             }
@@ -183,24 +194,26 @@ public class AlarmServiceImpl implements AlarmService {
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         for(SiteModel siteModel : siteModelList){
             String code = siteModel.getCode();
-            List<Alarm> siteIdAlarmList = siteCodeAlarmListMap.get(code);
-            for(Alarm alarm : siteIdAlarmList){
+            List<AlarmBusiness> siteIdAlarmList = siteCodeAlarmListMap.get(code);
+            for(AlarmBusiness alarm : siteIdAlarmList){
                 alarm.setSiteName(siteModel.getName());
                 alarm.setSiteAddress(siteModel.getAddress());
-                alarm.setTierName(siteModel.getTierName());
                 alarm.setSiteType(siteModel.getSiteType());
+                alarm.setTierCode(siteModel.getTierCode());
+                alarm.setTierName(siteModel.getTierName());
+                alarm.setTierName(siteModel.getTierName());
             }
         }
 
         //填充信号点信息
         List<String> cntbIdList = new ArrayList<>();
-        Map<String, List<Alarm>> cntbIdAlarmListMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
-            String signalId = alarm.getSignalId();
+        Map<String, List<AlarmBusiness>> cntbIdAlarmListMap = new HashMap<>();
+        for(AlarmBusiness alarm : businessList){
+            String signalId = alarm.getCntbId();
             if(!cntbIdList.contains(signalId)){
                 cntbIdList.add(signalId);
             }
-            List<Alarm> cntbIdAlarmList = cntbIdAlarmListMap.get(signalId);
+            List<AlarmBusiness> cntbIdAlarmList = cntbIdAlarmListMap.get(signalId);
             if(cntbIdAlarmList == null){
                 cntbIdAlarmList = new ArrayList<>();
             }
@@ -210,8 +223,8 @@ public class AlarmServiceImpl implements AlarmService {
         List<SignalType> signalTypeList = deviceSignalTypeService.getByCodeListCntbIdList(uniqueCode, typeCodeList, cntbIdList);
         for(SignalType signalType : signalTypeList){
             String cntbId = signalType.getCntbId();
-            List<Alarm> cntbIdAlarmList = cntbIdAlarmListMap.get(cntbId);
-            for(Alarm alarm : cntbIdAlarmList){
+            List<AlarmBusiness> cntbIdAlarmList = cntbIdAlarmListMap.get(cntbId);
+            for(AlarmBusiness alarm : cntbIdAlarmList){
                 alarm.setSignalName(signalType.getTypeName());
             }
         }
@@ -247,13 +260,14 @@ public class AlarmServiceImpl implements AlarmService {
     private void listCommon(AlarmQuery alarmQuery)throws ParameterException {
         checkPara(alarmQuery);
         //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表，现假定前端将用户所管辖站点全部传递给后台
-        List<String> siteCodeList = alarmQuery.getSiteCodeList();
-        DeviceQuery deviceQuery = new DeviceQuery();
-        deviceQuery.setSiteCodes(siteCodeList);
-        deviceQuery.setOperationState(alarmQuery.getOperationState());
-        List<DeviceEntity> deviceEntityList = deviceService.listEntity(alarmQuery.getEnterpriseCode(), deviceQuery);
-        List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
-        alarmQuery.setDeviceCodeList(deviceCodeList);
+        //20200410直接根据站点编码筛选，无需经过设备编码
+//        List<String> siteCodeList = alarmQuery.getSiteCodeList();
+//        DeviceQuery deviceQuery = new DeviceQuery();
+//        deviceQuery.setSiteCodes(siteCodeList);
+//        deviceQuery.setOperationState(alarmQuery.getOperationState());
+//        List<DeviceEntity> deviceEntityList = deviceService.listEntity(alarmQuery.getEnterpriseCode(), deviceQuery);
+//        List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
+//        alarmQuery.setDeviceCodeList(deviceCodeList);
         combineFilter(alarmQuery);
     }
 
@@ -346,15 +360,23 @@ public class AlarmServiceImpl implements AlarmService {
                 }
             }
             //根据告警过滤规则，获取站点编码列表，与告警列表传递的站点列表取交集
-            List<String> siteCodeList = filterRule.getSiteCodeList();
-            DeviceQuery deviceQuery = new DeviceQuery();
-            deviceQuery.setPageSize(Integer.MAX_VALUE);
-            deviceQuery.setSiteCodes(siteCodeList);
-            List<DeviceEntity> deviceEntityList = deviceService.listEntity(uniqueCode, deviceQuery);
-            List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
-            List<String> sourceDeviceCodeList = alarmQuery.getDeviceCodeList();
-            deviceCodeList.retainAll(sourceDeviceCodeList);
-            alarmQuery.setDeviceCodeList(deviceCodeList);
+            if(filterRule.isBaseSite()){
+                List<String> siteCodeList  = filterRule.getSiteCodeList();
+                List<String> sourSiteCodeList = alarmQuery.getSiteCodeList();
+                sourSiteCodeList.retainAll(siteCodeList);
+                alarmQuery.setSiteCodeList(sourSiteCodeList);
+            }else{
+                //基于区域，根据区域编码获取所有站点
+                alarmQuery.setTierCodeList(filterRule.getTierCodeList());
+            }
+//            DeviceQuery deviceQuery = new DeviceQuery();
+//            deviceQuery.setPageSize(Integer.MAX_VALUE);
+//            deviceQuery.setSiteCodes(siteCodeList);
+//            List<DeviceEntity> deviceEntityList = deviceService.listEntity(uniqueCode, deviceQuery);
+//            List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
+//            List<String> sourceDeviceCodeList = alarmQuery.getDeviceCodeList();
+//            deviceCodeList.retainAll(sourceDeviceCodeList);
+//            alarmQuery.setDeviceCodeList(deviceCodeList);
         }
     }
 

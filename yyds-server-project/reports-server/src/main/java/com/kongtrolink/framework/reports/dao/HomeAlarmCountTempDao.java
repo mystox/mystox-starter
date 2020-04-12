@@ -40,7 +40,6 @@ public class HomeAlarmCountTempDao extends MongoBaseDao {
     public List<JSONObject> getCountDataByCondition(String taskId, JSONObject condition, TimePeriod timePeriod) {
         long startTime = timePeriod.getStartTime().getTime();
         long endTime = timePeriod.getEndTime().getTime();
-        int limit = condition.getInteger("limit");
         Criteria criteria = Criteria.where("tempDate").gte(startTime).lte(endTime);
         JSONArray stationList = condition.getJSONArray("stationList");
         if (!CollectionUtils.isEmpty(stationList)) {
@@ -65,7 +64,7 @@ public class HomeAlarmCountTempDao extends MongoBaseDao {
                 match(criteria),
                 group(fields).sum("alarmCount").as("alarmCount"),
                 sort(Sort.Direction.DESC, "alarmCount"),
-                limit(limit)
+                limit(10)
         );
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_HomeALARM_COUNT + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();

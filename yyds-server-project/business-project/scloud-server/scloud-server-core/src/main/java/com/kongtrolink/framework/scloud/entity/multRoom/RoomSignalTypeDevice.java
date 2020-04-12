@@ -14,6 +14,7 @@ public class RoomSignalTypeDevice implements Serializable{
     private String signalName;
     private String measurement;
     private int order;
+    private String type;    //信号点类型。"0"-遥信信号(DI),"1"-遥测信号(AI),"2"-遥控信号(DO),"3"-遥调信号(AO)
 
     public String getCntbId() {
         return cntbId;
@@ -45,5 +46,13 @@ public class RoomSignalTypeDevice implements Serializable{
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
