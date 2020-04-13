@@ -7,6 +7,7 @@ import com.kongtrolink.framework.reports.entity.StatisticLevel;
 import com.kongtrolink.framework.reports.entity.TimePeriod;
 import com.kongtrolink.framework.reports.entity.alarmCategory.AlarmCategoryTemp;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.Fields;
@@ -20,6 +21,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
+
 /**
  * \* @Author: mystox
  * \* Date: 2020/2/24 9:26
@@ -30,9 +33,8 @@ import java.util.List;
 public class AlarmCategoryTempDao extends MongoBaseDao {
 
 
-
     public void save(List<AlarmCategoryTemp> alarmCategoryTemps, String taskId) {
-        mongoTemplate.insert(alarmCategoryTemps,MongoDocName.REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT+taskId);
+        mongoTemplate.insert(alarmCategoryTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT + taskId);
     }
 
 
@@ -43,33 +45,40 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
     }
 
     public List<JSONObject> getCategoryDataByCondition(String taskId, JSONObject condition, TimePeriod timePeriod) {
-            Criteria criteria = Criteria.where("deleteFlag").is(false);
+        Criteria criteria = Criteria.where("deleteFlag").is(false);
 
         String alarmLevel = condition.getString("alarmLevel");
-        if (StringUtils.isNotBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
+        if (!"全部".equals(alarmLevel) && StringUtils.isNotBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
-        if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
+        if (!"全部".equals(stationType) && StringUtils.isNotBlank(stationType))
+            criteria.and("stationType").is(stationType);
         String runningSate = condition.getString("operationState");
-        if (!"全部".equals(runningSate)) criteria.and("operationState").is(runningSate);
+        if (!"全部".equals(runningSate) && StringUtils.isNotBlank(runningSate))
+            criteria.and("operationState").is(runningSate);
         String fsuManufactory = condition.getString("fsuManufactory");
-        if (!"全部".equals(fsuManufactory)) criteria.and("fsuManufactory").is(fsuManufactory);
+        if (!"全部".equals(fsuManufactory) && StringUtils.isNotBlank(fsuManufactory))
+            criteria.and("fsuManufactory").is(fsuManufactory);
         JSONArray stationList = condition.getJSONArray("stationList");
         if (!CollectionUtils.isEmpty(stationList)) {
             List<String> siteIdList = stationList.toJavaList(String.class);
             criteria.and("stationId").in(siteIdList);
         }
 
-        Date startTime = timePeriod.getStartTime();
-        Date endTime = timePeriod.getEndTime();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startTime);
-        int year = calendar.get(Calendar.YEAR);
-        int startMonth = calendar.get(Calendar.MONTH);
-        calendar.setTime(endTime);
-        int endMonth = calendar.get(Calendar.MONTH);
-
-        criteria.and("year").is(year);
-        criteria.and("month").gte(startMonth).lte(endMonth);
+        if ("current".equals(timePeriod.getDimension())) {
+            criteria.and("year").is(0);
+        } else {
+            Date startTime = timePeriod.getStartTime();
+            Date endTime = timePeriod.getEndTime();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startTime);
+            int year = calendar.get(Calendar.YEAR);
+            int startMonth = calendar.get(Calendar.MONTH) + 1;
+            calendar.setTime(endTime);
+            int endMonth = calendar.get(Calendar.MONTH);
+            if (endMonth == 0) endMonth = 12;
+            criteria.and("year").is(year);
+            criteria.and("month").gte(startMonth).lte(endMonth);
+        }
 
 
         String statisticLevel = condition.getString("statisticLevel");
@@ -102,8 +111,9 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
                         .sum("waterImmersion").as("waterImmersion")
                         .sum("airConditioning").as("airConditioning")
                         .avg("alarmCount").as("countAvg").first("province").as("province")
-        );
-        AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId, JSONObject.class);
+                        .first("province").as("province"),
+                sort(Sort.Direction.ASC, "province"));
+        AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();
         return mappedResults;
     }
