@@ -34,10 +34,16 @@ public class CollectionSuffix {
     public static final String CONFIGRATION_3D = "_config3d";
     // app组态坐标映射
     public static final String CONFIGRATION_APP = "_config_app";
-    //实时告警业务信心表
+    //实时告警业务信息表
     public static final String CUR_ALARM_BUSINESS = "_current_alarm_business";
-    //历史告警业务信心表
+    //历史告警业务信息表
     public static final String HIS_ALARM_BUSINESS = "_history_alarm_business";
+    //告警重定义规则
+    public static final String REDEDINE_RULE = "_redefine_rule";
+    //被重定义的告警
+    public static final String REDEDINE_ALARM = "_redefine_alarm";
+
     // 工单
     public static final String WORK = "_work";
+
 }

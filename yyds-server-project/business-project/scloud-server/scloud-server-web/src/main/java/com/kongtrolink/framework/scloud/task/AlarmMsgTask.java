@@ -1,12 +1,8 @@
 package com.kongtrolink.framework.scloud.task;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
-import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
-import com.kongtrolink.framework.scloud.mqtt.impl.MqttServiceImpl;
 import com.kongtrolink.framework.scloud.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,18 +22,21 @@ public class AlarmMsgTask implements Runnable{
     private AlarmService alarmService;
     private AlarmBusinessService businessService;
     private WorkService workService;
+    RedefineRuleService ruleService;
     private ConcurrentLinkedQueue<AlarmBusiness> msgQueue = new ConcurrentLinkedQueue<>();
     private String cur_alarm_business = CollectionSuffix.CUR_ALARM_BUSINESS;
     private String his_alarm_business = CollectionSuffix.HIS_ALARM_BUSINESS;
     private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
 
     public AlarmMsgTask(ShieldRuleService shieldRuleService, WorkAlarmConfigService alarmConfigService,
-                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, ConcurrentLinkedQueue<AlarmBusiness> msgQueue) {
+                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, RedefineRuleService ruleService,
+                        ConcurrentLinkedQueue<AlarmBusiness> msgQueue) {
         this.shieldRuleService = shieldRuleService;
         this.alarmConfigService = alarmConfigService;
         this.alarmService = alarmService;
         this.businessService = businessService;
         this.workService = workService;
+        this.ruleService = ruleService;
         this.msgQueue = msgQueue;
     }
 
@@ -59,6 +58,8 @@ public class AlarmMsgTask implements Runnable{
         businessList.add(alarmBusiness);
         //填充设备信息
         alarmService.initInfo(enterpriseCode, serverCode, businessList);
+        //匹配告警重定义功能
+        ruleService.matchRule(enterpriseCode, alarmBusiness);
         //告警屏蔽功能
         shieldRuleService.matchRule(enterpriseCode, businessList);
         //匹配告警工单配置

@@ -378,6 +378,7 @@ public class Alarm {
         if(null == alarmBusiness){
             return;
         }
+        this.setLevel(alarmBusiness.getLevel());
         this.setSiteCode(alarmBusiness.getSiteCode());
         this.setSiteName(alarmBusiness.getSiteName());
         this.setSiteType(alarmBusiness.getSiteType());

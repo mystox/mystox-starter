@@ -19,7 +19,6 @@ import java.io.Serializable;
 public class FacadeView implements Serializable{
 
 	private static final long serialVersionUID = -5582784481982344034L;
-	private int id;
 	private String strId;
     private String name;
     private String phone;
@@ -73,13 +72,5 @@ public class FacadeView implements Serializable{
 
     public void setOperationState(String operationState) {
         this.operationState = operationState;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }

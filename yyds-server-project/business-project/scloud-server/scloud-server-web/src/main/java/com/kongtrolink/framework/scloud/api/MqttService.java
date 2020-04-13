@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.scloud.mqtt;
+package com.kongtrolink.framework.scloud.api;
 
 
 import com.kongtrolink.framework.stereotype.OperaCode;
