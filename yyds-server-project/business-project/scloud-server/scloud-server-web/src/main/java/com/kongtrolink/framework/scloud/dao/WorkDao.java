@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.dao;
 
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.Work;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -113,6 +115,10 @@ public class WorkDao {
 
     public Work getNotOverByDeviceCode(String uniqueCode, String deviceCode) {
         Criteria criteria = Criteria.where("device.strId").is(deviceCode);
+        List<String> stateList = new ArrayList<>();
+        stateList.add(WorkConstants.STATE_RECEIVE);
+        stateList.add(WorkConstants.STATE_HANDLER);
+        criteria.and("state").in(stateList);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, Work.class, uniqueCode + table);
     }

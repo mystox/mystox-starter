@@ -53,7 +53,7 @@ public class JobWorkDao {
         List<String> stateList = new ArrayList<>();
         stateList.add(WorkConstants.STATE_RECEIVE);
         stateList.add(WorkConstants.STATE_HANDLER);
-        criteria.and("status").in(stateList);
+        criteria.and("state").in(stateList);
         Query query = new Query(criteria);
         return mongoTemplate.findOne(query, Work.class, uniqueCode + table_work);
     }
