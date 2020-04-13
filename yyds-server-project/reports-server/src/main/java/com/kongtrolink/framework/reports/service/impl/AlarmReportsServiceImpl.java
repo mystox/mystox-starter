@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -61,7 +60,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
 
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
-            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
+//            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
 //            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/reportsOpera/getStationList"), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.JSON, belong = ExecutorType.query, uri = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
@@ -470,7 +469,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 List<String> deviceIds = ReflectionUtils.convertElementPropertyToList(deviceList, "deviceId");
                 deviceIds.addAll(fsuIds);
                 // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
-                logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
+                logger.debug("statistic details Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
                /* / Test
                 List<String> deviceIds = new ArrayList<>();
                 String operationState = "交维态";
@@ -558,7 +557,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         resultData[0][length - 2] = new String[]{"时间段:" + timePeriod.getStartTimeStr() + "至" + timePeriod.getEndTimeStr()};
         resultData[0][length - 1] = new String[]{"操作人员:" + currentUser.getString("name")};
         String excelUri = alarmDetailsExcelCreate("告警量统计表-" + statisticLevel, resultData);
-        ReportData reportData = new ReportData(DataType.JSON, excelUri);
+        ReportData reportData = new ReportData(DataType.FILE, excelUri);
         return reportData;
     }
 
@@ -599,11 +598,16 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 row[8 + a] = DateUtil.getInstance().format(recoveryTime);
             Double duration = alarmDetailsTemp.getDuration();
             if (duration != null)
-                row[9 + a] = new DecimalFormat("#.00").format(duration);
+                row[9 + a] = String.format("%.2f", duration);
         }
         return new String[][][]{sheetData};
     }
 
+    public static void main(String[] args)
+    {
+
+        System.out.println(String.format("%.2f", 0.555555));
+    }
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
@@ -615,6 +619,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
             @ReportExtend(field = "alarmStatus", name = "告警状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"历史告警","活动告警"}),
             @ReportExtend(field = "alarmLevel", name = "告警等级", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, uri = "/reportsOpera/getAlarmLevel"),
+            @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "区县级", "站点级"}),
             @ReportExtend(field = "statisticPeriod", name = "统计周期", type = ReportExtend.FieldType.STATISTIC_PERIOD, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}, description = "{dimension:月报表,timePeriod:{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}}"),
     })
     public ReportData alarmCategory(String reportConfigStr) {
@@ -815,9 +820,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String taskId = reportTask.getId();
         JSONObject condition = reportConfig.getCondition();//获取查询条件
         String alarmStatus = condition.getString("alarmStatus");
-        if ("活动告警".equals(alarmStatus)) {
-            alarmCategoryQueryCurrent(reportConfig, reportTask);
-        }
         String statisticLevel = condition.getString("statisticLevel");
         //根据用户id的区域权限及其搜索条件获取站点列表筛选
         JSONObject currentUser = condition.getJSONObject("currentUser");
@@ -828,7 +830,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         if ("活动告警".equals(alarmStatus)) {
             timePeriod = new TimePeriod();
             timePeriod.setDimension("current");
-            alarmDetailsExecutorCurrent(reportConfig, reportTask);
+            alarmCategoryQueryCurrent(reportConfig, reportTask);
         }
         List<JSONObject> alarmCategoryDatas = alarmCategoryTempDao.getCategoryDataByCondition(taskId, condition, timePeriod);
         //统计告警分类
@@ -877,8 +879,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
             JSONObject jsonObject = alarmCategoryList.get(i - 1);
             row[0] = CommonCheck.aggregateTierName(jsonObject);
             int a = 0;
-            Long otherCount = 0L;
             Long alarmCount = jsonObject.getLong("alarmCount");
+            Long otherCount = alarmCount;
             if (colLength > 13) {
                 row[1] = jsonObject.getString("stationName");
                 row[2] = jsonObject.getString("stationType");
@@ -887,7 +889,8 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 a = 4;
             } else {
                 row[1] = String.valueOf(alarmCount);
-                row[2 + a] = jsonObject.getString("countAvg");
+                row[2] = jsonObject.getString("countAvg");
+                a = 2;
             }
             Long fsuOffline = jsonObject.getLong("fsuOffline");
             otherCount -= fsuOffline == null ? 0L : fsuOffline;

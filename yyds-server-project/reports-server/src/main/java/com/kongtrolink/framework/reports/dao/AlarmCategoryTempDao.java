@@ -98,7 +98,19 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
         } /*else { //单站平均告警
 
         }*/
+        Fields fields2 = fields.and(Fields.fields("province", "municipality", "county", "stationId", "stationName", "stationType"));
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
+                Aggregation.group(fields2)
+                        .sum("alarmCount").as("alarmCount")
+                        .sum("fsuOffline").as("fsuOffline")
+                        .sum("smokeSensation").as("smokeSensation")
+                        .sum("sensirion").as("sensirion")
+                        .sum("switchPower").as("switchPower")
+                        .sum("battery").as("battery")
+                        .sum("infrared").as("infrared")
+                        .sum("gateMagnetism").as("gateMagnetism")
+                        .sum("waterImmersion").as("waterImmersion")
+                        .sum("airConditioning").as("airConditioning"),
                 Aggregation.group(fields)
                         .sum("alarmCount").as("alarmCount")
                         .sum("fsuOffline").as("fsuOffline")
@@ -110,7 +122,7 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
                         .sum("gateMagnetism").as("gateMagnetism")
                         .sum("waterImmersion").as("waterImmersion")
                         .sum("airConditioning").as("airConditioning")
-                        .avg("alarmCount").as("countAvg").first("province").as("province")
+                        .avg("alarmCount").as("countAvg")
                         .first("province").as("province"),
                 sort(Sort.Direction.ASC, "province"));
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT + taskId, JSONObject.class);
