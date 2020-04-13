@@ -35,3 +35,5 @@ privFunc:
       name: 报表查看
       code: CUSTOM_REPORT_SHOW
       uri: /ZKReport/customReportShow
+#      - type: URI
+

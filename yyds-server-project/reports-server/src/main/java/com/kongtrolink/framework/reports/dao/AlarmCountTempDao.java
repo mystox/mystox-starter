@@ -57,12 +57,10 @@ public class AlarmCountTempDao extends MongoBaseDao {
         int year = calendar.get(Calendar.YEAR);
         int startMonth = calendar.get(Calendar.MONTH)+1;
         calendar.setTime(endTime);
-        int endMonth = calendar.get(Calendar.MONTH)+1;
-
+        int endMonth = calendar.get(Calendar.MONTH);
+        if (endMonth == 0) endMonth = 12;
         criteria.and("year").is(year);
         criteria.and("month").gte(startMonth).lte(endMonth);
-
-
         String statisticLevel = condition.getString("statisticLevel");
 
         Fields fields = Fields.fields();

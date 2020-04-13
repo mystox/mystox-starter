@@ -1,10 +1,12 @@
 package com.kongtrolink.framework.reports.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.reports.entity.TimePeriod;
 import com.kongtrolink.framework.reports.entity.query.FsuEntity;
 import com.kongtrolink.framework.reports.entity.query.FsuOperationState;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,5 +46,22 @@ public class CommonCheck {
         if (StringUtils.isNotBlank(municipality)) tierName = tierName + "-" + municipality;
         if (StringUtils.isNotBlank(county)) tierName = tierName + "-" + county;
         return tierName;
+    }
+
+
+    public static TimePeriod getTimePeriod(JSONObject statisticPeriod) {
+        String period = "";
+        TimePeriod timePeriod;
+        if (statisticPeriod == null) {
+            period = "月报表";
+            timePeriod = new TimePeriod();
+            timePeriod.setEndTime(new Date(System.currentTimeMillis()));
+            timePeriod.setStartTime(DateUtil.getInstance().getFirstDayOfMonth());
+        } else {
+            period = statisticPeriod.getString("dimension");
+            timePeriod = statisticPeriod.getObject("timePeriod", TimePeriod.class);
+        }
+        timePeriod.setDimension(period);
+        return timePeriod;
     }
 }

@@ -10,10 +10,12 @@ import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -54,16 +56,11 @@ public class HomePageMongo {
         )
         );
         DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(projectSql), //取得字段
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                group("siteId").min("checkState").as("siteState"),//group
-                project("siteId","siteState"),
-                group().sum("siteState").as("intersectionState")//group
-        );
-
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql,new CustomOperation(projectSql));
+        operations.add(group("siteId").min("checkState").as("siteState"));
+        operations.add(project("siteId","siteState"));
+        operations.add(group().sum("siteState").as("intersectionState"));
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeFsuNumber> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeFsuNumber.class);
         List<HomeFsuNumber> list = result.getMappedResults();
         HomeFsuNumber homeFsuNumber = new HomeFsuNumber();//以防sql查出来的 是空对象
@@ -87,13 +84,10 @@ public class HomePageMongo {
             criteria.and("code").regex("^"+code);//模糊查询
         }
         DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                project("id","siteCode","code","state")
-        );
-
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        operations.add(match(new Criteria("stockData.userId").exists(true)));
+        operations.add(project("id","siteCode","code","state"));
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeFsuOnlineInfo> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeFsuOnlineInfo.class);
         return result.getMappedResults();
     }
@@ -112,11 +106,8 @@ public class HomePageMongo {
             criteria.and("code").regex("^"+code);//模糊查询
         }
         DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"id");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true))
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeSiteAlarmMap> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.SITE, HomeSiteAlarmMap.class);
         return result.getMappedResults();
     }
@@ -148,15 +139,11 @@ public class HomePageMongo {
         )
         );
         DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(projectSql), //取得字段
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                group("siteCode").min("checkState").as("siteState"),//group
-                match(new Criteria("siteState").is(1)),//只查询交维态的
-                project().and("siteCode").previousOperation()
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql,new CustomOperation(projectSql));
+        operations.add(group("siteCode").min("checkState").as("siteState"));
+        operations.add(match(new Criteria("siteState").is(1)));
+        operations.add(project().and("siteCode").previousOperation());
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeSiteInfo> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeSiteInfo.class);
         return result.getMappedResults();
     }
@@ -183,13 +170,10 @@ public class HomePageMongo {
         //查询条件
         Criteria criteria = getHomeWorkQuery(homeQuery,false);
         DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                group("state").count().as("count"),
-                project("count").and("state").previousOperation()
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        operations.add(group("state").count().as("count"));
+        operations.add(project("count").and("state").previousOperation());
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
         return result.getMappedResults();
     }
@@ -198,11 +182,8 @@ public class HomePageMongo {
         //查询条件
         Criteria criteria = getHomeWorkQuery(homeQuery,true);
         DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true))
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
         return result.getMappedResults().size();
     }
@@ -236,13 +217,10 @@ public class HomePageMongo {
             criteria.and("siteCode").regex("^"+code);//模糊查询
         }
         DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"siteCode");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                group("siteCode","level").count().as("count"),
-                project("count").and("_id.siteCode").as("siteCode").and("_id.level").as("level")
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        operations.add(group("siteCode","level").count().as("count"));
+        operations.add(project("count").and("_id.siteCode").as("siteCode").and("_id.level").as("level"));
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeReportModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.CUR_ALARM_BUSINESS, HomeReportModel.class);
         return result.getMappedResults();
     }
@@ -262,13 +240,10 @@ public class HomePageMongo {
             criteria.and("code").regex("^"+code);//模糊查询
         }
         DBObject lookupSql = getLookupSqlId(uniqueCode,userId,"siteId");
-        Aggregation agg = Aggregation.newAggregation(
-                match(criteria),
-                new CustomOperation(lookupSql), //取得字段()
-                match(new Criteria("stockData.userId").exists(true)),
-                group("state").count().as("count"),
-                project("count").and("state").previousOperation()
-        );
+        List<AggregationOperation> operations = getOperations(criteria,homeQuery,lookupSql);
+        operations.add(group("state").count().as("count"));
+        operations.add(project("count").and("state").previousOperation());
+        Aggregation agg = Aggregation.newAggregation(operations);
         AggregationResults<HomeFsuOnlineModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.DEVICE, HomeFsuOnlineModel.class);
         return result.getMappedResults();
     }
@@ -324,5 +299,25 @@ public class HomePageMongo {
         )
         );
         return lookupSql;
+    }
+
+    private List<AggregationOperation> getOperations(Criteria criteria,HomeQuery homeQuery,DBObject lookupSql){
+        List<AggregationOperation> operations = new ArrayList<>();
+        operations.add(match(criteria));
+        if(!homeQuery.isCurrentRoot()){
+            operations.add(new CustomOperation(lookupSql)); //取得字段()
+            operations.add(match(new Criteria("stockData.userId").exists(true)));
+        }
+        return operations;
+    }
+    private List<AggregationOperation> getOperations(Criteria criteria,HomeQuery homeQuery,DBObject lookupSql,AggregationOperation operation){
+        List<AggregationOperation> operations = new ArrayList<>();
+        operations.add(match(criteria));
+        operations.add(operation);
+        if(!homeQuery.isCurrentRoot()){
+            operations.add(new CustomOperation(lookupSql)); //取得字段()
+            operations.add(match(new Criteria("stockData.userId").exists(true)));
+        }
+        return operations;
     }
 }

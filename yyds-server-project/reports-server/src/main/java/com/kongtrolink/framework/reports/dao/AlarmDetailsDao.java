@@ -26,7 +26,6 @@ import java.util.List;
 public class AlarmDetailsDao extends MongoBaseDao {
 
 
-
     public void save(List<AlarmDetailsTemp> alarmDetailsTemps, String taskId) {
         mongoTemplate.insert(alarmDetailsTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS + taskId);
     }
@@ -42,31 +41,37 @@ public class AlarmDetailsDao extends MongoBaseDao {
 
         Criteria criteria = Criteria.where("deleteFlag").is(false);
         String alarmLevel = condition.getString("alarmLevel");
-        if (StringUtils.isNotBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
+        if (!"全部".equals(alarmLevel) && StringUtils.isNotBlank(alarmLevel)) criteria.and("alarmLevel").is(alarmLevel);
         String stationType = condition.getString("stationType");
-        if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
+        if (!"全部".equals(stationType) && StringUtils.isNotBlank(stationType))
+            criteria.and("stationType").is(stationType);
         String runningSate = condition.getString("operationState");
-        if (!"全部".equals(runningSate)) criteria.and("operationState").is(runningSate);
+        if (!"全部".equals(runningSate) && StringUtils.isNotBlank(runningSate))
+            criteria.and("operationState").is(runningSate);
         String fsuManufactory = condition.getString("fsuManufactory");
-        if (!"全部".equals(fsuManufactory)) criteria.and("fsuManufactory").is(fsuManufactory);
-
+        if (!"全部".equals(fsuManufactory) && StringUtils.isNotBlank(fsuManufactory))
+            criteria.and("fsuManufactory").is(fsuManufactory);
         JSONArray stationList = condition.getJSONArray("stationList");
         if (!CollectionUtils.isEmpty(stationList)) {
             List<String> siteIdList = stationList.toJavaList(String.class);
             criteria.and("stationId").in(siteIdList);
         }
 
-        Date startTime = timePeriod.getStartTime();
-        Date endTime = timePeriod.getEndTime();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startTime);
-        int year = calendar.get(Calendar.YEAR);
-        int startMonth = calendar.get(Calendar.MONTH);
-        calendar.setTime(endTime);
-        int endMonth = calendar.get(Calendar.MONTH);
-
-        criteria.and("year").is(year);
-        criteria.and("month").gte(startMonth).lte(endMonth);
+        if ("current".equals(timePeriod.getDimension())) {
+            criteria.and("year").is(0);
+        } else {
+            Date startTime = timePeriod.getStartTime();
+            Date endTime = timePeriod.getEndTime();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startTime);
+            int year = calendar.get(Calendar.YEAR);
+            int startMonth = calendar.get(Calendar.MONTH) + 1;
+            calendar.setTime(endTime);
+            int endMonth = calendar.get(Calendar.MONTH);
+            if (endMonth == 0) endMonth = 12;
+            criteria.and("year").is(year);
+            criteria.and("month").gte(startMonth).lte(endMonth);
+        }
 
         return mongoTemplate.find(Query.query(criteria), AlarmDetailsTemp.class, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS + taskId);
     }
