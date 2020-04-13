@@ -59,7 +59,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     ReportTaskDao reportTaskDao;
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCount", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING, description = "格式为year-month"), //时间类型是否需要
 //            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
             @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/reportsOpera/getStationList"), //站点列表
@@ -304,7 +304,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     }
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmDetails", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmDetails", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             //@ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/reportsOpera/getRegionCodeList"), //区域层级
@@ -603,7 +603,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     }
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
             @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
             //@ReportExtend(field = "date", name = "时间", type = ReportExtend.FieldType.DATE), //时间类型是否需要
             @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/reportsOpera/getRegionCodeList"), //区域层级

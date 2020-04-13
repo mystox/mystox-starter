@@ -31,8 +31,8 @@ public class SessionConstant {
     public static final String LOGIN_USER_SUB_SERVICE = "LOGIN_USER_SUB_SERVICE";//存放当前用户订阅的服务
 
     public static final String IS_ADMIN = "IS_ADMIN"; //超级管理员的标记
-    public static final String IS_ROOT = "IS_ROOT";//是否全局管理员
-
+    public static final String IS_ROOT = "IS_ROOT";//是否ROOT
+    public static final String IS_CURRENT_ROOT = "IS_CURRENT_ROOT";//是否全局管理员
     public static final String TOKEN = "TOKEN";
 
     public static final String AGENCY_UNIQUE_CODE_LIST = "AGENCY_CODE_LIST";//代理企业的uniquecode列表
