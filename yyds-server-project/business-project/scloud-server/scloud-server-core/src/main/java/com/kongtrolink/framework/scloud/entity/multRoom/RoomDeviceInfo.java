@@ -13,6 +13,7 @@ public class RoomDeviceInfo implements Serializable{
     private String deviceCode;//设备code
     private String deviceName;//设备名称
     private String status;//状态:(在线,离线,告警)
+    private int alarmNum;//状态:(在线,离线,告警)
     private String doValue;//值1 (存DO值)
     private String doSinId;//值1 (存DO值)对应的信号点ID
     private String doSinName;//信号点名称
@@ -143,5 +144,13 @@ public class RoomDeviceInfo implements Serializable{
 
     public void setAiName2(String aiName2) {
         this.aiName2 = aiName2;
+    }
+
+    public int getAlarmNum() {
+        return alarmNum;
+    }
+
+    public void setAlarmNum(int alarmNum) {
+        this.alarmNum = alarmNum;
     }
 }
