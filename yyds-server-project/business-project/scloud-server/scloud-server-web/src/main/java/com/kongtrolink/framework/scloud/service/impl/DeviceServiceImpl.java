@@ -86,8 +86,6 @@ public class DeviceServiceImpl implements DeviceService {
                             map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
                         }
                         if (map.size() > 0){
-
-
                             for (String deviceCode : map.keySet()){
                                 DeviceEntity device = deviceEntityMap.get(deviceCode);
                                 DeviceModel deviceModel = getDeviceModel(device);
