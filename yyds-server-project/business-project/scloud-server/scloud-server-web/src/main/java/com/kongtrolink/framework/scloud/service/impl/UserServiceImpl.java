@@ -37,18 +37,22 @@ public class UserServiceImpl implements UserService {
      * 保存或修改 用户管辖站点
      *
      * @param uniqueCode 企业唯一码
-     * @param userSiteEntity 用户管辖站点
+     * @param userSites 用户管辖站点
      */
     @Override
-    public void upsertUserSite(String uniqueCode, UserSiteEntity userSiteEntity) {
-        userMongo.upsertUserSite(uniqueCode, userSiteEntity);
+    public void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites) {
+        //保存前，先删除原有用户管辖站点
+        userMongo.deleteUserSite(uniqueCode, userSites.get(0).getUserId());
+
+        //保存新的用户管辖站点
+        userMongo.saveUserSite(uniqueCode, userSites);
     }
 
     /**
      * 获取用户管辖站点
      */
     @Override
-    public List<UserSiteEntity> getUserSite(String uniqueCode, UserSiteEntity userSiteEntity) {
-        return userMongo.findUserSite(uniqueCode, userSiteEntity);
+    public List<UserSiteEntity> getUserSite(String uniqueCode, String userId) {
+        return userMongo.findUserSite(uniqueCode, userId);
     }
 }

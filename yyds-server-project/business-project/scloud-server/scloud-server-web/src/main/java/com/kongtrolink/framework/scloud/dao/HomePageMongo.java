@@ -162,11 +162,11 @@ public class HomePageMongo {
     }
 
     public List<HomeReportModel> getHomeAlarmLevelNum(String uniqueCode,List<String> siteCodes) {
-        Criteria criteria = Criteria.where("state").is("待处理").and("siteCode").is(siteCodes);
+        Criteria criteria = Criteria.where("state").is("待处理").and("siteCode").in(siteCodes);
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
                 group("level","checkState").count().as("count"),
-                project("count").and("state").previousOperation()
+                project("count").and("_id.level").as("state").and("_id.checkState").as("checkState")
         );
         AggregationResults<HomeReportModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.CUR_ALARM_BUSINESS, HomeReportModel.class);
         return result.getMappedResults();
@@ -181,13 +181,7 @@ public class HomePageMongo {
      */
     public List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
         //查询条件
-        String code = homeQuery.getTierCode();
-        Date startTime = homeQuery.getStartTime();//开始时间
-        Date endTime = homeQuery.getEndTime(); //结束时间
-        Criteria criteria = Criteria.where("sentTime").gte(endTime).lte(startTime);
-        if (code != null && !"".equals(code)) {
-            criteria.and("site.strId").regex("^"+code);//模糊查询
-        }
+        Criteria criteria = getHomeWorkQuery(homeQuery,false);
         DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
         Aggregation agg = Aggregation.newAggregation(
                 match(criteria),
@@ -200,6 +194,32 @@ public class HomePageMongo {
         return result.getMappedResults();
     }
 
+    public int getHomeWorkModelOverTime(String uniqueCode, String userId, HomeQuery homeQuery) {
+        //查询条件
+        Criteria criteria = getHomeWorkQuery(homeQuery,true);
+        DBObject lookupSql = getLookupSqlCode(uniqueCode,userId,"site.strId");
+        Aggregation agg = Aggregation.newAggregation(
+                match(criteria),
+                new CustomOperation(lookupSql), //取得字段()
+                match(new Criteria("stockData.userId").exists(true))
+        );
+        AggregationResults<HomeWorkModel> result = mongoTemplate.aggregate(agg,uniqueCode+ CollectionSuffix.WORK, HomeWorkModel.class);
+        return result.getMappedResults().size();
+    }
+
+    private Criteria getHomeWorkQuery(HomeQuery homeQuery,boolean isOverTime){
+        String code = homeQuery.getTierCode();
+        Date startTime = homeQuery.getStartTime();//开始时间
+        Date endTime = homeQuery.getEndTime(); //结束时间
+        Criteria criteria = Criteria.where("sentTime").gte(startTime).lte(endTime);
+        if(isOverTime){
+            criteria.and("isOverTime").is("是");
+        }
+        if (code != null && !"".equals(code)) {
+            criteria.and("site.strId").regex("^"+code);//模糊查询
+        }
+        return criteria;
+    }
     /**
      * 告警工单统计
      *

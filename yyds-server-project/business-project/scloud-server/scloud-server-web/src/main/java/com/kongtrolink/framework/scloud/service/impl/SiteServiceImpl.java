@@ -5,6 +5,7 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
+import com.kongtrolink.framework.scloud.dao.UserMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
@@ -37,6 +38,8 @@ public class SiteServiceImpl implements SiteService {
     SiteMongo siteMongo;
     @Autowired
     DeviceMongo deviceMongo;
+    @Autowired
+    UserMongo userMongo;
     @Autowired
     MqttOpera mqttOpera;
     @Autowired
@@ -315,8 +318,8 @@ public class SiteServiceImpl implements SiteService {
                     deviceQuery.setDeviceCodes(deletedDeviceCodes);
                     deviceService.deleteDevice(uniqueCode, deviceQuery);
 
-                    // TODO: 2020/2/12 2.修改系统用户和维护用户的管辖站点
-
+                    //2.从用户的管辖站点中删除该站点
+                    userMongo.deleteSitesFromUserSite(uniqueCode, siteQuery.getSiteCodes());
                 }
             }else {
                 LOGGER.error("向【资管】发送删除站点MQTT 请求失败");
@@ -375,7 +378,7 @@ public class SiteServiceImpl implements SiteService {
                 row[9] = siteModel.getTowerType();
                 row[10] = siteModel.getShareInfo();
                 row[11] = siteModel.getAssetNature();
-                row[12] = sdf.format(new Date(siteModel.getCreateTime()));
+                row[12] = siteModel.getCreateTime() != null?sdf.format(new Date(siteModel.getCreateTime())):"-";
                 row[13] = siteModel.getAreaCovered();
             }
         }

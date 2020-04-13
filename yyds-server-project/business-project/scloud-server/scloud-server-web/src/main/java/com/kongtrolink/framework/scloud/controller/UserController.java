@@ -67,10 +67,10 @@ public class UserController extends BaseController{
      * 修改系统用户或维护用户 管辖站点
      */
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
-    public @ResponseBody JsonResult modifyUserSite(@RequestBody UserSiteEntity userSiteEntity){
+    public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
         try{
 //            String uniqueCode = getUniqueCode();
-            userService.upsertUserSite(uniqueCode, userSiteEntity);
+            userService.modifyUserSite(uniqueCode, userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
         }catch (Exception e){
             e.printStackTrace();
@@ -85,7 +85,8 @@ public class UserController extends BaseController{
     public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
 //            String uniqueCode = getUniqueCode();
-            List<UserSiteEntity> list = userService.getUserSite(uniqueCode, userSiteEntity);
+            String userId = userSiteEntity.getUserId();
+            List<UserSiteEntity> list = userService.getUserSite(uniqueCode, userId);
             return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();

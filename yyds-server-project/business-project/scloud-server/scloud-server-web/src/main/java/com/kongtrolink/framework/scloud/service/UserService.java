@@ -15,10 +15,10 @@ public interface UserService {
     /**
      * 保存或修改 用户管辖站点
      */
-    void upsertUserSite(String uniqueCode, UserSiteEntity userSiteEntity);
+    void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites);
 
     /**
      * 获取用户管辖站点
      */
-    List<UserSiteEntity> getUserSite(String uniqueCode, UserSiteEntity userSiteEntity);
+    List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
 }

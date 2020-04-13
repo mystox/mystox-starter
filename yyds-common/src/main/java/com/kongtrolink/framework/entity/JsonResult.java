@@ -15,8 +15,8 @@ public class JsonResult {
     private String info = "请求成功！";
     private Boolean success = true;
     private Object data;
-    private int count;
-    private Object otherInfo;
+    private int count;  //liudd添加
+    private Object otherInfo;   //liudd添加
 
     public int getCount() {
         return count;

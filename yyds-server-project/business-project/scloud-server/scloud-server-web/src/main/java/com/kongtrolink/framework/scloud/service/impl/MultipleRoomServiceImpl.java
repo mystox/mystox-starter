@@ -53,7 +53,7 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
     @Override
     public void initSignalType(String uniqueCode) {
         LOGGER.info("初始化 综合机房默认配置---------("+uniqueCode+")-------------");
-//        multipleRoomDao.removeRoomDeviceType(uniqueCode);
+        multipleRoomDao.removeRoomDeviceType(uniqueCode);
         updateRoomDeviceType(uniqueCode);
     }
 
@@ -66,9 +66,7 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
      */
     @Override
     public RoomSiteInfo getSiteInfo(String uniqueCode, int siteId) {
-        SiteEntity site =  multipleRoomDao.findSite(uniqueCode, siteId);
-        RoomSiteInfo roomSiteInfo = new RoomSiteInfo();
-        roomSiteInfo.inputSite(site);
+        RoomSiteInfo roomSiteInfo =  multipleRoomDao.findSite(uniqueCode, siteId);
         int deviceNum = 0;
         int signalNum = 0;
         List<DeviceEntity> deviceList = multipleRoomDao.getDeviceList(uniqueCode,siteId);//监控设备总数
@@ -97,6 +95,11 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
      */
     @Override
     public List<RoomDevice> getRoomDevice(String uniqueCode, MultipleRoomQuery query) throws Exception{
+        //判断该企业是否进行了信号点初始化 若没有 则进行初始化
+        int roomShow = multipleRoomDao.countRoomDeviceType(uniqueCode);
+        if(roomShow==0){
+            updateRoomDeviceType(uniqueCode);
+        }
         String siteCode = query.getSiteCode();
         List<String> siteCodes = new ArrayList<>();
         siteCodes.add(siteCode);
@@ -258,7 +261,7 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
         InputStream inputStream = null;
         BufferedReader br = null;
         try {
-            inputStream = this.getClass().getResourceAsStream("/signalShow.txt");
+            inputStream = this.getClass().getResourceAsStream("/config/signalShow.txt");
             br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
             String lineTxt;
             while ((lineTxt = br.readLine()) != null) {//数据以逗号分隔

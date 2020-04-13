@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.home.*;
@@ -168,9 +169,14 @@ public class HomePageServiceImpl implements HomePageService {
      * @param userId     用户ID
      * @param homeQuery  区域
      * @return 站点总数
+     *      告警工单统计
+     *      未接： state 待接
+     *      在途工单: state 待处理
+     *      超时工单:  isOverTime = 是 超时工单
+     *      历史工单：state 已完成 已撤销
      */
     @Override
-    public List<HomeWorkModel> getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
+    public HomeWorkDto getHomeWorkModel(String uniqueCode, String userId, HomeQuery homeQuery) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         Date end = calendar.getTime();
@@ -178,7 +184,33 @@ public class HomePageServiceImpl implements HomePageService {
         Date start =  calendar.getTime();
         homeQuery.setEndTime(end);
         homeQuery.setStartTime(start);
-        return homePageMongo.getHomeWorkModel(uniqueCode,userId,homeQuery);
+        List<HomeWorkModel>  list = homePageMongo.getHomeWorkModel(uniqueCode,userId,homeQuery);
+        int noReceive = 0;//未接工单
+        int onRoad = 0;//在途
+        int history = 0;//历史
+        int total = 0;//总数
+        if(list !=null){
+            for(HomeWorkModel workModel:list){
+                String state = workModel.getState();
+                total = total + workModel.getCount();
+                if(WorkConstants.STATE_RECEIVE.equals(state)){
+                    noReceive = noReceive + workModel.getCount();
+                }else if(WorkConstants.STATE_HANDLER.equals(state)){
+                    onRoad = onRoad + workModel.getCount();
+                }else if(WorkConstants.STATE_DOWN.equals(state)||
+                        WorkConstants.STATE_CANCEL.equals(state)){
+                    history = history + workModel.getCount();
+                }
+            }
+        }
+        int overTime = homePageMongo.getHomeWorkModelOverTime(uniqueCode,userId,homeQuery);//超时
+        HomeWorkDto dto = new HomeWorkDto();
+        dto.setHistory(history);
+        dto.setNoReceive(noReceive);
+        dto.setOnRoad(onRoad);
+        dto.setOverTime(overTime);
+        dto.setTotal(total);
+        return dto;
     }
 
     /**

@@ -9,6 +9,7 @@ import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomDeviceType;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomSignalType;
 import com.kongtrolink.framework.scloud.entity.multRoom.RoomSignalTypeConfig;
+import com.kongtrolink.framework.scloud.entity.multRoom.RoomSiteInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -33,10 +34,10 @@ public class MultipleRoomDao {
     /**
      * 查询站点信息
      */
-    public SiteEntity findSite(String uniqueCode, int siteId) {
+    public RoomSiteInfo findSite(String uniqueCode, int siteId) {
         return mongoTemplate.findOne(
                 new Query(Criteria.where("id").is(siteId)),
-                SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+                RoomSiteInfo.class, uniqueCode + CollectionSuffix.SITE);
     }
     /**
      * 获取 基本信息 中的 监控点设备数 和监控点数
@@ -116,6 +117,17 @@ public class MultipleRoomDao {
     public void saveRoomDeviceType(RoomDeviceType roomDeviceType) {
         mongoTemplate.save(roomDeviceType,CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
     }
+
+    public  int countRoomDeviceType(String uniqueCode){
+        Criteria criteria = Criteria.where("uniqueCode").is(uniqueCode);
+        return (int)mongoTemplate.count(new Query(criteria), RoomDeviceType.class, CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
+    }
+
+    public  void removeRoomDeviceType(String uniqueCode){
+        Criteria criteria = Criteria.where("uniqueCode").is(uniqueCode);
+        mongoTemplate.remove(new Query(criteria), CollectionSuffix.MULTIPLE_ROOM_SIGNAL);
+    }
+
 
     public Map<String, Integer> deviceAlarmCountMap(String uniqueCode, String siteCode){
         Map<String, Integer> map = new HashMap<>();
