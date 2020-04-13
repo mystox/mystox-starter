@@ -94,7 +94,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         List<StationOffStatisticsTemp> stationOffStatisticsTemps = new ArrayList<>();
         //获取时间信息
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) +1;
 
         /*if (month == 1) {
             month = 12;
@@ -293,7 +293,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<StationOffDetailsTemp> stationOffDetailsTemps = new ArrayList<StationOffDetailsTemp>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
         /*if (month == 1) {
             month = 12;
@@ -479,7 +479,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<StationOffDetailsTemp> stationOffDetailsTemps = new ArrayList<StationOffDetailsTemp>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
         /*if (month == 1) {
             month = 12;
@@ -644,7 +644,7 @@ public class SystemReportsServiceImpl implements SystemReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<StationOffDetailsTemp> stationOffDetailsTemps = new ArrayList<StationOffDetailsTemp>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) +1;
 /*
 
         if (month == 1) {

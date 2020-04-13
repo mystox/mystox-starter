@@ -37,10 +37,18 @@ public class UserMongo {
     }
 
     /**
-     * 删除用户管辖站点
+     * 删除用户所有管辖站点
      */
     public void deleteUserSite(String uniqueCode, String userId){
         Criteria criteria = Criteria.where("userId").is(userId);
+        mongoTemplate.remove(new Query(criteria), UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
+    }
+
+    /**
+     * 从用户的管辖站点中删除该站点
+     */
+    public void deleteSitesFromUserSite(String uniqueCode, List<String> siteCodes){
+        Criteria criteria = Criteria.where("siteCode").in(siteCodes);
         mongoTemplate.remove(new Query(criteria), UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
     }
 }

@@ -27,6 +27,7 @@ public class SiteQuery extends Paging{
 
     private List<String> simplifiedSitekeys;    //存储简化版站点的所有key
 
+
     public String getUserId() {
         return userId;
     }

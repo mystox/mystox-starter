@@ -13,4 +13,6 @@ import com.kongtrolink.framework.stereotype.Register;
 public interface LogService {
     @OperaCode
     public void mqLog(String moduleMsgStr);
+
+
 }

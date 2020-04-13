@@ -76,19 +76,19 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
 
         Fields fields = Fields.fields();
         if (StatisticLevel.province.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("province"));
+            fields = fields.and("province");
         }
         if (StatisticLevel.municipality.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("municipality"));
+            fields = fields.and(Fields.fields("province", "municipality"));
         }
         if (StatisticLevel.county.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("county"));
+            fields = fields.and(Fields.fields("province", "municipality", "county"));
         }
         if (StatisticLevel.site.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("stationId", "stationName", "stationType"));
-        } else { //单站平均告警
+            fields = fields.and(Fields.fields("province", "municipality", "county", "stationId", "stationName", "stationType"));
+        } /*else { //单站平均告警
 
-        }
+        }*/
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
                 Aggregation.group(fields)
                         .sum("alarmCount").as("alarmCount")
@@ -101,7 +101,7 @@ public class AlarmCategoryTempDao extends MongoBaseDao {
                         .sum("gateMagnetism").as("gateMagnetism")
                         .sum("waterImmersion").as("waterImmersion")
                         .sum("airConditioning").as("airConditioning")
-                        .avg("alarmCount").as("countAvg")
+                        .avg("alarmCount").as("countAvg").first("province").as("province")
         );
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();

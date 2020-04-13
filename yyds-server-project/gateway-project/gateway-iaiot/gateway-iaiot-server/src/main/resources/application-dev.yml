@@ -24,7 +24,7 @@ management:
     enabled: false
 ###########消息框架相关配置#############
 server:
-  groupCode: GROUP
+  groupCode: GROUP_LIUDD_TEST20200409
   host: 172.16.5.62
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode}_FSU #服务编码
   port: 52002 #服务占用web端口
@@ -35,5 +35,5 @@ mqtt:
 gatewayMqtt:
   username: root #可选配置 mqtt配置相关
   password: 123456 #可选配置 mqtt配置相关
-  url: tcp://172.16.6.37:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+  url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
   version: 1.0.0

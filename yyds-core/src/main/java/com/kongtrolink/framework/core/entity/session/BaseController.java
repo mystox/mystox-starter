@@ -249,6 +249,11 @@ public abstract class BaseController {
         return (Boolean) o;
     }
 
+    public boolean isCurrentRoot() {
+        Object o = getSession().getAttribute(SessionConstant.IS_CURRENT_ROOT);
+        if (o == null) return false;
+        return (Boolean) o;
+    }
 
     public HttpSession getSession() {
         return this.session == null ? getHttpServletRequest().getSession() : this.session;

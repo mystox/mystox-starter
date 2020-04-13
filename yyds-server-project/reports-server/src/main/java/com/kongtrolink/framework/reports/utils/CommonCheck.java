@@ -41,8 +41,8 @@ public class CommonCheck {
         String municipality = jsonObject.getString("municipality");
         String county = jsonObject.getString("county");
         String tierName = province;
-        if (StringUtils.isNotBlank(municipality)) tierName = tierName + "" + municipality;
-        if (StringUtils.isNotBlank(county)) tierName = tierName + "" + county;
+        if (StringUtils.isNotBlank(municipality)) tierName = tierName + "-" + municipality;
+        if (StringUtils.isNotBlank(county)) tierName = tierName + "-" + county;
         return tierName;
     }
 }

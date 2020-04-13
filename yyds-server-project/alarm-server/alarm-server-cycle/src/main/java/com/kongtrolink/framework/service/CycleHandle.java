@@ -223,7 +223,7 @@ public class CycleHandle{
             logger.info("无需调用历史告警转化远程:{}", sdgdScloudAlarmHistory);
             return;
         }
-        mqttOpera.operaAsync(sdgdScloudAlarmHistory, JSONObject.toJSONString(historyKeyList));
+        mqttOpera.opera(sdgdScloudAlarmHistory, JSONObject.toJSONString(historyKeyList));
     }
 
     /**

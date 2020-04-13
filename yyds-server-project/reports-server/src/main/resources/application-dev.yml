@@ -14,40 +14,4 @@ mqtt:
 ########## mongo数据库配置 ##########
 mongodb:
   uri: mongodb://172.16.5.61:27017/reports_server
-privFunc:
-  type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
-  name: ${server.title} #权限名称 必填
-  code: ${server.name}_${server.version} #权限编码 必填同级不可重复
-  remark: 告警模块 #备注 可填
-  children:
-  - type: ROOT
-    name: 报表管理员页面
-    code: REPORTS_MANAGER
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
-    children:
-    - type: PAGE
-      name: 报表任务结果
-      code: REPORT_TASK_RESULT
-      uri: /ZKReport/reportService
-      root: true
-    - type: PAGE
-      name: 报表任务分配
-      code: SETTING
-      uri: /ZKReport/reportSetting
-      root: true
-    - type: PAGE
-      name: 报表层级
-      code: TIER
-      uri: /ZKReport/reportTier
-      root: true
-  - type: ROOT
-    name: 报表业务功能
-    code: REPORTS_FUNCTION
-    routeMark: proxy_reports
-    pageRoute: proxy_reports
-    children:
-    - type: PAGE
-      name: 报表查看
-      code: CUSTOM_REPORT_SHOW
-      uri: /ZKReport/customReportShow
+

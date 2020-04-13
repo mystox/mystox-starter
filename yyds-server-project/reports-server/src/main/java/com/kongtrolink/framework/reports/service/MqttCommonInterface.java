@@ -62,4 +62,6 @@ public interface MqttCommonInterface {
      **/
     JSONObject exportAlarmHistory(Date endTime, Date startTime, JSONObject baseCondition);
 
+
+    List<JSONObject> getCurrentStationList(JSONObject query);
 }

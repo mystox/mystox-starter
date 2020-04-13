@@ -44,6 +44,23 @@ public class ReportsOperaController extends BaseController {
     }
 
 
+    @RequestMapping("/getStationList")
+    public JsonResult getStationListTree() {
+        String uniqueCode = getUniqueCode();
+        String currentServerCode = getCurrentService().getCode();
+        JSONObject query = new JSONObject();
+        String userId = getUserId();
+        query.put("uniqueCode",uniqueCode);
+        query.put("serverCode", currentServerCode);
+        query.put("userId", userId);
+        List<JSONObject> result = mqttCommonInterface.getCurrentStationList(query);
+        if (result != null) {
+            return new JsonResult(result);
+        }
+        return new JsonResult(new String[]{});
+    }
+
+
 
 
 }

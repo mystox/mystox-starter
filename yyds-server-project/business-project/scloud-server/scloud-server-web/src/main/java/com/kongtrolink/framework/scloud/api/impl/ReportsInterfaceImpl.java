@@ -69,9 +69,13 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         JSONObject condition = JSONObject.parseObject(msg);
         String siteId = condition.getString("stationId");
         String enterpriseCode = condition.getString("enterpriseCode");
+        String serverCode = condition.getString("serverCode");
         DeviceQuery deviceQuery = new DeviceQuery();
         deviceQuery.setDeviceTypeCode("038"); //fsu
-        deviceQuery.setSiteCode(siteId);
+        List<String> sites = new ArrayList<>();
+        sites.add(siteId);
+        deviceQuery.setSiteCodes(sites);
+        deviceQuery.setServerCode(serverCode);
         try {
             List<DeviceModel> deviceList = deviceService.findDeviceList(enterpriseCode, deviceQuery);
             return deviceList;
@@ -156,6 +160,19 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         JSONObject result = new JSONObject();
         result.put("uri", excelUri);
         return result;
+    }
+
+    @Override
+    public List<SiteModel> getCurrentStationList(String msg) {
+        JSONObject jsonObject = JSONObject.parseObject(msg, JSONObject.class);
+        String uniqueCode = jsonObject.getString("uniqueCode");
+        String userId = jsonObject.getString("userId");
+        String serverCode = jsonObject.getString("serverCode");
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setUserId(userId);
+        siteQuery.setServerCode(serverCode);
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
+        return siteModelList;
     }
 
     private String alarmHistoryExcelCreate(String fileName, String[][][] resultData) {

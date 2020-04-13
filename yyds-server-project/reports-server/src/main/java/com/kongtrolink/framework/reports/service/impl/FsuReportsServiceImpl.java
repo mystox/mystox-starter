@@ -104,7 +104,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
 
         }*/
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
         /*if (month == 1) {
             month = 12;
@@ -306,7 +306,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
         List<FsuRunStateTemp> fsuRunStateTemps = new ArrayList<>();
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -468,7 +468,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<FsuOfflineDetailsTemp> fsuOfflineDetailsTemps = new ArrayList<FsuOfflineDetailsTemp>();
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
         /*if (month == 1) {
             month = 12;
