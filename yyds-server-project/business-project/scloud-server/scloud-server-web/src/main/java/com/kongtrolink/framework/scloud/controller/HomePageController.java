@@ -151,6 +151,8 @@ public class HomePageController extends ExportController {
     public @ResponseBody JsonResult getSiteModel(@RequestBody SiteQuery siteQuery) {
         try{
             String uniqueCode = getUniqueCode();
+            siteQuery.setCurrentRoot(isCurrentRoot());
+            siteQuery.setUserId(getUserId());
             //统计交维态的站点总数
             SiteModel siteModel = homePageService.getSiteModel(uniqueCode,siteQuery);
             return new JsonResult(siteModel);
