@@ -3,8 +3,11 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.entity.model.home.*;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.HomePageService;
+import com.kongtrolink.framework.scloud.service.SiteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,8 @@ public class HomePageServiceImpl implements HomePageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomePageServiceImpl.class);
     @Autowired
     private HomePageMongo homePageMongo;
+    @Autowired
+    private SiteService siteService;
     /**
      * 首页 - 站点数量(交维态/所有)
      *
@@ -131,7 +136,7 @@ public class HomePageServiceImpl implements HomePageService {
             for(HomeFsuOnlineInfo onlineInfo:stateList){
                 String siteCode = onlineInfo.getSiteCode();
                 List<HomeFsuOnlineInfo> fsuList = new ArrayList<>();
-                if(map.containsKey(siteCode)){
+                if(stateMap.containsKey(siteCode)){
                     fsuList = stateMap.get(siteCode);
                 }
                 fsuList.add(onlineInfo);
@@ -143,6 +148,7 @@ public class HomePageServiceImpl implements HomePageService {
             siteInfo.setFsuOnlineInfo(stateMap.get(siteInfo.getCode()));
         }
         return list;
+
     }
 
     /**
@@ -224,5 +230,14 @@ public class HomePageServiceImpl implements HomePageService {
     @Override
     public List<HomeFsuOnlineModel> getHomeFsuOnlineModel(String uniqueCode, String userId, HomeQuery homeQuery) {
         return homePageMongo.getHomeFsuOnlineModel(uniqueCode,userId,homeQuery);
+    }
+
+    @Override
+    public SiteModel getSiteModel(String uniqueCode, SiteQuery siteQuery) {
+        List<SiteModel> list = siteService.findSiteList(uniqueCode,siteQuery);
+        if(list==null || list.size()==0){
+            return new SiteModel();
+        }
+        return list.get(0);
     }
 }

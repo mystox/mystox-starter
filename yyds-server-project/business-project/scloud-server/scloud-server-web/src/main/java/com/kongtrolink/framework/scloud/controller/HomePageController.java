@@ -6,7 +6,9 @@ import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.dao.HomePageMongo;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.entity.model.home.*;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.HomePageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -144,5 +146,21 @@ public class HomePageController extends ExportController {
         return new JsonResult("查询失败",false);
 
     }
+
+    @RequestMapping(value = "/siteModel", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getSiteModel(@RequestBody SiteQuery siteQuery) {
+        try{
+            String uniqueCode = getUniqueCode();
+            siteQuery.setCurrentRoot(isCurrentRoot());
+            siteQuery.setUserId(getUserId());
+            //统计交维态的站点总数
+            SiteModel siteModel = homePageService.getSiteModel(uniqueCode,siteQuery);
+            return new JsonResult(siteModel);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new JsonResult("查询失败",false);
+    }
+
 
 }

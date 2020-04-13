@@ -65,9 +65,9 @@ public class WorkDao {
         if(!StringUtil.isNUll(sendType)){
             criteria.and("sendType").is(sendType);
         }
-        String status = workQuery.getStatus();
-        if(!StringUtil.isNUll(status)){
-            criteria.and("status").is(status);
+        String state = workQuery.getState();
+        if(!StringUtil.isNUll(state)){
+            criteria.and("state").is(state);
         }
         String code = workQuery.getCode();
         if(!StringUtil.isNUll(code)){

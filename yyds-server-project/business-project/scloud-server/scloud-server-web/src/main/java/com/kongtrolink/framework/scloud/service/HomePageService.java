@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.entity.model.home.*;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 
 import java.util.List;
 
@@ -55,4 +57,5 @@ public interface HomePageService {
      */
     List<HomeFsuOnlineModel> getHomeFsuOnlineModel(String uniqueCode, String userId, HomeQuery homeQuery);
 
+    SiteModel getSiteModel(String uniqueCode, SiteQuery siteQuery);
 }

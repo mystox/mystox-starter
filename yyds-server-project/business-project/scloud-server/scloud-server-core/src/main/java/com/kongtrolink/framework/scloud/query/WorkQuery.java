@@ -16,7 +16,7 @@ public class WorkQuery extends Paging{
     private String enterpriseCode;              //企业编码
     private String serverCode;                  //服务编码
     private String sendType;            //派单类型
-    private String status;              //工单状态
+    private String state;              //工单状态
     private String code;                //流水号
     private String siteCode;            //站点编码
     private String siteName;            //站点名称
@@ -122,12 +122,12 @@ public class WorkQuery extends Paging{
         this.sendType = sendType;
     }
 
-    public String getStatus() {
-        return status;
+    public String getState() {
+        return state;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getCode() {
