@@ -7,7 +7,7 @@ spring:
     database: 2
 
 server:
-  groupCode: GROUP_LIUDD_TEST20200407
+  groupCode: GROUP_LIUDD_TEST20200409
   port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #  serverUri: /home #首页名
   pageRoute: proxy_alarm
@@ -24,7 +24,7 @@ mqtt:
   url: tcp://172.16.5.62:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 
 mongodb:
-  uri: mongodb://172.16.6.9:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm-server
 
 unique:
   service:
