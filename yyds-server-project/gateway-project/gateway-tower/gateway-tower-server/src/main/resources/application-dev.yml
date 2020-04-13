@@ -24,8 +24,8 @@ management:
     enabled: false
 ###########消息框架相关配置#############
 server:
-  groupCode: GROUP
-  host: 172.16.6.16
+  groupCode: GROUP_LIUDD_TEST20200409
+#  host: 172.16.6.16
   name: GATEWAY_${gateway.businessCode}_${gateway.enterpriseCode} #服务编码
   port: 52002 #服务占用web端口
 mqtt:

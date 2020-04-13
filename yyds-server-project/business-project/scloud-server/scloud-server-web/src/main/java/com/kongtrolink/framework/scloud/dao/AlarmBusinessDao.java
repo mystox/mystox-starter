@@ -69,7 +69,7 @@ public class AlarmBusinessDao {
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("trecover", alarmBusiness.getTrecover());
-        update.set("state", alarmBusiness.getState());
+        update.set("state", BaseConstant.ALARM_STATE_RESOLVE);
         WriteResult result = mongoTemplate.updateFirst(query, update, unuqieCode + table);
         return result.getN()>0 ? true : false;
     }
