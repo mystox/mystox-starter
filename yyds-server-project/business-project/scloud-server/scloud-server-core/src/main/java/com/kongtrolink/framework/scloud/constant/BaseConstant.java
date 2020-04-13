@@ -29,4 +29,13 @@ public class BaseConstant {
     public static String UNDERLINE = "_";
     public static String COLON = ":";
 
+    public static String OPERATE_ADD = "新增";
+    public static String OPERATE_DELETE = "删除";
+    public static String OPERATE_UPDATE = "修改";
+    public static String OPERATE_USE = "启用";
+    public static String OPERATE_FORBIT = "禁用";
+
+    public static String RESULT_SUCC = "成功";
+    public static String RESULT_FAIL = "失败";
+
 }
