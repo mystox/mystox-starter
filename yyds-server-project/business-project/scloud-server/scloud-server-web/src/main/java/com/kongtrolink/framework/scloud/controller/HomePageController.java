@@ -38,6 +38,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             List<HomeSiteAlarmMap> list = homePageService.getHomeSiteAlarmMap(uniqueCode,userId,homeQuery);
             return new JsonResult(list);
         }catch (Exception e){
@@ -55,6 +56,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             //统计交维态的站点总数
             HomeFsuNumber homeFsuNumber = homePageService.getHomeFsuNumber(uniqueCode,userId,homeQuery);
             return new JsonResult(homeFsuNumber);
@@ -73,6 +75,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             //统计交维态的站点总数
             List<HomeSiteAlarmMap> list = homePageService.getHomeSiteList(uniqueCode,userId,homeQuery);
             return new JsonResult(list);
@@ -93,6 +96,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             HomeAlarmLevelNum value = homePageService.getHomeAlarmLevelNum(uniqueCode,userId,homeQuery);
             return new JsonResult(value);
         }catch (Exception e){
@@ -113,6 +117,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             HomeWorkDto list = homePageService.getHomeWorkModel(uniqueCode,userId,homeQuery);
             return  new JsonResult(list);
         }catch (Exception e){
@@ -129,6 +134,7 @@ public class HomePageController extends ExportController {
         try{
             String uniqueCode = getUniqueCode();
             String userId = getUserId();
+            homeQuery.setCurrentRoot(isCurrentRoot());
             //统计交维态的站点总数
             List<HomeFsuOnlineModel> list = homePageService.getHomeFsuOnlineModel(uniqueCode,userId,homeQuery);
             int total = 0;
