@@ -21,7 +21,6 @@ public class HomeAlarmCountTemp {
     private String stationId; //站点id
     private String stationType;//站点类型
     private String alarmLevel; //告警等级
-    private String alarmState; //告警状态： 历史告警
     private Long alarmCount; //告警总数
 
     public String getId() {
@@ -110,14 +109,6 @@ public class HomeAlarmCountTemp {
 
     public void setAlarmLevel(String alarmLevel) {
         this.alarmLevel = alarmLevel;
-    }
-
-    public String getAlarmState() {
-        return alarmState;
-    }
-
-    public void setAlarmState(String alarmState) {
-        this.alarmState = alarmState;
     }
 
     public Long getAlarmCount() {

@@ -124,7 +124,7 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
                 jsonObjects.forEach(entity -> {
                     //填充站点告警统计信息
                     HomeAlarmCountTemp alarmCountTemp = new HomeAlarmCountTemp();
-                    alarmCountTemp.setTime(sdf.format(new Date(time)));
+                    alarmCountTemp.setTime(time);
                     alarmCountTemp.setTempDate(timeDate);
                     alarmCountTemp.setAlarmLevel(entity.getString("name"));
                     alarmCountTemp.setAlarmCount(entity.getLong("count"));
@@ -163,9 +163,6 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
         String taskId = reportTask.getId();
         JSONObject condition = reportConfig.getCondition();//获取查询条件
         String statisticLevel = condition.getString("statisticLevel");
-        //根据用户id的区域权限及其搜索条件获取站点列表筛选
-        JSONObject currentUser = condition.getJSONObject("currentUser");
-        if (currentUser == null) currentUser = new JSONObject();
         List<JSONObject> alarmCountList = new ArrayList<>();
         TimePeriod timePeriod = condition.getObject("timePeriod", TimePeriod.class);
         if (timePeriod == null) {

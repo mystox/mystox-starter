@@ -12,6 +12,7 @@ public class HomeQuery implements Serializable{
 
     private static final long serialVersionUID = 2364848418917007425L;
 
+    private String serverCode;
     private String tierCode; // 区域code
     private Date startTime;//开始时间
     private Date endTime; //结束时间
@@ -38,5 +39,13 @@ public class HomeQuery implements Serializable{
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
     }
 }
