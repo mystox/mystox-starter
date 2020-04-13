@@ -36,7 +36,7 @@ mqtt:
 
 mongodb:
 #  uri: mongodb://172.16.5.61:27017/alarm_server
-  uri: mongodb://scloud:123456@172.16.6.37:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm_server
 
 
 executor:
