@@ -58,7 +58,7 @@ public class HomeAlarmCountTempDao extends MongoBaseDao {
             fields = fields.and(Fields.fields("county"));
         }
         if (StatisticLevel.site.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("stationId", "stationName"));
+            fields = fields.and(Fields.fields("stationName"));
         }
         Aggregation aggregation = Aggregation.newAggregation(
                 match(criteria),
