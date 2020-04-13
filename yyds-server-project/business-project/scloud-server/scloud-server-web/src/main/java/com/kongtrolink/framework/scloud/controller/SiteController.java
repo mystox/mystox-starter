@@ -50,6 +50,8 @@ public class SiteController extends BaseController{
     public @ResponseBody JsonResult getSiteList(@RequestBody SiteQuery siteQuery){
         try{
 //            String uniqueCode = getUniqueCode();
+            siteQuery.setCurrentRoot(isCurrentRoot());
+            siteQuery.setUserId(getUserId());
             List<SiteModel> list = siteService.findSiteList(uniqueCode, siteQuery);
             return new JsonResult(list);
         }catch (Exception e){
@@ -65,6 +67,8 @@ public class SiteController extends BaseController{
     public void exportSiteList(@RequestBody SiteQuery siteQuery, HttpServletResponse response){
         try{
 //            String uniqueCode = getUniqueCode();
+            siteQuery.setCurrentRoot(isCurrentRoot());
+            siteQuery.setUserId(getUserId());
             List<SiteModel> list = siteService.findSiteList(uniqueCode, siteQuery);
             HSSFWorkbook workbook = siteService.exportSiteList(list);
             export(response, workbook, "站点资产信息列表");
@@ -233,6 +237,8 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "/getSimplifiedSiteList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getSimplifiedSiteList(@RequestBody SiteQuery siteQuery){
 //        String uniqueCode = getUniqueCode();
+        siteQuery.setCurrentRoot(isCurrentRoot());
+        siteQuery.setUserId(getUserId());
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         List<JSONObject> objectList = siteService.getSimplifiedSiteList(siteModelList,siteQuery);
         return new JsonResult(objectList);
