@@ -83,7 +83,7 @@ public class MqttServiceImpl implements MqttService {
      */
     @Override
     public String sdgdScloudAlarmResolve(String jsonStr) {
-        LOGGER.debug("sdgdScloudAlarmResolve--receive:{}", jsonStr);
+        LOGGER.info("sdgdScloudAlarmResolve--receive:{}", jsonStr);
         List<Alarm> alarmList = JSONObject.parseArray(jsonStr, Alarm.class);
         List<AlarmBusiness> businessList = new ArrayList<>();
         for(Alarm alarm : alarmList){
@@ -103,7 +103,7 @@ public class MqttServiceImpl implements MqttService {
 
     @Override
     public String sdgdScloudAlarmHistory(String jsonStr) {
-        LOGGER.debug("sdgdScloudAlarmHistory--receive:{}", jsonStr);
+        LOGGER.info("sdgdScloudAlarmHistory--receive:{}", jsonStr);
         List<String> keyList = JSONObject.parseArray(jsonStr, String.class);
         Map<String, List<String>> enterpriseCodeKeyListMap = new HashMap<>();
         for(String key : keyList){
@@ -113,6 +113,7 @@ public class MqttServiceImpl implements MqttService {
                 enterpriseCodeKeyList = new ArrayList<>();
             }
             enterpriseCodeKeyList.add(key);
+            enterpriseCodeKeyListMap.put(enterpriseCode, enterpriseCodeKeyList);
         }
         //从实时表获取告警列表，然后删除
         for(String enterpriseCode : enterpriseCodeKeyListMap.keySet()){
