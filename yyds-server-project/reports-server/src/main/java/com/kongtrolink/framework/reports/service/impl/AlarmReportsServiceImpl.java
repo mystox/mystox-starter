@@ -821,7 +821,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         JSONObject condition = reportConfig.getCondition();//获取查询条件
         String alarmStatus = condition.getString("alarmStatus");
         String statisticLevel = condition.getString("statisticLevel");
-        //根据用户id的区域权限及其搜索条件获取站点列表筛选
         JSONObject currentUser = condition.getJSONObject("currentUser");
         if (currentUser == null) currentUser = new JSONObject();
         JSONObject statisticPeriod = condition.getJSONObject("statisticPeriod");
