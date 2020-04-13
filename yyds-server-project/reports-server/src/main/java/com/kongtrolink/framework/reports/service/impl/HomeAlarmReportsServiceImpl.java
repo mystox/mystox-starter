@@ -50,9 +50,9 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
 
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "homeAlarmCount", rhythm = 3600 * 24, dataType = {DataType.TABLE, DataType.FILE}, extend = {
-            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/proxy_ap/region/getCurrentRegion"), //区域层级
-            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/region/getStationList", hide = true), //站点列表
+            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/reportsOpera/getStationList", hide = true), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.JSON, belong = ExecutorType.query, uri = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
+            @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "区县级", "站点级"}),
             @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE_PERIOD, belong = ExecutorType.query, description = "时间范围,返回格式为{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}"),
     })
     public ReportData alarmCount(String reportConfigStr) {
@@ -191,11 +191,11 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
         if (StringUtils.equalsAny(statisticLevel, "省级", "市级", "区县级")) {
             tableHead = new String[]{"区域层级", "告警总数"};
         } else
-            tableHead = new String[]{"区域层级", "站点名称", "告警总数"};
+            tableHead = new String[]{"站点名称", "告警总数"};
 
         int colLength = tableHead.length; // 列
-        int rowLength = alarmCountList.size() + 1; //行数
-        String[][] sheetData = new String[rowLength + 4][colLength];
+        int rowLength = alarmCountList.size()+1; //行数
+        String[][] sheetData = new String[rowLength][colLength];
 
         for (int i = 0; i < rowLength; i++) {
             String[] row = sheetData[i];
@@ -203,14 +203,9 @@ public class HomeAlarmReportsServiceImpl implements HomeAlarmReportsService {
                 sheetData[i] = tableHead;
                 continue;
             }
-            JSONObject jsonObject = alarmCountList.get(i - 1);
-            row[0] = CommonCheck.aggregateTierName(jsonObject);
-            int a = 0;
-            if (colLength > 2) {
-                row[1] = jsonObject.getString("stationName");
-                a = 1;
-            }
-            row[1 + a] = jsonObject.getString("alarmCount");
+            JSONObject jsonObject = alarmCountList.get(i-1);
+            row[0] = jsonObject.getString("_id");
+            row[1] = jsonObject.getString("alarmCount");
         }
         return new String[][][]{sheetData};
     }

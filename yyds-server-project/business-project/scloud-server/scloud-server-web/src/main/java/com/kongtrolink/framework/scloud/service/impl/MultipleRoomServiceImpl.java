@@ -104,6 +104,7 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
         List<String> siteCodes = new ArrayList<>();
         siteCodes.add(siteCode);
         DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setServerCode(query.getServerCode());
         deviceQuery.setSiteCodes(siteCodes);
         List<DeviceModel> deviceList =  deviceService.findDeviceList(uniqueCode, deviceQuery);
         List<RoomDevice> list = getRoomDeviceList(uniqueCode,deviceList,siteCode,query.getServerCode());
@@ -112,24 +113,23 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
 
     private List<RoomDevice> getRoomDeviceList(String uniqueCode, List<DeviceModel> deviceList,String siteCode,String serverCode){
         Map<String,List<RoomDeviceInfo>> map = new HashMap<>();
-        Map<String,String> deviceFsuMap = new HashMap<>();//DEVICE所属FSU的map
+//        Map<String,String> deviceFsuMap = new HashMap<>();//DEVICE所属FSU的map
         List<String> deviceTypeCodeList = new ArrayList<>();
-        Map<String, DeviceModel> fsuMap = new HashMap<>();
         for(DeviceModel device : deviceList){
             String typeCode = device.getTypeCode();
             deviceTypeCodeList.add(typeCode);
-            if("038".equals(typeCode)){
-                fsuMap.put(device.getCode(),device);
-                DeviceQuery deviceQuery = new DeviceQuery();
-                deviceQuery.setDeviceCode(device.getCode());
-                deviceQuery.setServerCode(serverCode);
-                List<RelatedDeviceInfo> relatedDeviceInfos = deviceService.findRelatedDeviceList(uniqueCode, deviceQuery);
-                if(relatedDeviceInfos!=null){
-                    for(RelatedDeviceInfo deviceInfo:relatedDeviceInfos){
-                        deviceFsuMap.put(deviceInfo.getDeviceCode(),device.getCode());
-                    }
-                }
-            }
+//            if("038".equals(typeCode)){
+//                fsuMap.put(device.getCode(),device);
+//                DeviceQuery deviceQuery = new DeviceQuery();
+//                deviceQuery.setDeviceCode(device.getCode());
+//                deviceQuery.setServerCode(serverCode);
+//                List<RelatedDeviceInfo> relatedDeviceInfos = deviceService.findRelatedDeviceList(uniqueCode, deviceQuery);
+//                if(relatedDeviceInfos!=null){
+//                    for(RelatedDeviceInfo deviceInfo:relatedDeviceInfos){
+//                        deviceFsuMap.put(deviceInfo.getDeviceCode(),device.getCode());
+//                    }
+//                }
+//            }
         }
         List<RoomDeviceType> roomDeviceTypeList = multipleRoomDao.getByDeviceTypeList(uniqueCode, deviceTypeCodeList);
         Map<String, List<RoomSignalType>> deviceTypeCodeSignalListMap = multipleRoomDao.deviceTypeList2CodeSignalMap(roomDeviceTypeList);
@@ -141,18 +141,9 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
             deviceInfo.setDeviceId(device.getId());
             deviceInfo.setDeviceName(device.getName());
             deviceInfo.setDeviceCode(device.getCode());
-            int alarmNum = deviceIdAlarmCountMap.get(device.getId());
-            if(alarmNum>0){
-                deviceInfo.setStatus("告警");
-            }else{
-                //设备的在线状态 - FSU的在线状态
-                if(deviceFsuMap.containsKey(device.getCode())){
-                    String fsuCode = deviceFsuMap.get(device.getCode());
-                    if(fsuMap.containsKey(fsuCode)){
-                        deviceInfo.setStatus(fsuMap.get(fsuCode).getState());
-                    }
-                }
-            }
+            Integer alarmNum = deviceIdAlarmCountMap.get(device.getId());
+            deviceInfo.setAlarmNum(alarmNum==null?0:alarmNum);
+            deviceInfo.setStatus(device.getState());
             //查询 该设备是否有自定义配置
             RoomSignalTypeConfig signalConfig =  queryRoomSignalTypeConfig(uniqueCode,device.getId());
             List<RoomSignalType> signalTypeList = deviceTypeCodeSignalListMap.get(deviceType);
