@@ -27,6 +27,11 @@ public class MqttOperaRestController {
     @RequestMapping("/operaSync")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
         MsgResult opera = mqttOpera.opera(operaCode,message,2,120, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (stateCode == 1) {
+            String msg = opera.getMsg();
+            System.out.println(msg);
+        }
         return new JsonResult(opera);
     }
 

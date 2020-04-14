@@ -1,5 +1,8 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.UserEntity;
@@ -11,13 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,22 +35,81 @@ public class UserController extends BaseController{
     @Autowired
     UserService userService;
 
-    private String uniqueCode = "YYDS"; //写死，为了自测用
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    /**
-     * 导出系统用户列表
-     */
-    @RequestMapping(value = "exportUserList", method = RequestMethod.POST)
-    public void exportUserList(@RequestBody UserQuery userQuery, HttpServletResponse response){
-        try{
-//            String uniqueCode = getUniqueCode();
 
+    /**
+     * 增加系统用户
+     */
+    @RequestMapping(value = "addUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
+        try {
+            userService.addUser(getUniqueCode(),userModel);
+            return new JsonResult("添加成功",true);
         }catch (Exception e){
             e.printStackTrace();
+            return new JsonResult("添加失败",false);
         }
     }
 
+    /**
+     * 修改系统用户
+     */
+    @RequestMapping(value = "modifyUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult modifyUser(@RequestBody UserModel userModel){
+        boolean modifyResult = userService.modifyUser(getUniqueCode(),userModel);
+        try {
+            if (modifyResult){
+                return new JsonResult("修改成功",true);
+            }else {
+                return new JsonResult("修改失败",false);
+            }
+        }catch (Exception e){
+            return new JsonResult("修改异常",false);
+        }
+    }
+
+    /**
+     * 删除系统用户
+     */
+    @RequestMapping(value = "deleteUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult deleteUser(@RequestBody UserModel userModel){
+        try {
+            if (userModel.getUserId() != null && userModel.getUserId() != ""){
+                userService.deleteUser(getUniqueCode(),userModel);
+                return new JsonResult("删除成功",true);
+            }else {
+                return new JsonResult("删除失败",true);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("删除失败",true);
+        }
+    }
+
+    /**
+     * 用户列表
+     */
+    @RequestMapping(value = "listUser", method = RequestMethod.POST)
+    @Transactional
+    public List<JSONObject> listUser(@RequestBody UserQuery userQuery){
+
+        List<JSONObject> userResult = userService.listUser(getUniqueCode(),userQuery);
+        return userResult;
+    }
+    /**
+     * 导出系统用户
+     */
+    @RequestMapping(value = "exportUserList",method = RequestMethod.POST)
+    public void exportUserList(@RequestBody UserQuery userQuery){
+        List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery);
+        List<UserModel> result = new ArrayList<>();
+        for (JSONObject list:userList){
+            UserModel user = JSON.toJavaObject(list,UserModel.class);
+            result.add(user);
+        }
+    }
     /**
      * 批量导入系统用户
      */
