@@ -90,15 +90,15 @@ public class UserServiceImpl implements UserService {
             Object data = jsonResult.getData();
             String userId = String.valueOf(data);//填充数据库实体
             userEntity.setUserId(userId);
-            userEntity.setLockStatus(userModel.getLockStatus());
+//            userEntity.setLockStatus(userModel.getLockStatus());
             userEntity.setUserStatus(userModel.getUserStatus());
             userEntity.setValidTime(userModel.getValidTime());
             userEntity.setWorkId(userModel.getWorkId());
-            userEntity.setCreateTime(userModel.getCreateTime());
-            userEntity.setLastLogin(userModel.getLastLogin());
-            userEntity.setChangeTime(userModel.getChangeTime());
+//            userEntity.setCreateTime(userModel.getCreateTime());
+//            userEntity.setLastLogin(userModel.getLastLogin());
+//            userEntity.setChangeTime(userModel.getChangeTime());
             userEntity.setRemark(userModel.getRemark());
-            userEntity.setPassword(userModel.getPassword());
+//            userEntity.setPassword(userModel.getPassword());
             userEntity.setSex(userModel.getSex());
             userEntity.setUserTime(userModel.getUserTime());
             userMongo.addUser(uniqueCode,userEntity);

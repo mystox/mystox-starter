@@ -5,9 +5,12 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
 
 /**
  * \* @Author: mystox
@@ -20,19 +23,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServiceLoginController extends BaseController {
 
 
+    @Autowired
     UserService userService;
 
     @RequestMapping("/login")
-    public JsonResult serviceLogin(@RequestBody  JSONObject body) {
-
+    public JsonResult serviceLogin(@RequestBody JSONObject body) {
         String uniqueCode = getUniqueCode();
         String userId = getUserId();
         UserModel userModel = userService.getUserById(uniqueCode, userId);
-        //todo 获取锁定状态
-        if (true)
-            return new JsonResult("帐号已锁定，请联系管理人员", false);
-        return new JsonResult("登录成功",true);
-
+        Date validTime = userModel.getValidTime();
+        if (validTime != null)
+            new JsonResult("账号已过期", false);
+        return new JsonResult("用户登录服务验证成功", true);
     }
+
+
 
 }
