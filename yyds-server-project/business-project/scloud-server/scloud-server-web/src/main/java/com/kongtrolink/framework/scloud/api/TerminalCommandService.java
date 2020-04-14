@@ -20,5 +20,9 @@ public interface TerminalCommandService {
      */
     @OperaCode(code = ScloudBusinessOperate.LOGIN)
     String login(String message);
-
+    /**
+     *  SC向GW请求监控点数据
+     */
+    @OperaCode(code = ScloudBusinessOperate.LOGIN_OFFINE)
+    String loginOffline(String message);
 }

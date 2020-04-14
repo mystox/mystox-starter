@@ -4,6 +4,7 @@ package com.kongtrolink.framework.scloud.api;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginAckMessage;
 import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginOfflineMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,18 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         LoginAckMessage ack = new LoginAckMessage();
         ack.setResult(true);
         return JSONObject.toJSONString(ack);
+    }
+
+    /**
+     * SC向GW请求监控点数据
+     *
+     * @param message
+     */
+    @Override
+    public String loginOffline(String message) {
+        LoginOfflineMessage recServerBase = JSONObject.parseObject(message,LoginOfflineMessage.class);
+
+        return "";//不需要返回
     }
 
 
