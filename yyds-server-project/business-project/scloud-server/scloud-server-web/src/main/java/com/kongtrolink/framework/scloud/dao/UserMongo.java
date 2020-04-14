@@ -1,17 +1,16 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
-import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
-import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.UserEntity;
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.mongodb.WriteResult;
-import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -113,7 +112,7 @@ public class UserMongo {
         }
         criteria.andOperator(criteria1);
         Query query = new Query(criteria);
-        UserModel user = (UserModel) mongoTemplate.find(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
+        UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
         return user;
     }
 }
