@@ -123,7 +123,7 @@ public class AlarmBusinessController extends ExportController{
     /**
      * @auther: liudd
      * @date: 2020/4/14 15:50
-     * 功能描述:告警频发站，最大一个月
+     * 功能描述:告警频发站，允许选择一个月时间跨度
      */
     @RequestMapping("/alarmSiteHistory")
     @ResponseBody
