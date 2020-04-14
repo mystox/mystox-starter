@@ -13,5 +13,4 @@ public interface AlarmLevelService {
     JSONObject getLastUse(AlarmLevelQuery alarmLevelQuery);
 
     JSONObject getDeviceTypeList(AlarmLevelQuery alarmLevelQuery);
-
 }

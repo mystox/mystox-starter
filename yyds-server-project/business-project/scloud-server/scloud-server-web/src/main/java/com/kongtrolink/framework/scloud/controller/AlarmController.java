@@ -1,7 +1,6 @@
 package com.kongtrolink.framework.scloud.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.exception.ParameterException;
@@ -36,17 +35,9 @@ public class AlarmController extends ExportController{
     @Autowired
     AlarmService alarmService;
     @Autowired
-    SiteService siteService;
-    @Autowired
-    DeviceService deviceService;
+    AlarmBusinessService businessService;
     @Autowired
     MqttOpera mqttOpera;
-    @Autowired
-    AlarmFocusService alarmFocusService;
-    @Autowired
-    FilterRuleService filterRuleService;
-    @Autowired
-    AlarmBusinessService businessService;
 
     /**
      * @auther: liudd

@@ -7,7 +7,7 @@ spring:
     database: 2
 
 server:
-  groupCode: GROUP
+  groupCode: GROUP_LIUDD_2020041301
   port: 19000 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3 \u5360\u7528\u62E6\u622A{/mqtt/*,/register*}
 #  serverUri: /home #首页名
   pageRoute: proxy_alarm
@@ -25,7 +25,7 @@ mqtt:
 
 mongodb:
 #  uri: mongodb://172.16.6.9:27017/alarm_server
-  uri: mongodb://172.16.5.61:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm-server
 
 unique:
   service:

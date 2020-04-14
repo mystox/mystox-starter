@@ -121,6 +121,9 @@ public class MqttServiceImpl implements MqttService {
         for(String enterpriseCode : enterpriseCodeKeyListMap.keySet()){
             List<String> keys = enterpriseCodeKeyListMap.get(enterpriseCode);
             List<AlarmBusiness> businessList = businessService.listByKeyList(enterpriseCode, CollectionSuffix.CUR_ALARM_BUSINESS, keys);
+            for(AlarmBusiness alarmBusiness : businessList){
+                alarmBusiness.setTable(CollectionSuffix.HIS_ALARM_BUSINESS);
+            }
             boolean addResult = businessService.add(enterpriseCode, CollectionSuffix.HIS_ALARM_BUSINESS, businessList);
             if(addResult) {
                 businessService.deleteByKeyList(enterpriseCode, CollectionSuffix.CUR_ALARM_BUSINESS, keys);

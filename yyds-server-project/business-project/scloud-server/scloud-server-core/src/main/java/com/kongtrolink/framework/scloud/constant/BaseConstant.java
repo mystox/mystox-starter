@@ -38,4 +38,5 @@ public class BaseConstant {
     public static String RESULT_SUCC = "成功";
     public static String RESULT_FAIL = "失败";
 
+    public static String BASE_ALL = "全部";
 }
