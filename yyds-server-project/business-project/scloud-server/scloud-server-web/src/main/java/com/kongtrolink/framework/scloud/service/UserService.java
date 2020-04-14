@@ -2,7 +2,6 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
-import com.kongtrolink.framework.scloud.query.UserQuery;
 
 import java.util.List;
 
@@ -21,4 +20,13 @@ public interface UserService {
      * 获取用户管辖站点
      */
     List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
+
+    /**
+     * @Date 13:12 2020/4/14
+     * @Param No such property: code for class: Script1
+     * @return com.kongtrolink.framework.scloud.entity.model.UserModel
+     * @Author mystox
+     * @Description //根据用户id 获取用户
+     **/
+    UserModel getUserById(String uniqueCode, String userId);
 }

@@ -14,4 +14,17 @@ mqtt:
 ########## mongo数据库配置 ##########
 mongodb:
   uri: mongodb://172.16.5.61:27017/reports_server
+###########日志配置###########
+logging:
+  level:
+    root: info
+    com.kongtrolink.framework: INFO
+    com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    com.kongtrolink.framework.reports.service.impl: debug
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 

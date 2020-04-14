@@ -101,37 +101,17 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String serverCode = reportConfig.getServerCode();
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<AlarmCountTemp> alarmCountTempList = new ArrayList<AlarmCountTemp>();
-        //获取时间信息
-        /*JSONObject condition = reportConfig.getCondition();
-        if (TaskType.singleTask.name().equals(reportTask.getTaskType())) {
-            String monthStr = condition.getString("month");
-
-        } else {
-
-        }*/
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
         Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
-        if (alarmCycle != null) {
-            int cycleDay = alarmCycle / 24 + 1;
-            if (day <= cycleDay)  //每月前几天周期统计上月的历史数据
-                if (month == 1) {
-                    month = 12;
-                    year -= 1;
-                } else month -= 1;
-        }
+        int month = CommonCheck.getMonth(alarmCycle);
+        int year = CommonCheck.getYear(alarmCycle);
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         logger.debug("get site list is:[{}]", JSONObject.toJSONString(siteList));
         if (!CollectionUtils.isEmpty(siteList)) {
-            int finalMonth = month;
-            int finalYear = year;
             siteList.forEach(s -> {
                 // 获取站点名称
                 String address = s.getAddress();
@@ -146,7 +126,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                 String siteType = s.getSiteType();
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
                 if (CollectionUtils.isEmpty(fsuList)) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    logger.warn("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);
@@ -161,20 +141,14 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
                     logger.debug("get device list is:[{}]", JSONObject.toJSONString(deviceIds));
                 }
                 deviceIds.addAll(fsuIds);
-               /* / Test
-                List<String> deviceIds = new ArrayList<>();
-                String operationState = "交维态";
-                deviceIds.add("10010_1021006");
-                deviceIds.add("10010_1021015");
-                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
                 // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
-                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, finalYear, finalMonth, baseCondition);
+                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, year, month, baseCondition);
                 logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", reportTask.getId());
                 jsonObjects.forEach(entity -> {
                     //填充站点告警统计信息
                     AlarmCountTemp alarmCountTemp = new AlarmCountTemp();
-                    alarmCountTemp.setYear(finalYear);
-                    alarmCountTemp.setMonth(finalMonth);
+                    alarmCountTemp.setYear(year);
+                    alarmCountTemp.setMonth(month);
                     alarmCountTemp.setAlarmLevel(entity.getString("name"));
                     alarmCountTemp.setAlarmCount(entity.getLong("count"));
                     alarmCountTemp.setAlarmRecoveryCount(entity.getLong("recoverCount"));
@@ -201,6 +175,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("executorTime", year + "-" + month);
         jsonObject.put("executorResult", alarmCountTempList);
+        logger.debug("[{}] executorResult:[{}]",reportTaskId,jsonObject);
         return new ReportData(DataType.TEXT, jsonObject.toJSONString());
     }
 
@@ -330,22 +305,13 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<AlarmDetailsTemp> alarmDetailsTempList = new ArrayList<AlarmDetailsTemp>();
         //获取时间信息
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
         Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
-        if (alarmCycle != null) {
-            int cycleDay = alarmCycle / 24 + 1;
-            if (day <= cycleDay)  //每月前两天统计上月的历史数据
-                if (month == 1) {
-                    month = 12;
-                    year -= 1;
-                } else month -= 1;
-        }
+        int month = CommonCheck.getMonth(alarmCycle);
+        int year = CommonCheck.getYear(alarmCycle);
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         if (!CollectionUtils.isEmpty(siteList)) {
@@ -647,22 +613,13 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         String serverCode = reportConfig.getServerCode();
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<AlarmCategoryTemp> alarmCountTempList = new ArrayList<>();
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
         Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
-        if (alarmCycle != null) {
-            int cycleDay = alarmCycle / 24 + 1;
-            if (day <= cycleDay)  //每月前两天统计上月的历史数据
-                if (month == 1) {
-                    month = 12;
-                    year -= 1;
-                } else month -= 1;
-        }
+        int month = CommonCheck.getMonth(alarmCycle);
+        int year = CommonCheck.getYear(alarmCycle);
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
         if (!CollectionUtils.isEmpty(siteList)) {

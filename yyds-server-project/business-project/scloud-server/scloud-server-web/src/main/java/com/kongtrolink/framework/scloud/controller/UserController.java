@@ -2,9 +2,7 @@ package com.kongtrolink.framework.scloud.controller;
 
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.scloud.entity.UserEntity;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
-import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.kongtrolink.framework.scloud.service.UserService;
 import org.slf4j.Logger;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -151,5 +148,6 @@ public class UserController extends BaseController{
         }
     }
     */
+
 
 }

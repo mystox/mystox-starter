@@ -2,11 +2,11 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
+import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -50,5 +50,10 @@ public class UserMongo {
     public void deleteSitesFromUserSite(String uniqueCode, List<String> siteCodes){
         Criteria criteria = Criteria.where("siteCode").in(siteCodes);
         mongoTemplate.remove(new Query(criteria), UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
+    }
+
+    public UserModel findUserById(String uniqueCode, String userId) {
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
+
     }
 }

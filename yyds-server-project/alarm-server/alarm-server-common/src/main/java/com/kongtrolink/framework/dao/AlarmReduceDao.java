@@ -403,19 +403,19 @@ public class AlarmReduceDao {
                 "            return ret;\n" +
                 "        }";
         JSONObject fsuOfflineStatisticList = new JSONObject();
-        Map<String, JSONObject> resultMap = new HashMap<>();
         for (int i = weeks.size() - 1; i >= 0; i--) {
             String week = weeks.get(i);
             logger.debug("map reduce weeks data:[{}]", week);
             String table = tablePrefix + week;
             Criteria criteria = new Criteria();
             criteria = commonQuery(criteria, alarmQuery);
-            criteria.and("name").and("FSU离线告警");
+            criteria.and("name").is("FSU离线告警");
             criteria.and("state").is("已消除");
             boolean b = mongoTemplate.collectionExists(table);
             if (!b) continue;
             MapReduceResults<JSONObject> mapReduceResults = mongoTemplate.mapReduce(
-                    Query.query(criteria), table, map, reduce, JSONObject.class);
+                    Query.query(criteria),
+                    table, map, reduce, JSONObject.class);
             logger.debug("table:{}, reduceResult:[{}]", table, JSONObject.toJSONString(mapReduceResults.iterator()));
             for (JSONObject result : mapReduceResults) {
                 JSONObject value = result.getJSONObject("value");
