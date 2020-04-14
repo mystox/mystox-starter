@@ -13,6 +13,7 @@ import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.kongtrolink.framework.scloud.service.UserService;
+import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
@@ -20,10 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -184,15 +183,64 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * 导出用户列表
+     * @param list
+     * @return
+     */
     @Override
     public HSSFWorkbook exportUserList(List<UserModel> list) {
-        return null;
+        String[][] userSheet = getUserListAsTable(list);
+        HSSFWorkbook workbook = ExcelUtil.getInstance().createWorkBook(
+                new String[] {"系统用户列表"},new String[][][] {userSheet});
+        return workbook;
     }
+
     /**
      * 获取用户管辖站点
      */
     @Override
     public List<UserSiteEntity> getUserSite(String uniqueCode, String userId) {
         return userMongo.findUserSite(uniqueCode, userId);
+    }
+    public String[][] getUserListAsTable(List<UserModel> list){
+        int colNum = 13;
+        int rowNum = list.size() + 1;
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
+        String[][] tableData = new String[colNum][rowNum];
+        for (int i = 0; i < rowNum; i++){
+            String[] row = tableData[i];
+            if (i == 0){
+                row[0] = "账号";
+                row[1] = "隶属角色";
+                row[2] = "姓名";
+                row[3] = "员工工号";
+                row[4] = "性别";
+                row[5] = "联系电话";
+                row[6] = "E-mail";
+                row[7] = "创建时间";
+                row[8] = "有效日期";
+                row[9] = "最后登录日期";
+                row[10] = "密码更改日期";
+                row[11] = "锁定状态";
+                row[12] = "用户状态";
+            }else {
+                UserModel userModel = list.get(i-1);
+                row[0] = userModel.getUsername();
+                row[1] = userModel.getCurrentRoleName();
+                row[2] = userModel.getName();
+                row[3] = userModel.getWorkId();
+                row[4] = userModel.getSex();
+                row[5] = userModel.getPhone();
+                row[6] = userModel.getEmail();
+                row[7] = userModel.getCreateTime()  != null?userModel.getCreateTime():"-";
+                row[8] = userModel.getValidTime() != null?sd.format(new Date(userModel.getValidTime())):"-";
+                row[9] = userModel.getLastLogin();
+                row[10] = userModel.getChangeTime() != null?userModel.getChangeTime():"-";
+                row[11] = userModel.getLockStatus();
+                row[12] = userModel.getUserStatus();
+            }
+        }
+        return tableData;
     }
 }
