@@ -11,5 +11,93 @@ public class UserQuery extends Paging{
     private static final long serialVersionUID = -5591511152856559674L;
 
     private String userId;  //用户Id
+    private String name;        //姓名
+    private String username;        //账号
+    private String currentPostId;   //角色id
+    private String currentRoleName;     //角色名称
+    private String lockStatus;      //锁定状态
+    private String userStatus;      //用户状态
+    private Long validTime;       //有效日期
+    private Long startTime;     //开始时间
+    private Long endTime;       //结束时间
 
+    public String getCurrentRoleName() {
+        return currentRoleName;
+    }
+
+    public void setCurrentRoleName(String currentRoleName) {
+        this.currentRoleName = currentRoleName;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCurrentPostId() {
+        return currentPostId;
+    }
+
+    public void setCurrentPostId(String currentPostId) {
+        this.currentPostId = currentPostId;
+    }
+
+    public String getLockStatus() {
+        return lockStatus;
+    }
+
+    public void setLockStatus(String lockStatus) {
+        this.lockStatus = lockStatus;
+    }
+
+    public String getUserStatus() {
+        return userStatus;
+    }
+
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
+    }
+
+    public Long getValidTime() {
+        return validTime;
+    }
+
+    public void setValidTime(Long validTime) {
+        this.validTime = validTime;
+    }
 }

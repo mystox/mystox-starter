@@ -16,8 +16,9 @@ public class FooServiceImpl implements FooService {
     }
 
     @Override
-    public String boo(String foo) {
-        return null;
+    public String boo(String msg) {
+        System.out.println("============"+msg);
+        return "result";
       /*  JSONObject jsonObject = JSONObject.parseObject(foo);
         Integer a = jsonObject.getInteger("a");
         String s = "你我他";

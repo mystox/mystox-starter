@@ -1,8 +1,11 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
-import com.kongtrolink.framework.scloud.entity.model.UserModel;
+import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.scloud.entity.UserEntity;
 
+import com.kongtrolink.framework.scloud.query.UserQuery;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import java.util.List;
 
 /**
@@ -29,4 +32,24 @@ public interface UserService {
      * @Description //根据用户id 获取用户
      **/
     UserModel getUserById(String uniqueCode, String userId);
+    /**
+     * 添加系统用户
+     */
+    void addUser(String uniqueCode, UserModel userModel);
+    /**
+     * 修改系统用户
+     */
+    boolean modifyUser(String uniqueCode,UserModel userModel);
+    /**
+     * 删除系统用户
+     */
+    void deleteUser(String uniqueCode,UserModel userModel);
+    /**
+     * 用户列表
+     */
+    List<JSONObject> listUser(String uniqueCode, UserQuery userQuery);
+    /**
+     * 导出用户列表
+     */
+    HSSFWorkbook exportUserList(List<UserModel> list);
 }
