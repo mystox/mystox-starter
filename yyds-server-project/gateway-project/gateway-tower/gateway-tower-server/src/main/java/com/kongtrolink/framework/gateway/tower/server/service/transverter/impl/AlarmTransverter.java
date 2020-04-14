@@ -2,12 +2,18 @@ package com.kongtrolink.framework.gateway.tower.server.service.transverter.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.common.util.MqttUtils;
+import com.kongtrolink.framework.core.constant.ScloudBusinessOperate;
 import com.kongtrolink.framework.core.utils.RedisUtils;
+import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.OperaCode;
 import com.kongtrolink.framework.entity.ServerName;
 import com.kongtrolink.framework.gateway.iaiot.core.alarm.AlarmReport;
 import com.kongtrolink.framework.gateway.iaiot.core.alarm.AlarmReportInfo;
 import com.kongtrolink.framework.gateway.tower.core.constant.RedisKey;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginAckMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.mqtt.receive.LoginOfflineMessage;
+import com.kongtrolink.framework.gateway.tower.core.entity.msg.Login;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.SendAlarm;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.TAlarm;
 import com.kongtrolink.framework.gateway.tower.core.entity.msg.XmlList;
@@ -18,6 +24,7 @@ import com.kongtrolink.framework.gateway.tower.server.entity.DeviceConfigEntity;
 import com.kongtrolink.framework.gateway.tower.server.entity.Transverter;
 import com.kongtrolink.framework.gateway.tower.server.service.DeviceTypeConfig;
 import com.kongtrolink.framework.gateway.tower.server.service.transverter.TransverterHandler;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +52,8 @@ public class AlarmTransverter extends TransverterHandler {
     private DeviceTypeConfig deviceTypeConfig;
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    MqttOpera mqttOpera;
 
     public void transferExecute(String payload){
         try{
@@ -57,7 +66,7 @@ public class AlarmTransverter extends TransverterHandler {
             }
             List<AlarmReportInfo> alarmInfoList = new ArrayList<>();
             for(TAlarm pushAlarmInfo:tAlarmLists){
-                String deviceSn = pushAlarmInfo.getFsuId()+"_"+pushAlarmInfo.getDeviceId();
+                String deviceSn = pushAlarmInfo.getDeviceId();
                 AlarmReportInfo alarmInfo = new AlarmReportInfo();
                 String desc = pushAlarmInfo.getAlarmDesc();
                 alarmInfo.setName(desc);
@@ -154,9 +163,31 @@ public class AlarmTransverter extends TransverterHandler {
         redisUtils.hset(RedisKeyUtil.getRedisKey(uniqueCode,RedisKey.FSU_ALARM_INFO),sn,String.valueOf(serial));
         //推送给告警模块
         sendMessage(alarmInfoList);
-
+        //推送平台
+        loginAck(sn);
     }
 
+    /**
+     * 推送到业务平台
+
+     */
+    private boolean loginAck(String fsuId){
+        try{
+            LoginOfflineMessage loginMessage = new LoginOfflineMessage();
+            loginMessage.setFsuId(fsuId);
+            loginMessage.setEnterpriseCode(getEnterpriseCode());
+            loginMessage.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
+            loginMessage.setServerCode(getBusinessCode());
+            MsgResult msgResult = mqttOpera.opera(ScloudBusinessOperate.LOGIN_OFFINE,JSONObject.toJSONString(loginMessage));
+            if(msgResult!=null && msgResult.getMsg()!=null){
+                LoginAckMessage ackMessage = JSONObject.parseObject(msgResult.getMsg(),LoginAckMessage.class);
+                return ackMessage.isResult();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
     private void sendMessage(List<AlarmReportInfo> alarmInfoList){
         AlarmReport report = new AlarmReport();
         report.setEnterpriseCode(getEnterpriseCode());

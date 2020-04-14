@@ -26,18 +26,49 @@ public class MqttOperaRestController {
 
     @RequestMapping("/operaSync")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
-        MsgResult opera = mqttOpera.opera(operaCode,message,2,120, TimeUnit.SECONDS);
-        int stateCode = opera.getStateCode();
-        if (stateCode == 1) {
-            String msg = opera.getMsg();
-            System.out.println(msg);
-        }
+
+
+
+
+
+
+
+
+        //
+
+
+
+        MsgResult opera = mqttOpera.opera("getDevice",message,2,120, TimeUnit.SECONDS);
+
+
+
+        //
+
+
+
+
+
+
+
+
+
+
+
         return new JsonResult(opera);
     }
 
     @RequestMapping("/operaAsync")
     public JsonResult operaAsync(@RequestParam String operaCode,@RequestBody String message) {
+
+
+
         mqttOpera.operaAsync(operaCode,message);
+
+
+
+
+
+
         return new JsonResult();
     }
     @RequestMapping("/broadcast")

@@ -1,14 +1,9 @@
 package com.kongtrolink.framework.scloud.task;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
-import com.kongtrolink.framework.scloud.mqtt.impl.MqttServiceImpl;
-import com.kongtrolink.framework.scloud.service.AlarmService;
-import com.kongtrolink.framework.scloud.service.ShieldRuleService;
-import com.kongtrolink.framework.scloud.service.WorkAlarmConfigService;
-import com.kongtrolink.framework.scloud.service.WorkService;
+import com.kongtrolink.framework.scloud.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,57 +20,61 @@ public class AlarmMsgTask implements Runnable{
     private ShieldRuleService shieldRuleService;
     private WorkAlarmConfigService alarmConfigService;
     private AlarmService alarmService;
+    private AlarmBusinessService businessService;
     private WorkService workService;
-    private ConcurrentLinkedQueue<JSONObject> msgQueue = new ConcurrentLinkedQueue<>();
+    RedefineRuleService ruleService;
+    private ConcurrentLinkedQueue<AlarmBusiness> msgQueue = new ConcurrentLinkedQueue<>();
+    private String cur_alarm_business = CollectionSuffix.CUR_ALARM_BUSINESS;
+    private String his_alarm_business = CollectionSuffix.HIS_ALARM_BUSINESS;
+    private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
 
     public AlarmMsgTask(ShieldRuleService shieldRuleService, WorkAlarmConfigService alarmConfigService,
-                        AlarmService alarmService, WorkService workService, ConcurrentLinkedQueue<JSONObject> msgQueue) {
+                        AlarmService alarmService, AlarmBusinessService businessService, WorkService workService, RedefineRuleService ruleService,
+                        ConcurrentLinkedQueue<AlarmBusiness> msgQueue) {
         this.shieldRuleService = shieldRuleService;
         this.alarmConfigService = alarmConfigService;
         this.alarmService = alarmService;
+        this.businessService = businessService;
         this.workService = workService;
+        this.ruleService = ruleService;
         this.msgQueue = msgQueue;
     }
-    private Logger LOGGER = LoggerFactory.getLogger(AlarmMsgTask.class);
+
     @Override
     public void run() {
-        JSONObject jsonObject = msgQueue.poll();
-        LOGGER.info(jsonObject.toString());
-        String type = jsonObject.getString("type");
-        String data = jsonObject.getString("data");
-        if("1".equals(type)){
-            alarmReport(data);
+        AlarmBusiness alarmBusiness = msgQueue.poll();
+        if(1 == alarmBusiness.getFlag()){
+            alarmReport(alarmBusiness);
         }else{
-            alarmResolve(data);
+            alarmResolve(alarmBusiness);
         }
     }
 
-    private void alarmReport(String jsonStr){
-        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-        if(null == alarmList || alarmList.size() == 0){
-            return ;
-        }
-        String enterpriseCode = alarmList.get(0).getEnterpriseCode();
-        //填充你设备信息
-        alarmService.initInfo(enterpriseCode, alarmList);
+    private void alarmReport(AlarmBusiness alarmBusiness){
+        String key = alarmBusiness.getKey();
+        String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+        String serverCode = alarmBusiness.getServerCode();
         List<AlarmBusiness> businessList = new ArrayList<>();
-        for(Alarm alarm : alarmList){
-            AlarmBusiness business = AlarmBusiness.createByAlarm(alarm);
-            businessList.add(business);
-        }
-
+        businessList.add(alarmBusiness);
+        //填充设备信息
+        alarmService.initInfo(enterpriseCode, serverCode, businessList);
+        //匹配告警重定义功能
+        ruleService.matchRule(enterpriseCode, alarmBusiness);
         //告警屏蔽功能
-        shieldRuleService.matchRule(enterpriseCode, alarmList);
+        shieldRuleService.matchRule(enterpriseCode, businessList);
         //匹配告警工单配置
-        alarmConfigService.matchAutoConfig(alarmList);
+        alarmConfigService.matchAutoConfig(enterpriseCode, businessList);
+        businessService.add(enterpriseCode, cur_alarm_business, businessList);
     }
 
-    private void alarmResolve(String jsonStr){
-        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-        if(null == alarmList || alarmList.size() == 0){
-            return ;
+    private void alarmResolve(AlarmBusiness alarmBusiness){
+        String key = alarmBusiness.getKey();
+        String enterpriseCode = key.substring(0, key.indexOf(BaseConstant.UNDERLINE));
+        workService.resolveAlarm(enterpriseCode, alarmBusiness);
+        //修改实时告警表中告警状态
+        boolean result = businessService.resolveByKey(enterpriseCode, cur_alarm_business, alarmBusiness);
+        if(!result){
+            businessService.resolveByKey(enterpriseCode, his_alarm_business, alarmBusiness);
         }
-        Alarm alarm = alarmList.get(0);
-        workService.resolveAlarm(alarm.getEnterpriseCode(), alarmList);
     }
 }

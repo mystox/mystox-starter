@@ -44,4 +44,24 @@ public interface MqttCommonInterface {
     JSONObject getStationBreakStatistic(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
 
     JSONObject getStationElectricCountList(List<String> fsuIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<String> getAlarmLevel(JSONObject query);
+
+    Integer getAlarmCycle(JSONObject baseCondition);
+
+    List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    List<JSONObject> getAlarmCurrentCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition);
+
+    /**
+     * @Date 16:26 2020/4/8
+     * @Param No such property: code for class: Script1
+     * @return com.alibaba.fastjson.JSONObject
+     * @Author mystox
+     * @Description //告警服务生成历史报表
+     **/
+    JSONObject exportAlarmHistory(Date endTime, Date startTime, JSONObject baseCondition);
+
+
+    List<JSONObject> getCurrentStationList(JSONObject query);
 }

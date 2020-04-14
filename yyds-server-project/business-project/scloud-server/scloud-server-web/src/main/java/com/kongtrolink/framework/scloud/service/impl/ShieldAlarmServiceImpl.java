@@ -48,32 +48,4 @@ public class ShieldAlarmServiceImpl implements ShieldAlarmService{
     public int count(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery) {
         return shieldAlarmDao.count(uniqueCode, shieldAlarmQuery);
     }
-
-    /**
-     * @auther: liudd
-     * @date: 2020/3/5 9:57
-     * 功能描述:填充信息
-     */
-    @Override
-    public void initInfo(String uniqueCode, List<ShieldAlarm> shieldAlarmList) {
-        if(null == shieldAlarmList){
-            return;
-        }
-        List<Alarm> alarmList = new ArrayList<>();
-        Map<String, Alarm> alarmIdAlarmMap = new HashMap<>();
-        for(ShieldAlarm shieldAlarm : shieldAlarmList){
-            Alarm alarm = new Alarm();
-            alarm.setId(shieldAlarm.getAlarmId());
-            alarm.setTreport(shieldAlarm.getTreport());
-            alarm.setTargetLevelName(shieldAlarm.getAlarmLevel());
-            alarm.setSignalId(shieldAlarm.getSignalId());
-            alarm.setDeviceId(shieldAlarm.getDeviceId());
-            alarmIdAlarmMap.put(alarm.getId(), alarm);
-        }
-        alarmService.initInfo(uniqueCode, alarmList);
-        for(ShieldAlarm shieldAlarm : shieldAlarmList){
-            Alarm alarm = alarmIdAlarmMap.get(shieldAlarm.getAlarmId());
-            shieldAlarm.initAlarmInfo(alarm);
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.dao;
 
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.Work;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -65,9 +67,9 @@ public class WorkDao {
         if(!StringUtil.isNUll(sendType)){
             criteria.and("sendType").is(sendType);
         }
-        String status = workQuery.getStatus();
-        if(!StringUtil.isNUll(status)){
-            criteria.and("status").is(status);
+        String state = workQuery.getState();
+        if(!StringUtil.isNUll(state)){
+            criteria.and("state").is(state);
         }
         String code = workQuery.getCode();
         if(!StringUtil.isNUll(code)){
@@ -113,6 +115,10 @@ public class WorkDao {
 
     public Work getNotOverByDeviceCode(String uniqueCode, String deviceCode) {
         Criteria criteria = Criteria.where("device.strId").is(deviceCode);
+        List<String> stateList = new ArrayList<>();
+        stateList.add(WorkConstants.STATE_RECEIVE);
+        stateList.add(WorkConstants.STATE_HANDLER);
+        criteria.and("state").in(stateList);
         Query query = Query.query(criteria);
         return mongoTemplate.findOne(query, Work.class, uniqueCode + table);
     }
@@ -121,6 +127,12 @@ public class WorkDao {
         Criteria criteria = Criteria.where("workAlarmList.alarmKey").in(keys);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, Work.class, uniqueCode + table);
+    }
+
+    public Work getByKey(String uniqueCode, String key){
+        Criteria criteria = Criteria.where("workAlarmList.alarmKey").is(key);
+        Query query = Query.query(criteria);
+        return mongoTemplate.findOne(query, Work.class, uniqueCode + table);
     }
 
     public void updateAlarmInfo(String uniqueCode, Work work){

@@ -3,11 +3,15 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
+import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.ShieldAlarmQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
+import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.AlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
@@ -35,6 +39,8 @@ public class ShieldRuleController extends BaseController{
     AlarmService alarmService;
     @Autowired
     ShieldAlarmService shieldAlarmService;
+    @Autowired
+    AlarmBusinessService businessService;
 
     @RequestMapping("/add")
     @ResponseBody
@@ -61,7 +67,7 @@ public class ShieldRuleController extends BaseController{
 
     @RequestMapping("/delete")
     @ResponseBody
-    public JsonResult delete(@RequestBody ShieldRule shieldRule, HttpServletRequest request){
+    public JsonResult delete(@RequestBody ShieldRule shieldRule){
         String uniqueCode = getUniqueCode();
         int delete = ruleService.delete(uniqueCode, shieldRule.getId());
         if(delete > 0){
@@ -72,13 +78,12 @@ public class ShieldRuleController extends BaseController{
 
     @RequestMapping("/list")
     @ResponseBody
-    public JsonResult list(@RequestBody ShieldRuleQuery ruleQuery, HttpServletRequest request){
+    public JsonResult list(@RequestBody ShieldRuleQuery ruleQuery){
         String uniqueCode = getUniqueCode();
         List<ShieldRule> list = ruleService.list(uniqueCode, ruleQuery);
         int count = ruleService.count(uniqueCode, ruleQuery);
-        JsonResult jsonResult = new JsonResult();
-        jsonResult.setData(list);
-        jsonResult.setCount(count);
+        ListResult<ShieldRule> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 
@@ -97,10 +102,17 @@ public class ShieldRuleController extends BaseController{
     @RequestMapping("/getShieldAlarm")
     public JsonResult getShieldAlarm(@RequestBody ShieldAlarmQuery shieldAlarmQuery){
         String uniqueCode = getUniqueCode();
-        List<ShieldAlarm> list = shieldAlarmService.list(uniqueCode, shieldAlarmQuery);
-        int count = shieldAlarmService.count(uniqueCode, shieldAlarmQuery);
-//        shieldAlarmService.initInfo(uniqueCode, list);
-        JsonResult jsonResult = new JsonResult(list, count);
+        AlarmBusinessQuery alarmBusinessQuery = new AlarmBusinessQuery();
+        alarmBusinessQuery.setShield(true);
+        alarmBusinessQuery.setShieldRuleId(shieldAlarmQuery.getRuleId());
+        alarmBusinessQuery.setType(shieldAlarmQuery.getType());
+        alarmBusinessQuery.setCurrentPage(shieldAlarmQuery.getCurrentPage());
+        alarmBusinessQuery.setPageSize(shieldAlarmQuery.getPageSize());
+        alarmBusinessQuery.setSkipSize(shieldAlarmQuery.getPageSize());
+        List<AlarmBusiness> list = businessService.list(uniqueCode, alarmBusinessQuery);
+        int count= businessService.count(uniqueCode, alarmBusinessQuery);
+        ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 

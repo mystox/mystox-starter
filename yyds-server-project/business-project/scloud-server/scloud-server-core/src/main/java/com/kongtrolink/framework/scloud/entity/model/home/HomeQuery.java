@@ -12,6 +12,8 @@ public class HomeQuery implements Serializable{
 
     private static final long serialVersionUID = 2364848418917007425L;
 
+    private boolean isCurrentRoot = true;   //是否为全局管理员，默认为true（跟用户管辖站点权限相关）
+    private String serverCode;
     private String tierCode; // 区域code
     private Date startTime;//开始时间
     private Date endTime; //结束时间
@@ -38,5 +40,21 @@ public class HomeQuery implements Serializable{
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public String getServerCode() {
+        return serverCode;
+    }
+
+    public void setServerCode(String serverCode) {
+        this.serverCode = serverCode;
+    }
+
+    public boolean isCurrentRoot() {
+        return isCurrentRoot;
+    }
+
+    public void setCurrentRoot(boolean currentRoot) {
+        isCurrentRoot = currentRoot;
     }
 }

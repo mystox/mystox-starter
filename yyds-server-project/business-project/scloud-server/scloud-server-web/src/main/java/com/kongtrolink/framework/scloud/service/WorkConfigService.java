@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.WorkConfig;
 import com.kongtrolink.framework.scloud.query.WorkConfigQuery;
 
@@ -30,7 +31,7 @@ public interface WorkConfigService {
      * @date: 2020/4/2 14:15
      * 功能描述:自动派单匹配告警工单
      */
-    WorkConfig matchAutoConfig(String uniqueCode, Alarm alarm, String siteType, String sendWorkType);
+    WorkConfig matchAutoConfig(String uniqueCode, AlarmBusiness alarmBusiness, String sendWorkType);
 
     /**
      * @auther: liudd

@@ -13,6 +13,7 @@ import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.service.*;
+import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.scloud.util.XlsExporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -61,7 +62,8 @@ public class WorkController extends ExportController {
         String uniqueCode = getUniqueCode();
         List<Work> list = workService.list(uniqueCode, workQuery);
         int count = workService.count(uniqueCode, workQuery);
-        JsonResult jsonResult = new JsonResult(list, count);
+        ListResult<Work> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 
@@ -159,6 +161,9 @@ public class WorkController extends ExportController {
         String uniqueCode = getUniqueCode();
         User user = getUser(request);
         String workId = workQuery.getId();
+        if(StringUtil.isNUll(workId)){
+            return new JsonResult("工单id不能为空", false);
+        }
         return workService.receCommon(uniqueCode, workId, user, curTime, WorkConstants.FTU_WEB);
     }
 

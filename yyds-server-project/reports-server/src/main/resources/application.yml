@@ -22,13 +22,14 @@ register:
 mqtt:
   username: root #可选配置 mqtt配置相关
   password: 123456 #可选配置 mqtt配置相关
-  url: tcp://172.16.5.26:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+  url: tcp://127.0.0.1:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 ###########日志配置###########
 logging:
   level:
     root: info
     com.kongtrolink.framework: INFO
     com.kongtrolink.framework.reports.service.ReportsHandler: DEBUG
+    com.kongtrolink.framework.reports.service.impl: debug
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF

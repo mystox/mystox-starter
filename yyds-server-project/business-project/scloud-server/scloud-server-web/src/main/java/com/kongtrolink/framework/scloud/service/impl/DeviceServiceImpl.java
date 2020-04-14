@@ -86,8 +86,6 @@ public class DeviceServiceImpl implements DeviceService {
                             map.put(basicDeviceEntity.getCode(), basicDeviceEntity);    //key:设备编码，value:设备基本信息
                         }
                         if (map.size() > 0){
-
-
                             for (String deviceCode : map.keySet()){
                                 DeviceEntity device = deviceEntityMap.get(deviceCode);
                                 DeviceModel deviceModel = getDeviceModel(device);
@@ -509,7 +507,7 @@ public class DeviceServiceImpl implements DeviceService {
                 row[3] = deviceModel.getName();
                 row[4] = deviceModel.getTierName();
                 row[5] = deviceModel.getManufacturer();
-                row[6] = dateUtil.format(new Date(deviceModel.getCreateTime()), "yyyy-MM-dd");
+                row[6] = deviceModel.getCreateTime() != null?dateUtil.format(new Date(deviceModel.getCreateTime()), "yyyy-MM-dd"):"-";
                 row[7] = deviceModel.getState();
                 row[8] = deviceModel.getOperationState();
                 row[9] = deviceModel.getIp();

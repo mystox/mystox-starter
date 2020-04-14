@@ -1,8 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
-import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.WorkAlarmConfig;
-
 import java.util.List;
 
 /**
@@ -13,7 +12,7 @@ public interface WorkAlarmConfigService {
     /**
      * 添加
      */
-    void add(WorkAlarmConfig workAlarmConfig);
+    void add(String uniqueCode, WorkAlarmConfig workAlarmConfig);
 
     /**
      * 根据企业编码和告警id获取记录
@@ -29,5 +28,5 @@ public interface WorkAlarmConfigService {
      */
     void deleteByAlarmKey(String uniqueCode, String alarmKey);
 
-    void matchAutoConfig(List<Alarm> alarmList);
+    void matchAutoConfig(String enterpriseCode, List<AlarmBusiness> businessList);
 }

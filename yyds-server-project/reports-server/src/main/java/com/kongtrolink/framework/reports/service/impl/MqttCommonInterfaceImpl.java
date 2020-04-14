@@ -3,6 +3,7 @@ package com.kongtrolink.framework.reports.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.ReflectionUtils;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
 import com.kongtrolink.framework.reports.entity.query.*;
@@ -82,12 +83,75 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
         alarmCountCondition.put("deviceIds", deviceIds);
         alarmCountCondition.put("startBeginTime", DateUtil.getInstance().getFirstDayOfMonth(finalYear, finalMonth));
         alarmCountCondition.put("startEndTime", DateUtil.getInstance().getLastDayOfMonth(finalYear, finalMonth));
-        MsgResult opera = mqttOpera.opera("getAlarmsByDeviceIdList", baseCondition.toJSONString());
+        MsgResult opera = mqttOpera.opera("getAlarmsByDeviceIdList", alarmCountCondition.toJSONString());
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
         } else {
             logger.error("get alarm details list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public List<JSONObject> getAlarmCurrentDetails(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        MsgResult opera = mqttOpera.opera("getCurrentAlarmsByDeviceIdList", baseCondition.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(opera.getMsg(), JSONObject.class);
+        } else {
+            logger.error("get alarm details list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public List<JSONObject> getAlarmCurrentCategoryByDeviceIds(List<String> deviceIds, int finalYear, int finalMonth, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("deviceIds", deviceIds);
+        MsgResult opera = mqttOpera.opera("getAlarmCurrentCategoryByDeviceIdList", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        String alarmCategoryListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseArray(alarmCategoryListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public JSONObject exportAlarmHistory(Date endTime, Date startTime, JSONObject baseCondition) {
+        JSONObject alarmCountCondition = new JSONObject();
+        alarmCountCondition.putAll(baseCondition);
+        alarmCountCondition.put("startBeginTime", startTime);
+        alarmCountCondition.put("startEndTime", endTime);
+        MsgResult opera = mqttOpera.opera("exportAlarmHistory", alarmCountCondition.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        String alarmCategoryListMsg = opera.getMsg();
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            return JSONObject.parseObject(alarmCategoryListMsg, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
+        }
+        return null;
+
+    }
+
+
+    @Override
+    public List<JSONObject> getCurrentStationList(JSONObject query) {
+        MsgResult opera = mqttOpera.opera("getCurrentStationList", query.toJSONString(), 2, 3600L * 2, TimeUnit.SECONDS);
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            String siteListStr = opera.getMsg();
+            return JSONObject.parseArray(siteListStr, JSONObject.class);
+        } else {
+            logger.error("get alarm category list error[mqtt]");
         }
         return null;
     }
@@ -229,6 +293,35 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
     }
 
     @Override
+    public List<String> getAlarmLevel(JSONObject query) {
+        MsgResult opera = mqttOpera.opera("getAlarmLevel", query.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            List<Level> ts = JSON.parseArray(opera.getMsg(), Level.class);
+            return ReflectionUtils.convertElementPropertyToList(ts, "levelName");
+        } else {
+            logger.error("get station break statistic list error[mqtt]");
+        }
+        return null;
+    }
+
+    @Override
+    public Integer getAlarmCycle(JSONObject baseCondition) {
+        MsgResult opera = mqttOpera.opera("getAlarmCycle", baseCondition.toJSONString());
+        int stateCode = opera.getStateCode();
+        if (StateCode.SUCCESS == stateCode) {
+            JSONObject jsonObject = JSON.parseObject(opera.getMsg());
+            Integer diffTime = jsonObject.getInteger("diffTime");
+            return diffTime;
+        } else {
+            logger.error("get station break statistic list error[mqtt]");
+        }
+        return null;
+
+    }
+
+
+    @Override
     public List<FsuEntity> getFsuList(String stationId, JSONObject baseCondition) {
         baseCondition.put("stationId", stationId);
         MsgResult opera = mqttOpera.opera(GET_FSU_SCLOUD, baseCondition.toJSONString());
@@ -251,8 +344,11 @@ public class MqttCommonInterfaceImpl implements MqttCommonInterface {
             basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceType));
         BasicParentQuery basicParentQuery = new BasicParentQuery();
         basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, fsuIds));
+        basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT,"FSU动环主机"));
         basicDeviceQuery.set_parent(basicParentQuery);
+
         MsgResult opera = mqttOpera.opera(GET_CI_SCLOUD, JSON.toJSONString(basicDeviceQuery));
+        System.out.println(basicDeviceQuery);
         int stateCode = opera.getStateCode();
         if (StateCode.SUCCESS == stateCode) {
             List<DeviceEntity> siteEntities = new ArrayList<>();

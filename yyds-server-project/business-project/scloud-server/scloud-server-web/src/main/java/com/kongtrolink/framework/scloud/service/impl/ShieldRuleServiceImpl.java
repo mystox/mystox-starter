@@ -4,6 +4,7 @@ import com.kongtrolink.framework.core.entity.Const;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.ShieldRuleDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -91,35 +92,27 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     }
 
     /**
-     * @param alarmList
      * @auther: liudd
      * @date: 2020/3/4 16:08
      * 功能描述:匹配告警屏蔽规则
      */
     @Override
-    public void matchRule(String uniqueCode, List<Alarm> alarmList) {
+    public void matchRule(String uniqueCode, List<AlarmBusiness> alarmBusinessList) {
         List<ShieldRule> rules = shieldRuleDao.getEnables(uniqueCode);
-        List<ShieldAlarm> shieldAlarmList = new ArrayList<>();
-        for (Alarm alarm : alarmList) {
+        for (AlarmBusiness alarm : alarmBusinessList) {
             for (ShieldRule rule : rules) {
-                String deviceId = alarm.getDeviceId();
-                if (rule.getDeviceCodeList().contains(deviceId) && rule.getAlarmlevel().contains(alarm.getLevel())) {
-                    ShieldAlarm shieldAlarm = new ShieldAlarm();
-                    shieldAlarm.setRuleId(rule.getId());
-                    shieldAlarm.setAlarmId(alarm.getId());
-                    shieldAlarm.setAlarmLevel(alarm.getTargetLevelName());
-                    shieldAlarm.setTreport(alarm.getTreport());
-                    shieldAlarm.setSiteName(alarm.getSiteName());
-                    shieldAlarm.setSiteAddress(alarm.getSiteAddress());
-                    shieldAlarm.setDeviceId(alarm.getDeviceId());
-                    shieldAlarm.setDeviceName(alarm.getDeviceName());
-                    shieldAlarm.setSignalId(alarm.getSignalId());
-                    shieldAlarm.setSignalName(alarm.getSignalName());
-                    shieldAlarmList.add(shieldAlarm);
+                String deviceId = alarm.getDeviceCode();
+                if (rule.getDeviceCodeList().contains(deviceId)) {
                     alarm.setShield(true);
+                    alarm.setShieldRuleId(rule.getId());
+                    List<Integer> alarmlevelList = rule.getAlarmlevelList();
+                    if(null != alarmlevelList && !alarmlevelList.contains(alarm.getLevel())) {
+                        alarm.setShield(false);
+                        alarm.setShieldRuleId(null);
+                    }
                 }
             }
         }
-        shieldAlarmService.add(uniqueCode, shieldAlarmList);
+//        shieldAlarmService.add(uniqueCode, shieldAlarmList);
     }
 }

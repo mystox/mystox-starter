@@ -24,7 +24,6 @@ public class MaintainerEntity implements Serializable{
     private String skill;   //具备技能
     private String address; //家庭地址
     private String idCard;  //身份证号码
-    private String sex; //性别
     private String duty;    //岗位职责
     private String education;   //文化程度(小学、初中、高中、初中中专、高中中专、大专、本科、研究生)
     private String authentication;    //认证名称
@@ -118,14 +117,6 @@ public class MaintainerEntity implements Serializable{
 
     public void setIdCard(String idCard) {
         this.idCard = idCard;
-    }
-
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
     }
 
     public String getDuty() {

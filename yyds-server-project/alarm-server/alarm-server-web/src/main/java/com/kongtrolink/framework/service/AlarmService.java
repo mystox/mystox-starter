@@ -47,4 +47,6 @@ public interface AlarmService {
      * 功能描述:告警消除
      */
     boolean resolve(AlarmQuery alarmQuery);
+
+    boolean resolveByKey(AlarmQuery alarmQuery);
 }

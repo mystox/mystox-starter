@@ -19,9 +19,18 @@ public interface ReportsInterface {
 
     @OperaCode
     public List<SiteModel> getSiteListByEnterpriseCode(String msg);
+
     @OperaCode
     List<DeviceModel> getFsuSCloud(String msg);
 
     @OperaCode
     JSONObject stationElectricCountList(String msg);
+
+    @OperaCode(description = "历史告警导出统计")
+    public JSONObject exportAlarmHistory(String msg);
+
+
+    @OperaCode(description = "当前站点列表")
+    public List<SiteModel> getCurrentStationList(String msg);
+
 }

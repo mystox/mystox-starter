@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +34,7 @@ public class DeviceTypeConfig {
     /**
      * 读取deviceType映射表
      */
+    @PostConstruct
     public  void reFlashRedisDeviceType(){
         /* 读取数据 */
         InputStream inputStream = null;

@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.scloud.mqtt;
+package com.kongtrolink.framework.scloud.api;
 
 
 import com.kongtrolink.framework.stereotype.OperaCode;
@@ -17,4 +17,7 @@ public interface MqttService {
 
     @OperaCode
     String sdgdScloudAlarmResolve(String jsonStr);
+
+    @OperaCode
+    String sdgdScloudAlarmHistory(String jsonStr);
 }

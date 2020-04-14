@@ -18,4 +18,11 @@ public interface AlarmFocusService {
     List<AlarmFocus> list(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
 
     int count(String uniqueCode, AlarmFocusQuery alarmFocusQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/11 14:19
+     * 功能描述:根据用户id和***获取告警关注列表
+     */
+    List<AlarmFocus> listByUserIdEntDevSigs(String uniqueCode, String userId, List<String> entDevSigList);
 }

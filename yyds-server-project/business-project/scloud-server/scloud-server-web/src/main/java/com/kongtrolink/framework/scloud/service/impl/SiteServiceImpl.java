@@ -5,8 +5,10 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.dao.DeviceMongo;
 import com.kongtrolink.framework.scloud.dao.SiteMongo;
+import com.kongtrolink.framework.scloud.dao.UserMongo;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicSiteEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.CIResponseEntity;
@@ -37,6 +39,8 @@ public class SiteServiceImpl implements SiteService {
     SiteMongo siteMongo;
     @Autowired
     DeviceMongo deviceMongo;
+    @Autowired
+    UserMongo userMongo;
     @Autowired
     MqttOpera mqttOpera;
     @Autowired
@@ -124,7 +128,7 @@ public class SiteServiceImpl implements SiteService {
             CIResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), CIResponseEntity.class);
             if (response.getResult() == CommonConstant.SUCCESSFUL) {    //请求成功
                 LOGGER.info("【站点管理】，从【资管】获取站点基本信息成功");
-                List<String> siteCodes = new ArrayList<>();
+                List<String> siteCodes = new ArrayList<>(); //从资管中查出的站点Code
                 Map<String, BasicSiteEntity> map = new HashMap<>();
                 for (JSONObject jsonObject : response.getInfos()) {
                     BasicSiteEntity basicSiteEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicSiteEntity.class);
@@ -132,30 +136,23 @@ public class SiteServiceImpl implements SiteService {
                     map.put(basicSiteEntity.getCode(), basicSiteEntity);    //key：code站点编码，value：站点基本信息
                 }
 
-                if (siteCodes.size() > 0) { //如果从资管中查出的站点不为空
+                if (!siteQuery.isCurrentRoot()){    //如果不是全局管理员，则筛选出用户管辖的站点
+                    List<UserSiteEntity> userSiteEntityList = userMongo.findUserSite(uniqueCode, siteQuery.getUserId());
+                    if (userSiteEntityList != null && userSiteEntityList.size() > 0){
+                        List<String> userSiteCodes = new ArrayList<>(); //用户管辖站点Code
+                        for (UserSiteEntity userSiteEntity : userSiteEntityList){
+                            userSiteCodes.add(userSiteEntity.getSiteCode());
+                        }
+                        siteCodes.retainAll(userSiteCodes);
+                    }
+                }
+
+                if (siteCodes.size() > 0) {
                     siteQuery.setSiteCodes(siteCodes);
                     List<SiteEntity> siteEntityList = siteMongo.findSiteList(uniqueCode, siteQuery);
                     if (siteEntityList != null && siteEntityList.size() > 0) {
                         for (SiteEntity siteEntity : siteEntityList) {
-                            SiteModel siteModel = new SiteModel();
-                            siteModel.setSiteId(siteEntity.getId());
-                            siteModel.setTierCode(siteEntity.getTierCode());
-                            siteModel.setTierName(siteEntity.getTierName());
-                            siteModel.setName(map.get(siteEntity.getCode()).getName());
-                            siteModel.setCode(siteEntity.getCode());
-                            siteModel.setSiteType(map.get(siteEntity.getCode()).getSiteType());
-                            siteModel.setCoordinate(siteEntity.getCoordinate());
-                            siteModel.setAddress(siteEntity.getAddress());
-                            siteModel.setRespName(siteEntity.getRespName());
-                            siteModel.setRespPhone(siteEntity.getRespPhone());
-                            siteModel.setTowerHeight(siteEntity.getTowerHeight());
-                            siteModel.setTowerType(siteEntity.getTowerType());
-                            siteModel.setShareInfo(siteEntity.getShareInfo());
-                            siteModel.setAssetNature(siteEntity.getAssetNature());
-                            siteModel.setCreateTime(siteEntity.getCreateTime());
-                            siteModel.setAreaCovered(siteEntity.getAreaCovered());
-                            siteModel.setFileId(siteEntity.getFileId());
-                            siteModel.setFileName(siteEntity.getFileName());
+                            SiteModel siteModel = getSiteModel(map, siteEntity);    //返回给前端的站点数据模型
 
                             list.add(siteModel);
                         }
@@ -315,8 +312,8 @@ public class SiteServiceImpl implements SiteService {
                     deviceQuery.setDeviceCodes(deletedDeviceCodes);
                     deviceService.deleteDevice(uniqueCode, deviceQuery);
 
-                    // TODO: 2020/2/12 2.修改系统用户和维护用户的站点权限
-
+                    //2.从用户的管辖站点中删除该站点
+                    userMongo.deleteSitesFromUserSite(uniqueCode, siteQuery.getSiteCodes());
                 }
             }else {
                 LOGGER.error("向【资管】发送删除站点MQTT 请求失败");
@@ -332,7 +329,7 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public List<String> getRespList(String uniqueCode, SiteQuery siteQuery) {
         int pageSize = siteQuery.getPageSize();
-        // TODO: 2020/2/12 获取前六页站点中存在的资产管理员列表
+        // TODO: 2020/2/12 获取前六页站点中存在的资产管理员列表(目前不需要实现该功能)
 
         return new ArrayList<>();
     }
@@ -375,10 +372,35 @@ public class SiteServiceImpl implements SiteService {
                 row[9] = siteModel.getTowerType();
                 row[10] = siteModel.getShareInfo();
                 row[11] = siteModel.getAssetNature();
-                row[12] = sdf.format(new Date(siteModel.getCreateTime()));
+                row[12] = siteModel.getCreateTime() != null?sdf.format(new Date(siteModel.getCreateTime())):"-";
                 row[13] = siteModel.getAreaCovered();
             }
         }
         return tableDatas;
+    }
+
+    //返回前端的站点数据模型
+    private SiteModel getSiteModel(Map<String, BasicSiteEntity> map, SiteEntity siteEntity){
+        SiteModel siteModel = new SiteModel();
+        siteModel.setSiteId(siteEntity.getId());
+        siteModel.setTierCode(siteEntity.getTierCode());
+        siteModel.setTierName(siteEntity.getTierName());
+        siteModel.setName(map.get(siteEntity.getCode()).getName());
+        siteModel.setCode(siteEntity.getCode());
+        siteModel.setSiteType(map.get(siteEntity.getCode()).getSiteType());
+        siteModel.setCoordinate(siteEntity.getCoordinate());
+        siteModel.setAddress(siteEntity.getAddress());
+        siteModel.setRespName(siteEntity.getRespName());
+        siteModel.setRespPhone(siteEntity.getRespPhone());
+        siteModel.setTowerHeight(siteEntity.getTowerHeight());
+        siteModel.setTowerType(siteEntity.getTowerType());
+        siteModel.setShareInfo(siteEntity.getShareInfo());
+        siteModel.setAssetNature(siteEntity.getAssetNature());
+        siteModel.setCreateTime(siteEntity.getCreateTime());
+        siteModel.setAreaCovered(siteEntity.getAreaCovered());
+        siteModel.setFileId(siteEntity.getFileId());
+        siteModel.setFileName(siteEntity.getFileName());
+
+        return siteModel;
     }
 }

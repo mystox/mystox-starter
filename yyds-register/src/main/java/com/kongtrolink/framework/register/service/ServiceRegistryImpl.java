@@ -25,7 +25,8 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     Logger logger = LoggerFactory.getLogger(ServiceRegistryImpl.class);
 
     private CountDownLatch latch = new CountDownLatch(1);
-    private static final int SESSION_TIMEOUT = 60;
+    private static final int SESSION_TIMEOUT = 1400; //milliseconds
+
     private ZooKeeper zk;
     private String serviceUrl;
 
@@ -74,6 +75,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this);
             latch.await();
         } else {
+            zk.close();
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this::process);
             latch.await();
             registerRunner.multiRegister();
@@ -114,6 +116,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
 
     @Override
     public void process(WatchedEvent watchedEvent) {
+        logger.info("trigger event type: [{}] content: [{}] ", watchedEvent.getType(), watchedEvent.toString());
         Event.KeeperState state = watchedEvent.getState();
         if (state == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
             logger.warn("zookeeper connected successful...");
@@ -127,16 +130,11 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
                     latch = new CountDownLatch(1);
                     build(getServiceUrl());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (KeeperException e) {
+            } catch (IOException | InterruptedException | KeeperException e) {
                 e.printStackTrace();
             }
 
         }
-        logger.info("trigger event type: [{}] content: [{}] ", watchedEvent.getType(), watchedEvent.toString());
     }
 
 }

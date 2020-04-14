@@ -64,7 +64,7 @@ public class AlarmDao {
         int currentPage = alarmQuery.getCurrentPage();
         int pageSize = alarmQuery.getPageSize();
         query.with(new Sort(Sort.Direction.DESC, "treport"));
-        query.skip( (currentPage-1)*pageSize ).limit(pageSize * (currentLimit+1));
+        query.skip( (currentPage-1)*pageSize ).limit(pageSize * (currentLimit));
         return mongoTemplate.find(query, Alarm.class, table);
     }
 
@@ -85,7 +85,6 @@ public class AlarmDao {
     }
 
     Criteria baseCriteria(Criteria criteria, AlarmQuery alarmQuery){
-        criteria.and("shield").ne(true);
         String id = alarmQuery.getId();
         if(!StringUtil.isNUll(id)){
             criteria.and("_id").is(id);
@@ -158,6 +157,10 @@ public class AlarmDao {
         List<String> entDevSigList = alarmQuery.getEntDevSigList();
         if(null != entDevSigList){
             criteria.and("entDevSig").in(entDevSigList);
+        }
+        List<String> keyList = alarmQuery.getKeyList();
+        if(null != keyList){
+            criteria.and("key").in(keyList);
         }
         return criteria;
     }
@@ -363,6 +366,23 @@ public class AlarmDao {
      */
     public boolean resolve(String table, AlarmQuery alarmQuery) {
         Criteria criteria = Criteria.where("_id").in(alarmQuery.getId());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("state", Contant.RESOLVE);
+        update.set("trecover", alarmQuery.getTrecover());
+        WriteResult result = mongoTemplate.updateFirst(query, update, table);
+        return result.getN()>0 ? true : false;
+    }
+
+
+    /**
+     * @param table
+     * @auther: liudd
+     * @date: 2019/9/26 10:29
+     * 功能描述:告警消除
+     */
+    public boolean resolveByKey(String table, AlarmQuery alarmQuery) {
+        Criteria criteria = Criteria.where("key").is(alarmQuery.getKey());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", Contant.RESOLVE);

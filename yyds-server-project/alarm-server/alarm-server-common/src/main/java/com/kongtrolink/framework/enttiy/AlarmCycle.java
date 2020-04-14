@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.enttiy;
 
 import com.kongtrolink.framework.base.Contant;
-import com.kongtrolink.framework.base.DateUtil;
 import com.kongtrolink.framework.base.FacadeView;
+
 import java.util.Date;
 
 /**
@@ -16,7 +16,7 @@ public class AlarmCycle {
     private String name;
     private String enterpriseCode;
     private String serverCode;
-    private Integer diffTime;       //时间，必须大于0， -1表示默认，告警消除则成为历史告警
+    private Integer diffTime;       //时间，必须大于0， -1表示默认，单位 小时
     private Date updateTime;
     private FacadeView operator;
     private String state ;

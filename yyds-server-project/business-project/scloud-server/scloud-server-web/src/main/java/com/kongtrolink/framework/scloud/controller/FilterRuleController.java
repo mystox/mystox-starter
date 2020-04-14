@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.FilterRule;
 import com.kongtrolink.framework.scloud.query.FilterRuleQuery;
@@ -75,7 +76,8 @@ public class FilterRuleController extends BaseController {
         String uniqueCode = getUniqueCode();
         List<FilterRule> list = ruleService.list(uniqueCode, ruleQuery);
         int count = ruleService.count(uniqueCode, ruleQuery);
-        JsonResult jsonResult = new JsonResult(list, count);
+        ListResult<FilterRule> listResult = new ListResult<>(list, count);
+        JsonResult jsonResult = new JsonResult(listResult);
         return jsonResult;
     }
 
@@ -94,7 +96,7 @@ public class FilterRuleController extends BaseController {
         }
         User user = getUser();
         if(null != user){
-            ruleQuery.setCreatorId(user.getId());
+            ruleQuery.setOperatorId(user.getId());
         }
         boolean result = ruleService.updateState(uniqueCode, ruleQuery);
         String operate = "禁用";

@@ -11,9 +11,9 @@ public class ShieldAlarm {
     private String id;
     private String ruleId;
     private String alarmId;
-    private String alarmLevel;
+    private Integer alarmLevel;
     private String signalId;
-    private String deviceId;
+    private String deviceCode;
     private Date treport;
     //前端展示数据
     private String signalName;
@@ -77,12 +77,12 @@ public class ShieldAlarm {
         this.alarmId = alarmId;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
     }
 
     public String getSignalId() {
@@ -93,11 +93,11 @@ public class ShieldAlarm {
         this.signalId = signalId;
     }
 
-    public String getAlarmLevel() {
+    public Integer getAlarmLevel() {
         return alarmLevel;
     }
 
-    public void setAlarmLevel(String alarmLevel) {
+    public void setAlarmLevel(Integer alarmLevel) {
         this.alarmLevel = alarmLevel;
     }
 
@@ -107,17 +107,5 @@ public class ShieldAlarm {
 
     public void setTreport(Date treport) {
         this.treport = treport;
-    }
-
-    public void initAlarmInfo(Alarm alarm){
-        this.alarmId = alarm.getId();
-        this.alarmLevel = alarm.getTargetLevelName();
-        this.signalId = alarm.getSignalId();
-        this.deviceId = alarm.getDeviceId();
-        this.treport = alarm.getTreport();
-        this.signalName = alarm.getSignalName();
-        this.deviceName = alarm.getDeviceName();
-        this.siteName = alarm.getSiteName();
-        this.siteAddress = alarm.getSiteAddress();
     }
 }

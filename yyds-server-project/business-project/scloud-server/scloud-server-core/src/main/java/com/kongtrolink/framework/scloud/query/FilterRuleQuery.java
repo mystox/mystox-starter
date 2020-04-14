@@ -12,7 +12,7 @@ public class FilterRuleQuery extends Paging{
     private String id;
     private String name;
     private String signalName;
-    private String creatorId;
+    private String operatorId;
     private Boolean state;
     private Date updateTime;
 
@@ -40,12 +40,12 @@ public class FilterRuleQuery extends Paging{
         this.state = state;
     }
 
-    public String getCreatorId() {
-        return creatorId;
+    public String getOperatorId() {
+        return operatorId;
     }
 
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
+    public void setOperatorId(String operatorId) {
+        this.operatorId = operatorId;
     }
 
     public String getName() {

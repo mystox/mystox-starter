@@ -22,4 +22,5 @@ public class MongoDocName {
     public final static String REPORT_OPERA_EXECUTE_TEMP_STATION_OFFLINE_DETAILS = "t_report_opera_execute_temp_station_offline_details_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_STATION_BREAK = "t_report_opera_execute_temp_station_break_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_ELECTRIC_COUNT = "t_report_opera_execute_temp_electric_count_";
+    public final static String REPORT_OPERA_EXECUTE_TEMP_ALARM_HISTORY = "t_report_opera_execute_temp_alarm_history_";
 }

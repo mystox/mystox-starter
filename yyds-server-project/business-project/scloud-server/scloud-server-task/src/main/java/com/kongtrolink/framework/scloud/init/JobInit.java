@@ -44,8 +44,8 @@ public class JobInit {
     public void  init(){  
 		System.out.println("##服务开始 - 修改状态为 启动");
 		//统一在数据库中进行配置启动
-//		List<JobEntity> list = JobInitConfig.getList();
-		List<JobEntity> dblist = jobService.findAll();
+		List<JobEntity> dblist = JobInitConfig.getList();
+//		List<JobEntity> dblist = jobService.findAll();
 //		Map<String,JobEntity> jobMap = new HashMap<>();
 		if(dblist!=null){
 			for(JobEntity entity:dblist){

@@ -6,9 +6,12 @@ import java.io.Serializable;
  * 首页 站点交维态数量统计
  * Created by Mg on 2018/5/11.
  */
+
 public class HomeFsuNumber implements Serializable {
 
     private static final long serialVersionUID = -2078676889300386894L;
+
+    private String siteCode; //站点code
 
     private int intersectionState; //交维态数量
 
@@ -28,5 +31,13 @@ public class HomeFsuNumber implements Serializable {
 
     public void setTotal(int total) {
         this.total = total;
+    }
+
+    public String getSiteCode() {
+        return siteCode;
+    }
+
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
     }
 }

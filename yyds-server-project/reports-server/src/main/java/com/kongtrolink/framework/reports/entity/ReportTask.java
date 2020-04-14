@@ -15,7 +15,7 @@ public class ReportTask {
 
     private String id;
 
-    private String taskType; //报表任务类型：计划任务 一次性任务
+    private String taskType; //报表任务类型：计划任务 一次性任务 周期性任务
 
     private String reportName;
 

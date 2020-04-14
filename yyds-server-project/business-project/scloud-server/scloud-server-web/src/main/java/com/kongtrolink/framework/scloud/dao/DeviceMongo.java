@@ -16,7 +16,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -274,5 +273,28 @@ public class DeviceMongo {
         Criteria criteria = Criteria.where("siteCode").in(siteCodeList);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 更新FSU相关属性
+     * 【使用场景】：网关上报FSU在线(注册)/离线
+     */
+    public void updateFsu(DeviceEntity deviceEntity){
+        Criteria criteria = Criteria.where("code").is(deviceEntity.getCode());
+
+        Update update = new Update();
+        update.set("state", deviceEntity.getState());
+        update.set("ip", deviceEntity.getIp());
+        update.set("enterpriseCode", deviceEntity.getEnterpriseCode());
+        update.set("serverCode", deviceEntity.getServerCode());
+        update.set("gatewayServerCode", deviceEntity.getGatewayServerCode());
+        if (!StringUtil.isNUll(deviceEntity.getIp())){
+            update.set("ip", deviceEntity.getIp());
+        }
+        if (deviceEntity.getOfflineTime() != null) {
+            update.set("offlineTime", deviceEntity.getOfflineTime());
+        }
+
+        mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, deviceEntity.getEnterpriseCode() + CollectionSuffix.DEVICE);
     }
 }

@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.UserEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
@@ -13,6 +14,16 @@ import java.util.List;
  * Created by Eric on 2020/2/28.
  */
 public interface UserService {
+
+    /**
+     * 保存或修改 用户管辖站点
+     */
+    void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites);
+
+    /**
+     * 获取用户管辖站点
+     */
+    List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
     /**
      * 添加系统用户
      */

@@ -15,14 +15,14 @@ public class WorkAlarmConfigDao {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    private String table = "work_alarm_config";
+    private String table = "_work_alarm_config";
 
     /**
      * 添加
      * @param workConfig
      */
-    public void add(WorkAlarmConfig workConfig){
-        mongoTemplate.save(workConfig, table);
+    public void add(String uniqueCode, WorkAlarmConfig workConfig){
+        mongoTemplate.save(workConfig, uniqueCode + table);
     }
 
     /**

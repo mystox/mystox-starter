@@ -14,12 +14,15 @@ import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
 import com.kongtrolink.framework.scloud.service.SiteService;
+import com.kongtrolink.framework.scloud.util.WorkbookUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +35,8 @@ import java.util.List;
 public class ReportsInterfaceImpl implements ReportsInterface {
 
     Logger logger = LoggerFactory.getLogger(ReportsInterfaceImpl.class);
-
+    @Value("${server.routeMark}")
+    private String routeMark;
     @Autowired
     SiteService siteService;
 
@@ -65,9 +69,13 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         JSONObject condition = JSONObject.parseObject(msg);
         String siteId = condition.getString("stationId");
         String enterpriseCode = condition.getString("enterpriseCode");
+        String serverCode = condition.getString("serverCode");
         DeviceQuery deviceQuery = new DeviceQuery();
         deviceQuery.setDeviceTypeCode("038"); //fsu
-        deviceQuery.setSiteCode(siteId);
+        List<String> sites = new ArrayList<>();
+        sites.add(siteId);
+        deviceQuery.setSiteCodes(sites);
+        deviceQuery.setServerCode(serverCode);
         try {
             List<DeviceModel> deviceList = deviceService.findDeviceList(enterpriseCode, deviceQuery);
             return deviceList;
@@ -136,6 +144,82 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         }
 
         return null;
+    }
+
+    @Override
+    public JSONObject exportAlarmHistory(String msg) {
+        logger.info("alarm export AlarmHistory receive...[{}]", msg);
+
+        JSONObject msgJson = JSONObject.parseObject(msg, JSONObject.class);
+        List<JSONObject> alarmHistory = new ArrayList<>();
+
+        String[][][] resultData = alarmHistoryDataCreate(alarmHistory);
+
+        String fileName = msgJson.getString("fileName");
+        String excelUri = alarmHistoryExcelCreate(fileName, resultData);
+        JSONObject result = new JSONObject();
+        result.put("uri", excelUri);
+        return result;
+    }
+
+    @Override
+    public List<SiteModel> getCurrentStationList(String msg) {
+        JSONObject jsonObject = JSONObject.parseObject(msg, JSONObject.class);
+        String uniqueCode = jsonObject.getString("uniqueCode");
+        String userId = jsonObject.getString("userId");
+        String serverCode = jsonObject.getString("serverCode");
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setUserId(userId);
+        siteQuery.setServerCode(serverCode);
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
+        return siteModelList;
+    }
+
+    private String alarmHistoryExcelCreate(String fileName, String[][][] resultData) {
+        long currentTime = System.currentTimeMillis();
+        String path = "/reportsResources/report_alarmHistory";
+        String filename = fileName + ".xls";
+        WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{"告警列表"}, resultData));
+        return "/" + routeMark + path + "/" + filename + ".xls";
+    }
+
+    private String[][][] alarmHistoryDataCreate(List<JSONObject> alarmHistory) {
+        String[] tableHead = null;
+        tableHead = new String[]{"告警名称", "告警等级", "告警值", "区域层级", "站点名称", "设备名称", "告警详情", "告警发生时间", "告警恢复时间", "确认时间", "确认人", "清除时间", "清除人"};
+        String[] title = new String[tableHead.length];
+        int colLength = tableHead.length; // 列
+        int rowLength = alarmHistory.size() + 1; //行
+        String[][] sheetData = new String[rowLength + 4][colLength];
+
+        for (int i = 0; i < rowLength; i++) {
+            String[] row = sheetData[i];
+            if (i == 0) {
+                sheetData[i] = title;
+                continue;
+            }
+            if (i == 1) {
+                sheetData[i] = tableHead;
+                continue;
+            }
+            JSONObject jsonObject = alarmHistory.get(i - 1);
+            row[0] = jsonObject.getString("alarmName");
+            row[1] = jsonObject.getString("alarmLevel");
+            row[2] = jsonObject.getString("value");
+            row[3] = jsonObject.getString("alarmName");
+            row[4] = jsonObject.getString("alarmName");
+            row[5] = jsonObject.getString("alarmName");
+            row[6] = jsonObject.getString("alarmName");
+            row[7] = jsonObject.getString("alarmName");
+            row[8] = jsonObject.getString("alarmName");
+            row[9] = jsonObject.getString("alarmName");
+            row[10] = jsonObject.getString("alarmName");
+            row[11] = jsonObject.getString("alarmName");
+            row[12] = jsonObject.getString("alarmName");
+
+        }
+        return new String[][][]{sheetData};
+
+
     }
 
 

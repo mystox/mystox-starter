@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.log.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.log.service.LogControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/log")
-public class LogController {
+public class LogController extends BaseController {
 
     @Autowired
     LogControllerService logControllerService;

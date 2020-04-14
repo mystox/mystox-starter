@@ -46,7 +46,24 @@ public class AlarmQuery extends Paging {
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
-    private List<String> keys;         //告警键
+    private String key;
+    private List<String> keyList;         //告警键
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public List<String> getKeyList() {
+        return keyList;
+    }
+
+    public void setKeyList(List<String> keyList) {
+        this.keyList = keyList;
+    }
 
     public List<String> getTargetLevelNameList() {
         return targetLevelNameList;
@@ -55,15 +72,6 @@ public class AlarmQuery extends Paging {
     public void setTargetLevelNameList(List<String> targetLevelNameList) {
         this.targetLevelNameList = targetLevelNameList;
     }
-
-    public List<String> getKeys() {
-        return keys;
-    }
-
-    public void setKeys(List<String> keys) {
-        this.keys = keys;
-    }
-
     public List<String> getDeviceIds() {
         return deviceIds;
     }
