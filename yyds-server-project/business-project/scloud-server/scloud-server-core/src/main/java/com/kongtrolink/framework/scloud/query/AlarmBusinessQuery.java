@@ -16,8 +16,10 @@ public class AlarmBusinessQuery extends Paging {
     private List<String> keyList;
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private String name;                        //告警名称
-    private Integer level;                      //告警等级
+    //前端告警等级全部传递等级列表
+//    private Integer level;                      //告警等级
     private List<Integer> levelList;            //等级列表
+    private String levelName;
     private String state;                       //告警状态(待处理，已消除)
     private String checkState;                  //告警确认状态
     private List<String> siteCodeList;
@@ -26,6 +28,7 @@ public class AlarmBusinessQuery extends Paging {
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备型号，如果没有与deviceType一致
     private List<String> deviceCodeList;        //设备编码列表，用户数据权限最终转换成设备id列表，传递到中台告警模块查询
+    private String operationState;
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
@@ -41,6 +44,22 @@ public class AlarmBusinessQuery extends Paging {
     private List<String> entDevSigList;
     private boolean shield=false;                 //是否屏蔽
     private String shieldRuleId;            //屏蔽规则id
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public List<String> getSiteCodeList() {
         return siteCodeList;
@@ -186,13 +205,13 @@ public class AlarmBusinessQuery extends Paging {
         this.name = name;
     }
 
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
+//    public Integer getLevel() {
+//        return level;
+//    }
+//
+//    public void setLevel(Integer level) {
+//        this.level = level;
+//    }
 
     public List<Integer> getLevelList() {
         return levelList;
@@ -293,7 +312,7 @@ public class AlarmBusinessQuery extends Paging {
     public static AlarmBusinessQuery createByAlarmQuery(AlarmQuery alarmQuery){
         AlarmBusinessQuery businessQuery = new AlarmBusinessQuery();
         businessQuery.setName(alarmQuery.getName());
-        businessQuery.setLevel(alarmQuery.getLevel());
+//        businessQuery.setLevel(alarmQuery.getLevel());
         businessQuery.setLevelList(alarmQuery.getLevelList());
         businessQuery.setState(alarmQuery.getState());
         businessQuery.setCheckState(alarmQuery.getCheckState());
@@ -311,6 +330,7 @@ public class AlarmBusinessQuery extends Paging {
         businessQuery.setCurrentPage(alarmQuery.getCurrentPage());
         businessQuery.setPageSize(alarmQuery.getPageSize());
         businessQuery.setSkipSize(alarmQuery.getPageSize() * 5);
+        businessQuery.setOperateUserId(alarmQuery.getOperateUserId());
         alarmQuery.setName(null);
         alarmQuery.setLevel(null);
         alarmQuery.setLevelList(null);

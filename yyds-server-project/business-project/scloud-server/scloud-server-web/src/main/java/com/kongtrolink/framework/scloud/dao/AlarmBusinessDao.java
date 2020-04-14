@@ -98,10 +98,10 @@ public class AlarmBusinessDao {
             name = MongoRegexUtil.escapeExprSpecialWord(name);
             criteria.and("name").regex(".*?" + name + ".*?");
         }
-        Integer level = businessQuery.getLevel();
-        if(null != level){
-            criteria.and("level").is(level);
-        }
+//        Integer level = businessQuery.getLevel();
+//        if(null != level){
+//            criteria.and("level").is(level);
+//        }
         List<Integer> levelList = businessQuery.getLevelList();
         if(null != levelList){
             criteria.and("level").in(levelList);
