@@ -4,6 +4,12 @@ privFunc:
   code: ${server.name}_${server.version} #权限编码 必填同级不可重复
   remark: 云平台 #备注 可填
   children:
+  - type: SCRIPT
+    name: 服务登录验证
+    code: SERVICE_LOGIN
+    routeMak: proxy_scloud
+    pageRoute: proxy_scloud
+    uri: /service/login.js
   - type: ROOT
     name: 权限管理
     code: SCLOUD_PAGE

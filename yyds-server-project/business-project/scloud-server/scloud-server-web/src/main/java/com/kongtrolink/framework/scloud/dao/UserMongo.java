@@ -1,9 +1,8 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
-import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
-import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.UserEntity;
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.mongodb.WriteResult;
@@ -51,6 +50,11 @@ public class UserMongo {
     public void deleteSitesFromUserSite(String uniqueCode, List<String> siteCodes){
         Criteria criteria = Criteria.where("siteCode").in(siteCodes);
         mongoTemplate.remove(new Query(criteria), UserSiteEntity.class, uniqueCode + CollectionSuffix.USER_SITE);
+    }
+
+    public UserModel findUserById(String uniqueCode, String userId) {
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
+
     }
     /**
      * 添加系统用户
@@ -108,7 +112,7 @@ public class UserMongo {
         }
         criteria.andOperator(criteria1);
         Query query = new Query(criteria);
-        UserModel user = (UserModel) mongoTemplate.find(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
+        UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
         return user;
     }
 }

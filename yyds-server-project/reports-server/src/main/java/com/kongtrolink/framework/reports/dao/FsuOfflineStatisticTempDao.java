@@ -29,13 +29,13 @@ import java.util.List;
 public class FsuOfflineStatisticTempDao extends MongoBaseDao{
 
     public void save(List<FsuOfflineStatisticTemp> fsuOfflineDetailsTemps, String taskId) {
-        mongoTemplate.insert(fsuOfflineDetailsTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS+taskId);
+        mongoTemplate.insert(fsuOfflineDetailsTemps, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE+taskId);
     }
 
     public void updateDelete(int year, int month, String taskId) {
         Query query = Query.query(Criteria.where("year").is(year).and("month").is(month));
         Update update = Update.update("deleteFlag", true);
-        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS + taskId);
+        mongoTemplate.updateMulti(query, update, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE + taskId);
 
     }
 
@@ -87,7 +87,7 @@ public class FsuOfflineStatisticTempDao extends MongoBaseDao{
                         .sum("durationSum").as("durationSum")
                         .sum("offlineMark").as("offlineSiteCount")
                         .count().as("siteCount"));
-        AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS + taskId, JSONObject.class);
+        AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();
         return mappedResults;
 

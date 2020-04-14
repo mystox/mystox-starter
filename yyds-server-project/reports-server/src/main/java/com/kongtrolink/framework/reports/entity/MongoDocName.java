@@ -16,6 +16,7 @@ public class MongoDocName {
     public final static String REPORT_OPERA_EXECUTE_TEMP_HomeALARM_COUNT = "t_report_opera_execute_temp_homeAlarm_count_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_ALARM_DETAILS = "t_report_opera_execute_temp_alarm_details_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_CATEGORY_COUNT = "t_report_opera_execute_temp_alarm_category_";
+    public final static String REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE = "t_report_opera_execute_temp_fsu_offline_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE_DETAILS = "t_report_opera_execute_temp_fsu_offline_details_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_FSU_RUNNING_STATE = "t_report_opera_execute_temp_fsu_running_state_";
     public final static String REPORT_OPERA_EXECUTE_TEMP_STATION_OFFLINE_STATISTIC = "t_report_opera_execute_temp_station_offline_statistic_";

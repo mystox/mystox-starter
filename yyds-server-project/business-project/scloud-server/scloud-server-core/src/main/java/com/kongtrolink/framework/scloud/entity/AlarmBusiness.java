@@ -16,6 +16,7 @@ public class AlarmBusiness {
     private String id;      //与告警id无关
     private String serverCode;
     private float value;                //告警值
+    private String measurement;                //单位
     private String tierCode;
     private String tierName;
     private String siteCode;
@@ -26,10 +27,12 @@ public class AlarmBusiness {
     private String deviceModel;
     private String deviceCode;
     private String deviceName;
+    private String operationState;      //运行状态（FSU类型）：工程态、测试态、交维态FsuOperationState.PROJECT
     private String cntbId;
     private String signalName;
     private String name;
     private Integer level;
+    private String levelName;               //告警等级名称，对应自定义告警等级名称，用于告警统计导出
     private String state;
     private String checkState = BaseConstant.NOCHECK;          //告警确认状态
     private Date checkTime;             //确认时间
@@ -45,6 +48,30 @@ public class AlarmBusiness {
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
     private String table;
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
+
+    public String getMeasurement() {
+        return measurement;
+    }
+
+    public void setMeasurement(String measurement) {
+        this.measurement = measurement;
+    }
 
     public String getTable() {
         return table;
@@ -326,7 +353,7 @@ public class AlarmBusiness {
         business.setCntbId(alarm.getSignalId());
         business.setName(alarm.getName());
         business.setLevel(alarm.getLevel());
-        business.setState("待处理");
+        business.setState(BaseConstant.ALARM_STATE_PENDING);
         business.setTreport(alarm.getTreport());
         business.setTrecover(alarm.getTrecover());
         business.setKey(alarm.getKey());

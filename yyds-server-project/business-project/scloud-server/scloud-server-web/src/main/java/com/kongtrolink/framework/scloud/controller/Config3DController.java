@@ -53,10 +53,10 @@ public class Config3DController extends BaseController {
      * 加载3D场景数据
      */
     @RequestMapping(value = "/loadScene", method = RequestMethod.POST)
-    public @ResponseBody JsonResult loadScene(@RequestBody int siteId) {
+    public @ResponseBody JsonResult loadScene(@RequestBody Config3dScene scene) {
         try {
             String uniqueCode = getUniqueCode();
-            Config3dScene config3dScene = config3dService.find(uniqueCode, siteId);
+            Config3dScene config3dScene = config3dService.find(uniqueCode, scene.getSiteId());
             return new JsonResult(config3dScene);
         }catch (Exception e){
             e.printStackTrace();
