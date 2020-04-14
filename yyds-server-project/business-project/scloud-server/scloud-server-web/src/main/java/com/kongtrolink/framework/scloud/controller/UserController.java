@@ -1,11 +1,9 @@
 package com.kongtrolink.framework.scloud.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.scloud.entity.UserEntity;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
@@ -14,13 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +35,15 @@ public class UserController extends BaseController{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-
     /**
      * 增加系统用户
      */
     @RequestMapping(value = "addUser",method = RequestMethod.POST)
     public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
         try {
-            userService.addUser(getUniqueCode(),userModel);
-            return new JsonResult("添加成功",true);
+            String uniqueCode = getUniqueCode();
+            uniqueCode = "YYDS";
+            return userService.addUser(uniqueCode,userModel);
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("添加失败",false);
@@ -92,11 +89,12 @@ public class UserController extends BaseController{
      * 用户列表
      */
     @RequestMapping(value = "listUser", method = RequestMethod.POST)
-    @Transactional
-    public List<JSONObject> listUser(@RequestBody UserQuery userQuery){
+    public  @ResponseBody JsonResult listUser(@RequestBody UserQuery userQuery){
 
-        List<JSONObject> userResult = userService.listUser(getUniqueCode(),userQuery);
-        return userResult;
+        String uniqueCode = getUniqueCode();
+        uniqueCode = "YYDS";
+        List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery);
+        return new JsonResult(userResult);
     }
     /**
      * 导出系统用户
@@ -131,11 +129,8 @@ public class UserController extends BaseController{
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
         try{
-            String uniqueCode = getUniqueCode();
-            if(null == uniqueCode){
-                uniqueCode = "YYDS";
-            }
-            userService.modifyUserSite(uniqueCode, userSiteEntityList);
+//            String uniqueCode = getUniqueCode();
+            userService.modifyUserSite(getUniqueCode(), userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
         }catch (Exception e){
             e.printStackTrace();
@@ -149,12 +144,9 @@ public class UserController extends BaseController{
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
-            String uniqueCode = getUniqueCode();
-            if(null == uniqueCode){
-                uniqueCode = "YYDS";
-            }
+//            String uniqueCode = getUniqueCode();
             String userId = userSiteEntity.getUserId();
-            List<UserSiteEntity> list = userService.getUserSite(uniqueCode, userId);
+            List<UserSiteEntity> list = userService.getUserSite(getUniqueCode(), userId);
             return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();

@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.service;
 
 import com.kongtrolink.framework.api.LocalService;
+import com.kongtrolink.framework.stereotype.OperaCode;
+import com.kongtrolink.framework.stereotype.Register;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,8 +12,12 @@ import org.springframework.stereotype.Component;
  * update record:
  */
 @Component
+@Register
 public class LocalServiceImpl implements LocalService {
+
+
     @Override
+    @OperaCode
     public String hello(String param) {
         try {
             Thread.sleep(6000L);

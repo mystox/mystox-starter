@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -42,10 +43,11 @@ public class HomeAlarmCountTempDao extends MongoBaseDao {
         long endTime = timePeriod.getEndTime().getTime();
         Criteria criteria = Criteria.where("tempDate").gte(startTime).lte(endTime);
         JSONArray stationList = condition.getJSONArray("stationList");
+        List<String> siteIdList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(stationList)) {
-            List<String> siteIdList = stationList.toJavaList(String.class);
-            criteria.and("stationId").in(siteIdList);
+             siteIdList = stationList.toJavaList(String.class);
         }
+        criteria.and("stationId").in(siteIdList);
         String statisticLevel = condition.getString("statisticLevel");
         Fields fields = Fields.fields();
         if (StatisticLevel.province.equals(statisticLevel)) {

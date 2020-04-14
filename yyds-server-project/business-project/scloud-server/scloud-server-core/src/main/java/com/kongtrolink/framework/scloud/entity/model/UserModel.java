@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.entity.model;
 
 
 import java.io.Serializable;
+import java.util.Date;
 
 
 /**
@@ -21,13 +22,13 @@ public class UserModel implements Serializable {
     private String currentRoleName;     //角色名称
     private Object informRule;
 
-    private String lockStatus;      //锁定状态
+//    private String lockStatus;      //锁定状态
     private String userStatus;      //用户状态
-    private Long validTime;       //有效日期
+    private Date validTime;       //有效日期
     private String workId;      //员工工号
     private String createTime;      //创建日期
-    private String lastLogin;       //最后登录日期
-    private String changeTime;      //密码更改日期
+//    private String lastLogin;       //最后登录日期
+//    private String changeTime;      //密码更改日期
     private String remark;      //用户备注
     private String password;
     private String sex;     //性别
@@ -105,40 +106,41 @@ public class UserModel implements Serializable {
         this.createTime = createTime;
     }
 
-    public String getLastLogin() {
-        return lastLogin;
-    }
+//    public String getLastLogin() {
+//        return lastLogin;
+//    }
+//
+//    public void setLastLogin(String lastLogin) {
+//        this.lastLogin = lastLogin;
+//    }
+//
+//    public String getChangeTime() {
+//        return changeTime;
+//    }
+//
+//    public void setChangeTime(String changeTime) {
+//        this.changeTime = changeTime;
+//    }
 
-    public void setLastLogin(String lastLogin) {
-        this.lastLogin = lastLogin;
-    }
+//    public String getLockStatus() {
+//        return lockStatus;
+//    }
+//
+//    public void setLockStatus(String lockStatus) {
+//        this.lockStatus = lockStatus;
+//    }
 
-    public String getChangeTime() {
-        return changeTime;
-    }
-
-    public void setChangeTime(String changeTime) {
-        this.changeTime = changeTime;
-    }
-
-    public String getLockStatus() {
-        return lockStatus;
-    }
-
-    public void setLockStatus(String lockStatus) {
-        this.lockStatus = lockStatus;
-    }
-
-    public Long getValidTime() {
-        return validTime;
-    }
-
-    public void setValidTime(Long validTime) {
-        this.validTime = validTime;
-    }
 
     public String getUserId() {
         return userId;
+    }
+
+    public Date getValidTime() {
+        return validTime;
+    }
+
+    public void setValidTime(Date validTime) {
+        this.validTime = validTime;
     }
 
     public void setUserId(String userId) {

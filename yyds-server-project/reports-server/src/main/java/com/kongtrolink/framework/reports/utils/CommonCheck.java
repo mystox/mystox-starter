@@ -6,6 +6,7 @@ import com.kongtrolink.framework.reports.entity.query.FsuEntity;
 import com.kongtrolink.framework.reports.entity.query.FsuOperationState;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -63,5 +64,34 @@ public class CommonCheck {
         }
         timePeriod.setDimension(period);
         return timePeriod;
+    }
+
+
+    public static int getYear(Integer alarmCycle) {
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        if (alarmCycle != null) {
+            int cycleDay = alarmCycle / 24 + 1;
+            if (day <= cycleDay)  //每月前几天周期统计上月的历史数据
+                if (month == 1) {
+                    year -= 1;
+                }
+        }
+        return year;
+    }
+
+
+    public static int getMonth(Integer alarmCycle) {
+        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        if (alarmCycle != null) {
+            int cycleDay = alarmCycle / 24 + 1;
+            if (day <= cycleDay)  //每月前几天周期统计上月的历史数据
+                if (month == 1) {
+                    month = 12;
+                } else month -= 1;
+        }
+        return month;
     }
 }

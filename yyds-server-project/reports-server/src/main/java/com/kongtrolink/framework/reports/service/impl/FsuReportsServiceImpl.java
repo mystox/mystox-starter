@@ -61,16 +61,13 @@ public class FsuReportsServiceImpl implements FsuReportsService {
     FsuRunStateDao fsuRunStateDao;
 
     @Override
-    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuOffLine", rhythm = 20, dataType = {DataType.TABLE, DataType.FILE}, extend = {
-            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
-            @ReportExtend(field = "region", name = "区域层级", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/proxy_ap/region/getCurrentRegion"), //区域层级
-            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList", hide = true), //站点列表
+    @ReportOperaCode(code = OperaCodePrefix.REPORTS + "fsuOffLine", rhythm = 20, dataType = {DataType.JSON, DataType.FILE}, extend = {
+            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, uri = "/reportsOpera/getStationList"), //站点列表            @ReportExtend(field = "stationList", name = "区域层级(站点级)", type = ReportExtend.FieldType.DISTRICT, belong = ExecutorType.query, value = "/region/getStationList", hide = true), //站点列表
             @ReportExtend(field = "currentUser", name = "当前用户", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, value = "/proxy_ap/commonFunc/getUserInfo", hide = true), //当前用户信息
             @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
             @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
             @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "交维态", "工程态", "测试态"}),
-            @ReportExtend(field = "period", name = "统计周期", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}),
-            @ReportExtend(field = "timePeriod", name = "时间段", type = ReportExtend.FieldType.DATE, belong = ExecutorType.query),
+            @ReportExtend(field = "statisticPeriod", name = "统计周期", type = ReportExtend.FieldType.STATISTIC_PERIOD, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}, description = "{dimension:月报表,timePeriod:{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}}"),
     })
     public ReportData fsuOffLine(String reportConfigStr) {
         ReportConfig reportConfig = JSONObject.parseObject(reportConfigStr, ReportConfig.class);
@@ -96,30 +93,17 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         String enterpriseCode = reportConfig.getEnterpriseCode();
         List<FsuOfflineStatisticTemp> fsuOfflineStatisticTemps = new ArrayList<FsuOfflineStatisticTemp>();
         //获取时间信息
-        /*JSONObject condition = reportConfig.getCondition();
-        if (TaskType.singleTask.name().equals(reportTask.getTaskType())) {
-            String monthStr = condition.getString("month");
-
-        } else {
-
-        }*/
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        int month = Calendar.getInstance().get(Calendar.MONTH) + 1;
-
-        /*if (month == 1) {
-            month = 12;
-            year -= 1;
-        } else month -= 1;*/
-
 
         JSONObject baseCondition = new JSONObject();
         baseCondition.put("serverCode", serverCode);
         baseCondition.put("enterpriseCode", enterpriseCode);
+        Integer alarmCycle = mqttCommonInterface.getAlarmCycle(baseCondition);
+        int month = CommonCheck.getMonth(alarmCycle);
+        int year = CommonCheck.getYear(alarmCycle);
         // 获取企业在该云平台下所有站点
         List<SiteEntity> siteList = mqttCommonInterface.getSiteList(baseCondition);
+        logger.debug("get site list is:[{}]", JSONObject.toJSONString(siteList));
         if (!CollectionUtils.isEmpty(siteList)) {
-            int finalMonth = month;
-            int finalYear = year;
             siteList.forEach(s -> {
                 // 获取站点名称
                 String address = s.getAddress();
@@ -134,29 +118,22 @@ public class FsuReportsServiceImpl implements FsuReportsService {
                 String siteType = s.getSiteType();
 
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
-                //判断交维态
-                if (fsuList == null) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                if (CollectionUtils.isEmpty(fsuList)) {
+                    logger.warn("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);
                 String manufacturer = fsuEntity.getManufacturer();
+                //判断交维态
                 String operationState = CommonCheck.fsuOperaStateCheck(fsuList);
                 List<String> fsuIds = ReflectionUtils.convertElementPropertyToList(fsuList, "fsuId");
                 // 获取上月告警统计信息 ,包括多项告警统计信息 根据等级统计上个月内的所有历史告警数量和告警恢复数量
                 logger.debug("statistic count Alarm ByDeviceIds, site reportTaskId is [{}]", stationId);
-               /* / Test
-                List<String> deviceIds = new ArrayList<>();
-                String operationState = "交维态";
-                deviceIds.add("10010_1021006");
-                deviceIds.add("10010_1021015");
-                List<JSONObject> jsonObjects = mqttCommonInterface.countAlarmByDeviceIds(deviceIds, 2020, 3, baseCondition);*/
-                JSONObject jsonObjects = mqttCommonInterface.statisticFsuOfflineData(fsuIds, finalYear, finalMonth, baseCondition);
-
+                JSONObject jsonObjects = mqttCommonInterface.statisticFsuOfflineData(fsuIds, year, month, baseCondition);
                 //填充站点告警统计信息
                 FsuOfflineStatisticTemp fsuOfflineStatisticTemp = new FsuOfflineStatisticTemp();
-                fsuOfflineStatisticTemp.setYear(finalYear);
-                fsuOfflineStatisticTemp.setMonth(finalMonth);
+                fsuOfflineStatisticTemp.setYear(year);
+                fsuOfflineStatisticTemp.setMonth(month);
                 fsuOfflineStatisticTemp.setStationId(stationId);
                 fsuOfflineStatisticTemp.setStationName(stationName);
                 fsuOfflineStatisticTemp.setStationType(siteType);
@@ -185,6 +162,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("executorTime", year + "-" + month);
         jsonObject.put("executorResult", fsuOfflineStatisticTemps);
+        logger.debug("[{}] executorResult:[{}]",reportTaskId,jsonObject);
         return new ReportData(DataType.TEXT, jsonObject.toJSONString());
     }
 
@@ -499,7 +477,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
                 List<FsuEntity> fsuList = mqttCommonInterface.getFsuList(stationId, baseCondition);
                 //判断交维态
                 if (fsuList == null) {
-                    logger.error("get fsu list is null:[{}]", JSONObject.toJSONString(s));
+                    logger.warn("get fsu list is null:[{}]", JSONObject.toJSONString(s));
                     return;
                 }
                 FsuEntity fsuEntity = fsuList.get(0);
@@ -544,7 +522,8 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("executorTime", year + "-" + month);
         jsonObject.put("executorResult", fsuOfflineDetailsTemps);
-        return new ReportData(DataType.TEXT, jsonObject.toJSONString());
+        logger.debug("[{}] executorResult:[{}]",reportTaskId,jsonObject);
+        return new ReportData(DataType.TEXT, jsonObject.toJSONString(jsonObject));
     }
 
 

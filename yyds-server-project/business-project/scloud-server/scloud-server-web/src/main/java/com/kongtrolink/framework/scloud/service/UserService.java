@@ -1,8 +1,8 @@
 package com.kongtrolink.framework.scloud.service;
 
-import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.scloud.entity.UserEntity;
+import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -24,10 +24,19 @@ public interface UserService {
      * 获取用户管辖站点
      */
     List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
+
+    /**
+     * @Date 13:12 2020/4/14
+     * @Param No such property: code for class: Script1
+     * @return com.kongtrolink.framework.scloud.entity.model.UserModel
+     * @Author mystox
+     * @Description //根据用户id 获取用户
+     **/
+    UserModel getUserById(String uniqueCode, String userId);
     /**
      * 添加系统用户
      */
-    void addUser(String uniqueCode, UserModel userModel);
+    JsonResult addUser(String uniqueCode, UserModel userModel);
     /**
      * 修改系统用户
      */

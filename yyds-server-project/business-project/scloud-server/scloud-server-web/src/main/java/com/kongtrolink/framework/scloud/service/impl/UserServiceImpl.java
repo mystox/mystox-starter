@@ -1,16 +1,13 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
-import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
 import com.kongtrolink.framework.scloud.dao.UserMongo;
 import com.kongtrolink.framework.scloud.entity.UserEntity;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
-import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.kongtrolink.framework.scloud.service.UserService;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -24,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 系统管理-用户管理-系统用户 接口实现类
@@ -72,7 +68,7 @@ public class UserServiceImpl implements UserService {
      * @param userModel
      */
     @Override
-    public void addUser(String uniqueCode, UserModel userModel) {
+    public JsonResult addUser(String uniqueCode, UserModel userModel) {
         UserEntity userEntity = new UserEntity();
         Map<String,Object> map = new HashMap<>();   //传给云管的参数
         map.put("name",userModel.getName());
@@ -80,7 +76,7 @@ public class UserServiceImpl implements UserService {
         map.put("phone",userModel.getPhone());
         map.put("email",userModel.getEmail());
         map.put("currentPostId",userModel.getCurrentPostId());
-        map.put("currentRoleName",userModel.getCurrentRoleName());
+        map.put("currentPositionName",userModel.getCurrentRoleName());
         map.put("informRule",userModel.getInformRule());
         String userModelMsg = JSONObject.toJSONString(map);
         MsgResult opera = mqttOpera.opera("addUser",userModelMsg);
@@ -88,21 +84,29 @@ public class UserServiceImpl implements UserService {
         if (stateCode == CommonConstant.SUCCESSFUL) {
             String msg = opera.getMsg();
             JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            Boolean success = jsonResult.getSuccess();
+            if (!success)
+                return jsonResult;
             Object data = jsonResult.getData();
             String userId = String.valueOf(data);//填充数据库实体
             userEntity.setUserId(userId);
-            userEntity.setLockStatus(userModel.getLockStatus());
+//            userEntity.setLockStatus(userModel.getLockStatus());
             userEntity.setUserStatus(userModel.getUserStatus());
             userEntity.setValidTime(userModel.getValidTime());
             userEntity.setWorkId(userModel.getWorkId());
-            userEntity.setCreateTime(userModel.getCreateTime());
-            userEntity.setLastLogin(userModel.getLastLogin());
-            userEntity.setChangeTime(userModel.getChangeTime());
+//            userEntity.setCreateTime(userModel.getCreateTime());
+//            userEntity.setLastLogin(userModel.getLastLogin());
+//            userEntity.setChangeTime(userModel.getChangeTime());
             userEntity.setRemark(userModel.getRemark());
-            userEntity.setPassword(userModel.getPassword());
+//            userEntity.setPassword(userModel.getPassword());
             userEntity.setSex(userModel.getSex());
             userEntity.setUserTime(userModel.getUserTime());
             userMongo.addUser(uniqueCode,userEntity);
+            return jsonResult;
+        } else {
+            String msg = opera.getMsg();
+            JsonResult jsonResult = JSONObject.parseObject(msg, JsonResult.class);
+            return jsonResult;
         }
     }
 
@@ -173,8 +177,10 @@ public class UserServiceImpl implements UserService {
                 result = resultRange.getJSONArray("list").toJavaList(JSONObject.class);
                 for (JSONObject userList:result){
                     String userId = userList.getString("userId");
-                    UserModel list = userMongo.listUser(uniqueCode,userId,userQuery);
-                    JSONObject userJson = (JSONObject) JSONObject.toJSON(list);
+                    UserModel userModel = userMongo.listUser(uniqueCode,userId,userQuery);
+                    if (userModel == null)
+                        continue;
+                    JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
                     userList.putAll(userJson);
                 }
             }
@@ -194,5 +200,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserSiteEntity> getUserSite(String uniqueCode, String userId) {
         return userMongo.findUserSite(uniqueCode, userId);
+    }
+
+    @Override
+    public UserModel getUserById(String uniqueCode, String userId) {
+        return userMongo.findUserById(uniqueCode,userId);
     }
 }
