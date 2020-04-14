@@ -9,6 +9,7 @@ import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.Alarm;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.AlarmLevel;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmLevelQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
@@ -117,5 +118,21 @@ public class AlarmBusinessController extends ExportController{
         String[] headsName = { "告警名称", "告警等级", "告警值","站点层级","站点名称","告警设备", "开始时间"};
         String[] properiesName = { "name", "levelName", "value" ,"tierName","siteName", "deviceName", "treport"};
         ExcelExportService.exportTwoLineHeadData(response, "实时告警统计表", list, properiesName, headsName, tableTitle);
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/14 15:50
+     * 功能描述:告警频发站，最大一个月
+     */
+    @RequestMapping("/alarmSiteHistory")
+    @ResponseBody
+    public JsonResult alarmSiteHistory(@RequestBody AlarmBusinessQuery businessQuery){
+        String uniqueCode = getUniqueCode();
+        if(StringUtil.isNUll(uniqueCode)){
+            uniqueCode = "YYDS";
+        }
+        List<AlarmSiteStatistics> businessList = businessService.alarmSiteTopHistory(uniqueCode, businessQuery);
+        return new JsonResult(businessList);
     }
 }

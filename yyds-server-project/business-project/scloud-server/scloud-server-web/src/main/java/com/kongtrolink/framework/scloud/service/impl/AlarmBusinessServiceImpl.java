@@ -6,17 +6,19 @@ import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.dao.AlarmBusinessDao;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteCount;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.entity.FilterRule;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
+import com.kongtrolink.framework.scloud.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -242,5 +244,39 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     @Override
     public boolean unResolveByKeys(String uniqueCode, String table, List<String> keyList) {
         return businessDao.unResolveByKeys(uniqueCode, table, keyList);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param businessQuery
+     * @auther: liudd
+     * @date: 2020/4/14 15:59
+     * 功能描述:告警频发站点统计
+     */
+    @Override
+    public List<AlarmSiteStatistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery) {
+        List<AlarmSiteStatistics> alarmSiteStatisticsList = businessDao.siteDateCount(uniqueCode, CollectionSuffix.HIS_ALARM_BUSINESS, businessQuery);
+        Map<String, AlarmSiteStatistics> siteCodeStatisticsMap = new HashMap<>();
+        Date startBeginTime = businessQuery.getStartBeginTime();
+        Date startEndTime = businessQuery.getStartEndTime();
+        for(long i= startBeginTime.getTime(); i<= startEndTime.getTime(); i= i+(24*60*60*1000)){
+            String timeStr = DateUtil.getInstance().format(startBeginTime, "yyyy-MM-dd");
+            for(AlarmSiteStatistics alarmSiteStatistics : alarmSiteStatisticsList){
+                if(alarmSiteStatistics.getTimeStr().equals(timeStr)){
+                    AlarmSiteStatistics real = siteCodeStatisticsMap.get(alarmSiteStatistics.getSiteCode());
+                    if(null == real){
+                        real = alarmSiteStatistics;
+                        real.setAlarmSiteCountList(new ArrayList<>());
+                    }
+                    AlarmSiteCount byStatistics = AlarmSiteCount.createByStatistics(alarmSiteStatistics);
+                    real.getAlarmSiteCountList().add(byStatistics);
+                    siteCodeStatisticsMap.put(alarmSiteStatistics.getSiteCode(), real);
+                }
+            }
+            startBeginTime = new Date(i);
+        }
+        List<AlarmSiteStatistics> list = new ArrayList<>();
+        list.addAll(siteCodeStatisticsMap.values());
+        return list;
     }
 }

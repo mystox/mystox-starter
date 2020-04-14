@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 
@@ -50,4 +51,11 @@ public interface AlarmBusinessService {
     boolean resolve(String uniqueCode, String table, AlarmBusinessQuery businessQuery);
 
     boolean unResolveByKeys(String uniqueCode, String table, List<String> keyList);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/14 15:59
+     * 功能描述:告警频发站点统计
+     */
+    List<AlarmSiteStatistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery);
 }

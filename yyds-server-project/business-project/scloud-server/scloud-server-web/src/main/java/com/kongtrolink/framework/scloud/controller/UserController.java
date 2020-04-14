@@ -131,7 +131,10 @@ public class UserController extends BaseController{
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
+            if(null == uniqueCode){
+                uniqueCode = "YYDS";
+            }
             userService.modifyUserSite(uniqueCode, userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
         }catch (Exception e){
@@ -146,7 +149,10 @@ public class UserController extends BaseController{
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
+            if(null == uniqueCode){
+                uniqueCode = "YYDS";
+            }
             String userId = userSiteEntity.getUserId();
             List<UserSiteEntity> list = userService.getUserSite(uniqueCode, userId);
             return new JsonResult(list);
