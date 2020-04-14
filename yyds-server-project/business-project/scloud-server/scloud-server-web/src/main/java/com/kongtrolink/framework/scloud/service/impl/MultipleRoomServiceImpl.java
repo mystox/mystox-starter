@@ -67,6 +67,9 @@ public class MultipleRoomServiceImpl implements MultipleRoomService {
     @Override
     public RoomSiteInfo getSiteInfo(String uniqueCode, int siteId) {
         RoomSiteInfo roomSiteInfo =  multipleRoomDao.findSite(uniqueCode, siteId);
+        if(roomSiteInfo==null){
+            return new RoomSiteInfo();
+        }
         int deviceNum = 0;
         int signalNum = 0;
         List<DeviceEntity> deviceList = multipleRoomDao.getDeviceList(uniqueCode,siteId);//监控设备总数
