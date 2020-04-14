@@ -4,6 +4,7 @@ spring:
     port: 6379
     database: 2
 server:
+  groupCode: GROUP_LIUDD_2020041301
   name: SCLOUD_SERVER_WEB #服务编码
   host: 172.16.6.143
   groupCode: GROUP
@@ -15,7 +16,7 @@ mqtt:
 
 ########## mongo数据库配置 ##########
 spring.data.mongodb:
-  uri: mongodb://scloud:123456@172.16.6.9:27017/scloud-product
+  uri: mongodb://172.16.5.61:27017/scloud-product
 
 executor:
   threadPool:
