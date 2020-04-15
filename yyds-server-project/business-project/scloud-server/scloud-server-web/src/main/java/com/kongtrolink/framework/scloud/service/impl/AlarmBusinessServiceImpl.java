@@ -9,10 +9,13 @@ import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.AlarmSiteCount;
 import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.entity.FilterRule;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
+import com.kongtrolink.framework.scloud.service.SiteService;
 import com.kongtrolink.framework.scloud.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,8 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     AlarmBusinessDao businessDao;
     @Autowired
     FilterRuleService filterRuleService;
+    @Autowired
+    SiteService siteService;
 
     @Override
     public void add(String uniqueCode, String table, AlarmBusiness business) {
@@ -271,7 +276,7 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
         Map<String, AlarmSiteStatistics> siteCodeStatisticsMap = new HashMap<>();
         Date startBeginTime = businessQuery.getStartBeginTime();
         Date startEndTime = businessQuery.getStartEndTime();
-        for(long i= startBeginTime.getTime(); i<= startEndTime.getTime(); i= i+(24*60*60*1000)){
+        for(long i= startBeginTime.getTime(); i< startEndTime.getTime();){
             String timeStr = DateUtil.getInstance().format(startBeginTime, "yyyy-MM-dd");
             for(String key : siteCodeStatisticsListMap.keySet()){
                 List<AlarmSiteStatistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(key);
@@ -279,26 +284,57 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
                 if(alarmSiteStatistics == null){
                     alarmSiteStatistics = new AlarmSiteStatistics();
                     alarmSiteStatistics.setSiteCode(siteCodeStatisticsList.get(0).getSiteCode());
-                    alarmSiteStatistics.setAlarmSiteCountList(new ArrayList<>());
+                    alarmSiteStatistics.setProperties(new ArrayList<>());
+                    alarmSiteStatistics.setValues(new ArrayList<>());
+                    alarmSiteStatistics.getProperties().add("站点名称");
+                    alarmSiteStatistics.getValues().add("null");
+                    alarmSiteStatistics.getProperties().add("告警总数");
+                    alarmSiteStatistics.getValues().add("0");
                 }
-                AlarmSiteCount alarmSiteCount = new AlarmSiteCount();
-                alarmSiteCount.setTimeStr(timeStr);
+                int count = 0;
                 Iterator<AlarmSiteStatistics> iterator = siteCodeStatisticsList.iterator();
                 while(iterator.hasNext()){
                     AlarmSiteStatistics next = iterator.next();
                     if(timeStr.equals(next.getTimeStr())){
-                        alarmSiteCount.setCount(next.getCount());
+                        count = next.getCount();
                         iterator.remove();
                     }
                 }
-                alarmSiteStatistics.getAlarmSiteCountList().add(alarmSiteCount);
-                alarmSiteStatistics.setCount(alarmSiteStatistics.getCount() + alarmSiteCount.getCount());
+                alarmSiteStatistics.getProperties().add(timeStr);
+                alarmSiteStatistics.getValues().add(count+"");
+                alarmSiteStatistics.setCount(alarmSiteStatistics.getCount() + count);
+                alarmSiteStatistics.getValues().set(1, alarmSiteStatistics.getCount()+"");
                 siteCodeStatisticsMap.put(key, alarmSiteStatistics);
             }
+            i= i+(24*60*60*1000);
             startBeginTime = new Date(i);
         }
         List<AlarmSiteStatistics> list = new ArrayList<>();
         list.addAll(siteCodeStatisticsMap.values());
+        List<String> siteCodeList = new ArrayList<>();
+        siteCodeList.addAll(siteCodeStatisticsMap.keySet());
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setServerCode(businessQuery.getServerCode());
+        siteQuery.setSiteCodes(siteCodeList);
+        List<SiteModel> siteList = siteService.findSiteList(uniqueCode, siteQuery);
+        for(SiteModel siteModel : siteList){
+            String code = siteModel.getCode();
+            AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(code);
+            if(null != alarmSiteStatistics){
+                alarmSiteStatistics.getValues().set(0, siteModel.getName());
+            }
+            siteCodeStatisticsMap.remove(code);
+        }
+        boolean connFailt = siteCodeStatisticsMap.size()==list.size()? true : false;
+        String connFailtInfo = "资管通讯失败";
+        for(String key : siteCodeStatisticsMap.keySet()){
+            AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(key);
+            alarmSiteStatistics.getValues().set(0, "资管不存在该设备");
+            if(connFailt) {
+                alarmSiteStatistics.getValues().set(0, connFailtInfo);
+            }
+
+        }
         return list;
     }
 }

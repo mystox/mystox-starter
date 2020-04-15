@@ -70,11 +70,11 @@ public class UserMongo {
         String userId = userModel.getUserId();
         Criteria criteria = Criteria.where("userId").is(userId);
         Update update = new Update();
-        update.set("lockStatus",userModel.getLockStatus());
-        update.set("userStatus",userModel.getUserStatus());
-        update.set("validTime",userModel.getValidTime());
-        update.set("workId",userModel.getWorkId());
-        update.set("changeTime",userModel.getChangeTime());
+//        update.set("lockStatus",userModel.getLockStatus());
+//        update.set("userStatus",userModel.getUserStatus());
+//        update.set("validTime",userModel.getValidTime());
+//        update.set("workId",userModel.getWorkId());
+//        update.set("changeTime",userModel.getChangeTime());
         update.set("remark",userModel.getRemark());
         update.set("password",userModel.getPassword());
         update.set("sex",userModel.getSex());
@@ -98,7 +98,7 @@ public class UserMongo {
         UserEntity userEntity = new UserEntity();
         String lockStatus = userEntity.getLockStatus(); //锁定状态
         String userStatus = userEntity.getUserStatus(); //用户状态
-        Long validTime = userEntity.getValidTime();  //有效日期
+//        Long validTime = userEntity.getValidTime();  //有效日期
         Criteria criteria = Criteria.where("userId").is(id);
         Criteria criteria1 = new Criteria();
         if (lockStatus != null && !lockStatus.equals("")){
@@ -107,9 +107,9 @@ public class UserMongo {
         if (userStatus != null && !userStatus.equals("")){
             criteria1.and("userStatus").is(userStatus);
         }
-        if (validTime != null){
-            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
-        }
+//        if (validTime != null){
+//            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
+//        }
         criteria.andOperator(criteria1);
         Query query = new Query(criteria);
         UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);

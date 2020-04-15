@@ -13,7 +13,27 @@ public class AlarmSiteStatistics {
     private String siteName;
     private String timeStr;
     private int count;
-    private List<AlarmSiteCount> alarmSiteCountList;
+    private List<String> properties;
+    private List<String> values;
+
+//    private List<AlarmSiteCount> alarmSiteCountList;
+
+    public List<String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<String> properties) {
+        this.properties = properties;
+    }
+
+    public List<String> getValues() {
+        return values;
+    }
+
+    public void setValues(List<String> values) {
+        this.values = values;
+    }
+
 
     public String getTimeStr() {
         return timeStr;
@@ -22,14 +42,14 @@ public class AlarmSiteStatistics {
     public void setTimeStr(String timeStr) {
         this.timeStr = timeStr;
     }
-
-    public List<AlarmSiteCount> getAlarmSiteCountList() {
-        return alarmSiteCountList;
-    }
-
-    public void setAlarmSiteCountList(List<AlarmSiteCount> alarmSiteCountList) {
-        this.alarmSiteCountList = alarmSiteCountList;
-    }
+//
+//    public List<AlarmSiteCount> getAlarmSiteCountList() {
+//        return alarmSiteCountList;
+//    }
+//
+//    public void setAlarmSiteCountList(List<AlarmSiteCount> alarmSiteCountList) {
+//        this.alarmSiteCountList = alarmSiteCountList;
+//    }
 
     public String getSiteCode() {
         return siteCode;

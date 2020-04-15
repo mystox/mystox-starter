@@ -135,4 +135,21 @@ public class AlarmBusinessController extends ExportController{
         List<AlarmSiteStatistics> businessList = businessService.alarmSiteTopHistory(uniqueCode, businessQuery);
         return new JsonResult(businessList);
     }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/14 15:50
+     * 功能描述:告警频发站，允许选择一个月时间跨度
+     */
+    @RequestMapping("/alarmSiteHistoryExport")
+    @ResponseBody
+    public JsonResult alarmSiteHistoryExport(@RequestBody AlarmBusinessQuery businessQuery, HttpServletResponse response){
+        String uniqueCode = getUniqueCode();
+        if(StringUtil.isNUll(uniqueCode)){
+            uniqueCode = "YYDS";
+        }
+        List<AlarmSiteStatistics> businessList = businessService.alarmSiteTopHistory(uniqueCode, businessQuery);
+        ExcelExportService.alarmSiteHistoryExport(response, "告警频发站点", businessList);
+        return new JsonResult(businessList);
+    }
 }
