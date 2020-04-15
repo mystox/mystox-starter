@@ -12,40 +12,40 @@
             <table scloud-table-head-fix class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>告警名称</th><th>告警等级</th><th>告警值</th><th>告警设备</th><th>站点名称</th><th>站点分级</th><th>开始时间</th><th>状态</th><th>操作</th>
+                        <th>告警名称</th><th>告警等级</th><th>告警值</th><th>告警设备</th><th>站点名称</th><th>区域层级</th><th>开始时间</th><th>状态</th><th>操作</th>
                     </tr>
                 </thead>
                 <tbody ng-repeat="a in focusAlarmList" ng-class="CONST.animation.list">
                     <tr>
-                        <td ng-bind="a.alarm.signal.name"></td>
-                        <td ng-style="util.alarmColor(a.alarm.level);">
+                        <td ng-bind="a.name"></td>
+                        <td ng-style="util.alarmColor(a.level);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="a.alarm.level | alarmLevelFilter"></span>
+                            <span ng-bind="a.level | alarmLevelFilter"></span>
                         </td>
-                        <td ng-bind="a.alarm.value | nullFilter"></td>
-                        <td ng-bind="a.alarm.device.name"></td>
-                        <td ng-bind="a.alarm.site.name"></td>
-                        <td ng-bind="a.alarm.siteTierString"></td>
-                        <td ng-bind="a.alarm.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="a.value | nullFilter"></td>
+                        <td ng-bind="a.deviceName"></td>
+                        <td ng-bind="a.siteName"></td>
+                        <td ng-bind="a.siteTierString"></td>
+                        <td ng-bind="a.treport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
-                            <label class="label" ng-class="util.alarmStateColor(a.alarm.tCheck);" ng-bind="a.alarm.tCheck | alarmCheckFilter | date: 'yyyy-MM-dd HH:mm:ss'"></label>
+                            <label class="label" ng-class="util.alarmStateColor(a.state === '已消除');" ng-bind="a.state"></label>
                         </td>
                         <td>
-                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(1009)" ng-click="removeFocus(a.alarm.signal.strId,$event);"></a>
-                            <a title="确认" class="ic ic-check" ng-if="util.checkPrivilege(1010) && !a.alarm.tCheck" ng-click="checkAlarm(a.alarm,$event);"></a>
-                            <a title="取消确认" class="ic ic-times" ng-if="util.checkPrivilege(1010) && a.alarm.tCheck" ng-click="checkAlarm(a.alarm,$event);"></a>
+                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(1009)" ng-click="removeFocus(a.focusId,$event);"></a>
+                            <a title="确认" class="ic ic-check" ng-if="util.checkPrivilege(1010) && !a.checkTime" ng-click="alarmConfirm.toModal(a,$event);"></a>
+                            <a title="取消确认" class="ic ic-times" ng-if="util.checkPrivilege(1010) && a.checkTime" ng-click="alarmConfirm.toModal(a,$event);"></a>
                             <a title="详情" class="ic ic-detail" ng-click="openDetailTab($index);"></a>
                         </td>
                     </tr>
                     <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
                         <td colspan="11" class="detail">
                             <ul>
-                                <li>恢复时间：<span ng-bind="a.alarm.tRecover| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
-                                <li>告警详情：<span ng-bind="a.alarm.details"></span></li>
+                                <li>恢复时间：<span ng-bind="a.trecover| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>告警详情：<span ng-bind="a.details | nullFilter"></span></li>
                             </ul>
                             <ul>
-                                <li>确认时间：<span ng-bind="a.alarm.tCheck| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
-                                <li>确认人：<span ng-bind="a.alarm.checkOperator.name | nullFilter"></span></li>
+                                <li>确认时间：<span ng-bind="a.checkTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>确认人：<span ng-bind="a.checker | nullFilter"></span></li>
                             </ul>
                             <ul>
                                 <li>消除时间：<span ng-bind="a.alarm.tClear| date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
@@ -78,12 +78,12 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="item in focusDIModelList" ng-class="CONST.animation.list">
-                        <td ng-bind="item.signal.name"></td>
-                        <td ng-bind="item.device.name"></td>
-                        <td ng-bind="item.site.name"></td>
+                        <td ng-bind="item.signalName"></td>
+                        <td ng-bind="item.deviceName"></td>
+                        <td ng-bind="item.siteName"></td>
                         <td ng-bind="item.tierString"></td>
                         <td>
-                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(409)" ng-click="removeFocus(item.signal.id,$event);"></a>
+                            <a title="取消关注" class="ic ic-focus" ng-if="util.checkPrivilege(409)" ng-click="removeFocus(item.id,$event);"></a>
                         </td>
                     </tr>
                 </tbody>
@@ -97,4 +97,42 @@
         </div>
         <tm-pagination conf="paginationConf2"></tm-pagination>
     </div>
+    
+    <div>
+        <!-- 告警确认 -->
+        <form class="modal hide form-horizontal" data-backdrop="static" id="alarmConfirmModal"
+              name="alarmConfirm.form" novalidate ng-submit="alarmConfirm.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="alarmConfirm.clear();"><i class="ic ic-close"></i></button>
+                <h3>告警确认</h3>
+            </div>
+            <div class="modal-body scroll">
+
+                <div class="control-group">
+                    <label class="control-label">用户姓名:</label>
+                    <div class="controls">
+                        <span ng-bind="site.user.name | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">操作时间:</label>
+                    <div class="controls">
+                        <span ng-bind="site.alarmConfirm.obj.operateTime | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(alarmConfirm.form.operateDesc);">
+                    <label class="control-label">确认内容</label>
+                    <div class="controls">
+                        <textarea name="operateDesc" style="resize: none; width: 300px;" ng-model="alarmConfirm.obj.operateDesc" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">确认</button>
+                <button type="button" class="btn btn-default" ng-click="alarmConfirm.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+        
 </section>

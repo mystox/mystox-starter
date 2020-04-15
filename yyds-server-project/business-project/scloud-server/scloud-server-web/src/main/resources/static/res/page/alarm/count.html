@@ -47,23 +47,23 @@
                         <thead>
                         <tr>
                             <th>告警名称</th>
+                            <th>告警等级</th>
                             <th>告警值</th>
                             <th>站点层级</th>
                             <th>站点名称</th>
-                            <th>归属公司</th>
                             <th>告警设备</th>
                             <th>开始时间</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="item in realtimeAlarmList" ng-class="CONST.animation.list">
-                            <td ng-bind="item.signal.name"></td>
+                            <td ng-bind="item.name"></td>
+                            <td ng-bind="item.level | alarmLevelFilter"></td>
                             <td ng-bind="item.value"></td>
-                            <td ng-bind="item.siteTierString"></td>
-                            <td ng-bind="item.site.name"></td>
-                            <td ng-bind="item.company | nullFilter"></td>
-                            <td ng-bind="item.device.name"></td>
-                            <td ng-bind="item.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                            <td ng-bind="item.tierName"></td>
+                            <td ng-bind="item.siteName"></td>
+                            <td ng-bind="item.deviceName"></td>
+                            <td ng-bind="item.treport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -129,38 +129,25 @@
                     scloud-count-down sng-count="30"></button>
             </div>
         </form>
-        <div class="page-header"><h4>告警分布</h4></div>
+        <div class="page-header"><h4>告警频发站</h4></div>
         <div class="page-body">
-            <div id="frequent-chart"></div>
-            <div id="frequent-xAxis">
-                <div ng-repeat = "item in frequentSiteList">
-                    <p class="value" ng-bind="item.value"></p>
-                    <p class="name" ng-bind="item.name"></p>
-                </div>
-            </div>
             <div class="table-box scroll">
                 <table border="1" class="countPageTable">
                     <thead>
                     <tr>
                         <th rowspan="2">站点</th>
-                        <th rowspan="2">归属公司</th>
+                        <th rowspan="2">告警总数</th>
                         <th colspan="7">告警数量</th>
                     </tr>
                     <tr>
-                        <th ng-repeat="item in frequentDateList" ng-bind="item"></th>
+                        <th ng-repeat="item in frequentDateList track by $index" ng-bind="item"></th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="item in frequentAlarmList" ng-class="CONST.animation.list">
-                        <td ng-bind="item.site.name"></td>
-                        <td ng-bind="item.site.company | nullFilter"></td>
-                        <td ng-bind="item.count[0].count"></td>
-                        <td ng-bind="item.count[1].count"></td>
-                        <td ng-bind="item.count[2].count"></td>
-                        <td ng-bind="item.count[3].count"></td>
-                        <td ng-bind="item.count[4].count"></td>
-                        <td ng-bind="item.count[5].count"></td>
-                        <td ng-bind="item.count[6].count"></td>
+                        <td ng-bind="item.name"></td>
+                        <td ng-bind="item.total"></td>
+                        <td ng-bind="v" ng-repeat="v in item.count track by $index"></td>
                     </tr>
                     </tbody>
                 </table>

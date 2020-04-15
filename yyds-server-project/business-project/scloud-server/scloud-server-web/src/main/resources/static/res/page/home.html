@@ -1,70 +1,60 @@
 <section id="homePage" scloud-fullscreen="true">
-    <div class="left1 card-bg card-transparent cursor-point" ui-sref="config/site">
+    <div class="left1 card-bg card-transparent">
         <div class="page-header left-bar">
-            <h4>站点数量(交维态/所有)</h4>
-        </div>
-        <div class="page-body">
-            <div class="led">
-                <div class="value-wrapper">
-                    <span class="count count-left" ng-style="getFontSize('l', maintenanceSiteCount)" ng-bind="maintenanceSiteCount"></span>
-                </div><!--
-             --><small>/</small><!--
-             --><div class="value-wrapper">
-                    <span class="count count-right" ng-style="getFontSize('r', siteCount)" ng-bind="siteCount"></span>
-                </div>
-                <div class="corner corner-lt"></div>
-                <div class="corner corner-rt"></div>
-                <div class="corner corner-lb"></div>
-                <div class="corner corner-rb"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="left2 card-bg card-transparent">
-        <div class="page-header left-bar">
-            <h4>FSU实时在线情况</h4>
+            <h4>FSU实时在线情况
+                <span>(
+                    <span ng-bind="fsu[0].count || 0" class="cursor-point font-important" ng-click="go('config/fsu', {query: {state:'在线', fsuOperationState: '交维态'}, tier: curTier})"></span>
+                    /
+                    <span ng-bind="fsu[1].count || 0" class="cursor-point font-important" ng-click="go('config/fsu', {query: {state:'离线', fsuOperationState: '交维态'}, tier: curTier})"></span>
+                )</span>
+            </h4>
         </div>
         <div class="page-body">
             <div id="{{fsuPieId}}" class = 'fsuPie'></div>
-            <p class="check text-center mgt">
-                在线：
-                <span ng-bind="fsu.onlineCount" class="cursor-point font-important" ui-sref="config/fsu({state:'在线'})"></span> 个
-                <span class="mgl">离线：</span>
-                <span ng-bind="fsu.offlineCount" class="cursor-point font-important" ui-sref="config/fsu({state:'离线'})"></span> 个
-            </p>
+        </div>
+    </div>
+
+    <div class="left2 card-bg page-wrapper card-transparent">
+        <div class="page-header left-bar">
+            <h4>告警工单</h4>
+            <span class="page-header-count1">(</span>
+            <span class="page-header-count1 font-important cursor-point" ng-bind="workInfoCounts[0]+workInfoCounts[1]+workInfoCounts[2]+workInfoCounts[3]" ng-click="go('operation/workList', {})"></span>
+            <span class="page-header-count1">)</span>
+        </div>
+        <div class="page-body">
+           <div id="{{alarmWorkBarId}}" class="alarmWorkBar"></div>
         </div>
     </div>
 
     <div class="left3 card-bg card-transparent">
         <div class="page-header left-bar">
-            <h4>FSU在线趋势(72小时)</h4>
-        </div>
-        <div class="page-body">
-            <div id="{{fsuStatId}}" class="fsuStat"></div>
-        </div>
-    </div>
-
-    <div class="left4 card-bg card-transparent">
-        <div class="page-header left-bar">
             <h4>实时告警统计</h4>
-            <small ui-sref="alarm/list">查看更多</small>
+            <small ng-click="go('alarm/list', {query: {operationState: '交维态'}, tier: curTier, startView: 'list'})">查看更多</small>
         </div>
         <div class="page-body">
-            <div class="unit cursor-point" ng-repeat="item in alarmLevelList track by $index" ui-sref="alarm/list({alarmLevel:item.key})" title="{{item.key | alarmLevelFilter}}">
-                <span ng-bind="item.key | alarmLevelFilter"></span>
-                <div class="progress-box">
-                    <div class="progress">
-                        <div class="bar" ng-style="util.progressStyle(item.percent, item.color);"></div>
+            <div class="unit-wrapper">
+                <div>                    
+                    <div class="unit" 
+                        ng-repeat="item in alarmLevelList track by $index" 
+                        ng-style="{borderColor:item.color}">
+                        <div ng-if="$index < 3" class="cursor-point text" ng-click="go('alarm/list', {alarmLevel:item.key, alarmState: '待处理', query: {operationState: '交维态'}, tier: curTier})">
+                            <span ng-bind="item.key | alarmLevelFilter" title="{{item.key | alarmLevelFilter}}"></span><br/>
+                            <span ng-bind="item.value"></span>
+                        </div>
+                        <div ng-if="$index === 3" class="cursor-point text" ng-click="go('alarm/list', {alarmLevel:item.key, alarmState: '待处理', query: {operationState: '交维态'}, tier: curTier})">
+                            <span ng-bind="item.value"></span><br/>
+                            <span ng-bind="item.key | alarmLevelFilter" title="{{item.key | alarmLevelFilter}}"></span>
+                        </div>
                     </div>
+                    <div class="inner"><div></div></div>
                 </div>
-                <span ng-bind="item.value"></span>
             </div>
             <p class="check mgt text-center">
                 <span class="">                        
-                    已确认：<span ng-bind="checkedCounts" class="cursor-point font-important" ui-sref="alarm/list({checkedState:true})"></span> 个
+                    已确认：<span ng-bind="checkedCounts" class="cursor-point font-important" ng-click="go('alarm/list', {checkedState:true, startView: 'list', query: {operationState: '交维态'}, tier: curTier})"></span> 个
                 </span>
                 <span class="">
-                    未确认：<span ng-bind="uncheckedCounts" class="cursor-point font-important" ui-sref="alarm/list({checkedState:false})"></span> 个
+                    待确认：<span ng-bind="uncheckedCounts" class="cursor-point font-important" ng-click="go('alarm/list', {checkedState:false, startView: 'list', query: {operationState: '交维态'}, tier: curTier})"></span> 个
                 </span>
             </p>
         </div>
@@ -93,46 +83,27 @@
         <div id="site-detail">
             
         </div>
-    </div>
-
-    <div class="bottom card-bg card-transparent">
-        <div class="page-header left-bar">
-            <h4>实时告警</h4>
-        </div>
-        <div class="page-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>告警名称</th>
-                        <th>告警等级</th>
-                        <th>站点名称</th>
-                        <th>告警设备</th>
-                        <th width="150">告警时间</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat = 'item in alarmList' class="cursor-point" ui-sref="scene/site({siteId: item.site.strId})">
-                        <td><span ng-bind="item.signal.name"></span></td>
-                        <td><span ng-bind="item.level | alarmLevelFilter" ng-style="{color: CONST.alarmColorList[item.level - 1]}"></span></td>
-                        <td><span ng-bind="item.site.name"></span></td>
-                        <td><span ng-bind="item.device.name"></span></td>
-                        <td><span ng-bind="item.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></span></td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="site-count">
+            <svg width="500" height="70" viewBox="0 0 334 47" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g><path stroke="#55DEFF" d="M37.58 46.129H2V26.097M123.452 1.161H167v20.645"/><path fill-opacity=".5" fill="#0D306A" fill-rule="nonzero" d="M162 5v36.006H6V5z"/><path stroke="#55DEFF" d="M162 5.516v36.13H6V5.515zM100.806 0l-1.741 2.323M103.226 0l-1.742 2.323M105.645 0l-1.742 2.323M108.065 0l-1.742 2.323M110.484 0l-1.742 2.323M112.903 0l-1.742 2.323M115.323 0l-1.742 2.323M117.742 0L116 2.323M120.161 0l-1.742 2.323M122.58 0l-1.741 2.323M41.065 44.677L39.323 47M43.484 44.677L41.742 47M45.903 44.677L44.161 47M48.323 44.677L46.58 47M50.742 44.677L49 47M53.161 44.677L51.42 47M55.58 44.677L53.84 47M58 44.677L56.258 47M60.42 44.677L58.676 47M62.839 44.677L61.097 47"/><circle fill="#00F3FF" fill-rule="nonzero" cx="1.919" cy="25.661" r="1.306"/><circle fill="#00F3FF" fill-rule="nonzero" cx="166.806" cy="21.242" r="1.306"/></g><g transform="translate(165)"><path stroke="#55DEFF" d="M37.58 46.129H2V28.097M123.452 1.161H167v22.645"/><path fill-opacity=".5" fill="#0D306A" fill-rule="nonzero" d="M162 5v36.006H6V5z"/><path stroke="#55DEFF" d="M162 5.516v36.13H6V5.515zM100.806 0l-1.741 2.323M103.226 0l-1.742 2.323M105.645 0l-1.742 2.323M108.065 0l-1.742 2.323M110.484 0l-1.742 2.323M112.903 0l-1.742 2.323M115.323 0l-1.742 2.323M117.742 0L116 2.323M120.161 0l-1.742 2.323M122.58 0l-1.741 2.323M41.065 44.677L39.323 47M43.484 44.677L41.742 47M45.903 44.677L44.161 47M48.323 44.677L46.58 47M50.742 44.677L49 47M53.161 44.677L51.42 47M55.58 44.677L53.84 47M58 44.677L56.258 47M60.42 44.677L58.676 47M62.839 44.677L61.097 47"/><circle fill="#00F3FF" fill-rule="nonzero" cx="1.919" cy="27.661" r="1.306"/><circle fill="#00F3FF" fill-rule="nonzero" cx="166.806" cy="23.242" r="1.306"/></g></g></svg>
+            <div class="total">
+                <span>站点总数</span><strong ng-click="go('config/site', {tier:curTier})" class="cursor-point" ng-bind="siteCount"></strong>
+            </div>
+            <div class="maintain">
+                <span>交维态</span><strong ng-click="go('config/fsu', {tier:curTier, query: {fsuOperationState: '交维态'}})" class="cursor-point" ng-bind="maintenanceSiteCount"></strong>
+            </div>
         </div>
     </div>
 
     <div class="right1 card-bg card-transparent">
         <div class="page-header left-bar">
-            <h4>告警频发站点Top5(近7天)</h4>
-            <small ui-sref="alarm/list">查看更多</small>
+            <h4>告警频发站点Top10<i> (近一个月)</i></h4>
+            <small ng-click="go7days('alarm/list', {alarmState: '全部', query: {operationState: '交维态'}, tier: curTier})">查看更多</small>
         </div>
         <div class="page-body">
             <p class="line" ng-repeat="item in alarmSiteList" 
                 ng-class="item.value && 'cursor-point'" 
                 ng-style="{pointerEvents: item.value? 'auto' : 'none'}" 
-                ui-sref="alarm/list({siteId:item.id, startView: 'list'})">
+                ng-click="go7days('alarm/list', {alarmState: '全部', siteId:item.id, startView: 'list', query: {operationState: '交维态'}, tier: curTier})">
                 <span class="number" ng-bind="$index + 1"></span>
                 <span class="key-value-wrapper">
                     <span class="key" ng-bind="item.key" title={{item.key}}></span>
@@ -140,25 +111,16 @@
                 </span>
                
             </p>
-            <div class="top3-wrapper">
-                <div id="{{alarmSiteBarId}}" class="alarmSiteBar"></div>
-                <p class="top3 value" ng-repeat="item in alarmSiteList" ng-if="$index < 3" ng-bind="item.value"></p>
-                <p class="top3 key" ng-repeat="item in alarmSiteList" ng-if="$index < 3" ng-bind="item.key" title="{{item.key}}"  
-                    ng-class="item.value && 'cursor-point'" 
-                    ng-style="{pointerEvents: item.value? 'auto' : 'none'}" 
-                    ui-sref="alarm/list({siteId:item.id, startView: 'list'})"></p>
-            </div>
         </div>
     </div>
 
     <div class="right2 card-bg card-transparent">
         <div class="page-header left-bar">
-            <h4>历史告警统计</h4>
-            <small ui-sref="alarm/list({alarmState:'已消除'})">查看更多</small>
+            <h4>告警分布TOP8<i> (近一个月)</i></h4>
+            <small ng-click="go('alarm/count', {tabPage:{currentIndex: 1}})">查看更多</small>
         </div>
         <div class="page-body">
-            <div id="{{alarmLineId}}" class="alarmLine"></div>
-            <div id="{{alarmTop3LineId}}" class="alarmTop3Line"></div>
+            <div id="{{alarmDistributionId}}" class="alarmDistributionTop5"></div>
         </div>
     </div>
 </section>

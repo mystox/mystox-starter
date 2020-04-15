@@ -20,12 +20,12 @@
                     <label class="control-label">开始时间</label>
                     <div class="controls">
                         <div class="startTime input-append date">
-                            <input size="16" type="text" value="" ng-model="updateRule.obj.tReportStart">
+                            <input size="16" type="text" value="" ng-model="updateRule.obj.startBeginTime">
                             <span class="add-on"><i class="icon-th icon-white"></i></span>
                         </div>
                         -
                         <div class="endTime input-append date mgl">
-                            <input size="16" type="text" value="" ng-model="updateRule.obj.tReportEnd">
+                            <input size="16" type="text" value="" ng-model="updateRule.obj.startEndTime">
                             <span class="add-on"><i class="icon-th icon-white"></i></span>
                         </div>
                         <span class="help-inline"></span>
@@ -36,12 +36,12 @@
                     <label class="control-label">恢复时间</label>
                     <div class="controls">
                         <div class="startTime input-append date">
-                            <input size="16" type="text" value="" ng-model="updateRule.obj.tRecoverStart">
+                            <input size="16" type="text" value="" ng-model="updateRule.obj.clearBeginTime">
                             <span class="add-on"><i class="icon-th icon-white"></i></span>
                         </div>
                         -
                         <div class="endTime input-append date mgl">
-                            <input size="16" type="text" value="" ng-model="updateRule.obj.tRecoverEnd">
+                            <input size="16" type="text" value="" ng-model="updateRule.obj.clearEndTime">
                             <span class="add-on"><i class="icon-th icon-white"></i></span>
                         </div>
                         <span class="help-inline"></span>
@@ -52,8 +52,8 @@
                     <label class="control-label">告警等级</label>
                     <div class="controls">
                         <input type="text" class="form-control" multiple
-                               select2 config="CONST.alarmLevelListForSelect2"
-                               select2-model="updateRule.obj.alarmLevels" />
+                               select2 config="alarmLevelListForSelect2"
+                               select2-model="updateRule.obj.alarmLevelList" />
                     </div>
                 </div>
 
@@ -105,14 +105,14 @@
                     <scloud-tree-radio
                             is-radio='true'
                             index="0"
-                            name="siteBased"
+                            name="baseSite"
                             content='{"name":" 基于站点", "id": 0}'
                             callback="changeSiteBased"
                     ></scloud-tree-radio>
                     <scloud-tree-radio
                             is-radio='true'
                             index="1"
-                            name="siteBased"
+                            name="baseSite"
                             content='{"name":" 基于区域", "id": 1}'
                             callback="changeSiteBased"
                     ></scloud-tree-radio>
@@ -125,7 +125,7 @@
             <div class="control-group">
                 <label class="control-label"></label>
                 <div class="controls">
-                    <div ng-show="updateRule.obj.siteBased" class="tree-box scroll">
+                    <div ng-show="updateRule.obj.baseSite" class="tree-box scroll">
                         <ul id="areaTree" class="ztree" ng-hide="zTree.isEmpty"></ul>
                         <div ng-show="zTree.isEmpty" class="no-data">
                             <div class="img img-1x"></div>
@@ -134,7 +134,7 @@
                             <i class="ic ic-spinner ic-spin ic-5x"></i>
                         </div>
                     </div>
-                    <div ng-show="!updateRule.obj.siteBased" class="tree-box scroll">
+                    <div ng-show="!updateRule.obj.baseSite" class="tree-box scroll">
                         <ul id="areaTree2" class="ztree scroll" ng-hide="zTree2.isEmpty"></ul>
                         <div ng-show="zTree2.isEmpty" class="no-data">
                             <div class="img img-1x"></div>
@@ -185,20 +185,20 @@
                 </thead>
                 <tbody ng-repeat="item in ruleList" ng-class="CONST.animation.list">
                     <tr>
-                        <td ng-bind="item.rule.name"></td>
-                        <td ng-bind="item.rule.siteBased | siteBaseFilter"></td>
-                        <td ng-bind="item.userCount"></td>
-                        <td ng-bind="item.rule.creator.name"></td>
-                        <td ng-bind="item.rule.tCreate | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="item.name"></td>
+                        <td ng-bind="item.baseSite | siteBaseFilter"></td>
+                        <td ng-bind="item.useCount"></td>
+                        <td ng-bind="item.creator"></td>
+                        <td ng-bind="item.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
-                            <label class="label" ng-class="{true:'font-success',false:'font-white'}[item.inUse]" ng-bind="item.inUse | enabledFilter"></label>
+                            <label class="label" ng-class="{true:'font-success',false:'font-danger'}[item.state]" ng-bind="item.state | enabledFilter"></label>
                         </td>
                         <td>
-                            <a ng-if="!item.inUse" title="启用" class="ic ic-check" ng-if="util.checkPrivilege(1212)" ng-click="useFilter(item.rule.id, $event);"></a>
-                            <a ng-if="item.inUse" title="禁用" class="ic ic-times" ng-if="util.checkPrivilege(1212)" ng-click="unuseFilter($event);"></a>
+                            <a ng-if="!item.state" title="启用" class="ic ic-check" ng-if="util.checkPrivilege(1212)" ng-click="useFilter(item.id, $event);"></a>
+                            <a ng-if="item.state" title="禁用" class="ic ic-times" ng-if="util.checkPrivilege(1212)" ng-click="unuseFilter(item.id, $event);"></a>
                             <a title="详情" class="ic ic-detail" ng-click="openDetailTab($index);"></a>
                             <a title="编辑" class="ic ic-edit" ng-click="updateRule.toModal(item, $event);"></a>
-                            <a ng-if="!item.inUse" title="删除" class="ic ic-delete" ng-click="deleteRule.toModal(item.rule, $event);"></a>
+                            <a ng-if="!item.state" title="删除" class="ic ic-delete" ng-click="deleteRule.toModal(item, $event);"></a>
                         </td>
                     </tr>
                     <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
@@ -211,12 +211,12 @@
                                     </span>
                                     <span ng-if="!item.rule.deviceTypeCode || item.rule.deviceTypeCode.length === 0">-</span>
                                 </li>
-                                <li ng-if="item.rule.siteBased">所选站点：
+                                <li ng-if="item.rule.baseSite">所选站点：
                                     <span ng-repeat="site in item.site">
                                         <span ng-bind="site.name"></span><span ng-hide="$last">、</span>
                                     </span>
                                 </li>
-                                <li ng-if="!item.rule.siteBased">所选区域：
+                                <li ng-if="!item.rule.baseSite">所选区域：
                                     <span ng-repeat="tier in item.tier">
                                         <span ng-bind="tier.name"></span><span ng-hide="$last">、</span>
                                     </span>
@@ -224,14 +224,14 @@
                             </ul>
                             <ul>
                                 <li>告警等级：
-                                    <span ng-repeat="alarm in item.rule.alarmLevel">
+                                    <span ng-repeat="alarm in item.alarmLevel">
                                         <span ng-bind="alarm | alarmLevelFilter"></span><span ng-hide="$last">、</span>
                                     </span>
-                                    <span ng-if="item.rule.alarmLevel.length === 0">-</span>
+                                    <span ng-if="item.alarmLevel.length === 0">-</span>
                                 </li>
-                                <li>开始时间：<span ng-bind="item.rule.tReportStart | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span> ~ <span ng-bind="item.rule.tReportEnd | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
-                                <li>恢复时间：<span ng-bind="item.rule.tRecoverStart | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span> ~ <span ng-bind="item.rule.tRecoverEnd | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
-                                <li>备注：<span ng-bind="item.rule.remarks | nullFilter"></span></li>
+                                <li>开始时间：<span ng-bind="item.startBeginTime | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span> ~ <span ng-bind="item.startEndTime | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>恢复时间：<span ng-bind="item.clearBeginTime | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span> ~ <span ng-bind="item.clearEndTime | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></span></li>
+                                <li>备注：<span ng-bind="item.remarks | nullFilter"></span></li>
                             </ul>
                         </td>
                     </tr>
