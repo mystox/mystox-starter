@@ -2,9 +2,9 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
-import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
+import com.kongtrolink.framework.scloud.entity.Statistics;
+import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
-import com.kongtrolink.framework.scloud.query.AlarmQuery;
 
 import java.util.List;
 
@@ -54,8 +54,22 @@ public interface AlarmBusinessService {
 
     /**
      * @auther: liudd
+     * @date: 2020/4/15 16:14
+     * 功能描述:根据等级统计
+     */
+    List<Statistics> countLevel(String uniqueCode, String table, AlarmBusinessQuery businessQuery);
+
+    /**
+     * @auther: liudd
      * @date: 2020/4/14 15:59
      * 功能描述:告警频发站点统计
      */
-    List<AlarmSiteStatistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery);
+    List<Statistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/15 11:19
+     * 功能描述:告警分布
+     */
+    List<Statistics> getAlarmDistributeList(String uniqueCode, AlarmBusinessQuery businessQuery);
 }

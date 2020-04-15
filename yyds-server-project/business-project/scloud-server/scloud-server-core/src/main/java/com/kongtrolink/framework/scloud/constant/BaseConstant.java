@@ -28,6 +28,7 @@ public class BaseConstant {
 
     public static String UNDERLINE = "_";
     public static String COLON = ":";
+    public static String LEDGE = "-";
 
     public static String OPERATE_ADD = "新增";
     public static String OPERATE_DELETE = "删除";

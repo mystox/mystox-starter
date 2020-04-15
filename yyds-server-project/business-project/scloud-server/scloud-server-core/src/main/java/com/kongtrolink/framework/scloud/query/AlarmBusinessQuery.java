@@ -44,6 +44,15 @@ public class AlarmBusinessQuery extends Paging {
     private List<String> entDevSigList;
     private boolean shield=false;                 //是否屏蔽
     private String shieldRuleId;            //屏蔽规则id
+    private String tierCodePrefix;          //告警分布区域层级前缀
+
+    public String getTierCodePrefix() {
+        return tierCodePrefix;
+    }
+
+    public void setTierCodePrefix(String tierCodePrefix) {
+        this.tierCodePrefix = tierCodePrefix;
+    }
 
     public String getLevelName() {
         return levelName;

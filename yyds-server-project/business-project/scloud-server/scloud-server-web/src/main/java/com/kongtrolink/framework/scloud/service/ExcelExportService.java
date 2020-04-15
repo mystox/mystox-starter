@@ -1,9 +1,8 @@
 package com.kongtrolink.framework.scloud.service;
 
-import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
+import com.kongtrolink.framework.scloud.entity.Statistics;
 import com.kongtrolink.framework.scloud.util.XlsExporter;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -170,7 +169,7 @@ public class ExcelExportService {
         return style;
     }
 
-    public static String alarmSiteHistoryExport(HttpServletResponse response, String fileName,  List<AlarmSiteStatistics> businessList){
+    public static String alarmSiteHistoryExport(HttpServletResponse response, String fileName,  List<Statistics> businessList){
         if(null == businessList || businessList.size() == 0){
             return "导出失败，数据为空";
         }
@@ -193,7 +192,7 @@ public class ExcelExportService {
             cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); //水平居中
             cellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);//垂直居中
             for(int i=1; i<businessList.size(); i++){
-                AlarmSiteStatistics alarmSiteStatistics = businessList.get(i);
+                Statistics alarmSiteStatistics = businessList.get(i);
                 initData(sheet, cellStyle, alarmSiteStatistics.getValues(), i+1);
             }
             OutputStream out= response.getOutputStream();
