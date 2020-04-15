@@ -48,7 +48,7 @@ public interface UserService {
     /**
      * 用户列表
      */
-    List<JSONObject> listUser(String uniqueCode, UserQuery userQuery);
+    List<JSONObject> listUser(String uniqueCode, UserQuery userQuery, String serverCode);
     /**
      * 导出用户列表
      */

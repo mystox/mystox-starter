@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -72,9 +73,8 @@ public class UserMongo {
         Update update = new Update();
 //        update.set("lockStatus",userModel.getLockStatus());
 //        update.set("userStatus",userModel.getUserStatus());
-//        update.set("validTime",userModel.getValidTime());
-//        update.set("workId",userModel.getWorkId());
-//        update.set("changeTime",userModel.getChangeTime());
+        update.set("validTime",userModel.getValidTime());
+        update.set("workId",userModel.getWorkId());
         update.set("remark",userModel.getRemark());
         update.set("password",userModel.getPassword());
         update.set("sex",userModel.getSex());
@@ -96,20 +96,20 @@ public class UserMongo {
      */
     public UserModel listUser(String uniqueCode, String id, UserQuery userQuery){
         UserEntity userEntity = new UserEntity();
-        String lockStatus = userEntity.getLockStatus(); //锁定状态
+//        String lockStatus = userEntity.getLockStatus(); //锁定状态
         String userStatus = userEntity.getUserStatus(); //用户状态
-//        Long validTime = userEntity.getValidTime();  //有效日期
+        Date validTime = userEntity.getValidTime();  //有效日期
         Criteria criteria = Criteria.where("userId").is(id);
         Criteria criteria1 = new Criteria();
-        if (lockStatus != null && !lockStatus.equals("")){
-            criteria1.and("lockStatus").is(lockStatus);
-        }
+//        if (lockStatus != null && !lockStatus.equals("")){
+//            criteria1.and("lockStatus").is(lockStatus);
+//        }
         if (userStatus != null && !userStatus.equals("")){
             criteria1.and("userStatus").is(userStatus);
         }
-//        if (validTime != null){
-//            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
-//        }
+        if (validTime != null){
+            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
+        }
         criteria.andOperator(criteria1);
         Query query = new Query(criteria);
         UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
