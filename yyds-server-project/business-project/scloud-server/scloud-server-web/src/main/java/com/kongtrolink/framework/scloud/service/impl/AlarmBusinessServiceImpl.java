@@ -256,22 +256,44 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     @Override
     public List<AlarmSiteStatistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery) {
         List<AlarmSiteStatistics> alarmSiteStatisticsList = businessDao.siteDateCount(uniqueCode, CollectionSuffix.HIS_ALARM_BUSINESS, businessQuery);
+        //存储站点编码--统计实体列表map
+        Map<String, List<AlarmSiteStatistics>> siteCodeStatisticsListMap = new HashMap<>();
+        for(AlarmSiteStatistics alarmSiteStatistics : alarmSiteStatisticsList){
+            String siteCode = alarmSiteStatistics.getSiteCode();
+            List<AlarmSiteStatistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(siteCode);
+            if(null == siteCodeStatisticsList){
+                siteCodeStatisticsList = new ArrayList<>();
+            }
+            siteCodeStatisticsList.add(alarmSiteStatistics);
+            siteCodeStatisticsListMap.put(siteCode, siteCodeStatisticsList);
+        }
+
         Map<String, AlarmSiteStatistics> siteCodeStatisticsMap = new HashMap<>();
         Date startBeginTime = businessQuery.getStartBeginTime();
         Date startEndTime = businessQuery.getStartEndTime();
         for(long i= startBeginTime.getTime(); i<= startEndTime.getTime(); i= i+(24*60*60*1000)){
             String timeStr = DateUtil.getInstance().format(startBeginTime, "yyyy-MM-dd");
-            for(AlarmSiteStatistics alarmSiteStatistics : alarmSiteStatisticsList){
-                if(alarmSiteStatistics.getTimeStr().equals(timeStr)){
-                    AlarmSiteStatistics real = siteCodeStatisticsMap.get(alarmSiteStatistics.getSiteCode());
-                    if(null == real){
-                        real = alarmSiteStatistics;
-                        real.setAlarmSiteCountList(new ArrayList<>());
-                    }
-                    AlarmSiteCount byStatistics = AlarmSiteCount.createByStatistics(alarmSiteStatistics);
-                    real.getAlarmSiteCountList().add(byStatistics);
-                    siteCodeStatisticsMap.put(alarmSiteStatistics.getSiteCode(), real);
+            for(String key : siteCodeStatisticsListMap.keySet()){
+                List<AlarmSiteStatistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(key);
+                AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(key);
+                if(alarmSiteStatistics == null){
+                    alarmSiteStatistics = new AlarmSiteStatistics();
+                    alarmSiteStatistics.setSiteCode(siteCodeStatisticsList.get(0).getSiteCode());
+                    alarmSiteStatistics.setAlarmSiteCountList(new ArrayList<>());
                 }
+                AlarmSiteCount alarmSiteCount = new AlarmSiteCount();
+                alarmSiteCount.setTimeStr(timeStr);
+                Iterator<AlarmSiteStatistics> iterator = siteCodeStatisticsList.iterator();
+                while(iterator.hasNext()){
+                    AlarmSiteStatistics next = iterator.next();
+                    if(timeStr.equals(next.getTimeStr())){
+                        alarmSiteCount.setCount(next.getCount());
+                        iterator.remove();
+                    }
+                }
+                alarmSiteStatistics.getAlarmSiteCountList().add(alarmSiteCount);
+                alarmSiteStatistics.setCount(alarmSiteStatistics.getCount() + alarmSiteCount.getCount());
+                siteCodeStatisticsMap.put(key, alarmSiteStatistics);
             }
             startBeginTime = new Date(i);
         }
