@@ -6,17 +6,22 @@ import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.dao.AlarmBusinessDao;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteCount;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.entity.FilterRule;
+import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
+import com.kongtrolink.framework.scloud.service.SiteService;
+import com.kongtrolink.framework.scloud.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: liudd
@@ -30,6 +35,8 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     AlarmBusinessDao businessDao;
     @Autowired
     FilterRuleService filterRuleService;
+    @Autowired
+    SiteService siteService;
 
     @Override
     public void add(String uniqueCode, String table, AlarmBusiness business) {
@@ -242,5 +249,92 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     @Override
     public boolean unResolveByKeys(String uniqueCode, String table, List<String> keyList) {
         return businessDao.unResolveByKeys(uniqueCode, table, keyList);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param businessQuery
+     * @auther: liudd
+     * @date: 2020/4/14 15:59
+     * 功能描述:告警频发站点统计
+     */
+    @Override
+    public List<AlarmSiteStatistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery) {
+        List<AlarmSiteStatistics> alarmSiteStatisticsList = businessDao.siteDateCount(uniqueCode, CollectionSuffix.HIS_ALARM_BUSINESS, businessQuery);
+        //存储站点编码--统计实体列表map
+        Map<String, List<AlarmSiteStatistics>> siteCodeStatisticsListMap = new HashMap<>();
+        for(AlarmSiteStatistics alarmSiteStatistics : alarmSiteStatisticsList){
+            String siteCode = alarmSiteStatistics.getSiteCode();
+            List<AlarmSiteStatistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(siteCode);
+            if(null == siteCodeStatisticsList){
+                siteCodeStatisticsList = new ArrayList<>();
+            }
+            siteCodeStatisticsList.add(alarmSiteStatistics);
+            siteCodeStatisticsListMap.put(siteCode, siteCodeStatisticsList);
+        }
+
+        Map<String, AlarmSiteStatistics> siteCodeStatisticsMap = new HashMap<>();
+        Date startBeginTime = businessQuery.getStartBeginTime();
+        Date startEndTime = businessQuery.getStartEndTime();
+        for(long i= startBeginTime.getTime(); i< startEndTime.getTime();){
+            String timeStr = DateUtil.getInstance().format(startBeginTime, "yyyy-MM-dd");
+            for(String key : siteCodeStatisticsListMap.keySet()){
+                List<AlarmSiteStatistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(key);
+                AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(key);
+                if(alarmSiteStatistics == null){
+                    alarmSiteStatistics = new AlarmSiteStatistics();
+                    alarmSiteStatistics.setSiteCode(siteCodeStatisticsList.get(0).getSiteCode());
+                    alarmSiteStatistics.setProperties(new ArrayList<>());
+                    alarmSiteStatistics.setValues(new ArrayList<>());
+                    alarmSiteStatistics.getProperties().add("站点名称");
+                    alarmSiteStatistics.getValues().add("null");
+                    alarmSiteStatistics.getProperties().add("告警总数");
+                    alarmSiteStatistics.getValues().add("0");
+                }
+                int count = 0;
+                Iterator<AlarmSiteStatistics> iterator = siteCodeStatisticsList.iterator();
+                while(iterator.hasNext()){
+                    AlarmSiteStatistics next = iterator.next();
+                    if(timeStr.equals(next.getTimeStr())){
+                        count = next.getCount();
+                        iterator.remove();
+                    }
+                }
+                alarmSiteStatistics.getProperties().add(timeStr);
+                alarmSiteStatistics.getValues().add(count+"");
+                alarmSiteStatistics.setCount(alarmSiteStatistics.getCount() + count);
+                alarmSiteStatistics.getValues().set(1, alarmSiteStatistics.getCount()+"");
+                siteCodeStatisticsMap.put(key, alarmSiteStatistics);
+            }
+            i= i+(24*60*60*1000);
+            startBeginTime = new Date(i);
+        }
+        List<AlarmSiteStatistics> list = new ArrayList<>();
+        list.addAll(siteCodeStatisticsMap.values());
+        List<String> siteCodeList = new ArrayList<>();
+        siteCodeList.addAll(siteCodeStatisticsMap.keySet());
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setServerCode(businessQuery.getServerCode());
+        siteQuery.setSiteCodes(siteCodeList);
+        List<SiteModel> siteList = siteService.findSiteList(uniqueCode, siteQuery);
+        for(SiteModel siteModel : siteList){
+            String code = siteModel.getCode();
+            AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(code);
+            if(null != alarmSiteStatistics){
+                alarmSiteStatistics.getValues().set(0, siteModel.getName());
+            }
+            siteCodeStatisticsMap.remove(code);
+        }
+        boolean connFailt = siteCodeStatisticsMap.size()==list.size()? true : false;
+        String connFailtInfo = "资管通讯失败";
+        for(String key : siteCodeStatisticsMap.keySet()){
+            AlarmSiteStatistics alarmSiteStatistics = siteCodeStatisticsMap.get(key);
+            alarmSiteStatistics.getValues().set(0, "资管不存在该设备");
+            if(connFailt) {
+                alarmSiteStatistics.getValues().set(0, connFailtInfo);
+            }
+
+        }
+        return list;
     }
 }

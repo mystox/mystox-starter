@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -72,10 +71,9 @@ public class UserMongo {
         Criteria criteria = Criteria.where("userId").is(userId);
         Update update = new Update();
 //        update.set("lockStatus",userModel.getLockStatus());
-        update.set("userStatus",userModel.getUserStatus());
+//        update.set("userStatus",userModel.getUserStatus());
         update.set("validTime",userModel.getValidTime());
         update.set("workId",userModel.getWorkId());
-//        update.set("changeTime",userModel.getChangeTime());
         update.set("remark",userModel.getRemark());
         update.set("password",userModel.getPassword());
         update.set("sex",userModel.getSex());
@@ -99,7 +97,7 @@ public class UserMongo {
         UserEntity userEntity = new UserEntity();
         String lockStatus = userEntity.getLockStatus(); //锁定状态
         String userStatus = userEntity.getUserStatus(); //用户状态
-        Date validTime = userEntity.getValidTime();  //有效日期
+        Long validTime = userEntity.getValidTime();  //有效日期
         Criteria criteria = Criteria.where("userId").is(id);
         Criteria criteria1 = new Criteria();
         if (lockStatus != null && !lockStatus.equals("")){

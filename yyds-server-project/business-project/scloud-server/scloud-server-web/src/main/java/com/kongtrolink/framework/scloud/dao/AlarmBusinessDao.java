@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.AlarmSiteStatistics;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
@@ -9,14 +10,21 @@ import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 /**
  * @Auther: liudd
@@ -220,5 +228,47 @@ public class AlarmBusinessDao {
         update.unset("trecover");
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
+    }
+
+    /**
+     * 根据站点 获取其最近7天数据
+     * @param uniqueCode 企业唯一吗
+     * @return
+     * 第一步：获取一个月内待处理告警前10的站点编码
+     * 第二步：根据站点编码按日统计
+     */
+    public List<AlarmSiteStatistics> siteDateCount(String uniqueCode, String table, AlarmBusinessQuery businessQuery) {
+        Criteria oneCri = Criteria.where("state").is(BaseConstant.ALARM_STATE_PENDING);
+        if(null != businessQuery.getSiteCodeList()){
+            oneCri.and("siteCode").in(businessQuery.getSiteCodeList());
+        }
+        oneCri.and("treport").gte(businessQuery.getStartBeginTime()).lte(businessQuery.getStartEndTime());
+        Aggregation oneAggre = Aggregation.newAggregation(
+                Aggregation.match(oneCri),
+                Aggregation.group("siteCode").count().as("count"),
+                Aggregation.project("count").and("_id").as("siteCode"),
+                Aggregation.sort(Sort.Direction.DESC, "count"),
+                Aggregation.limit(10)
+        );
+        AggregationResults<AlarmSiteStatistics> oneAggResults = mongoTemplate.aggregate(oneAggre, uniqueCode + table, AlarmSiteStatistics.class);
+        List<AlarmSiteStatistics> oneMapped = oneAggResults.getMappedResults();
+        List<String> siteCodeList = new ArrayList<>();
+        for(AlarmSiteStatistics alarmSiteStatistics : oneMapped){
+            siteCodeList.add(alarmSiteStatistics.getSiteCode());
+        }
+
+        Criteria twoCri = Criteria.where("siteCode").in(siteCodeList).and("state").is(BaseConstant.ALARM_STATE_PENDING)
+                .and("treport").gte(businessQuery.getStartBeginTime()).lte(businessQuery.getStartEndTime());
+        Aggregation twoAggre = Aggregation.newAggregation(
+                match(twoCri),
+                project("siteCode")
+                        .and("treport").plus(28800000).as("publishDateAdd"),
+                project("siteCode")
+                        .andExpression("substr(publishDateAdd,0,10)").as("checkTime"),//取得 时分秒
+                group("checkTime","siteCode").count().as("count"),
+                project("count").and("_id.checkTime").as("timeStr").and("_id.siteCode").as("siteCode"),
+                sort(Sort.Direction.ASC, "siteCode","timeStr"));
+        AggregationResults<AlarmSiteStatistics> result = mongoTemplate.aggregate(twoAggre, uniqueCode + table, AlarmSiteStatistics.class);
+        return result.getMappedResults();
     }
 }
