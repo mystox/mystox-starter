@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
+import com.kongtrolink.framework.core.entity.session.WebPageInfo;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
@@ -29,11 +30,11 @@ import java.util.List;
 @RequestMapping(value = "/user/", method = RequestMethod.POST)
 public class UserController extends BaseController{
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     @Autowired
     UserService userService;
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     /**
      * 增加系统用户
@@ -93,7 +94,9 @@ public class UserController extends BaseController{
 
         String uniqueCode = getUniqueCode();
         uniqueCode = "YYDS";
-        List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery);
+        WebPageInfo currentService = getCurrentService();
+        String serverCode = currentService.getServerCode();
+        List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery,serverCode);
         return new JsonResult(userResult);
     }
     /**
@@ -101,7 +104,7 @@ public class UserController extends BaseController{
      */
     @RequestMapping(value = "exportUserList",method = RequestMethod.POST)
     public void exportUserList(@RequestBody UserQuery userQuery){
-        List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery);
+        List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery, getCurrentService().getServerCode());
         List<UserModel> result = new ArrayList<>();
         for (JSONObject list:userList){
             UserModel user = JSON.toJavaObject(list,UserModel.class);
