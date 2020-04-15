@@ -31,7 +31,7 @@ public class UserModel implements Serializable {
 //    private String changeTime;      //密码更改日期
     private String remark;      //用户备注
     private String password;
-    private String sex;     //性别
+    private String gender;     //性别
     private String userTime;
 
     public String getUserTime() {
@@ -58,12 +58,12 @@ public class UserModel implements Serializable {
         this.id = id;
     }
 
-    public String getSex() {
-        return sex;
+    public String getGender() {
+        return gender;
     }
 
-    public void setSex(String sex) {
-        this.sex = sex;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getPassword() {

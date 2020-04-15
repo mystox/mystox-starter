@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
 //            userEntity.setChangeTime(userModel.getChangeTime());
             userEntity.setRemark(userModel.getRemark());
 //            userEntity.setPassword(userModel.getPassword());
-            userEntity.setSex(userModel.getSex());
+            userEntity.setSex(userModel.getGender());
             userEntity.setUserTime(userModel.getUserTime());
             userMongo.addUser(uniqueCode, userEntity);
             return jsonResult;
@@ -183,6 +183,7 @@ public class UserServiceImpl implements UserService {
             String msg = opera.getMsg();
             JSONObject resultRange = JSONObject.parseObject(msg, JSONObject.class);
             Boolean success = resultRange.getBoolean("success");
+            List<JSONObject> userResult = new ArrayList<>();
             if (success) {
                 result = resultRange.getJSONArray("list").toJavaList(JSONObject.class);
                 for (JSONObject userEntity : result) {
@@ -192,16 +193,17 @@ public class UserServiceImpl implements UserService {
                     if (userModel == null)
                         continue;
                     JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
-                    userEntity.putAll(userJson);
+                    userJson.putAll(userEntity);
                     String username = userEntity.getString("username");
                     if (onlineUsernames.contains(username)) {
-                        userEntity.put("onlineStatus", 1);
+                        userJson.put("onlineStatus", 1);
                     } else {
-                        userEntity.put("onlineStatus", 0);
+                        userJson.put("onlineStatus", 0);
                     }
+                    userResult.add(userJson);
                 }
             }
-            return result;
+            return userResult;
         } else {
             return null;
         }

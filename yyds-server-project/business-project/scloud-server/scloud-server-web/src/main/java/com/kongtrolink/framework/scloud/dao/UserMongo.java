@@ -54,7 +54,7 @@ public class UserMongo {
     }
 
     public UserModel findUserById(String uniqueCode, String userId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER);
 
     }
     /**
@@ -77,7 +77,7 @@ public class UserMongo {
         update.set("workId",userModel.getWorkId());
         update.set("remark",userModel.getRemark());
         update.set("password",userModel.getPassword());
-        update.set("sex",userModel.getSex());
+        update.set("gender",userModel.getGender());
         WriteResult result = mongoTemplate.updateFirst(new Query(criteria),update,uniqueCode+CollectionSuffix.USER);
         return result.getN()>0;
 
