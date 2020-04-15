@@ -27,7 +27,7 @@ public class ControllerCommonUtils {
             nextMenuList.forEach(webPageInfo -> {
                 String code = webPageInfo.getCode();
                 String uri = webPageInfo.getUri();
-                if ("/ZKReport/customReportShow".equals(uri) && code.endsWith("CUSTOM_REPORT_SHOW")) {
+                if ("/ZKReport/customReportShow".equals(uri)/* && code.endsWith("CUSTOM_REPORT_SHOW")*/) { //暂时uri为判断标准
                     reportsWebPageInfo.add(webPageInfo);
                 }
                     getReportsFuncPriv(webPageInfo, reportsWebPageInfo);
