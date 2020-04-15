@@ -136,6 +136,7 @@ public class AlarmBusinessController extends ExportController{
         if(StringUtil.isNUll(uniqueCode)){
             uniqueCode = "YYDS";
         }
+
         User user = getUser(request);
         if(null != user){
             businessQuery.setOperateUserId(user.getId());
