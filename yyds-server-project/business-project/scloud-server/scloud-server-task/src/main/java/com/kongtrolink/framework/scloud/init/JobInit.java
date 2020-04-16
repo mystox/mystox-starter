@@ -7,6 +7,9 @@ import com.kongtrolink.framework.scloud.service.JobLogService;
 import com.kongtrolink.framework.scloud.service.JobService;
 import com.kongtrolink.framework.scloud.util.QuartzManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +26,8 @@ import java.util.Map;
  *
  */
 @Service
-public class JobInit {
+@Order(3)
+public class JobInit implements ApplicationRunner {
 	@Autowired
 	QuartzManager quartzManager;
 	@Autowired
@@ -40,8 +44,8 @@ public class JobInit {
 	 * 更新2018年1月4日 10:02:27
 	 * task 定时任务 采用 spring-quartz xml配置形式 不进行动态配置时间粒度
 	 */
-	@PostConstruct
-	public void  init(){
+	@Override
+	public void run(ApplicationArguments applicationArguments) throws Exception{
 		System.out.println("##服务开始 - 修改状态为 启动");
 		List<JobEntity> list = JobInitConfig.getList();
 		List<JobEntity> dblist = jobService.findAll();
@@ -71,6 +75,5 @@ public class JobInit {
 		System.out.println("服务停止 - 修改状态为 停止");
 		jobService.updateAllStartOrStop("停止");
 	}
-
 
 }
