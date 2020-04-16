@@ -32,15 +32,15 @@ public class WorkServiceImpl implements WorkService{
     @Autowired
     MqttOpera mqttOpera;
 
-    @Value("${push.app.pushKey}")
+    @Value("${push.app.pushKey:null}")
     private String appPushKey;
-    @Value("${push.app.pushSecret}")
+    @Value("${push.app.pushSecret:null}")
     private String appPushSecret;
-    @Value("${push.app.pushProduct}")
+    @Value("${push.app.pushProduct:false}")
     private boolean appProduct;
-    @Value("${push.app.keyName}")
+    @Value("${push.app.keyName:null}")
     private String appKeyName;      //type
-    @Value("${push.app.proName}")
+    @Value("${push.app.proName:null}")
     private String appProName;      //workId
 
     @Override

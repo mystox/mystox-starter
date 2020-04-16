@@ -27,11 +27,7 @@ import com.kongtrolink.framework.scloud.entity.PushEntity;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
 /**
  *
  * @author Mosaico
@@ -58,12 +54,9 @@ public class JPushService {
         } catch (APIConnectionException ex) {
             jsonObject.put("result", false);
             jsonObject.put("info", ex.getMessage());
-            LOGGER.error("Connection Error. Message:{}", ex.getMessage());
         } catch (APIRequestException ex) {
             jsonObject.put("result", false);
             jsonObject.put("info", ex.getMessage());
-            LOGGER.error("Response Error from JPush Server. Http status:{}. Error Code:{}. Error Message:{}. Msg ID:{}.",
-                    ex.getStatus(), ex.getErrorCode(), ex.getErrorMessage(), ex.getMsgId());
         }
         return jsonObject;
     }
