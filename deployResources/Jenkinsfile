@@ -11,8 +11,10 @@ pipeline {
         string(name: 'password', defaultValue: 'yytd1234', description: '')
         //string(name: 'deployServer', defaultValue: 'all', description: '')
         choice(name: 'deployServer', choices: \
-        ['skipModule', 'all','ALARM_SERVER_WEB', 'REPORTS_SERVER','LOG_SERVER', 'ASSET_SERVER','GATEWAY_COMMON_SERVER',\
-        'ALARM_CONTROLLER','ALARM_SENDER','ALARM_CYCLE','ALARM_LEVEL','ALARM_DELIVER'],\
+        ['skipModule', 'all','SCLOUD_SERVER_WEB','ALARM_SERVER_WEB', 'REPORTS_SERVER','LOG_SERVER','ASSET_SERVER',\
+        'ALARM_CONTROLLER','ALARM_SENDER','ALARM_CYCLE','ALARM_LEVEL','ALARM_DELIVER',\
+        'SCLOUD_SERVER_TASK','SCLOUD_SERVER_HISTORY','GATEWAY_TOWER_SERVER','GATEWAY_TOWER_SERVER' \
+        ],\
          description: 'serverChoices')
     }
     environment {
