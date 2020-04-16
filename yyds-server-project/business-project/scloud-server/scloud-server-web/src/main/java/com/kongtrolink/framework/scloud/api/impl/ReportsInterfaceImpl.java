@@ -154,7 +154,6 @@ public class ReportsInterfaceImpl implements ReportsInterface {
         List<JSONObject> alarmHistory = new ArrayList<>();
 
         String[][][] resultData = alarmHistoryDataCreate(alarmHistory);
-
         String fileName = msgJson.getString("fileName");
         String excelUri = alarmHistoryExcelCreate(fileName, resultData);
         JSONObject result = new JSONObject();

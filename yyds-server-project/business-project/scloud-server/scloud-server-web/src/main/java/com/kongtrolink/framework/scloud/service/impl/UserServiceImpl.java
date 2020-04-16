@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService {
         map.put("currentPostId", userModel.getCurrentPostId());
         map.put("currentPositionName", userModel.getCurrentRoleName());
         map.put("informRule", userModel.getInformRule());
+        map.put("password", userModel.getPassword());
         String userModelMsg = JSONObject.toJSONString(map);
         MsgResult opera = mqttOpera.opera("addUser", userModelMsg);
         int stateCode = opera.getStateCode();
@@ -128,9 +129,10 @@ public class UserServiceImpl implements UserService {
         map.put("phone", userModel.getPhone());
         map.put("email", userModel.getEmail());
         map.put("currentPostId", userModel.getCurrentPostId());
-        map.put("currentRoleName", userModel.getCurrentRoleName());
+        map.put("currentPositionName", userModel.getCurrentRoleName());
         map.put("informRule", userModel.getInformRule());
-        String userModelMsg = JSONObject.toJSONString(userModel);
+        map.put("password", userModel.getPassword());
+        String userModelMsg = JSONObject.toJSONString(map);
         MsgResult opera = mqttOpera.opera("modifyUser", userModelMsg);
         if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
             boolean modifyUser = userMongo.modifyUser(uniqueCode, userModel);
@@ -191,7 +193,7 @@ public class UserServiceImpl implements UserService {
                     String userId = userEntity.getString("userId");
                     UserModel userModel = userMongo.listUser(uniqueCode, userId, userQuery);
                     if (userModel == null)
-                        continue;
+                        userModel = new UserModel();
                     JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
                     userJson.putAll(userEntity);
                     String username = userEntity.getString("username");

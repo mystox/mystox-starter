@@ -74,6 +74,7 @@ pipeline {
                 }
             }
         }
+        //日志页面服务
         stage ('LOG_SERVER') {
             when {
                 expression {
@@ -90,6 +91,7 @@ pipeline {
                 }
             }
         }
+        //资管页面服务
         stage ('ASSET_SERVER') {
             when {
                 expression {
@@ -108,8 +110,59 @@ pipeline {
                 }
             }
         }
+        //业务云平台页面
+        stage ('SCLOUD_SERVER_WEB') {
+            when {
+                expression {
+                    def serverCode = 'SCLOUD_SERVER_WEB'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                        remoteExecutor('yyds-server-project/business-project/scloud-server/scloud-server-web/target/scloud-server-web-1.0.0.jar', \
+                        '/home/yyds/scloud/web','scloud-server-web-1.0.0.jar',10,'deployResources/scloud-server-web.ini','scloud-server-web')
 
+                }
+            }
+        }
+        //业务云平子模块
+        stage ('SCLOUD_SERVER_TASK') {
+            when {
+                expression {
+                    def serverCode = 'SCLOUD_SERVER_TASK'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/business-project/scloud-server/scloud-server-task/target/scloud-server-task-1.0.0.jar', \
+                    '/home/yyds/scloud/task','scloud-server-task-1.0.0.jar',10,'deployResources/scloud-server-task.ini','scloud-server-task')
 
+                }
+            }
+        }
+        //业务云平子模块
+        stage ('SCLOUD_SERVER_HISTORY') {
+            when {
+                expression {
+                    def serverCode = 'SCLOUD_SERVER_HISTORY'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/business-project/scloud-server/scloud-server-history/target/scloud-server-history-1.0.0.jar', \
+                    '/home/yyds/scloud/history','scloud-server-task-1.0.0.jar',10,'deployResources/scloud-server-history.ini','scloud-server-history')
+                }
+            }
+        }
        //告警子模块
         stage ('ALARM_CONTROLLER') {
            when {
@@ -186,11 +239,46 @@ pipeline {
             }
             steps {
                 script {
-                        remoteExecutor('yyds-server-project/alarm-server/alarm-server-deliver/target/alarm-server-deliver-1.0.0.jar', \
-                        '/home/yyds/alarm/alarm-server-node-jar/deliver','alarm-server-deliver-1.0.0.jar',10,'deployResources/alarm-deliver.ini','alarm-deliver')
+                    remoteExecutor('yyds-server-project/alarm-server/alarm-server-deliver/target/alarm-server-deliver-1.0.0.jar', \
+                    '/home/yyds/alarm/alarm-server-node-jar/deliver','alarm-server-deliver-1.0.0.jar',10,'deployResources/alarm-deliver.ini','alarm-deliver')
                 }
             }
         }
+        //业务网关
+        stage ('GATEWAY_TOWER_SERVER') {
+            when {
+                expression {
+                    def serverCode = 'GATEWAY_TOWER_SERVER'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/gateway-project/gateway-tower/gateway-tower-server/target/gateway-tower-server-1.0.0.jar', \
+                    '/home/yyds/gateway/server','gateway-tower-server-1.0.0.jar',10,'deployResources/gateway-tower-server.ini','gateway-tower-server')
+                }
+            }
+        }
+        //网关心跳
+        stage ('GATEWAY_TOWER_HEART') {
+            when {
+                expression {
+                    def serverCode = 'GATEWAY_TOWER_HEART'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/gateway-project/gateway-tower/gateway-tower-heart/target/gateway-tower-heart-1.0.0.jar', \
+                    '/home/yyds/gateway/heart','gateway-tower-heart-1.0.0.jar',10,'deployResources/gateway-tower-heart.ini','gateway-tower-heart')
+                }
+            }
+        }
+        /* 此版本common网关已经作废
         stage ('GATEWAY_COMMON_SERVER') {
             when {
                 expression {
@@ -208,26 +296,9 @@ pipeline {
                 }
             }
         }
-        stage ('GATEWAY_COMMON_SERVER') {
-                    when {
-                        expression {
-                            def serverCode = 'GATEWAY_COMMON_SERVER'
-                            def deployServer = params.deployServer
-                            return (deployServer == 'all' || deployServer == serverCode \
-                            || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
-                        }
-                    }
-                    steps {
-                        script {
-                                remoteExecutor('yyds-server-project/gateway-project/gateway-common-base/target/gateway-common-base-1.0.0.jar', \
-                                '/home/yyds/gateway','gateway-common-base-1.0.0.jar',10,'deployResources/gateway-common-base.ini','gateway-common-base')
+        */
 
-                        }
-                    }
-                }
     }
-
-
 
 }
 

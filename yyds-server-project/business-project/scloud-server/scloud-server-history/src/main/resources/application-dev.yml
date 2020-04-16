@@ -25,7 +25,7 @@ management:
 ###########消息框架相关配置#############
 server:
   groupCode: GROUP
-  host: 172.16.6.37
+  host: 172.16.5.60
   name: SCLOUD_${history.businessCode}_SERVER #服务编码
   port: 52003 #服务占用web端口
 mqtt:
