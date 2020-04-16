@@ -16,7 +16,9 @@ public interface ShieldRuleService {
 
     boolean add(String uniqueCode, ShieldRule shieldRule);
 
-    int delete(String uniqueCode, String shieldRuleId);
+    boolean delete(String uniqueCode, String shieldRuleId);
+
+    boolean update(String uniqueCode, ShieldRule shieldRule);
 
     boolean updateState(String uniqueCode, String shieldId, Boolean state);
 
