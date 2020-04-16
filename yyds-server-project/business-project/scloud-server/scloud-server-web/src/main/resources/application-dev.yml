@@ -4,9 +4,9 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP
+  groupCode: GROUP_LIUDD_2020041501
   name: SCLOUD_SERVER_WEB #服务编码
-  host: 172.16.6.143
+#  host: 172.16.6.143
   port: 59002 #服务占用web端口
 mqtt:
   username: root #可选配置 mqtt配置相关
@@ -41,4 +41,12 @@ asset:
   getCIModel: getCIModel
 deliver:
   sender: handleSender
+
+push:
+  app:
+    pushKey: db1eb39511fee670d2845fdb
+    pushSecret: 185e690a9858c0b580e7f0c0
+    pushProduct: false
+    keyName: type
+    proName: workId
 

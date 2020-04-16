@@ -47,3 +47,11 @@ servlet:
 
 file:
   savePath: D:/scloudFile/
+
+push:
+  app:
+    pushKey: db1eb39511fee670d2845fdb
+    pushSecret: 185e690a9858c0b580e7f0c0
+    pushProduct: false
+    keyName: type
+    proName: workId
