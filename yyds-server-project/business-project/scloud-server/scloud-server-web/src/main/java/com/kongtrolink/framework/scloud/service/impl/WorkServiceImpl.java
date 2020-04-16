@@ -1,23 +1,20 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.WorkDao;
 import com.kongtrolink.framework.scloud.entity.*;
+import com.kongtrolink.framework.scloud.push.JPushService;
 import com.kongtrolink.framework.scloud.query.WorkQuery;
 import com.kongtrolink.framework.scloud.service.WorkRecordService;
 import com.kongtrolink.framework.scloud.service.WorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
-import com.sun.org.apache.regexp.internal.RE;
-import org.apache.tools.ant.taskdefs.BUnzip2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 /**
@@ -32,10 +29,19 @@ public class WorkServiceImpl implements WorkService{
     WorkDao workDao;
     @Autowired
     WorkRecordService recordService;
-    @Value("${deliver.sender:handleSender}")
-    private String handleSender;
     @Autowired
     MqttOpera mqttOpera;
+
+    @Value("${push.app.pushKey}")
+    private String appPushKey;
+    @Value("${push.app.pushSecret}")
+    private String appPushSecret;
+    @Value("${push.app.pushProduct}")
+    private boolean appProduct;
+    @Value("${push.app.keyName}")
+    private String appKeyName;      //type
+    @Value("${push.app.proName}")
+    private String appProName;      //workId
 
     @Override
     public void add(String uniqueCode, Work work) {
@@ -99,16 +105,14 @@ public class WorkServiceImpl implements WorkService{
 
     /**
      * @param uniqueCode
-     * @param workId
      * @param user
      * @auther: liudd
      * @date: 2020/4/2 12:23
      * 功能描述:接单公共部分
      */
     @Override
-    public JsonResult receCommon(String uniqueCode, String workId, User user, Date curTime, String FTU) {
+    public JsonResult receCommon(String uniqueCode, Work work, User user, Date curTime, String FTU) {
         FacadeView operator = new FacadeView(user.getUsername(), user.getName(), user.getPhone());
-        Work work = getById(uniqueCode, workId);
         //上次操作时间，用于计算处理时间
         Date beforOperatorTime = work.getOperatorTime();
         float handleTime = (curTime.getTime() - beforOperatorTime.getTime()) / (1000*60);
@@ -136,12 +140,7 @@ public class WorkServiceImpl implements WorkService{
      * 功能描述:转派公共部分
      */
     @Override
-    public JsonResult redeployCommon(String uniqueCode, WorkRecord workRecord,  User user, Date curDate, String FTU) {
-        //修改工单的当前处理人信息
-        Work work = getById(uniqueCode, workRecord.getWorkId());
-        if(null == work){
-            return new JsonResult("转派失败，该工单不存在", true);
-        }
+    public JsonResult redeployCommon(String uniqueCode, Work work, WorkRecord workRecord,  User user, Date curDate, String FTU) {
         Date beforOperatorTime = work.getOperatorTime();
         //设置处理时间
         float handleTime = (curDate.getTime() - beforOperatorTime.getTime()) / (1000*60);
@@ -157,18 +156,11 @@ public class WorkServiceImpl implements WorkService{
         workRecord.setHandleTime(handleTime);
         workRecord.setOperateFTU(FTU);
         recordService.add(uniqueCode, workRecord);
-
-        //这里需要发送推送或者短信
-//        workJpushService.pushWork(uniqueCode, work, workRecord);
-        return new JsonResult("转派成功");
+        return new JsonResult("转派成功", true);
     }
 
     @Override
-    public JsonResult urgeCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU) {
-        Work work = getById(uniqueCode, workRecord.getWorkId());
-        if(null == work){
-            return new JsonResult("该工单不存在", false);
-        }
+    public JsonResult urgeCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU) {
         Date beforOperatorTime = work.getOperatorTime();
         //设置处理时间
         float handleTime = (curDate.getTime() - beforOperatorTime.getTime()) / (1000*60);
@@ -180,18 +172,11 @@ public class WorkServiceImpl implements WorkService{
         workRecord.setOperateFTU(FTU);
         workRecord.setReceiver(work.getWorker());
         recordService.add(uniqueCode, workRecord);
-        //处理推送或者短信
-//        workJpushService.pushWork(uniqueCode, work, workRecord);
         return new JsonResult("催单成功", true);
     }
 
     @Override
-    public JsonResult overCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU) {
-        Work work = getById(uniqueCode, workRecord.getWorkId());
-        if(null == work){
-            return new JsonResult("回单失败，该工单不存在", false);
-        }
-
+    public JsonResult overCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU) {
         Date beforOperatorTime = work.getOperatorTime();
         float handleTime = (curDate.getTime() - beforOperatorTime.getTime()) / (1000*60);
         workRecord.setWorker(new FacadeView(user.getUsername(), user.getName(), user.getPhone()));
@@ -204,8 +189,6 @@ public class WorkServiceImpl implements WorkService{
             //修改操作类型为反馈信息
             workRecord.setOperateType(WorkConstants.OPERATE_FEED);
             recordService.add(uniqueCode, workRecord);
-            //处理推送或者短信
-//            workJpushService.pushWork(uniqueCode, work, workRecord);
             return new JsonResult("反馈成功", true);
         }else if(WorkConstants.STATE_OVER.equals(work.getState())){ //已回单的工单只能作为回单补充
             workRecord.setOperateType(WorkConstants.OPERATE_REPL);
@@ -221,18 +204,11 @@ public class WorkServiceImpl implements WorkService{
             update(uniqueCode, work);
         }
         recordService.add(uniqueCode, workRecord);
-        //这里需要发送推送或者短信
-//        workJpushService.pushWork(uniqueCode, work, workRecord);
-
         return new JsonResult("回单成功", true);
     }
 
     @Override
-    public JsonResult cancelCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU) {
-        Work work = getById(uniqueCode, workRecord.getWorkId());
-        if(null == work){
-            return new JsonResult("回单失败，该工单不存在", false);
-        }
+    public JsonResult cancelCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU) {
         work.setState(WorkConstants.STATE_CANCEL);
         work.setOperatorTime(curDate);
         update(uniqueCode, work);
@@ -281,15 +257,14 @@ public class WorkServiceImpl implements WorkService{
     }
 
     @Override
-    public JSONObject createJpush(Work work, String operate, List<String> accountList) {
-        JSONObject jsonObject = new JSONObject();
+    public PushEntity createJpush(Work work, String operate, List<String> accountList) {
         String title = "[工单通告--"+ operate +"]";
         String content = "您有一条工单："+work.getDevice().getName() + "设备，请及时处理" ;
-        jsonObject.put("title", title);
-        jsonObject.put("content", content);
-        jsonObject.put("theKey", work.getId());
-        jsonObject.put("type", BaseConstant.TEMPLATE_APP);
-        jsonObject.put("accountList", accountList);
-        return jsonObject;
+        PushEntity pushEntity = new PushEntity(title, content, accountList, BaseConstant.TEMPLATE_APP, appPushKey, appPushSecret, appProduct);
+        pushEntity.setKeyName(appKeyName);
+        pushEntity.setKeyValue(work.getId());
+        pushEntity.setProName(appProName);
+        pushEntity.setProValue(BaseConstant.JPUSH_TYPE_WORK);
+        return pushEntity;
     }
 }
