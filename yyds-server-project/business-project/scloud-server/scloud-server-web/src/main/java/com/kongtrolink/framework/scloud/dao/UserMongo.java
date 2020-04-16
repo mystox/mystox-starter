@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * 系统用户 相关数据操作类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 @Repository
 public class UserMongo {
@@ -27,6 +27,7 @@ public class UserMongo {
     MongoTemplate mongoTemplate;
     /**
      * 获取用户管辖站点
+     * Created by Eric on 2020/2/28.
      */
     public List<UserSiteEntity> findUserSite(String uniqueCode, String userId){
         Criteria criteria = Criteria.where("userId").is(userId);
@@ -34,12 +35,14 @@ public class UserMongo {
     }
     /**
      * 保存用户管辖站点
+     * Created by Eric on 2020/2/28.
      */
     public void saveUserSite(String uniqueCode, List<UserSiteEntity> userSites){
         mongoTemplate.insert(userSites, uniqueCode + CollectionSuffix.USER_SITE);
     }
     /**
      * 删除用户所有管辖站点
+     * Created by Eric on 2020/2/28.
      */
     public void deleteUserSite(String uniqueCode, String userId){
         Criteria criteria = Criteria.where("userId").is(userId);
@@ -47,6 +50,7 @@ public class UserMongo {
     }
     /**
      * 从用户的管辖站点中删除该站点
+     * Created by Eric on 2020/2/28.
      */
     public void deleteSitesFromUserSite(String uniqueCode, List<String> siteCodes){
         Criteria criteria = Criteria.where("siteCode").in(siteCodes);
@@ -54,7 +58,7 @@ public class UserMongo {
     }
 
     public UserModel findUserById(String uniqueCode, String userId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER);
 
     }
     /**
@@ -77,7 +81,7 @@ public class UserMongo {
         update.set("workId",userModel.getWorkId());
         update.set("remark",userModel.getRemark());
         update.set("password",userModel.getPassword());
-        update.set("sex",userModel.getSex());
+        update.set("gender",userModel.getGender());
         WriteResult result = mongoTemplate.updateFirst(new Query(criteria),update,uniqueCode+CollectionSuffix.USER);
         return result.getN()>0;
 

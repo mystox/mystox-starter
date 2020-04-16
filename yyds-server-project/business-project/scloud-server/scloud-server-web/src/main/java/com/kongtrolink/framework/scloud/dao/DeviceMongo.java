@@ -276,7 +276,7 @@ public class DeviceMongo {
     }
 
     /**
-     * 更新FSU相关属性
+     * 更新FSU注册状态及相关属性
      * 【使用场景】：网关上报FSU在线(注册)/离线
      */
     public void updateFsu(DeviceEntity deviceEntity){
@@ -296,5 +296,18 @@ public class DeviceMongo {
         }
 
         mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, deviceEntity.getEnterpriseCode() + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 更新FSU运行状态
+     */
+    public void updateFsuOperationState(String uniqueCode, String fsuCode, String fsuOperationState){
+        Criteria criteria = Criteria.where("code").is(fsuCode);
+
+        Update update = new Update();
+        if (fsuOperationState != null){
+            update.set("operationState", fsuOperationState);
+        }
+        mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 }

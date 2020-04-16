@@ -24,17 +24,16 @@ import java.util.List;
 
 /**
  * 系统管理-用户管理-系统用户 控制器
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 @Controller
 @RequestMapping(value = "/user/", method = RequestMethod.POST)
 public class UserController extends BaseController{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     @Autowired
     UserService userService;
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     /**
      * 增加系统用户
@@ -128,11 +127,11 @@ public class UserController extends BaseController{
 
     /**
      * 修改系统用户或维护用户 管辖站点
+     * Created by Eric on 2020/2/28.
      */
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
         try{
-//            String uniqueCode = getUniqueCode();
             userService.modifyUserSite(getUniqueCode(), userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
         }catch (Exception e){
@@ -143,11 +142,11 @@ public class UserController extends BaseController{
 
     /**
      * 获取系统用户或维护用户 管辖站点
+     * Created by Eric on 2020/2/28.
      */
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
-//            String uniqueCode = getUniqueCode();
             String userId = userSiteEntity.getUserId();
             List<UserSiteEntity> list = userService.getUserSite(getUniqueCode(), userId);
             return new JsonResult(list);

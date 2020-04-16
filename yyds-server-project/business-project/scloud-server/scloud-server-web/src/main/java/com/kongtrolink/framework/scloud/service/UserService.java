@@ -11,17 +11,19 @@ import java.util.List;
 
 /**
  * 系统管理-用户管理-系统用户 接口类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 public interface UserService {
 
     /**
      * 保存或修改 用户管辖站点
+     * Created by Eric on 2020/2/28.
      */
     void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites);
 
     /**
      * 获取用户管辖站点
+     * Created by Eric on 2020/2/28.
      */
     List<UserSiteEntity> getUserSite(String uniqueCode, String userId);
 

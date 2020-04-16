@@ -32,7 +32,7 @@
             (function (callback) {
                 var Cache = {};
                 Cache.connectToDB = function (callback) {
-                    var req = indexedDB.open("SDGD", 1584602563071);
+                    var req = indexedDB.open("SDGD", 1587001440525);
                     req.onerror = function (e) { 
                         var req1 = indexedDB.deleteDatabase("SDGD"); 
                         req1.onsuccess = function () {
@@ -131,6 +131,7 @@
                     '../plugin/Threejs/OBJLoader.js',
                     '../plugin/Threejs/OrbitControls.js',
                     '../plugin/Threejs/tween.js',
+                    '../plugin/Threejs/THREEx.prototype.js',
                     '../plugin/videojs/video.js',
                     '../js/scloud.main.js',
                 ]

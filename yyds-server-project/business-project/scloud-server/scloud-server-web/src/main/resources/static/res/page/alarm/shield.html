@@ -69,7 +69,7 @@
                             ng-disabled="addRule.obj.deviceList.length === 0"
                             ng-model="addRule.obj.addDevice"
                             ng-click="multiSelect.add(addRule.obj.addDevice,addRule.obj.selectedDeviceList);"
-                            ng-options="item.device as item.device.name + '（' + item.device.code + '）' group by item.device.siteName for item in addRule.obj.deviceList"></select>
+                            ng-options="item as item.name + '（' + item.code + '）' group by item.siteName for item in addRule.obj.deviceList"></select>
                     <i class="ic ic-angle-right"></i>
                     <select multiple="multiple" class="multiselect scroll"
                             ng-model="addRule.obj.removeDevice"
@@ -99,10 +99,10 @@
                     <tr ng-click="getShieldAlarmList(r.id);">
                         <td ng-bind="r.name"></td>
                         <td>
-                            <label class="label" ng-class="{true:'font-success',false:'font-white'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
+                            <label class="label" ng-class="{true:'font-success',false:'font-danger'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
                         </td>
-                        <td ng-bind="r.creator.name"></td>
-                        <td ng-bind="r.tCreate | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="r.creator"></td>
+                        <td ng-bind="r.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
                             <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>
                             <a ng-if="util.checkPrivilege(1112) && r.enabled" ng-click="changeState(r, $event);" title="禁用" class="ic ic-times"></a>

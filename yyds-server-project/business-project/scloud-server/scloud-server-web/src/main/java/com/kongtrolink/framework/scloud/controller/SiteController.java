@@ -40,7 +40,6 @@ public class SiteController extends BaseController{
     @Autowired
     ComAttachmentsService comAttachmentsService;
 
-    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteController.class);
 
     /**
@@ -49,7 +48,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "getSiteList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getSiteList(@RequestBody SiteQuery siteQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             siteQuery.setCurrentRoot(isCurrentRoot());
             siteQuery.setUserId(getUserId());
             List<SiteModel> list = siteService.findSiteList(uniqueCode, siteQuery);
@@ -66,7 +65,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "exportSiteList", method = RequestMethod.POST)
     public void exportSiteList(@RequestBody SiteQuery siteQuery, HttpServletResponse response){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             siteQuery.setCurrentRoot(isCurrentRoot());
             siteQuery.setUserId(getUserId());
             List<SiteModel> list = siteService.findSiteList(uniqueCode, siteQuery);
@@ -82,7 +81,7 @@ public class SiteController extends BaseController{
      */
     @RequestMapping(value = "createSiteCode", method = RequestMethod.POST)
     public @ResponseBody JsonResult createSiteCode(@RequestBody SiteEntity siteEntity){
-//        String uniqueCode = getUniqueCode();
+        String uniqueCode = getUniqueCode();
         String siteCode = siteService.createSiteCode(uniqueCode, siteEntity.getTierCode());
 
         return new JsonResult(siteCode);
@@ -94,7 +93,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "addSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult addSite(@RequestBody SiteModel siteModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             siteService.addSite(uniqueCode, siteModel);
 
             return new JsonResult("添加成功", true);
@@ -110,7 +109,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "importSiteList/{serverCode}", method = RequestMethod.POST)
     public @ResponseBody JsonResult importSiteList(@PathVariable String serverCode, @RequestBody MultipartFile file){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
 
             CommonsMultipartFile cmf = (CommonsMultipartFile) file;
             DiskFileItem dfi = (DiskFileItem)cmf.getFileItem();
@@ -137,7 +136,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "uploadSiteDrawing", method = RequestMethod.POST)
     public @ResponseBody JsonResult uploadSiteDrawing(@RequestBody MultipartFile file){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             if (file == null || file.isEmpty()){
                 return new JsonResult("文件为空", false);
             }
@@ -161,7 +160,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "downloadSiteDrawing/{id}", method = RequestMethod.GET)
     public @ResponseBody void downloadSiteDrawing(@PathVariable int id, HttpServletResponse response){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             comAttachmentsService.downloadMultipartFile(uniqueCode, id, response);
         }catch (Exception e){
             e.printStackTrace();
@@ -174,7 +173,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "getRespList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getRespList(@RequestBody SiteQuery siteQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<String> respNames = siteService.getRespList(uniqueCode, siteQuery);
             return new JsonResult(respNames);
         }catch (Exception e){
@@ -189,7 +188,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "modifySite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifySite(@RequestBody SiteModel siteModel){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             boolean modifyResult = siteService.modifySite(uniqueCode, siteModel);
             if (modifyResult) {
                 return new JsonResult("修改成功", true);
@@ -208,7 +207,7 @@ public class SiteController extends BaseController{
     @RequestMapping(value = "deleteSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult deleteSite(@RequestBody SiteQuery siteQuery){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             if (siteQuery.getSiteCodes() != null && siteQuery.getSiteCodes().size() > 0) {
                 siteService.deleteSite(uniqueCode, siteQuery);
 
@@ -236,7 +235,7 @@ public class SiteController extends BaseController{
      */
     @RequestMapping(value = "/getSimplifiedSiteList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getSimplifiedSiteList(@RequestBody SiteQuery siteQuery){
-//        String uniqueCode = getUniqueCode();
+        String uniqueCode = getUniqueCode();
         siteQuery.setCurrentRoot(isCurrentRoot());
         siteQuery.setUserId(getUserId());
         List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);

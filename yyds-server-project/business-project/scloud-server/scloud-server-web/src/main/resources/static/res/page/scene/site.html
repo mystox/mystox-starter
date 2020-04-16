@@ -32,40 +32,40 @@
                     <div class="basic-info-item-title">
                         基本信息
                     </div>
-                   <div class="item">
-                       <span>基站编号：</span>
-                       <span ng-bind="currentSite.baseStationNumber | nullFilter"></span>
-                   </div>
                     <div class="item">
-                        <span>基站类型：</span>
-                        <span ng-bind="curSiteBaseInfo.stationType | stationTypeFilter | nullFilter"></span>
+                        <span>站点编码：</span>
+                        <span ng-bind="currentSite.code | nullFilter"></span>
                     </div>
-                   <div class="item">
-                       <span>经度纬度：</span>
-                       <span ng-bind="curSiteBaseInfo.coordinate | nullFilter"></span>
-                   </div>
-                   <div class="item">
-                       <span>维护人员：</span>
-                       <span ng-bind="curSiteBaseInfo.respName | nullFilter"></span>
-                   </div>
-                   <div class="item">
-                       <span>联系方式：</span>
-                       <span ng-bind="curSiteBaseInfo.respPhone | nullFilter"></span>
-                   </div>
-                   <div class="item" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                       <span>详细地址：</span>
-                       <span title="{{curSiteBaseInfo.address  | nullFilter}}" ng-bind="curSiteBaseInfo.address  | nullFilter"></span>
-                   </div>
-                   <div class="item">
-                       <span>监控设备数量：</span>
-                       <span ng-bind="curSiteBaseInfo.deviceNum | nullFilter"></span>
-                   </div>
-                   <div class="item">
-                       <span>监控点总数：</span>
-                       <span ng-bind="curSiteBaseInfo.signalNum  | nullFilter"></span>
-                   </div>
+                    <div class="item">
+                        <span>站点类型：</span>
+                        <span ng-bind="currentSite.siteType | nullFilter"></span>
+                    </div>
+                    <div class="item">
+                        <span>经度纬度：</span>
+                        <span ng-bind="currentSite.coordinate | nullFilter"></span>
+                    </div>
+                    <div class="item">
+                        <span>资产管理员：</span>
+                        <span ng-bind="currentSite.respName | nullFilter"></span>
+                    </div>
+                    <div class="item">
+                        <span>联系电话：</span>
+                        <span ng-bind="currentSite.respPhone | nullFilter"></span>
+                    </div>
+                    <div class="item" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <span>站点地址：</span>
+                        <span title="{{currentSite.address  | nullFilter}}" ng-bind="currentSite.address  | nullFilter"></span>
+                    </div>
+                    <div class="item">
+                        <span>监控设备数量：</span>
+                        <span ng-bind="currentSite.deviceNum | nullFilter"></span>
+                    </div>
+                    <div class="item">
+                        <span>监控点总数：</span>
+                        <span ng-bind="currentSite.signalNum  | nullFilter"></span>
+                    </div>
                 </div>
-                <div class="basic-info-item">
+                <!-- <div class="basic-info-item">
                     <div class="chart-title" ng-click="openAlarmStatistic()">历史告警统计  {{allHistoryAlarmCounts}}</a></div>
                     <div id="{{allAlarmCountPie}}" class="allAlarmCountPie"></div>
                 </div>
@@ -73,13 +73,13 @@
                     <div class="chart-title"><a ui-sref="alarm/list">TOP3历史告警统计曲线图</a></div>
                     <div id="{{top3AlarmLineForScene}}" class="top3AlarmLineForScene">
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
 
     <!-- 修改站点 -->
-    <form class="modal hide form-horizontal broad-modal" data-backdrop="static" id="addSiteInSceneModal"
+    <form class="modal hide form-horizontal" data-backdrop="static" id="addSiteInSceneModal"
           name="addSiteInScene.form" novalidate ng-submit="addSiteInScene.execute();">
         <div class="modal-header">
             <button type="reset" class="close" ng-click="addSiteInScene.clear();"><i class="ic ic-close"></i></button>
@@ -88,11 +88,15 @@
         <div class="modal-body scroll">
             <input type="hidden" name="tierCode" ng-model="addSiteInScene.obj.tierCode" required>
             <div class="control-group">
-                <label class="control-label">站点层级</label>
+                <label class="control-label">区域层级</label>
                 <div class="controls">
-                    <input type="text" name="tierString" placeholder='点击选择位置' ng-class="addSiteInScene.status === 'add' && 'cursor-point'" ng-disabled="addSiteInScene.status !== 'add'" required readonly
-                           ng-model="addSiteInScene.obj.tierString">
-                    <span class="help-inline"></span>
+                    <span ng-bind="addSiteInScene.obj.tierName"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">站点编码</label>
+                <div class="controls">
+                    <span ng-bind="addSiteInScene.obj.code"></span>                    
                 </div>
             </div>
             <div class="control-group" ng-class="getValidClass(addSiteInScene.form.name);">
@@ -101,6 +105,15 @@
                     <input type="text" name="name" placeholder="{{REGEX.siteNameDesc}}"
                            ng-model="addSiteInScene.obj.name" ng-pattern="REGEX.siteName" required
                            ng-disabled="addSiteInScene.status === 'detail'">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.stationType);">
+                <label class="control-label">局站类型</label>
+                <div class="controls">
+                    <select name="model" ng-model="addSiteInScene.obj.siteType" required
+                            ng-options="item.value as item.value for item in CONST.stationTypeList"
+                            ng-disabled="addSiteInScene.status === 'detail'"></select>
                     <span class="help-inline"></span>
                 </div>
             </div>
@@ -114,29 +127,6 @@
                     <a ng-hide="addSiteInScene.status === 'detail'" ng-click="coordPickerInSceneModal.toModal()" class="suffix ic ic-map-marker"></a>
                 </div>
             </div>
-            <div class="control-group" ng-hide="addSiteInScene.status === 'add'">
-                <label class="control-label">基站编号</label>
-                <div class="controls">
-                    <input type="text" ng-model="addSiteInScene.obj.baseStationNumber" readonly>
-                    <span class="help-inline"></span>
-                </div>
-            </div>
-            <div class="control-group" ng-hide="addSiteInScene.status === 'add'">
-                <label class="control-label">站点编号</label>
-                <div class="controls">
-                    <input type="text" ng-model="addSiteInScene.obj.code" readonly>
-                    <span class="help-inline"></span>
-                </div>
-            </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.stationType);">
-                <label class="control-label">局站类型</label>
-                <div class="controls">
-                    <select name="model" ng-model="addSiteInScene.obj.stationType" required
-                            ng-options="item.key as item.value for item in CONST.stationTypeList"
-                            ng-disabled="addSiteInScene.status === 'detail'"></select>
-                    <span class="help-inline"></span>
-                </div>
-            </div>
             <div class="control-group" ng-class="getValidClass(addSiteInScene.form.address);">
                 <label class="control-label">站点地址</label>
                 <div class="controls">
@@ -147,7 +137,7 @@
                 </div>
             </div>
             <div class="control-group" ng-class="getValidClass(addSiteInScene.form.respName);">
-                <label class="control-label">负责人</label>
+                <label class="control-label">资产管理员</label>
                 <div class="controls">
                     <input type="text" name="respName" ng-model="addSiteInScene.obj.respName" ng-pattern="REGEX.personName"
                            ng-disabled="addSiteInScene.status === 'detail'">
@@ -162,18 +152,13 @@
                     <span class="help-inline"></span>
                 </div>
             </div>
-            <div class="control-group" ng-show="addSiteInScene.status != 'add'">
-                <label class="control-label">FSU状态</label>
-                <div class="controls">
-                    <span class="input-like" ng-bind="addSiteInScene.obj.fsuState | nullFilter"></span>
-                </div>
-            </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.company);">
-                <label class="control-label">归属公司</label>
-                <div class="controls">
-                    <input type="text" name="company" ng-model="addSiteInScene.obj.company" required ng-pattern="REGEX.enterpriseName"
-                           ng-disabled="addSiteInScene.status === 'detail'">
-                    <span class="help-inline"></span>
+            <div class="control-group">
+                <label class="control-label">站点图纸</label>
+                <div class="controls" style="position: relative;">
+                    <input type="text" ng-show="addSiteInScene.docUplad.info.name" ng-model="addSiteInScene.docUplad.info.name" class="file-name" readonly /> 
+                    <a ng-show="addSiteInScene.docUplad.info.name" style="position: absolute; right: 46px; font-size: 20px; top: 4px; background: #fff;" ng-click="addSiteInScene.docUplad.info.name = null">&times;</a>
+                    <button type="button" class="btn btn-primary" ng-show="!addSiteInScene.docUplad.info.name" ng-click="addSiteInScene.docUpladSelect();">选择文件</button>
+                    <input id="repairsDocBtn" style="display: none;" name="file" type="file" accept=".doc, .docx, .pdf, .txt, .xls, .xlsx" ng-file-select="addSiteInScene.docUplad.onFileSelect($files, 'doc');"/>
                 </div>
             </div>
             <div class="control-group" ng-class="getValidClass(addSiteInScene.form.towerHeight);">
@@ -201,49 +186,30 @@
                     <span class="help-inline"></span>
                 </div>
             </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.approvalStatus);">
-                <label class="control-label">审批状态</label>
+            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.assetNature);">
+                <label class="control-label">产权性质</label>
                 <div class="controls">
-                    <select name="approvalStatus" ng-model="addSiteInScene.obj.approvalStatus" required ng-options="item as item for item in approvalStatusList"
+                    <select name="assetNature" ng-model="addSiteInScene.obj.assetNature" required ng-options="item as item for item in CONST.assetNatureList"
                             ng-disabled="addSiteInScene.status === 'detail'"></select>
                     <span class="help-inline"></span>
                 </div>
             </div>
-            <div class="control-group" ng-show="addSiteInScene.status === 'detail'">
-                <label class="control-label">站点图片</label>
+            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.createTime);">
+                <label class="control-label">投入使用时间</label>
                 <div class="controls">
                     <span class="input-like">
-                        <button type="button" class="btn btn-primary" ng-click="uploadImage.toModal()">上传</button>
-                        <a ng-click="showImage()">查看</a>
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addSiteInScene.obj.createTime" style="width: 220px;">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
                     </span>
                 </div>
             </div>
-            <br ng-show="addSiteInScene.status === 'detail'"/>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.platform0);">
-                <label class="control-label">平台信息0</label>
+            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.areaCovered);">
+                <label class="control-label">占地面积</label>
                 <div class="controls">
-                    <input type="text" name="platform0" ng-model="addSiteInScene.obj.platform0" ng-disabled="addSiteInScene.status === 'detail'">
-                </div>
-            </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.platform1);">
-                <label class="control-label">平台信息1</label>
-                <div class="controls">
-                    <input type="text" name="platform1" ng-model="addSiteInScene.obj.platform1" ng-disabled="addSiteInScene.status === 'detail'">
-                    <span class="help-inline"></span>
-                </div>
-            </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.platform2);">
-                <label class="control-label">平台信息2</label>
-                <div class="controls">
-                    <input type="text" name="platform2" ng-model="addSiteInScene.obj.platform2" ng-disabled="addSiteInScene.status === 'detail'">
-                    <span class="help-inline"></span>
-                </div>
-            </div>
-            <div class="control-group" ng-class="getValidClass(addSiteInScene.form.platform3);">
-                <label class="control-label">平台信息3</label>
-                <div class="controls">
-                    <input type="text" name="platform3" ng-model="addSiteInScene.obj.platform3" ng-disabled="addSiteInScene.status === 'detail'">
-                    <span class="help-inline"></span>
+                    <input type="text" name="areaCovered" ng-model="addSiteInScene.obj.areaCovered">
                 </div>
             </div>
         </div>
@@ -290,7 +256,7 @@
                     <input type="text" name="code" ng-model="addFsuInScene.obj.code" required
                            placeholder='根据所选站点生成' readonly>
                     <span class="help-inline"></span>
-                    <a ng-click="createFsuCode(addFsuInScene.obj.siteId);">重新生成编号</a>
+                    <a ng-click="createFsuCode();" class="ic ic-refresh"></a>
                 </div>
             </div>
             <div class="control-group" ng-class="getValidClass(addFsuInScene.form.name);">
@@ -301,43 +267,82 @@
                     <span class="help-inline"></span>
                 </div>
             </div>
-            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.respName);">
-                <label class="control-label">FSU负责人</label>
-                <div class="controls">
-                    <input type="text" name="respName" ng-model="addFsuInScene.obj.respName" ng-pattern="REGEX.personName">
-                    <span class="help-inline"></span>
-                </div>
-            </div>
             <div class="control-group" ng-class="getValidClass(addFsuInScene.form.model);">
-                <label class="control-label">FSU型号</label>
+                <label class="control-label">设备型号</label>
                 <div class="controls">
-                    <select name="model" ng-model="addFsuInScene.obj.model" required
-                            ng-options="item as item for item in fsuModelList"></select>
+                    <input type="text" name="model"
+                           ng-model="addFsuInScene.obj.model" required>
                     <span class="help-inline"></span>
                 </div>
             </div>
-            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.systemName);">
-                <label class="control-label">所属系统</label>
-                <div class="controls" ng-switch="addFsuInScene.style">
-                    <select name="systemName"  required
-                            ng-if="!addFsuInScene.style"
-                            ng-model="addFsuInScene.obj.systemName"
-                            ng-options="item as item for item in systemList">
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.adaptation);">
+                <label class="control-label">适配层</label>
+                <div class="controls">
+                    <input type="text" name="adaptation" ng-model="addFsuInScene.obj.adaptation">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.engine);">
+                <label class="control-label">引擎</label>
+                <div class="controls">
+                    <input type="text" name="engine" ng-model="addFsuInScene.obj.engine">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.sMinitor);">
+                <label class="control-label">SMonitor</label>
+                <div class="controls">
+                    <input type="text" name="sMinitor" ng-model="addFsuInScene.obj.sMinitor">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.createTime);">
+                <label class="control-label">投入使用时间</label>
+                <div class="controls">
+                    <span class="input-like">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addFsuInScene.obj.createTime" style="width: 220px;">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
+                    </span>
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.shelfLife);">
+                <label class="control-label">保质期</label>
+                <div class="controls">
+                    <input type="text" name="shelfLife" ng-model="addFsuInScene.obj.shelfLife">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.isInsurance);">
+                <label class="control-label">是否出保</label>
+                <div class="controls">
+                    <select name="isInsurance" ng-options="item for item in ['是', '否']" ng-model="addFsuInScene.obj.isInsurance">
+                        <option ng-bind="' '"></option>
                     </select>
-                    <input type="text" name="systemName" required
-                           ng-if="addFsuInScene.style"
-                           ng-model="addFsuInScene.obj.systemName"
-                           placeholder="{{REGEX.systemNameDesc}}"
-                           ng-pattern="REGEX.systemName">
                     <span class="help-inline"></span>
-                    <div scloud-checkbox selected="addFsuInScene.style" content="手动输入"></div>
                 </div>
             </div>
-            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.manufactory);">
-                <label class="control-label">FSU厂家</label>
-            <div class="controls">
-                    <select name="manufactory" ng-model="addFsuInScene.obj.manufactory" required
-                            ng-options="item as item for item in CONST.fsuManufactoryList"></select>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.manufacturer);">
+                <label class="control-label">生产厂家</label>
+                <div class="controls">
+                    <input type="text" name="manufacturer" ng-model="addFsuInScene.obj.manufacturer">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.brand);">
+                <label class="control-label">品牌</label>
+                <div class="controls">
+                    <input type="text" name="brand" ng-model="addFsuInScene.obj.brand">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(addFsuInScene.form.deviceDesc);">
+                <label class="control-label">备注</label>
+                <div class="controls">
+                    <input type="text" name="deviceDesc" ng-model="addFsuInScene.obj.deviceDesc">
                     <span class="help-inline"></span>
                 </div>
             </div>
@@ -607,7 +612,7 @@
                      ng-bind="item.text"
                      ng-hide="item.type === 'video' && cameraList < 1"
                      ng-click="handleClickViewListItem(item.id, item, $event)"
-                     ng-class="$index === curButtonIndex ? 'active ' + item.class : item.class"
+                     ng-class="$index + 1 === curButtonIndex ? 'active ' + item.class : item.class"
                     title="{{item.target}}">
                 </div>
             </div>
@@ -716,7 +721,7 @@
             <div class="each-device" ng-repeat="(key, value) in deviceAndFsu">
                 <div class="each-device-title">
                     <span class="sprite sprite-device" ng-class="'sprite_icon_' + value.code"></span>
-                    <span class="text" ng-bind="value.type"></span>
+                    <span class="text" ng-bind="value.type" ng-class="value.type ==='FSU动环主机' && 'cursor-point'" ng-click="value.type ==='FSU动环主机' && ($parent.selectedFsuList = null) "></span>
                     <span class="angle-btn" ng-click="value.isHide = !value.isHide">
                         <i class="ic ic-angle-up"
                            ng-hide="value.isHide"></i>
@@ -726,19 +731,21 @@
                 </div>
 
                 <ul class="each-device-list" ng-hide="value.isHide">
-                    <li ng-repeat="item in value.infoList | orderBy : item.code track by $index" ng-hide="value.type !== 'FSU' && selectedFsuList.indexOf(item.fsuId) === -1">
+                    <li ng-repeat="item in value.infoList | orderBy : item.code track by $index" ng-hide="value.type !== 'FSU动环主机' && $parent.$parent.selectedFsuList !== item.fsuId && $parent.$parent.selectedFsuList != null">
                         <span title="{{'设备名称：' + (item.name ? item.name : item.deviceName)}}">
-                            <a ng-if="value.type==='FSU'" ng-show="selectedFsuList[$index] === item.id" ng-click="selectedFsuList[$index] = null" class="ic ic-check-square"></a>
-                            <a ng-if="value.type==='FSU'" ng-show="selectedFsuList[$index] != item.id" ng-click="selectedFsuList[$index] = item.id" class="ic ic-square"></a>
-                            <i ng-hide="value.type === 'FSU'" class="is-line"
+                            <a ng-if="value.type==='FSU动环主机'" ng-show="$parent.$parent.$parent.selectedFsuList === item.code" class="ic ic-check-square"></a>
+                            <a ng-if="value.type==='FSU动环主机'" ng-show="$parent.$parent.$parent.selectedFsuList != item.code" class="ic ic-square" style="color: transparent;"></a>
+                            <i ng-hide="value.type === 'FSU动环主机'" class="is-line"
                                ng-class="{
-                                    'is-online': item.status === '在线',
-                                    'is-offline': item.status === '离线',
-                                    'is-alarm': item.status === '告警'
+                                    'is-online': item.alarmNum == 0 && item.online,
+                                    'is-offline': item.alarmNum == 0 && !item.online,
+                                    'is-alarm': item.alarmNum > 0
                                 }">
                             </i>
                             <span ng-bind="item.name ? item.name : item.deviceName" ng-class="item.isInScene ? 'is-in-scene': ''"
-                                  ng-click="curFsuId = item.id;item.isInScene && findDeviceInScene({code: item.deviceCode || item.code})"></span>
+                                ng-click="
+                                selectDeviceInSidebar(item)
+                                "></span>
                         </span>
                         <!-- 外接设备 -->
                         <span>
@@ -754,7 +761,7 @@
                             <span ng-show ="value.type === 'FSU'" ng-click="openDevicePage(item, value.type, value.code)">
                                 CPU:{{item.aiValue1 | nullFilter}}% 内存:{{item.aiValue2 | nullFilter}}%
                             </span>
-                            <span ng-show ="value.type !== 'FSU' &&  (item.aiValue1 || item.aiValue2)"
+                            <span ng-show ="value.type !== 'FSU' &&  (item.aiValue1 != null || item.aiValue2 != null)"
                                    ng-click="openDevicePage(item, value.type, value.code)">
                                 <span title="{{item.aiName1}}">{{item.aiValue1 | nullFilter}} {{item.aiUnit1 | nullFilter}}</span>
                                 <span title="{{item.aiName2}}">{{item.aiValue2 | nullFilter}} {{item.aiUnit2 | nullFilter}}</span>
