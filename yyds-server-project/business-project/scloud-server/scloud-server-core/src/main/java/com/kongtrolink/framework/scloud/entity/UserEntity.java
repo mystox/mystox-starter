@@ -5,7 +5,7 @@ import java.util.Date;
 
 /**
  * 系统用户(扩展信息) 数据实体类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 public class UserEntity implements Serializable{
     /**
