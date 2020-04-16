@@ -1,7 +1,9 @@
 package com.kongtrolink.framework.scloud.job;
 
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.entity.*;
+import com.kongtrolink.framework.scloud.push.JPushService;
 import com.kongtrolink.framework.scloud.service.JobWorkService;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.quartz.Job;
@@ -10,6 +12,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +26,19 @@ public class SendWorkJob implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(SendWorkJob.class);
     @Autowired
     JobWorkService jobWorkService;
+    @Autowired
+    JPushService jPushService;
+
+    @Value("${push.app.pushKey}")
+    private String appPushKey;
+    @Value("${push.app.pushSecret}")
+    private String appPushSecret;
+    @Value("${push.app.pushProduct}")
+    private boolean appProduct;
+    @Value("${push.app.keyName}")
+    private String appKeyName;      //type
+    @Value("${push.app.proName}")
+    private String appProName;      //workId
 
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
@@ -70,9 +86,9 @@ public class SendWorkJob implements Job {
             jobWorkService.addWorkRecord(uniqueCode, workRecord);
             alarmBusiness.setWorkCode(work.getCode());
             //liuddtodo 发送工单推送
-//            workJpushService.pushWork(uniqueCode, work, workRecord);
+            PushEntity jpushEntity = createJpush(work, WorkConstants.OPERATE_SEND, null);
+            jPushService.push(jpushEntity);
         }
-
         //删除该告警工单配置对应信息
         jobWorkService.deleteWorkAlarmConfigById(uniqueCode, alarmWorkConfig.getId());
         //修改告警的工单状态
@@ -110,5 +126,16 @@ public class SendWorkJob implements Job {
         workRecord.setOperateFTU(operateFTU);
         workRecord.setReceiver(receiver);
         return workRecord;
+    }
+
+    public PushEntity createJpush(Work work, String operate, List<String> accountList) {
+        String title = "[工单通告--"+ operate +"]";
+        String content = "您有一条工单："+work.getDevice().getName() + "设备，请及时处理" ;
+        PushEntity pushEntity = new PushEntity(title, content, accountList, BaseConstant.TEMPLATE_APP, appPushKey, appPushSecret, appProduct);
+        pushEntity.setKeyName(appKeyName);
+        pushEntity.setKeyValue(work.getId());
+        pushEntity.setProName(appProName);
+        pushEntity.setProValue(BaseConstant.JPUSH_TYPE_WORK);
+        return pushEntity;
     }
 }

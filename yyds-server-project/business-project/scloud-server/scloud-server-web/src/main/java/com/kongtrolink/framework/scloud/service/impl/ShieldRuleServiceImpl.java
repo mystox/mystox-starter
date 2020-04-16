@@ -44,8 +44,18 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     }
 
     @Override
-    public int delete(String uniqueCode, String shieldRuleId) {
+    public boolean delete(String uniqueCode, String shieldRuleId) {
         return shieldRuleDao.delete(uniqueCode, shieldRuleId);
+    }
+
+    @Override
+    public boolean update(String uniqueCode, ShieldRule shieldRule) {
+        if(delete(uniqueCode, shieldRule.getId())){
+            if(add(uniqueCode, shieldRule)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

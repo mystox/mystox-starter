@@ -23,7 +23,7 @@ import java.util.*;
 
 /**
  * 系统管理-用户管理-系统用户 接口实现类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 @Service
 public class UserServiceImpl implements UserService {
@@ -48,17 +48,6 @@ public class UserServiceImpl implements UserService {
         //保存前，先删除原有用户管辖站点
         userMongo.deleteUserSite(uniqueCode, userSites.get(0).getUserId());
 
-
-//    public static void main(String[] args){
-//        UserModel userModel = new UserModel();
-//        String s = "{\"msg\": \"success\", \"data\": [{\"xm\": \"张三\", \"birthdate\": \"1990-01-18 11:10:41\"},{\"xm\": \"李四\", \"birthdate\": \"1991-01-18 11:10:41\"}]}";        //json字符串转Map
-//        //json字符串转Map
-//        Map<String,Object> jsonToMap = JSONObject.parseObject(s);
-//        System.out.println("jsonToMap："+jsonToMap);
-//        //json字符串转List
-//        List<Object> jsonToList = JSONArray.parseArray(jsonToMap.get("data").toString());
-//        System.out.println("jsonToList："+jsonToList);
-//    }
         //保存新的用户管辖站点
         userMongo.saveUserSite(uniqueCode, userSites);
     }
