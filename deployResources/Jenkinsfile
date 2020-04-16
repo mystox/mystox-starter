@@ -208,6 +208,23 @@ pipeline {
                 }
             }
         }
+        stage ('GATEWAY_COMMON_SERVER') {
+                    when {
+                        expression {
+                            def serverCode = 'GATEWAY_COMMON_SERVER'
+                            def deployServer = params.deployServer
+                            return (deployServer == 'all' || deployServer == serverCode \
+                            || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                        }
+                    }
+                    steps {
+                        script {
+                                remoteExecutor('yyds-server-project/gateway-project/gateway-common-base/target/gateway-common-base-1.0.0.jar', \
+                                '/home/yyds/gateway','gateway-common-base-1.0.0.jar',10,'deployResources/gateway-common-base.ini','gateway-common-base')
+
+                        }
+                    }
+                }
     }
 
 
