@@ -52,7 +52,7 @@ public class BusinessRedisConfig
         return template;
     }
 
-    @Bean("jedisConnectionFactoryBusiness")
+    @Bean(name = "jedisConnectionFactoryBusiness")
     @Primary
     public RedisConnectionFactory jedisConnectionFactoryBusiness()
     {
