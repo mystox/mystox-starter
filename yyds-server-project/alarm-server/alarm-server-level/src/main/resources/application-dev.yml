@@ -5,7 +5,7 @@ spring:
     name: alarm-server-level_test
 ###########\u6D88\u606F\u6846\u67B6\u76F8\u5173\u914D\u7F6E#############
 server:
-  groupCode: GROUP_LIUDD_2020041501
+  groupCode: GROUP
   name: ALARM_SERVER_LEVEL_TEST #\u670D\u52A1\u7F16\u7801
   version: V1.0.0 #\u670D\u52A1\u7248\u672C
   port: 19002 #\u670D\u52A1\u5360\u7528web\u7AEF\u53E3

@@ -42,7 +42,7 @@
             <div class="right">
 
                 <div class="table-box scroll">
-                    <div class="table-header" ng-bind="{'1':'一级告警', '2':'二级告警', '3':'三级告警', '4':'四级告警'}[realtimeQueryLevel] || '全部'"></div>
+                    <div class="table-header" ng-bind="realtimeQueryLevelName"></div>
                     <table border="1" class="countPageTable">
                         <thead>
                         <tr>
@@ -58,7 +58,7 @@
                         <tbody>
                         <tr ng-repeat="item in realtimeAlarmList" ng-class="CONST.animation.list">
                             <td ng-bind="item.name"></td>
-                            <td ng-bind="item.level | alarmLevelFilter"></td>
+                            <td ng-bind="item.levelName"></td>
                             <td ng-bind="item.value"></td>
                             <td ng-bind="item.tierName"></td>
                             <td ng-bind="item.siteName"></td>

@@ -36,7 +36,7 @@
                     <label class="control-label">重定义为</label>
                     <div class="controls">
                         <select name="alarmLevel" ng-model="addRule.obj.alarmLevel" required
-                                ng-options="item.key as item.value for item in CONST.alarmLevelList"></select>
+                                ng-options="item.key as item.value for item in alarmLevelList"></select>
                         <span class="help-inline"></span>
                     </div>
                 </div>
@@ -124,7 +124,7 @@
                     <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
                         <td colspan="5" class="detail">
                             <ul>
-                                <li>重定义为：<span ng-bind="ruleDetail.alarmLevel | alarmLevelFilter | nullFilter"></span></li>
+                                <li>重定义为：<span ng-bind="ruleDetail.targetLevel | nullFilter"></span></li>
                                 <li>所选站点：
                                     <select multiple="multiple" readonly>
                                         <option ng-repeat="item in ruleDetail.siteInfoList track by $index" ng-bind="item"></option>
