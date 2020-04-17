@@ -4,7 +4,6 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP_LIUDD_2020041301
   name: SCLOUD_SERVER_WEB #服务编码
   host: 172.16.6.143
   groupCode: GROUP_YPT_TEST3

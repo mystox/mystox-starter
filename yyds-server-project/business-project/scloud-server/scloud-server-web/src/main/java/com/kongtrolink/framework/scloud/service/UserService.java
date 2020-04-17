@@ -6,7 +6,10 @@ import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -52,5 +55,9 @@ public interface UserService {
     /**
      * 导出用户列表
      */
-    HSSFWorkbook exportUserList(List<UserModel> list);
+    HSSFWorkbook exportUserList(List<JSONObject> list);
+    /**
+     * 导入用户列表
+     */
+    boolean importUserList(String uniqueCode,MultipartFile file) throws IOException, ParseException;
 }

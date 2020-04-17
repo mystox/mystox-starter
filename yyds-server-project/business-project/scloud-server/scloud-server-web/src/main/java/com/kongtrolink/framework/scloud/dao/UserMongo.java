@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,7 +54,7 @@ public class UserMongo {
     }
 
     public UserModel findUserById(String uniqueCode, String userId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER);
 
     }
     /**
@@ -70,14 +71,14 @@ public class UserMongo {
         String userId = userModel.getUserId();
         Criteria criteria = Criteria.where("userId").is(userId);
         Update update = new Update();
-        update.set("lockStatus",userModel.getLockStatus());
         update.set("userStatus",userModel.getUserStatus());
         update.set("validTime",userModel.getValidTime());
+        if (userModel.getValidTime()!=null){
+            update.set("validTime","临时");
+        }
         update.set("workId",userModel.getWorkId());
-        update.set("changeTime",userModel.getChangeTime());
         update.set("remark",userModel.getRemark());
-        update.set("password",userModel.getPassword());
-        update.set("sex",userModel.getSex());
+        update.set("gender",userModel.getGender());
         WriteResult result = mongoTemplate.updateFirst(new Query(criteria),update,uniqueCode+CollectionSuffix.USER);
         return result.getN()>0;
 
@@ -94,25 +95,17 @@ public class UserMongo {
     /**
      * 用户列表
      */
-    public UserModel listUser(String uniqueCode, String id, UserQuery userQuery){
-        UserEntity userEntity = new UserEntity();
-        String lockStatus = userEntity.getLockStatus(); //锁定状态
-        String userStatus = userEntity.getUserStatus(); //用户状态
-        Long validTime = userEntity.getValidTime();  //有效日期
+    public UserEntity listUser(String uniqueCode, String id, UserQuery userQuery){
         Criteria criteria = Criteria.where("userId").is(id);
-        Criteria criteria1 = new Criteria();
-        if (lockStatus != null && !lockStatus.equals("")){
-            criteria1.and("lockStatus").is(lockStatus);
-        }
-        if (userStatus != null && !userStatus.equals("")){
-            criteria1.and("userStatus").is(userStatus);
-        }
-        if (validTime != null){
-            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
-        }
-        criteria.andOperator(criteria1);
         Query query = new Query(criteria);
-        UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
+        UserEntity user = mongoTemplate.findOne(query,UserEntity.class,uniqueCode+CollectionSuffix.USER);
         return user;
     }
+    /**
+     * 批量添加用户
+     */
+    public void addUserBatch(String uniqueCode,List<UserEntity> list){
+        mongoTemplate.insert(list,uniqueCode+CollectionSuffix.USER);
+    }
+
 }
