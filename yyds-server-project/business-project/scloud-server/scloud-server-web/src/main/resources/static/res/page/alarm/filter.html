@@ -188,7 +188,7 @@
                         <td ng-bind="item.name"></td>
                         <td ng-bind="item.baseSite | siteBaseFilter"></td>
                         <td ng-bind="item.useCount"></td>
-                        <td ng-bind="item.creator"></td>
+                        <td ng-bind="item.creator.name"></td>
                         <td ng-bind="item.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
                             <label class="label" ng-class="{true:'font-success',false:'font-danger'}[item.state]" ng-bind="item.state | enabledFilter"></label>
