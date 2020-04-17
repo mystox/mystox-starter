@@ -31,7 +31,7 @@
             <form class="query-form" ng-show="tabPage.isActive(0)">
                 <div class="form-inline">
                     <label>设备类型</label>
-                    <select ng-model="deviceQuery.typeCode" ng-options="item.code as item.typeName for item in deviceTypeList">
+                    <select ng-model="deviceQuery.deviceTypeCode" ng-options="item.code as item.typeName for item in deviceTypeList">
                         <option ng-bind="'全部'"></option>
                     </select>
 
@@ -82,7 +82,7 @@
             <form class="query-form" ng-show="tabPage.isActive(1)">
                 <div class="form-inline">
                     <label>设备类型</label>
-                    <select ng-model="signalQuery.deviceType" ng-change="signalQuery.signal=signalQuery.deviceType?signalQuery.deviceType.signalTypeList[0].cntbId:undefined" ng-options="item as item.typeName for item in deviceTypeList">
+                    <select ng-model="signalQuery.deviceTypeCode" ng-change="signalQuery.signal=signalQuery.deviceTypeCode?signalQuery.deviceTypeCode.signalTypeList[0].cntbId:undefined" ng-options="item as item.typeName for item in deviceTypeList">
                         <option ng-bind="'全部'"></option>
                     </select>
                     <label>设备编号</label>
@@ -90,7 +90,7 @@
                     <label>设备名称</label>
                     <input type="text" ng-model="signalQuery.deviceName">
                     <label>遥测信号</label>
-                    <select ng-model="signalQuery.signal" ng-options="item.cntbId as item.typeName for item in (signalQuery.deviceType ? signalQuery.deviceType.signalTypeList : [])"></select>
+                    <select ng-model="signalQuery.signal" ng-options="item.cntbId as item.typeName for item in (signalQuery.deviceTypeCode ? signalQuery.deviceTypeCode.signalTypeList : [])"></select>
                     <button class="btn btn-primary" ng-click="doSignalValueQuery();">查询</button>
                     <button class="btn btn-default" type="reset" ng-click="signalValueReset();">清除</button>
 

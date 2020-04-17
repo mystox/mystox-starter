@@ -607,7 +607,7 @@
 
             <!--右上角控制按钮-->
             <div class="menu-button">
-                <span class="ic ic-alarm" ng-show="hasRealTimeAlarm" title="有告警"></span>
+                <span class="ic ic-alarm" ng-show="currentSite.isAlarm" style="color: #fff;" title="有告警"></span>
                 <div ng-repeat="item in viewList"
                      ng-bind="item.text"
                      ng-hide="item.type === 'video' && cameraList < 1"
@@ -735,14 +735,14 @@
                         <span title="{{'设备名称：' + (item.name ? item.name : item.deviceName)}}">
                             <a ng-if="value.type==='FSU动环主机'" ng-show="$parent.$parent.$parent.selectedFsuList === item.code" class="ic ic-check-square"></a>
                             <a ng-if="value.type==='FSU动环主机'" ng-show="$parent.$parent.$parent.selectedFsuList != item.code" class="ic ic-square" style="color: transparent;"></a>
-                            <i ng-hide="value.type === 'FSU动环主机'" class="is-line"
+                            <i class="is-line"
                                ng-class="{
                                     'is-online': item.alarmNum == 0 && item.online,
                                     'is-offline': item.alarmNum == 0 && !item.online,
                                     'is-alarm': item.alarmNum > 0
                                 }">
                             </i>
-                            <span ng-bind="item.name ? item.name : item.deviceName" ng-class="item.isInScene ? 'is-in-scene': ''"
+                            <span ng-bind="item.name ? item.name : item.deviceName" ng-class="scene3D.deviceToMesh[item.code] ? 'is-in-scene': ''"
                                 ng-click="
                                 selectDeviceInSidebar(item)
                                 "></span>
@@ -758,18 +758,18 @@
                                     click="operateInfo.toModal"
                                     ng-show="item.doSinId" >
                             </scloudmytarget>
-                            <span ng-show ="value.type === 'FSU'" ng-click="openDevicePage(item, value.type, value.code)">
+                            <span ng-show ="value.type === 'FSU动环主机'" ng-click="openDevicePage(item, value.type, value.code)" title="CPU:{{item.aiValue1||'-'}}% 内存:{{item.aiValue2||'-'}}%">
                                 CPU:{{item.aiValue1 | nullFilter}}% 内存:{{item.aiValue2 | nullFilter}}%
                             </span>
-                            <span ng-show ="value.type !== 'FSU' &&  (item.aiValue1 != null || item.aiValue2 != null)"
+                            <span ng-show ="value.type !== 'FSU动环主机' &&  (item.aiValue1 != null || item.aiValue2 != null)"
                                    ng-click="openDevicePage(item, value.type, value.code)">
                                 <span title="{{item.aiName1}}">{{item.aiValue1 | nullFilter}} {{item.aiUnit1 | nullFilter}}</span>
                                 <span title="{{item.aiName2}}">{{item.aiValue2 | nullFilter}} {{item.aiUnit2 | nullFilter}}</span>
                             </span>
-                            <span ng-show ="value.type !== 'FSU' && !item.aiValue1 && !item.aiValue2" ng-click="openDevicePage(item, value.type, value.code, $index)">{{value.code === '100' ? '视频监控' : '数据监控'}}</span>
+                            <span ng-show ="value.type !== 'FSU动环主机' && !item.aiValue1 && !item.aiValue2" ng-click="openDevicePage(item, value.type, value.code, $index)">{{value.code === '100' ? '视频监控' : '数据监控'}}</span>
                         </span>
-                        <!-- FSU -->
-                        <span ng-show="value.type === 'FSU'">
+                        <!-- FSU动环主机 -->
+                        <span ng-show="value.type === 'FSU动环主机'">
                             <span ng-if="util.checkPrivilege(204)" class="ic ic-edit" ng-click="modifyFsuInScene.toModal(item)" ></span>
                             <span ng-if="util.checkPrivilege(302)" class="ic ic-plus-square" ng-click="addDeviceOnFsuInScene.toModal(item)"></span>
                         </span>

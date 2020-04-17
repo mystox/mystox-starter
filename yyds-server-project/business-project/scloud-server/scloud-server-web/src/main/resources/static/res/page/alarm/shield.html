@@ -19,7 +19,7 @@
                     <label class="control-label">屏蔽等级</label>
                     <div class="controls">
                         <input type="text" class="form-control" multiple
-                               select2 config="CONST.alarmLevelListForSelect2"
+                               select2 config="alarmLevelList"
                                select2-model="addRule.obj.alarmLevels" />
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                         <td>
                             <label class="label" ng-class="{true:'font-success',false:'font-danger'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
                         </td>
-                        <td ng-bind="r.creator"></td>
+                        <td ng-bind="r.creator.name"></td>
                         <td ng-bind="r.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
                             <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>

@@ -47,10 +47,8 @@
                     <option ng-if="!deviceTypeList" ng-bind="'全部'"></option>
                 </select>
 
-                <label>告警类型</label>
-                <select ng-model="orderQuery.alarmName" ng-options="item.signalName as item.signalName for item in orderQuery.device.signalTypeList">
-                    <option ng-bind="'全部'"></option>
-                </select>
+                <label>告警名称</label>
+                <input type="text" ng-model="orderQuery.alarmName" />
 
                 <label>告警等级</label>
                 <select ng-model="orderQuery.alarmLevel" ng-options="item.key as item.value for item in CONST.alarmLevelList">
@@ -59,8 +57,10 @@
             </div>
 
             <div class="form-inline">
-                <label>代维公司</label>
-                <input type="text" ng-model="orderQuery.companyName">
+                <label>告警状态</label>
+                <select ng-model="orderQuery.checkState" ng-options="item.value as item.value for item in CONST.alarmCheckedStateList">
+                    <option ng-bind="'全部'"></option>
+                </select>
 
                 <label>派单时间</label>
                 <div class="startTime input-append date">
@@ -100,14 +100,13 @@
                             <th>派单时间</th>
                             <th>任务时限</th>
                             <th ng-show="subTabPage.currentIndex === 1">回单时间</th>
-                            <th ng-show="subTabPage.currentIndex === 1">站点类型</th>
                             <th ng-show="subTabPage.currentIndex === 1">站点层级</th>
                             <th>站点名称</th>
+                            <th ng-show="subTabPage.currentIndex === 1">站点地址</th>
                             <th ng-show="subTabPage.currentIndex === 1">设备类型</th>
-                            <th>告警状态</th>
-                            <th>告警级别</th>
                             <th>告警名称</th>
-                            <th ng-show="subTabPage.currentIndex === 1">告警详情</th>
+                            <th>告警级别</th>
+                            <th>告警状态</th>
                             <th>接单人</th>
                             <th>操作</th>
                         </tr>
@@ -128,14 +127,13 @@
                             <td ng-bind="item.sentTime | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                             <td ng-bind="item.taskTime + '小时'"></td>
                             <td ng-bind="item.backTime | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'" ng-show="subTabPage.currentIndex === 1"></td>
-                            <td ng-bind="item.siteType | nullFilter" ng-show="subTabPage.currentIndex === 1"></td>
                             <td ng-bind="item.tierName" ng-show="subTabPage.currentIndex === 1"></td> <!-- 没有 -->
                             <td ng-bind="item.site.name"></td>
+                            <td ng-bind="item.address | nullFilter" ng-show="subTabPage.currentIndex === 1"></td>
                             <td ng-bind="item.deviceType" ng-show="subTabPage.currentIndex === 1"></td>
-                            <td ng-bind="item.workAlarmList[0].state"></td>
-                            <td ng-bind="item.workAlarmList[0].level | alarmLevelFilter"></td>
                             <td ng-bind="item.workAlarmList[0].alarmName"></td>
-                            <td ng-bind="item.workAlarmList[0].details" ng-show="subTabPage.currentIndex === 1"></td> <!-- 没有 -->
+                            <td ng-bind="item.workAlarmList[0].level | SDGD_alarmLevelFilter: alarmLevelList"></td>
+                            <td ng-bind="item.workAlarmList[0].state"></td>
                             <td ng-bind="item.worker.name | nullFilter"></td>
                             <td>
                                 <a title="接单" ng-if="user.job==='维护人员'" ng-show="needShowBtn('接单', item.state)" class="ic ic-work-deploy" ng-click="applyWork(item); $event.stopPropagation()"></a>
@@ -226,7 +224,7 @@
                             <td ng-bind = "item.sendType"></td>
                             <td ng-bind = "item.type"></td>
                             <td ng-bind = "item.stationTypeList.length > 1 ? '全部' : (item.stationTypeList[0] | stationTypeFilter)"></td>
-                            <td ng-bind = "item.alarmLevelList | alarmLevelFilter | nullFilter"></td>
+                            <td ng-bind = "item.alarmLevelList | SDGD_alarmLevelFilter: alarmLevelList "></td>
                             <td ng-bind = "item.alarmNameList.join('、') | nullFilter"></td>
                             <td ng-bind = "item.sendType === '手动' ? '-' : (item.reportAfter + '分钟')"></td>
                             <td ng-bind = "item.reportBegin | nullFilter: ':00'"></td>
@@ -524,7 +522,7 @@
                     <tbody>
                         <tr ng-repeat="alarm in curWork.workAlarmList" ng-class="CONST.animation.list">
                             <td ng-bind="alarm.alarmName">告警名称</td>
-                            <td ng-bind="alarm.level | alarmLevelFilter">告警等级</td>
+                            <td ng-bind="alarm.level | SDGD_alarmLevelFilter: alarmLevelList">告警等级</td>
                             <td ng-bind="alarm.details">告警详情</td>
                             <td ng-bind="alarm.state">告警状态</td>
                             <td ng-bind="alarm.treport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter">告警时间</td>
@@ -569,11 +567,12 @@
             </div>
         </div>
         <div class="operation">
+            <button class="btn btn-primary" ng-if="user.job==='维护人员'" ng-show="needShowBtn('接单', curWork.state)" ng-click="applyWork(curWork)">接单</button>
             <button class="btn btn-primary" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', curWork.state)" ng-click="urge.toModal()">催单</button>
             <button class="btn btn-primary" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', curWork.state)" ng-click="redeploy.toModal()">转单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621)" ng-show="needShowBtn('回单', curWork.state)" ng-click="response.toModal('回单')">回单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621) && user.job==='维护人员'" ng-show="needShowBtn('回单', curWork.state)" ng-click="response.toModal('回单')">回单</button>
             <button class="btn btn-primary" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', curWork.state)" ng-click="cancleWork(curWork); ifShowSingleWork=false">撤单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621)" ng-show="needShowBtn('回单补充', curWork.state)" ng-click="response.toModal('回单补充')">回单补充</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621) && user.job==='维护人员'" ng-show="needShowBtn('回单补充', curWork.state)" ng-click="response.toModal('回单补充')">回单补充</button>
         </div>
     </div>
 
