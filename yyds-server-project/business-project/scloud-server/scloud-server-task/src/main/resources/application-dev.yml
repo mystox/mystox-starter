@@ -1,7 +1,7 @@
 spring:
   redis:
-    host: 172.16.6.37
-    port: 7006
+    host: 172.16.5.26
+    port: 6379
     database: 5
 server:
   host: 172.16.6.16

@@ -107,7 +107,7 @@
                             <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>
                             <a ng-if="util.checkPrivilege(1112) && r.enabled" ng-click="changeState(r, $event);" title="禁用" class="ic ic-times"></a>
                             <a ng-if="util.checkPrivilege(1504) && !r.enabled" ng-click="addTimeRange.toModal(r, $event);" title="自动启用时段" class="ic ic-calendar"></a>
-                            <a ng-click="getRuleDetail(r.id, $index, $event);" title="详情" class="ic ic-detail"></a>
+                            <a ng-click="getRuleDetail(r, $index, $event);" title="详情" class="ic ic-detail"></a>
                             <a ng-if="!r.enabled" ng-click="deleteRule.toModal(r, $event);" title="删除" class="ic ic-delete"></a>
                         </td>
                     </tr>
