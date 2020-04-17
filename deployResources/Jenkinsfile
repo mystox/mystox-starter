@@ -13,7 +13,7 @@ pipeline {
         choice(name: 'deployServer', choices: \
         ['skipModule', 'all','SCLOUD_SERVER_WEB','ALARM_SERVER_WEB', 'REPORTS_SERVER','LOG_SERVER','ASSET_SERVER',\
         'ALARM_CONTROLLER','ALARM_SENDER','ALARM_CYCLE','ALARM_LEVEL','ALARM_DELIVER',\
-        'SCLOUD_SERVER_TASK','SCLOUD_SERVER_HISTORY','GATEWAY_TOWER_SERVER','GATEWAY_TOWER_SERVER' \
+        'SCLOUD_SERVER_TASK','SCLOUD_SERVER_HISTORY','GATEWAY_TOWER_SERVER','GATEWAY_TOWER_HEART' \
         ],\
          description: 'serverChoices')
     }
