@@ -2,6 +2,7 @@ package com.kongtrolink.framework.scloud.config;
 
 import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,10 +35,10 @@ public class BusinessRedisConfig
     @Autowired
     private BusinessRedisProperties businessRedisProperties;
 
-    @Bean
+    @Bean("redisTemplateBusiness")
     @ConditionalOnMissingBean(name = "redisTemplateBusiness")
     public RedisTemplate<Object, Object> redisTemplateBusiness(
-            RedisConnectionFactory jedisConnectionFactoryBusiness)
+            @Qualifier(value = "jedisConnectionFactoryBusiness")RedisConnectionFactory jedisConnectionFactoryBusiness)
             throws UnknownHostException
     {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
