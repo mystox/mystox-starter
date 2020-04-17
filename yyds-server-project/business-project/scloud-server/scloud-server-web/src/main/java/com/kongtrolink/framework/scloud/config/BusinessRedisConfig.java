@@ -27,7 +27,7 @@ import java.net.UnknownHostException;
  * update record:
  */
 @Configuration("RedisConfigBusiness")
-@EnableConfigurationProperties(RedisProperties.class)
+@EnableConfigurationProperties(BusinessRedisProperties.class)
 public class BusinessRedisConfig
 {
 
