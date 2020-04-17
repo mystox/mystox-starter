@@ -10,7 +10,7 @@ import java.util.List;
  * @author Mag
  **/
 @Component
-@ConfigurationProperties(prefix = "spring.redisBusiness")
+@ConfigurationProperties(prefix = "redisBusiness")
 public class BusinessRedisProperties {
     private int database = 0;
     private String url;
