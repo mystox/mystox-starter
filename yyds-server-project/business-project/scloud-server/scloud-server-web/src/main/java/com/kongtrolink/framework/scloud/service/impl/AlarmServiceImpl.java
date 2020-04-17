@@ -6,7 +6,6 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
-import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.dao.AlarmDao;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -107,9 +106,6 @@ public class AlarmServiceImpl implements AlarmService {
                     alarm.setFocusId(alarmFocus.getId());
                 }
             }
-//            if(null != alarmList && alarmList.size()>0) {
-//                initInfo(alarmQuery.getEnterpriseCode(), alarmList);
-//            }
             jsonResult.setData(alarmList);
             return jsonResult;
         }catch (Exception e){
