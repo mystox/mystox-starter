@@ -11,7 +11,7 @@ import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
 import com.kongtrolink.framework.scloud.service.SiteService;
-import com.kongtrolink.framework.scloud.util.DateUtil;
+import com.kongtrolink.framework.common.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -384,5 +384,12 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
             }
         }
         return alarmDistributeList;
+    }
+
+    @Override
+    public List<AlarmBusiness> findByTimePeriod(AlarmBusinessQuery alarmQuery) {
+        String uniqueCode = alarmQuery.getEnterpriseCode();
+        String table = CollectionSuffix.CUR_ALARM_BUSINESS;
+        return businessDao.listNoPage(uniqueCode, table, alarmQuery);
     }
 }

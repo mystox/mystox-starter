@@ -4,7 +4,7 @@ spring:
     port: 6379
     database: 2
 server:
-  groupCode: GROUP
+  groupCode: GROUP_1
   name: SCLOUD_SERVER_WEB #服务编码
   host: 172.16.5.60
   port: 59002 #服务占用web端口

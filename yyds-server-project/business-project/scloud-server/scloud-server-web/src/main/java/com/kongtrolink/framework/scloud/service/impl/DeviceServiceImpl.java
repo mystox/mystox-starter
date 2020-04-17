@@ -19,7 +19,7 @@ import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AssetCIService;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.DeviceSignalTypeService;
-import com.kongtrolink.framework.scloud.util.DateUtil;
+import com.kongtrolink.framework.common.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
