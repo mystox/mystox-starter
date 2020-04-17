@@ -98,7 +98,7 @@ public class AlarmServiceImpl implements AlarmService {
 
             }
             //填充告警关注信息
-            String operateUserId = alarmQuery.getOperateUserId();
+            String operateUserId = alarmQuery.getOperatorId();
             List<AlarmFocus> alarmFocusList = focusService.listByUserIdEntDevSigs(alarmQuery.getEnterpriseCode(), operateUserId, entDevSigList);
             for(AlarmFocus alarmFocus : alarmFocusList){
                 List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(alarmFocus.getEntDevSig());

@@ -194,7 +194,7 @@ public class AlarmBusinessDao {
         update.set("checkState", BaseConstant.CHECKED);
         update.set("checkTime", businessQuery.getOperateTime());
         update.set("checkContant", businessQuery.getOperateDesc());
-        update.set("checker", new FacadeView(businessQuery.getOperateUserId(), businessQuery.getOperateUsername()));
+        update.set("checker", new FacadeView(businessQuery.getOperatorId(), businessQuery.getOperatorName()));
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN();
     }
@@ -225,6 +225,9 @@ public class AlarmBusinessDao {
         Update update = new Update();
         update.set("state", BaseConstant.ALARM_STATE_RESOLVE);
         update.set("trecover", businessQuery.getOperateTime());
+        if(null != businessQuery.getRecoverMan()){
+            update.set("recoverMan", businessQuery.getRecoverMan());
+        }
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
     }

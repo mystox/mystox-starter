@@ -54,7 +54,7 @@ public class AlarmBusinessController extends ExportController{
         }
         User user = getUser(request);
         if(null != user){
-            businessQuery.setOperateUserId(user.getId());
+            businessQuery.setOperatorId(user.getId());
         }
         Date startBeginTime = businessQuery.getStartBeginTime();
         Date startEndTime = businessQuery.getStartEndTime();
@@ -110,7 +110,7 @@ public class AlarmBusinessController extends ExportController{
         }
         User user = getUser(request);
         if(null != user){
-            businessQuery.setOperateUserId(user.getId());
+            businessQuery.setOperatorId(user.getId());
         }
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
         List<AlarmLevel> alarmLevelList = getLastUseLevels(businessQuery.getEnterpriseCode(), businessQuery.getServerCode());
@@ -139,7 +139,7 @@ public class AlarmBusinessController extends ExportController{
 
         User user = getUser(request);
         if(null != user){
-            businessQuery.setOperateUserId(user.getId());
+            businessQuery.setOperatorId(user.getId());
         }
         Date startBeginTime = businessQuery.getStartBeginTime();
         Date startEndTime = businessQuery.getStartEndTime();

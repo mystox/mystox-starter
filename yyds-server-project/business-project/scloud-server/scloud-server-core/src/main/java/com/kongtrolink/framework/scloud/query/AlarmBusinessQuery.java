@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.query;
 
+import com.kongtrolink.framework.scloud.entity.FacadeView;
+
 import java.util.Date;
 import java.util.List;
 
@@ -38,13 +40,22 @@ public class AlarmBusinessQuery extends Paging {
     private String operate;             //操作，告警确认，取消确认，告警消除
     private String operateDesc;             //操作描述
     private Date operateTime;         //操作对应的时间，方便远程接口参数解析
-    private String operateUserId;           //操作用户id
-    private String operateUsername;         //操作用户名
+    private String operatorId;           //操作用户id
+    private String operatorName;         //操作用户名
     private int skipSize;
     private List<String> entDevSigList;
     private boolean shield=false;                 //是否屏蔽
     private String shieldRuleId;            //屏蔽规则id
     private String tierCodePrefix;          //告警分布区域层级前缀
+    private FacadeView recoverMan;      //消除人
+
+    public FacadeView getRecoverMan() {
+        return recoverMan;
+    }
+
+    public void setRecoverMan(FacadeView recoverMan) {
+        this.recoverMan = recoverMan;
+    }
 
     public String getTierCodePrefix() {
         return tierCodePrefix;
@@ -190,20 +201,20 @@ public class AlarmBusinessQuery extends Paging {
         this.operateTime = operateTime;
     }
 
-    public String getOperateUserId() {
-        return operateUserId;
+    public String getOperatorId() {
+        return operatorId;
     }
 
-    public void setOperateUserId(String operateUserId) {
-        this.operateUserId = operateUserId;
+    public void setOperatorId(String operatorId) {
+        this.operatorId = operatorId;
     }
 
-    public String getOperateUsername() {
-        return operateUsername;
+    public String getOperatorName() {
+        return operatorName;
     }
 
-    public void setOperateUsername(String operateUsername) {
-        this.operateUsername = operateUsername;
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
     }
 
     public String getName() {
@@ -213,14 +224,6 @@ public class AlarmBusinessQuery extends Paging {
     public void setName(String name) {
         this.name = name;
     }
-
-//    public Integer getLevel() {
-//        return level;
-//    }
-//
-//    public void setLevel(Integer level) {
-//        this.level = level;
-//    }
 
     public List<Integer> getLevelList() {
         return levelList;
@@ -339,7 +342,8 @@ public class AlarmBusinessQuery extends Paging {
         businessQuery.setCurrentPage(alarmQuery.getCurrentPage());
         businessQuery.setPageSize(alarmQuery.getPageSize());
         businessQuery.setSkipSize(alarmQuery.getPageSize() * 5);
-        businessQuery.setOperateUserId(alarmQuery.getOperateUserId());
+        businessQuery.setOperatorId(alarmQuery.getOperatorId());
+        businessQuery.setOperatorName(alarmQuery.getOperatorName());
         alarmQuery.setName(null);
         alarmQuery.setLevel(null);
         alarmQuery.setLevelList(null);

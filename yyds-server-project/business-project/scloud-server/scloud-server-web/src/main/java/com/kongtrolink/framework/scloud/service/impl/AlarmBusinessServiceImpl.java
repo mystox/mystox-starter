@@ -94,7 +94,7 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表，现假定前端将用户所管辖站点全部传递给后台
     private void combineFilter(String uniqueCode, AlarmBusinessQuery alarmQuery){
         //累加告警过滤功能
-        FilterRule filterRule = filterRuleService.getUserInUse(uniqueCode, alarmQuery.getOperateUserId());
+        FilterRule filterRule = filterRuleService.getUserInUse(uniqueCode, alarmQuery.getOperatorId());
         if(null != filterRule){
             //比较时间
             Date startBeginTime = filterRule.getStartBeginTime();
