@@ -22,6 +22,7 @@ import com.kongtrolink.framework.scloud.query.SignalQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
 import com.kongtrolink.framework.scloud.service.RealTimeDataService;
+import com.kongtrolink.framework.scloud.util.BusinessRedisUtils;
 import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class RealTimeDataServiceImpl implements RealTimeDataService {
     @Autowired
     RealTimeDataDao realTimeDataDao;
     @Autowired
-    RedisUtils redisUtils;
+    BusinessRedisUtils redisUtils;
     @Autowired
     FocusSignalService focusSignalService;
     @Autowired

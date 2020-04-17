@@ -8,6 +8,7 @@ import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.controller.base.ExportController;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.service.*;
@@ -50,7 +51,7 @@ public class AlarmController extends ExportController{
         try {
             User user = getUser(request);
             if(null != user){
-                alarmQuery.setOperateUserId(user.getId());
+                alarmQuery.setOperatorId(user.getId());
             }
             //具体查询历史还是实时数据，由中台告警模块根据参数判定
             JsonResult jsonResult = alarmService.list(alarmQuery);
@@ -104,11 +105,11 @@ public class AlarmController extends ExportController{
         User user = getUser(request);
         businessQuery.setOperateTime(new Date());
         if(null != user){
-            businessQuery.setOperateUserId(user.getId());
-            businessQuery.setOperateUsername(user.getUsername());
+            businessQuery.setOperatorId(user.getId());
+            businessQuery.setOperatorName(user.getUsername());
         }else{
-            businessQuery.setOperateUserId("admin");
-            businessQuery.setOperateUsername("超级管理员");
+            businessQuery.setOperatorId("admin");
+            businessQuery.setOperatorName("超级管理员");
         }
         String operate = businessQuery.getOperate();
         if(BaseConstant.ALARM_OPERATE_CHECK.equals(operate)){
@@ -125,6 +126,7 @@ public class AlarmController extends ExportController{
             for(int i = 0; i< keyList.size(); i++){
                 String key = keyList.get(i);
                 businessQuery.setKey(key);
+                businessQuery.setRecoverMan(new FacadeView(businessQuery.getOperatorId(), businessQuery.getOperatorName()));
                 Date treport = treportList.get(i);
                 boolean resolve = businessService.resolve(uniqueCode, table, businessQuery);
                 if(resolve){
@@ -141,6 +143,8 @@ public class AlarmController extends ExportController{
                 alarmQuery.setOperateTime(businessQuery.getOperateTime());
                 alarmQuery.setTreportList(realReportList);
                 alarmQuery.setKeyList(realKeyList);
+                alarmQuery.setOperatorId(businessQuery.getOperatorId());
+                alarmQuery.setOperatorName(businessQuery.getOperatorName());
                 try {
                     jsonObject = alarmService.operate(alarmQuery);
                     String failKeyListStr = jsonObject.getString(BaseConstant.REMOTE_OPERATE_FAILKEYS);

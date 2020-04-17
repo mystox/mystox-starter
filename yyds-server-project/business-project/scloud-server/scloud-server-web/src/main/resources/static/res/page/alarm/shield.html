@@ -19,7 +19,7 @@
                     <label class="control-label">屏蔽等级</label>
                     <div class="controls">
                         <input type="text" class="form-control" multiple
-                               select2 config="CONST.alarmLevelListForSelect2"
+                               select2 config="alarmLevelList"
                                select2-model="addRule.obj.alarmLevels" />
                     </div>
                 </div>
@@ -101,13 +101,13 @@
                         <td>
                             <label class="label" ng-class="{true:'font-success',false:'font-danger'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
                         </td>
-                        <td ng-bind="r.creator"></td>
+                        <td ng-bind="r.creator.name"></td>
                         <td ng-bind="r.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
                             <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>
                             <a ng-if="util.checkPrivilege(1112) && r.enabled" ng-click="changeState(r, $event);" title="禁用" class="ic ic-times"></a>
                             <a ng-if="util.checkPrivilege(1504) && !r.enabled" ng-click="addTimeRange.toModal(r, $event);" title="自动启用时段" class="ic ic-calendar"></a>
-                            <a ng-click="getRuleDetail(r.id, $index, $event);" title="详情" class="ic ic-detail"></a>
+                            <a ng-click="getRuleDetail(r, $index, $event);" title="详情" class="ic ic-detail"></a>
                             <a ng-if="!r.enabled" ng-click="deleteRule.toModal(r, $event);" title="删除" class="ic ic-delete"></a>
                         </td>
                     </tr>
@@ -115,8 +115,8 @@
                         <td colspan="5" class="detail">
                             <ul>
                                 <li>屏蔽等级：
-                                    <span ng-repeat="item in ruleDetail.alarmLevel">
-                                        <span ng-bind="item | alarmLevelFilter"></span><span ng-hide="$last">、</span>
+                                    <span ng-repeat="item in ruleDetail.alarmlevelList">
+                                        <span ng-bind="item | SDGD_alarmLevelFilter:alarmLevelListForFilter"></span><span ng-hide="$last">、</span>
                                     </span>
                                     <span ng-if="ruleDetail.alarmLevel.length === 0">-</span>
                                 </li>
@@ -159,15 +159,15 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="s in shieldList" ng-class="CONST.animation.list">
-                        <td ng-bind="s.signal.name"></td>
-                        <td ng-bind="s.device.name"></td>
-                        <td ng-bind="s.site.name"></td>
-                        <td ng-bind="s.siteTierString"></td>
+                        <td ng-bind="s.signalName;"></td>
+                        <td ng-bind="s.deviceName;"></td>
+                        <td ng-bind="s.siteName;"></td>
+                        <td ng-bind="s.tierName;"></td>
                         <td ng-style="util.alarmColor(s.level);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="s.level | alarmLevelFilter"></span>
+                            <span ng-bind="s.levelName"></span>
                         </td>
-                        <td ng-bind="s.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="s.treport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                     </tr>
                 </tbody>
             </table>

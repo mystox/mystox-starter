@@ -332,7 +332,7 @@ public class AlarmDao {
         Update update = new Update();
         update.set("checkTime", alarmQuery.getOperateTime());
         update.set("checkContant", alarmQuery.getOperateDesc());
-        update.set("checker",new FacadeView(alarmQuery.getOperateUsername(), alarmQuery.getOperateUsername()));
+        update.set("checker",new FacadeView(alarmQuery.getOperatorId(), alarmQuery.getOperatorName()));
         update.set("checkState", "已确认");
         WriteResult result = mongoTemplate.updateMulti(query, update, table);
         return result.getN()>0 ? true : false;
@@ -386,7 +386,7 @@ public class AlarmDao {
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("state", Contant.RESOLVE);
-        update.set("trecover", alarmQuery.getTrecover());
+        update.set("recoverMan", new FacadeView(alarmQuery.getOperatorId(), alarmQuery.getOperatorName()));
         WriteResult result = mongoTemplate.updateFirst(query, update, table);
         return result.getN()>0 ? true : false;
     }

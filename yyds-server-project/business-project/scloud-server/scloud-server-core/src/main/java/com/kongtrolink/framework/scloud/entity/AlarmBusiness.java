@@ -40,7 +40,7 @@ public class AlarmBusiness {
     private FacadeView checker;         //确认人
     private Date treport;
     private Date trecover;
-    private FacadeView recoverMan;         //确认人
+    private FacadeView recoverMan;          //消除人
     private String key;     //对应告警表中key，可唯一性从告警表获取数据
     private String entDevSig;           //enterprise_CodedeviceId_signalId,用于告警关注，屏蔽等功能
     private String workCode;
@@ -49,7 +49,6 @@ public class AlarmBusiness {
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
     private String table;
-
 
     public FacadeView getRecoverMan() {
         return recoverMan;

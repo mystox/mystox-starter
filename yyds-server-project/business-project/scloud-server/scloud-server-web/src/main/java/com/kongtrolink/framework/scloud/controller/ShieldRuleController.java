@@ -117,6 +117,7 @@ public class ShieldRuleController extends BaseController{
         alarmBusinessQuery.setCurrentPage(shieldAlarmQuery.getCurrentPage());
         alarmBusinessQuery.setPageSize(shieldAlarmQuery.getPageSize());
         alarmBusinessQuery.setSkipSize(shieldAlarmQuery.getPageSize());
+        alarmBusinessQuery.setSiteCodeList(shieldAlarmQuery.getSiteCodeList());
         List<AlarmBusiness> list = businessService.list(uniqueCode, alarmBusinessQuery);
         int count= businessService.count(uniqueCode, alarmBusinessQuery);
         ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);

@@ -32,22 +32,14 @@
             <small ng-click="go('alarm/list', {query: {operationState: '交维态'}, tier: curTier, startView: 'list'})">查看更多</small>
         </div>
         <div class="page-body">
-            <div class="unit-wrapper">
-                <div>                    
-                    <div class="unit" 
-                        ng-repeat="item in alarmLevelList track by $index" 
-                        ng-style="{borderColor:item.color}">
-                        <div ng-if="$index < 3" class="cursor-point text" ng-click="go('alarm/list', {alarmLevel:item.key, alarmState: '待处理', query: {operationState: '交维态'}, tier: curTier})">
-                            <span ng-bind="item.key | alarmLevelFilter" title="{{item.key | alarmLevelFilter}}"></span><br/>
-                            <span ng-bind="item.value"></span>
-                        </div>
-                        <div ng-if="$index === 3" class="cursor-point text" ng-click="go('alarm/list', {alarmLevel:item.key, alarmState: '待处理', query: {operationState: '交维态'}, tier: curTier})">
-                            <span ng-bind="item.value"></span><br/>
-                            <span ng-bind="item.key | alarmLevelFilter" title="{{item.key | alarmLevelFilter}}"></span>
-                        </div>
+            <div class="unit cursor-point" ng-repeat="item in alarmLevelList track by $index" ng-click="go('alarm/count', {noRealtimeQuery: true, realtimeParams:item.key})" title="{{item.name}}">
+                <span ng-bind="item.name"></span>
+                <div class="progress-box">
+                    <div class="progress">
+                        <div class="bar" ng-style="util.progressStyle(item.percent, item.color);"></div>
                     </div>
-                    <div class="inner"><div></div></div>
                 </div>
+                <span ng-bind="item.value"></span>
             </div>
             <p class="check mgt text-center">
                 <span class="">                        
@@ -64,18 +56,10 @@
         <div id="{{alarmMapId}}" class="alarmMap"></div>
         <div id="location"></div>
         <div id="filter">
-            <div class="alarm cursor-point" ng-click="mapFilter.alarm[1] = !mapFilter.alarm[1] ;renderMap()">
-                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[1] ? CONST.alarmColorList[0] : '#999'}"></div>一级告警
+            <div class="alarm cursor-point" ng-repeat="item in alarmLevelList" ng-click="mapFilter.alarm[$index + 1] = !mapFilter.alarm[$index + 1] ;renderMap()">
+                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[$index + 1] ? alarmLevelList[$index].color : '#999'}"></div><span ng-bind="item.name"></span>
             </div>
-            <div class="alarm cursor-point" ng-click="mapFilter.alarm[2] = !mapFilter.alarm[2] ;renderMap()">
-                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[2] ? CONST.alarmColorList[1] : '#999'}"></div>二级告警
-            </div>
-            <div class="alarm cursor-point" ng-click="mapFilter.alarm[3] = !mapFilter.alarm[3] ;renderMap()">
-                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[3] ? CONST.alarmColorList[2] : '#999'}"></div>三级告警
-            </div>
-            <div class="alarm cursor-point" ng-click="mapFilter.alarm[4] = !mapFilter.alarm[4] ;renderMap()">
-                <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[4] ? CONST.alarmColorList[3] : '#999'}"></div>四级告警
-            </div>
+
             <div class="alarm cursor-point" ng-click="mapFilter.alarm[0] = !mapFilter.alarm[0] ;renderMap()">
                 <div class="alarm-dot" ng-style="{backgroundColor: mapFilter.alarm[0] ? '#38C2FF' : '#999'}"></div>站点
             </div>

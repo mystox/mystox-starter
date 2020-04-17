@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.query;
 
+import java.util.List;
+
 /**
  * @Auther: liudd
  * @Date: 2020/2/28 13:11
@@ -16,6 +18,15 @@ public class AlarmFocusQuery extends Paging{
     private String endTiem;
     private String userId;
     private String type;
+    private List<String> siteCodeList;
+
+    public List<String> getSiteCodeList() {
+        return siteCodeList;
+    }
+
+    public void setSiteCodeList(List<String> siteCodeList) {
+        this.siteCodeList = siteCodeList;
+    }
 
     public String getType() {
         return type;

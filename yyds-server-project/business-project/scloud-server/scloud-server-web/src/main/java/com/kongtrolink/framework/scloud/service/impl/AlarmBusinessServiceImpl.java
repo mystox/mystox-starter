@@ -94,7 +94,7 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表，现假定前端将用户所管辖站点全部传递给后台
     private void combineFilter(String uniqueCode, AlarmBusinessQuery alarmQuery){
         //累加告警过滤功能
-        FilterRule filterRule = filterRuleService.getUserInUse(uniqueCode, alarmQuery.getOperateUserId());
+        FilterRule filterRule = filterRuleService.getUserInUse(uniqueCode, alarmQuery.getOperatorId());
         if(null != filterRule){
             //比较时间
             Date startBeginTime = filterRule.getStartBeginTime();
@@ -149,17 +149,6 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
                     alarmLevelList.retainAll(levelList);
                 }
                 alarmQuery.setLevelList(alarmLevelList);
-//                Integer level = alarmQuery.getLevel();
-//                if(null == level){
-//                    alarmQuery.setLevelList(alarmLevelList);
-//                }else{
-//                    if(alarmLevelList.contains(level)){
-//
-//                    }else{
-//                        alarmQuery.setLevel(level + 52014);
-//                    }
-//                }
-
             }
             //告警名称
             String alarmName = filterRule.getAlarmName();
@@ -189,8 +178,12 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
             if(filterRule.isBaseSite()){
                 List<String> siteCodeList  = filterRule.getSiteCodeList();
                 List<String> sourSiteCodeList = alarmQuery.getSiteCodeList();
-                sourSiteCodeList.retainAll(siteCodeList);
-                alarmQuery.setSiteCodeList(sourSiteCodeList);
+                if(null != sourSiteCodeList) {
+                    sourSiteCodeList.retainAll(siteCodeList);
+                    alarmQuery.setSiteCodeList(sourSiteCodeList);
+                }else{
+                    alarmQuery.setSiteCodeList(siteCodeList);
+                }
             }else{
                 //基于区域，根据区域编码获取所有站点
                 alarmQuery.setTierCodeList(filterRule.getTierCodeList());

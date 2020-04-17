@@ -52,7 +52,7 @@
                     <label class="control-label">告警等级</label>
                     <div class="controls">
                         <input type="text" class="form-control" multiple
-                               select2 config="alarmLevelListForSelect2"
+                               select2 config="alarmLevelList"
                                select2-model="updateRule.obj.alarmLevelList" />
                     </div>
                 </div>
@@ -188,7 +188,7 @@
                         <td ng-bind="item.name"></td>
                         <td ng-bind="item.baseSite | siteBaseFilter"></td>
                         <td ng-bind="item.useCount"></td>
-                        <td ng-bind="item.creator"></td>
+                        <td ng-bind="item.creator.name"></td>
                         <td ng-bind="item.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
                             <label class="label" ng-class="{true:'font-success',false:'font-danger'}[item.state]" ng-bind="item.state | enabledFilter"></label>

@@ -7,6 +7,7 @@ import com.kongtrolink.framework.scloud.dao.FocusSignalDao;
 import com.kongtrolink.framework.scloud.entity.FocusSignalEntity;
 import com.kongtrolink.framework.scloud.query.FocusSignalQuery;
 import com.kongtrolink.framework.scloud.service.FocusSignalService;
+import com.kongtrolink.framework.scloud.util.BusinessRedisUtils;
 import com.kongtrolink.framework.scloud.util.redis.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class FocusSignalServiceImpl implements FocusSignalService {
     @Autowired
     FocusSignalDao focusSignalDao;
     @Autowired
-    RedisUtils redisUtils;
+    BusinessRedisUtils redisUtils;
     /**
      * 保存信息
      *
