@@ -115,8 +115,8 @@
                         <td colspan="5" class="detail">
                             <ul>
                                 <li>屏蔽等级：
-                                    <span ng-repeat="item in ruleDetail.alarmLevel">
-                                        <span ng-bind="item | alarmLevelFilter"></span><span ng-hide="$last">、</span>
+                                    <span ng-repeat="item in ruleDetail.alarmlevelList">
+                                        <span ng-bind="item | SDGD_alarmLevelFilter:alarmLevelListForFilter"></span><span ng-hide="$last">、</span>
                                     </span>
                                     <span ng-if="ruleDetail.alarmLevel.length === 0">-</span>
                                 </li>
@@ -159,15 +159,15 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="s in shieldList" ng-class="CONST.animation.list">
-                        <td ng-bind="s.signal.name"></td>
-                        <td ng-bind="s.device.name"></td>
-                        <td ng-bind="s.site.name"></td>
-                        <td ng-bind="s.siteTierString"></td>
+                        <td ng-bind="s.signalName;"></td>
+                        <td ng-bind="s.deviceName;"></td>
+                        <td ng-bind="s.siteName;"></td>
+                        <td ng-bind="s.tierName;"></td>
                         <td ng-style="util.alarmColor(s.level);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="s.level | alarmLevelFilter"></span>
+                            <span ng-bind="s.levelName"></span>
                         </td>
-                        <td ng-bind="s.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="s.treport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                     </tr>
                 </tbody>
             </table>
