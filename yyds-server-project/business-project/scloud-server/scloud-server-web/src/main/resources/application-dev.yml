@@ -20,7 +20,7 @@ redisBusiness:
   host: 172.16.5.26
   port: 6379
 server:
-  groupCode: GROUP_LIUDD_2020041501
+  groupCode: GROUP
   name: SCLOUD_SERVER_WEB #服务编码
   #  host: 172.16.6.143
   port: 59002 #服务占用web端口
