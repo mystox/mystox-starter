@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -26,8 +27,8 @@ import java.net.UnknownHostException;
  * update record:
  */
 @Configuration("RedisConfigBusiness")
-@EnableConfigurationProperties(RedisProperties.class)
-public class RedisConfig
+@EnableConfigurationProperties(BusinessRedisProperties.class)
+public class BusinessRedisConfig
 {
 
     @Autowired
@@ -36,11 +37,11 @@ public class RedisConfig
     @Bean
     @ConditionalOnMissingBean(name = "redisTemplateBusiness")
     public RedisTemplate<Object, Object> redisTemplateBusiness(
-            RedisConnectionFactory redisConnectionFactory)
+            RedisConnectionFactory jedisConnectionFactoryBusiness)
             throws UnknownHostException
     {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
+        template.setConnectionFactory(jedisConnectionFactoryBusiness);
         FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
@@ -49,8 +50,10 @@ public class RedisConfig
         template.afterPropertiesSet();
         return template;
     }
-    @Bean
-    public RedisConnectionFactory jedisConnectionFactory()
+
+    @Bean("jedisConnectionFactoryBusiness")
+    @Primary
+    public RedisConnectionFactory jedisConnectionFactoryBusiness()
     {
 
         JedisConnectionFactory factory = createJedisConnectionFactory();
