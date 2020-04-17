@@ -106,7 +106,10 @@ public class AlarmBusinessDao {
         }else{
             criteria.and("shield").ne(true);
         }
-
+        String shieldRuleId = businessQuery.getShieldRuleId();
+        if(!StringUtil.isNUll(shieldRuleId)){
+            criteria.and("shieldRuleId").is(shieldRuleId);
+        }
         String name = businessQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoRegexUtil.escapeExprSpecialWord(name);
