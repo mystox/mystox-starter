@@ -383,7 +383,7 @@ public class Alarm {
         this.setSiteName(alarmBusiness.getSiteName());
         this.setSiteType(alarmBusiness.getSiteType());
         this.setDeviceName(alarmBusiness.getDeviceName());
-
+        this.setTargetLevelName(alarmBusiness.getLevelName());
         this.setShield(alarmBusiness.getShield());
         this.setCheckState(alarmBusiness.getCheckState());
         this.setCheckContant(alarmBusiness.getCheckContant());

@@ -149,17 +149,6 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
                     alarmLevelList.retainAll(levelList);
                 }
                 alarmQuery.setLevelList(alarmLevelList);
-//                Integer level = alarmQuery.getLevel();
-//                if(null == level){
-//                    alarmQuery.setLevelList(alarmLevelList);
-//                }else{
-//                    if(alarmLevelList.contains(level)){
-//
-//                    }else{
-//                        alarmQuery.setLevel(level + 52014);
-//                    }
-//                }
-
             }
             //告警名称
             String alarmName = filterRule.getAlarmName();
@@ -189,8 +178,12 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
             if(filterRule.isBaseSite()){
                 List<String> siteCodeList  = filterRule.getSiteCodeList();
                 List<String> sourSiteCodeList = alarmQuery.getSiteCodeList();
-                sourSiteCodeList.retainAll(siteCodeList);
-                alarmQuery.setSiteCodeList(sourSiteCodeList);
+                if(null != sourSiteCodeList) {
+                    sourSiteCodeList.retainAll(siteCodeList);
+                    alarmQuery.setSiteCodeList(sourSiteCodeList);
+                }else{
+                    alarmQuery.setSiteCodeList(siteCodeList);
+                }
             }else{
                 //基于区域，根据区域编码获取所有站点
                 alarmQuery.setTierCodeList(filterRule.getTierCodeList());

@@ -193,6 +193,7 @@ public class AlarmFocusController extends BaseController {
         businessQuery.setSkipSize(focusQuery.getPageSize());
         businessQuery.setEntDevSigList(entDevSigList);
         businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
+        businessQuery.setSiteCodeList(focusQuery.getSiteCodeList());
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
         for(AlarmBusiness alarmBusiness : list){
             String entDevSig = alarmBusiness.getEntDevSig();
