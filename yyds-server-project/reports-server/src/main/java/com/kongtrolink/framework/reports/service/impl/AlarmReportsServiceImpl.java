@@ -569,11 +569,6 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
         return new String[][][]{sheetData};
     }
 
-    public static void main(String[] args)
-    {
-
-        System.out.println(String.format("%.2f", 0.555555));
-    }
     @Override
     @ReportOperaCode(code = OperaCodePrefix.REPORTS + "alarmCategory", rhythm = 3600 * 24, dataType = {DataType.JSON, DataType.FILE}, extend = {
 //            @ReportExtend(field = "month", name = "月份", type = ReportExtend.FieldType.STRING), //时间类型是否需要
@@ -884,7 +879,7 @@ public class AlarmReportsServiceImpl implements AlarmReportsService {
     private String alarmCategoryExcelCreate(String sheetName, String[][][] resultData) {
         long currentTime = System.currentTimeMillis();
         String path = "/reportsResources/report_alarmCount";
-        String filename = "告警分类统计表_" + currentTime + ".xls";
+        String filename = "告警分类统计表_" + currentTime;
         WorkbookUtil.save("." + path, filename, WorkbookUtil.createWorkBook(new String[]{sheetName}, resultData));
         return "/" + routeMark + path + "/" + filename + ".xls";
     }

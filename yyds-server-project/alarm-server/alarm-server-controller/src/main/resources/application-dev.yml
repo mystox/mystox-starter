@@ -15,7 +15,7 @@ spring:
         max-idle: 100
       ## 连接池中的最小空闲连接
         min-idle: 20
-      host: 172.16.5.26
+      host: 172.16.5.60
       port: 6379
       pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 

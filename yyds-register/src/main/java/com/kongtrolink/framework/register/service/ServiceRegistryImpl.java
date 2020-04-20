@@ -25,7 +25,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     Logger logger = LoggerFactory.getLogger(ServiceRegistryImpl.class);
 
     private CountDownLatch latch = new CountDownLatch(1);
-    private static final int SESSION_TIMEOUT = 140000; //milliseconds
+    private static final int SESSION_TIMEOUT = 14000000; //milliseconds
 
     private ZooKeeper zk;
     private String serviceUrl;

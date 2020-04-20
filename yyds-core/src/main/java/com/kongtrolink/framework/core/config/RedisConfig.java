@@ -34,7 +34,7 @@ public class RedisConfig
     @Autowired
     private RedisProperties properties;
 
-    @Bean("redisTemplate")
+    @Bean
     @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(
             @Qualifier(value = "jedisConnectionFactory") RedisConnectionFactory redisConnectionFactory)
@@ -50,7 +50,7 @@ public class RedisConfig
         template.afterPropertiesSet();
         return template;
     }
-    @Bean
+    @Bean(name = "jedisConnectionFactory")
     public RedisConnectionFactory jedisConnectionFactory()
     {
 
