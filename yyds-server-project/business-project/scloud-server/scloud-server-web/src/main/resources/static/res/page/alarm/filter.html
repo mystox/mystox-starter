@@ -204,28 +204,28 @@
                     <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
                         <td colspan="7" class="detail">
                             <ul>
-                                <li>告警名称：<span ng-bind="item.rule.alarmName | nullFilter"></span></li>
+                                <li>告警名称：<span ng-bind="item.alarmName | nullFilter"></span></li>
                                 <li>监控设备类型：
-                                    <span ng-repeat="deviceType in item.rule.deviceTypeCode">
+                                    <span ng-repeat="deviceType in item.deviceTypeList">
                                         <span ng-bind="deviceTypeMap[deviceType] + '(' + deviceType + ')'"></span><span ng-hide="$last">、</span>
                                     </span>
-                                    <span ng-if="!item.rule.deviceTypeCode || item.rule.deviceTypeCode.length === 0">-</span>
+                                    <span ng-if="!item.deviceTypeCode || item.deviceTypeCode.length === 0">-</span>
                                 </li>
-                                <li ng-if="item.rule.baseSite">所选站点：
-                                    <span ng-repeat="site in item.site">
-                                        <span ng-bind="site.name"></span><span ng-hide="$last">、</span>
+                                <li ng-if="item.baseSite">所选站点：
+                                    <span ng-repeat="site in item.siteCodeList">
+                                        <span ng-bind="getSiteFromSiteCode(site)"></span><span ng-hide="$last">、</span>
                                     </span>
                                 </li>
-                                <li ng-if="!item.rule.baseSite">所选区域：
-                                    <span ng-repeat="tier in item.tier">
-                                        <span ng-bind="tier.name"></span><span ng-hide="$last">、</span>
+                                <li ng-if="!item.baseSite">所选区域：
+                                    <span ng-repeat="tier in item.tierCodeList">
+                                        <span ng-bind="getTierFromTierCode(tier)"></span><span ng-hide="$last">、</span>
                                     </span>
                                 </li>
                             </ul>
                             <ul>
                                 <li>告警等级：
-                                    <span ng-repeat="alarm in item.alarmLevel">
-                                        <span ng-bind="alarm | alarmLevelFilter"></span><span ng-hide="$last">、</span>
+                                    <span ng-repeat="alarm in item.alarmLevelList">
+                                        <span ng-bind="alarm | SDGD_alarmLevelFilter:alarmLevelList4Filter"></span><span ng-hide="$last">、</span>
                                     </span>
                                     <span ng-if="item.alarmLevel.length === 0">-</span>
                                 </li>

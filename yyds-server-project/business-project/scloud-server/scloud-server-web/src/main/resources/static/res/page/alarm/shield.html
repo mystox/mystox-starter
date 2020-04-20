@@ -1,10 +1,10 @@
 <section id="alarmShieldPage">
     <div class="_top card-bg">
         <div class="page-header">
-            <h3>添加屏蔽规则</h3>
+            <h3 ng-bind="UPDATE_MODE === 'MODIFY' ? '修改屏蔽规则' : '添加屏蔽规则'"></h3>
         </div>
 
-        <div class="page-body">
+        <div class="page-body" ng-class="{'inset-shadow':UPDATE_MODE === 'MODIFY'}">
             <form class="form-horizontal _top_left scroll" id="addRuleModal" name="addRule.form" novalidate ng-submit="addRule.execute();">
 
                 <div class="control-group" ng-class="getValidClass(addRule.form.name);">
@@ -106,7 +106,8 @@
                         <td>
                             <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>
                             <a ng-if="util.checkPrivilege(1112) && r.enabled" ng-click="changeState(r, $event);" title="禁用" class="ic ic-times"></a>
-                            <a ng-if="util.checkPrivilege(1504) && !r.enabled" ng-click="addTimeRange.toModal(r, $event);" title="自动启用时段" class="ic ic-calendar"></a>
+                            <!-- <a ng-if="util.checkPrivilege(1504) && !r.enabled" ng-click="addTimeRange.toModal(r, $event);" title="自动启用时段" class="ic ic-calendar"></a> -->
+                            <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="addRule.toModal(r, $event);" title="编辑" class="ic ic-edit"></a>
                             <a ng-click="getRuleDetail(r, $index, $event);" title="详情" class="ic ic-detail"></a>
                             <a ng-if="!r.enabled" ng-click="deleteRule.toModal(r, $event);" title="删除" class="ic ic-delete"></a>
                         </td>
