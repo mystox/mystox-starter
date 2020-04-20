@@ -9,7 +9,11 @@ privFunc:
   - type: SCRIPT
     name: 服务登录验证
     code: SERVICE_LOGIN
-    uri: /service/login.js
+    uri: /SDGD/static/checkLogin.js
+  - type: SCRIPT
+    name: 告警关注
+    code: ALARM_CONFIRM
+    uri: /SDGD/static/alarmConfirm.js
   - type: PAGE
     name: 首页
     code: HOME
