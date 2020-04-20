@@ -27,9 +27,7 @@
             </select>
 
             <label>FSU厂家</label>
-            <select ng-model="orderQuery.fsuManufactory" ng-options="item as item for item in CONST.fsuManufactoryList" ng-change="query();">
-                <option ng-bind="'全部'"></option>
-            </select>
+            <input type="text" ng-model="orderQuery.manufacturer" />
 
             <label>FSU注册状态</label>
             <select ng-model="orderQuery.fsuState"
@@ -68,25 +66,25 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="item in orderList">
-                    <td ng-bind="item.site.tierString"></td>
-                    <td ng-bind="item.site.name"></td>
-                    <td ng-bind="item.site.code"></td>
-                    <td ng-bind="item.fsu.name"></td>
-                    <td ng-bind="item.fsu.code"></td>
-                    <td ng-bind="item.fsu.manufactory"></td>
+                    <td ng-bind="getSiteFromTree(item.siteCode).tierName"></td>
+                    <td ng-bind="getSiteFromTree(item.siteCode).name"></td>
+                    <td ng-bind="item.siteCode"></td>
+                    <td ng-bind="item.fsuName"></td>
+                    <td ng-bind="item.fsuCode"></td>
+                    <td ng-bind="item.manufacturer"></td>
                     <td>
-                        <label class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[item.fsu.state]" ng-bind="item.fsu.state"></label>
+                        <label class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[item.fsuState]" ng-bind="item.fsuState"></label>
                     </td>
                     <td>
-                        <label class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[item.fsu.operationState]" ng-bind="item.fsu.operationState"></label>
+                        <label class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[item.operationState]" ng-bind="item.operationState"></label>
                     </td>
                     <td>
-                        <label class="label" ng-class="{'font-info':item.order.state === CONST.orderState.SUBMIT,
-                            'font-warning':item.order.state === CONST.orderState.CHECK,
-                            'font-success':item.order.state === CONST.orderState.PASS,
-                            'font-danger':item.order.state === CONST.orderState.CANCEL}" ng-bind="item.order.state"></label>
+                        <label class="label" ng-class="{'font-info':item.state === CONST.orderState.SUBMIT,
+                            'font-warning':item.state === CONST.orderState.CHECK,
+                            'font-success':item.state === CONST.orderState.PASS,
+                            'font-danger':item.state === CONST.orderState.CANCEL}" ng-bind="item.state"></label>
                         </td>
-                    <td ng-bind="item.order.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-bind="item.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                     <td>
                         <a title="查看" class="ic ic-detail" ng-click="showOrder.toModal(item);"></a>
                     </td>
@@ -166,7 +164,7 @@
                         <label class="control-label">选择FSU</label>
                         <div class="controls">
                             <select name="alarmLevel" ng-model="addOrder.obj.fsu" required
-                                    ng-options="item as item.name + '(' + item.operationState + ')' for item in fsuList"></select>
+                                    ng-options="item as item.deviceName + '(' + item.operationState + ')' for item in fsuList"></select>
                             <span class="help-inline"></span>
                         </div>
                     </div>
@@ -174,14 +172,14 @@
                     <div class="control-group">
                         <label class="control-label">FSU编码</label>
                         <div class="controls">
-                            <span ng-bind="addOrder.obj.fsu.code | nullFilter"></span>
+                            <span ng-bind="addOrder.obj.fsu.deviceCode | nullFilter"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">FSU厂家</label>
                         <div class="controls">
-                            <span ng-bind="addOrder.obj.fsu.manufactory | nullFilter"></span>
+                            <span ng-bind="addOrder.obj.fsu.manufacturer | nullFilter"></span>
                         </div>
                     </div>
 
@@ -190,13 +188,6 @@
                         <div class="controls">
                             <span class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[addOrder.obj.fsu.state]" ng-bind="addOrder.obj.fsu.state | nullFilter"></span>
                             <span class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[addOrder.obj.fsu.operationState]" ng-bind="addOrder.obj.fsu.operationState | nullFilter"></span>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label">FSU负责人</label>
-                        <div class="controls">
-                            <span ng-bind="addOrder.obj.fsu.respName | nullFilter"></span>
                         </div>
                     </div>
                 </div>
@@ -254,38 +245,38 @@
                     <div class="control-group">
                         <label class="control-label">申请时间</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.order.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                            <span ng-bind="currentOrder.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">处理状态</label>
                         <div class="controls">
-                            <span class="label" ng-class="{'font-info':currentOrder.order.state === CONST.orderState.SUBMIT,
-                            'font-warning':currentOrder.order.state === CONST.orderState.CHECK,
-                            'font-success':currentOrder.order.state === CONST.orderState.PASS,
-                            'font-danger':currentOrder.order.state === CONST.orderState.CANCEL}" ng-bind="currentOrder.order.state"></span>
+                            <span class="label" ng-class="{'font-info':currentOrder.state === CONST.orderState.SUBMIT,
+                            'font-warning':currentOrder.state === CONST.orderState.CHECK,
+                            'font-success':currentOrder.state === CONST.orderState.PASS,
+                            'font-danger':currentOrder.state === CONST.orderState.CANCEL}" ng-bind="currentOrder.state"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">入网说明</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.order.desc"></span>
+                            <span ng-bind="currentOrder.desc"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">联系人</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.order.applicantName | nullFilter"></span>
+                            <span ng-bind="currentOrder.applicantName | nullFilter"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">联系电话</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.order.applicantPhone | nullFilter"></span>
+                            <span ng-bind="currentOrder.applicantPhone | nullFilter"></span>
                         </div>
                     </div>
                 </div>
@@ -297,21 +288,21 @@
                     <div class="control-group">
                         <label class="control-label">所属区域</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.site.tierString"></span>
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).tierName"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">站点名称</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.site.name"></span>
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).name"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">经纬度</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.site.coordinate | nullFilter"></span>
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).coordinate"></span>
                         </div>
                     </div>
 
@@ -337,36 +328,29 @@
                     <div class="control-group">
                         <label class="control-label">名称</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.fsu.name"></span>
+                            <span ng-bind="currentOrder.fsuName"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">编码</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.fsu.code"></span>
+                            <span ng-bind="currentOrder.fsuCode"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">状态</label>
                         <div class="controls">
-                            <span class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[currentOrder.fsu.state]" ng-bind="currentOrder.fsu.state"></span>
-                            <span class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[currentOrder.fsu.operationState]" ng-bind="currentOrder.fsu.operationState"></span>
+                            <span class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[currentOrder.fsuState]" ng-bind="currentOrder.fsuState"></span>
+                            <span class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[currentOrder.operationState]" ng-bind="currentOrder.operationState"></span>
                         </div>
                     </div>
 
                     <div class="control-group">
                         <label class="control-label">厂家</label>
                         <div class="controls">
-                            <span ng-bind="currentOrder.fsu.manufactory"></span>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="control-label">负责人</label>
-                        <div class="controls">
-                            <span ng-bind="currentOrder.fsu.respName | nullFilter"></span>
+                            <span ng-bind="currentOrder.fsu.manufactory | nullFilter"></span>
                         </div>
                     </div>
 
@@ -393,7 +377,7 @@
                             <tbody>
                             <tr ng-repeat="log in currentOrder.logList" ng-class="CONST.animation.list">
                                 <td ng-bind="$index + 1"></td>
-                                <td ng-bind="log.user.name"></td>
+                                <td ng-bind="log.operator.name"></td>
                                 <td ng-bind="log.action"></td>
                                 <td ng-bind="log.suggestion | nullFilter"></td>
                                 <td ng-bind="log.remark | nullFilter"></td>
@@ -407,8 +391,8 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-primary" ng-click="showOrder.hide();testOrder.toModal();">
-                <span ng-if="currentOrder.order.state === CONST.orderState.SUBMIT">生成测试报告</span>
-                <span ng-if="currentOrder.order.state !== CONST.orderState.SUBMIT">查看测试报告</span>
+                <span ng-if="currentOrder.state === CONST.orderState.SUBMIT">生成测试报告</span>
+                <span ng-if="currentOrder.state !== CONST.orderState.SUBMIT">查看测试报告</span>
             </button>
             <button type="reset" class="btn btn-default" ng-click="showOrder.clear();">关闭</button>
         </div>
@@ -444,10 +428,10 @@
                             <tbody>
                             <tr ng-repeat="device in currentOrder.deviceList" ng-class="CONST.animation.list">
                                 <td ng-bind="$index + 1"></td>
-                                <td ng-bind="device.name"></td>
-                                <td ng-bind="device.code"></td>
-                                <td ng-bind="device.model"></td>
-                                <td ng-bind="device.manufactory"></td>
+                                <td ng-bind="device.deviceName"></td>
+                                <td ng-bind="device.deviceCode"></td>
+                                <td ng-bind="device.model | nullFilter"></td>
+                                <td ng-bind="device.manufacturer | nullFilter"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -457,8 +441,8 @@
 
             <div>
                 <div class="title">
-                    <h4 ng-if="currentOrder.order.state !== CONST.orderState.SUBMIT">测试项目明细</h4>
-                    <h4 ng-if="currentOrder.order.state === CONST.orderState.SUBMIT">测试项目明细
+                    <h4 ng-if="currentOrder.state !== CONST.orderState.SUBMIT">测试项目明细</h4>
+                    <h4 ng-if="currentOrder.state === CONST.orderState.SUBMIT">测试项目明细
                         <button type="button" class="btn btn-primary" ng-click="getOrderTestHistoryAndCurrent();">测试并刷新</button>
                         <button type="button" class="btn btn-primary" ng-click="createOrderTest()">生成测试项</button>
                     </h4>
@@ -503,9 +487,9 @@
                                     <label class="label" ng-bind="test.result | orderTestResultFilter" ng-class="{true:'font-success', false:'font-danger'}[!!test.result]"></label>
                                 </td>
                                 <td>
-                                    <input ng-if="currentOrder.order.state === CONST.orderState.SUBMIT" type="text" ng-model="test.remark" ng-required="!test.result">
+                                    <input ng-if="currentOrder.state === CONST.orderState.SUBMIT" type="text" ng-model="test.remark" ng-required="!test.result">
                                     <span class="help-inline"></span>
-                                    <span ng-if="currentOrder.order.state !== CONST.orderState.SUBMIT" ng-bind="test.remark | nullFilter"></span>
+                                    <span ng-if="currentOrder.state !== CONST.orderState.SUBMIT" ng-bind="test.remark | nullFilter"></span>
                                 </td>
                             </tr>
                             </tbody>
@@ -516,7 +500,7 @@
 
             <br>
 
-            <div ng-if="currentOrder.order.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
+            <div ng-if="currentOrder.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
                 <div class="control-group" ng-class="getValidClass(testOrder.form.suggestion);">
                     <label class="control-label">审核意见</label>
                     <div class="controls">
@@ -534,10 +518,10 @@
             </div>
         </div>
         <div class="modal-footer">
-            <div class="display-inline" ng-if="currentOrder.order.state === CONST.orderState.SUBMIT">
+            <div class="display-inline" ng-if="currentOrder.state === CONST.orderState.SUBMIT">
                 <button type="submit" class="btn btn-primary" ng-disabled="testOrder.form.$invalid || !currentOrder.orderTestList.length" ng-click="testOrder.execute();">提交审核</button>
             </div>
-            <div class="display-inline" ng-if="currentOrder.order.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
+            <div class="display-inline" ng-if="currentOrder.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
                 <button type="submit" class="btn btn-primary" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.PASS);">通过</button>
                 <button type="submit" class="btn btn-default" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.SUBMIT);">不通过(退回重测)</button>
                 <button type="submit" class="btn btn-default" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.CANCEL);">作废</button>
