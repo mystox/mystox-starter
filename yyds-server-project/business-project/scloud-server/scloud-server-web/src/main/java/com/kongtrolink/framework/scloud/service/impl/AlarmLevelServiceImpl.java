@@ -39,6 +39,15 @@ public class AlarmLevelServiceImpl implements AlarmLevelService{
         return jsonObject;
     }
 
+
+    @Override
+    public JSONObject getLastUse(String enterpriseCode, String serverCode) {
+        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
+        alarmLevelQuery.setEnterpriseCode(enterpriseCode);
+        alarmLevelQuery.setServerCode(serverCode);
+        return getLastUse(alarmLevelQuery);
+    }
+
     @Override
     public JSONObject getDeviceTypeList(AlarmLevelQuery alarmLevelQuery) {
         JSONObject jsonObject = new JSONObject();

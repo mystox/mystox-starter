@@ -68,32 +68,9 @@ public class AlarmBusinessController extends ExportController{
             businessQuery.setStartEndTime(startEndTime);
         }
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
-        List<AlarmLevel> alarmLevelList = getLastUseLevels(businessQuery.getEnterpriseCode(), businessQuery.getServerCode());
-        for(AlarmBusiness alarmBusiness : list){
-            String levelName = AlarmLevel.getLevelName(alarmBusiness.getLevel(), alarmLevelList);
-            alarmBusiness.setLevelName(levelName);
-        }
         int count = businessService.count(uniqueCode, businessQuery);
         ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);
         return new JsonResult(listResult);
-    }
-
-    /**
-     * @auther: liudd
-     * @date: 2020/4/15 16:28
-     * 功能描述:获取企业最后启用的告警等级
-     */
-    private List<AlarmLevel> getLastUseLevels(String enterpriseCode, String serverCode){
-        AlarmLevelQuery alarmLevelQuery = new AlarmLevelQuery();
-        alarmLevelQuery.setEnterpriseCode(enterpriseCode);
-        alarmLevelQuery.setServerCode(serverCode);
-        JSONObject lastUse = alarmLevelService.getLastUse(alarmLevelQuery);
-        Boolean success = lastUse.getBoolean("success");
-        List<AlarmLevel> alarmLevelList = null;
-        if(success){
-            alarmLevelList = JSONObject.parseArray(lastUse.getString("data"), AlarmLevel.class);
-        }
-        return alarmLevelList;
     }
 
     /**
@@ -113,11 +90,7 @@ public class AlarmBusinessController extends ExportController{
             businessQuery.setOperatorId(user.getId());
         }
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
-        List<AlarmLevel> alarmLevelList = getLastUseLevels(businessQuery.getEnterpriseCode(), businessQuery.getServerCode());
-        for(AlarmBusiness alarmBusiness : list){
-            String levelName = AlarmLevel.getLevelName(alarmBusiness.getLevel(), alarmLevelList);
-            alarmBusiness.setLevelName(levelName);
-        }
+
         String tableTitle = businessQuery.getLevelName();
         String[] headsName = { "告警名称", "告警等级", "告警值","站点层级","站点名称","告警设备", "开始时间"};
         String[] properiesName = { "name", "levelName", "value" ,"tierName","siteName", "deviceName", "treport"};
@@ -154,10 +127,16 @@ public class AlarmBusinessController extends ExportController{
         }
         businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
         List<Statistics> statisticss = businessService.countLevel(uniqueCode, CollectionSuffix.CUR_ALARM_BUSINESS, businessQuery);
-        List<AlarmLevel> alarmLevelList = getLastUseLevels(businessQuery.getEnterpriseCode(), businessQuery.getServerCode());
-        for(Statistics statistics : statisticss){
-            String levelName = AlarmLevel.getLevelName(statistics.getIntPro(), alarmLevelList);
-            statistics.setName(levelName);
+        //填充最终告警等级
+        JSONObject lastUse = alarmLevelService.getLastUse(businessQuery.getEnterpriseCode(), businessQuery.getServerCode());
+        Boolean success = lastUse.getBoolean("success");
+        List<AlarmLevel> alarmLevelList = null;
+        if(success){
+            alarmLevelList = JSONObject.parseArray(lastUse.getString("data"), AlarmLevel.class);
+        }
+        for(Statistics alarmBusiness : statisticss){
+            String levelName = AlarmLevel.getLevelName(alarmBusiness.getIntPro(), alarmLevelList);
+            alarmBusiness.setName(levelName);
         }
         return new JsonResult(statisticss);
     }
