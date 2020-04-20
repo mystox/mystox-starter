@@ -186,10 +186,9 @@ public class UserServiceImpl implements UserService {
 
                     String userId = userEntity.getString("userId");
                     UserEntity userEntity1 = userMongo.listUser(uniqueCode, userId, userQuery);
+                    if (userEntity1 == null) userEntity1 = new UserEntity();
                     UserModel userModel = new UserModel();
-                    BeanUtils.copyProperties(userEntity,userModel);
-                    if (userModel == null)
-                        userModel = new UserModel();
+                    BeanUtils.copyProperties(userEntity1,userModel);
                     JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
                     userJson.putAll(userEntity);
                     String username = userEntity.getString("username");
