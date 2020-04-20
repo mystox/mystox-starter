@@ -7,6 +7,7 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,9 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
     Logger logger = LoggerFactory.getLogger(ServiceRegistryImpl.class);
 
     private CountDownLatch latch = new CountDownLatch(1);
-    private static final int SESSION_TIMEOUT = 14000000; //milliseconds
+
+    @Value("${zookeeper.sessionTimeOut:100}")
+    private /*static final*/ int SESSION_TIMEOUT; //milliseconds
 
     private ZooKeeper zk;
     private String serviceUrl;
@@ -75,7 +78,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this);
             latch.await();
         } else {
-            zk.close();
+//            zk.close();
             zk = new ZooKeeper(serviceUrl, SESSION_TIMEOUT, this::process);
             latch.await();
             registerRunner.multiRegister();
