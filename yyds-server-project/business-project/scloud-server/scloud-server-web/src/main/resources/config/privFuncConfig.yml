@@ -2,13 +2,13 @@ privFunc:
   type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
   name: ${server.title} #权限名称 必填
   code: ${server.name}_${server.version} #权限编码 必填同级不可重复
+  routeMark: proxy_scloud
+  pageRoute: proxy_scloud
   remark: 云平台 #备注 可填
   children:
   - type: SCRIPT
     name: 服务登录验证
     code: SERVICE_LOGIN
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
     uri: /service/login.js
   - type: PAGE
     name: 首页
@@ -29,8 +29,8 @@ privFunc:
     pageRoute: proxy_scloud
     children:
     - type: PAGE
-      name: FOCUS
-      code: 关注数据
+      name: 关注数据
+      code: FOCUS
       uri: /SDGD/data/focus
     - type: PAGE
       name: 实时数据
@@ -96,6 +96,7 @@ privFunc:
       uri: /ZKSDGD/enterpriseInfo
     - type: PAGE
       name: 站点资产
+
       code: SITEMANAGE
       uri: /ZKSDGD/siteManage
     - type: PAGE
