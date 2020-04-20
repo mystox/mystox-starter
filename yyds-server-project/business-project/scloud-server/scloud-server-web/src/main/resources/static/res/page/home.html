@@ -3,9 +3,9 @@
         <div class="page-header left-bar">
             <h4>FSU实时在线情况
                 <span>(
-                    <span ng-bind="fsu[0].count || 0" class="cursor-point font-important" ng-click="go('config/fsu', {query: {state:'在线', fsuOperationState: '交维态'}, tier: curTier})"></span>
+                    <span ng-bind="fsu[0].count || 0" class="cursor-point font-important" ng-click="go('ZKSDGD/deviceManage', {query: {state:'在线', operationState: '交维态'}, tier: curTier})"></span>
                     /
-                    <span ng-bind="fsu[1].count || 0" class="cursor-point font-important" ng-click="go('config/fsu', {query: {state:'离线', fsuOperationState: '交维态'}, tier: curTier})"></span>
+                    <span ng-bind="fsu[1].count || 0" class="cursor-point font-important" ng-click="go('ZKSDGD/deviceManage', {query: {state:'离线', operationState: '交维态'}, tier: curTier})"></span>
                 )</span>
             </h4>
         </div>
@@ -18,7 +18,7 @@
         <div class="page-header left-bar">
             <h4>告警工单</h4>
             <span class="page-header-count1">(</span>
-            <span class="page-header-count1 font-important cursor-point" ng-bind="workInfoCounts[0]+workInfoCounts[1]+workInfoCounts[2]+workInfoCounts[3]" ng-click="go('operation/workList', {})"></span>
+            <span class="page-header-count1 font-important cursor-point" ng-bind="workInfoCounts[0]+workInfoCounts[1]+workInfoCounts[2]+workInfoCounts[3]" ng-click="goOneMonth('SDGD/operation/workList', {})"></span>
             <span class="page-header-count1">)</span>
         </div>
         <div class="page-body">
@@ -29,10 +29,10 @@
     <div class="left3 card-bg card-transparent">
         <div class="page-header left-bar">
             <h4>实时告警统计</h4>
-            <small ng-click="go('alarm/list', {query: {operationState: '交维态'}, tier: curTier, startView: 'list'})">查看更多</small>
+            <small ng-click="go('ZKSDGD/SDGD_alarmList', {query: {operationState: '交维态'}, tier: curTier, startView: 'active'})">查看更多</small>
         </div>
         <div class="page-body">
-            <div class="unit cursor-point" ng-repeat="item in alarmLevelList track by $index" ng-click="go('alarm/count', {noRealtimeQuery: true, realtimeParams:item.key})" title="{{item.name}}">
+            <div class="unit cursor-point" ng-repeat="item in alarmLevelList track by $index" ng-click="go('SDGD/alarm/count', {tier: curTier, noRealtimeQuery: true, realtimeParams:item.key, alarmLevel: item.levels})" title="{{item.name}}">
                 <span ng-bind="item.name"></span>
                 <div class="progress-box">
                     <div class="progress">
@@ -43,10 +43,10 @@
             </div>
             <p class="check mgt text-center">
                 <span class="">                        
-                    已确认：<span ng-bind="checkedCounts" class="cursor-point font-important" ng-click="go('alarm/list', {checkedState:true, startView: 'list', query: {operationState: '交维态'}, tier: curTier})"></span> 个
+                    已确认：<span ng-bind="checkedCounts" class="cursor-point font-important" ng-click="go('ZKSDGD/SDGD_alarmList', {checkedState:true, startView: 'active', query: {operationState: '交维态', isCheck: true}, tier: curTier})"></span> 个
                 </span>
                 <span class="">
-                    待确认：<span ng-bind="uncheckedCounts" class="cursor-point font-important" ng-click="go('alarm/list', {checkedState:false, startView: 'list', query: {operationState: '交维态'}, tier: curTier})"></span> 个
+                    待确认：<span ng-bind="uncheckedCounts" class="cursor-point font-important" ng-click="go('ZKSDGD/SDGD_alarmList', {checkedState:false, startView: 'active', query: {operationState: '交维态', isCheck: false}, tier: curTier})"></span> 个
                 </span>
             </p>
         </div>
@@ -70,10 +70,10 @@
         <div class="site-count">
             <svg width="500" height="70" viewBox="0 0 334 47" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g><path stroke="#55DEFF" d="M37.58 46.129H2V26.097M123.452 1.161H167v20.645"/><path fill-opacity=".5" fill="#0D306A" fill-rule="nonzero" d="M162 5v36.006H6V5z"/><path stroke="#55DEFF" d="M162 5.516v36.13H6V5.515zM100.806 0l-1.741 2.323M103.226 0l-1.742 2.323M105.645 0l-1.742 2.323M108.065 0l-1.742 2.323M110.484 0l-1.742 2.323M112.903 0l-1.742 2.323M115.323 0l-1.742 2.323M117.742 0L116 2.323M120.161 0l-1.742 2.323M122.58 0l-1.741 2.323M41.065 44.677L39.323 47M43.484 44.677L41.742 47M45.903 44.677L44.161 47M48.323 44.677L46.58 47M50.742 44.677L49 47M53.161 44.677L51.42 47M55.58 44.677L53.84 47M58 44.677L56.258 47M60.42 44.677L58.676 47M62.839 44.677L61.097 47"/><circle fill="#00F3FF" fill-rule="nonzero" cx="1.919" cy="25.661" r="1.306"/><circle fill="#00F3FF" fill-rule="nonzero" cx="166.806" cy="21.242" r="1.306"/></g><g transform="translate(165)"><path stroke="#55DEFF" d="M37.58 46.129H2V28.097M123.452 1.161H167v22.645"/><path fill-opacity=".5" fill="#0D306A" fill-rule="nonzero" d="M162 5v36.006H6V5z"/><path stroke="#55DEFF" d="M162 5.516v36.13H6V5.515zM100.806 0l-1.741 2.323M103.226 0l-1.742 2.323M105.645 0l-1.742 2.323M108.065 0l-1.742 2.323M110.484 0l-1.742 2.323M112.903 0l-1.742 2.323M115.323 0l-1.742 2.323M117.742 0L116 2.323M120.161 0l-1.742 2.323M122.58 0l-1.741 2.323M41.065 44.677L39.323 47M43.484 44.677L41.742 47M45.903 44.677L44.161 47M48.323 44.677L46.58 47M50.742 44.677L49 47M53.161 44.677L51.42 47M55.58 44.677L53.84 47M58 44.677L56.258 47M60.42 44.677L58.676 47M62.839 44.677L61.097 47"/><circle fill="#00F3FF" fill-rule="nonzero" cx="1.919" cy="27.661" r="1.306"/><circle fill="#00F3FF" fill-rule="nonzero" cx="166.806" cy="23.242" r="1.306"/></g></g></svg>
             <div class="total">
-                <span>站点总数</span><strong ng-click="go('config/site', {tier:curTier})" class="cursor-point" ng-bind="siteCount"></strong>
+                <span>站点总数</span><strong ng-click="go('ZKSDGD/siteManage', {tier: curTier})" class="cursor-point" ng-bind="siteCount"></strong>
             </div>
             <div class="maintain">
-                <span>交维态</span><strong ng-click="go('config/fsu', {tier:curTier, query: {fsuOperationState: '交维态'}})" class="cursor-point" ng-bind="maintenanceSiteCount"></strong>
+                <span>交维态</span><strong ng-click="go('ZKSDGD/deviceManage', {tier:curTier, query: {operationState: '交维态'}})" class="cursor-point" ng-bind="maintenanceSiteCount"></strong>
             </div>
         </div>
     </div>
@@ -81,19 +81,18 @@
     <div class="right1 card-bg card-transparent">
         <div class="page-header left-bar">
             <h4>告警频发站点Top10<i> (近一个月)</i></h4>
-            <small ng-click="go7days('alarm/list', {alarmState: '全部', query: {operationState: '交维态'}, tier: curTier})">查看更多</small>
+            <small ng-click="goOneMonth('SDGD/alarm/count', {tier: curTier})">查看更多</small>
         </div>
         <div class="page-body">
             <p class="line" ng-repeat="item in alarmSiteList" 
                 ng-class="item.value && 'cursor-point'" 
                 ng-style="{pointerEvents: item.value? 'auto' : 'none'}" 
-                ng-click="go7days('alarm/list', {alarmState: '全部', siteId:item.id, startView: 'list', query: {operationState: '交维态'}, tier: curTier})">
+                ng-click="goOneMonth('SDGD/alarm/count', {query: {siteName: item.key}, tabPage: {currentIndex: 2}, tier: curTier})">
                 <span class="number" ng-bind="$index + 1"></span>
                 <span class="key-value-wrapper">
                     <span class="key" ng-bind="item.key" title={{item.key}}></span>
                     <span class="value" ng-bind="item.value + ' 条'" class="font-important"></span> 
                 </span>
-               
             </p>
         </div>
     </div>

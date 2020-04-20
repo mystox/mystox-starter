@@ -3,15 +3,14 @@ package com.kongtrolink.framework.scloud.dao;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.SiteEntity;
 import com.kongtrolink.framework.scloud.entity.Statistics;
-import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
-import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
@@ -23,7 +22,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
@@ -370,5 +371,11 @@ public class AlarmBusinessDao {
         );
         AggregationResults<Statistics> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + CollectionSuffix.HIS_ALARM_BUSINESS, Statistics.class);
         return aggregate.getMappedResults();
+    }
+
+    public List<AlarmBusiness> listNoPage(String uniqueCode, String table, AlarmBusinessQuery alarmQuery) {
+        Criteria criteria = baseCriteria(alarmQuery);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, AlarmBusiness.class, uniqueCode + table);
     }
 }

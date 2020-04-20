@@ -1,5 +1,7 @@
 package com.kongtrolink.framework.scloud.query;
 
+import java.util.List;
+
 /**
  * 系统用户 查询类
  * Created by Yu Pengtao on 2020/4/13.
@@ -11,6 +13,7 @@ public class UserQuery extends Paging{
     private static final long serialVersionUID = -5591511152856559674L;
 
     private String userId;  //用户Id
+    private List<String> userIds;   //用户Id列表
     private String name;        //姓名
     private String username;        //账号
     private String currentPostId;   //角色id
@@ -20,6 +23,23 @@ public class UserQuery extends Paging{
     private Long validTime;       //有效日期
     private Long startTime;     //开始时间
     private Long endTime;       //结束时间
+    private String userTime;
+
+    public List<String> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(List<String> userIds) {
+        this.userIds = userIds;
+    }
+
+    public String getUserTime() {
+        return userTime;
+    }
+
+    public void setUserTime(String userTime) {
+        this.userTime = userTime;
+    }
 
     public String getCurrentRoleName() {
         return currentRoleName;

@@ -9,29 +9,31 @@ import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.kongtrolink.framework.scloud.service.UserService;
+import com.kongtrolink.framework.scloud.util.ExcelUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kongtrolink.framework.scloud.controller.base.ExportController.export;
+
 /**
  * 系统管理-用户管理-系统用户 控制器
- * Created by Yu Pengtao on 2020/4/13.
+ * Created by Eric on 2020/2/28.
  */
-@Controller
+@RestController
 @RequestMapping(value = "/user/", method = RequestMethod.POST)
 public class UserController extends BaseController{
 
     @Autowired
     UserService userService;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -42,7 +44,7 @@ public class UserController extends BaseController{
     public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
         try {
             String uniqueCode = getUniqueCode();
-            uniqueCode = "YYDS";
+//            uniqueCode = "YYDS";
             return userService.addUser(uniqueCode,userModel);
         }catch (Exception e){
             e.printStackTrace();
@@ -92,7 +94,7 @@ public class UserController extends BaseController{
     public  @ResponseBody JsonResult listUser(@RequestBody UserQuery userQuery){
 
         String uniqueCode = getUniqueCode();
-        uniqueCode = "YYDS";
+//        uniqueCode = "YYDS";
         WebPageInfo currentService = getCurrentService();
         String serverCode = currentService.getServerCode();
         List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery,serverCode);
@@ -102,36 +104,78 @@ public class UserController extends BaseController{
      * 导出系统用户
      */
     @RequestMapping(value = "exportUserList",method = RequestMethod.POST)
-    public void exportUserList(@RequestBody UserQuery userQuery){
-        List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery, getCurrentService().getServerCode());
-        List<UserModel> result = new ArrayList<>();
-        for (JSONObject list:userList){
-            UserModel user = JSON.toJavaObject(list,UserModel.class);
-            result.add(user);
+    public void exportUserList(@RequestBody UserQuery userQuery,HttpServletResponse response){
+        try {
+            List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery,"");
+            List<UserModel> result = new ArrayList<>();
+            for (JSONObject list:userList){
+                UserModel user = JSON.toJavaObject(list,UserModel.class);
+                result.add(user);
+            }
+            HSSFWorkbook workbook = userService.exportUserList(userList);
+            export(response,workbook,"系统用户列表");
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
     /**
      * 批量导入系统用户
      */
     @RequestMapping(value = "importUserList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult importUserList(@RequestBody MultipartFile multipartFile){
-        try{
-//            String uniqueCode = getUniqueCode();
-
-            return new JsonResult(null);
+    public @ResponseBody JsonResult importUserList(@RequestParam("file") MultipartFile file){
+        if (!file.isEmpty()){
+            try{
+                //获取文件名
+                String fileName = file.getOriginalFilename();
+                //进一步判断文件是否为空（即判断其大小是否为0或其名称是否为null）验证文件名是否合格
+                long size=file.getSize();
+                if(fileName==null || ("").equals(fileName) && size==0 && !ExcelUtil.validateExcel(fileName)){
+                    LOGGER.error("文件格式不正确！");
+                }else {
+                    if (userService.importUserList(getUniqueCode(),file)){
+                        return new JsonResult("导入成功",true);
+                    }else {
+                        return new JsonResult("导入失败", false);
+                    }
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                return new JsonResult("导入失败", false);
+            }
+        }
+        return new JsonResult("导入失败",false);
+    }
+    /**
+     * 批量删除系统用户
+     */
+    @RequestMapping(value = "deleteUserList",method = RequestMethod.POST)
+    public @ResponseBody JsonResult deleteUserList(@RequestBody UserQuery userQuery){
+        try {
+            List<String> ids = userQuery.getUserIds();
+            for (String id:ids){
+                if (userQuery.getUserId() != null && userQuery.getUserId() != ""){
+                    UserModel user = new UserModel();
+                    user.setUserId(id);
+                    userService.deleteUser(getUniqueCode(),user);
+                    return new JsonResult("删除成功",true);
+                }else {
+                    return new JsonResult("删除失败",false);
+                }
+            }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("导入失败", false);
+            return new JsonResult("删除失败",true);
         }
+        return new JsonResult("删除失败",false);
     }
 
     /**
      * 修改系统用户或维护用户 管辖站点
-     * Created by Eric on 2020/2/28.
      */
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
         try{
+//            String uniqueCode = getUniqueCode();
             userService.modifyUserSite(getUniqueCode(), userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
         }catch (Exception e){
@@ -142,11 +186,11 @@ public class UserController extends BaseController{
 
     /**
      * 获取系统用户或维护用户 管辖站点
-     * Created by Eric on 2020/2/28.
      */
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
         try{
+//            String uniqueCode = getUniqueCode();
             String userId = userSiteEntity.getUserId();
             List<UserSiteEntity> list = userService.getUserSite(getUniqueCode(), userId);
             return new JsonResult(list);

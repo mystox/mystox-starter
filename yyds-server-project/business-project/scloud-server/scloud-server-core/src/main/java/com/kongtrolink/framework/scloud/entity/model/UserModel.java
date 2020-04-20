@@ -22,13 +22,9 @@ public class UserModel implements Serializable {
     private String currentRoleName;     //角色名称
     private Object informRule;
 
-//    private String lockStatus;      //锁定状态
     private String userStatus;      //用户状态
     private Date validTime;       //有效日期
     private String workId;      //员工工号
-    private String createTime;      //创建日期
-//    private String lastLogin;       //最后登录日期
-//    private String changeTime;      //密码更改日期
     private String remark;      //用户备注
     private String password;
     private String gender;     //性别
@@ -97,39 +93,6 @@ public class UserModel implements Serializable {
     public void setWorkId(String workId) {
         this.workId = workId;
     }
-
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
-    }
-
-//    public String getLastLogin() {
-//        return lastLogin;
-//    }
-//
-//    public void setLastLogin(String lastLogin) {
-//        this.lastLogin = lastLogin;
-//    }
-//
-//    public String getChangeTime() {
-//        return changeTime;
-//    }
-//
-//    public void setChangeTime(String changeTime) {
-//        this.changeTime = changeTime;
-//    }
-
-//    public String getLockStatus() {
-//        return lockStatus;
-//    }
-//
-//    public void setLockStatus(String lockStatus) {
-//        this.lockStatus = lockStatus;
-//    }
-
 
     public String getUserId() {
         return userId;

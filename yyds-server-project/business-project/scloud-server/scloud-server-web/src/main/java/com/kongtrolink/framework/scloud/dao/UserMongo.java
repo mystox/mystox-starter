@@ -35,14 +35,12 @@ public class UserMongo {
     }
     /**
      * 保存用户管辖站点
-     * Created by Eric on 2020/2/28.
      */
     public void saveUserSite(String uniqueCode, List<UserSiteEntity> userSites){
         mongoTemplate.insert(userSites, uniqueCode + CollectionSuffix.USER_SITE);
     }
     /**
      * 删除用户所有管辖站点
-     * Created by Eric on 2020/2/28.
      */
     public void deleteUserSite(String uniqueCode, String userId){
         Criteria criteria = Criteria.where("userId").is(userId);
@@ -50,7 +48,6 @@ public class UserMongo {
     }
     /**
      * 从用户的管辖站点中删除该站点
-     * Created by Eric on 2020/2/28.
      */
     public void deleteSitesFromUserSite(String uniqueCode, List<String> siteCodes){
         Criteria criteria = Criteria.where("siteCode").in(siteCodes);
@@ -58,7 +55,7 @@ public class UserMongo {
     }
 
     public UserModel findUserById(String uniqueCode, String userId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER);
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
 
     }
     /**
@@ -75,12 +72,13 @@ public class UserMongo {
         String userId = userModel.getUserId();
         Criteria criteria = Criteria.where("userId").is(userId);
         Update update = new Update();
-//        update.set("lockStatus",userModel.getLockStatus());
-//        update.set("userStatus",userModel.getUserStatus());
+        update.set("userStatus",userModel.getUserStatus());
         update.set("validTime",userModel.getValidTime());
+        if (userModel.getValidTime()!=null){
+            update.set("validTime","临时");
+        }
         update.set("workId",userModel.getWorkId());
         update.set("remark",userModel.getRemark());
-        update.set("password",userModel.getPassword());
         update.set("gender",userModel.getGender());
         WriteResult result = mongoTemplate.updateFirst(new Query(criteria),update,uniqueCode+CollectionSuffix.USER);
         return result.getN()>0;
@@ -98,7 +96,7 @@ public class UserMongo {
     /**
      * 用户列表
      */
-    public UserModel listUser(String uniqueCode, String id, UserQuery userQuery){
+    public UserEntity listUser(String uniqueCode, String id, UserQuery userQuery){
         UserEntity userEntity = new UserEntity();
 //        String lockStatus = userEntity.getLockStatus(); //锁定状态
         String userStatus = userEntity.getUserStatus(); //用户状态
@@ -116,7 +114,14 @@ public class UserMongo {
         }
         criteria.andOperator(criteria1);
         Query query = new Query(criteria);
-        UserModel user = mongoTemplate.findOne(query,UserModel.class,uniqueCode+CollectionSuffix.USER);
+        UserEntity user = mongoTemplate.findOne(query,UserEntity.class,uniqueCode+CollectionSuffix.USER);
         return user;
     }
+    /**
+     * 批量添加用户
+     */
+    public void addUserBatch(String uniqueCode,List<UserEntity> list){
+        mongoTemplate.insert(list,uniqueCode+CollectionSuffix.USER);
+    }
+
 }

@@ -137,9 +137,9 @@
                             <td ng-bind="item.worker.name | nullFilter"></td>
                             <td>
                                 <a title="接单" ng-if="user.job==='维护人员'" ng-show="needShowBtn('接单', item.state)" class="ic ic-work-deploy" ng-click="applyWork(item); $event.stopPropagation()"></a>
-                                <a title="转单" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', item.state)" class="ic ic-work-redeploy" ng-click="$parent.curWork=item; redeploy.toModal(); $event.stopPropagation()"></a>
-                                <a title="催单" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', item.state)" class="ic ic-work-urge" ng-click="$parent.curWork=item; urge.toModal(); $event.stopPropagation()"></a>
-                                <a title="撤单" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', item.state)" class="ic ic-work-cancle" ng-click="$parent.curWork=item; cancleWork(item); $event.stopPropagation()"></a>
+                                <a title="转单" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', item.state)" class="ic ic-work-redeploy" ng-click="redeploy.toModal(item); $event.stopPropagation()"></a>
+                                <a title="催单" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', item.state)" class="ic ic-work-urge" ng-click="urge.toModal(item); $event.stopPropagation()"></a>
+                                <a title="撤单" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', item.state)" class="ic ic-work-cancle" ng-click="cancleWork(item); $event.stopPropagation()"></a>
                             </td>
                         </tr>
                         </tbody>
@@ -599,7 +599,7 @@
                 <div class="control-group">
                     <label class="control-label">被转派人</label>
                     <div class="controls">
-                        <select ng-model="redeploy.obj.receiver" ng-style="{color: redeploy.obj.receiver ? '#fff':'#999'}" ng-options = "item as item.name for item in workerList">
+                        <select ng-model="redeploy.obj.receiver" ng-style="{color: redeploy.obj.receiver ? '#000':'#999'}" ng-options = "item as item.name for item in workerList">
                             <option value="" style="display: none;" ng-if="!redeploy.obj.receiver" selected>请选择</option>          
                         </select>
                         <span class="help-inline"></span>

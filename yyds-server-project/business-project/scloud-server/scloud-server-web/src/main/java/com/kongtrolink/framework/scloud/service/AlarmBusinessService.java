@@ -3,7 +3,6 @@ package com.kongtrolink.framework.scloud.service;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.Statistics;
-import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 
 import java.util.List;
@@ -72,4 +71,14 @@ public interface AlarmBusinessService {
      * 功能描述:告警分布
      */
     List<Statistics> getAlarmDistributeList(String uniqueCode, AlarmBusinessQuery businessQuery);
+
+
+    /**
+     * @Date  2020/4/17
+     * @Param No such property: code for class: Script1
+     * @return java.util.List<com.kongtrolink.framework.scloud.entity.AlarmBusiness>
+     * @Author mystox
+     * @Description //不包含分頁
+     **/
+    List<AlarmBusiness> findByTimePeriod(AlarmBusinessQuery alarmQuery);
 }

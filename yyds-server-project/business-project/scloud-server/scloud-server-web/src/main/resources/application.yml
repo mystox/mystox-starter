@@ -2,7 +2,7 @@ spring:
   application:
     name: scloud-server-web
   profiles:
-    active: dev,test,prod
+    active: dev,test,prod,mystox
   session:
     store-type: redis
   redis:
