@@ -274,8 +274,14 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
         Map<String, Statistics> siteCodeStatisticsMap = new HashMap<>();
         Date startBeginTime = businessQuery.getStartBeginTime();
         Date startEndTime = businessQuery.getStartEndTime();
+        Statistics beginStatics = new Statistics();
+        beginStatics.setProperties(new ArrayList<>());
+        beginStatics.getProperties().add("站点名称");
+        beginStatics.getProperties().add("告警总数");
+        beginStatics.setValues(new ArrayList<>());
         for(long i= startBeginTime.getTime(); i< startEndTime.getTime();){
             String timeStr = DateUtil.getInstance().format(startBeginTime, "yyyy-MM-dd");
+            beginStatics.getProperties().add(timeStr);
             for(String key : siteCodeStatisticsListMap.keySet()){
                 List<Statistics> siteCodeStatisticsList = siteCodeStatisticsListMap.get(key);
                 Statistics alarmSiteStatistics = siteCodeStatisticsMap.get(key);
@@ -332,6 +338,21 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
                 alarmSiteStatistics.getValues().set(0, connFailtInfo);
             }
         }
+        for (int i = 1; i < list.size(); i++) {
+            //挖出一个要用来插入的值,同时位置上留下一个可以存新的值的坑
+            Statistics x = list.get(i);
+            int j = i - 1;
+            //在前面有一个或连续多个值比x大的时候,一直循环往前面找,将x插入到这串值前面
+            while (j >= 0 && list.get(j).getCount() > x.getCount()) {
+                //当arr[j]比x大的时候,将j向后移一位,正好填到坑中
+                list.set(j+1, list.get(j));
+                j--;
+            }
+            //将x插入到最前面
+            list.set(j+1, x);
+        }
+        list.add(beginStatics);
+        Collections.reverse(list);
         return list;
     }
 
