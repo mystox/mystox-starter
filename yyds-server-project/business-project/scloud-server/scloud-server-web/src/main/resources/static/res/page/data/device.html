@@ -9,7 +9,7 @@
     </div>
 
     <div class="_bottom card-bg card-transparent">
-        <img src="{{CONST.ctx}}/res/img/content/data/device/{{params.typeCode}}.png" alt="{{device.type}}">
+        <img src="../../img/content/data/device/{{params.typeCode}}.png" alt="{{device.type}}">
         <dl class="dl-horizontal info">
             <dt>设备名称：</dt>
             <dd>
@@ -27,7 +27,7 @@
             <dd ng-bind="params.model | nullFilter"></dd>
         </dl>
 
-        <dl class="dl-horizontal device-control" ng-show="(signalDOList && signalDOList.length > 0) && device.typeCode !== '026'">
+        <dl class="dl-horizontal device-control scroll" ng-show="(signalDOList && signalDOList.length > 0) && device.typeCode !== '026'">
             <!--遥控: 除了灯控-->
             <div ng-repeat="s in signalDOList" ng-show="device.typeCode !== '026'">
                 <dt ng-bind="s.name"></dt>

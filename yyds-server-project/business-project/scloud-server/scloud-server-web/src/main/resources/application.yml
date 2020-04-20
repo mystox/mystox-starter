@@ -2,7 +2,7 @@ spring:
   application:
     name: scloud-server-web
   profiles:
-    active: dev,test,prod
+    active: dev,test,prod,mystox
   session:
     store-type: redis
   redis:
@@ -11,7 +11,7 @@ spring:
     database: 2
 ###########服务及消息框架相关配置#############
 server:
-  groupCode: GROUP_LIUDD_TEST2
+  groupCode: GROUP
   name: SCLOUD_SERVER_WEB #服务编码
   version: 1.0.0 #服务版本
   port: 58202 #服务占用web端口
@@ -47,3 +47,11 @@ servlet:
 
 file:
   savePath: D:/scloudFile/
+
+push:
+  app:
+    pushKey: db1eb39511fee670d2845fdb
+    pushSecret: 185e690a9858c0b580e7f0c0
+    pushProduct: false
+    keyName: type
+    proName: workId

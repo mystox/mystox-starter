@@ -2,6 +2,7 @@ package com.kongtrolink.framework.core.config;
 
 import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,10 +34,10 @@ public class RedisConfig
     @Autowired
     private RedisProperties properties;
 
-    @Bean
+    @Bean("redisTemplate")
     @ConditionalOnMissingBean(name = "redisTemplate")
     public RedisTemplate<Object, Object> redisTemplate(
-            RedisConnectionFactory redisConnectionFactory)
+            @Qualifier(value = "jedisConnectionFactory") RedisConnectionFactory redisConnectionFactory)
             throws UnknownHostException
     {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();

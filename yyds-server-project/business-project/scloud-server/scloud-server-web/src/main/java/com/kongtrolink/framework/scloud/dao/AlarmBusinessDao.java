@@ -1,22 +1,32 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
+import com.kongtrolink.framework.scloud.entity.SiteEntity;
+import com.kongtrolink.framework.scloud.entity.Statistics;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.util.MongoRegexUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.BulkWriteResult;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 /**
  * @Auther: liudd
@@ -92,7 +102,15 @@ public class AlarmBusinessDao {
     private Criteria baseCriteria(AlarmBusinessQuery businessQuery){
         Criteria criteria = new Criteria();
         Boolean shield = businessQuery.getShield();
-        criteria.and("shield").is(shield);
+        if(shield != null) {
+            criteria.and("shield").is(shield);
+        }else{
+            criteria.and("shield").ne(true);
+        }
+        String shieldRuleId = businessQuery.getShieldRuleId();
+        if(!StringUtil.isNUll(shieldRuleId)){
+            criteria.and("shieldRuleId").is(shieldRuleId);
+        }
         String name = businessQuery.getName();
         if(!StringUtil.isNUll(name)){
             name = MongoRegexUtil.escapeExprSpecialWord(name);
@@ -177,7 +195,7 @@ public class AlarmBusinessDao {
         update.set("checkState", BaseConstant.CHECKED);
         update.set("checkTime", businessQuery.getOperateTime());
         update.set("checkContant", businessQuery.getOperateDesc());
-        update.set("checker", new FacadeView(businessQuery.getOperateUserId(), businessQuery.getOperateUsername()));
+        update.set("checker", new FacadeView(businessQuery.getOperatorId(), businessQuery.getOperatorName()));
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN();
     }
@@ -208,6 +226,9 @@ public class AlarmBusinessDao {
         Update update = new Update();
         update.set("state", BaseConstant.ALARM_STATE_RESOLVE);
         update.set("trecover", businessQuery.getOperateTime());
+        if(null != businessQuery.getRecoverMan()){
+            update.set("recoverMan", businessQuery.getRecoverMan());
+        }
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
     }
@@ -220,5 +241,141 @@ public class AlarmBusinessDao {
         update.unset("trecover");
         WriteResult result = mongoTemplate.updateMulti(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/9 17:31
+     * 功能描述:告警消除
+     */
+    public List<Statistics> countLevel(String uniqueCode, String table, AlarmBusinessQuery businessQuery) {
+        Criteria criteria = baseCriteria(businessQuery);
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.group("level").count().as("count"),
+                Aggregation.project("_id", "count").and("_id").as("intPro")
+        );
+        AggregationResults<Statistics> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + table, Statistics.class);
+        return aggregate.getMappedResults();
+    }
+
+    /**
+     * 第一步：获取一个月内待处理告警前10的站点编码
+     * 第二步：根据站点编码按日统计
+     */
+    public List<Statistics> siteDateCount(String uniqueCode, String table, AlarmBusinessQuery businessQuery) {
+        businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
+        Criteria oneCri = baseCriteria(businessQuery);
+        Aggregation oneAggre = Aggregation.newAggregation(
+                Aggregation.match(oneCri),
+                Aggregation.group("siteCode").count().as("count"),
+                Aggregation.project("count").and("_id").as("code"),
+                Aggregation.sort(Sort.Direction.DESC, "count"),
+                Aggregation.limit(10)
+        );
+        AggregationResults<Statistics> oneAggResults = mongoTemplate.aggregate(oneAggre, uniqueCode + table, Statistics.class);
+        List<Statistics> oneMapped = oneAggResults.getMappedResults();
+        List<String> siteCodeList = new ArrayList<>();
+        for(Statistics alarmSiteStatistics : oneMapped){
+            siteCodeList.add(alarmSiteStatistics.getCode());
+        }
+        businessQuery.setSiteCodeList(siteCodeList);
+        Criteria twoCri = baseCriteria(businessQuery);
+        Aggregation twoAggre = Aggregation.newAggregation(
+                match(twoCri),
+                project("siteCode")
+                        .and("treport").plus(28800000).as("publishDateAdd"),
+                project("siteCode").andExpression("substr(publishDateAdd,0,10)").as("checkTime"),//取得 时分秒
+                group("checkTime","siteCode").count().as("count"),
+                project("count").and("_id.checkTime").as("name").and("_id.siteCode").as("code"),
+                sort(Sort.Direction.ASC, "code","name"));
+        AggregationResults<Statistics> result = mongoTemplate.aggregate(twoAggre, uniqueCode + table, Statistics.class);
+        return result.getMappedResults();
+    }
+
+    /**
+     * @param uniqueCode
+     * @param businessQuery
+     * @auther: liudd
+     * @date: 2020/4/15 11:19
+     * 功能描述:告警分布
+     */
+    public List<Statistics> getAlarmDistributeList(String uniqueCode, AlarmBusinessQuery businessQuery) {
+        businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
+        String tierCodePrefix = businessQuery.getTierCodePrefix();
+        if(!StringUtil.isNUll(tierCodePrefix) && tierCodePrefix.length() >= 6){
+            return getAlarmSiteList(uniqueCode, businessQuery);
+        }else {
+            return getAlarmTierList(uniqueCode, businessQuery);
+        }
+    }
+
+    /**
+     * @param uniqueCode
+     * @param businessQuery
+     * @auther: liudd
+     * @date: 2020/4/15 11:19
+     * 功能描述:告警层级分布
+     */
+    public List<Statistics> getAlarmTierList(String uniqueCode, AlarmBusinessQuery businessQuery) {
+        Criteria criteria = baseCriteria(businessQuery);
+        int substrLen = 2;
+        String tierCodePrefix = businessQuery.getTierCodePrefix();
+        if(!StringUtil.isNUll(tierCodePrefix)) {
+            criteria.and("siteCode").regex("^" + tierCodePrefix + ".*?");
+            substrLen = tierCodePrefix.length() + 2;
+        }
+        String subStr = "substr(siteCode,0," + substrLen + ")";
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.project("siteCode").andExpression(subStr).as("tier"),
+                Aggregation.group("tier").count().as("count"),
+                Aggregation.sort(Sort.Direction.DESC, "count"),
+                Aggregation.limit(8),
+                Aggregation.project("_id", "count").and("_id").as("code")
+        );
+        AggregationResults<Statistics> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + CollectionSuffix.HIS_ALARM_BUSINESS, Statistics.class);
+        //填充层级信息
+        for(Statistics statistics : aggregate.getMappedResults()){
+            statistics.setName("站点不存在，无法获取区域信息");
+            Criteria siteCri = Criteria.where("code").regex("^" + statistics.getCode() + ".*?");
+            Query siteQuery = Query.query(siteCri);
+            SiteEntity siteEntity = mongoTemplate.findOne(siteQuery, SiteEntity.class, uniqueCode + CollectionSuffix.SITE);
+            if(null != siteEntity){
+                String tierName = siteEntity.getTierName();
+                if(!StringUtil.isNUll(tierName)){
+                    String[] split = tierName.split(BaseConstant.LEDGE);
+                    statistics.setName(split[(substrLen/2)-1]);
+                }
+            }
+        }
+        return aggregate.getMappedResults();
+    }
+
+    /**
+     * @param uniqueCode
+     * @param businessQuery
+     * @auther: liudd
+     * @date: 2020/4/15 11:19
+     * 功能描述:告警站点分布
+     */
+    public List<Statistics> getAlarmSiteList(String uniqueCode, AlarmBusinessQuery businessQuery) {
+        Criteria criteria = baseCriteria(businessQuery);
+        criteria.and("siteCode").regex("^" + businessQuery.getTierCodePrefix() + ".*?");
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.group("siteCode").count().as("count"),
+                Aggregation.sort(Sort.Direction.DESC, "count"),
+                Aggregation.limit(8),
+                Aggregation.project("_id", "count").and("_id").as("code")
+        );
+        AggregationResults<Statistics> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + CollectionSuffix.HIS_ALARM_BUSINESS, Statistics.class);
+        return aggregate.getMappedResults();
+    }
+
+    public List<AlarmBusiness> listNoPage(String uniqueCode, String table, AlarmBusinessQuery alarmQuery) {
+        Criteria criteria = baseCriteria(alarmQuery);
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, AlarmBusiness.class, uniqueCode + table);
     }
 }

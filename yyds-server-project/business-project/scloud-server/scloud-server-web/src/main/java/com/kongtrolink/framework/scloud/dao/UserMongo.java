@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * 系统用户 相关数据操作类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 @Repository
 public class UserMongo {
@@ -27,6 +27,7 @@ public class UserMongo {
     MongoTemplate mongoTemplate;
     /**
      * 获取用户管辖站点
+     * Created by Eric on 2020/2/28.
      */
     public List<UserSiteEntity> findUserSite(String uniqueCode, String userId){
         Criteria criteria = Criteria.where("userId").is(userId);
@@ -54,7 +55,7 @@ public class UserMongo {
     }
 
     public UserModel findUserById(String uniqueCode, String userId) {
-       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER);
+       return mongoTemplate.findOne(Query.query(Criteria.where("userId").is(userId)), UserModel.class, uniqueCode + CollectionSuffix.USER_SITE);
 
     }
     /**
@@ -96,7 +97,22 @@ public class UserMongo {
      * 用户列表
      */
     public UserEntity listUser(String uniqueCode, String id, UserQuery userQuery){
+        UserEntity userEntity = new UserEntity();
+//        String lockStatus = userEntity.getLockStatus(); //锁定状态
+        String userStatus = userEntity.getUserStatus(); //用户状态
+        Date validTime = userEntity.getValidTime();  //有效日期
         Criteria criteria = Criteria.where("userId").is(id);
+        Criteria criteria1 = new Criteria();
+//        if (lockStatus != null && !lockStatus.equals("")){
+//            criteria1.and("lockStatus").is(lockStatus);
+//        }
+        if (userStatus != null && !userStatus.equals("")){
+            criteria1.and("userStatus").is(userStatus);
+        }
+        if (validTime != null){
+            criteria1.and("validTime").gte(userQuery.getStartTime()).lte(userQuery.getEndTime());
+        }
+        criteria.andOperator(criteria1);
         Query query = new Query(criteria);
         UserEntity user = mongoTemplate.findOne(query,UserEntity.class,uniqueCode+CollectionSuffix.USER);
         return user;

@@ -35,6 +35,7 @@ public class Alarm {
     private String color;               //告警颜色
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
+    private FacadeView recoverMan;      //消除人
     private String state;               //告警状态（待处理，已消除）
     private Map<String, String> auxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
@@ -47,6 +48,14 @@ public class Alarm {
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
     private String workCode;            //工单编码，用于前端展示
+
+    public FacadeView getRecoverMan() {
+        return recoverMan;
+    }
+
+    public void setRecoverMan(FacadeView recoverMan) {
+        this.recoverMan = recoverMan;
+    }
 
     public String getWorkCode() {
         return workCode;

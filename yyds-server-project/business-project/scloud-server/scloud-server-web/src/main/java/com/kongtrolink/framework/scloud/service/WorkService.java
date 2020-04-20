@@ -37,20 +37,20 @@ public interface WorkService {
      * @date: 2020/4/2 12:23
      * 功能描述:接单公共部分
      */
-    JsonResult receCommon(String uniqueCode, String workId, User user, Date curDate, String FTU);
+    JsonResult receCommon(String uniqueCode, Work work, User user, Date curDate, String FTU);
 
     /**
      * @auther: liudd
      * @date: 2020/4/2 13:19
      * 功能描述:转派公共部分
      */
-    JsonResult redeployCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU);
+    JsonResult redeployCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU);
 
-    JsonResult urgeCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU);
+    JsonResult urgeCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU);
 
-    JsonResult overCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU);
+    JsonResult overCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU);
 
-    JsonResult cancelCommon(String uniqueCode, WorkRecord workRecord, User user, Date curDate, String FTU);
+    JsonResult cancelCommon(String uniqueCode, Work work, WorkRecord workRecord, User user, Date curDate, String FTU);
 
     JsonResult detailCommon(String uniqueCode, String workId);
 
@@ -61,6 +61,6 @@ public interface WorkService {
      */
     void resolveAlarm(String uniqueCode, AlarmBusiness business);
 
-    JSONObject createJpush(Work work, String operate, List<String> accountList);
+    PushEntity createJpush(Work work, String operate, List<String> accountList);
 
 }

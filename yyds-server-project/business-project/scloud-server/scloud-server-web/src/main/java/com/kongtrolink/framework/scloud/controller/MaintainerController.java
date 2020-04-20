@@ -33,7 +33,6 @@ public class MaintainerController extends BaseController {
     @Autowired
     MaintainerService maintainerService;
 
-    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintainerController.class);
 
     /**
@@ -42,7 +41,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "getMaintainerList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getMaintainerList(@RequestBody MaintainerQuery maintainerQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<MaintainerModel> list = maintainerService.getMaintainerList(uniqueCode, maintainerQuery);
             return new JsonResult(list);
         }catch (Exception e){
@@ -57,7 +56,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "exportMaintainerList", method = RequestMethod.POST)
     public void exportMaintainerList(@RequestBody MaintainerQuery maintainerQuery, HttpServletResponse response){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<MaintainerModel> list = maintainerService.getMaintainerList(uniqueCode, maintainerQuery);
             HSSFWorkbook workbook = maintainerService.exportMaintainerList(list);
             export(response, workbook, "维护用户表");
@@ -72,7 +71,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "addMaintainer", method = RequestMethod.POST)
     public @ResponseBody JsonResult addMaintainer(@RequestBody MaintainerModel maintainerModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             String userId = maintainerService.addMaintainer(uniqueCode, maintainerModel);
             if (userId != null){
                 return new JsonResult(userId);
@@ -91,7 +90,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "importMaintainerList", method = RequestMethod.POST)
     public @ResponseBody JsonResult importMaintainerList(@RequestBody MultipartFile multipartFile){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
 
             return new JsonResult("批量导入维护用户成功", true);
         }catch (Exception e){
@@ -106,7 +105,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "modifyMaintainer", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyMaintainer(@RequestBody MaintainerModel maintainerModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             boolean modifyResult = maintainerService.modifyMaintainer(uniqueCode, maintainerModel);
             if (modifyResult) {
                 return new JsonResult("修改成功", true);
@@ -125,7 +124,7 @@ public class MaintainerController extends BaseController {
     @RequestMapping(value = "deleteMaintainer", method = RequestMethod.POST)
     public @ResponseBody JsonResult deleteMaintainer(@RequestBody MaintainerQuery maintainerQuery){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             if (maintainerQuery.getUserIds() != null && maintainerQuery.getUserIds().size() > 0) {
                 maintainerService.deleteMaintainer(uniqueCode, maintainerQuery);
                 return new JsonResult("删除成功", true);

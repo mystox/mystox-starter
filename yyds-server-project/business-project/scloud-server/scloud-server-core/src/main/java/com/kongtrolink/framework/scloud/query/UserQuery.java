@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * 系统用户 查询类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 public class UserQuery extends Paging{
     /**

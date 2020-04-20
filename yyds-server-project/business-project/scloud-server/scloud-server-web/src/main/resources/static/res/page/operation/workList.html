@@ -27,11 +27,11 @@
                 </select>
 
                 <label>工单状态</label>
-                <select ng-model="orderQuery.status" ng-options="item as item for item in CONST.workList.status">
+                <select ng-model="orderQuery.state" ng-options="item as item for item in CONST.workList.status">
                     <option ng-bind="'全部'"></option>
                 </select>
 
-                <label>告警工单流水号</label>
+                <label>工单流水号</label>
                 <input type="text" ng-model="orderQuery.code">
 
                 <label>站点名称</label>
@@ -47,20 +47,20 @@
                     <option ng-if="!deviceTypeList" ng-bind="'全部'"></option>
                 </select>
 
-                <label>告警类型</label>
-                <select ng-model="orderQuery.alarmName" ng-options="item.signalName as item.signalName for item in orderQuery.device.signalTypeList">
-                    <option ng-bind="'全部'"></option>
-                </select>
+                <label>告警名称</label>
+                <input type="text" ng-model="orderQuery.alarmName" />
 
                 <label>告警等级</label>
-                <select ng-model="orderQuery.alarmLevel" ng-options="item.key as item.value for item in CONST.alarmLevelList">
+                <select ng-model="orderQuery.alarmLevel" ng-options="item.levels[0] as item.name for item in alarmLevelList">
                     <option ng-bind="'全部'"></option>
                 </select>
             </div>
 
             <div class="form-inline">
-                <label>代维公司</label>
-                <input type="text" ng-model="orderQuery.companyName">
+                <label>告警状态</label>
+                <select ng-model="orderQuery.checkState" ng-options="item.value as item.value for item in CONST.alarmCheckedStateList">
+                    <option ng-bind="'全部'"></option>
+                </select>
 
                 <label>派单时间</label>
                 <div class="startTime input-append date">
@@ -100,14 +100,13 @@
                             <th>派单时间</th>
                             <th>任务时限</th>
                             <th ng-show="subTabPage.currentIndex === 1">回单时间</th>
-                            <th ng-show="subTabPage.currentIndex === 1">站点类型</th>
                             <th ng-show="subTabPage.currentIndex === 1">站点层级</th>
                             <th>站点名称</th>
+                            <th ng-show="subTabPage.currentIndex === 1">站点地址</th>
                             <th ng-show="subTabPage.currentIndex === 1">设备类型</th>
-                            <th>告警状态</th>
-                            <th>告警级别</th>
                             <th>告警名称</th>
-                            <th ng-show="subTabPage.currentIndex === 1">告警详情</th>
+                            <th>告警级别</th>
+                            <th>告警状态</th>
                             <th>接单人</th>
                             <th>操作</th>
                         </tr>
@@ -116,7 +115,7 @@
                         <tr ng-repeat="item in orderList" class="cursor-point" ng-click="$parent.curWork=item; showSingleWork()">
                             <td ng-bind="item.code"></td>
                             <td ng-bind="item.sendType"></td>
-                            <td ng-bind="item.status" ng-class="{
+                            <td ng-bind="item.state" ng-class="{
                                 '未派单': 'font-white',
                                 '已派单': 'font-white',                                
                                 '超时未接单': 'font-danger',
@@ -124,24 +123,23 @@
                                 '超时未回单': 'font-danger',
                                 '已回单': 'font-success'
                             }[item.status]"></td>
-                            <td ng-bind="item.alarmList[0].tReport | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                            <td ng-bind="item.workAlarmList[0].treport | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                             <td ng-bind="item.sentTime | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                             <td ng-bind="item.taskTime + '小时'"></td>
                             <td ng-bind="item.backTime | nullFilter | date: 'yyyy-MM-dd HH:mm:ss'" ng-show="subTabPage.currentIndex === 1"></td>
-                            <td ng-bind="item.stationType | stationTypeFilter" ng-show="subTabPage.currentIndex === 1"></td>
-                            <td ng-bind="item.tierName" ng-show="subTabPage.currentIndex === 1"></td>
+                            <td ng-bind="getSiteTier(item.site.strId)" ng-show="subTabPage.currentIndex === 1"></td> <!-- 没有 -->
                             <td ng-bind="item.site.name"></td>
-                            <td ng-bind="item.deviceType" ng-show="subTabPage.currentIndex === 1"></td>
-                            <td ng-bind="item.alarmList[0].state"></td>
-                            <td ng-bind="item.alarmList[0].level | alarmLevelFilter"></td>
-                            <td ng-bind="item.alarmList[0].signalName"></td>
-                            <td ng-bind="item.alarmList[0].details" ng-show="subTabPage.currentIndex === 1"></td>
+                            <td ng-bind="item.address | nullFilter" ng-show="subTabPage.currentIndex === 1"></td>
+                            <td ng-bind="getDeviceType(item.deviceType)" ng-show="subTabPage.currentIndex === 1"></td>
+                            <td ng-bind="item.workAlarmList[0].alarmName"></td>
+                            <td ng-bind="item.workAlarmList[0].level | SDGD_alarmLevelFilter:alarmLevelForFilter"></td>
+                            <td ng-bind="item.workAlarmList[0].state"></td>
                             <td ng-bind="item.worker.name | nullFilter"></td>
                             <td>
-                                <!-- <a title="派单" ng-show="needShowBtn('派单', item.status)" class="ic ic-work-deploy" ng-click="curWork=item; deployWork(item); $event.stopPropagation()"></a> -->
-                                <a title="转单" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', item.status)" class="ic ic-work-redeploy" ng-click="$parent.curWork=item; redeploy.toModal(); $event.stopPropagation()"></a>
-                                <a title="催单" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', item.status)" class="ic ic-work-urge" ng-click="$parent.curWork=item; urge.toModal(); $event.stopPropagation()"></a>
-                                <a title="撤单" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', item.status)" class="ic ic-work-cancle" ng-click="$parent.curWork=item; cancleWork(item); $event.stopPropagation()"></a>
+                                <a title="接单" ng-if="user.job==='维护人员'" ng-show="needShowBtn('接单', item.state)" class="ic ic-work-deploy" ng-click="applyWork(item); $event.stopPropagation()"></a>
+                                <a title="转单" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', item.state)" class="ic ic-work-redeploy" ng-click="$parent.curWork=item; redeploy.toModal(); $event.stopPropagation()"></a>
+                                <a title="催单" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', item.state)" class="ic ic-work-urge" ng-click="$parent.curWork=item; urge.toModal(); $event.stopPropagation()"></a>
+                                <a title="撤单" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', item.state)" class="ic ic-work-cancle" ng-click="$parent.curWork=item; cancleWork(item); $event.stopPropagation()"></a>
                             </td>
                         </tr>
                         </tbody>
@@ -164,35 +162,18 @@
             <div class="form-inline">
 
                 <label>派单方式</label>
-                <select ng-model="workConfigQuery.sendWorkType" ng-options="item as item for item in CONST.workList.sendType">
-                    <option value="">全部</option>
-                </select>
-
-                <label>站点类型</label>
-                <select ng-model="workConfigQuery.stationType" ng-options="item.key as item.value for item in CONST.stationTypeList">
+                <select ng-model="workConfigQuery.sendType" ng-options="item as item for item in CONST.workList.sendType">
                     <option value="">全部</option>
                 </select>
 
                 <label>告警级别</label>                
-                <select ng-model="workConfigQuery.alarmLevelList" ng-options="item.key as item.value for item in CONST.alarmLevelList">
+                <select ng-model="workConfigQuery.alarmLevelList" ng-options="item.levels[0] as item.name for item in alarmLevelList">
                     <option value="">全部</option>
                 </select>
-            </div>
 
-            <div class="form-inline">
                 <label>告警名称</label>
                 <input type="text" ng-model="workConfigQuery.signalName">
 
-                <!-- <label>派单时间</label>
-                <div class="startTime input-append date">
-                    <input size="16" type="text" value="" ng-model="workConfigQuery.sendedWorkBeginTime">
-                    <span class="add-on"><i class="icon-th icon-white"></i></span>
-                </div>
-                <label>-</label>
-                <div class="endTime input-append date">
-                    <input size="16" type="text" value="" ng-model="workConfigQuery.sendedWorkEndTime">
-                    <span class="add-on"><i class="icon-th icon-white"></i></span>
-                </div> -->
                 <button class="btn btn-primary" ng-click="queryWorkConfig();">查询</button>
                 <button class="btn btn-default" type="reset" ng-click="resetWorkConfig();">清除</button>
             </div>
@@ -200,6 +181,7 @@
         <div class="work-orders setting-work-orders">
             <div class="card-bg">
                 <div class="page-header">
+                    <h3 style="color: #000">工单配置</h3>
                     <button ng-if="util.checkPrivilege(2702)" class="btn btn-primary" ng-click="addOrModifyWork.toModal()">
                         <i class="ic ic-plus"  title="增加"></i> 增加
                     </button>
@@ -223,14 +205,14 @@
                         <tbody>
                         <tr ng-repeat="item in workConfigList">
                             <td ng-bind = "$index + 1"></td>
-                            <td ng-bind = "item.sendWorkType"></td>
+                            <td ng-bind = "item.sendType"></td>
                             <td ng-bind = "item.type"></td>
                             <td ng-bind = "item.stationTypeList.length > 1 ? '全部' : (item.stationTypeList[0] | stationTypeFilter)"></td>
-                            <td ng-bind = "item.alarmLevelList | alarmLevelFilter | nullFilter"></td>
-                            <td ng-bind = "item.signalNameList.join('、') | nullFilter"></td>
-                            <td ng-bind = "item.sendWorkType === '手动' ? '-' : (item.alarmBeginTime + '分钟')"></td>
-                            <td ng-bind = "item.sendedWorkBeginTime | nullFilter: ':00'"></td>
-                            <td ng-bind = "item.sendedWorkEndTime | nullFilter: ':00'"></td>
+                            <td ng-bind = "item.alarmLevelList | SDGD_alarmLevelFilter:alarmLevelForFilter"></td>
+                            <td ng-bind = "item.alarmNameList.join('、') | nullFilter"></td>
+                            <td ng-bind = "item.sendType === '手动' ? '-' : (item.reportAfter + '分钟')"></td>
+                            <td ng-bind = "item.reportBegin | nullFilter: ':00'"></td>
+                            <td ng-bind = "item.reportEnd | nullFilter: ':00'"></td>
                             <td>
                                 <a title="编辑" ng-if="item.type !== '默认' && util.checkPrivilege(2704)" class="ic ic-edit" ng-click="addOrModifyWork.toModal(item);"></a>
                                 <a title="详情" class="ic ic-detail" ng-click="addOrModifyWork.toModal(item, 'detail');"></a>
@@ -277,7 +259,7 @@
                     <div class="controls">
                         <select required
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                                ng-model="addOrModifyWork.obj.sendWorkType"
+                                ng-model="addOrModifyWork.obj.sendType"
                                 ng-options="item as item for item in CONST.workList.sendType">
                         </select>
                         <span class="help-inline"></span>
@@ -293,81 +275,81 @@
                         <span class="help-inline required"></span>
                     </div>
                 </div>
-                <div class="control-group" ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group" ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">站点类型</label>
                     <div class="controls">
                         <select ng-model="addOrModifyWork.obj.stationType"
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                                ng-options="item.key as item.value for item in CONST.stationTypeList">
+                                ng-options="item.value as item.value for item in CONST.stationTypeList">
                                 <option ng-bind="'全部'"></option>
                         </select>
                         <span class="help-inline required"></span>
                     </div>
                 </div>
-                <div class="control-group" ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group" ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">告警级别</label>
                     <div class="controls">                        
                         <input type="text" class="form-control" multiple
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                               select2 config="CONST.alarmLevelListForSelect2"
+                               select2 config="alarmLevelListSelect2"
                                select2-model="addOrModifyWork.obj.alarmLevelList" />
                     </div>
                 </div>
-                <div class="control-group" ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group" ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">告警名称</label>
                     <div class="controls">
                         <input type="text" class="form-control" multiple
                                select2 config="allDeviceTypeListForSelect2"
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                               select2-model="addOrModifyWork.obj.signalNameList" />
+                               select2-model="addOrModifyWork.obj.alarmNameList" />
                         <span ng-show="addOrModifyWork.error" class="font-danger">告警名称和告警等级只能填写一项</span>
                     </div>
                 </div>
-                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.alarmBeginTime);" ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.reportAfter);" ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">告警后启用时限</label>
                     <div class="controls">
-                        <input type="text" name="alarmBeginTime" 
-                               ng-model="addOrModifyWork.obj.alarmBeginTime"
+                        <input type="text" name="reportAfter" 
+                               ng-model="addOrModifyWork.obj.reportAfter"
                                placeholder="{{REGEX.workConfigTimeDesc}}" 
                                 ng-disabled="addOrModifyWork.status === 'detail'"
                                ng-pattern = "REGEX.workConfigTime">
                         分钟<span class="help-inline required"></span>
                     </div>
                 </div>
-                <div class="control-group startTime input-append date" setting='{"format": "hh:mm:00"}' ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group startTime input-append date" setting='{"format": "hh:mm:00"}' ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">派单启用开始时间</label>
                     <div class="controls">
                         <input size="16" type="text" value=""
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                               ng-model="addOrModifyWork.obj.sendedWorkBeginTime">
+                               ng-model="addOrModifyWork.obj.reportBegin">
                         <span class="add-on"><i class="icon-th icon-white"></i></span>
                     </div>
                 </div>
-                <div class="control-group endTime input-append date" setting='{"format": "hh:mm:00"}' ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+                <div class="control-group endTime input-append date" setting='{"format": "hh:mm:00"}' ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">派单启用结束时间</label>
                     <div class="controls">
                         <input size="16" type="text" value=""
                                 ng-disabled="addOrModifyWork.status === 'detail'"
-                               ng-model="addOrModifyWork.obj.sendedWorkEndTime">
+                               ng-model="addOrModifyWork.obj.reportEnd">
                         <span class="add-on"><i class="icon-th icon-white"></i></span>
                     </div>
                 </div>
 
-               <!--  <div class="control-group" ng-show="addOrModifyWork.obj.sendWorkType === '自动派单'">
+               <!--  <div class="control-group" ng-show="addOrModifyWork.obj.sendType === '自动派单'">
                     <label class="control-label">派单启用时间段</label>
                     <div class="controls">
                         <scloud-range start = "00:00" end = "23:59" 
-                            max="addOrModifyWork.obj.sendedWorkEndTime" 
-                            min="addOrModifyWork.obj.sendedWorkBeginTime"></scloud-range>
+                            max="addOrModifyWork.obj.reportEnd" 
+                            min="addOrModifyWork.obj.reportBegin"></scloud-range>
                     </div>
                 </div> -->
 
-                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.receWorkOvertimeNotice);">
+                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.csjdsc);">
                     <label class="control-label">超时接单提醒时长</label>
                     <div class="controls">
-                        <input type="text" name="receWorkOvertimeNotice"
+                        <input type="text" name="csjdsc"
                                required
-                               ng-model="addOrModifyWork.obj.receWorkOvertimeNotice"
+                               ng-model="addOrModifyWork.obj.csjdsc"
                                placeholder="{{REGEX.workConfigTimeDesc}}" 
                                ng-pattern = "REGEX.workConfigTime"
                                 ng-disabled="addOrModifyWork.status === 'detail'"
@@ -375,12 +357,12 @@
                         分钟<span class="help-inline"></span>
                     </div>
                 </div>
-                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.receWorkTimeNotice);">
+                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.csjdtxjg);">
                     <label class="control-label">超时接单提醒间隔</label>
                     <div class="controls">
-                        <input type="text" name="receWorkTimeNotice"
+                        <input type="text" name="csjdtxjg"
                                required
-                               ng-model="addOrModifyWork.obj.receWorkTimeNotice"
+                               ng-model="addOrModifyWork.obj.csjdtxjg"
                                placeholder="{{REGEX.workConfigTimeDesc}}" 
                                 ng-disabled="addOrModifyWork.status === 'detail'"
                                ng-pattern = "REGEX.workConfigTime"
@@ -388,12 +370,12 @@
                         分钟<span class="help-inline"></span>
                     </div>
                 </div>
-                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.backWorkOvertimeNotice);">
+                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.cshdsc);">
                     <label class="control-label">超时回单提醒时长</label>
                     <div class="controls">
-                        <input type="text" name="backWorkOvertimeNotice"
+                        <input type="text" name="cshdsc"
                                required
-                               ng-model="addOrModifyWork.obj.backWorkOvertimeNotice"
+                               ng-model="addOrModifyWork.obj.cshdsc"
                                placeholder="{{REGEX.workConfigTimeDesc}}" 
                                 ng-disabled="addOrModifyWork.status === 'detail'"
                                ng-pattern = "REGEX.workConfigTime"
@@ -401,12 +383,12 @@
                         分钟<span class="help-inline"></span>
                     </div>
                 </div>
-                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.backWorkTimeNotice);">
+                <div class="control-group" ng-class="getValidClass(addOrModifyWork.form.cshdtxjg);">
                     <label class="control-label">超时回单提醒间隔</label>
                     <div class="controls">
-                        <input type="text" name="backWorkTimeNotice"
+                        <input type="text" name="cshdtxjg"
                                required
-                               ng-model="addOrModifyWork.obj.backWorkTimeNotice"
+                               ng-model="addOrModifyWork.obj.cshdtxjg"
                                placeholder="{{REGEX.workConfigTimeDesc}}" 
                                ng-pattern = "REGEX.workConfigTime"
                                 ng-disabled="addOrModifyWork.status === 'detail'"
@@ -418,11 +400,11 @@
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary" 
                     ng-disabled="addOrModifyWork.form.$invalid || 
-                    !addOrModifyWork.obj.tierCodes || 
-                    addOrModifyWork.obj.tierCodes.length === 0 || 
-                    (addOrModifyWork.obj.sendWorkType === '自动派单' && 
-                        (!addOrModifyWork.obj.alarmBeginTime || 
-                        (!(addOrModifyWork.obj.alarmLevelList.length > 0) && !(addOrModifyWork.obj.signalNameList.length > 0))))">确认</button>
+                    !addOrModifyWork.obj.siteCodeList || 
+                    addOrModifyWork.obj.siteCodeList.length === 0 || 
+                    (addOrModifyWork.obj.sendType === '自动派单' && 
+                        (!addOrModifyWork.obj.reportAfter || 
+                        (!(addOrModifyWork.obj.alarmLevelList.length > 0) && !(addOrModifyWork.obj.alarmNameList.length > 0))))">确认</button>
                 <button type="reset" class="btn btn-default" ng-click="addOrModifyWork.clear();">取消</button>
             </div>
         </form>
@@ -442,7 +424,7 @@
             <div class="page-body query-form">            
                 <div class="form-inline ">
                     <div class="form-inline item">
-                        <label>告警工单流水号</label>
+                        <label>工单流水号</label>
                         <span ng-bind = "curWork.code"></span>
                     </div>
                     <div class="form-inline item">
@@ -451,19 +433,16 @@
                     </div>
                     <div class="form-inline item">
                         <label>工单状态</label>
-                        <span ng-bind = "curWork.status"></span>
+                        <span ng-bind = "curWork.state"></span>
                     </div>
                     <div class="form-inline item">
                         <label>站点名称</label>
                         <span ng-bind = "curWork.site.name"></span>
                     </div>
+                    <!-- meiyou  精确到分，以天、小时、分显示 -->
                     <div class="form-inline item">
-                        <label>站点类型</label>
-                        <span ng-bind = "curWork.stationType | stationTypeFilter"></span>
-                    </div>
-                    <div class="form-inline item">
-                        <label>任务时限</label>
-                        <span ng-bind = "curWork.taskTime + '小时'"></span>
+                        <label>站点地址</label>
+                        <span ng-bind = "curWork.site.name"></span>
                     </div>
                     <div class="form-inline item">
                         <label>接单人</label>
@@ -471,27 +450,42 @@
                     </div>
                     <div class="form-inline item">
                         <label>联系方式</label>
-                        <span ng-bind = "curWork.workerPhone"></span>
-                    </div>
-                    <div class="form-inline item">
-                        <label>代维公司</label>
-                        <span ng-bind = "curWork.companyName"></span>
-                    </div>
-                    <div class="form-inline item">
-                        <label>账号</label>
-                        <span ng-bind = "curWork.workerAccount"></span>
+                        <span ng-bind = "curWork.worker.phone"></span>
                     </div>
                     <div class="form-inline item">
                         <label>设备类型</label>
-                        <span ng-bind = "curWork.deviceType"></span>
+                        <span ng-bind = "getDeviceType(curWork.deviceType)"></span>
                     </div>
                     <div class="form-inline item">
                         <label>派单时间</label>
                         <span ng-bind = "curWork.sentTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
                     </div>
+                    <!-- ？？？ -->
+                    <div class="form-inline item">
+                        <label>接单时限</label>
+                        <span ng-bind = "curWork.taskTime + '小时'"></span>
+                    </div>
+                    <!-- ？？？ -->
+                    <div class="form-inline item">
+                        <label>接单时长</label>
+                        <span ng-bind = "curWork.taskTime + '小时'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>接单时间</label>
+                        <span ng-bind = "curWork.receTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span>
+                    </div>
                     <div class="form-inline item">
                         <label>超时接单</label>
-                        <span ng-bind = "curWork.reveOverTime + '小时'"></span>
+                        <span ng-bind = "curWork.csjdsc + '分钟'"></span>
+                    </div>
+                    <!-- ???  -->
+                    <div class="form-inline item">
+                        <label>回单时限</label>
+                        <span ng-bind = "curWork.cshdtxjg + '小时'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>回单时长</label>
+                        <span ng-bind = "curWork.cshdsc + '小时'"></span>
                     </div>
                     <div class="form-inline item">
                         <label>回单时间</label>
@@ -499,7 +493,11 @@
                     </div>
                     <div class="form-inline item">
                         <label>超时回单</label>
-                        <span ng-bind = "curWork.backOverTime + '小时'"></span>
+                        <span ng-bind = "curWork.cshdsc + '分钟'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>任务历时</label>
+                        <span ng-bind = "curWork.taskTime + '分钟'"></span>
                     </div>
                 </div>
             </div>
@@ -522,13 +520,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="alarm in curWork.alarmList" ng-class="CONST.animation.list">
-                            <td ng-bind="alarm.signalName">告警名称</td>
-                            <td ng-bind="alarm.level">告警等级</td>
+                        <tr ng-repeat="alarm in curWork.workAlarmList" ng-class="CONST.animation.list">
+                            <td ng-bind="alarm.alarmName">告警名称</td>
+                            <td ng-bind="alarm.level | SDGD_alarmLevelFilter:alarmLevelForFilter">告警等级</td>
+                            <!-- ??? -->
                             <td ng-bind="alarm.details">告警详情</td>
                             <td ng-bind="alarm.state">告警状态</td>
-                            <td ng-bind="alarm.tReport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter">告警时间</td>
-                            <td ng-bind="alarm.tRecover | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter">告警清除时间</td>
+                            <td ng-bind="alarm.treport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter">告警时间</td>
+                            <td ng-bind="alarm.trecover | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter">告警清除时间</td>
                         </tr>
                     </tbody>
                 </table>
@@ -557,8 +556,8 @@
                         <tr ng-repeat="record in curWork.workRecordList" ng-class="CONST.animation.list">
                             <td ng-bind="record.operateType | nullFilter"></td>
                             <td ng-bind="record.worker.name | nullFilter"></td>
-                            <td ng-bind="record.workerAccount | nullFilter"></td>
-                            <td ng-bind="record.workerPhone | nullFilter"></td>
+                            <td ng-bind="record.worker.strId | nullFilter"></td>
+                            <td ng-bind="record.worker.phone | nullFilter"></td>
                             <td ng-bind="record.operateDescribe | nullFilter"></td>
                             <td ng-bind="record.operateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                             <td ng-bind="record.handleTime * 60 | secondFilter"></td>
@@ -569,11 +568,12 @@
             </div>
         </div>
         <div class="operation">
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', curWork.status)" ng-click="urge.toModal()">催单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', curWork.status)" ng-click="redeploy.toModal()">转单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621)" ng-show="needShowBtn('回单', curWork.status)" ng-click="response.toModal('回单')">回单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', curWork.status)" ng-click="cancleWork(curWork); ifShowSingleWork=false">撤单</button>
-            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621)" ng-show="needShowBtn('回单补充', curWork.status)" ng-click="response.toModal('回单补充')">回单补充</button>
+            <button class="btn btn-primary" ng-if="user.job==='维护人员'" ng-show="needShowBtn('接单', curWork.state)" ng-click="applyWork(curWork)">接单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2619)" ng-show="needShowBtn('催单', curWork.state)" ng-click="urge.toModal()">催单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2618)" ng-show="needShowBtn('转单', curWork.state)" ng-click="redeploy.toModal()">转单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621) && user.job==='维护人员'" ng-show="needShowBtn('回单', curWork.state)" ng-click="response.toModal('回单')">回单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2620)" ng-show="needShowBtn('撤单', curWork.state)" ng-click="cancleWork(curWork); ifShowSingleWork=false">撤单</button>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(2621) && user.job==='维护人员'" ng-show="needShowBtn('回单补充', curWork.state)" ng-click="response.toModal('回单补充')">回单补充</button>
         </div>
     </div>
 

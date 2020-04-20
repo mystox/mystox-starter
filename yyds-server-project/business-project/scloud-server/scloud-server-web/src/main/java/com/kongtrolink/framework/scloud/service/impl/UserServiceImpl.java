@@ -3,6 +3,8 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.utils.ReflectionUtils;
+import com.kongtrolink.framework.core.utils.SessionCommonService;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
@@ -14,12 +16,14 @@ import com.kongtrolink.framework.scloud.query.UserQuery;
 import com.kongtrolink.framework.scloud.service.UserService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.service.MqttOpera;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,11 +35,13 @@ import java.util.*;
 
 /**
  * 系统管理-用户管理-系统用户 接口实现类
- * Created by Eric on 2020/2/28.
+ * Created by Yu Pengtao on 2020/4/13.
  */
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Autowired
+    SessionCommonService sessionCommonService;
     @Autowired
     UserMongo userMongo;
     @Autowired
@@ -53,6 +59,7 @@ public class UserServiceImpl implements UserService {
     public void modifyUserSite(String uniqueCode, List<UserSiteEntity> userSites) {
         //保存前，先删除原有用户管辖站点
         userMongo.deleteUserSite(uniqueCode, userSites.get(0).getUserId());
+
         //保存新的用户管辖站点
         userMongo.saveUserSite(uniqueCode, userSites);
     }
@@ -64,16 +71,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public JsonResult addUser(String uniqueCode, UserModel userModel) {
         UserEntity userEntity = new UserEntity();
-        Map<String,Object> map = new HashMap<>();   //传给云管的参数
-        map.put("name",userModel.getName());
-        map.put("username",userModel.getUsername());
-        map.put("phone",userModel.getPhone());
-        map.put("email",userModel.getEmail());
-        map.put("currentPostId",userModel.getCurrentPostId());
-        map.put("currentPositionName",userModel.getCurrentRoleName());
-        map.put("informRule",userModel.getInformRule());
+        Map<String, Object> map = new HashMap<>();   //传给云管的参数
+        map.put("name", userModel.getName());
+        map.put("username", userModel.getUsername());
+        map.put("phone", userModel.getPhone());
+        map.put("email", userModel.getEmail());
+        map.put("currentPostId", userModel.getCurrentPostId());
+        map.put("currentPositionName", userModel.getCurrentRoleName());
+        map.put("informRule", userModel.getInformRule());
+        map.put("password", userModel.getPassword());
         String userModelMsg = JSONObject.toJSONString(map);
-        MsgResult opera = mqttOpera.opera("addUser",userModelMsg);
+        MsgResult opera = mqttOpera.opera("addUser", userModelMsg);
         int stateCode = opera.getStateCode();
         if (stateCode == CommonConstant.SUCCESSFUL) {
             String msg = opera.getMsg();
@@ -84,13 +92,18 @@ public class UserServiceImpl implements UserService {
             Object data = jsonResult.getData();
             String userId = String.valueOf(data);//填充数据库实体
             userEntity.setUserId(userId);
+//            userEntity.setLockStatus(userModel.getLockStatus());
             userEntity.setUserStatus(userModel.getUserStatus());
             userEntity.setValidTime(userModel.getValidTime());
             userEntity.setWorkId(userModel.getWorkId());
+//            userEntity.setCreateTime(userModel.getCreateTime());
+//            userEntity.setLastLogin(userModel.getLastLogin());
+//            userEntity.setChangeTime(userModel.getChangeTime());
             userEntity.setRemark(userModel.getRemark());
+//            userEntity.setPassword(userModel.getPassword());
             userEntity.setGender(userModel.getGender());
             userEntity.setUserTime(userModel.getUserTime());
-            userMongo.addUser(uniqueCode,userEntity);
+            userMongo.addUser(uniqueCode, userEntity);
             return jsonResult;
         } else {
             String msg = opera.getMsg();
@@ -107,19 +120,20 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean modifyUser(String uniqueCode, UserModel userModel) {
-        Map<String,Object> map = new HashMap<>();   //传给云管的参数
-        map.put("userId",userModel.getUserId());
-        map.put("name",userModel.getName());
-        map.put("username",userModel.getUsername());
-        map.put("phone",userModel.getPhone());
-        map.put("email",userModel.getEmail());
-        map.put("currentPostId",userModel.getCurrentPostId());
-        map.put("currentRoleName",userModel.getCurrentRoleName());
-        map.put("informRule",userModel.getInformRule());
-        String userModelMsg = JSONObject.toJSONString(userModel);
-        MsgResult opera = mqttOpera.opera("modifyUser",userModelMsg);
-        if (opera.getStateCode() == CommonConstant.SUCCESSFUL){
-            boolean modifyUser = userMongo.modifyUser(uniqueCode,userModel);
+        Map<String, Object> map = new HashMap<>();   //传给云管的参数
+        map.put("userId", userModel.getUserId());
+        map.put("name", userModel.getName());
+        map.put("username", userModel.getUsername());
+        map.put("phone", userModel.getPhone());
+        map.put("email", userModel.getEmail());
+        map.put("currentPostId", userModel.getCurrentPostId());
+        map.put("currentPositionName", userModel.getCurrentRoleName());
+        map.put("informRule", userModel.getInformRule());
+        map.put("password", userModel.getPassword());
+        String userModelMsg = JSONObject.toJSONString(map);
+        MsgResult opera = mqttOpera.opera("modifyUser", userModelMsg);
+        if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
+            boolean modifyUser = userMongo.modifyUser(uniqueCode, userModel);
             return modifyUser;
         }else {
             return false;
@@ -133,12 +147,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(String uniqueCode, UserModel userModel) {
-        Map<String,Object> map = new HashMap<>();   //传给云管的参数
-        map.put("userId",userModel.getUserId());
+        Map<String, Object> map = new HashMap<>();   //传给云管的参数
+        map.put("userId", userModel.getUserId());
         String userModelMsg = JSONObject.toJSONString(map);
-        MsgResult opera = mqttOpera.opera("deleteUser",userModelMsg);
-        if (opera.getStateCode() == CommonConstant.SUCCESSFUL){
-            userMongo.deleteUser(uniqueCode,userModel);
+        MsgResult opera = mqttOpera.opera("deleteUser", userModelMsg);
+        if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
+            userMongo.deleteUser(uniqueCode, userModel);
         }
     }
 
@@ -149,28 +163,43 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public List<JSONObject> listUser(String uniqueCode, UserQuery userQuery) {
-        Map<String,Object> map = new HashMap<>();   //传给云管的参数
-        map.put("enterpriseCode",uniqueCode);
-        map.put("name",userQuery.getName());
-        map.put("username",userQuery.getUsername());
-        map.put("currentRoleName",userQuery.getCurrentRoleName());
+    public List<JSONObject> listUser(String uniqueCode, UserQuery userQuery, String serverCode) {
+        Set<String> onlineUsernames = new HashSet<>();
+        if (StringUtils.isNotBlank(serverCode)) {
+            onlineUsernames = sessionCommonService.getUsernameListByCurrentServerCode(serverCode);
+        }
+        Map<String, Object> map = new HashMap<>();   //传给云管的参数
+        map.put("enterpriseCode", uniqueCode);
+        map.put("name", userQuery.getName());
+        map.put("username", userQuery.getUsername());
+        map.put("currentRoleName", userQuery.getCurrentRoleName());
         String userMsg = JSONObject.toJSONString(map);
         List<JSONObject> result = new ArrayList<>();
-        MsgResult opera = mqttOpera.opera("listUser",userMsg);
-        if (opera.getStateCode() == CommonConstant.SUCCESSFUL){
+        MsgResult opera = mqttOpera.opera("listUser", userMsg);
+        if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
             String msg = opera.getMsg();
             JSONObject resultRange = JSONObject.parseObject(msg, JSONObject.class);
             Boolean success = resultRange.getBoolean("success");
+            List<JSONObject> userResult = new ArrayList<>();
             if (success) {
                 result = resultRange.getJSONArray("list").toJavaList(JSONObject.class);
-                for (JSONObject userList:result){
-                    String userId = userList.getString("userId");
-                    UserEntity userModel = userMongo.listUser(uniqueCode,userId,userQuery);
+                for (JSONObject userEntity : result) {
+
+                    String userId = userEntity.getString("userId");
+                    UserEntity userEntity1 = userMongo.listUser(uniqueCode, userId, userQuery);
+                    UserModel userModel = new UserModel();
+                    BeanUtils.copyProperties(userEntity,userModel);
                     if (userModel == null)
-                        continue;
+                        userModel = new UserModel();
                     JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
-                    userList.putAll(userJson);
+                    userJson.putAll(userEntity);
+                    String username = userEntity.getString("username");
+                    if (onlineUsernames.contains(username)) {
+                        userJson.put("onlineStatus", 1);
+                    } else {
+                        userJson.put("onlineStatus", 0);
+                    }
+                    userResult.add(userJson);
                 }
             }
             return result;
@@ -332,7 +361,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserModel getUserById(String uniqueCode, String userId) {
-        return userMongo.findUserById(uniqueCode,userId);
+        return userMongo.findUserById(uniqueCode, userId);
     }
     public String[][] getUserListAsTable(List<JSONObject> list){
         int colNum = 7;

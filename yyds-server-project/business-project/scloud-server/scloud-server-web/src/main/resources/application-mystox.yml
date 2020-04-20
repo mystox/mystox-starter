@@ -1,0 +1,44 @@
+spring:
+  redis:
+    host: 172.16.5.26
+    port: 6379
+    database: 2
+server:
+  groupCode: GROUP_1
+  name: SCLOUD_SERVER_WEB #服务编码
+  host: 172.16.5.60
+  port: 59002 #服务占用web端口
+mqtt:
+  username: root #可选配置 mqtt配置相关
+  password: 123456 #可选配置 mqtt配置相关
+  url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+
+########## mongo数据库配置 ##########
+spring.data.mongodb:
+  uri: mongodb://172.16.5.61:27017/scloud-product
+
+executor:
+  threadPool:
+    corePoolSize: 10
+    maxPoolSize: 1000
+
+###########上传文件配置###########
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 20MB
+    max-request-size: 100MB
+
+alarmModule:
+  list: alarmRemoteList
+  operate: alarmRemoteOperate
+  updateWorkInfo: alarmRemoteUpdateWork
+  level:
+    getLastUse: levelRemoteLastUse
+  auxilaryRemoteGet: auxilaryRemoteGet
+  auxilaryRemoteDel: auxilaryRemoteDel
+asset:
+  getCIModel: getCIModel
+deliver:
+  sender: handleSender
+

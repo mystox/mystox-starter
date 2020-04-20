@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
+import com.kongtrolink.framework.core.entity.session.WebPageInfo;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
@@ -42,7 +43,9 @@ public class UserController extends BaseController{
     @RequestMapping(value = "addUser",method = RequestMethod.POST)
     public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
         try {
-            return userService.addUser("YYDS",userModel);
+            String uniqueCode = getUniqueCode();
+//            uniqueCode = "YYDS";
+            return userService.addUser(uniqueCode,userModel);
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("添加失败",false);
@@ -89,7 +92,12 @@ public class UserController extends BaseController{
      */
     @RequestMapping(value = "listUser", method = RequestMethod.POST)
     public  @ResponseBody JsonResult listUser(@RequestBody UserQuery userQuery){
-        List<JSONObject> userResult = userService.listUser(getUniqueCode(),userQuery);
+
+        String uniqueCode = getUniqueCode();
+//        uniqueCode = "YYDS";
+        WebPageInfo currentService = getCurrentService();
+        String serverCode = currentService.getServerCode();
+        List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery,serverCode);
         return new JsonResult(userResult);
     }
     /**
@@ -98,7 +106,7 @@ public class UserController extends BaseController{
     @RequestMapping(value = "exportUserList",method = RequestMethod.POST)
     public void exportUserList(@RequestBody UserQuery userQuery,HttpServletResponse response){
         try {
-            List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery);
+            List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery,"");
             List<UserModel> result = new ArrayList<>();
             for (JSONObject list:userList){
                 UserModel user = JSON.toJavaObject(list,UserModel.class);

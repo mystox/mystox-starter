@@ -4,7 +4,7 @@ spring:
     port: 6379
     database: 2
 server:
-  host: 172.16.6.101
+  host: 172.16.5.60
   groupCode: GROUP
   port: 56002 #服务占用web端口
 mqtt:

@@ -37,7 +37,6 @@ public class DeviceController extends BaseController{
     @Autowired
     DeviceService deviceService;
 
-    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceController.class);
 
     /**
@@ -46,7 +45,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceList(@RequestBody DeviceQuery deviceQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, deviceQuery);
 
             return new JsonResult(list);
@@ -62,7 +61,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getDeviceSpecialInfo", method = RequestMethod.POST)
     public @ResponseBody JsonResult getDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             DeviceSpecialInfoEntity entity = deviceService.getDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
             return new JsonResult(entity);
         }catch (Exception e){
@@ -77,7 +76,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "exportDeviceList", method = RequestMethod.POST)
     public void exportDeviceList(@RequestBody DeviceQuery deviceQuery, HttpServletResponse response){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<DeviceModel> list = deviceService.findDeviceList(uniqueCode, deviceQuery);
             HSSFWorkbook workbook = deviceService.exportDeviceList(list);
             export(response, workbook, "站点资产信息列表");
@@ -92,7 +91,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "createDeviceCode", method = RequestMethod.POST)
     public @ResponseBody JsonResult createDeviceCode(@RequestBody DeviceModel deviceModel){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             String code = deviceService.createDeviceCode(uniqueCode, deviceModel);
             return new JsonResult(code);
         }catch (Exception e){
@@ -107,7 +106,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "addDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult addDevice(@RequestBody DeviceModel deviceModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             Integer deviceId = deviceService.addDevice(uniqueCode, deviceModel);
             if (deviceId != null) {
                 return new JsonResult(deviceId);
@@ -127,7 +126,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "saveDeviceSpecialInfo", method = RequestMethod.POST)
     public @ResponseBody JsonResult saveDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity entity){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             deviceService.saveDeviceSpecialInfo(uniqueCode, entity);
             return new JsonResult("保存设备特殊属性成功", true);
         }catch (Exception e){
@@ -156,7 +155,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "modifyDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult modifyDevice(@RequestBody DeviceModel deviceModel){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             boolean modifyResult = deviceService.modifyDevice(uniqueCode, deviceModel);
             if (modifyResult) {
                 return new JsonResult("修改成功", true);
@@ -176,7 +175,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "modifyDeviceSpecialInfo", method = RequestMethod.POST)
     public @ResponseBody void modifyDeviceSpecialInfo(@RequestBody DeviceSpecialInfoEntity deviceSpecialInfoEntity){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             deviceService.modifyDeviceSpecialInfo(uniqueCode, deviceSpecialInfoEntity);
         }catch (Exception e){
             e.printStackTrace();
@@ -189,7 +188,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "deleteDevice", method = RequestMethod.POST)
     public @ResponseBody JsonResult deleteDevice(@RequestBody DeviceQuery deviceQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             if (deviceQuery.getDeviceCodes() != null && deviceQuery.getDeviceCodes().size() > 0) {
                 deviceService.deleteDevice(uniqueCode, deviceQuery);
                 return new JsonResult("删除成功", true);
@@ -209,7 +208,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getFsuList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getFsuList(@RequestBody DeviceQuery deviceQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<RelatedDeviceInfo> list = deviceService.findFsuList(uniqueCode, deviceQuery);
             return new JsonResult(list);
         }catch (Exception e){
@@ -224,7 +223,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getRelatedDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getRelatedDeviceList(@RequestBody DeviceQuery deviceQuery){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<RelatedDeviceInfo> list = deviceService.findRelatedDeviceList(uniqueCode, deviceQuery);
             return new JsonResult(list);
         }catch (Exception e){
@@ -240,7 +239,7 @@ public class DeviceController extends BaseController{
     @RequestMapping(value = "getUnrelatedDeviceList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getUnrelatedDeviceList(@RequestBody DeviceQuery deviceQuery){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<RelatedDeviceInfo> list = deviceService.findUnrelatedDeviceList(uniqueCode, deviceQuery);
             return new JsonResult(list);
         }catch (Exception e){

@@ -136,7 +136,7 @@ public class MqttServiceImpl implements MqttService{
             alarmQuery.setKey(keyList.get(i));
             alarmQuery.setTreport(treportList.get(i));
             if(Const.ALARM_OPERATE_RESOLVE.equals(alarmQuery.getOperate())){
-                alarmQuery.setTrecover(alarmQuery.getOperateTime());
+//                alarmQuery.setTrecover(alarmQuery.getOperateTime());
                 check = alarmService.resolveByKey(alarmQuery);
             }
             if(check){

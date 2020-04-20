@@ -12,10 +12,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -168,13 +165,13 @@ public class HistoryMapXlsExporter {
 		} else if (obj instanceof Integer) { // Integer
 			return (Integer) obj;
 		}else if (obj instanceof Long && ((Long) obj).longValue()>99999999) { // 时间 1583115217569
-			return DateUtil.getInstance().format(new Date((Long) obj));
+			return com.kongtrolink.framework.common.util.DateUtil.getInstance().format(new Date((Long) obj));
 		} else if (obj instanceof Double) { // Double
 			return (Double) obj;
 		} else if (obj instanceof Boolean) { // Boolean
 			return(Boolean) obj;
 		} else if (obj instanceof Date) { // Date
-			return DateUtil.getInstance().format((Date) obj);
+			return com.kongtrolink.framework.common.util.DateUtil.getInstance().format((Date) obj);
 		} else if (obj instanceof String[]) { // String[]
 			String[] arr = (String[]) obj;
 			StringBuffer bu = new StringBuffer("");

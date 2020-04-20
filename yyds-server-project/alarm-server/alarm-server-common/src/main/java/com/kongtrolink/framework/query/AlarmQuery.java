@@ -41,13 +41,29 @@ public class AlarmQuery extends Paging {
     //远程调用需要参数
     private String operate;             //操作，告警确认，取消确认，告警消除
     private Date operateTime;         //操作对应的时间，方便远程接口参数解析
-    private String operateUsername;         //操作用户名
-    private String operateName;           //操作用户姓名
+    private String operatorId;           //操作用户id
+    private String operatorName;         //操作用户名
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
     private String key;
     private List<String> keyList;         //告警键
+
+    public String getOperatorId() {
+        return operatorId;
+    }
+
+    public void setOperatorId(String operatorId) {
+        this.operatorId = operatorId;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
 
     public String getKey() {
         return key;
@@ -134,22 +150,6 @@ public class AlarmQuery extends Paging {
 
     public void setOperateTime(Date operateTime) {
         this.operateTime = operateTime;
-    }
-
-    public String getOperateName() {
-        return operateName;
-    }
-
-    public void setOperateName(String operateName) {
-        this.operateName = operateName;
-    }
-
-    public String getOperateUsername() {
-        return operateUsername;
-    }
-
-    public void setOperateUsername(String operateUsername) {
-        this.operateUsername = operateUsername;
     }
 
     public String getOperate() {

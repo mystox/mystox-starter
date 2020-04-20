@@ -3,7 +3,6 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
@@ -61,7 +60,7 @@ public class MaintainerServiceImpl implements MaintainerService{
                     //筛选出维护人员
                     List<BasicUserEntity> basicMaintainerList = new ArrayList<>();
                     for (BasicUserEntity basicMaintainer : basicUserEntityList){
-                        if (basicMaintainer.getCurrentRoleName().equals("维护人员")){
+                        if ("维护人员".equals(basicMaintainer.getCurrentRoleName())){
                             basicMaintainerList.add(basicMaintainer);
                         }
                     }

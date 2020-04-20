@@ -7,7 +7,7 @@ privFunc:
   - type: SCRIPT
     name: 服务登录验证
     code: SERVICE_LOGIN
-    routeMak: proxy_scloud
+    routeMark: proxy_scloud
     pageRoute: proxy_scloud
     uri: /service/login.js
   - type: ROOT

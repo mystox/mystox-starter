@@ -17,7 +17,7 @@ mqtt:
 
 mongodb:
 #  uri: mongodb://172.16.6.9:27017/alarm_server
-  uri: mongodb://172.16.5.61:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm-server
 
 dataLevel:
   enterpriseLevel: true

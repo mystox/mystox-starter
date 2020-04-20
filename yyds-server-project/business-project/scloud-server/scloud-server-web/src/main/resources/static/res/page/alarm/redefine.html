@@ -36,7 +36,7 @@
                     <label class="control-label">重定义为</label>
                     <div class="controls">
                         <select name="alarmLevel" ng-model="addRule.obj.alarmLevel" required
-                                ng-options="item.key as item.value for item in CONST.alarmLevelList"></select>
+                                ng-options="item.key as item.value for item in alarmLevelList"></select>
                         <span class="help-inline"></span>
                     </div>
                 </div>
@@ -106,32 +106,33 @@
                     </tr>
                 </thead>
                 <tbody ng-repeat="r in ruleList" ng-class="CONST.animation.list">
-                    <tr>
+                    <tr ng-click="reGetSignalList(r)" class="cursor-point">
                         <td ng-bind="r.name"></td>
                         <td>
-                            <label class="label" ng-class="{true:'font-success',false:'font-white'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
+                            <label class="label" ng-class="{true:'font-success',false:'font-danger'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
                         </td>
                         <td ng-bind="r.creator.name"></td>
-                        <td ng-bind="r.tCreate | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="r.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                         <td>
+                            <a ng-if="util.checkPrivilege(1312) && !r.enabled" ng-click="addRule.toModal(r);" title="修改" class="ic ic-edit"></a>
                             <a ng-if="util.checkPrivilege(1312) && !r.enabled" ng-click="changeState(r);" title="启用" class="ic ic-check"></a>
                             <a ng-if="util.checkPrivilege(1312) && r.enabled" ng-click="changeState(r);" title="禁用" class="ic ic-times"></a>
-                            <a ng-click="getRuleDetail(r.id, $index);" title="详情" class="ic ic-detail"></a>
+                            <a ng-click="getRuleDetail(r, $index);" title="详情" class="ic ic-detail"></a>
                             <a ng-if="!r.enabled" ng-click="deleteRule.toModal(r);" title="删除" class="ic ic-delete"></a>
                         </td>
                     </tr>
                     <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
                         <td colspan="5" class="detail">
                             <ul>
-                                <li>重定义为：<span ng-bind="ruleDetail.alarmLevel | alarmLevelFilter | nullFilter"></span></li>
+                                <li>重定义为：<span ng-bind="ruleDetail.targetLevel | nullFilter"></span></li>
                                 <li>所选站点：
                                     <select multiple="multiple" readonly>
-                                        <option ng-repeat="item in ruleDetail.site track by $index" ng-bind="item"></option>
+                                        <option ng-repeat="item in ruleDetail.siteInfoList track by $index" ng-bind="item"></option>
                                     </select>
                                 </li>
                                 <li>信号类型：
                                     <select multiple="multiple" readonly>
-                                        <option ng-repeat="item in ruleDetail.signalType track by $index" ng-bind="item"></option>
+                                        <option ng-repeat="item in ruleDetail.signalInfoList track by $index" ng-bind="item"></option>
                                     </select>
                                 </li>
                                 <li>原因：<span ng-bind="ruleDetail.reason | nullFilter"></span></li>
@@ -163,18 +164,18 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="r in redefinedList" ng-class="CONST.animation.list">
-                        <td ng-bind="r.rule.name"></td>
-                        <td ng-bind="r.signal.name"></td>
-                        <td ng-bind="r.site.name"></td>
-                        <td ng-style="util.alarmColor(r.nativeLevel);">
+                        <td ng-bind="r.ruleName"></td>
+                        <td ng-bind="r.alarmName"></td>
+                        <td ng-bind="r.siteName"></td>
+                        <td ng-style="util.alarmColor(r.sourceLevel);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="r.nativeLevel | alarmLevelFilter"></span>
+                            <span ng-bind="r.sourceLevel | alarmLevelFilter"></span>
                         </td>
-                        <td ng-style="util.alarmColor(r.redefinedLevel);">
+                        <td ng-style="util.alarmColor(r.targetLevel);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="r.redefinedLevel | alarmLevelFilter"></span>
+                            <span ng-bind="r.targetLevel | alarmLevelFilter"></span>
                         </td>
-                        <td ng-bind="r.tRedefine | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="r.useTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
                     </tr>
                 </tbody>
             </table>

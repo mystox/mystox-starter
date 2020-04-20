@@ -4,6 +4,7 @@ import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.ListResult;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.FacadeView;
 import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
@@ -52,11 +53,6 @@ public class ShieldRuleController extends BaseController{
             shieldRule.setCreator(new FacadeView(user.getId(), user.getUsername()));
         }
         shieldRule.setUpdateTime(curDate);
-        try {
-            ruleService.initInfo(uniqueCode, shieldRule);
-        }catch (Exception e){
-            return new JsonResult("获取设备信息失败", false);
-        }
         boolean add = ruleService.add(uniqueCode, shieldRule);
         if(add){
             return new JsonResult("添加成功");
@@ -69,11 +65,23 @@ public class ShieldRuleController extends BaseController{
     @ResponseBody
     public JsonResult delete(@RequestBody ShieldRule shieldRule){
         String uniqueCode = getUniqueCode();
-        int delete = ruleService.delete(uniqueCode, shieldRule.getId());
-        if(delete > 0){
+        boolean delete = ruleService.delete(uniqueCode, shieldRule.getId());
+        if(delete){
             return new JsonResult("删除成功", true);
         }
         return new JsonResult("删除失败", false);
+    }
+
+    @RequestMapping("/udate")
+    @ResponseBody
+    public JsonResult udate(@RequestBody ShieldRule shieldRule){
+        String uniqueCode = getUniqueCode();
+        shieldRule.setUpdateTime(new Date());
+        boolean update = ruleService.add(uniqueCode, shieldRule);
+        if(update){
+            return new JsonResult(BaseConstant.OPERATE_UPDATE + BaseConstant.RESULT_SUCC);
+        }
+        return new JsonResult(BaseConstant.OPERATE_UPDATE + BaseConstant.RESULT_FAIL);
     }
 
     @RequestMapping("/list")
@@ -109,6 +117,7 @@ public class ShieldRuleController extends BaseController{
         alarmBusinessQuery.setCurrentPage(shieldAlarmQuery.getCurrentPage());
         alarmBusinessQuery.setPageSize(shieldAlarmQuery.getPageSize());
         alarmBusinessQuery.setSkipSize(shieldAlarmQuery.getPageSize());
+        alarmBusinessQuery.setSiteCodeList(shieldAlarmQuery.getSiteCodeList());
         List<AlarmBusiness> list = businessService.list(uniqueCode, alarmBusinessQuery);
         int count= businessService.count(uniqueCode, alarmBusinessQuery);
         ListResult<AlarmBusiness> listResult = new ListResult<>(list, count);

@@ -2,8 +2,8 @@ package com.kongtrolink.framework.scloud.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
+import com.kongtrolink.framework.scloud.entity.Statistics;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
-import com.kongtrolink.framework.scloud.query.AlarmQuery;
 
 import java.util.List;
 
@@ -50,4 +50,35 @@ public interface AlarmBusinessService {
     boolean resolve(String uniqueCode, String table, AlarmBusinessQuery businessQuery);
 
     boolean unResolveByKeys(String uniqueCode, String table, List<String> keyList);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/15 16:14
+     * 功能描述:根据等级统计
+     */
+    List<Statistics> countLevel(String uniqueCode, String table, AlarmBusinessQuery businessQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/14 15:59
+     * 功能描述:告警频发站点统计
+     */
+    List<Statistics> alarmSiteTopHistory(String uniqueCode, AlarmBusinessQuery businessQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/15 11:19
+     * 功能描述:告警分布
+     */
+    List<Statistics> getAlarmDistributeList(String uniqueCode, AlarmBusinessQuery businessQuery);
+
+
+    /**
+     * @Date  2020/4/17
+     * @Param No such property: code for class: Script1
+     * @return java.util.List<com.kongtrolink.framework.scloud.entity.AlarmBusiness>
+     * @Author mystox
+     * @Description //不包含分頁
+     **/
+    List<AlarmBusiness> findByTimePeriod(AlarmBusinessQuery alarmQuery);
 }

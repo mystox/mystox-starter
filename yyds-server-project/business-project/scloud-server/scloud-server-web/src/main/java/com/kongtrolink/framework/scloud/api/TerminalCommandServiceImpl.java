@@ -42,6 +42,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
 
         //更新FSU注册状态及相关属性
         if (recServerBase != null){
+            logger.info("FSU注册在线,fsuId:{},enterpriseCode:{},serverCode:{}"
+                    , recServerBase.getFsuId(), recServerBase.getEnterpriseCode(), recServerBase.getServerCode());
             DeviceEntity fsu = new DeviceEntity();
             fsu.setState(CommonConstant.ONLINE);
             fsu.setCode(recServerBase.getFsuId());
@@ -66,6 +68,8 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
 
         //更新FSU注册状态及相关属性
         if (recServerBase != null){
+            logger.info("FSU离线,fsuId:{},enterpriseCode:{},serverCode:{}"
+                    , recServerBase.getFsuId(), recServerBase.getEnterpriseCode(), recServerBase.getServerCode());
             DeviceEntity fsu = new DeviceEntity();
             fsu.setState(CommonConstant.OFFLINE);
             fsu.setCode(recServerBase.getFsuId());

@@ -118,47 +118,33 @@ public class AlarmLevel {
         this.state = state;
     }
 
-    public static void initLevelName(AlarmBusiness alarmBusiness, List<AlarmLevel> alarmLevelList){
-        if(null == alarmBusiness){
-            return;
-        }
+    public static String getLevelName(Integer level, List<AlarmLevel> alarmLevelList){
         if(null != alarmLevelList){
             for(AlarmLevel alarmLevel : alarmLevelList){
-                if(alarmLevel.getLevel() <= alarmBusiness.getLevel()){
-                    alarmBusiness.setLevelName(alarmLevel.getLevelName());
-                    return;
+                if(alarmLevel.getLevel() <= level){
+                    return alarmLevel.getLevelName();
                 }
             }
         }
-
-        switch (alarmBusiness.getLevel()){
+        switch (level){
             case 8:
-                alarmBusiness.setLevelName("八级告警");
-                break;
+                return "八级告警";
             case 7:
-                alarmBusiness.setLevelName("七级告警");
-                break;
+                return "七级告警";
             case 6:
-                alarmBusiness.setLevelName("六级告警");
-                break;
+                return "六级告警";
             case 5:
-                alarmBusiness.setLevelName("五级告警");
-                break;
+                return "五级告警";
             case 4:
-                alarmBusiness.setLevelName("四级告警");
-                break;
+                return "四级告警";
             case 3:
-                alarmBusiness.setLevelName("三级告警");
-                break;
+                return "三级告警";
             case 2:
-                alarmBusiness.setLevelName("二级告警");
-                break;
+                return "二级告警";
             case 1:
-                alarmBusiness.setLevelName("一级告警");
-                break;
+                return "一级告警";
             default:
-                alarmBusiness.setLevelName("无对应等级");
-                break;
+                return "无对应等级";
         }
     }
 }

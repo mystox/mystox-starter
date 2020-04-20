@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.controller;
 import com.kongtrolink.framework.core.entity.User;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.ListResult;
 import com.kongtrolink.framework.scloud.entity.ProjectOrderEntity;
 import com.kongtrolink.framework.scloud.entity.ProjectOrderLogEntity;
 import com.kongtrolink.framework.scloud.entity.model.ProjectOrderModel;
@@ -31,7 +32,6 @@ public class ProjectController extends BaseController{
     @Autowired
     ProjectService projectService;
 
-    private String uniqueCode = "YYDS"; //写死，为了自测用
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectController.class);
 
     /**
@@ -40,10 +40,9 @@ public class ProjectController extends BaseController{
     @RequestMapping(value = "getProjectOrderList", method = RequestMethod.POST)
     public @ResponseBody JsonResult getProjectOrderList(@RequestBody ProjectOrderQuery projectOrderQuery){
         try{
-//            String uniqueCode = getUniqueCode();
-            List<ProjectOrderModel> list = projectService.getProjectOrderList(uniqueCode, projectOrderQuery);
-
-            return new JsonResult(list);
+            String uniqueCode = getUniqueCode();
+            ListResult<ProjectOrderModel> result = projectService.getProjectOrderList(uniqueCode, projectOrderQuery);
+            return new JsonResult(result);
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("获取测试单列表异常", false);
@@ -56,7 +55,7 @@ public class ProjectController extends BaseController{
     @RequestMapping(value = "createProjectOrder", method = RequestMethod.POST)
     public @ResponseBody JsonResult createProjectOrder(@RequestBody ProjectOrderEntity projectOrderEntity){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             User user = getUser();
             projectService.createProjectOrder(uniqueCode, user, projectOrderEntity);
             return new JsonResult("创建成功", true);
@@ -69,12 +68,12 @@ public class ProjectController extends BaseController{
     /**
      * 获取测试单操作记录
      */
-    @RequestMapping(value = "getOrderLog", method = RequestMethod.POST)
-    public @ResponseBody JsonResult getOrderLog(@RequestBody ProjectOrderQuery projectOrderQuery){
+    @RequestMapping(value = "getOrderLogs", method = RequestMethod.POST)
+    public @ResponseBody JsonResult getOrderLogs(@RequestBody ProjectOrderQuery projectOrderQuery){
         try{
-//            String uniqueCode = getUniqueCode();
-            ProjectOrderLogEntity entity = new ProjectOrderLogEntity();
-            return new JsonResult(entity);
+            String uniqueCode = getUniqueCode();
+            List<ProjectOrderLogEntity> list = projectService.getOrderLogs(uniqueCode, projectOrderQuery);
+            return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("获取测试单操作记录异常", false);
