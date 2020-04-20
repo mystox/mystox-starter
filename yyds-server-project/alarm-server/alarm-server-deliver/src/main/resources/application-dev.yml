@@ -1,7 +1,10 @@
 spring:
   application:
     name: alarm-server-deliver
-
+#  redis:
+#    host: 172.16.5.26
+#    port: 6379
+#    database: 2
 server:
   groupCode: GROUP
   name: ALARM_SERVER_DELIVER   #\u544A\u8B66\u5904\u7406\u540E\u7AEF\u5165\u53E3
