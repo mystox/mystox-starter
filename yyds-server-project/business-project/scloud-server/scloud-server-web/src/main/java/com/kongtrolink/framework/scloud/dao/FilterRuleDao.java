@@ -88,7 +88,7 @@ public class FilterRuleDao {
     }
 
     private boolean updateUserIdList(String uniqueCode, FilterRule filterRule){
-        Criteria criteria = Criteria.where("_id").is(filterRule);
+        Criteria criteria = Criteria.where("_id").is(filterRule.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("userIdList", filterRule.getUserIdList());
