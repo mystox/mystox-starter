@@ -31,7 +31,7 @@ public class BusinessRedisUtils
     @Resource(name = "redisTemplateBusiness")
     private RedisTemplate redisTemplate;
     @Autowired
-    @Qualifier(value = "redisTemplateBusiness")
+    @Qualifier(value = "stringRedisTemplateBusiness")
     private StringRedisTemplate stringRedisTemplate;
 
     public <T> T get(String key, Class<T> clazz)
