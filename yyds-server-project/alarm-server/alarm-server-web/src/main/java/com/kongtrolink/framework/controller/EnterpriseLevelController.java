@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -137,6 +139,7 @@ public class EnterpriseLevelController extends BaseController {
     @ResponseBody
     public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
         List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        Collections.reverse(lastUse);
         return new JsonResult(lastUse);
     }
 
