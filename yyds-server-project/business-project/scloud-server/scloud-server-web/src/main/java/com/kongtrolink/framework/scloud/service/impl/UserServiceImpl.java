@@ -3,8 +3,7 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.core.utils.ReflectionUtils;
-import com.kongtrolink.framework.core.utils.SessionCommonService;
+import com.kongtrolink.framework.scloud.util.SessionCommonService;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.scloud.constant.CommonConstant;
@@ -174,23 +173,22 @@ public class UserServiceImpl implements UserService {
         map.put("username", userQuery.getUsername());
         map.put("currentRoleName", userQuery.getCurrentRoleName());
         String userMsg = JSONObject.toJSONString(map);
-        List<JSONObject> result = new ArrayList<>();
         MsgResult opera = mqttOpera.opera("listUser", userMsg);
+            List<JSONObject> userResult = new ArrayList<>();
         if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
             String msg = opera.getMsg();
             JSONObject resultRange = JSONObject.parseObject(msg, JSONObject.class);
             Boolean success = resultRange.getBoolean("success");
-            List<JSONObject> userResult = new ArrayList<>();
             if (success) {
+        List<JSONObject> result = new ArrayList<>();
                 result = resultRange.getJSONArray("list").toJavaList(JSONObject.class);
                 for (JSONObject userEntity : result) {
 
                     String userId = userEntity.getString("userId");
                     UserEntity userEntity1 = userMongo.listUser(uniqueCode, userId, userQuery);
+                    if (userEntity1 == null) userEntity1 = new UserEntity();
                     UserModel userModel = new UserModel();
-                    BeanUtils.copyProperties(userEntity,userModel);
-                    if (userModel == null)
-                        userModel = new UserModel();
+                    BeanUtils.copyProperties(userEntity1,userModel);
                     JSONObject userJson = (JSONObject) JSONObject.toJSON(userModel);
                     userJson.putAll(userEntity);
                     String username = userEntity.getString("username");
@@ -202,7 +200,7 @@ public class UserServiceImpl implements UserService {
                     userResult.add(userJson);
                 }
             }
-            return result;
+            return userResult;
         }else {
             return null;
         }

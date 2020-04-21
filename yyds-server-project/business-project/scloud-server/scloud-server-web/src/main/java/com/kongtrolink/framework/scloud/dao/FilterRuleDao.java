@@ -75,20 +75,17 @@ public class FilterRuleDao {
      * @date: 2020/3/5 15:33
      * 功能描述:禁用用户下已经启用的规则
      */
-    public boolean unUse(String uniqueCode, FilterRuleQuery ruleQuery){
-        Criteria criteria = Criteria.where("userIdList").is(ruleQuery.getOperatorId());
+    public boolean unUse(String uniqueCode, String ruleId, String operatorId){
+        Criteria criteria = Criteria.where("_id").is(ruleId);
         Query query = Query.query(criteria);
         FilterRule filterRule = mongoTemplate.findOne(query, FilterRule.class, uniqueCode + table);
-        if(null == filterRule){
-            return true;
-        }
-        filterRule.getUserIdList().remove(ruleQuery.getOperatorId());
+        filterRule.getUserIdList().remove(operatorId);
         filterRule.setUseCount(filterRule.getUseCount()-1);
         return updateUserIdList(uniqueCode, filterRule);
     }
 
     private boolean updateUserIdList(String uniqueCode, FilterRule filterRule){
-        Criteria criteria = Criteria.where("_id").is(filterRule);
+        Criteria criteria = Criteria.where("_id").is(filterRule.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
         update.set("userIdList", filterRule.getUserIdList());
@@ -97,12 +94,13 @@ public class FilterRuleDao {
         return result.getN()>0 ? true : false;
     }
 
-    public boolean use(String uniqueCode, FilterRuleQuery ruleQuery) {
-        Criteria criteria = Criteria.where("_id").is(ruleQuery.getId());
+    public boolean use(String uniqueCode, String ruleId, String operatorId) {
+        //先禁用用户上个启用的
+        Criteria criteria = Criteria.where("_id").is(ruleId);
         Query query = Query.query(criteria);
         FilterRule filterRule = mongoTemplate.findOne(query, FilterRule.class, uniqueCode + table);
         filterRule.setUseCount(filterRule.getUseCount()+1);
-        filterRule.getUserIdList().add(ruleQuery.getOperatorId());
+        filterRule.getUserIdList().add(operatorId);
         return updateUserIdList(uniqueCode, filterRule);
     }
 

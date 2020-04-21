@@ -170,7 +170,7 @@ public class ExcelExportService {
     }
 
     public static String alarmSiteHistoryExport(HttpServletResponse response, String fileName,  List<Statistics> businessList){
-        if(null == businessList || businessList.size() == 0){
+        if(null == businessList){
             return "导出失败，数据为空";
         }
         if(null == response){
@@ -193,7 +193,7 @@ public class ExcelExportService {
             cellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);//垂直居中
             for(int i=1; i<businessList.size(); i++){
                 Statistics alarmSiteStatistics = businessList.get(i);
-                initData(sheet, cellStyle, alarmSiteStatistics.getValues(), i+1);
+                initData(sheet, cellStyle, alarmSiteStatistics.getValues(), i+2);
             }
             OutputStream out= response.getOutputStream();
             workbook.write(out);

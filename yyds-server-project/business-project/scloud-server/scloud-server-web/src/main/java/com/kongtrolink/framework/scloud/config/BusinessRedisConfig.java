@@ -8,11 +8,11 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
@@ -51,9 +51,19 @@ public class BusinessRedisConfig
         template.afterPropertiesSet();
         return template;
     }
-
+    @Bean("stringRedisTemplateBusiness")
+    @ConditionalOnMissingBean(name = "stringRedisTemplateBusiness")
+    public StringRedisTemplate stringRedisTemplateBusiness(
+            @Qualifier(value = "jedisConnectionFactoryBusiness")RedisConnectionFactory jedisConnectionFactoryBusiness)
+            throws UnknownHostException
+    {
+        StringRedisTemplate template = new StringRedisTemplate();
+        template.setConnectionFactory(jedisConnectionFactoryBusiness);
+        template.afterPropertiesSet();
+        return template;
+    }
     @Bean(name = "jedisConnectionFactoryBusiness")
-    @Primary
+//    @Primary
     public RedisConnectionFactory jedisConnectionFactoryBusiness()
     {
 

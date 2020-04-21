@@ -6,6 +6,7 @@ import com.kongtrolink.framework.reports.entity.MongoDocName;
 import com.kongtrolink.framework.reports.entity.StatisticLevel;
 import com.kongtrolink.framework.reports.entity.TimePeriod;
 import com.kongtrolink.framework.reports.entity.fsu.FsuOfflineStatisticTemp;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.Fields;
@@ -18,6 +19,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.sort;
 
 /**
  * \* @Author: mystox
@@ -45,8 +48,8 @@ public class FsuOfflineStatisticTempDao extends MongoBaseDao{
 
         String stationType = condition.getString("stationType");
         if (!"全部".equals(stationType)) criteria.and("stationType").is(stationType);
-        String runningSate = condition.getString("operationState");
-        if (!"全部".equals(runningSate)) criteria.and("operationState").is(runningSate);
+        String runningSate = condition.getString("runningSate");
+        if (!"全部".equals(runningSate)) criteria.and("runningSate").is(runningSate);
         String fsuManufactory = condition.getString("fsuManufactory");
         if (!"全部".equals(fsuManufactory)) criteria.and("fsuManufactory").is(fsuManufactory);
         JSONArray stationList = condition.getJSONArray("stationList");
@@ -61,32 +64,35 @@ public class FsuOfflineStatisticTempDao extends MongoBaseDao{
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(startTime);
         int year = calendar.get(Calendar.YEAR);
-        int startMonth = calendar.get(Calendar.MONTH);
+        int startMonth = calendar.get(Calendar.MONTH)+1;
         calendar.setTime(endTime);
         int endMonth = calendar.get(Calendar.MONTH);
-
+        if (endMonth == 0) endMonth = 12;
         criteria.and("year").is(year);
         criteria.and("month").gte(startMonth).lte(endMonth);
         String statisticLevel = condition.getString("statisticLevel");
 
+
         Fields fields = Fields.fields();
         if (StatisticLevel.province.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("province"));
+            fields = fields.and("province");
         }
         if (StatisticLevel.municipality.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("municipality"));
+            fields = fields.and(Fields.fields("province", "municipality"));
         }
         if (StatisticLevel.county.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("county"));
+            fields = fields.and(Fields.fields("province", "municipality", "county"));
         }
         if (StatisticLevel.site.equals(statisticLevel)) {
-            fields = fields.and(Fields.fields("stationId", "stationName", "stationType","fsuManufactory"));
+            fields = fields.and(Fields.fields("province", "municipality", "county", "stationId", "stationName", "stationType"));
         }
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
                 Aggregation.group(fields).sum("times").as("times")
                         .sum("durationSum").as("durationSum")
                         .sum("offlineMark").as("offlineSiteCount")
-                        .count().as("siteCount"));
+                        .count().as("siteCount")
+                        .first("province").as("province"),
+                sort(Sort.Direction.ASC, "province"));
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_FSU_OFFLINE + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();
         return mappedResults;

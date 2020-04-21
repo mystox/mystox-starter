@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.core.utils;
+package com.kongtrolink.framework.scloud.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

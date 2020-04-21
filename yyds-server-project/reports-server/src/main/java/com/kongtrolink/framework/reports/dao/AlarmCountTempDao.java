@@ -77,7 +77,8 @@ public class AlarmCountTempDao extends MongoBaseDao {
             fields = fields.and(Fields.fields("province", "municipality", "county", "stationId", "stationName", "stationType"));
         }
         Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(criteria),
-                Aggregation.group(fields).sum("alarmCount").as("alarmCount").sum("alarmRecoveryCount").as("alarmRecoveryCount").first("province").as("province"),
+                Aggregation.group(fields).sum("alarmCount").as("alarmCount").sum("alarmRecoveryCount").as("alarmRecoveryCount")
+                        .first("province").as("province"),
                 sort(Sort.Direction.ASC, "province"));
         AggregationResults<JSONObject> results = mongoTemplate.aggregate(aggregation, MongoDocName.REPORT_OPERA_EXECUTE_TEMP_ALARM_COUNT + taskId, JSONObject.class);
         List<JSONObject> mappedResults = results.getMappedResults();
