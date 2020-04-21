@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -296,6 +297,11 @@ public class DeviceMongo {
         }
 
         mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, deviceEntity.getEnterpriseCode() + CollectionSuffix.DEVICE);
+    }
+
+    public boolean isExistFsu(String uniqueCode,String code){
+        Criteria criteria = Criteria.where("code").is(code).and("typeCode").is(CommonConstant.DEVICE_TYPE_CODE_FSU);
+        return mongoTemplate.count(new Query(criteria),uniqueCode + CollectionSuffix.DEVICE) > 0;
     }
 
     /**

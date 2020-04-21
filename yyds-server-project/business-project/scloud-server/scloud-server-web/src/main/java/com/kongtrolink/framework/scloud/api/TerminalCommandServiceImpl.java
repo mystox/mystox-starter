@@ -39,28 +39,34 @@ public class TerminalCommandServiceImpl implements TerminalCommandService {
         LoginMessage recServerBase = JSONObject.parseObject(message,LoginMessage.class);
         LoginAckMessage ack = new LoginAckMessage();
         ack.setResult(true);
-
-        //更新FSU注册状态及相关属性
-        if (recServerBase != null){
-            logger.info("FSU注册在线,fsuId:{},enterpriseCode:{},serverCode:{}"
-                    , recServerBase.getFsuId(), recServerBase.getEnterpriseCode(), recServerBase.getServerCode());
-            DeviceEntity fsu = new DeviceEntity();
-            fsu.setState(CommonConstant.ONLINE);
-            fsu.setCode(recServerBase.getFsuId());
-            fsu.setIp(recServerBase.getIp());
-            fsu.setEnterpriseCode(recServerBase.getEnterpriseCode());
-            fsu.setServerCode(recServerBase.getServerCode());
-            fsu.setGatewayServerCode(recServerBase.getGatewayServerCode());
-            deviceMongo.updateFsu(fsu);
+        if(recServerBase==null){
+            ack.setResult(false);
+            logger.info("注册报文接收 null");
+            return JSONObject.toJSONString(ack);
         }
-
+        boolean isExistFsu = deviceMongo.isExistFsu(recServerBase.getEnterpriseCode(),recServerBase.getFsuId());
+        if(!isExistFsu){
+            ack.setResult(false);
+            logger.info("该FSU不存在,fsuId:{},enterpriseCode:{},serverCode:{}"
+                    , recServerBase.getFsuId(), recServerBase.getEnterpriseCode(), recServerBase.getServerCode());
+            return JSONObject.toJSONString(ack);
+        }
+        //更新FSU注册状态及相关属性
+        logger.info("FSU注册在线,fsuId:{},enterpriseCode:{},serverCode:{}"
+                , recServerBase.getFsuId(), recServerBase.getEnterpriseCode(), recServerBase.getServerCode());
+        DeviceEntity fsu = new DeviceEntity();
+        fsu.setState(CommonConstant.ONLINE);
+        fsu.setCode(recServerBase.getFsuId());
+        fsu.setIp(recServerBase.getIp());
+        fsu.setEnterpriseCode(recServerBase.getEnterpriseCode());
+        fsu.setServerCode(recServerBase.getServerCode());
+        fsu.setGatewayServerCode(recServerBase.getGatewayServerCode());
+        deviceMongo.updateFsu(fsu);
         return JSONObject.toJSONString(ack);
     }
 
     /**
      * SC向GW请求监控点数据
-     *
-     * @param message
      */
     @Override
     public String loginOffline(String message) {
