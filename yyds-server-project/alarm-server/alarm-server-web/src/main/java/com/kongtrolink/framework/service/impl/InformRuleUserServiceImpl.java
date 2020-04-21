@@ -40,6 +40,11 @@ public class InformRuleUserServiceImpl implements InformRuleUserService {
     }
 
     @Override
+    public boolean deleteByUserId(String userId) {
+        return ruleUserDao.deleteByUserId(userId);
+    }
+
+    @Override
     public List<InformRuleUser> getByRuleId(String ruleId) {
         return ruleUserDao.getByRuleId(ruleId);
     }

@@ -19,5 +19,7 @@ public interface InformRuleUserService {
 
     boolean deleteByUserIds(List<String> userIds);
 
+    boolean deleteByUserId(String userId);
+
     List<InformRuleUser> getByRuleId(String ruleId);
 }

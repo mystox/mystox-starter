@@ -15,6 +15,7 @@ import com.kongtrolink.framework.query.EnterpriseLevelQuery;
 import com.kongtrolink.framework.service.AlarmService;
 import com.kongtrolink.framework.service.AuxilaryService;
 import com.kongtrolink.framework.service.EnterpriseLevelService;
+import com.kongtrolink.framework.service.InformRuleUserService;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ public class MqttServiceImpl implements MqttService{
     AuxilaryService auxilaryService;
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
+    @Autowired
+    InformRuleUserService ruleUserService;
 
     private static final Logger logger = LoggerFactory.getLogger(MqttServiceImpl.class);
 
@@ -181,5 +184,20 @@ public class MqttServiceImpl implements MqttService{
         AuxilaryQuery auxilaryQuery = JSONObject.parseObject(jsonStr, AuxilaryQuery.class);
         JsonResult delete = auxilaryService.delete(auxilaryQuery);
         return JSONObject.toJSON(delete).toString();
+    }
+
+    /**
+     * @param jsonStr
+     * @auther: liudd
+     * @date: 2020/4/21 17:30
+     * 功能描述:业务平台删除用户或者维护人员时，删除告警投递模板中绑定用户
+     */
+    @Override
+    public String deliverRemoteDelUserId(String jsonStr) {
+        JSONObject resJson = new JSONObject();
+        resJson.put("success", true);
+        JSONObject jsonObject = JSONObject.parseObject(jsonStr, JSONObject.class);
+        ruleUserService.deleteByUserId(jsonObject.getString("userId"));
+        return resJson.toJSONString();
     }
 }
