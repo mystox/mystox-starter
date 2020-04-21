@@ -18,7 +18,7 @@ public class Alarm {
     private String serverCode;
     private String serial;              //告警序列号
     private String name;                //告警名称
-    private float value;                //告警值
+    private String value;                //告警值
     private Integer level;               //告警等级
     private String siteCode;
     private String siteName;
@@ -218,11 +218,11 @@ public class Alarm {
         this.name = name;
     }
 
-    public float getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

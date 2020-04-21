@@ -15,7 +15,7 @@ public class AlarmBusiness {
 
     private String id;      //与告警id无关
     private String serverCode;
-    private float value;                //告警值
+    private String value;                //告警值
     private String measurement;                //单位
     private String tierCode;
     private String tierName;
@@ -163,11 +163,11 @@ public class AlarmBusiness {
         this.entDevSig = entDevSig;
     }
 
-    public float getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
