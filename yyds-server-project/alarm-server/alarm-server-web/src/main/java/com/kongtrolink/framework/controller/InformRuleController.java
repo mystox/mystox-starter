@@ -443,7 +443,7 @@ public class InformRuleController extends BaseController {
         alarm.setSerial(""+serial);
         alarm.setFlag("1");
         alarm.setLevel(3);
-        alarm.setValue(666);
+        alarm.setValue(666+"");
         return alarm;
     }
 }

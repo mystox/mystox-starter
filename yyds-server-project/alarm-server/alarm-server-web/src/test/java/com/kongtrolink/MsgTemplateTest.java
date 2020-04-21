@@ -64,7 +64,6 @@ public class MsgTemplateTest {
         String enterpriseCode = "yytd";
         String serverCode = "TOWER_SERVER";
         String name = "温度过高告警";
-        float value = 99.0f;
         String deviceType = "yy6";
         String deviceModel = "YY006";
         String deviceId = "10010_1021006";
@@ -77,7 +76,6 @@ public class MsgTemplateTest {
         alarm.setEnterpriseCode(enterpriseCode);
         alarm.setServerCode(serverCode);
         alarm.setName(name);
-        alarm.setValue(value);
         alarm.setDeviceType(deviceType);
         alarm.setDeviceModel(deviceModel);
         alarm.setDeviceId(deviceId);
