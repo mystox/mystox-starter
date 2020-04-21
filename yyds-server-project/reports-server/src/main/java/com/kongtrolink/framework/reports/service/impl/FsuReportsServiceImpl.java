@@ -265,7 +265,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
             @ReportExtend(field = "stationType", name = "站点类型", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "A级机房", "B级机房", "C级机房", "D级机房"}),
             @ReportExtend(field = "fsuManufactory", name = "fsu厂家", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"全部", "义益钛迪"}),
             @ReportExtend(field = "runningSate", name = "运行状态", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"交维态"}),
-            @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "区县级", "站点级"}),
+            @ReportExtend(field = "statisticLevel", name = "统计维度", type = ReportExtend.FieldType.STRING, belong = ExecutorType.query, select = {"省级", "市级", "区县级"}),
 //            @ReportExtend(field = "statisticPeriod", name = "统计周期", type = ReportExtend.FieldType.STATISTIC_PERIOD, belong = ExecutorType.query, select = {"月报表", "季报表", "年报表"}, description = "{dimension:月报表,timePeriod:{startTime:yyyy-MM-dd,endTime:yyyy-MM-dd}}"),
 
     })
@@ -371,7 +371,7 @@ public class FsuReportsServiceImpl implements FsuReportsService {
         TimePeriod timePeriod = CommonCheck.getTimePeriod(statisticPeriod);
         String period = timePeriod.getDimension();
 
-        List<JSONObject> fsuRunStateData = fsuRunStateDao.getFsuRunStateData(taskId, condition);
+        List<JSONObject> fsuRunStateData = fsuRunStateDao.getFsuRunStateData(taskId, condition, timePeriod);
         String[][][] resultData = fsuRunningDataCreate(fsuRunStateData, statisticLevel);
         String resultType = reportConfig.getDataType();
         if (!DataType.FILE.equals(resultType)) {
