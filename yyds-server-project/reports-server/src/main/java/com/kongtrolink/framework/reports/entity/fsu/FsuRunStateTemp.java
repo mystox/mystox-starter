@@ -30,7 +30,7 @@ public class FsuRunStateTemp {
     private Integer offlineCount;
 
 
-    private Boolean deleteFlag;
+    private Boolean deleteFlag=false;
 
     public Boolean getDeleteFlag() {
         return deleteFlag;

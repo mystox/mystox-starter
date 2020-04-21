@@ -20,7 +20,7 @@ redisBusiness:
   host: 172.16.5.60
   port: 6379
 server:
-  groupCode: GROUP_1
+  groupCode: GROUP
   name: SCLOUD_SERVER_WEB #服务编码
   host: 172.16.5.60
   port: 59002 #服务占用web端口
@@ -57,4 +57,5 @@ asset:
   getCIModel: getCIModel
 deliver:
   sender: handleSender
-
+zookeeper:
+  sessionTimeout: 1400000
