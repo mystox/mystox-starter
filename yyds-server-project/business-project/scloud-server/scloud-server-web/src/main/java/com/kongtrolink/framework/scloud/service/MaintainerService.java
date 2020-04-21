@@ -45,6 +45,11 @@ public interface MaintainerService {
     String addMaintainer(String uniqueCode, MaintainerModel maintainerModel);
 
     /**
+     * 批量添加维护用户
+     */
+    void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels);
+
+    /**
      * 修改维护用户
      */
     boolean modifyMaintainer(String uniqueCode, MaintainerModel maintainerModel);

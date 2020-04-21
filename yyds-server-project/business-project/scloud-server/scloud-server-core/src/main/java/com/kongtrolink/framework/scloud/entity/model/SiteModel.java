@@ -26,6 +26,7 @@ public class SiteModel{
     private String areaCovered;	//占地面积
     private Integer fileId;	//站点图纸文件Id
     private String fileName;    //站点图纸文件名称
+    private Boolean online;//在线状态
 
     private String isModified; //修改站点时，是否修改了站点名称,"0"-未修改，"1"-修改
 
@@ -179,6 +180,14 @@ public class SiteModel{
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public Boolean getOnline() {
+        return online;
+    }
+
+    public void setOnline(Boolean online) {
+        this.online = online;
     }
 
     public String getIsModified() {

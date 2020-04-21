@@ -25,5 +25,6 @@ public class CommonConstant {
 
     //--------------------设备类型----------------------
     public static final String DEVICE_TYPE_FSU = "FSU动环主机";
+    public static final String DEVICE_TYPE_CODE_FSU = "038";
 
 }
