@@ -118,33 +118,44 @@ public class AlarmLevel {
         this.state = state;
     }
 
-    public static String getLevelName(Integer level, List<AlarmLevel> alarmLevelList){
+    public static AlarmLevel getLevel(Integer level, List<AlarmLevel> alarmLevelList){
         if(null != alarmLevelList){
             for(AlarmLevel alarmLevel : alarmLevelList){
                 if(alarmLevel.getLevel() <= level){
-                    return alarmLevel.getLevelName();
+                    return alarmLevel;
                 }
             }
         }
+        AlarmLevel alarmLevel = new AlarmLevel();
+        alarmLevel.setColor("#DB001B");
+        String levelName = "八级告警";
         switch (level){
             case 8:
-                return "八级告警";
+                levelName =  "八级告警";
+                break;
             case 7:
-                return "七级告警";
+                levelName =  "七级告警";
+                break;
             case 6:
-                return "六级告警";
+                levelName =  "六级告警";
+                break;
             case 5:
-                return "五级告警";
+                levelName =  "五级告警";
+                break;
             case 4:
-                return "四级告警";
+                levelName =  "四级告警";
+                break;
             case 3:
-                return "三级告警";
+                levelName =  "三级告警";
+                break;
             case 2:
-                return "二级告警";
+                levelName =  "二级告警";
+                break;
             case 1:
-                return "一级告警";
-            default:
-                return "无对应等级";
+                levelName =  "一级告警";
+                break;
         }
+        alarmLevel.setLevelName(levelName);
+        return alarmLevel;
     }
 }

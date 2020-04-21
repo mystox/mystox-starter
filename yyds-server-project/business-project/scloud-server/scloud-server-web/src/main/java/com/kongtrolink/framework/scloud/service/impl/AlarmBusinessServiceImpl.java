@@ -86,8 +86,9 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
             alarmLevelList = JSONObject.parseArray(lastUse.getString("data"), AlarmLevel.class);
         }
         for(AlarmBusiness alarmBusiness : list){
-            String levelName = AlarmLevel.getLevelName(alarmBusiness.getLevel(), alarmLevelList);
-            alarmBusiness.setName(levelName);
+            AlarmLevel alarmLevel = AlarmLevel.getLevel(alarmBusiness.getLevel(), alarmLevelList);
+            alarmBusiness.setLevelName(alarmLevel.getLevelName());
+            alarmBusiness.setColor(alarmLevel.getColor());
         }
         return list;
     }

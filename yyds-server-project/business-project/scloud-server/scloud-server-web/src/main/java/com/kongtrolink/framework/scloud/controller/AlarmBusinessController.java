@@ -135,8 +135,8 @@ public class AlarmBusinessController extends ExportController{
             alarmLevelList = JSONObject.parseArray(lastUse.getString("data"), AlarmLevel.class);
         }
         for(Statistics alarmBusiness : statisticss){
-            String levelName = AlarmLevel.getLevelName(alarmBusiness.getIntPro(), alarmLevelList);
-            alarmBusiness.setName(levelName);
+            AlarmLevel alarmLevel = AlarmLevel.getLevel(alarmBusiness.getIntPro(), alarmLevelList);
+            alarmBusiness.setName(alarmLevel.getLevelName());
         }
         return new JsonResult(statisticss);
     }

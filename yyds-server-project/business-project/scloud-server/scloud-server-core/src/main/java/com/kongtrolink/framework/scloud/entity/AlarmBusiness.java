@@ -33,6 +33,7 @@ public class AlarmBusiness {
     private String name;
     private Integer level;
     private String levelName;               //告警等级名称，对应自定义告警等级名称，用于告警统计导出
+    private String color;
     private String state;
     private String checkState = BaseConstant.NOCHECK;          //告警确认状态
     private Date checkTime;             //确认时间
@@ -49,6 +50,14 @@ public class AlarmBusiness {
     int flag;
     private String focusId;             //关注点id，用于前端取消关注
     private String table;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public FacadeView getRecoverMan() {
         return recoverMan;

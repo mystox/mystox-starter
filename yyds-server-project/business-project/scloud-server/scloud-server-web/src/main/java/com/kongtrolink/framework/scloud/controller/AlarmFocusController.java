@@ -188,12 +188,15 @@ public class AlarmFocusController extends BaseController {
             entDevSigListFocusMap.put(entDevSig, alarmFocus);
         }
         AlarmBusinessQuery businessQuery = new AlarmBusinessQuery();
+        businessQuery.setEnterpriseCode(focusQuery.getEnterpriseCode());
+        businessQuery.setServerCode(focusQuery.getServerCode());
         businessQuery.setCurrentPage(focusQuery.getCurrentPage());
         businessQuery.setPageSize(focusQuery.getPageSize());
         businessQuery.setSkipSize(focusQuery.getPageSize());
         businessQuery.setEntDevSigList(entDevSigList);
         businessQuery.setState(BaseConstant.ALARM_STATE_PENDING);
         businessQuery.setSiteCodeList(focusQuery.getSiteCodeList());
+        businessQuery.setOperatorId(focusQuery.getUserId());
         List<AlarmBusiness> list = businessService.list(uniqueCode, businessQuery);
         for(AlarmBusiness alarmBusiness : list){
             String entDevSig = alarmBusiness.getEntDevSig();
