@@ -47,7 +47,7 @@ public interface MaintainerService {
     /**
      * 批量添加维护用户
      */
-    void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels);
+    void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels, String roleId, String roleName);
 
     /**
      * 修改维护用户
@@ -58,4 +58,9 @@ public interface MaintainerService {
      * 删除维护用户
      */
     void deleteMaintainer(String uniqueCode, MaintainerQuery maintainerQuery);
+
+    /**
+     * 根据账号，判断维护人员是否已存在
+     */
+    boolean isMaintainerExist(String uniqueCode, String username);
 }

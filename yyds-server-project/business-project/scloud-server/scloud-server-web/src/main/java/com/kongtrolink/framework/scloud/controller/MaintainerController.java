@@ -1,13 +1,22 @@
 package com.kongtrolink.framework.scloud.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
+import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
+import com.kongtrolink.framework.scloud.constant.OperaCodeConstant;
 import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
 import com.kongtrolink.framework.scloud.exception.ExcelParseException;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserRoleEntity;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
 import com.kongtrolink.framework.scloud.service.MaintainerExcelService;
 import com.kongtrolink.framework.scloud.service.MaintainerService;
+import com.kongtrolink.framework.service.MqttOpera;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -24,6 +33,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +51,8 @@ public class MaintainerController extends BaseController {
     MaintainerService maintainerService;
     @Autowired
     MaintainerExcelService maintainerExcelService;
+    @Autowired
+    MqttOpera mqttOpera;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintainerController.class);
 
@@ -103,6 +115,9 @@ public class MaintainerController extends BaseController {
     public @ResponseBody JsonResult addMaintainer(@RequestBody MaintainerModel maintainerModel){
         try{
             String uniqueCode = getUniqueCode();
+            if (maintainerService.isMaintainerExist(uniqueCode, maintainerModel.getUsername())){
+                return new JsonResult("该账号已存在", false);
+            }
             String userId = maintainerService.addMaintainer(uniqueCode, maintainerModel);
             if (userId != null){
                 return new JsonResult(userId);
@@ -122,10 +137,28 @@ public class MaintainerController extends BaseController {
     public @ResponseBody JsonResult importMaintainerList(@RequestBody MultipartFile file){
         String uniqueCode = getUniqueCode();
 
-        //获取当前企业下的角色列表中的维护人员Id
-            //如果当前不存在维护人员角色，则提醒先添加维护人员角色
+        Map<String, String> userRoleMap = new HashMap<>();  //key：角色名称，value：角色Id
 
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("enterpriseCode", uniqueCode);
 
+        //获取当前企业下的角色列表
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_ROLE_LIST, JSON.toJSONString(jsonObject));
+        if (CommonConstant.SUCCESSFUL == msgResult.getStateCode()){
+            List<BasicUserRoleEntity> basicUserRoleEntityList = JSONArray.parseArray(msgResult.getMsg(), BasicUserRoleEntity.class);
+            if (basicUserRoleEntityList != null && basicUserRoleEntityList.size() > 0){
+                for (BasicUserRoleEntity role : basicUserRoleEntityList){
+                    userRoleMap.put(role.getName(), role.getId());
+                }
+                if (!userRoleMap.containsKey(CommonConstant.ROLE_MAINTAINER)){
+                    return new JsonResult("当前不存在【维护人员】角色，请先添加该角色", false);
+                }
+            }else {
+                return new JsonResult("当前不存在【维护人员】角色，请先添加该角色", false);
+            }
+        }else {
+            return new JsonResult("获取维护人员角色异常", false);
+        }
 
         //解析Excel文件
         CommonsMultipartFile cmf = (CommonsMultipartFile) file;
@@ -143,7 +176,8 @@ public class MaintainerController extends BaseController {
         }
 
         //批量添加维护用户
-        maintainerService.addMaintainerList(uniqueCode, list);
+        String maintainerRoleId = userRoleMap.get(CommonConstant.ROLE_MAINTAINER);
+        maintainerService.addMaintainerList(uniqueCode, list, maintainerRoleId, CommonConstant.ROLE_MAINTAINER);
 
         return new JsonResult("批量导入维护用户成功", true);
     }

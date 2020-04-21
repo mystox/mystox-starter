@@ -11,7 +11,9 @@ import com.kongtrolink.framework.scloud.dao.UserMongo;
 import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
 import com.kongtrolink.framework.scloud.mqtt.entity.AuthPlatformResponseEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicMaintainerEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserInfoEntity;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
 import com.kongtrolink.framework.scloud.service.MaintainerService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
@@ -238,8 +240,50 @@ public class MaintainerServiceImpl implements MaintainerService{
      * 批量添加维护用户
      */
     @Override
-    public void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels) {
+    public void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels, String roleId, String roleName) {
+        List<MaintainerEntity> maintainerEntityList = new ArrayList<>();    //保存在业务平台的维护人扩展信息列表
+        List<BasicMaintainerEntity> basicMaintainerEntityList = new ArrayList<>();  //向【云管】批量添加的维护人员基本信息列表
+        for (MaintainerModel maintainerModel : maintainerModels){
+            MaintainerEntity maintainerEntity = createMaintainerEntity(maintainerModel);
+            maintainerEntityList.add(maintainerEntity);
+
+            BasicMaintainerEntity basicMaintainerEntity = createBasicMaintainerEntity(maintainerModel, roleId, roleName);
+            basicMaintainerEntityList.add(basicMaintainerEntity);
+        }
+
         //向【云管】下发批量添加维护用户的MQTT消息
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.ADD_USER_BATCH, JSON.toJSONString(basicMaintainerEntityList));
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){
+            if (msgResult.getMsg() != null) {
+                AuthPlatformResponseEntity response = JSONObject.parseObject(msgResult.getMsg(), AuthPlatformResponseEntity.class);
+                if (response.isSuccess()) {
+                    LOGGER.info("向【云管】发送批量添加维护人员MQTT,请求成功");
+                    List<BasicUserInfoEntity> basicUserInfoEntityList = JSONArray.parseArray(response.getData(), BasicUserInfoEntity.class);
+                    Map<String, String> basicUserMap = new HashMap<>(); //key：username, value:userId
+                    if (basicUserInfoEntityList != null && basicUserInfoEntityList.size() > 0) {
+                        for (BasicUserInfoEntity basicUserInfo : basicUserInfoEntityList){
+                            basicUserMap.put(basicUserInfo.getUsername(), basicUserInfo.getUserId());
+                        }
+
+                        //业务平台保存维护人员扩展信息
+                        for (MaintainerEntity maintainerEntity : maintainerEntityList){
+                            String userId = basicUserMap.get(maintainerEntity.getUsername());
+                            if (userId != null) {
+                                maintainerEntity.setUserId(userId);
+                                maintainerMongo.saveMaintainer(uniqueCode, maintainerEntity);
+                            }
+                        }
+                    }
+
+                }else {
+                    LOGGER.info("向【云管】发送批量添加维护人员,请求失败");
+                }
+            }else {
+                LOGGER.info("向【云管】发送批量添加维护人员,msg为null，请求失败");
+            }
+        }else {
+            LOGGER.error("向【云管】发送批量添加维护人员,通信失败");
+        }
 
     }
 
@@ -323,6 +367,18 @@ public class MaintainerServiceImpl implements MaintainerService{
         }
     }
 
+    /**
+     * 根据账号，判断维护人员是否已存在
+     *
+     * @param uniqueCode
+     * @param username
+     */
+    @Override
+    public boolean isMaintainerExist(String uniqueCode, String username) {
+        MaintainerEntity maintainer = maintainerMongo.findMaintainerByUsername(uniqueCode, username);
+        return maintainer != null;
+    }
+
     private String[][] getMaintainerListAsTable(List<MaintainerModel> list) {
         int colNum = 19;
         int rowNum = list.size() + 1;
@@ -376,6 +432,34 @@ public class MaintainerServiceImpl implements MaintainerService{
             }
         }
         return tableDatas;
+    }
+
+    //向【云管】批量添加的维护人员基本信息
+    private BasicMaintainerEntity createBasicMaintainerEntity(MaintainerModel maintainerModel, String roleId, String roleName){
+        BasicMaintainerEntity basicMaintainerEntity = new BasicMaintainerEntity();
+        basicMaintainerEntity.setName(maintainerModel.getName());
+        basicMaintainerEntity.setUsername(maintainerModel.getUsername());
+        basicMaintainerEntity.setPhone(maintainerModel.getPhone());
+        basicMaintainerEntity.setEmail(maintainerModel.getEmail());
+        basicMaintainerEntity.setCurrentPostId(roleId);
+        basicMaintainerEntity.setCurrentPositionName(roleName);
+        basicMaintainerEntity.setPassword("123456");
+
+        return basicMaintainerEntity;
+    }
+
+    //保存在业务平台的维护人扩展信息
+    private MaintainerEntity createMaintainerEntity(MaintainerModel maintainerModel){
+        MaintainerEntity maintainerEntity = new MaintainerEntity();
+        maintainerEntity.setUsername(maintainerModel.getUsername());
+        maintainerEntity.setCompanyName(maintainerModel.getCompanyName());
+        maintainerEntity.setStatus(maintainerModel.getStatus());
+        maintainerEntity.setMajor(maintainerModel.getMajor());
+        maintainerEntity.setSkill(maintainerModel.getSkill());
+        maintainerEntity.setDuty(maintainerModel.getDuty());
+        maintainerEntity.setEducation(maintainerModel.getEducation());
+
+        return maintainerEntity;
     }
 
     //将维护人员扩展属性赋值给返回前端的数据模型

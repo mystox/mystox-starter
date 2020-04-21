@@ -127,4 +127,12 @@ public class MaintainerMongo {
         Criteria criteria = Criteria.where("userId").is(userId);
         mongoTemplate.remove(new Query(criteria), MaintainerEntity.class, uniqueCode + CollectionSuffix.MAINTAINER);
     }
+
+    /**
+     * 根据账号，查找维护人员
+     */
+    public MaintainerEntity findMaintainerByUsername(String uniqueCode, String username){
+        Criteria criteria = Criteria.where("username").is(username);
+        return mongoTemplate.findOne(new Query(criteria), MaintainerEntity.class, uniqueCode + CollectionSuffix.MAINTAINER);
+    }
 }
