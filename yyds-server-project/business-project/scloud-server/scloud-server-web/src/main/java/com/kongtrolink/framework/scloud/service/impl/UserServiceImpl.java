@@ -173,14 +173,14 @@ public class UserServiceImpl implements UserService {
         map.put("username", userQuery.getUsername());
         map.put("currentRoleName", userQuery.getCurrentRoleName());
         String userMsg = JSONObject.toJSONString(map);
-        List<JSONObject> result = new ArrayList<>();
         MsgResult opera = mqttOpera.opera("listUser", userMsg);
+            List<JSONObject> userResult = new ArrayList<>();
         if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
             String msg = opera.getMsg();
             JSONObject resultRange = JSONObject.parseObject(msg, JSONObject.class);
             Boolean success = resultRange.getBoolean("success");
-            List<JSONObject> userResult = new ArrayList<>();
             if (success) {
+        List<JSONObject> result = new ArrayList<>();
                 result = resultRange.getJSONArray("list").toJavaList(JSONObject.class);
                 for (JSONObject userEntity : result) {
 
@@ -200,7 +200,7 @@ public class UserServiceImpl implements UserService {
                     userResult.add(userJson);
                 }
             }
-            return result;
+            return userResult;
         }else {
             return null;
         }

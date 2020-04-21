@@ -11,7 +11,7 @@ privFunc:
     code: SERVICE_LOGIN
     uri: /SDGD/static/checkLogin.js
   - type: SCRIPT
-    name: 告警关注
+    name: 告警提醒
     code: ALARM_CONFIRM
     uri: /SDGD/static/alarmConfirm.js
   - type: PAGE
