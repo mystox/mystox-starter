@@ -18,9 +18,9 @@
                 <tbody ng-repeat="a in focusAlarmList" ng-class="CONST.animation.list">
                     <tr>
                         <td ng-bind="a.name"></td>
-                        <td ng-style="util.alarmColor(a.level);">
+                        <td ng-style="util.alarmColor(a.color);">
                             <i class="ic ic-alarm"></i>
-                            <span ng-bind="a.level | alarmLevelFilter"></span>
+                            <span ng-bind="a.levelName"></span>
                         </td>
                         <td ng-bind="a.value | nullFilter"></td>
                         <td ng-bind="a.deviceName"></td>
