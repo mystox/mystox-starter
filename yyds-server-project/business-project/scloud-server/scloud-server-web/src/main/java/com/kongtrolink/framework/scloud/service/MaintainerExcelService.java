@@ -5,6 +5,7 @@ import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
 import com.kongtrolink.framework.scloud.exception.ExcelParseException;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -18,6 +19,9 @@ import java.util.List;
  */
 @Service
 public class MaintainerExcelService {
+
+    @Autowired
+    MaintainerService maintainerService;
 
     private boolean[] nullable = {false, false, false, false, false, true, true, true, true, true};
     private String[] regex = {Regex.USERNAME, Regex.PERSON_NAME, Regex.CELLPHONE, Regex.EMAIL, Regex.DEFAULT,
@@ -36,6 +40,10 @@ public class MaintainerExcelService {
         int currentRowIndex = 0;
         while (currentRowIndex < array.length) {
             String[] row = array[currentRowIndex];
+
+            if (maintainerService.isMaintainerExist(uniqueCode, row[0])){
+                throw  new ExcelParseException("账号已存在，username：" + row[0]);
+            }
 
             MaintainerModel model = new MaintainerModel();
             model.setUsername(row[0]);

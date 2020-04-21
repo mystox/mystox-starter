@@ -27,4 +27,6 @@ public class CommonConstant {
     public static final String DEVICE_TYPE_FSU = "FSU动环主机";
     public static final String DEVICE_TYPE_CODE_FSU = "038";
 
+    //--------------------角色----------------------
+    public static final String ROLE_MAINTAINER = "维护人员";
 }

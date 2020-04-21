@@ -3,7 +3,7 @@ package com.kongtrolink.framework.scloud.mqtt.entity;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
- * 从【云管】获取用户信息 响应数据实体类
+ * 云管->业务平台 响应数据实体类
  * Created by Eric on 2020/4/10.
  */
 public class AuthPlatformResponseEntity {
