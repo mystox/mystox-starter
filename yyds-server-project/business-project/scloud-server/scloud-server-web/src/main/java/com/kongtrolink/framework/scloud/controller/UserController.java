@@ -79,11 +79,11 @@ public class UserController extends BaseController{
                 userService.deleteUser(getUniqueCode(),userModel);
                 return new JsonResult("删除成功",true);
             }else {
-                return new JsonResult("删除失败",true);
+                return new JsonResult("删除失败",false);
             }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("删除失败",true);
+            return new JsonResult("删除失败",false);
         }
     }
 
@@ -152,21 +152,18 @@ public class UserController extends BaseController{
     public @ResponseBody JsonResult deleteUserList(@RequestBody UserQuery userQuery){
         try {
             List<String> ids = userQuery.getUserIds();
-            for (String id:ids){
-                if (userQuery.getUserId() != null && userQuery.getUserId() != ""){
+            if (ids != null){
+                for (String id:ids){
                     UserModel user = new UserModel();
                     user.setUserId(id);
                     userService.deleteUser(getUniqueCode(),user);
-                    return new JsonResult("删除成功",true);
-                }else {
-                    return new JsonResult("删除失败",false);
                 }
             }
+            return new JsonResult("删除成功",true);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("删除失败",true);
+            return new JsonResult("删除失败",false);
         }
-        return new JsonResult("删除失败",false);
     }
 
     /**
