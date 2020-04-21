@@ -62,19 +62,6 @@ public class MqttServiceImpl implements MqttService {
         }
         msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, ruleService, msgQueue));
-//        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-//        if(null == alarmList || alarmList.size() == 0){
-//            return jsonStr;
-//        }
-//        Alarm alarm = alarmList.get(0);
-//        String enterpriseCode = alarm.getEnterpriseCode();
-//        //填充你设备信息
-//        alarmService.initInfo(enterpriseCode, alarmList);
-//
-//        //告警屏蔽功能
-//        shieldRuleService.matchRule(enterpriseCode, alarmList);
-//        //匹配告警工单配置
-//        alarmConfigService.matchAutoConfig(alarmList);
         return jsonStr;
     }
 
@@ -94,12 +81,6 @@ public class MqttServiceImpl implements MqttService {
         }
         msgQueue.addAll(businessList);
         scloudWebExecutor.execute(new AlarmMsgTask(shieldRuleService, alarmConfigService, alarmService, businessService, workService, ruleService, msgQueue));
-//        List<Alarm> alarmList = JSON.parseArray(jsonStr, Alarm.class);
-//        if(null == alarmList || alarmList.size() == 0){
-//            return jsonStr;
-//        }
-//        Alarm alarm = alarmList.get(0);
-//        workService.resolveAlarm(alarm.getEnterpriseCode(), alarmList);
         return jsonStr;
     }
 

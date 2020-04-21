@@ -79,6 +79,10 @@ public class ShieldRuleDao {
             creatorName = MongoRegexUtil.escapeExprSpecialWord(creatorName);
             criteria.and("creator.name").regex(".*?" + creatorName + ".*?");
         }
+        Boolean enabled = ruleQuery.getEnabled();
+        if(null != enabled){
+            criteria.and("enabled").is(enabled);
+        }
 
         return criteria;
     }
