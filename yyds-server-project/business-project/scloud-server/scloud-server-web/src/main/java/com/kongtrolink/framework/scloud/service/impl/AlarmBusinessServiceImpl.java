@@ -7,8 +7,10 @@ import com.kongtrolink.framework.scloud.dao.AlarmBusinessDao;
 import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
 import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
+import com.kongtrolink.framework.scloud.query.AlarmLevelQuery;
 import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.AlarmBusinessService;
+import com.kongtrolink.framework.scloud.service.AlarmLevelService;
 import com.kongtrolink.framework.scloud.service.FilterRuleService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import com.kongtrolink.framework.common.util.DateUtil;
@@ -32,6 +34,8 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
     FilterRuleService filterRuleService;
     @Autowired
     SiteService siteService;
+    @Autowired
+    AlarmLevelService alarmLevelService;
 
     @Override
     public void add(String uniqueCode, String table, AlarmBusiness business) {
@@ -73,7 +77,19 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
         if(BaseConstant.ALARM_TYPE_HISTORY.equals(alarmBusinessQuery.getType())){
             table = CollectionSuffix.HIS_ALARM_BUSINESS;
         }
-        return businessDao.list(uniqueCode, table, alarmBusinessQuery);
+        List<AlarmBusiness> list = businessDao.list(uniqueCode, table, alarmBusinessQuery);
+        //填充最终告警等级
+        JSONObject lastUse = alarmLevelService.getLastUse(alarmBusinessQuery.getEnterpriseCode(), alarmBusinessQuery.getServerCode());
+        Boolean success = lastUse.getBoolean("success");
+        List<AlarmLevel> alarmLevelList = null;
+        if(success){
+            alarmLevelList = JSONObject.parseArray(lastUse.getString("data"), AlarmLevel.class);
+        }
+        for(AlarmBusiness alarmBusiness : list){
+            String levelName = AlarmLevel.getLevelName(alarmBusiness.getLevel(), alarmLevelList);
+            alarmBusiness.setName(levelName);
+        }
+        return list;
     }
 
     @Override

@@ -75,7 +75,7 @@ public class UserMongo {
         update.set("userStatus",userModel.getUserStatus());
         update.set("validTime",userModel.getValidTime());
         if (userModel.getValidTime()!=null){
-            update.set("validTime",userModel.getValidTime());
+            update.set("userTime","临时");
         }
         update.set("workId",userModel.getWorkId());
         update.set("remark",userModel.getRemark());

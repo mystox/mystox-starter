@@ -4,8 +4,12 @@ import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
+import com.kongtrolink.framework.scloud.exception.ExcelParseException;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
+import com.kongtrolink.framework.scloud.service.MaintainerExcelService;
 import com.kongtrolink.framework.scloud.service.MaintainerService;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import static com.kongtrolink.framework.scloud.controller.base.ExportController.export;
 
@@ -32,8 +39,32 @@ public class MaintainerController extends BaseController {
 
     @Autowired
     MaintainerService maintainerService;
+    @Autowired
+    MaintainerExcelService maintainerExcelService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintainerController.class);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/21 9:37
+     * 功能描述:列表
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult list(@RequestBody MaintainerQuery maintainerQuery){
+        try{
+            String uniqueCode = getUniqueCode();
+            if(StringUtil.isNUll(uniqueCode)){
+                uniqueCode = "YYDS";
+            }
+            List<MaintainerEntity> entityList = maintainerService.list(uniqueCode, maintainerQuery);
+            List<MaintainerModel> modelList = maintainerService.listModelsFromEntities(uniqueCode, entityList, maintainerQuery);
+            return new JsonResult(modelList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取维护用户列表异常", false);
+        }
+    }
 
     /**
      * 获取维护用户列表
@@ -88,15 +119,33 @@ public class MaintainerController extends BaseController {
      * 批量导入维护用户
      */
     @RequestMapping(value = "importMaintainerList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult importMaintainerList(@RequestBody MultipartFile multipartFile){
-        try{
-            String uniqueCode = getUniqueCode();
+    public @ResponseBody JsonResult importMaintainerList(@RequestBody MultipartFile file){
+        String uniqueCode = getUniqueCode();
 
-            return new JsonResult("批量导入维护用户成功", true);
-        }catch (Exception e){
-            e.printStackTrace();
-            return new JsonResult("批量导入维护用户失败", false);
+        //获取当前企业下的角色列表中的维护人员Id
+            //如果当前不存在维护人员角色，则提醒先添加维护人员角色
+
+
+
+        //解析Excel文件
+        CommonsMultipartFile cmf = (CommonsMultipartFile) file;
+        DiskFileItem dfi = (DiskFileItem)cmf.getFileItem();
+        File f = dfi.getStoreLocation();
+        List<MaintainerModel> list = null;
+        try {
+            list = maintainerExcelService.read(f, uniqueCode);
+        }catch (ExcelParseException ex){
+            LOGGER.error(ex.getMessage());
+            return new JsonResult(ex.getMessage(), false);
         }
+        if (list == null || list.size() <= 0){
+            return new JsonResult("维护用户信息解析失败", false);
+        }
+
+        //批量添加维护用户
+        maintainerService.addMaintainerList(uniqueCode, list);
+
+        return new JsonResult("批量导入维护用户成功", true);
     }
 
     /**

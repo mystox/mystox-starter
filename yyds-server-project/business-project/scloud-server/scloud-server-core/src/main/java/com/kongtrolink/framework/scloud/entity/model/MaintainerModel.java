@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.entity.model;
 
 import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
+import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 
 /**
  * 维护用户前端显示模型
@@ -75,5 +76,43 @@ public class MaintainerModel extends MaintainerEntity {
 
     public void setIsModified(String isModified) {
         this.isModified = isModified;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/21 10:39
+     * 功能描述:根据业务服务数据库维护人员和运管中心用户信息创建维护人员信息。
+     * 数据库维护人员信息不能为空
+     */
+    public static MaintainerModel createByEntityBasic( MaintainerEntity entity, BasicUserEntity basicMaintainerEntity){
+        if(entity == null){
+            return null;
+        }
+        MaintainerModel model = new MaintainerModel();
+        model.setUserId(entity.getUserId());
+        model.setUsername(entity.getUsername());
+        model.setCompanyName(entity.getCompanyName());
+        model.setOrganizationId(entity.getOrganizationId());
+        model.setStatus(entity.getStatus());
+        model.setHireDate(entity.getHireDate());
+        model.setExpireDate(entity.getExpireDate());
+        model.setMajor(entity.getMajor());
+        model.setSkill(entity.getSkill());
+        model.setAddress(entity.getAddress());
+        model.setIdCard(entity.getIdCard());
+        model.setDuty(entity.getDuty());
+        model.setEducation(entity.getEducation());
+        model.setAuthentication(entity.getAuthentication());
+        model.setAuthLevel(entity.getAuthLevel());
+        model.setAuthDate(entity.getAuthDate());
+        model.setAuthExpireDate(entity.getAuthExpireDate());
+        if(null != basicMaintainerEntity) {
+            model.setName(basicMaintainerEntity.getName());
+            model.setPhone(basicMaintainerEntity.getPhone());
+            model.setEmail(basicMaintainerEntity.getEmail());
+            model.setCurrentPostId(basicMaintainerEntity.getCurrentRoleId());
+            model.setCurrentPositionName(basicMaintainerEntity.getCurrentRoleName());
+        }
+        return model;
     }
 }

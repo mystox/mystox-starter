@@ -310,4 +310,12 @@ public class DeviceMongo {
         }
         mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
+
+    /**
+     * 根据设备类型编码, 查询出所有指定设备
+     */
+    public List<DeviceEntity> findSpecificDevices(String uniqueCode, String deviceTypeCode){
+        Criteria criteria = Criteria.where("typeCode").is(deviceTypeCode);
+        return mongoTemplate.find(new Query(criteria), DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
 }

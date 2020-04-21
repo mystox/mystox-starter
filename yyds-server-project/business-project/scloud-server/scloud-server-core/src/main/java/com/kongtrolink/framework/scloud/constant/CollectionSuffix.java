@@ -50,5 +50,7 @@ public class CollectionSuffix {
     public static final String PROJECT_ORDER = "_project_order";
     // 工程管理测试单操作记录
     public static final String PROJECT_ORDER_LOG = "_project_order_log";
+    // 工程管理测试单测试项
+    public static final String PROJECT_ORDER_TEST = "_project_order_test";
 
 }

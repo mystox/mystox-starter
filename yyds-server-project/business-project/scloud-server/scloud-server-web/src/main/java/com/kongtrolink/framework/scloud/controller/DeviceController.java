@@ -2,9 +2,7 @@ package com.kongtrolink.framework.scloud.controller;
 
 import com.kongtrolink.framework.core.entity.session.BaseController;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
-import com.kongtrolink.framework.scloud.entity.DeviceType;
 import com.kongtrolink.framework.scloud.entity.RelatedDeviceInfo;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.kongtrolink.framework.scloud.controller.base.ExportController.export;
@@ -228,7 +225,7 @@ public class DeviceController extends BaseController{
             return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("获取FSU下关联设备失败", false);
+            return new JsonResult("获取FSU下关联设备异常", false);
         }
     }
 
@@ -244,7 +241,7 @@ public class DeviceController extends BaseController{
             return new JsonResult(list);
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("获取未关联设备列表", false);
+            return new JsonResult("获取未关联设备列表异常", false);
         }
     }
 }

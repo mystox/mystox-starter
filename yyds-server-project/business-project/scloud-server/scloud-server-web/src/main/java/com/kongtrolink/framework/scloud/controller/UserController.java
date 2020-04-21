@@ -29,7 +29,7 @@ import static com.kongtrolink.framework.scloud.controller.base.ExportController.
  */
 @RestController
 @RequestMapping(value = "/user/", method = RequestMethod.POST)
-public class UserController extends BaseController {
+public class UserController extends BaseController{
 
     @Autowired
     UserService userService;
@@ -40,56 +40,50 @@ public class UserController extends BaseController {
     /**
      * 增加系统用户
      */
-    @RequestMapping(value = "addUser", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult addUser(@RequestBody UserModel userModel) {
+    @RequestMapping(value = "addUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult addUser(@RequestBody UserModel userModel){
         try {
             String uniqueCode = getUniqueCode();
 //            uniqueCode = "YYDS";
-            return userService.addUser(uniqueCode, userModel);
-        } catch (Exception e) {
+            return userService.addUser(uniqueCode,userModel);
+        }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("添加失败", false);
+            return new JsonResult("添加失败",false);
         }
     }
 
     /**
      * 修改系统用户
      */
-    @RequestMapping(value = "modifyUser", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult modifyUser(@RequestBody UserModel userModel) {
-        boolean modifyResult = userService.modifyUser(getUniqueCode(), userModel);
+    @RequestMapping(value = "modifyUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult modifyUser(@RequestBody UserModel userModel){
+        boolean modifyResult = userService.modifyUser(getUniqueCode(),userModel);
         try {
-            if (modifyResult) {
-                return new JsonResult("修改成功", true);
-            } else {
-                return new JsonResult("修改失败", false);
+            if (modifyResult){
+                return new JsonResult("修改成功",true);
+            }else {
+                return new JsonResult("修改失败",false);
             }
-        } catch (Exception e) {
-            return new JsonResult("修改异常", false);
+        }catch (Exception e){
+            return new JsonResult("修改异常",false);
         }
     }
 
     /**
      * 删除系统用户
      */
-    @RequestMapping(value = "deleteUser", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult deleteUser(@RequestBody UserModel userModel) {
+    @RequestMapping(value = "deleteUser",method = RequestMethod.POST)
+    public @ResponseBody JsonResult deleteUser(@RequestBody UserModel userModel){
         try {
-            if (userModel.getUserId() != null && userModel.getUserId() != "") {
-                userService.deleteUser(getUniqueCode(), userModel);
-                return new JsonResult("删除成功", true);
-            } else {
-                return new JsonResult("删除失败", true);
+            if (userModel.getUserId() != null && userModel.getUserId() != ""){
+                userService.deleteUser(getUniqueCode(),userModel);
+                return new JsonResult("删除成功",true);
+            }else {
+                return new JsonResult("删除失败",false);
             }
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("删除失败", true);
+            return new JsonResult("删除失败",true);
         }
     }
 
@@ -97,101 +91,91 @@ public class UserController extends BaseController {
      * 用户列表
      */
     @RequestMapping(value = "listUser", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult listUser(@RequestBody UserQuery userQuery) {
+    public  @ResponseBody JsonResult listUser(@RequestBody UserQuery userQuery){
 
         String uniqueCode = getUniqueCode();
 //        uniqueCode = "YYDS";
         WebPageInfo currentService = getCurrentService();
         String serverCode = currentService.getServerCode();
-        List<JSONObject> userResult = userService.listUser(uniqueCode, userQuery, serverCode);
+        List<JSONObject> userResult = userService.listUser(uniqueCode,userQuery,serverCode);
         return new JsonResult(userResult);
     }
-
     /**
      * 导出系统用户
      */
-    @RequestMapping(value = "exportUserList", method = RequestMethod.POST)
-    public void exportUserList(@RequestBody UserQuery userQuery, HttpServletResponse response) {
+    @RequestMapping(value = "exportUserList",method = RequestMethod.POST)
+    public void exportUserList(@RequestBody UserQuery userQuery,HttpServletResponse response){
         try {
-            List<JSONObject> userList = userService.listUser(getUniqueCode(), userQuery, "");
+            List<JSONObject> userList = userService.listUser(getUniqueCode(),userQuery,"");
             List<UserModel> result = new ArrayList<>();
-            for (JSONObject list : userList) {
-                UserModel user = JSON.toJavaObject(list, UserModel.class);
+            for (JSONObject list:userList){
+                UserModel user = JSON.toJavaObject(list,UserModel.class);
                 result.add(user);
             }
             HSSFWorkbook workbook = userService.exportUserList(userList);
-            export(response, workbook, "系统用户列表");
-        } catch (Exception e) {
+            export(response,workbook,"系统用户列表");
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
-
     /**
      * 批量导入系统用户
      */
     @RequestMapping(value = "importUserList", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult importUserList(@RequestParam("file") MultipartFile file) {
-        if (!file.isEmpty()) {
-            try {
+    public @ResponseBody JsonResult importUserList(@RequestParam("file") MultipartFile file){
+        if (!file.isEmpty()){
+            try{
                 //获取文件名
                 String fileName = file.getOriginalFilename();
                 //进一步判断文件是否为空（即判断其大小是否为0或其名称是否为null）验证文件名是否合格
-                long size = file.getSize();
-                if (fileName == null || ("").equals(fileName) && size == 0 && !ExcelUtil.validateExcel(fileName)) {
+                long size=file.getSize();
+                if(fileName==null || ("").equals(fileName) && size==0 && !ExcelUtil.validateExcel(fileName)){
                     LOGGER.error("文件格式不正确！");
-                } else {
-                    if (userService.importUserList(getUniqueCode(), file)) {
-                        return new JsonResult("导入成功", true);
-                    } else {
+                }else {
+                    if (userService.importUserList(getUniqueCode(),file)){
+                        return new JsonResult("导入成功",true);
+                    }else {
                         return new JsonResult("导入失败", false);
                     }
                 }
-            } catch (Exception e) {
+            }catch (Exception e){
                 e.printStackTrace();
                 return new JsonResult("导入失败", false);
             }
         }
-        return new JsonResult("导入失败", false);
+        return new JsonResult("导入失败",false);
     }
-
     /**
      * 批量删除系统用户
      */
-    @RequestMapping(value = "deleteUserList", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult deleteUserList(@RequestBody UserQuery userQuery) {
+    @RequestMapping(value = "deleteUserList",method = RequestMethod.POST)
+    public @ResponseBody JsonResult deleteUserList(@RequestBody UserQuery userQuery){
         try {
             List<String> ids = userQuery.getUserIds();
-            for (String id : ids) {
-                UserModel user = new UserModel();
-                user.setUserId(id);
-                userService.deleteUser(getUniqueCode(), user);
-                return new JsonResult("删除成功", true);
+            if (ids != null){
+                for (String id:ids){
+                    UserModel user = new UserModel();
+                    user.setUserId(id);
+                    userService.deleteUser(getUniqueCode(),user);
+                }
             }
-        } catch (Exception e) {
+            return new JsonResult("删除成功",true);
+        }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("删除失败", true);
+            return new JsonResult("删除失败",false);
         }
-        return new JsonResult("删除失败", false);
     }
 
     /**
      * 修改系统用户或维护用户 管辖站点
      */
     @RequestMapping(value = "modifyUserSite", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList) {
-        try {
+    public @ResponseBody JsonResult modifyUserSite(@RequestBody List<UserSiteEntity> userSiteEntityList){
+        try{
 //            String uniqueCode = getUniqueCode();
             userService.modifyUserSite(getUniqueCode(), userSiteEntityList);
             return new JsonResult("修改管辖站点成功", true);
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("修改管辖站点失败", false);
         }
@@ -201,15 +185,13 @@ public class UserController extends BaseController {
      * 获取系统用户或维护用户 管辖站点
      */
     @RequestMapping(value = "getUserSite", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity) {
-        try {
+    public @ResponseBody JsonResult getUserSite(@RequestBody UserSiteEntity userSiteEntity){
+        try{
 //            String uniqueCode = getUniqueCode();
             String userId = userSiteEntity.getUserId();
             List<UserSiteEntity> list = userService.getUserSite(getUniqueCode(), userId);
             return new JsonResult(list);
-        } catch (Exception e) {
+        }catch (Exception e){
             e.printStackTrace();
             return new JsonResult("获取管辖站点失败", false);
         }

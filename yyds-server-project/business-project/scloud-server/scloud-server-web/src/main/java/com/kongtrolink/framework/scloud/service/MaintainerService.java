@@ -15,6 +15,20 @@ import java.util.List;
 public interface MaintainerService {
 
     /**
+     * @auther: liudd
+     * @date: 2020/4/21 8:41
+     * 功能描述:获取列表
+     */
+    List<MaintainerEntity> list(String uniqueCode, MaintainerQuery maintainerQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/21 9:26
+     * 功能描述：将entity列表转换为model列表。
+     */
+    List<MaintainerModel> listModelsFromEntities(String uniquCode, List<MaintainerEntity> maintainerEntities, MaintainerQuery maintainerQuery);
+
+    /**
      * 获取维护用户列表
      */
     List<MaintainerModel> getMaintainerList(String uniqueCode, MaintainerQuery maintainerQuery);
@@ -29,6 +43,11 @@ public interface MaintainerService {
      * @return 用户Id
      */
     String addMaintainer(String uniqueCode, MaintainerModel maintainerModel);
+
+    /**
+     * 批量添加维护用户
+     */
+    void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels);
 
     /**
      * 修改维护用户

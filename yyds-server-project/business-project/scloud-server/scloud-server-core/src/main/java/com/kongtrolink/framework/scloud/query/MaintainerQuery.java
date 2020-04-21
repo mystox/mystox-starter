@@ -18,6 +18,15 @@ public class MaintainerQuery extends Paging{
     private String companyName; //代维公司
     private String currentPostId;   //角色Id
     private String currentPositionName; //角色名称
+    private String siteCode;
+
+    public String getSiteCode() {
+        return siteCode;
+    }
+
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
+    }
 
     public String getUserId() {
         return userId;
