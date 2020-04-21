@@ -148,11 +148,20 @@ public class SiteServiceImpl implements SiteService {
                 }
 
                 if (siteCodes.size() > 0) {
+                    //获取业务平台所有FSU及其注册状态
+                    List<DeviceEntity> fsuList = deviceMongo.findSpecificDevices(uniqueCode, CommonConstant.DEVICE_TYPE_CODE_FSU);
+                    Set<String> onlineSiteCodes = new HashSet<>();
+                    for (DeviceEntity fsu : fsuList){
+                        if (CommonConstant.ONLINE.equals(fsu.getState())){
+                            onlineSiteCodes.add(fsu.getSiteCode());
+                        }
+                    }
+
                     siteQuery.setSiteCodes(siteCodes);
                     List<SiteEntity> siteEntityList = siteMongo.findSiteList(uniqueCode, siteQuery);
                     if (siteEntityList != null && siteEntityList.size() > 0) {
                         for (SiteEntity siteEntity : siteEntityList) {
-                            SiteModel siteModel = getSiteModel(map, siteEntity);    //返回给前端的站点数据模型
+                            SiteModel siteModel = getSiteModel(map, onlineSiteCodes, siteEntity);    //返回给前端的站点数据模型
 
                             list.add(siteModel);
                         }
@@ -229,6 +238,9 @@ public class SiteServiceImpl implements SiteService {
                         break;
                     case "fileId":
                         jsonObject.put("fileId", siteModel.getFileId());
+                        break;
+                    case "online":
+                        jsonObject.put("online", siteModel.getOnline());
                         break;
                     default:
                         break;
@@ -380,7 +392,7 @@ public class SiteServiceImpl implements SiteService {
     }
 
     //返回前端的站点数据模型
-    private SiteModel getSiteModel(Map<String, BasicSiteEntity> map, SiteEntity siteEntity){
+    private SiteModel getSiteModel(Map<String, BasicSiteEntity> map, Set<String> onlineSiteCodes, SiteEntity siteEntity){
         SiteModel siteModel = new SiteModel();
         siteModel.setSiteId(siteEntity.getId());
         siteModel.setTierCode(siteEntity.getTierCode());
@@ -400,6 +412,11 @@ public class SiteServiceImpl implements SiteService {
         siteModel.setAreaCovered(siteEntity.getAreaCovered());
         siteModel.setFileId(siteEntity.getFileId());
         siteModel.setFileName(siteEntity.getFileName());
+        if (onlineSiteCodes.contains(siteEntity.getCode())){
+            siteModel.setOnline(true);
+        }else {
+            siteModel.setOnline(false);
+        }
 
         return siteModel;
     }

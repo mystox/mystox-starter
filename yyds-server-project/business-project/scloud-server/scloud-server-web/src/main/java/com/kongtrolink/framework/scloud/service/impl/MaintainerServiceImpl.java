@@ -235,6 +235,15 @@ public class MaintainerServiceImpl implements MaintainerService{
     }
 
     /**
+     * 批量添加维护用户
+     */
+    @Override
+    public void addMaintainerList(String uniqueCode, List<MaintainerModel> maintainerModels) {
+        //向【云管】下发批量添加维护用户的MQTT消息
+
+    }
+
+    /**
      * 修改维护用户
      */
     @Override

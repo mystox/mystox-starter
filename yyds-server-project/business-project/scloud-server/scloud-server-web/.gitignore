@@ -23,3 +23,6 @@
 /nbdist/
 /.nb-gradle/
 /build/
+
+### resources ###
+/src/main/resources/application-mystox.yml

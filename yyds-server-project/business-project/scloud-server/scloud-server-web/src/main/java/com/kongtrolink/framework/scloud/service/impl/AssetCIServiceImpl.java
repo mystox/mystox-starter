@@ -199,6 +199,10 @@ public class AssetCIServiceImpl implements AssetCIService{
         basicDeviceQuery.setServerCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, deviceQuery.getServerCode()));
         basicDeviceQuery.setEnterpriseCode(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, uniqueCode));
         basicDeviceQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, CommonConstant.DEVICE_TYPE_FSU));
+        if (null != deviceQuery.getDeviceCodes()) {
+            basicDeviceQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getDeviceCodes()));
+        }
+
         BasicParentQuery basicParentQuery = new BasicParentQuery();
         basicParentQuery.setType(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_EXACT, AssetTypeConstant.ASSET_TYPE_SITE));    //父资产类型：site
         basicParentQuery.setSn(new BasicCommonQuery(CommonConstant.SEARCH_TYPE_IN, deviceQuery.getSiteCodes()));    //父资产SN：站点编码（集合）

@@ -2,7 +2,7 @@ spring:
   application:
     name: reports-server
   profiles:
-    active: dev,test,prod
+    active: dev,test,prod,mystox
   session:
     store-type: redis
 ###########消息框架相关配置#############

@@ -27,7 +27,7 @@ public class ServiceRegistryImpl implements ServiceRegistry, Watcher {
 
     private CountDownLatch latch = new CountDownLatch(1);
 
-    @Value("${zookeeper.sessionTimeOut:100}")
+    @Value("${zookeeper.sessionTimeout:100}")
     private /*static final*/ int SESSION_TIMEOUT; //milliseconds
 
     private ZooKeeper zk;

@@ -11,7 +11,7 @@ public class ProjectOrderEntity implements Serializable{
      *
      */
     private static final long serialVersionUID = 8908778391904991970L;
-    private String _id;
+    private String _id; //测试单Id
     private String siteCode;    //站点编码
     private String fsuCode; //FSU设备编码
     private String desc;    //入网说明

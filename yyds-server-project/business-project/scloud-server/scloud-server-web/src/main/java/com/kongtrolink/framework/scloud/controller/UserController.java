@@ -83,7 +83,7 @@ public class UserController extends BaseController{
             }
         }catch (Exception e){
             e.printStackTrace();
-            return new JsonResult("删除失败",false);
+            return new JsonResult("删除失败",true);
         }
     }
 

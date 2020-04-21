@@ -171,7 +171,7 @@ public class DeviceServiceImpl implements DeviceService {
                 if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
                     LOGGER.info("从【资管】获取站点下FSU列表 成功");
                     //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
-                    list = getRelatedDeviceInfoList(response, list);
+                    list = getRelatedDeviceInfoList(uniqueCode, response, list);
                 } else {
                     LOGGER.error("从【资管】获取站点下FSU列表 失败");
                 }
@@ -198,7 +198,7 @@ public class DeviceServiceImpl implements DeviceService {
                 if (response.getResult() == CommonConstant.SUCCESSFUL) { //请求成功
                     LOGGER.info("从【资管】获取FSU下的关联设备 成功");
                     //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
-                    list = getRelatedDeviceInfoList(response, list);
+                    list = getRelatedDeviceInfoList(uniqueCode, response, list);
                 } else {
                     LOGGER.error("从【资管】获取FSU下的关联设备 失败");
                 }
@@ -237,7 +237,7 @@ public class DeviceServiceImpl implements DeviceService {
                         LOGGER.info("从【资管】获取站点下未关联FSU的设备列表 成功");
 
                         //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
-                        list = getRelatedDeviceInfoList(response, list);
+                        list = getRelatedDeviceInfoList(uniqueCode, response, list);
                     } else {
                         LOGGER.error("从【资管】获取站点下未关联FSU的设备列表 失败");
                     }
@@ -251,7 +251,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     //根据中台返回的对应设备资产信息，拼成返回给前端的设备数据模型
-    private List<RelatedDeviceInfo> getRelatedDeviceInfoList(CIResponseEntity response, List<RelatedDeviceInfo> list){
+    private List<RelatedDeviceInfo> getRelatedDeviceInfoList(String uniqueCode, CIResponseEntity response, List<RelatedDeviceInfo> list){
         for (JSONObject jsonObject : response.getInfos()) {
             BasicDeviceEntity basicDeviceEntity = JSONObject.parseObject(jsonObject.toJSONString(), BasicDeviceEntity.class);
 
@@ -259,6 +259,15 @@ public class DeviceServiceImpl implements DeviceService {
             relatedDeviceInfo.setDeviceName(basicDeviceEntity.getDeviceName());
             relatedDeviceInfo.setDeviceCode(basicDeviceEntity.getCode());
             relatedDeviceInfo.setType(basicDeviceEntity.getAssetType());
+            relatedDeviceInfo.setModel(basicDeviceEntity.getModel());
+
+            DeviceEntity device = deviceMongo.findDeviceByCode(uniqueCode, basicDeviceEntity.getCode());
+            if (device != null) {
+                relatedDeviceInfo.setTypeCode(device.getTypeCode());
+                relatedDeviceInfo.setManufacturer(device.getManufacturer());
+                relatedDeviceInfo.setState(device.getState());
+                relatedDeviceInfo.setOperationState(device.getOperationState());
+            }
 
             list.add(relatedDeviceInfo);
         }
