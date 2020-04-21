@@ -43,6 +43,68 @@ public class MaintainerServiceImpl implements MaintainerService{
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintainerServiceImpl.class);
 
     /**
+     * @param uniqueCode
+     * @param maintainerQuery
+     * @auther: liudd
+     * @date: 2020/4/21 8:41
+     * 功能描述:获取列表
+     */
+    @Override
+    public List<MaintainerEntity> list(String uniqueCode, MaintainerQuery maintainerQuery) {
+        return maintainerMongo.list(uniqueCode, maintainerQuery);
+    }
+
+    /**
+
+     * @param maintainerQuery
+     * @auther: liudd
+     * @date: 2020/4/21 9:26
+     * 功能描述：将entity列表转换为model列表。
+     */
+    @Override
+    public List<MaintainerModel> listModelsFromEntities(String uniqueCode, List<MaintainerEntity> maintainerEntities, MaintainerQuery maintainerQuery) {
+        if(null == maintainerEntities){
+            return null;
+        }
+        List<MaintainerModel> maintainerModelList = new ArrayList<>();
+        if(maintainerEntities.size() == 0){
+            return maintainerModelList;
+        }
+        //获取企业下所有用户（当前云管暂未提供根据条件获取用户，当前方案为从云管获取企业下所有用户，然后在业务平台进行条件筛选）
+        MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_USER_LIST_BY_ENTERPRISE_CODE, uniqueCode);
+        if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL){
+            if (msgResult.getMsg() != null) {
+                LOGGER.info("【维护用户管理】,从【云管】获取所有用户 成功");
+                List<BasicUserEntity> basicUserEntityList = JSONArray.parseArray(msgResult.getMsg(), BasicUserEntity.class);
+                if (basicUserEntityList.size() > 0) {
+                    Map<String, MaintainerEntity> usernameEntityMap = new HashMap<>();
+                    for(MaintainerEntity maintainerEntity : maintainerEntities){
+                        usernameEntityMap.put(maintainerEntity.getUsername(), maintainerEntity);
+                    }
+
+                    for (BasicUserEntity basicMaintainer : basicUserEntityList) {
+                        if (!StringUtil.isNUll(maintainerQuery.getName())) { //如果模糊搜索条件中姓名不为空，则筛选出满足条件的
+                            if (!basicMaintainer.getName().contains(maintainerQuery.getName())) {
+                                break;
+                            }
+                        }
+                        MaintainerEntity maintainerEntity = usernameEntityMap.get(basicMaintainer.getUsername());
+                        if(null != maintainerEntity){
+                            MaintainerModel maintainerModel = MaintainerModel.createByEntityBasic(maintainerEntity, basicMaintainer);
+                            maintainerModelList.add(maintainerModel);
+                        }
+                    }
+                }
+            }else {
+                LOGGER.error("【维护用户管理】,从【云管】获取所有用户 失败");
+            }
+        }else {
+            LOGGER.error("【维护用户管理】,从【云管】获取所有用户 MQTT通信失败");
+        }
+        return maintainerModelList;
+    }
+
+    /**
      * 获取维护用户列表
      */
     @Override

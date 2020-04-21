@@ -6,6 +6,7 @@ import com.kongtrolink.framework.scloud.entity.MaintainerEntity;
 import com.kongtrolink.framework.scloud.entity.model.MaintainerModel;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
 import com.kongtrolink.framework.scloud.service.MaintainerService;
+import com.kongtrolink.framework.scloud.util.StringUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,28 @@ public class MaintainerController extends BaseController {
     MaintainerService maintainerService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintainerController.class);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/21 9:37
+     * 功能描述:列表
+     */
+    @RequestMapping(value = "list", method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult list(@RequestBody MaintainerQuery maintainerQuery){
+        try{
+            String uniqueCode = getUniqueCode();
+            if(StringUtil.isNUll(uniqueCode)){
+                uniqueCode = "YYDS";
+            }
+            List<MaintainerEntity> entityList = maintainerService.list(uniqueCode, maintainerQuery);
+            List<MaintainerModel> modelList = maintainerService.listModelsFromEntities(uniqueCode, entityList, maintainerQuery);
+            return new JsonResult(modelList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new JsonResult("获取维护用户列表异常", false);
+        }
+    }
 
     /**
      * 获取维护用户列表

@@ -9,6 +9,8 @@ import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -25,6 +27,44 @@ public class MaintainerMongo {
 
     @Autowired
     MongoTemplate mongoTemplate;
+    private String table = CollectionSuffix.MAINTAINER;
+    //用户站点权限关联查询别名字段
+    private String user_site_info = "user_site_info";
+    private String user_site_userId = "userId";
+
+    /**
+     * @param uniqueCode
+     * @param maintainerQuery
+     * @auther: liudd
+     * @date: 2020/4/21 8:41
+     * 功能描述:获取列表
+     */
+    public List<MaintainerEntity> list(String uniqueCode, MaintainerQuery maintainerQuery) {
+        Criteria criteria = new Criteria();
+        String username = maintainerQuery.getUsername();
+        if(!StringUtil.isNUll(username)){
+            username = MongoRegexUtil.escapeExprSpecialWord(username);
+            criteria.and("username").regex(".*?" + username + ".*?");
+        }
+        String companyName = maintainerQuery.getCompanyName();
+        if (!StringUtil.isNUll(companyName)){
+            companyName = MongoRegexUtil.escapeExprSpecialWord(companyName);
+            criteria.and("companyName").regex(".*?" + companyName + ".*?");
+        }
+        String siteCode = maintainerQuery.getSiteCode();
+        if(StringUtil.isNUll(siteCode)){
+            return mongoTemplate.find(new Query(criteria), MaintainerEntity.class, uniqueCode + CollectionSuffix.MAINTAINER);
+        }else{
+            //使用关联查询
+            Aggregation aggregation = Aggregation.newAggregation(
+                    Aggregation.match(criteria),
+                    Aggregation.lookup(uniqueCode+CollectionSuffix.USER_SITE, user_site_userId, user_site_userId, user_site_info),
+                    Aggregation.match(Criteria.where("user_site_info.siteCode").is(maintainerQuery.getSiteCode()))
+            );
+            AggregationResults<MaintainerEntity> aggregate = mongoTemplate.aggregate(aggregation, uniqueCode + table, MaintainerEntity.class);
+            return aggregate.getMappedResults();
+        }
+    }
 
     /**
      * 根据查询条件，获取维护人员列表
