@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.entity;
 import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
 import com.kongtrolink.framework.scloud.constant.WorkConstants;
+import com.kongtrolink.framework.scloud.util.StringUtil;
 
 import java.util.Date;
 
@@ -359,7 +360,7 @@ public class AlarmBusiness {
         AlarmBusiness business = new AlarmBusiness();
         business.setServerCode(alarm.getServerCode());
         business.setFlag(alarm.getFlag());
-        business.setValue(alarm.getValue());
+        business.setValue(alarm.getTargetValue());
         business.setSiteCode(alarm.getSiteCode());
         business.setSiteName(alarm.getSiteName());
         business.setSiteType(alarm.getSiteType());
@@ -370,7 +371,11 @@ public class AlarmBusiness {
         business.setDeviceName(alarm.getDeviceName());
         business.setCntbId(alarm.getSignalId());
         business.setName(alarm.getName());
-        business.setLevel(alarm.getLevel());
+        Integer level = alarm.getTargetLevel();
+        if(null == level){
+            level = alarm.getLevel();
+        }
+        business.setLevel(level);
         business.setState(BaseConstant.ALARM_STATE_PENDING);
         business.setTreport(alarm.getTreport());
         business.setTrecover(alarm.getTrecover());

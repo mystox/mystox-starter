@@ -19,6 +19,7 @@ public class Alarm {
     private String serial;              //告警序列号
     private String name;                //告警名称
     private String value;                //告警值
+    private String targetValue;          //传递给业务平台的告警值
     private Integer level;               //告警等级
     private String siteCode;
     private String siteName;
@@ -51,6 +52,23 @@ public class Alarm {
     private String workCode;            //工单编码，用于前端展示
     private int flag;                //告警标志（0-结束；1-上报）
     private String focusId;             //关注点id，用于前端取消关注
+    private String table;               //业务模块所在表
+
+    public String getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(String targetValue) {
+        this.targetValue = targetValue;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
 
     public FacadeView getRecoverMan() {
         return recoverMan;
@@ -387,11 +405,13 @@ public class Alarm {
         if(null == alarmBusiness){
             return;
         }
+        this.setValue(alarmBusiness.getValue());
         this.setLevel(alarmBusiness.getLevel());
         this.setSiteCode(alarmBusiness.getSiteCode());
         this.setSiteName(alarmBusiness.getSiteName());
         this.setSiteType(alarmBusiness.getSiteType());
         this.setDeviceName(alarmBusiness.getDeviceName());
+        this.setLevel(alarmBusiness.getLevel());        //业务平台不显示原始告警等级
         this.setTargetLevelName(alarmBusiness.getLevelName());
         this.setShield(alarmBusiness.getShield());
         this.setCheckState(alarmBusiness.getCheckState());
@@ -400,5 +420,6 @@ public class Alarm {
         this.setCheckTime(alarmBusiness.getCheckTime());
         this.setWorkCode(alarmBusiness.getWorkCode());
         this.entDevSig = alarmBusiness.getEntDevSig();
+        this.table = alarmBusiness.getTable();
     }
 }

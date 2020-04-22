@@ -53,15 +53,19 @@ public class AlarmLevelService {
         AlarmLevel alarmLevel ;
         if(userAlarmLevel){
             alarmLevel = matchAlarmLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
+            logger.info("【告警等级模块】启用了告警等级对应，获取到的告警等级：{}", alarmLevel.toString());
         }else {
             alarmLevel = alarmLevelDao.matchLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
+            logger.info("【告警等级模块】没启用告警等级对应，从数据库获取到的告警等级：{}", alarmLevel.toString());
         }
         if(null == alarmLevel) {
             EnterpriseLevel enterpriseLevel;
             if(useEnterpriseLevel) {
                 enterpriseLevel = matchEnterpriseLevel(enterpriseCode, serverCode, level);
+                logger.info("【告警等级模块】告警等级对应为空，启用了企业等级对应，获取的企业等级为：{}", enterpriseLevel.toString());
             }else{
                 enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
+                logger.info("【告警等级模块】告警等级对应为空，未启用企业等级对应，从数据库获取的企业等级为：{}", enterpriseLevel.toString());
             }
             if (null != enterpriseLevel) {
                 alarmLevel = new AlarmLevel();

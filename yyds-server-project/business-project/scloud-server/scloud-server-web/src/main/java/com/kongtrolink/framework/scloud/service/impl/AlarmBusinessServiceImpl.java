@@ -15,7 +15,11 @@ import com.kongtrolink.framework.scloud.service.FilterRuleService;
 import com.kongtrolink.framework.scloud.service.SiteService;
 import com.kongtrolink.framework.common.util.DateUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
+import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -422,5 +426,17 @@ public class AlarmBusinessServiceImpl implements AlarmBusinessService{
         String uniqueCode = alarmQuery.getEnterpriseCode();
         String table = CollectionSuffix.CUR_ALARM_BUSINESS;
         return businessDao.listNoPage(uniqueCode, table, alarmQuery);
+    }
+
+    /**
+     * @param uniqueCode
+     * @param alarmBusiness
+     * @auther: liudd
+     * @date: 2020/4/11 15:03
+     * 功能描述:修改告警的工单编码
+     */
+    @Override
+    public boolean updateAlarmWorkCode(String uniqueCode, AlarmBusiness alarmBusiness) {
+        return businessDao.updateAlarmWorkCode(uniqueCode, alarmBusiness);
     }
 }

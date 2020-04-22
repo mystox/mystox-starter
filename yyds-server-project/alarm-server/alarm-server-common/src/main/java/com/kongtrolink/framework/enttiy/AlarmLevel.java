@@ -219,4 +219,17 @@ public class AlarmLevel {
     public String getKey(){
         return enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel + Contant.EXCLAM + sourceLevel;
     }
+
+    @Override
+    public String toString() {
+        return "AlarmLevel{" +
+                "entDevCode='" + entDevCode + '\'' +
+                ", enterpriseCode='" + enterpriseCode + '\'' +
+                ", serverCode='" + serverCode + '\'' +
+                ", deviceType='" + deviceType + '\'' +
+                ", deviceModel='" + deviceModel + '\'' +
+                ", targetLevelName='" + targetLevelName + '\'' +
+                ", color='" + color + '\'' +
+                '}';
+    }
 }
