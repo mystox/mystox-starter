@@ -53,15 +53,19 @@ public class AlarmLevelService {
         AlarmLevel alarmLevel ;
         if(userAlarmLevel){
             alarmLevel = matchAlarmLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
+            logger.info("【告警等级模块】启用了告警等级对应，获取到的告警等级：{}", alarmLevel);
         }else {
             alarmLevel = alarmLevelDao.matchLevel(enterpriseCode, serverCode, deviceType, deviceModel, level);
+            logger.info("【告警等级模块】没启用告警等级对应，从数据库获取到的告警等级：{}", alarmLevel);
         }
         if(null == alarmLevel) {
             EnterpriseLevel enterpriseLevel;
             if(useEnterpriseLevel) {
                 enterpriseLevel = matchEnterpriseLevel(enterpriseCode, serverCode, level);
+                logger.info("【告警等级模块】告警等级对应为空，启用了企业等级对应，获取的企业等级为：{}", enterpriseLevel);
             }else{
                 enterpriseLevel = enterpriseLevelDao.matchLevel(enterpriseCode, serverCode, level);
+                logger.info("【告警等级模块】告警等级对应为空，未启用企业等级对应，从数据库获取的企业等级为：{}", enterpriseLevel);
             }
             if (null != enterpriseLevel) {
                 alarmLevel = new AlarmLevel();
@@ -82,7 +86,7 @@ public class AlarmLevelService {
         //获取所有企业告警等级，包括默认告警等级
         List<EnterpriseLevel> byCodes = enterpriseLevelDao.getByCodes(codes);
         for(EnterpriseLevel enterpriseLevel : byCodes){
-            String key = enterpriseLevel.getEnterpriseCode() + Contant.UNDERLINE + enterpriseLevel.getServerCode();
+            String key = enterpriseLevel.getEnterpriseCode() + Contant.EXCLAM + enterpriseLevel.getServerCode();
             List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelMap.get(key);
             if(null == enterpriseLevelList){
                 enterpriseLevelList = new ArrayList<>();
@@ -115,6 +119,7 @@ public class AlarmLevelService {
      * 2191228enterpriseLevelList存储顺序为lastUse
      */
     public EnterpriseLevel matchEnterpriseLevel(String enterpriseCode, String serverCode, int level){
+        EnterpriseLevel targetLevel = null;
         String key = enterpriseCode + Contant.UNDERLINE + serverCode;
         List<EnterpriseLevel> enterpriseLevelList = enterpriseLevelMap.get(key);
         if(null == enterpriseLevelList){
@@ -130,13 +135,15 @@ public class AlarmLevelService {
             if(enterpriseLevel.getLevel() > level){
                 continue;
             }
-            return enterpriseLevel;
+            targetLevel = enterpriseLevel;
         }
-        EnterpriseLevel enterpriseLevel = enterpriseLevelList.get(0);
+        if(null == targetLevel) {
+            targetLevel = enterpriseLevelList.get(0);
+        }
         logger.info("enterpriseCode：{}，serverCode:{}, level:{} 对应最小企业告警等级：{}-{}-{}-{}",
                 enterpriseCode, serverCode, level,
-                enterpriseLevel.getEnterpriseCode(), enterpriseLevel.getServerCode(), enterpriseLevel.getLevel(), enterpriseLevel.getLevelName());
-        return enterpriseLevel;
+                targetLevel.getEnterpriseCode(), targetLevel.getServerCode(), targetLevel.getLevel(), targetLevel.getLevelName());
+        return targetLevel;
     }
 
     public void initAlarmLevelMap(){
@@ -148,8 +155,8 @@ public class AlarmLevelService {
         for(AlarmLevel alarmLevel : all){
             String enterpriseCode = alarmLevel.getEnterpriseCode();
             String serverCode = alarmLevel.getServerCode();
-            String key = alarmLevel.getKey();
-            alarmLevelMap.put(key, alarmLevel);
+            //key：企业编码：服务编码：设备类型：设备型号：告警原等级
+            alarmLevelMap.put(alarmLevel.initKey(), alarmLevel);
             //保存企业下所有告警等级，方便web端远程调用修改
             String enterServer = enterpriseCode + Contant.EXCLAM + serverCode;
             List<AlarmLevel> enterSerCodeAlarmLevelList = enterSerCodeAlarmLevelListMap.get(enterServer);
@@ -168,7 +175,7 @@ public class AlarmLevelService {
     }
 
     public void updateAlarmLevelMap(String jsonStr){
-        //type:level:key
+        //type:level:key:deleteKeys
         if(StringUtil.isNUll(jsonStr)){
             return;
         }
@@ -202,16 +209,19 @@ public class AlarmLevelService {
                     alarmLevelMap.remove(key);
                 }
             }
+            List<AlarmLevel> alarmLevelList = null;
             if(Contant.UPDATE.equals(type)) {
                 //根据enterpriseCode, serverCode, deviceType, deviceModel更新alarmLevelMap中告警信息
-                List<AlarmLevel> alarmLevelList = alarmLevelDao.getByInfo(info[0], info[1], info[2], info[3]);
+                alarmLevelList = alarmLevelDao.getByInfo(info[0], info[1], info[2], info[3]);
                 for (AlarmLevel alarmLevel : alarmLevelList) {
-                    alarmLevelMap.put(alarmLevel.getKey(), alarmLevel);
+                    alarmLevelMap.put(alarmLevel.initKey(), alarmLevel);
                 }
             }
             //重置enterSerCodeAlarmLevelListMap
             //1根据enterpriseCode和serverCode从数据库获取告警
-            List<AlarmLevel> alarmLevelList = alarmLevelDao.getByInfo(enterpriseCode, serverCode, null, null);
+            if(null == alarmLevelList) {
+                alarmLevelList = alarmLevelDao.getByInfo(enterpriseCode, serverCode, null, null);
+            }
             //2，跟新enterSerCodeAlarmLevelListMap中数据
             enterSerCodeAlarmLevelListMap.put(enterServer, alarmLevelList);
 
@@ -220,7 +230,7 @@ public class AlarmLevelService {
             List<AlarmLevel> enterSerCodeAlarmLevelList = enterSerCodeAlarmLevelListMap.get(enterServer);
             if(null != enterSerCodeAlarmLevelList){
                 for(AlarmLevel alarmLevel : enterSerCodeAlarmLevelList){
-                    alarmLevelMap.remove(alarmLevel.getKey());
+                    alarmLevelMap.remove(alarmLevel.initKey());
                 }
             }
             enterSerCodeAlarmLevelListMap.remove(enterServer);
@@ -232,7 +242,7 @@ public class AlarmLevelService {
                 enterSerCodeAlarmLevelListMap.put(enterServer, alarmLevelList);
                 //3,更新alarmLevelMap中数据
                 for(AlarmLevel alarmLevel : alarmLevelList){
-                    alarmLevelMap.put(alarmLevel.getKey(), alarmLevel);
+                    alarmLevelMap.put(alarmLevel.initKey(), alarmLevel);
                 }
             }
         }

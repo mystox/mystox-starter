@@ -23,7 +23,8 @@ public class Alarm {
     private String serverCode;
     private String serial;              //告警序列号
     private String name;                //告警名称
-    private float value;                //告警值
+    private String value;                //告警值
+    private String targetValue;          //传递给业务平台的告警值
     private Integer level;               //告警等级
     private String deviceType;          //设备型号，设备类型，与资管一致
     private String deviceModel;         //设备类型，设备型号，如果没有与deviceType一致
@@ -48,6 +49,14 @@ public class Alarm {
     private String checkContant;        //确认内容
     private FacadeView checker;         //确认人
     private String workCode;            //工单编码，用于前端展示
+
+    public String getTargetValue() {
+        return targetValue;
+    }
+
+    public void setTargetValue(String targetValue) {
+        this.targetValue = targetValue;
+    }
 
     public FacadeView getRecoverMan() {
         return recoverMan;
@@ -233,11 +242,11 @@ public class Alarm {
         this.name = name;
     }
 
-    public float getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

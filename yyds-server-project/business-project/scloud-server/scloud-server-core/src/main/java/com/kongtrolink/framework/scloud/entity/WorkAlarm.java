@@ -15,6 +15,15 @@ public class WorkAlarm {
     private String state;       //告警状态
     private Date treport;       //告警时间
     private Date trecover;      //告警清除时间
+    private String table ;      //业务模块所在表
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
 
     public String getAlarmKey() {
         return alarmKey;

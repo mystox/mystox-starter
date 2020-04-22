@@ -65,7 +65,7 @@ public class AlarmTest {
         alarm.setDeviceId(deviceId+"001");
         alarm.setSignalId(signalId+"001");
         alarm.setName("超低温告警");
-        alarm.setValue(-25);
+//        alarm.setValue(-25);
         alarm.setSerial("52");
         alarm.setLevel(2);
         alarm.setTargetLevel(1);

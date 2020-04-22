@@ -121,6 +121,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
                 alarm.setEnterpriseCode(enterpriseCode);
                 alarm.setServerCode(serverCode);
+                alarm.setTargetValue(alarm.getValue());
                 alarm.initKey();
 
                 if (!existAlarm(alarm)) { //判定告警是否存在
@@ -203,8 +204,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         List<OperateEntity> operate = reportOperateConfig.getOperate();
         logger.debug("ONE operate: " + operate);
         List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-        logger.debug("enterServerCode:"+ enterServerCode +"; operateEntityList:" + operateEntityList);
-        logger.debug("enterServerCodeONE operateEntityList: " + operateEntityList);
+        logger.info("enterServerCode:{}, operateEntityList: {}" , enterServerCode, operateEntityList);
         if (null != operateEntityList) {
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for (OperateEntity operateEntity : operateEntityList) {
@@ -213,7 +213,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     //所有其他模块，都返回告警列表json字符串
                     MsgResult msgResult = mqttOpera.opera(operaCode, reportAlarmListJson);
                     //打印请求相关信息
-                    logger.debug("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);
+                    logger.info("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);
                     int stateCode = msgResult.getStateCode();
                     if (1 == stateCode) {
                         reportAlarmListJson = msgResult.getMsg();

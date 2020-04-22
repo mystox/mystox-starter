@@ -120,7 +120,7 @@ public class AlarmLevelServiceImpl implements AlarmLevelService {
         if(null != alarmLevelList && alarmLevelList.size()>0){
             StringBuilder stringBuilder = new StringBuilder();
             for(AlarmLevel alarmLevel : alarmLevelList) {
-                stringBuilder.append(alarmLevel.getKey()).append(",");
+                stringBuilder.append(alarmLevel.initKey()).append(",");
             }
             deleteKey = stringBuilder.substring(0, stringBuilder.lastIndexOf(","));
         }

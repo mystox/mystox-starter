@@ -53,10 +53,6 @@ public class Contant {
     public static String TWO = "2";     //其他操作（修改附加属性）
     public static String THR = "3";
 
-//    public static String INFORM_TYPE_MSG = "msg";
-//    public static String INFORM_TYPE_EMAL = "email";
-//    public static String INFORM_TYPE_APP = "app";
-
     public static String ENTERPRISECODE = "enterpriseCode";
     public static String SERVERCODE = "serverCode";
     public static String DEVICEID = "deviceId";

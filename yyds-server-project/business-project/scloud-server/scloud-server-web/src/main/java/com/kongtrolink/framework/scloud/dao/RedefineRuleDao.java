@@ -75,6 +75,10 @@ public class RedefineRuleDao {
             name = MongoRegexUtil.escapeExprSpecialWord(name);
             criteria.and("name").regex(".*?" + name + ".*?");
         }
+        Boolean enabled = ruleQuery.getEnabled();
+        if(null != enabled){
+            criteria.and("enabled").is(enabled);
+        }
         return criteria;
     }
 

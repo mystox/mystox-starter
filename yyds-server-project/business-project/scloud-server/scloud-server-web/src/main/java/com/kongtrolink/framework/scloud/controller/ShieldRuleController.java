@@ -129,12 +129,12 @@ public class ShieldRuleController extends BaseController{
     @ResponseBody
     public JsonResult updateState(@RequestBody ShieldRuleQuery ruleQuery){
         String uniqueCode = getUniqueCode();
-        boolean result = ruleService.updateState(uniqueCode, ruleQuery.getId(), ruleQuery.getState());
+        boolean result = ruleService.updateState(uniqueCode, ruleQuery.getId(), ruleQuery.getEnabled());
         String operate = "禁用";
-        if(null == ruleQuery.getState()){
+        if(null == ruleQuery.getEnabled()){
             return new JsonResult("操作状态为空", false);
         }
-        if(ruleQuery.getState()){
+        if(ruleQuery.getEnabled()){
             operate = "启用";
         }
         if(result){

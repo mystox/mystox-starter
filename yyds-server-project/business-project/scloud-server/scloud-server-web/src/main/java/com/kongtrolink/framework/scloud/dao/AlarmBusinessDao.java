@@ -378,4 +378,20 @@ public class AlarmBusinessDao {
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, AlarmBusiness.class, uniqueCode + table);
     }
+
+    /**
+     * @param uniqueCode
+     * @param alarmBusiness
+     * @auther: liudd
+     * @date: 2020/4/11 15:03
+     * 功能描述:修改告警的工单编码
+     */
+    public boolean updateAlarmWorkCode(String uniqueCode, AlarmBusiness alarmBusiness) {
+        Criteria criteria = Criteria.where("key").is(alarmBusiness.getKey());
+        Query query = Query.query(criteria);
+        Update update = new Update();
+        update.set("workCode", alarmBusiness.getWorkCode());
+        WriteResult result = mongoTemplate.updateFirst(query, update, uniqueCode + alarmBusiness.getTable());
+        return result.getN()>0 ? true : false;
+    }
 }

@@ -1543,6 +1543,9 @@ public class Neo4jDBService implements DBService {
                             String temp = id1;
                             id1 = id2;
                             id2 = temp;
+                            temp = ciType1;
+                            ciType1 = ciType2;
+                            ciType2 = temp;
                             break;
                         }
                     }
@@ -1569,13 +1572,13 @@ public class Neo4jDBService implements DBService {
 
                 CICorrespondenceType ciCorrespondenceType = CICorrespondenceType.values()[relationship.getInteger("correspondence")];
                 if (ciCorrespondenceType == CICorrespondenceType.One_To_One) {
-                    cmd = "match (ci1:" + Neo4jDBNodeType.CI + " )" +
-                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:true}]->" +
-                            "(ci2:" + Neo4jDBNodeType.CI + ") " +
+                    cmd = "match (ci1:" + Neo4jDBNodeType.CI + " {type:{Type1}})" +
+                            "-[r:" + Neo4jDBRelationshipType.RELATIONSHIP + " {type:{Type}, status:true}]-" +
+                            "(ci2:" + Neo4jDBNodeType.CI + " {type:{Type2}}) " +
                             "where ci1.id = '" + id1 + "' or ci2.id = '" + id2 + "' " +
                             "return r";
                     statementResult = transaction.run(cmd,
-                            Values.parameters("Type", relationshipType));
+                            Values.parameters("Type", relationshipType, "Type1", ciType1, "Type2", ciType2));
                     recordList = statementResult.list();
 
                     if (recordList.size() > 0) {

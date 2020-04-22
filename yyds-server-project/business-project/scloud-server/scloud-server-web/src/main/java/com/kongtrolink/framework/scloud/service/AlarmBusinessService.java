@@ -81,4 +81,11 @@ public interface AlarmBusinessService {
      * @Description //不包含分頁
      **/
     List<AlarmBusiness> findByTimePeriod(AlarmBusinessQuery alarmQuery);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/22 9:39
+     * 功能描述:修改告警的工单编码字段
+     */
+    boolean updateAlarmWorkCode(String uniqueCode, AlarmBusiness alarmBusiness);
 }

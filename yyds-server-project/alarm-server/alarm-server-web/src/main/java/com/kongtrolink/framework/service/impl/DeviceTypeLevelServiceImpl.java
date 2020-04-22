@@ -58,7 +58,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
             addAlarmLevelByDeviceLevel(deviceTypeLevel, lastUse);
             String deviceType = deviceTypeLevel.getDeviceType();
             String deviceModel = deviceTypeLevel.getDeviceModel();
-            //修改等级模块告警等级
+            //修改等级模块告警等级，和修改设备告警等级一致
             String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel;
             updateAlarmLevelModel(Contant.UPDATE, Contant.DEVICELEVEL, key, Contant.THENULL);
             return true;
@@ -231,8 +231,7 @@ public class DeviceTypeLevelServiceImpl implements DeviceTypeLevelService {
         }
         try {
             String jsonStr = type + Contant.COLON + level + Contant.COLON + key + Contant.COLON + deleteKey;
-//            MsgResult msgResult = mqttSender.sendToMqttSync(levelServerVersion, updateAlarmLevelMap, jsonStr);
-            MsgResult msgResult = mqttOpera.opera( updateAlarmLevelMap, jsonStr);
+            MsgResult msgResult = mqttOpera.opera(updateAlarmLevelMap, jsonStr);
             resultCode = msgResult.getStateCode();
             if (resultCode != 1) {
                 logger.info("修改告警等级模块告警等级失败，请重启告警等级模块,key:{}, result:", jsonStr, resultCode);

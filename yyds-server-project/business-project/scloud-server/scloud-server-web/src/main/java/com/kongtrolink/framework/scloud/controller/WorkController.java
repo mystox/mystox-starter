@@ -86,6 +86,9 @@ public class WorkController extends ExportController {
         }else{  //该设备没有待回单工单
             FacadeView operator = new FacadeView(user.getUsername(), user.getName(), user.getPhone());
             noOverWork = createNewWork(uniqueCode, workQuery, operator, null);
+            if(null == noOverWork){
+                return new JsonResult("没有匹配的工单配置", false);
+            }
             //发送推送
             PushEntity pushEntity = workService.createJpush(noOverWork, WorkConstants.OPERATE_SEND, null);
             //liuddtodo 获取需要推送的人账号列表
@@ -95,7 +98,8 @@ public class WorkController extends ExportController {
         AlarmBusiness alarmBusiness = new AlarmBusiness();
         alarmBusiness.setWorkCode(noOverWork.getCode());
         alarmBusiness.setKey(workQuery.getWorkAlarm().getAlarmKey());
-        businessService.add(uniqueCode, CollectionSuffix.CUR_ALARM_BUSINESS, alarmBusiness);
+        alarmBusiness.setTable(workQuery.getWorkAlarm().getTable());
+        businessService.updateAlarmWorkCode(uniqueCode, alarmBusiness);
         return new JsonResult("派单成功", true);
     }
 
@@ -114,6 +118,9 @@ public class WorkController extends ExportController {
         }else {
             //匹配手动告警工单配置，如果没有，则使用默认告警工单配置
             workConfig = workConfigService.matchManualConfig(uniqueCode, workQuery.getSiteCode());
+            if(null == workConfig){
+                return null;
+            }
         }
         //生成工单
         Work work = workService.createWork(workQuery, workConfig, WorkConstants.WORK_CONFIG_TYPE_MANUAL);

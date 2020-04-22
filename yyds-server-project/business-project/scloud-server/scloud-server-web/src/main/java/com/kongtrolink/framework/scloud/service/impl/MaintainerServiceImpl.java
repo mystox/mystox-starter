@@ -15,6 +15,7 @@ import com.kongtrolink.framework.scloud.mqtt.entity.BasicMaintainerEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserEntity;
 import com.kongtrolink.framework.scloud.mqtt.entity.BasicUserInfoEntity;
 import com.kongtrolink.framework.scloud.query.MaintainerQuery;
+import com.kongtrolink.framework.scloud.service.DeliverService;
 import com.kongtrolink.framework.scloud.service.MaintainerService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
 import com.kongtrolink.framework.scloud.util.StringUtil;
@@ -39,6 +40,8 @@ public class MaintainerServiceImpl implements MaintainerService{
     MaintainerMongo maintainerMongo;
     @Autowired
     UserMongo userMongo;
+    @Autowired
+    DeliverService deliverService;
     @Autowired
     MqttOpera mqttOpera;
 
@@ -342,7 +345,7 @@ public class MaintainerServiceImpl implements MaintainerService{
         for (String userId : userIds) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("userId", userId);
-
+            boolean delResult = deliverService.delDeliverUser(uniqueCode, userId);
             //向【云管】下发删除维护用户的MQTT消息
             MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.DELETE_USER, JSON.toJSONString(jsonObject));
             if (msgResult.getStateCode() == CommonConstant.SUCCESSFUL) {

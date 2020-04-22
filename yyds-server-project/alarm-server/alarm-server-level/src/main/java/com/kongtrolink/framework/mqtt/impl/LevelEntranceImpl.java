@@ -25,11 +25,12 @@ public class LevelEntranceImpl implements LevelEntrance{
 
     @Override
     public String handleLevel(String alarmListJsonStr) {
-        logger.debug("receive ：{}", alarmListJsonStr);
+        logger.info("receive ：{}", alarmListJsonStr);
         List<Alarm> alarmList = JSON.parseArray(alarmListJsonStr, Alarm.class);
         for(Alarm alarm : alarmList) {
             AlarmLevel level = alarmLevelService.getLevelByAlarm(alarm);
             if (null != level) {
+                logger.info("【告警等级模块】根据告警{}获取到告警等级：{}", alarm.getKey(), level.toString());
                 alarm.setTargetLevel(level.getTargetLevel());
                 alarm.setTargetLevelName(level.getTargetLevelName());
                 alarm.setColor(level.getColor());

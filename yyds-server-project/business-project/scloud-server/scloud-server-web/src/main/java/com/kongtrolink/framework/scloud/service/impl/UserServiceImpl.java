@@ -3,6 +3,7 @@ package com.kongtrolink.framework.scloud.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.scloud.service.DeliverService;
 import com.kongtrolink.framework.scloud.util.SessionCommonService;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -43,6 +44,8 @@ public class UserServiceImpl implements UserService {
     SessionCommonService sessionCommonService;
     @Autowired
     UserMongo userMongo;
+    @Autowired
+    DeliverService deliverService;
     @Autowired
     MqttOpera mqttOpera;
 
@@ -153,6 +156,7 @@ public class UserServiceImpl implements UserService {
         if (opera.getStateCode() == CommonConstant.SUCCESSFUL) {
             userMongo.deleteUser(uniqueCode, userModel);
         }
+        boolean delResult = deliverService.delDeliverUser(uniqueCode, userModel.getUserId());
     }
 
     /**
