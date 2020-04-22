@@ -317,6 +317,26 @@ public class Alarm {
         return table;
     }
 
+    /**
+     * @auther: liudd
+     * @date: 2020/4/22 13:27
+     * 功能描述:告警等级模块获取告警对应key
+     */
+    public String getAlarmLevelKey(){
+        String key = enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel + Contant.EXCLAM + level;
+        return key;
+    }
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/22 13:27
+     * 功能描述:告警等级模块获取企业告警等级key
+     */
+    public String getEnterpriseLevelKey(){
+        String key = enterpriseCode + Contant.EXCLAM + serverCode;
+        return key;
+    }
+
     @Override
     public String toString() {
         return "Alarm{" +
