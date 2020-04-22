@@ -8,16 +8,22 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.scloud.entity.UserSiteEntity;
 import com.kongtrolink.framework.scloud.entity.model.UserModel;
 import com.kongtrolink.framework.scloud.query.UserQuery;
+import com.kongtrolink.framework.scloud.service.UserExcelService;
 import com.kongtrolink.framework.scloud.service.UserService;
 import com.kongtrolink.framework.scloud.util.ExcelUtil;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +39,8 @@ public class UserController extends BaseController{
 
     @Autowired
     UserService userService;
-
+    @Autowired
+    UserExcelService userExcelService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
@@ -122,28 +129,21 @@ public class UserController extends BaseController{
      * 批量导入系统用户
      */
     @RequestMapping(value = "importUserList", method = RequestMethod.POST)
-    public @ResponseBody JsonResult importUserList(@RequestParam("file") MultipartFile file){
-        if (!file.isEmpty()){
-            try{
-                //获取文件名
-                String fileName = file.getOriginalFilename();
-                //进一步判断文件是否为空（即判断其大小是否为0或其名称是否为null）验证文件名是否合格
-                long size=file.getSize();
-                if(fileName==null || ("").equals(fileName) && size==0 && !ExcelUtil.validateExcel(fileName)){
-                    LOGGER.error("文件格式不正确！");
-                }else {
-                    if (userService.importUserList(getUniqueCode(),file)){
-                        return new JsonResult("导入成功",true);
-                    }else {
-                        return new JsonResult("导入失败", false);
-                    }
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-                return new JsonResult("导入失败", false);
-            }
+    public @ResponseBody JsonResult importUserList(@RequestParam("file") MultipartFile file) throws IOException, ParseException {
+        CommonsMultipartFile cmf = (CommonsMultipartFile) file;
+        DiskFileItem dfi = (DiskFileItem) cmf.getFileItem();
+        File f = dfi.getStoreLocation();
+        List<UserModel> list = null;
+        try {
+            list = userExcelService.read(f, getUniqueCode());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return new JsonResult(e.getMessage(), false);
         }
-        return new JsonResult("导入失败",false);
+        if (list == null || list.size() <= 0) {
+            return new JsonResult("导入失败",false);
+        }
+        return userService.importUserList(getUniqueCode(),list);
     }
     /**
      * 批量删除系统用户
