@@ -5,15 +5,15 @@ import com.kongtrolink.framework.core.constant.Const;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.exception.ParameterException;
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
 import com.kongtrolink.framework.scloud.dao.AlarmDao;
-import com.kongtrolink.framework.scloud.entity.Alarm;
-import com.kongtrolink.framework.scloud.entity.DeviceEntity;
-import com.kongtrolink.framework.scloud.entity.FilterRule;
-import com.kongtrolink.framework.scloud.entity.SignalType;
+import com.kongtrolink.framework.scloud.entity.*;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.query.AlarmBusinessQuery;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
 import com.kongtrolink.framework.scloud.query.DeviceQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.*;
 import com.kongtrolink.framework.scloud.util.StringUtil;
 import com.kongtrolink.framework.service.MqttOpera;
@@ -45,11 +45,17 @@ public class AlarmServiceImpl implements AlarmService {
     DeviceSignalTypeService deviceSignalTypeService;
     @Autowired
     FilterRuleService filterRuleService;
+    @Autowired
+    AlarmBusinessService businessService;
+    @Autowired
+    AlarmFocusService focusService;
 
     @Value("${alarmModule.list:alarmRemoteList}")
     private String remoteList;
     @Value("${alarmModule.check:alarmRemoteOperate}")
     private String remoteOperate;
+    @Value("${alarmModule.updateWorkInfo:alarmRemoteUpdateWork}")
+    private String alarmRemoteUpdateWork;
 
     private static final Logger logger = LoggerFactory.getLogger(AlarmServiceImpl.class);
     /**
@@ -60,14 +66,46 @@ public class AlarmServiceImpl implements AlarmService {
      */
     @Override
     public JsonResult list(AlarmQuery alarmQuery) throws Exception {
-        listCommon(alarmQuery);
+        checkListPara(alarmQuery);
+        //从告警业务信息表中获取数据
+        AlarmBusinessQuery businessQuery = AlarmBusinessQuery.createByAlarmQuery(alarmQuery);
+        List<AlarmBusiness> businessList = businessService.list(alarmQuery.getEnterpriseCode(), businessQuery);
+        Map<String, AlarmBusiness> keyBusinessMap = new HashMap<>();
+        List<String> keyList = new ArrayList<>();
+        for(AlarmBusiness alarmBusiness : businessList){
+            keyBusinessMap.put(alarmBusiness.getKey(), alarmBusiness);
+            keyList.add(alarmBusiness.getKey());
+        }
+        alarmQuery.setKeyList(keyList);
         //具体查询历史还是实时数据，由中台告警模块根据参数判定
         try {
             MsgResult msgResult = mqttOpera.opera(remoteList, JSONObject.toJSONString(alarmQuery));
             JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
             String dataStr = jsonResult.getData().toString();
             List<Alarm> alarmList = JSONObject.parseArray(dataStr, Alarm.class);
-            initInfo(alarmQuery.getEnterpriseCode(), alarmList);
+            List<String> entDevSigList = new ArrayList<>();
+            Map<String, List<Alarm>> entDevSigAlarmListMap = new HashMap<>();
+            for(Alarm alarm : alarmList){
+                alarm.initByBusiness(keyBusinessMap.get(alarm.getKey()));
+                String entDevSig = alarm.getEntDevSig();
+                entDevSigList.add(entDevSig);
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(entDevSig);
+                if(null == entDevSigAlarmList){
+                    entDevSigAlarmList = new ArrayList<>();
+                }
+                entDevSigAlarmList.add(alarm);
+                entDevSigAlarmListMap.put(entDevSig, entDevSigAlarmList);
+
+            }
+            //填充告警关注信息
+            String operateUserId = alarmQuery.getOperatorId();
+            List<AlarmFocus> alarmFocusList = focusService.listByUserIdEntDevSigs(alarmQuery.getEnterpriseCode(), operateUserId, entDevSigList);
+            for(AlarmFocus alarmFocus : alarmFocusList){
+                List<Alarm> entDevSigAlarmList = entDevSigAlarmListMap.get(alarmFocus.getEntDevSig());
+                for(Alarm alarm : entDevSigAlarmList){
+                    alarm.setFocusId(alarmFocus.getId());
+                }
+            }
             jsonResult.setData(alarmList);
             return jsonResult;
         }catch (Exception e){
@@ -77,80 +115,102 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     /**
-     * @param alarmList
      * @auther: liudd
      * @date: 2020/3/3 15:59
      * 功能描述:填充设备，站点等信息
      */
     @Override
-    public void initInfo(String uniqueCode, List<Alarm> alarmList) {
-        if(null == alarmList){
-            return;
+    public void initInfo(String uniqueCode, String serverCode, List<AlarmBusiness> businessList) {
+        if(null == businessList){
+            return ;
         }
         //获取站点信息
         List<String> deviceCodeList = new ArrayList<>();
-        Map<String, List<Alarm>> deviceCodeAlarmListMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
-            String deviceId = alarm.getDeviceId();
-            if(!deviceCodeList.contains(deviceId)){
-                deviceCodeList.add(deviceId);
+        Map<String, List<AlarmBusiness>> deviceCodeAlarmListMap = new HashMap<>();
+        List<String> keyList = new ArrayList<>();
+        for(AlarmBusiness alarm : businessList){
+            keyList.add(alarm.getKey());
+            alarm.setCheckState(BaseConstant.NOCHECK);
+            if(null != alarm.getCheckTime()){
+                alarm.setCheckState(BaseConstant.CHECKED);
             }
-            List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(deviceId);
+            String deviceCode = alarm.getDeviceCode();
+            if(!deviceCodeList.contains(deviceCode)){
+                deviceCodeList.add(deviceCode);
+            }
+            List<AlarmBusiness> deviceCodeAlarmList = deviceCodeAlarmListMap.get(deviceCode);
             if(null == deviceCodeAlarmList){
                 deviceCodeAlarmList = new ArrayList<>();
             }
             deviceCodeAlarmList.add(alarm);
-            deviceCodeAlarmListMap.put(deviceId, deviceCodeAlarmList);
+            deviceCodeAlarmListMap.put(deviceCode, deviceCodeAlarmList);
         }
-        List<DeviceModel> deviceModelList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setServerCode(serverCode);
+        deviceQuery.setPageSize(Integer.MAX_VALUE);
+        deviceQuery.setDeviceCodes(deviceCodeList);
+        List<DeviceModel> deviceModelList = new ArrayList<>();
+        try{
+            deviceModelList = deviceService.listDeviceList(uniqueCode, deviceQuery);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         List<String> typeCodeList = new ArrayList<>();
         for(DeviceModel deviceModel : deviceModelList){
             String code = deviceModel.getCode();
             String typeCode = deviceModel.getTypeCode();
-            if(!typeCode.contains(typeCode)){
+            if(!typeCodeList.contains(typeCode)){
                 typeCodeList.add(typeCode);
             }
-            List<Alarm> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
-            for(Alarm alarm : deviceCodeAlarmList){
+            List<AlarmBusiness> deviceCodeAlarmList = deviceCodeAlarmListMap.get(code);
+            for(AlarmBusiness alarm : deviceCodeAlarmList){
                 alarm.setDeviceName(deviceModel.getName());
-                alarm.setSiteId(deviceModel.getSiteId());
+                alarm.setSiteCode(deviceModel.getSiteCode());
+                alarm.setOperationState(deviceModel.getOperationState());
             }
         }
-        //初始化站点信息
-        List<Integer> siteIdList = new ArrayList<>();
-        Map<Integer, List<Alarm>> siteIdAlarmListMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
-            int siteId = alarm.getSiteId();
-            if(!siteIdList.contains(siteId)){
-                siteIdList.add(siteId);
+//        初始化站点信息
+        List<String> siteCodeList = new ArrayList<>();
+        Map<String, List<AlarmBusiness>> siteCodeAlarmListMap = new HashMap<>();
+        for(AlarmBusiness alarm : businessList){
+            String siteCode = alarm.getSiteCode();
+            if(!siteCodeList.contains(siteCode)){
+                siteCodeList.add(siteCode);
             }
-            List<Alarm> siteIdAlarmList = siteIdAlarmListMap.get(siteId);
+            List<AlarmBusiness> siteIdAlarmList = siteCodeAlarmListMap.get(siteCode);
             if(null == siteIdAlarmList){
                 siteIdAlarmList = new ArrayList<>();
             }
             siteIdAlarmList.add(alarm);
-            siteIdAlarmListMap.put(siteId, siteIdAlarmList);
+            siteCodeAlarmListMap.put(siteCode, siteIdAlarmList);
         }
-        List<SiteModel> siteModelList = siteService.getByIdList(uniqueCode, siteIdList);
+        SiteQuery siteQuery = new SiteQuery();
+        siteQuery.setServerCode(serverCode);
+        siteQuery.setPageSize(Integer.MAX_VALUE);
+        siteQuery.setSiteCodes(siteCodeList);
+        List<SiteModel> siteModelList = siteService.findSiteList(uniqueCode, siteQuery);
         for(SiteModel siteModel : siteModelList){
-            int siteId = siteModel.getSiteId();
-            List<Alarm> siteIdAlarmList = siteIdAlarmListMap.get(siteId);
-            for(Alarm alarm : siteIdAlarmList){
+            String code = siteModel.getCode();
+            List<AlarmBusiness> siteIdAlarmList = siteCodeAlarmListMap.get(code);
+            for(AlarmBusiness alarm : siteIdAlarmList){
                 alarm.setSiteName(siteModel.getName());
                 alarm.setSiteAddress(siteModel.getAddress());
+                alarm.setSiteType(siteModel.getSiteType());
+                alarm.setTierCode(siteModel.getTierCode());
+                alarm.setTierName(siteModel.getTierName());
                 alarm.setTierName(siteModel.getTierName());
             }
         }
 
         //填充信号点信息
         List<String> cntbIdList = new ArrayList<>();
-        Map<String, List<Alarm>> cntbIdAlarmListMap = new HashMap<>();
-        for(Alarm alarm : alarmList){
-            String signalId = alarm.getSignalId();
+        Map<String, List<AlarmBusiness>> cntbIdAlarmListMap = new HashMap<>();
+        for(AlarmBusiness alarm : businessList){
+            String signalId = alarm.getCntbId();
             if(!cntbIdList.contains(signalId)){
                 cntbIdList.add(signalId);
             }
-            List<Alarm> cntbIdAlarmList = cntbIdAlarmListMap.get(signalId);
+            List<AlarmBusiness> cntbIdAlarmList = cntbIdAlarmListMap.get(signalId);
             if(cntbIdAlarmList == null){
                 cntbIdAlarmList = new ArrayList<>();
             }
@@ -160,30 +220,29 @@ public class AlarmServiceImpl implements AlarmService {
         List<SignalType> signalTypeList = deviceSignalTypeService.getByCodeListCntbIdList(uniqueCode, typeCodeList, cntbIdList);
         for(SignalType signalType : signalTypeList){
             String cntbId = signalType.getCntbId();
-            List<Alarm> cntbIdAlarmList = cntbIdAlarmListMap.get(cntbId);
-            for(Alarm alarm : cntbIdAlarmList){
+            List<AlarmBusiness> cntbIdAlarmList = cntbIdAlarmListMap.get(cntbId);
+            for(AlarmBusiness alarm : cntbIdAlarmList){
                 alarm.setSignalName(signalType.getTypeName());
+                alarm.setMeasurement(signalType.getMeasurement());
             }
         }
     }
 
     @Override
-    public JsonResult operate(AlarmQuery alarmQuery) throws Exception {
+    public JSONObject operate(AlarmQuery alarmQuery) throws Exception {
         checkOperatePara(alarmQuery);
         try {
-            Date curTime = new Date();
-            alarmQuery.setOperateTime(curTime);
             String jsonStr = JSONObject.toJSONString(alarmQuery);
             MsgResult msgResult = mqttOpera.opera(remoteOperate, jsonStr);
-            JsonResult jsonResult = JSONObject.parseObject(msgResult.getMsg(), JsonResult.class);
-            return jsonResult;
+            JSONObject jsonObject = JSONObject.parseObject(msgResult.getMsg(), JSONObject.class);
+            return jsonObject;
         }catch (Exception e){
             logger.error(" remote call error, msg:{}, operate:{}, result:{}", JSONObject.toJSONString(alarmQuery), remoteOperate, e.getMessage());
             throw new Exception("连接超时");
         }
     }
 
-    private void checkPara(@RequestBody AlarmQuery alarmQuery)throws ParameterException{
+    private void checkListPara(@RequestBody AlarmQuery alarmQuery)throws ParameterException{
         String enterpriseCode = alarmQuery.getEnterpriseCode();
         if(StringUtil.isNUll(enterpriseCode)){
             throw new ParameterException(Const.ALARM_LIST_ENTERPRISECODE + Const.PARA_MISS);
@@ -196,136 +255,40 @@ public class AlarmServiceImpl implements AlarmService {
         }
     }
 
-    private void listCommon(AlarmQuery alarmQuery)throws ParameterException {
-        checkPara(alarmQuery);
-        //liuddtodo 需要先根据前端选取站点层级和用户权限，获取用户站点编码列表,再获取用户管辖范围设备编码列表
-        List<String> siteCodeList = alarmQuery.getSiteCodeList();
-        DeviceQuery deviceQuery = new DeviceQuery();
-        deviceQuery.setSiteCodes(siteCodeList);
-        deviceQuery.setOperationState(alarmQuery.getOperationState());
-        List<DeviceEntity> deviceEntityList = deviceService.listEntity(alarmQuery.getEnterpriseCode(), deviceQuery);
-        List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
-        alarmQuery.setDeviceCodeList(deviceCodeList);
-        combineFilter(alarmQuery);
-    }
-
-    private void combineFilter(AlarmQuery alarmQuery){
-        String uniqueCode = alarmQuery.getEnterpriseCode();
-        //累加告警过滤功能
-        FilterRule filterRule = filterRuleService.getUserInUse(uniqueCode, alarmQuery.getOperateUserId());
-        if(null != filterRule){
-            //比较时间
-            Date startBeginTime = filterRule.getStartBeginTime();
-            if(null != startBeginTime){
-                Date sourStartBeginTime = alarmQuery.getStartBeginTime();
-                if(null == sourStartBeginTime){
-                    alarmQuery.setStartBeginTime(startBeginTime);
-                }else{
-                    if(startBeginTime.getTime() > sourStartBeginTime.getTime()){
-                        alarmQuery.setStartBeginTime(startBeginTime);
-                    }
-                }
-            }
-            Date startEndTime = filterRule.getStartEndTime();
-            if(null != startEndTime){
-                Date sourEndTime = alarmQuery.getStartEndTime();
-                if(null == sourEndTime){
-                    alarmQuery.setStartEndTime(startEndTime);
-                }else{
-                    if(startEndTime.getTime() < sourEndTime.getTime()){
-                        alarmQuery.setStartEndTime(startEndTime);
-                    }
-                }
-            }
-            Date clearBeginTime = filterRule.getClearBeginTime();
-            if(null != clearBeginTime){
-                Date sourBeginTime = alarmQuery.getClearBeginTime();
-                if(null == sourBeginTime){
-                    alarmQuery.setClearBeginTime(clearBeginTime);
-                }else{
-                    if(clearBeginTime.getTime() > sourBeginTime.getTime()){
-                        alarmQuery.setClearBeginTime(clearBeginTime);
-                    }
-                }
-            }
-            Date clearEndTime = filterRule.getClearEndTime();
-            if(null != clearEndTime){
-                Date sourEndTime = alarmQuery.getClearEndTime();
-                if(null == sourEndTime){
-                    alarmQuery.setClearEndTime(clearEndTime);
-                }else{
-                    if(clearEndTime.getTime() < sourEndTime.getTime()){
-                        alarmQuery.setClearEndTime(clearEndTime);
-                    }
-                }
-            }
-            //告警等级
-            List<String> alarmLevelList = filterRule.getAlarmLevelList();
-            if(null != alarmLevelList){
-                String targetLevelName = alarmQuery.getTargetLevelName();
-                if(StringUtil.isNUll(targetLevelName)){
-                    alarmQuery.setTargetLevelNameList(alarmLevelList);
-                }else{
-                    if(alarmLevelList.contains(targetLevelName)){
-
-                    }else{
-                        alarmQuery.setTargetLevelName(targetLevelName + "特殊等级@特殊等级");
-                    }
-                }
-            }
-            //告警名称
-            String alarmName = filterRule.getAlarmName();
-            if(!StringUtil.isNUll(alarmName)){  //告警过滤规则中有告警名称
-                String name = alarmQuery.getName();
-                if(StringUtil.contant(name, alarmName)){
-
-                }else if(StringUtil.contant(alarmName, name)){
-                    alarmQuery.setName(alarmName);
-                }else{
-                    alarmQuery.setName(name + "特殊字符@特殊字符" + alarmName); //  如果告警列表与告警过滤的告警名称排斥，必然无法获取到任何告警数据
-                }
-            }
-            //比对设备类型
-            List<String> deviceTypeList = filterRule.getDeviceTypeList();
-            if(null != deviceTypeList){
-                String deviceType = alarmQuery.getDeviceType();
-                if(StringUtil.isNUll(deviceType)){
-                    alarmQuery.setDeviceTypeList(deviceTypeList);
-                }else{
-                    if(!deviceTypeList.contains(deviceType)){
-                        alarmQuery.setDeviceType(deviceType + "特殊类型@特殊类型");
-                    }
-                }
-            }
-            //根据告警过滤规则，获取站点编码列表，与告警列表传递的站点列表取交集
-            List<String> siteCodeList = filterRule.getSiteCodeList();
-            DeviceQuery deviceQuery = new DeviceQuery();
-            deviceQuery.setPageSize(Integer.MAX_VALUE);
-            deviceQuery.setSiteCodes(siteCodeList);
-            List<DeviceEntity> deviceEntityList = deviceService.listEntity(uniqueCode, deviceQuery);
-            List<String> deviceCodeList = deviceService.entityList2CodeList(deviceEntityList);
-            List<String> sourceDeviceCodeList = alarmQuery.getDeviceCodeList();
-            deviceCodeList.retainAll(sourceDeviceCodeList);
-            alarmQuery.setDeviceCodeList(deviceCodeList);
-        }
-    }
-
     private void checkOperatePara(AlarmQuery alarmQuery)throws ParameterException{
-        checkPara(alarmQuery);
+        checkListPara(alarmQuery);
         //判定告警id，上报时间
-        List<String> idList = alarmQuery.getIdList();
+        List<String> keyList = alarmQuery.getKeyList();
         List<Date> treportList = alarmQuery.getTreportList();
-        if(null == idList || idList.size() == 0){
-            throw new ParameterException("告警id为空");
+        if(null == keyList || keyList.size() == 0){
+            throw new ParameterException("告警key为空");
         }
         if(null == treportList || treportList.size() == 0){
             throw new ParameterException("上报时间为空");
         }
-        if(idList.size() != treportList.size()){
-            throw new ParameterException("告警id和告警上报时间数量一致");
+        if(keyList.size() != treportList.size()){
+            throw new ParameterException("告警key和告警上报时间数量一致");
         }
         if(StringUtil.isNUll(alarmQuery.getOperate())){
             throw new ParameterException("操作类型为空");
         }
+    }
+
+    @Override
+    public JSONObject updateWorkInfo(AlarmQuery alarmQuery) {
+        JSONObject jsonObject = new JSONObject();
+        //具体查询历史还是实时数据，由中台告警模块根据参数判定
+        try {
+            MsgResult msgResult = mqttOpera.opera(alarmRemoteUpdateWork, JSONObject.toJSONString(alarmQuery));
+            String msg = msgResult.getMsg();
+            jsonObject.put("success", true);
+            jsonObject.put("data", msg);
+
+        }catch (Exception e){
+            jsonObject.put("success", false);
+            jsonObject.put("info", "远程调用错误");
+            jsonObject.put("data", e.getMessage());
+        }
+        return jsonObject;
     }
 }

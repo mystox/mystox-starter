@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.enttiy.Auxilary;
 import com.kongtrolink.framework.query.AuxilaryQuery;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public interface AuxilaryService {
 
     void save(Auxilary auxilary);
+
+    JsonResult delete(AuxilaryQuery auxilaryQuery);
 
     boolean delete(String auxilaryId);
 

@@ -12,9 +12,26 @@ import java.util.Date;
  * \
  */
 public class TimePeriod {
+    private String dimension; //统计维度 月 季 年
     private Date startTime;
     private Date endTime;
     private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+    public TimePeriod() {
+    }
+
+    public TimePeriod(Date startTime, Date endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public String getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(String dimension) {
+        this.dimension = dimension;
+    }
 
     public Date getStartTime() {
         return startTime;

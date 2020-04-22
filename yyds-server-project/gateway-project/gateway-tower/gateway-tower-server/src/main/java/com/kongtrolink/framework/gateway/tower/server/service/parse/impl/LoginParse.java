@@ -98,6 +98,7 @@ public class LoginParse extends ParseHandler {
     private boolean loginAck(Login login){
         try{
             LoginMessage loginMessage = new LoginMessage();
+            loginMessage.setFsuId(login.getFsuId());
             loginMessage.setEnterpriseCode(getEnterpriseCode());
             loginMessage.setGatewayServerCode(MqttUtils.preconditionServerCode(getServerName(),getServerVersion()));
             loginMessage.setIp(login.getIp());

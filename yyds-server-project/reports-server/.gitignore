@@ -29,3 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### resources ###
+/src/main/resources/application-mystox.yml

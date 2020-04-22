@@ -7,5 +7,5 @@ package com.kongtrolink.framework.reports.entity;
  * update record:
  */
 public enum  TaskType {
-    schecduled,singleTask
+    schecduled,singleTask,periodicity
 }

@@ -7,6 +7,7 @@ import com.kongtrolink.framework.base.EnumLevelName;
 import com.kongtrolink.framework.base.MongTable;
 import com.kongtrolink.framework.config.ReportOperateConfig;
 import com.kongtrolink.framework.config.ResloverOperateConfig;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.kongtrolink.framework.dao.AlarmDao;
 import com.kongtrolink.framework.dao.AuxilaryDao;
 import com.kongtrolink.framework.entity.MsgResult;
@@ -16,14 +17,12 @@ import com.kongtrolink.framework.mqtt.AlarmEntrance;
 import com.kongtrolink.framework.mqtt.AlarmMqttEntity;
 import com.kongtrolink.framework.mqtt.OperateEntity;
 import com.kongtrolink.framework.service.MqttOpera;
-import com.kongtrolink.framework.utils.RedisUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -35,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @Service
 public class AlarmEntranceImpl implements AlarmEntrance {
-
 
     private String currentAlarmTable = MongTable.ALARM_CURRENT;
     private String historyAlarmTable = MongTable.ALARM_HISTORY;
@@ -51,8 +49,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     ReportOperateConfig reportOperateConfig;
     @Autowired
     ResloverOperateConfig resloverOperateConfig;
-    //    @Autowired
-//    MqttSender mqttSender;
     @Autowired
     MqttOpera mqttOpera;
     //redis存储待消除的告警和所在表信息
@@ -62,14 +58,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     private String pendingAlarm;
     private int expiretionTime = 2592000;        //redis过期时间，默认30天2592000
     private static final Logger logger = LoggerFactory.getLogger(AlarmEntranceImpl.class);
-//    private volatile AtomicLong countLong = new AtomicLong(0);
-//    private volatile AtomicLong oneNoExitCount = new AtomicLong(0);
-//    private volatile AtomicLong oneExitCount = new AtomicLong(0);
-//    private volatile AtomicLong zeroCount = new AtomicLong(0);
-//    private volatile AtomicLong zeroExitCount = new AtomicLong(0);
-//    private volatile AtomicLong zeroNoExitCount = new AtomicLong(0);
-//    private volatile AtomicLong redisNotTable = new AtomicLong(0);
-//    private volatile AtomicLong twoCount = new AtomicLong(0);
 
     /**
      * @auther: liudd
@@ -136,8 +124,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 alarm.initKey();
 
                 if (!existAlarm(alarm)) { //判定告警是否存在
-
-//                    System.out.println("oneExitCount: " + oneExitCount.incrementAndGet());
                     alarm.setTreport(curDate);
                     reportAlarmList.add(alarm);
                     //保存告警部分信息，用于告警消除需要
@@ -149,9 +135,7 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                     redisUtils.set(pendingAlarm + Contant.COLON + alarm.getKey(), redisJson, expiretionTime);
                     continue;
                 }
-//                System.out.println("oneNoExitCount: " + oneNoExitCount.incrementAndGet());
             } else {
-//                System.out.println("zeroCount: " + zeroCount.incrementAndGet());
                 jsonObject.put("enterServerCode", enterServerCode);
                 jsonObject.put("enterpriseCode", enterpriseCode);
                 jsonObject.put("serverCode", serverCode);
@@ -175,11 +159,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 handleCurAlarmList(alarm, Contant.ONE);
             }
         }
-//        System.out.println("countLong:" + countLong.incrementAndGet()
-//                +"; oneExitCount:" + oneExitCount.get()+"; oneNoExitCount: " + oneNoExitCount.get()
-//                + "; zeroNoExitCount: " + zeroNoExitCount.get() + "; zeroExitCount:" + zeroExitCount.get()
-//                + "; twoCount:" + twoCount.get() + "; redisNotTable:" + redisNotTable.get());
-
         return;
     }
 
@@ -220,7 +199,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
      * 功能描述:处理远程调用模块
      */
     private List<Alarm> handleRemoteOperate(String enterServerCode, List<Alarm> reportAlarmList, List<JSONObject> alarmJsonList) {
-
         Map<String, List<OperateEntity>> enterServeOperaListMap = reportOperateConfig.getEnterServeOperaListMap();
         List<OperateEntity> operate = reportOperateConfig.getOperate();
         logger.debug("ONE operate: " + operate);
@@ -230,12 +208,9 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         if (null != operateEntityList) {
             String reportAlarmListJson = JSONObject.toJSONString(reportAlarmList);
             for (OperateEntity operateEntity : operateEntityList) {
-                String serverVerson = operateEntity.getServerVerson();
                 String operaCode = operateEntity.getOperaCode();
-
                 try {
                     //所有其他模块，都返回告警列表json字符串
-//                    MsgResult msgResult = mqttSender.sendToMqttSync(serverVerson, operaCode, reportAlarmListJson);
                     MsgResult msgResult = mqttOpera.opera(operaCode, reportAlarmListJson);
                     //打印请求相关信息
                     logger.debug("---report : msg:{}, operate:{}, result:{}", JSONObject.toJSON(alarmJsonList), operateEntity, msgResult);
@@ -255,7 +230,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
         return reportAlarmList;
     }
 
-
     /**
      * @auther: liudd
      * @date: 2019/10/21 11:27
@@ -270,7 +244,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             return;
         String flag = jsonObject.getString("flag");
         if (Contant.ZERO.equals(flag)) {
-//            System.out.println("zeroExitCount :" + zeroExitCount.incrementAndGet());
             Alarm alarm = JSONObject.parseObject(jsonObject.toJSONString(), Alarm.class);
             String enterServerCode = jsonObject.getString("enterServerCode");
             alarm.initKey();
@@ -279,7 +252,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
             JSONObject redisJson = (JSONObject) redisUtils.get(redisKey);
             if (null == redisJson) {
                 //redis待处理列表中没有该告警，说明该告警已经消除或者已经超时失效
-//                System.out.println("zeroNoExitCount:" + zeroNoExitCount.incrementAndGet());
                 return;
             }
             boolean result;
@@ -304,29 +276,23 @@ public class AlarmEntranceImpl implements AlarmEntrance {
                 ++exit;
                 if (exit <= 5) {
                     recoverAndAuxilaryAlarmQueue.add(jsonObject);
-//                    zeroExitCount.decrementAndGet();
                     return;
                 }
             }
             if (!result) {
                 logger.warn("redis存在但无法再内存和数据库找到的告警：" + alarm.toString() + "; redisJson:" + redisJson);
-//                System.out.println("redisNotTable :" + redisNotTable.incrementAndGet());
             }
             if (result) {
                 redisUtils.del(redisKey);
                 List<OperateEntity> operate = resloverOperateConfig.getOperate();
-//                System.out.println("ZERO operate: " + operate.toString());
                 Map<String, List<OperateEntity>> enterServeOperaListMap = resloverOperateConfig.getEnterServeOperaListMap();
                 List<OperateEntity> operateEntityList = enterServeOperaListMap.get(enterServerCode);
-//                System.out.println("ZERO operateEntityList:" + operateEntityList);
                 String resolveAlarmListJson = JSONObject.toJSONString(Arrays.asList(alarm));
                 if (null != operateEntityList) {
                     for (OperateEntity operateEntity : operateEntityList) {
-                        String serverVerson = operateEntity.getServerVerson();
                         String operaCode = operateEntity.getOperaCode();
                         try {
                             //所有其他模块，都返回告警列表json字符串
-//                            mqttSender.sendToMqtt(serverVerson, operaCode, resolveAlarmListJson);
                             mqttOpera.operaAsync(operaCode, resolveAlarmListJson);
                         } catch (Exception e) {
                             //打印调用失败消息
@@ -343,8 +309,6 @@ public class AlarmEntranceImpl implements AlarmEntrance {
     }
 
     private void handleAuxilary(JSONObject jsonObject) {
-//        System.out.println("修改属性：" + twoCount.incrementAndGet() + "; jsonObject;" + jsonObject);
-        //name, value,level,flag, deviceId,deviceType,deviceModel,signalId,serial
         String enterpriseCode = jsonObject.getString(Contant.ENTERPRISECODE);
         String serverCode = jsonObject.getString(Contant.SERVERCODE);
         Auxilary auxilary = auxilaryDao.getByEnterServerCode(enterpriseCode, serverCode);

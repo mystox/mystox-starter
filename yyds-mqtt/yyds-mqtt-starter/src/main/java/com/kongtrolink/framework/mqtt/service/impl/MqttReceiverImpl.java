@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
@@ -50,6 +49,8 @@ public class MqttReceiverImpl implements MqttReceiver {
     private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小
     @Value("${jarResources.path:./jarResources}")
     private String jarPath;
+    @Value("${server.name}_${server.version}")
+    private String serverCode;
 
     /**
      * 注入发送MQTT的Bean
@@ -80,7 +81,7 @@ public class MqttReceiverImpl implements MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, payload.getSourceAddress(), payload.getOperaCode());
+            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, payload.getOperaCode(), payload.getSourceAddress());
             logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
             result = new MqttResp(payload.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
@@ -98,19 +99,24 @@ public class MqttReceiverImpl implements MqttReceiver {
         String className = entity[0];
         String methodName = entity[1];
         String result = "";
+        MqttResp resp;
         try {
             Class<?> clazz = Class.forName(className);
             Object bean = SpringContextUtil.getBean(clazz);
             Method method = clazz.getDeclaredMethod(methodName, String.class);
             Object invoke = method.invoke(bean, mqttMsg.getPayload());
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
-            MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
+            resp = new MqttResp(mqttMsg.getMsgId(), result);
 //            logger.info("local result: {}", result);
             return resp;
-        } catch (ClassNotFoundException | NoSuchMethodException |NoSuchBeanDefinitionException| IllegalAccessException | InvocationTargetException e) {
+        } catch (Exception e) {
+            mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), serverCode);
+            logger.error("local execute exception:{}", mqttMsg.getMsgId(), e.toString());
+            resp = new MqttResp(mqttMsg.getMsgId(), e.toString());
+            resp.setStateCode(StateCode.FAILED);
             e.printStackTrace();
         }
-        return null;
+        return resp;
     }
 
     MqttResp jarExecute(String unit, MqttMsg mqttMsg) {
@@ -203,12 +209,13 @@ public class MqttReceiverImpl implements MqttReceiver {
                     int size = resultArr.size();
                     for (int i = 0; i < size; i++) {
                         MqttResp resp = resultArr.get(i);
+                        Thread.sleep(10L);
                         iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
                     }
                 } else
                     iMqttSender.sendToMqtt(ackTopic, 1, ackPayload);
             } catch (Exception e) {
-                logger.error("[{}] message ",e);
+                logger.error("[{}] message ", e);
             }
         });
 //        int activeCount = mqttExecutor.getActiveCount();

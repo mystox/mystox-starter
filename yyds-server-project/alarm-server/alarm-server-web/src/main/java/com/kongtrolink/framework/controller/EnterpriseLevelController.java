@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -32,8 +34,6 @@ public class EnterpriseLevelController extends BaseController {
 
     @Autowired
     EnterpriseLevelService enterpriseLevelService;
-//    @Autowired
-//    MqttSender mqttSender;
     @Autowired
     MqttOpera mqttOpera;
     @Value("${asset.serverVerson:ASSET_MANAGEMENT_SERVER_1.0.0}")
@@ -117,10 +117,17 @@ public class EnterpriseLevelController extends BaseController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("enterpriseCode", enterpriseLevelQuery.getEnterpriseCode());
         jsonObject.put("serverCode", enterpriseLevelQuery.getServerCode());
-//        MsgResult msgResult = mqttSender.sendToMqttSync(assetServerVerson, getCIModel, jsonObject.toJSONString());
-        MsgResult msgResult = mqttOpera.opera(getCIModel, jsonObject.toJSONString());
-        System.out.println(msgResult);
-        return msgResult.getMsg();
+        try {
+            MsgResult msgResult = mqttOpera.opera(getCIModel, jsonObject.toJSONString());
+            System.out.println(msgResult);
+            int stateCode = msgResult.getStateCode();
+            if(1 == stateCode){
+                return msgResult.getMsg();
+            }
+            return "[]";
+        }catch (Exception e) {
+            return "获取数据超时";
+        }
     }
 
     /**
@@ -132,6 +139,7 @@ public class EnterpriseLevelController extends BaseController {
     @ResponseBody
     public JsonResult getLastUse(@RequestBody EnterpriseLevelQuery enterpriseLevelQuery){
         List<EnterpriseLevel> lastUse = enterpriseLevelService.getLastUse(enterpriseLevelQuery.getEnterpriseCode(), enterpriseLevelQuery.getServerCode());
+        Collections.reverse(lastUse);
         return new JsonResult(lastUse);
     }
 

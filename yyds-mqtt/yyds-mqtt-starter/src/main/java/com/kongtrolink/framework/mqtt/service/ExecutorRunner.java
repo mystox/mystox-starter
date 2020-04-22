@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class ExecutorRunner implements ApplicationRunner {
     Logger logger = LoggerFactory.getLogger(ExecutorRunner.class);
 
-    LongAdder longAdder = new LongAdder();
+    private static LongAdder longAdder = new LongAdder();
 
     @Value("${executor.runner.rhythm:3}")
     private int rhythm;

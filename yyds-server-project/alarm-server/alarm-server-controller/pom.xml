@@ -46,7 +46,12 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 			<version>${spring-boot.version}</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.51</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

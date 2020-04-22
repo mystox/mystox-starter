@@ -16,8 +16,11 @@ public class ElectricCountTemp {
     private String province; //省
     private String municipality; //市
     private String county; //县|区
+    private String stationId; //站点编码
     private String stationName; //站点名称
     private String stationType;//站点类型
+    private String fsuManufactory; //fsu 厂家
+    private String operationState; //站点状态
     private Date startTime;
     private Date endTime;
     private Double sMobileElecCount;
@@ -26,6 +29,31 @@ public class ElectricCountTemp {
     private Double eMobileElecCount;
     private Double eUnicomElecCount;
     private Double eTelecomElecCount;
+
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
+
+    public String getFsuManufactory() {
+        return fsuManufactory;
+    }
+
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public String getId() {
         return id;

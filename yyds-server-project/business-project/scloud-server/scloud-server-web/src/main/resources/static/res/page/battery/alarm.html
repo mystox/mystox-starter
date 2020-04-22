@@ -1,0 +1,232 @@
+<section id="batteryAlarmPage">
+    <div class="nav-tree cloak filter-online" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy(searchKey,'areaTree','radioSiteTree');">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <p ng-show="zTree.isEmpty">没有符合要求的结果</p>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>告警状态</label>
+            <select ng-model="alarmQuery.alarmState"
+                    ng-init="alarmQuery.alarmState = CURRENT_ALARM;"
+                    ng-options="item.key as item.key+'（'+item.value+'）' for item in CONST.alarmStateList"
+                    ng-change="query();">
+            </select>
+
+            <label>告警等级</label>
+            <select ng-model="alarmQuery.alarmLevel"
+                    ng-options="item.key as item.value for item in CONST.alarmLevelList"
+                    ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+            <label>告警名称</label>
+            <input type="text" ng-model="alarmQuery.alarmName">
+        </div>
+
+        <div class="form-inline">
+            <label>供电设备类型</label>
+            <select ng-model="alarmQuery.power"
+                    ng-change="query();"
+                    ng-options="item as item for item in powerList">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+            <label>开始时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="alarmQuery.tStart">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="alarmQuery.tEnd">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            &nbsp;
+            <div class="btn-group pull-left" ng-if="(util.checkPrivilege(4210) || util.checkPrivilege(4211)) && alarmQuery.alarmState === CURRENT_ALARM">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    批量操作 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li ng-if="util.checkPrivilege(4210)">
+                        <a ng-click="batchOperation.toModal('check');">批量确认</a>
+                    </li>
+                    <li ng-if="util.checkPrivilege(4211)">
+                        <a ng-click="batchOperation.toModal('clear');">批量消除</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="table-box scroll" ng-cloak>
+            <table scloud-table-head-fix class="table table-hover">
+                <thead>
+                <tr>
+                    <th ng-show="alarmQuery.alarmState === CURRENT_ALARM">
+                        <div scloud-checkbox selected="isSelectAll" callback="selectAll"></div>
+                    </th>
+                    <th>告警序列号</th>
+                    <th>告警名称</th>
+                    <th>告警级别</th>
+                    <th>告警值</th>
+                    <th>设备名称</th>
+                    <th>供电设备类型</th>
+                    <th>供电设备号</th>
+                    <th>回路号</th>
+                    <th>电池号</th>
+                    <th>告警描述</th>
+                    <th>开始时间</th>
+                    <th ng-show="alarmQuery.alarmState === HISTORY_ALARM">恢复时间</th>
+                    <th ng-show="alarmQuery.alarmState === CURRENT_ALARM">确认状态</th>
+                    <th ng-show="alarmQuery.alarmState === HISTORY_ALARM">确认状态</th>
+                    <th ng-show="alarmQuery.alarmState === CURRENT_ALARM">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in currentAlarmList" ng-class="CONST.animation.list">
+                    <td ng-if="alarmQuery.alarmState === CURRENT_ALARM">
+                        <div scloud-checkbox selected="item.isSelected"></div>
+                    </td>
+                    <td ng-bind="item.alarm.alarmNo | nullFilter"></td>
+                    <td ng-bind="item.alarm.signal.name | nullFilter"></td>
+                    <td ng-style="util.alarmColor(item.alarm.level);">
+                        <i class="ic ic-alarm"></i>
+                        <span ng-bind="item.alarm.level | alarmLevelFilter"></span>
+                    </td>
+                    <td ng-bind="item.alarm.value | nullFilter"></td>
+                    <td ng-bind="item.alarm.device.name | nullFilter"></td>
+                    <td ng-bind="item.powerSysType | nullFilter"></td>
+                    <td ng-bind="item.powerSysNo | nullFilter"></td>
+                    <td ng-bind="item.configCircuitNo | nullFilter"></td>
+                    <td ng-bind="item.batteryNo | nullFilter"></td>
+                    <td ng-bind="item.alarm.details | nullFilter"></td>
+                    <td ng-bind="item.alarm.tReport | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                    <td ng-if="alarmQuery.alarmState === HISTORY_ALARM" ng-bind="item.alarm.tRecover | date:'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                    <td>
+                        <label class="label" ng-class="util.alarmStateColor(item.alarm.tCheck);" ng-bind="item.alarm.tCheck | alarmCheckFilter"></label>
+                    </td>
+                    <td ng-if="alarmQuery.alarmState === CURRENT_ALARM">
+                        <a title="确认" class="ic ic-check" ng-if="util.checkPrivilege(4210) && !item.alarm.tCheck" ng-click="checkAlarm(item.alarm, $event);"></a>
+                        <a title="取消确认" class="ic ic-times" ng-if="util.checkPrivilege(4210) && item.alarm.tCheck" ng-click="checkAlarm(item.alarm, $event);"></a>
+                        <a ng-if="util.checkPrivilege(4211)" ng-click="eliminateAlarm.toModal(item, $event)" title="消除" class="ic ic-alarm-off"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+    <!-- 消除告警模态框 -->
+    <form class="modal hide form-horizontal" data-backdrop="static" id="eliminateAlarmModal"
+          name="eliminateAlarm.form" novalidate ng-submit="eliminateAlarm.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="eliminateAlarm.clear();"><i class="ic ic-close"></i></button>
+            <h3>强制消除告警</h3>
+        </div>
+        <div class="modal-body scroll">
+            <div class="notification">
+                <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要消除该告警吗？</h4>
+                <p class="content">
+                    以下是该告警的信息
+                    <div class="control-group">
+                        <label class="control-label">告警名称</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.alarm.signal.name"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">告警等级</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.alarm.level | nullFilter | alarmLevelFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">位置信息</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.alarm.siteTierString + '-' + currentEliminateAlarm.alarm.site.name | nullFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">供电设备类型</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.power | nullFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">供电设备号</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.powerSysNo | nullFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">电池号</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.batteryNo | nullFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">告警值</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.alarm.value | nullFilter"></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">告警详情</label>
+                        <div class="controls">
+                            <span ng-bind="currentEliminateAlarm.alarm.details | nullFilter"></span>
+                        </div>
+                    </div>
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">确认</button>
+            <button type="reset" class="btn btn-default" ng-click="eliminateAlarm.clear();">取消</button>
+        </div>
+    </form>
+
+    <!-- 批量处理模态框 -->
+    <form class="modal hide form-horizontal" data-backdrop="static" id="batchOperationModal"
+          name="batchOperation.form" novalidate ng-submit="batchOperation.execute();">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="batchOperation.clear();"><i class="ic ic-close"></i></button>
+            <h3 ng-bind="'批量' + batchOperation.title + '告警'"></h3>
+        </div>
+        <div class="modal-body scroll">
+            <div class="notification">
+                <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要批量{{batchOperation.title}}告警吗？</h4>
+                <p class="content">
+                    本次批量 <span ng-bind="batchOperation.title" class="font-danger"></span> 操作将影响共计
+                    <span ng-bind="batchOperation.obj.alarmIdList.length" class="font-danger"></span> 条告警
+                </p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" ng-disabled="batchOperation.form.$invalid">确认</button>
+            <button type="reset" class="btn btn-default" ng-click="batchOperation.clear();"> 取消</button>
+        </div>
+    </form>
+</section>

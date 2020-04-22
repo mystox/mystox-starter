@@ -12,7 +12,7 @@ public class ShieldRuleQuery extends Paging {
     private String creatorName;
     private String startTime;
     private String endTime;
-    private Boolean state;
+    private Boolean enabled;
 
     public String getId() {
         return id;
@@ -22,12 +22,12 @@ public class ShieldRuleQuery extends Paging {
         this.id = id;
     }
 
-    public Boolean getState() {
-        return state;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setState(Boolean state) {
-        this.state = state;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getName() {

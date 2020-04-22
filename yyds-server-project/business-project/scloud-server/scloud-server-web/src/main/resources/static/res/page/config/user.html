@@ -1,0 +1,392 @@
+<section id="configUserPage">
+    <div class="nav-tree cloak" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey" ng-change="zTree.getNodesByParamFuzzy(searchKey,'areaTree','checkboxTierTree');">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+
+    <div class="_bg card-bg"></div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>代理公司</label>
+            <!-- <select ng-model="userQuery.type" 
+                    ng-options="item as item for item in typeList"
+                    ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select> -->
+            <input type="text" ng-model="userQuery.companyName" >
+
+            <label>人员姓名</label>
+            <input type="text" ng-model="userQuery.name" >
+
+            <label>账号</label>
+            <input type="text" ng-model="userQuery.username" >
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+    
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>站点维护人员列表</h3>
+            <div class="btn-group">
+                <button ng-if="util.checkPrivilege(2802)" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    批量导入维护人员 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul ng-if="util.checkPrivilege(2802)" class="dropdown-menu">
+                    <li>
+                        <a href="{{CONST.ctx}}/res/doc/template/maintainers.xls">下载模板</a>
+                    </li>
+                    <li>
+                        <a ng-click="addUserBatch.toModal();">批量导入维护人员</a>
+                    </li>
+                </ul>
+            </div>
+            <button ng-if="util.checkPrivilege(2807)" class="btn btn-primary" ng-disabled="isExportUserListLoading" ng-click="exportMaintainerList();">
+                <i ng-class="{'ic ic-spinner ic-spin':isExportUserListLoading}"></i>
+                <i ng-class="!isExportUserListLoading && 'ic ic-download'"></i> 导出Excel
+            </button>
+            <button class="btn btn-primary" ng-click="addUser.toModal('add');" ng-if="util.checkPrivilege(2802)"><i class="ic ic-plus-square"></i> 增加</button>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>账号</th>
+                        <th>联系电话</th>
+                        <th>代维公司名称</th>
+                        <th>组织机构ID</th>
+                        <th>在职状态</th>
+                        <th>入职时间</th>
+                        <th>劳动合同到期时间</th>
+                        <th>所属代维专业</th>
+                        <th>具备的技能</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="u in userList" ng-class="CONST.animation.list">
+                        <td ng-bind="u.name"></td> <!-- 姓名 -->
+                        <td ng-bind="u.username"></td> <!-- 账号 -->
+                        <td ng-bind="u.phone"></td> <!-- 联系电话 -->
+                        <td ng-bind="u.companyName"></td> <!-- 代理公司名称 -->
+                        <td ng-bind="u.uniqueCode"></td> <!-- 组织机构ID -->
+                        <td ng-bind="u.status"></td> <!-- 在职状态 -->
+                        <td ng-bind="u.hiredate | date:'yyyy-MM-dd' | nullFilter"></td> <!-- 入职时间 -->
+                        <td ng-bind="u.expireDate | date:'yyyy-MM-dd' | nullFilter"></td> <!-- 劳动合同到期时间 -->
+                        <td ng-bind="u.major | nullFilter"></td> <!-- 所属代维专业 -->
+                        <td ng-bind="u.skill | nullFilter"></td> <!-- 具备的技能 -->
+                        <td>
+                            <a title="修改" ng-if="util.checkPrivilege(2804)" ng-click="addUser.toModal('modify', u)" class="ic ic-edit"></a>
+                            <a title="详情" ng-click="addUser.toModal('detail', u)" class="ic ic-detail"></a>
+                            <a title="删除" ng-if="util.checkPrivilege(2805)" ng-click="deleteMaintainer.toModal(u)"class="ic ic-delete"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+    
+    <div>
+        <form class="modal broad-modal hide form-horizontal" data-backdrop="static" id="addUserModal"
+              name="addUser.form" novalidate ng-submit="addUser.execute();">
+            <div class="nav-tree nav-tree-sm" ng-show="addUser.status!=='detail'">
+                <div scloud-toggle target="target2" position="right" init-state="true" handler="toggleNavTree2"></div>
+
+                <input type="text" placeholder="搜索站点" ng-model="searchKey2" ng-change="getNodesByParamFuzzy2(searchKey2,'areaTree2','radioSiteTree');">
+
+                <div class="scroll-wrap">
+                    <ul id="modalTree" class="ztree scroll" ng-hide="modalTree.isEmpty"></ul>
+                    <div ng-show="modalTree.isEmpty" class="no-data">
+                        <div class="img img-2x"></div>
+                    </div>
+                </div>
+                <div class="loader" ng-show="modalTreeLoading">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+            </div>
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addUser.clear();"><i class="ic ic-close"></i></button>
+                <!-- 增加/修改/详情 -->
+                <h3 ng-bind="addUser.title"></h3>
+            </div> 
+            <div class="modal-body scroll">
+                <div ng-if="addUser.failToCheckUsername" class="modalAlert"><span>{{addUser.failToCheckUsername}}</span></div>
+                <div ng-if="addUser.failToCheckPhone" class="modalAlert"><span>{{addUser.failToCheckPhone}}</span></div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.name);">
+                    <label class="control-label">姓名</label>
+                    <div class="controls">
+                        <input type="text" name="name" ng-model="addUser.user.name" ng-pattern="REGEX.personName" required ng-disabled ="addUser.status!=='add'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.username);">
+                    <label class="control-label">账号</label>
+                    <div class="controls">
+                        <input type="text" ng-change="checkUsername()" name="username" ng-model="addUser.user.username" ng-pattern="REGEX.username" required  ng-disabled ="addUser.status!=='add'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.password);" ng-hide ="addUser.status ==='detail'">
+                    <label class="control-label">密码</label>
+                    <div class="controls">
+                        <input type="text"  name="password" ng-model="addUser.user.password" placeholder="{{addUser.status ==='modify' ? '不修改则不填写' : ''}}" ng-pattern="REGEX.password"/>
+                        <span class="help-inline" ng-class="addUser.status !=='modify' && 'required'"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.phone);">
+                    <label class="control-label">联系电话</label>
+                    <div class="controls">
+                        <input type="text" ng-change="checkPhone()" name="phone" ng-model="addUser.user.phone" required  ng-pattern="REGEX.phone" ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.companyName);">
+                    <label class="control-label">代维公司名称</label>
+                    <div class="controls">
+                        <input type="text" name="companyName" ng-model="addUser.user.companyName" ng-pattern="REGEX.enterpriseName" required  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.uniqueCode);">
+                    <label class="control-label">组织机构ID</label>
+                    <div class="controls">
+                        <input type="text" name="uniqueCode" ng-model="addUser.user.uniqueCode" ng-pattern="REGEX.uniqueCode" ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">在职状态</label>
+                    <div class="controls">
+                        <select ng-options="item as item for item in userStatus" ng-model="addUser.user.status" ng-disabled ="addUser.status==='detail'" ></select>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">入职时间</label>
+                    <div class="controls">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addUser.user.hiredate" ng-disabled ="addUser.status==='detail'" >
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">合同到期</label>
+                    <div class="controls">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addUser.user.expireDate" ng-disabled ="addUser.status==='detail'" >
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">代维专业</label>
+                    <div class="controls">
+                        <input type="text" name="username" ng-model="addUser.user.major"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">具备技能</label>
+                    <div class="controls">
+                        <input type="text" name="username" ng-model="addUser.user.skill"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">站点层级</label>
+                    <div class="controls">
+                        <input type="text" class="cursor-point" ng-model="addUser.user.siteTireName" required readonly ng-click="toggleNavTree2(false)" >
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.address);">
+                    <label class="control-label">家庭地址</label>
+                    <div class="controls">
+                        <input type="text" name="address" ng-model="addUser.user.address" ng-pattern="REGEX.address" ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addUser.form.idcard);">
+                    <label class="control-label">身份证号码</label>
+                    <div class="controls">
+                        <input type="text" name="idcard" ng-model="addUser.user.idcard" ng-pattern="REGEX.idCard"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">性别</label>
+                    <div class="controls">
+                        <select ng-model="addUser.user.sex" ng-disabled ="addUser.status==='detail'" >
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">岗位职责</label>
+                    <div class="controls">
+                        <input type="text" name="username" ng-model="addUser.user.duty"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">购买保险情况</label>
+                    <div class="controls">
+                        <input type="text" name="insurance" ng-model="addUser.user.insurance"   ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">文化程度</label>
+                    <div class="controls">
+                        <input type="text" name="education" ng-model="addUser.user.education"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">认证名称</label>
+                    <div class="controls">
+                        <input type="text" name="authentication" ng-model="addUser.user.authentication"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">认证级别</label>
+                    <div class="controls">
+                        <input type="text" name="authLevel" ng-model="addUser.user.authLevel"  ng-disabled ="addUser.status==='detail'" />
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">认证获取时间</label>
+                    <div class="controls">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addUser.user.authDate" ng-disabled ="addUser.status==='detail'" >
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">认证有效期</label>
+                    <div class="controls">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addUser.user.authExpireDate" ng-disabled ="addUser.status==='detail'" >
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                            <i class="suffix ic ic-calendar"></i>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div ng-if="addUser.status === 'detail'" class="table-box">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>站点编号</th>
+                                <th>站点层级</th>
+                                <th>局站类型</th>
+                                <th>站点名称</th>
+                                <th>站点状态</th>
+                                <th>站点地址</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="u in addUser.user.siteList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td>
+                                <td ng-bind="u.code"></td>
+                                <td ng-bind="u.tierString"></td>
+                                <td ng-bind="u.stationType | stationTypeFilter"></td>
+                                <td ng-bind="u.name"></td>
+                                <td ng-bind="u.approvalStatus | nullFilter"></td>
+                                <td ng-bind="u.address | nullFilter"></td>
+                                <td>
+                                    <a title="删除" ng-if="util.checkPrivilege(2815)" class="ic ic-delete" ng-click="addUser.deleteSite(u)"></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" 
+                    ng-disabled="addUser.form.$invalid || 
+                    !addUser.user.sex || 
+                    (addUser.status === 'add' && !addUser.user.password) || 
+                    !addUser.user.status || 
+                    addUser.failToCheckUsername || 
+                    addUser.failToCheckPhone">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="addUser.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addUserBatchModal"
+            name="addUserBatch.form" novalidate ng-submit="addUserBatch.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addUserBatch.clear();"><i class="ic ic-close"></i></button>
+                <h3>批量导入维护人员</h3>
+            </div>
+            <div class="modal-body scroll">
+                
+                <button type="button" class="btn btn-primary" ng-click="addUserBatch.select();">选择文件</button>
+                    
+                <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.name" class="label label-info"></span>
+                <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.size" class="label label-info"></span>
+                <span ng-show="!fileUpload.files" class="label label-default"><i class="ic ic-paperclip"></i> 未选择任何文件</span>
+                    
+                <input id="fileUploadBtn" name="file" type="file" accept=".xls,.xlsx" ng-file-select="fileUpload.onFileSelect($files, 'excel');"/>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" 
+                        ng-disabled="!fileUpload.files || addUserBatch.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':addUserBatch.loading}"></i>确认
+                </button>
+                <button type="reset" class="btn btn-default" ng-click="addUserBatch.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteMaintainerModal"
+              name="deleteMaintainer.form" novalidate ng-submit="deleteMaintainer.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteMaintainer.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除维护人员</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>删除该维护人员吗？</h4>                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteMaintainer.form.$invalid">确认</button>
+                <button type="button" class="btn btn-default" ng-click="deleteMaintainer.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+       
+</section>

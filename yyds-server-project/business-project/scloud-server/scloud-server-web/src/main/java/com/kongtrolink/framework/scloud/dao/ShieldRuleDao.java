@@ -32,11 +32,11 @@ public class ShieldRuleDao {
         return StringUtil.isNUll(shieldRule.getId()) ? false : true ;
     }
 
-    public int delete(String uniqueCode, String shieldRuleId) {
+    public boolean delete(String uniqueCode, String shieldRuleId) {
         Criteria criteria = Criteria.where("_id").is(shieldRuleId);
         Query query = Query.query(criteria);
         WriteResult remove = mongoTemplate.remove(query, uniqueCode + table);
-        return remove.getN();
+        return remove.getN()>0 ? true : false;
     }
 
     public boolean updateState(String uniqueCode, String shieldId, Boolean state) {
@@ -78,6 +78,10 @@ public class ShieldRuleDao {
         if(!StringUtil.isNUll(creatorName)){
             creatorName = MongoRegexUtil.escapeExprSpecialWord(creatorName);
             criteria.and("creator.name").regex(".*?" + creatorName + ".*?");
+        }
+        Boolean enabled = ruleQuery.getEnabled();
+        if(null != enabled){
+            criteria.and("enabled").is(enabled);
         }
 
         return criteria;

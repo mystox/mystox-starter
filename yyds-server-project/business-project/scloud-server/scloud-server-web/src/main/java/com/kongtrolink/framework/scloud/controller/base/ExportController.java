@@ -52,7 +52,7 @@ public abstract class ExportController extends BaseController {
 			fileName = URLEncoder.encode(fileName, "UTF-8");
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("application/x-download");
-			response.addHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+			response.addHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
 			out = response.getOutputStream();
 			workBook.write(out);
 		} catch (IOException e) {

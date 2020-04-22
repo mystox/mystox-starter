@@ -1,0 +1,457 @@
+<section id="configSitePage">
+    <div class="nav-tree cloak" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey" ng-change="zTree.getNodesByParamFuzzy(searchKey,'areaTree','checkboxTierTree');">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+        
+    <form class="top card-bg">
+        <div class="query-form">
+            <div class="form-inline">
+                <label>站点名称</label>
+                <input type="text" ng-model="siteQuery.name">
+                    
+                <label>站点编号</label>
+                <input type="text" ng-model="siteQuery.code">
+
+                <button class="btn btn-primary" ng-click="query();">查询</button>
+                <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+            </div>
+        </div>
+    </form>
+        
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>站点列表</h3>
+            <div class="btn-group" ng-if="util.checkPrivilege(2815)|| util.checkPrivilege(106)" >
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    批量操作 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a ng-if="util.checkPrivilege(106);" href="{{CONST.ctx}}/res/doc/template/resources.xls">下载站点模板</a>
+                        <a ng-if="util.checkPrivilege(106);" ng-click="addResources.toModal();">批量导入站点信息</a>
+                        <a ng-if="util.checkPrivilege(2815);" ng-click="userBind.toModal();">批量配置维护人员</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group" ng-if="util.checkPrivilege(107)">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <i class="ic ic-download" title="下载文件"></i> 导出 <i class="ic ic-angle-down ic-min"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <button
+                            sng-disabled="siteList.length === 0"
+                            ng-click="exportSiteList();"
+                            sng-Have='exportSiteList.have'
+                            ng-if="util.checkPrivilege(107);"
+                            scloud-count-down sng-count="60" sng-title="导出Excel">
+                        </button>
+                    </li>
+                    <li>
+                        <button
+                            sng-disabled="siteList.length === 0"
+                            ng-click="exportSiteListPdf();"
+                            ng-if="util.checkPrivilege(107);"
+                            sng-Have='exportSiteListPdf.have'
+                            scloud-count-down sng-count="60" sng-title="导出PDF">
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn btn-primary" ng-if="util.checkPrivilege(102);" ng-click="addSite.toModal('add');">添加站点</button>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th><div scloud-checkbox selected="isSelectAll" callback="selectAll"></div></th>
+                        <th>站点编号</th><th>站点名称</th><th>站点类型</th><th>层级编号</th><th>站点层级</th><th>站点地址</th><th>FSU状态</th><th>负责人</th><th>联系电话</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="s in siteList" ng-class="CONST.animation.list">
+                        <td>
+                            <div scloud-checkbox selected="s.isSelected"></div>
+                        </td>
+                        <td ng-bind="s.code"></td>
+                        <td ng-bind="s.name"></td>
+                        <td ng-bind="s.stationType | stationTypeFilter"></td>
+                        <td ng-bind="s.tierCode"></td>
+                        <td ng-bind="s.tierString"></td>
+                        <td ng-bind="s.address | nullFilter"></td>
+                        <td ng-bind="s.fsuState | nullFilter"></td>
+                        <td ng-bind="s.respName | nullFilter"></td>
+                        <td ng-bind="s.respPhone | nullFilter"></td>
+                        <td>
+                            <a title="修改" class="ic ic-edit" ng-if="util.checkPrivilege(104);" ng-click="addSite.toModal('modify', s);"></a>
+                            <a title="详情" class="ic ic-detail" ng-click="addSite.toModal('detail', s);"></a>
+                            <a title="删除" class="ic ic-delete" ng-if="util.checkPrivilege(105);" ng-click="deleteSite.toModal(s);"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+        
+    <div>
+        <form class="modal hide form-horizontal broad-modal" data-backdrop="static" id="addSiteModal"
+              name="addSite.form" novalidate ng-submit="addSite.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addSite.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="addSite.title"></h3>
+            </div>
+            <div class="modal-body scroll">
+                <input type="hidden" name="tierCode" ng-model="addSite.obj.tierCode" required>
+                <div class="control-group">
+                    <label class="control-label">站点层级</label>
+                    <div class="controls">
+                        <input type="text" name="tierString" placeholder='点击选择位置' ng-class="addSite.status === 'add' && 'cursor-point'" ng-disabled="addSite.status !== 'add'" required readonly
+                               ng-model="addSite.obj.tierString" ng-click="toggleNavTree();">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.name);">
+                    <label class="control-label">站点名称</label>
+                    <div class="controls">
+                        <input type="text" name="name" placeholder="{{REGEX.siteNameDesc}}"
+                               ng-model="addSite.obj.name" ng-pattern="REGEX.siteName" required
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.coordinate);">
+                    <label class="control-label">站点经纬</label>
+                    <div class="controls">
+                        <input type="text" name="coordinate" placeholder="{{REGEX.coordinateDesc}}"
+                               ng-model="addSite.obj.coordinate" ng-pattern="REGEX.coordinate"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                        <a ng-hide="addSite.status === 'detail'" ng-click="coordPickerModal.toModal()" class="suffix ic ic-map-marker"></a>
+                    </div>
+                </div>
+                <div class="control-group" ng-hide="addSite.status === 'add'" ng-class="getValidClass(addSite.form.code);">
+                    <label class="control-label">站点编号</label>
+                    <div class="controls">
+                        <input type="text" ng-model="addSite.obj.code" readonly>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.stationType);">
+                    <label class="control-label">局站类型</label>
+                    <div class="controls">
+                        <select name="model" ng-model="addSite.obj.stationType" required 
+                                ng-options="item.key as item.value for item in CONST.stationTypeList"
+                               ng-disabled="addSite.status === 'detail'"></select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.address);">
+                    <label class="control-label">站点地址</label>
+                    <div class="controls">
+                        <input type="text" name="address" placeholder="{{REGEX.addressDesc}}"
+                               ng-model="addSite.obj.address" ng-pattern="REGEX.address"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.respName);">
+                    <label class="control-label">负责人</label>
+                    <div class="controls">
+                        <input type="text" name="respName" ng-model="addSite.obj.respName" ng-pattern="REGEX.personName"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.respPhone);">
+                    <label class="control-label">联系电话</label>
+                    <div class="controls">
+                        <input type="text" name="respPhone" ng-model="addSite.obj.respPhone" ng-pattern="REGEX.phone"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-show="addSite.status != 'add'">
+                    <label class="control-label">FSU状态</label>
+                    <div class="controls">
+                        <span class="input-like" ng-bind="addSite.obj.fsuState | nullFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.company);">
+                    <label class="control-label">归属公司</label>
+                    <div class="controls">
+                        <input type="text" name="company" ng-model="addSite.obj.company" required ng-pattern="REGEX.enterpriseName"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.towerHeight);">
+                    <label class="control-label">铁塔高度</label>
+                    <div class="controls">
+                        <input type="text" name="towerHeight" ng-model="addSite.obj.towerHeight" ng-pattern="REGEX.float"
+                               ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                        <div class="suffix">米</div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">铁塔类型</label>
+                    <div class="controls">
+                        <select name="towerType" ng-model="addSite.obj.towerType" ng-options="item as item for item in towerTypeList" 
+                            ng-disabled="addSite.status === 'detail'"></select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.shareInfo);">
+                    <label class="control-label">共享信息</label>
+                    <div class="controls">
+                        <select name="shareInfo" ng-model="addSite.obj.shareInfo" ng-options="item as item for item in shareInfoList" 
+                            ng-disabled="addSite.status === 'detail'"></select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.approvalStatus);">
+                    <label class="control-label">审批状态</label>
+                    <div class="controls">
+                        <select name="approvalStatus" ng-model="addSite.obj.approvalStatus" required ng-options="item as item for item in approvalStatusList" 
+                            ng-disabled="addSite.status === 'detail'"></select>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-show="addSite.status === 'detail'">
+                    <label class="control-label">站点图片</label>
+                    <div class="controls">
+                        <span class="input-like">
+                            <button type="button" class="btn btn-primary" ng-click="uploadImage.toModal()">上传</button>
+                            <a ng-click="showImage()">查看</a>
+                        </span>
+                    </div>
+                </div>
+                <br ng-show="addSite.status === 'detail'"/>
+                <div class="control-group" ng-class="getValidClass(addSite.form.platform0);">
+                    <label class="control-label">平台信息1</label>
+                    <div class="controls">
+                        <input type="text" name="platform0" ng-model="addSite.obj.platform0" ng-disabled="addSite.status === 'detail'">
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.platform1);">
+                    <label class="control-label">平台信息2</label>
+                    <div class="controls">
+                        <input type="text" name="platform1" ng-model="addSite.obj.platform1" ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.platform2);">
+                    <label class="control-label">平台信息3</label>
+                    <div class="controls">
+                        <input type="text" name="platform2" ng-model="addSite.obj.platform2" ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(addSite.form.platform3);">
+                    <label class="control-label">平台信息4</label>
+                    <div class="controls">
+                        <input type="text" name="platform3" ng-model="addSite.obj.platform3" ng-disabled="addSite.status === 'detail'">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div ng-if="addSite.status === 'detail'" class="table-box">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>姓名</th>
+                                <th>账号</th>
+                                <th>联系电话</th>
+                                <th>代维公司</th>
+                                <th>组织机构ID</th>
+                                <th>在职状态</th>
+                                <th>劳动合同到期时间</th>
+                                <th>入职时间</th>
+                                <th>所属代维专业</th>
+                                <th>具备的技能</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="u in addSite.obj.maintainerList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td> <!-- 姓名 -->
+                                <td ng-bind="u.name"></td> <!-- 姓名 -->
+                                <td ng-bind="u.username"></td> <!-- 账号 -->
+                                <td ng-bind="u.phone"></td> <!-- 联系电话 -->
+                                <td ng-bind="u.companyName"></td> <!-- 代理公司名称 -->
+                                <td ng-bind="u.uniqueCode"></td> <!-- 组织机构ID -->
+                                <td ng-bind="u.status"></td> <!-- 在职状态 -->
+                                <td ng-bind="u.hiredate | date:'yyyy-MM-dd' | nullFilter"></td> <!-- 入职时间 -->
+                                <td ng-bind="u.expireDate | date:'yyyy-MM-dd' | nullFilter"></td> <!-- 劳动合同到期时间 -->
+                                <td ng-bind="u.major | nullFilter"></td> <!-- 所属代维专业 -->
+                                <td ng-bind="u.skill | nullFilter"></td> <!-- 具备的技能 -->
+                                <td>
+                                    <a title="删除" ng-click="addSite.deleteMaintainer(u)"class="ic ic-delete"></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="addSite.form.$invalid">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="addSite.clear();">取消</button>
+            </div>
+            <div class="nav-tree nav-tree-sm" ng-show="addSite.status === 'add'">
+                <div scloud-toggle target="target2" position="right" init-state="true" handler="toggleNavTree"></div>
+                <input type="text" placeholder="搜索站点" ng-model="searchKey2" ng-change="getNodesByParamFuzzy2(searchKey2,'areaTree2','radioTierTree');">
+                <div class="scroll-wrap">
+                    <ul id="areaTree2" class="ztree scroll" ng-hide="zTree2.isEmpty"></ul>
+                    <div ng-show="zTree2.isEmpty" class="no-data">
+                        <div class="img img-2x"></div>
+                    </div>
+                </div>
+                <div class="loader" ng-show="treeLoading2">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+            </div>
+        </form>
+            
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addResourcesModal"
+              name="addResources.form" novalidate ng-submit="addResources.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addResources.clear();"><i class="ic ic-close"></i></button>
+                <h3>批量导入资源</h3>
+            </div>
+            <div class="modal-body scroll">
+                
+                <button type="button" class="btn btn-primary" ng-click="addResources.select();">选择文件</button>
+                    
+                <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.name" class="label label-info"></span>
+                <span ng-hide="!fileUpload.files" ng-bind="fileUpload.info.size" class="label label-info"></span>
+                <span ng-show="!fileUpload.files" class="label label-default"><i class="ic ic-paperclip"></i> 未选择任何文件</span>
+                    
+                <input id="fileUploadBtn" name="file" type="file" accept=".xls,.xlsx" ng-file-select="fileUpload.onFileSelect($files, 'excel');"/>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" 
+                        ng-disabled="!fileUpload.files || addResources.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':addResources.loading}"></i>确认
+                </button>
+                <button type="reset" class="btn btn-default" ng-click="addResources.clear();">取消</button>
+            </div>
+        </form>        
+
+        <div id="uploadImageModalMask" ng-show="uploadImageModalMaskShow"></div>
+        <form class="modal hide form-horizontal" data-backdrop="static" id="uploadImageModal"
+              name="uploadImage.form" novalidate ng-submit="uploadImage.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="uploadImage.clear();"><i class="ic ic-close"></i></button>
+                <h3>上传图片</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="control-group">
+                    <label class="control-label">图片</label>
+                    <div class="controls">
+                        <img ng-if = "uploadImage.fileUrl[0]" ng-src="{{uploadImage.fileUrl[0]}}" class="preview cursor-point" ng-click="uploadImage.fileUpload.selectFile('uploadImageFileUploadBtn');">
+                        <label for="uploadImageFileUploadBtn" class="file" ng-show = "!uploadImage.fileUrl[0]">
+                            <input style="display:none" id="uploadImageFileUploadBtn" name="file" type="file" accept=".png,.jpg,jpeg,.bmp" multiple ng-file-select="uploadImage.fileUpload.onFileSelect($files, 'image');"/>
+                        </label>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" 
+                        ng-disabled="!uploadImage.fileUpload.files || uploadImage.loading">
+                    <i ng-class="{'ic ic-spinner ic-spin':uploadImage.loading}"></i>确认
+                </button>
+                <button type="reset" class="btn btn-default" ng-click="uploadImage.clear();">取消</button>
+            </div>
+        </form> 
+            
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteSiteModal"
+              name="deleteSite.form" novalidate ng-submit="deleteSite.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteSite.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除站点</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该站点？</h4>
+                    <p class="content">
+                        注意，将要删除的站点是
+                        <strong class="font-danger" ng-bind="deleteSite.obj.name"></strong>
+                        ，删除站点将会连带删除站点下的所有FSU，包括FSU下的所有设备及设备下的所有信号！
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteSite.form.$invalid">确认</button>
+                <button type="button" class="btn btn-default" ng-click="deleteSite.clear();">取消</button>
+            </div>
+        </form>
+            
+        <form class="modal hide form-horizontal" data-backdrop="static" id="coordPickerModal">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="coordPickerModal.clear();"><i class="ic ic-close"></i></button>
+                <h3>拾取坐标</h3>
+            </div>
+            <div class="modal-body scroll">                
+                <scloud-coord-picker 
+                    coord="addSite.obj.coordinate" 
+                    execute="coordPickerModal.execute" 
+                    clear="coordPickerModal.clear"
+                    show="addSite.showMap">                        
+                </scloud-coord-picker>
+            </div>
+        </form>
+        
+        <form class="modal hide form-horizontal" data-backdrop="static" id="userBindModal">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="userBind.clear();"><i class="ic ic-close"></i></button>
+                <h3>人员树</h3>
+            </div>
+            <div class="modal-body scroll">   
+                <div class="nav-tree userBindTreeWrapper">
+                <input type="text" placeholder="搜索站点" 
+                    ng-model="userBindTreeFilterString" 
+                    ng-change="userBindTree.getNodesByParamFuzzy(userBindTreeFilterString,'userBindTree','checkboxTierTree');">
+                <div class="scroll-wrap">
+                    <ul id="userBindTree" class="ztree scroll" ng-hide="userBindTree.isEmpty"></ul>
+                    <div ng-show="userBindTree.isEmpty" class="no-data">
+                        <div class="img img-2x"></div>
+                    </div>
+                </div>
+                <div class="loader" ng-show="treeLoading2">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+            </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="userBind.execute();">确认</button>
+                <button type="button" class="btn btn-default" ng-click="userBind.clear();">取消</button>
+            </div>
+        </form>
+        <form class="modal hide form-horizontal imageModal" data-backdrop="static" id="imageShowModal">
+            <div class="mask" ng-click="hidemage()">
+                <div class="img-wrapper">
+                    <img ng-if="showSIteimage" ng-src="{{'/siteFunc/querySiteImage/' + addSite.obj.id}}" alt="暂无图片" ng-click="$event.stopPropagation()">
+                </div>                
+            </div>
+        </form>
+
+    </div>
+</section>

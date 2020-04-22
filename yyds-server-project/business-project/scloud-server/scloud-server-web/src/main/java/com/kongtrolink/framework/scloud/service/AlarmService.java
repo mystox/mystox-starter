@@ -1,10 +1,9 @@
 package com.kongtrolink.framework.scloud.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
-import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.query.AlarmQuery;
-import com.mongodb.DBObject;
 
 import java.util.List;
 
@@ -22,12 +21,15 @@ public interface AlarmService {
      */
     JsonResult list(AlarmQuery alarmQuery) throws Exception;
 
+
     /**
      * @auther: liudd
      * @date: 2020/3/3 15:59
      * 功能描述:填充设备，站点等信息
      */
-    void initInfo(String uniqueCode, List<Alarm> alarmList);
+    void initInfo(String uniqueCode, String serverCode, List<AlarmBusiness> businessList);
 
-    JsonResult operate(AlarmQuery alarmQuery) throws Exception;
+    JSONObject operate(AlarmQuery alarmQuery) throws Exception;
+
+    JSONObject updateWorkInfo(AlarmQuery alarmQuery);
 }

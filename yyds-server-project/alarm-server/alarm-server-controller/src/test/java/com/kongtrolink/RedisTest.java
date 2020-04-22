@@ -1,11 +1,9 @@
 package com.kongtrolink;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.base.Contant;
 import com.kongtrolink.framework.base.DateUtil;
-import com.kongtrolink.framework.base.StringUtil;
-import com.kongtrolink.framework.utils.RedisUtils;
+import com.kongtrolink.framework.core.utils.RedisUtils;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.junit.Test;
@@ -17,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import java.util.*;
 
 /**

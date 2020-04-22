@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,21 +18,49 @@ public class FilterRule {
     private Date updateTime;
 
     private String alarmName;
-    private List<String> alarmLevelList;
-    private List<String> siteCodeList;      //站点编码列表
+    private List<Integer> alarmLevelList;
     private List<String> deviceTypeList;
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
     private Date clearBeginTime;                //清除开始时间
     private Date clearEndTime;                  //清除结束时间
-    private Boolean state;
+    private boolean baseSite;                   //是否基于站点，true-基于站点，false-基于区域
+    private List<String> tierCodeList;          //区域编码列表
+    private List<String> siteCodeList;          //站点编码列表，使用站点编码列表控制区域权限
 
-    public Boolean getState() {
-        return state;
+    private List<String> userIdList = new ArrayList<>();//启用用户id
+    private int useCount;                       //启用用户数量
+
+    public List<String> getTierCodeList() {
+        return tierCodeList;
     }
 
-    public void setState(Boolean state) {
-        this.state = state;
+    public void setTierCodeList(List<String> tierCodeList) {
+        this.tierCodeList = tierCodeList;
+    }
+
+    public boolean isBaseSite() {
+        return baseSite;
+    }
+
+    public void setBaseSite(boolean baseSite) {
+        this.baseSite = baseSite;
+    }
+
+    public List<String> getUserIdList() {
+        return userIdList;
+    }
+
+    public void setUserIdList(List<String> userIdList) {
+        this.userIdList = userIdList;
+    }
+
+    public int getUseCount() {
+        return useCount;
+    }
+
+    public void setUseCount(int useCount) {
+        this.useCount = useCount;
     }
 
     public String getId() {
@@ -90,11 +119,11 @@ public class FilterRule {
         this.alarmName = alarmName;
     }
 
-    public List<String> getAlarmLevelList() {
+    public List<Integer> getAlarmLevelList() {
         return alarmLevelList;
     }
 
-    public void setAlarmLevelList(List<String> alarmLevelList) {
+    public void setAlarmLevelList(List<Integer> alarmLevelList) {
         this.alarmLevelList = alarmLevelList;
     }
 

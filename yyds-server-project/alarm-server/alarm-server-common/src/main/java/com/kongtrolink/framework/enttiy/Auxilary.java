@@ -1,12 +1,7 @@
 package com.kongtrolink.framework.enttiy;
 
-import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.base.StringUtil;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Auther: liudd

@@ -18,6 +18,7 @@ public class AlarmCategoryTemp {
     private String alarmState; //告警状态： 历史告警、实时告警
     private Long alarmCount; //告警总数
     private String fsuManufactory; //生产厂家
+    private String operationState; //站点状态
 
 
     private Long fsuOffline; //fsu 离线告警
@@ -32,6 +33,14 @@ public class AlarmCategoryTemp {
 
     private Boolean deleteFlag = false;
 
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
 
     public String getStationId() {
         return stationId;

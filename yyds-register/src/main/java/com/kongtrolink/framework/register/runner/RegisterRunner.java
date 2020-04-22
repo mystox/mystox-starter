@@ -434,7 +434,7 @@ public class RegisterRunner implements ApplicationRunner {
      */
     public RegisterMsg getRegisterMsg() {
         RegisterMsg registerMsg = new RegisterMsg();
-        if (!serverName.equals(registerServerName)) {
+        if (!serverName.equals(registerServerName)) { //默认的注册服务名称与本地服务一致，则说明本服务为注册云管本服务，不需要远程获取注册信息
             ServerMsg serverMsg = new ServerMsg(host, port, serverName, serverVersion,
                     routeMark, pageRoute, serverUri, title, groupCode);
             String sLoginPayload = JSONObject.toJSONString(serverMsg);

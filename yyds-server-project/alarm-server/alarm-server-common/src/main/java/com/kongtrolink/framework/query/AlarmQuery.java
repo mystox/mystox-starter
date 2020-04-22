@@ -21,11 +21,12 @@ public class AlarmQuery extends Paging {
     private List<String> deviceTypeList;        //设备类型列表，用于告警过滤功能
     private String deviceModel;                 //设备类型
     private List<String> deviceCodeList;        //设备编码列表，需要统一
-    private List<String> deviceIdList;          //设备id
+    private List<String> deviceIds;
     private String state;                       //告警状态
     private Integer level;
     private Integer targetLevel;
     private String targetLevelName;             //目标等级名称
+    private List<String> targetLevelNameList;   //目标等级名称列表，用于告警过滤功能
     private String type;                        //告警类型（实时告警/历史告警）
     private Date startBeginTime;                //发生开始时间
     private Date startEndTime;                  //发生结束时间
@@ -33,26 +34,66 @@ public class AlarmQuery extends Paging {
     private Date clearEndTime;                  //清除结束时间
     private Integer realBeginNum;               //真实分页起始数据
     private Integer realLimit;                  //真实分页大小
-    private Boolean isCheck;                    //是否确认
+    private String checkState;          //告警确认状态
     private Date treport;                       //上报时间
     private Date trecover;              //消除时间
 
     //远程调用需要参数
     private String operate;             //操作，告警确认，取消确认，告警消除
     private Date operateTime;         //操作对应的时间，方便远程接口参数解析
-    private String operateUserId;           //操作用户id
-    private String operateUsername;         //操作用户名
+    private String operatorId;           //操作用户id
+    private String operatorName;         //操作用户名
     private String operateDesc;             //操作描述
     private List<Date> treportList;     //告警发生时间列表，用于批量告警消除
     private List<String> entDevSigList;     //enterpriseCode_deviceId_signalId列表
+    private String key;
+    private List<String> keyList;         //告警键
 
-
-    public List<String> getDeviceIdList() {
-        return deviceIdList;
+    public String getOperatorId() {
+        return operatorId;
     }
 
-    public void setDeviceIdList(List<String> deviceIdList) {
-        this.deviceIdList = deviceIdList;
+    public void setOperatorId(String operatorId) {
+        this.operatorId = operatorId;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public List<String> getKeyList() {
+        return keyList;
+    }
+
+    public void setKeyList(List<String> keyList) {
+        this.keyList = keyList;
+    }
+
+    public List<String> getTargetLevelNameList() {
+        return targetLevelNameList;
+    }
+
+    public void setTargetLevelNameList(List<String> targetLevelNameList) {
+        this.targetLevelNameList = targetLevelNameList;
+    }
+    public List<String> getDeviceIds() {
+        return deviceIds;
+    }
+
+    public void setDeviceIds(List<String> deviceIds) {
+        this.deviceIds = deviceIds;
     }
 
     public List<String> getDeviceTypeList() {
@@ -111,22 +152,6 @@ public class AlarmQuery extends Paging {
         this.operateTime = operateTime;
     }
 
-    public String getOperateUserId() {
-        return operateUserId;
-    }
-
-    public void setOperateUserId(String operateUserId) {
-        this.operateUserId = operateUserId;
-    }
-
-    public String getOperateUsername() {
-        return operateUsername;
-    }
-
-    public void setOperateUsername(String operateUsername) {
-        this.operateUsername = operateUsername;
-    }
-
     public String getOperate() {
         return operate;
     }
@@ -167,12 +192,12 @@ public class AlarmQuery extends Paging {
         this.targetLevel = targetLevel;
     }
 
-    public Boolean getCheck() {
-        return isCheck;
+    public String getCheckState() {
+        return checkState;
     }
 
-    public void setCheck(Boolean check) {
-        isCheck = check;
+    public void setCheckState(String checkState) {
+        this.checkState = checkState;
     }
 
     public Integer getRealBeginNum() {

@@ -25,6 +25,8 @@ public class DeviceModel extends DeviceEntity {
 	private static final long serialVersionUID = 3878090092310831714L;
 
 	private String siteName;	//站点名称
+	//todo 如果设备信息中填充了站点地址，关注告警list方法可以避免去资管获取站点信息
+	private String siteAddress;	//站点地址
 	private String name;	//设备名称
 	private String model;	//设备型号
 	private Integer fsuId; //fsuId
@@ -32,6 +34,14 @@ public class DeviceModel extends DeviceEntity {
 	private Integer countSignal;
 
 	private String isModified; //修改设备时，是否修改了设备名称和设备型号,"0"-未修改，"1"-修改
+
+	public String getSiteAddress() {
+		return siteAddress;
+	}
+
+	public void setSiteAddress(String siteAddress) {
+		this.siteAddress = siteAddress;
+	}
 
 	public String getSiteName() {
 		return siteName;

@@ -1,0 +1,75 @@
+<section id="settingEnterprisePage">
+    <div class="main card-bg">
+        <div class="page-header">
+            <h3>企业信息                
+            </h3>
+        </div>
+        <form class="page-body form-horizontal" name="form" novalidate>
+            <div class="control-group">
+                <label class="control-label">企业名称</label>
+                <div class="controls">
+                    <span ng-bind="enterprise.name | nullFilter"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">企业唯一识别码</label>
+                <div class="controls">
+                    <span ng-bind="enterprise.uniqueCode | nullFilter"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">企业联系人</label>
+                <div class="controls">
+                    <span ng-bind="enterprise.contactsName | nullFilter"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">联系电话</label>
+                <div class="controls">
+                    <span ng-bind="enterprise.contactsPhone | nullFilter"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">代理商</label>
+                <div class="controls">
+                    <span ng-bind="enterprise.agency.name | nullFilter"></span>
+                </div>
+            </div>
+            <hr/>
+            <div class="control-group" ng-class="getValidClass(form.pollingInterval);">
+                <label class="control-label">FSU轮巡间隔</label>
+                <div class="controls">
+                    <input type="text" name="pollingInterval" ng-model="enterprise.pollingInterval"
+                        placeholder = "{{REGEX.pollingIntervalDesc}}"
+                        ng-pattern = "REGEX.pollingInterval" required>
+                    <span>分钟</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">页面刷新间隔</label>
+                <div class="controls">
+                    <select name="refreshInterval" required
+                        ng-model="enterprise.refreshInterval"
+                        ng-options="item | secondFilter for item in refreshIntervals"></select>
+                </div>
+            </div>
+            <div class="control-group" ng-class="getValidClass(form.fsuOfflineDelayTime);">
+                <label class="control-label">FSU离线告警延时</label>
+                <div class="controls">
+                    <input type="text" name="fsuOfflineDelayTime" 
+                        placeholder = "{{REGEX.fsuOfflineDelayTimeDesc}}"
+                        ng-model="enterprise.fsuOfflineDelayTime" required
+                        ng-pattern = "REGEX.fsuOfflineDelayTime">
+                    <span>分钟</span>
+                </div>
+            </div>
+            <br/>
+            <div class="control-group">
+                <div class="controls">
+                    <button class="btn btn-primary" ng-if="util.checkPrivilege(7504)" ng-disabled="form.$invalid" ng-click = "modifyEnterprise()">保存</button>
+                    <button class="btn btn-default" ng-click = "clear()">清除</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>

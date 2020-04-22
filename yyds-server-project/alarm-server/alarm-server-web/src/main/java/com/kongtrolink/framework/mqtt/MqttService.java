@@ -26,4 +26,21 @@ public interface MqttService {
      */
     @OperaCode
     String alarmRemoteOperate(String jsonStr);
+
+    @OperaCode
+    String levelRemoteLastUse(String jsonStr);
+
+    @OperaCode
+    String auxilaryRemoteGet(String jsonStr);
+
+    @OperaCode
+    String auxilaryRemoteDel(String jsonStr);
+
+    /**
+     * @auther: liudd
+     * @date: 2020/4/21 17:30
+     * 功能描述:业务平台删除用户或者维护人员时，删除告警投递模板中绑定用户
+     */
+    @OperaCode
+    String deliverRemoteDelUserId(String jsonStr);
 }

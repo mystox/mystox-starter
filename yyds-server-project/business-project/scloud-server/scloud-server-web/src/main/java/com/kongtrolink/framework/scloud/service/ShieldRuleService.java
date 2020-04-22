@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.service;
 
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
 
@@ -15,7 +16,9 @@ public interface ShieldRuleService {
 
     boolean add(String uniqueCode, ShieldRule shieldRule);
 
-    int delete(String uniqueCode, String shieldRuleId);
+    boolean delete(String uniqueCode, String shieldRuleId);
+
+    boolean update(String uniqueCode, ShieldRule shieldRule);
 
     boolean updateState(String uniqueCode, String shieldId, Boolean state);
 
@@ -30,12 +33,12 @@ public interface ShieldRuleService {
      * @date: 2020/3/5 8:48
      * 功能描述:填充信息
      */
-    void initInfo(String uniqueCode, ShieldRule shieldRule);
+    void initInfo(String uniqueCode, ShieldRule shieldRule) throws Exception;
 
     /**
      * @auther: liudd
      * @date: 2020/3/4 16:08
      * 功能描述:匹配告警屏蔽规则
      */
-    void matchRule(String uniqueCode, List<Alarm> alarmList);
+    void matchRule(String uniqueCode, List<AlarmBusiness> alarmBusinessList);
 }

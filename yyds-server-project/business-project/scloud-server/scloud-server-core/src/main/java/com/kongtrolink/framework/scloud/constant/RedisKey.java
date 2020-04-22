@@ -14,4 +14,6 @@ public class RedisKey {
      *      value：值
      */
     public static final String DEVICE_REAL_DATA = "scloud_device_realData";
+    //保存下发值
+    public static final String DEVICE_SET_POINT = "scloud_device_setPoint";
 }

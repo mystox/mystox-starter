@@ -2,153 +2,78 @@ privFunc:
   type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
   name: ${server.title} #权限名称 必填
   code: ${server.name}_${server.version} #权限编码 必填同级不可重复
+  routeMark: proxy_scloud
+  pageRoute: proxy_scloud
   remark: 云平台 #备注 可填
   children:
+  - type: SCRIPT
+    name: 服务登录验证
+    code: SERVICE_LOGIN
+    uri: /SDGD/static/checkLogin.js
+  - type: SCRIPT
+    name: 告警提醒
+    code: ALARM_CONFIRM
+    uri: /SDGD/static/alarmConfirm.js
+  - type: PAGE
+    name: 首页
+    code: HOME
+    uri: /SDGD/home
+  - type: PAGE
+    name: 综合机房
+    code: SCENE
+    uri: /SDGD/scene/site
+  - type: PAGE
+    name: 组态管理
+    code: CONFIGURATION
+    uri: /SDGD/configuration/manager
   - type: ROOT
-    name: 权限管理
-    code: SCLOUD_PAGE
+    name: 数据监控
+    code: DATA
     routeMark: proxy_scloud
     pageRoute: proxy_scloud
     children:
     - type: PAGE
-      name: home
-      code: home
-      uri: /SDGD/home
-    - type: PAGE
-      name: list
-      code: list
-      uri: /SDGD/privilege/list
-    - type: PAGE
-      name: config
-      code: config
-      uri: /SDGD/privilege/config
-    - type: PAGE
-      name: depList
-      code: depList
-      uri: /SDGD/privilege/depList
-    - type: PAGE
-      name: positionList
-      code: positionList
-      uri: /SDGD/privilege/positionList
-    - type: PAGE
-      name: userList
-      code: userList
-      uri: /SDGD/privilege/userList
-    - type: PAGE
-      name: dictionary
-      code: dictionary
-      uri: /SDGD/privilege/dictionary
-  - type: ROOT
-    name: scene
-    code: scene
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: site
-      code: site
-      uri: /SDGD/scene/site
-    - type: PAGE
-      name: alarmStatistic
-      code: alarmStatistic
-      uri: /SDGD/scene/alarmStatistic
-  - type: ROOT
-    name: data
-    code: data
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: focus
-      code: focus
+      name: 关注数据
+      code: FOCUS
       uri: /SDGD/data/focus
     - type: PAGE
-      name: site
-      code: site
+      name: 实时数据
+      code: SITE
       uri: /SDGD/data/site
     - type: PAGE
-      name: device
-      code: device
-      uri: /SDGD/data/device
-      root: true
-    - type: PAGE
-      name: history
-      code: history
+      name: 历史数据
+      code: HISTORY
       uri: /SDGD/data/history
-    - type: PAGE
-      name: debug
-      code: debug
-      uri: /SDGD/data/debug
   - type: ROOT
-    name: battery
-    code: battery
+    name: 告警管理
+    code: ALARM
     routeMark: proxy_scloud
     pageRoute: proxy_scloud
     children:
     - type: PAGE
-      name: dashboard
-      code: dashboard
-      uri: /SDGD/battery/dashboard
+      name: 告警过滤
+      uri: /SDGD/alarm/filter
+      code: FILTER
     - type: PAGE
-      name: site
-      code: site
-      uri: /SDGD/battery/site
+      name: 告警列表
+      uri: /ZKSDGD/SDGD_alarmList
+      code: SDGD_ALARMLIST
     - type: PAGE
-      name: device
-      code: device
-      uri: /SDGD/battery/device
-    - type: PAGE
-      name: alarm
-      code: alarm
-      uri: /SDGD/battery/alarm
-    - type: PAGE
-      name: config
-      code: config
-      uri: /SDGD/battery/config
-  - type: ROOT
-    name: alarm
-    code: alarm
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: focus
-      code: focus
+      name: 关注告警
       uri: /SDGD/alarm/focus
+      code: FOCUS
     - type: PAGE
-      name: list
-      code: list
-      uri: /SDGD/alarm/list
+      name: 告警等级
+      uri: /ZKAlarm/alarmLevel
+      code: ALARMLEVEL
     - type: PAGE
-      name: setting
-      code: setting
-      uri: /SDGD/alarm/setting
+      name: 告警统计
+      uri: /SDGD/alarm/count
+      code: COUNT
     - type: PAGE
-      name: server
-      code: server
-      uri: /SDGD/alarm/server
-    - type: PAGE
-      name: link
-      code: link
-      uri: /SDGD/alarm/link
-    - type: PAGE
-      name: inform
-      code: inform
-      uri: /SDGD/alarm/inform
-  - type: ROOT
-    name: configuration
-    code: configuration
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: manager
-      code: manager
-      uri: /SDGD/configuration/manager
-    - type: PAGE
-      name: picture
-      code: picture
-      uri: /SDGD/configuration/picture
+      name: 告警屏蔽
+      uri: /SDGD/alarm/shield
+      code: SHIELD
   - type: ROOT
     name: operation
     code: operation
@@ -156,148 +81,33 @@ privFunc:
     pageRoute: proxy_scloud
     children:
     - type: PAGE
-      name: project
-      code: project
+      name: 工程管理
+      code: PROJECT
       uri: /SDGD/operation/project
     - type: PAGE
-      name: project
-      code: project
-      uri: /SDGD/operation/project
-    - type: PAGE
-      name: workList
-      code: workList
+      name: 告警工单
+      code: WORKLIST
       uri: /SDGD/operation/workList
-    - type: PAGE
-      name: examine
-      code: examine
-      uri: /SDGD/operation/examine
-    - type: PAGE
-      name: map
-      code: map
-      uri: /SDGD/operation/map
   - type: ROOT
-    name: log
-    code: log
+    name: 系统管理
+    code: SETTING
     routeMark: proxy_scloud
     pageRoute: proxy_scloud
     children:
     - type: PAGE
-      name: list
-      code: list
-      uri: /SDGD/log/list
-  - type: ROOT
-    name: report
-    code: report
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
+      name: 企业信息
+      code: ENTERPRISEINFO
+      uri: /ZKSDGD/enterpriseInfo
     - type: PAGE
-      name: setting
-      code: setting
-      uri: /SDGD/report/setting
+      name: 站点资产
+
+      code: SITEMANAGE
+      uri: /ZKSDGD/siteManage
     - type: PAGE
-      name: system
-      code: system
-      uri: /SDGD/report/system
+      name: 用户管理
+      code: USERMANAGE
+      uri: /ZKSDGD/UserManage
     - type: PAGE
-      name: alarm
-      code: alarm
-      uri: /SDGD/report/alarm
-  - type: ROOT
-    name: config
-    code: config
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: site
-      code: site
-      uri: /SDGD/config/site
-    - type: PAGE
-      name: fsu
-      code: fsu
-      uri: /SDGD/config/fsu
-    - type: PAGE
-      name: user
-      code: user
-      uri: /SDGD/config/user
-  - type: ROOT
-    name: setting
-    code: setting
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: basic
-      code: basic
-      uri: /SDGD/setting/basic
-    - type: PAGE
-      name: user
-      code: user
-      uri: /SDGD/setting/user
-    - type: PAGE
-      name: privilege
-      code: privilege
-      uri: /SDGD/setting/privilege
-    - type: PAGE
-      name: enterprise
-      code: enterprise
-      uri: /SDGD/setting/enterprise
-  - type: ROOT
-    name: monitor
-    code: monitor
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: list
-      code: list
-      uri: /SDGD/monitor/list
-  - type: ROOT
-    name: entrance
-    code: entrance
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: list
-      code: list
-      uri: /SDGD/entrance/list
-    - type: PAGE
-      name: log
-      code: log
-      uri: /SDGD/entrance/log
-    - type: PAGE
-      name: authorize
-      code: authorize
-      uri: /SDGD/entrance/authorize
-  - type: ROOT
-    name: other
-    code: other
-    routeMark: proxy_scloud
-    pageRoute: proxy_scloud
-    children:
-    - type: PAGE
-      name: shield
-      code: shield
-      uri: /SDGD/shield
-    - type: PAGE
-      name: delay
-      code: delay
-      uri: /SDGD/delay
-    - type: PAGE
-      name: filter
-      code: filter
-      uri: /SDGD/filter
-    - type: PAGE
-      name: major
-      code: major
-      uri: /SDGD/major
-    - type: PAGE
-      name: redefine
-      code: redefine
-      uri: /SDGD/redefine
-    - type: PAGE
-      name: config
-      code: config
-      uri: /SDGD/config
+      name: 设备资产
+      code: DEVICEMANAGE
+      uri: /ZKSDGD/deviceManage

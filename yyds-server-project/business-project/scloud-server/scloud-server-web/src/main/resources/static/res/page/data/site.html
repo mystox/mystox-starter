@@ -1,0 +1,159 @@
+<section id="dataSitePage">
+    <div class="nav-tree cloak filter-online" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">
+        <div class="scroll-wrap" ng-show="tabPage.isActive(0)">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="scroll-wrap" ng-show="tabPage.isActive(1)">
+            <ul id="checkboxTree" class="ztree scroll" ng-hide="checkboxTree.isEmpty"></ul>
+            <div ng-show="checkboxTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+    <ul class="nav nav-tabs">
+        <li ng-repeat="item in tabPage.pageList" ng-class="{active:tabPage.isActive($index)}">
+            <a ng-click="tabPage.showPage($index);" ng-bind="item"></a>
+        </li>
+    </ul>
+    <div class="site-content">
+
+
+        <div class="bottom card-bg" ng-show="tabPage.isActive(0)">
+            <form class="query-form" ng-show="tabPage.isActive(0)">
+                <div class="form-inline">
+                    <label>设备类型</label>
+                    <select ng-model="deviceQuery.deviceTypeCode" ng-options="item.code as item.typeName for item in deviceTypeList">
+                        <option ng-bind="'全部'"></option>
+                    </select>
+
+                    <label>设备名称</label>
+                    <input type="text" ng-model="deviceQuery.name">
+
+
+                    <label>设备编号</label>
+                    <input type="text" ng-model="deviceQuery.code">
+
+                    <button class="btn btn-primary" ng-click="query();">查询</button>
+                    <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+                </div>
+            </form>
+            <div class="page-header">
+                <h3>设备列表</h3>
+            </div>
+            <div class="table-box scroll" ng-cloak>
+                <table scloud-table-head-fix class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>设备编号</th><th>设备名称</th><th>设备类型</th><th>设备型号</th><th>设备厂家</th><th>监控点总数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in deviceList" class="cursor-point {{CONST.animation.list}}" ng-click="openDevice(d);">
+                            <td ng-bind="d.code"></td>
+                            <td ng-bind="d.name"></td>
+                            <td ng-bind="d.type"></td>
+                            <td ng-bind="d.manufacturer | nullFilter"></td>
+                            <td ng-bind="d.model | nullFilter"></td>
+                            <td ng-bind="d.countSignal"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="loader" ng-show="isLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+                <div class="img img-2x"></div>
+            </div>
+            <tm-pagination conf="paginationConf"></tm-pagination>
+        </div>
+
+
+        <div class="bottom card-bg df dfv" ng-show="tabPage.isActive(1)">
+            <form class="query-form" ng-show="tabPage.isActive(1)">
+                <div class="form-inline">
+                    <label>设备类型</label>
+                    <select ng-model="signalQuery.deviceTypeCode" ng-change="signalQuery.signal=signalQuery.deviceTypeCode?signalQuery.deviceTypeCode.signalTypeList[0].cntbId:undefined" ng-options="item as item.typeName for item in deviceTypeList">
+                        <option ng-bind="'全部'"></option>
+                    </select>
+                    <label>设备编号</label>
+                    <input type="text" ng-model="signalQuery.deviceCode">
+                    <label>设备名称</label>
+                    <input type="text" ng-model="signalQuery.deviceName">
+                    <label>遥测信号</label>
+                    <select ng-model="signalQuery.signal" ng-options="item.cntbId as item.typeName for item in (signalQuery.deviceTypeCode ? signalQuery.deviceTypeCode.signalTypeList : [])"></select>
+                    <button class="btn btn-primary" ng-click="doSignalValueQuery();">查询</button>
+                    <button class="btn btn-default" type="reset" ng-click="signalValueReset();">清除</button>
+
+                </div>
+            </form>
+            <div class="page-header">
+                <h3>遥测信号点统计表</h3>                
+                <div class="btn-group" ng-if="util.checkPrivilege(7907)">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                        <i class="ic ic-download" title="下载文件"></i> 导出 <i class="ic ic-angle-down ic-min"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <button
+                                    sng-disabled = "signalValueList.length === 0"
+                                ng-click="exportSignalValueList();"
+                                ng-if="util.checkPrivilege(7907);"
+                                sng-Have='exportSignalValueList.have'
+                                scloud-count-down sng-count="60" sng-title="导出Excel"></button>
+                        </li>
+                        <!-- <li>
+                            <button
+                                    sng-disabled = "signalValueList.length === 0"
+                                ng-click="exportSignalValuePdf();"
+                                ng-if="util.checkPrivilege(7907);"
+                                sng-Have='exportSignalValuePdf.have'
+                                scloud-count-down sng-count="60" sng-title="导出PDF"></button>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+            <div class="table-box-wrapper">
+            <div class="table-box scroll" ng-cloak>
+                <table scloud-table-head-fix class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>序号</th><th>站点层级</th><th>站点名称</th><th>站点类型</th><th>站点编号</th><th>设备名称</th><th>设备编号</th><th ng-bind="lastSignalName + '信号值'"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in signalValueList"
+                            ng-class="CONST.animation.list"> 
+                            <td ng-bind="$index + 1"></td>
+                            <td ng-bind="d.tier"></td>
+                            <td ng-bind="d.siteName"></td>
+                            <td ng-bind="d.siteType | nullFilter"></td>
+                            <td ng-bind="d.siteCode"></td>
+                            <td ng-bind="d.deviceName"></td>
+                            <td ng-bind="d.deviceCode"></td>
+                            <td ng-bind="d.value | nullFilter"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="loader" ng-show="singleIsLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div class="no-data" ng-hide="singleIsLoading || signalPaginationConf.totalItems">
+                <div class="img img-2x"></div>
+            </div>
+            <tm-pagination conf="signalPaginationConf"></tm-pagination>
+            </div>
+        </div>
+    </div>
+  
+</section>

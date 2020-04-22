@@ -12,6 +12,21 @@ public class OperaCodeConstant {
     //获取云管企业下所有用户
     public static final String GET_USER_LIST_BY_ENTERPRISE_CODE = "getUserListByEnterpriseCode";
 
+    //获取企业中存在的角色列表
+    public static final String GET_ROLE_LIST = "getRoleListByUniqueCode";
+
+    //批量添加维护用户
+    public static final String ADD_USER_BATCH = "addUserBatch";
+
+    //添加云管用户
+    public static final String ADD_USER = "addUser";
+
+    //修改云管用户
+    public static final String MODIFY_USER = "modifyUser";
+
+    //删除云管用户
+    public static final String DELETE_USER = "deleteUser";
+
     //获取资管信息
     public static final String GET_CI_SCLOUD = "getCISCloud";
 

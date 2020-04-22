@@ -1,0 +1,229 @@
+<section id="dataHistoryPage">
+    <div class="nav-tree cloak filter-online" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+
+    <div class="_bg card-bg"></div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>站点名称</label>
+            <input auto-width type="text" ng-model="historyDataQuery.siteName" readonly>
+                
+            <label>设备名称</label>
+            <select ng-disabled="!historyDataQuery.siteName"
+                    ng-model="historyDataQuery.deviceId"
+                    ng-options="item.code as item.name for item in deviceList"
+                    ng-change="getSignalList(historyDataQuery.deviceId);"></select>
+
+            <label>遥测信号</label>
+            <select ng-disabled="!historyDataQuery.deviceId"
+                    ng-model="historyDataQuery.signalId"
+                    ng-options="item.cntbId as item.typeName for item in signalList"
+                    ng-change="query(historyDataQuery.signalId);">
+                <option ng-if="!isAirCon" ng-bind="'全部'"></option>
+            </select>
+            <span ng-if=" historyDataQuery.siteId && historyDataQuery.systemName && historyDataQuery.deviceId && ( !signalList || signalList.length === 0)"
+                  class="font-important">（该设备无遥测信号）</span>
+        </div>
+        <div class="form-inline">
+            <label>起止时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="historyDataQuery.tStart">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="historyDataQuery.tEnd">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+    
+    <div class="left card-bg">
+        <div class="page-header">
+            <ul class="nav nav-tabs">
+                <li ng-repeat="(key, item) in tabPage.pageList track by key" ng-class="{active:tabPage.isActive($index)}">
+                    <a ng-click="tabPage.showPage($index);" ng-bind="item"></a>
+                </li>
+            </ul>
+            <!-- 导出遥测信号点统计表 -->
+            <button class="btn btn-primary"
+                    sng-disabled="signalsHistoryList2.length === 0"
+                ng-click="exportSingleSignalListLeft();"
+                ng-show="tabPage.isActive(1)"
+                ng-if="util.checkPrivilege(7334)"
+                sng-Have='exportSingleSignalListLeft.have'
+                scloud-count-down sng-count="60" sng-title="导出Excel">
+                <i class="ic ic-download" title="下载文件"></i> 
+            </button>
+            <!-- <button class="btn btn-primary"
+                sng-disabled="signalsHistoryList2.length === 0"
+                ng-click="exportSingleSignalListLeftPdf();"
+                ng-show="tabPage.isActive(1)"
+                ng-if="util.checkPrivilege(7334)"
+                sng-Have='exportSingleSignalListLeftPdf.have'
+                scloud-count-down sng-count="60" sng-title="导出PDF">
+                <i class="ic ic-download" title="下载文件"></i> 
+            </button> -->
+        </div>
+        <!-- 历史数据统计图 -->
+        <div ng-show="tabPage.isActive(0)">
+            <div id="dataLine" class="scroll"></div>
+            <div class="loader" ng-show="isLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div ng-hide="isLoading || signalDataList" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <!-- 历史数据统计表 -->
+        <div class="" ng-show="tabPage.isActive(1)">
+            <div class="table-box scroll">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>日期</th><th>最大值</th><th>最小值</th><th>平均值</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="s in signalsHistoryList2">
+                        <td ng-bind="s.time"></td>
+                        <td ng-bind="s.maxValue + s.measurement"></td>
+                        <td ng-bind="s.minValue + s.measurement"></td>
+                        <td ng-bind="s.avgValue + s.measurement"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="loader" ng-show="isLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div ng-hide="isLoading3 || paginationConf3.totalItems" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+            <tm-pagination conf="paginationConf3"></tm-pagination>
+        </div>
+
+    </div>
+
+    <div class="right-top card-bg">
+        <div class="page-header">
+            <h3>
+                <span ng-if="!signalDetail.typeName">请选择信号</span>
+                <span ng-if="signalDetail.typeName" ng-bind="signalDetail.typeName"></span>
+            </h3>
+        </div>
+            
+        <dl class="dl-horizontal">
+            <dt>信号类型</dt>
+            <dd ng-bind="signalDetail.type | nullFilter"></dd>
+                
+            <dt>监控点编号</dt>
+            <dd ng-bind="signalDetail.cntbId | nullFilter"></dd>
+                
+            <dt>监控点详情</dt>
+            <dd ng-bind="signalDetail.details | nullFilter"></dd>
+        </dl>
+    </div>
+        
+    <div class="right-bottom card-bg">
+        <div class="page-header">
+            <h3>历史数据列表</h3>
+            <button class="btn btn-primary"
+                sng-disabled = 'signalDataList.length === 0'
+                ng-click="exportSingleSignalListRight();"
+                ng-if="util.checkPrivilege(7307)"
+                sng-Have='exportSingleSignalListRight.have'
+                scloud-count-down sng-count="60" sng-title="导出Excel">
+                <i class="ic ic-download" title="下载文件"></i> 
+            </button>
+            <!-- <button class="btn btn-primary"
+                sng-disabled = 'signalDataList.length === 0'
+                ng-click="exportSingleSignalListRightPdf();"
+                ng-if="util.checkPrivilege(7307)"
+                sng-Have='exportSingleSignalListRightPdf.have'
+                scloud-count-down sng-count="60" sng-title="导出PDF">
+                <i class="ic ic-download" title="下载文件"></i> 
+            </button> -->
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>历史数据</th><th>采集时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="s in signalDataList" ng-class="CONST.animation.list">
+                        <td><span ng-bind="s.value"></span><span ng-bind="measurement"></span></td>
+                        <td ng-bind="s.time | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="isLoading || paginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+    <div class="bottom card-bg" ng-hide="historyDataQuery.signalId">
+        <div class="page-header">
+            <h3>历史数据列表</h3>
+            <button class="btn btn-primary" 
+                sng-disabled="!signalsTotalHistoryList || signalsTotalHistoryList.length === 0 || isExportHistoryDataLoading"
+                ng-click="exportHistoryData();"
+                sng-Have='exportHistoryData.have' 
+                ng-if="util.checkPrivilege(7307)"
+                scloud-count-down sng-count="60" sng-title="导出Excel">
+                <i class="ic ic-download" title="下载文件"></i> 
+                <i ng-class="{'ic ic-spinner ic-spin':isExportHistoryDataLoading}"></i>
+            </button>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>采集时间</th>
+                    <th ng-repeat="s in signals">
+                        <span class="title-tip" scloud-tooltip data-content = "{{s.cntbId}}" name = "s.typeName"></span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="s in signalsTotalHistoryList">
+                    <td ng-bind="s.time | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-repeat="data in s.datas track by $index">
+                        <span ng-bind="data"></span> <span ng-bind="units[$index]"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading2">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="isLoading2 || paginationConf2.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf2"></tm-pagination>
+    </div>
+
+</section>

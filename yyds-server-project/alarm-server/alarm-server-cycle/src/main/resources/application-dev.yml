@@ -16,7 +16,7 @@ spring:
       max-idle: 100
     ## 连接池中的最小空闲连接
       min-idle: 20
-    host: 172.16.5.26
+    host: 172.16.5.60
     port: 6379
     pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 
@@ -28,11 +28,10 @@ server:
 mqtt:
   username: root #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
   password: 123456 #\u53EF\u9009\u914D\u7F6E mqtt\u914D\u7F6E\u76F8\u5173
-  url: tcp://172.16.5.26:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+  url: tcp://172.16.5.62:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 
 mongodb:
-  uri: mongodb://172.16.5.61:27017/alarm_server
-
+  uri: mongodb://172.16.5.61:27017/alarm-server
 
 executor:
   threadPool:
@@ -41,6 +40,8 @@ executor:
 assets:
   serverVersion: ASSET_MANAGEMENT_SERVER_1.0.0
   operaCode: getCI
+sdgdScloud:
+    alarmHistory: sdgdScloudAlarmHistory
 
 #周期处理过期时间
 hcOverTime: 3

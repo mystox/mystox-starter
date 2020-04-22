@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html ng-app="scloudApp" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+
+        <!-- 图标 -->
+        <link href="../../img/app/favicon.ico" type="image/x-icon" rel="icon" />
+        <link  rel="stylesheet" type="text/css" href="../../font/scloud-iconfont/style.css "/>
+        <link  rel="stylesheet" type="text/css" href="../../font/unidreamled-webfont/stylesheet.css "/>
+
+        
+
+
+        <link rel="stylesheet" >
+
+        <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=Zex6o5pzxTxYqtx9MGM6Z97u"></script>
+        <script type="text/javascript" src="http://api.map.baidu.com/library/GeoUtils/1.2/src/GeoUtils.js"></script>
+      
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <script src="http://apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+        <script src="http://apps.bdimg.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+
+        
+
+        <script ></script>
+        <title>云监控系统</title>
+        <script>
+            (function (callback) {
+                var Cache = {};
+                Cache.connectToDB = function (callback) {
+                    var req = indexedDB.open("SDGD", 1587472604302);
+                    req.onerror = function (e) { 
+                        var req1 = indexedDB.deleteDatabase("SDGD"); 
+                        req1.onsuccess = function () {
+                            Cache.connectToDB(callback)
+                        }; 
+                        req1.onerror = function () {
+                            console.log("无法删除数据库"); 
+                        }; 
+                    };
+                    req.onsuccess = function(){
+                        Cache.curDb = req.result;
+                        callback();
+                    };
+                    req.onupgradeneeded = function(){
+                        var db = req.result;
+                        db.objectStoreNames.contains('js') && db.deleteObjectStore('js');
+                        db.objectStoreNames.contains('css') && db.deleteObjectStore('css');
+                        db.createObjectStore("js",{ keyPath: 'url' });
+                        db.createObjectStore("css",{ keyPath: 'url' });
+                    };
+                }
+                                
+                Cache.addCache = function (table, value) {
+                    if (!window.indexedDB) return;
+                    var tran = Cache.curDb.transaction([table], "readwrite");
+                    var objectStore = tran.objectStore(table);
+
+                    var addRequest = objectStore.put(value); 
+                };
+                
+                Cache.queryCache = function (table, url, callback) {
+                    if (!window.indexedDB) {callback(); return;}
+                    var tran = Cache.curDb.transaction([table], "readonly");
+                    var objectStore = tran.objectStore(table);
+
+                    var res = objectStore.get(url);
+                    res.onsuccess = function () {
+                        callback(res.result);
+                    };
+                };
+
+                var Ajax={
+                    get: function(url, fn) {
+                        var xhr = new XMLHttpRequest();            
+                        xhr.open('GET', url, true);
+                        xhr.onreadystatechange = function() { if (xhr.readyState == 4 && xhr.status == 200 || xhr.status == 304) { fn.call(this, xhr.responseText); } };
+                        xhr.send();
+                    }
+                };
+            
+                var css = [
+                    "../../plugin/bootstrap2/css/bootstrap.css",
+                    "../../plugin/jeDate/jedate.css",
+                    "../../plugin/colorpicker/css/colpick.css",
+                    "../../plugin/pagination/pagination.css",
+                    "../../plugin/zTree_v3/css/metroStyle/metroStyle.css",
+                    "../../plugin/pnotify-2.0.0/css/pnotify.all.css",
+                    "../../plugin/perfectScrollbar/perfect-scrollbar.css",
+                    "../../plugin/select2/css/select2.css",
+                    "../../plugin/select2/css/select2-bootstrap.css",
+                    "../../plugin/ngAnimation/ng-animation.css",
+                    "../../plugin/videojs/video-js.css",
+                    "../../css/scloud.main.css",
+                ]
+            
+                var list = [
+                    '../../plugin/jquery/jquery-1.9.1.js',
+                    '../../plugin/jquery/jquery.media.js',
+                    '../../plugin/bootstrap2/js/bootstrap.min.js',
+                    '../../plugin/jeDate/jedate.min.js',
+                    '../../plugin/colorpicker/js/colpick.js',
+                    '../../plugin/angular-1.2.17/angular.js',
+                    '../../plugin/angular-1.2.17/angular-ui-router.js',
+                    '../../plugin/angular-file-upload/angular-file-upload.js',
+                    '../../plugin/pagination/tm.pagination.js',
+                    '../../plugin/zTree_v3/js/jquery.ztree.core.min.js',
+                    '../../plugin/zTree_v3/js/jquery.ztree.excheck.min.js',
+                    '../../plugin/zTree_v3/js/jquery.ztree.exedit.min.js',
+                    '../../plugin/zTree_v3/js/jquery.ztree.exhide.min.js',
+                    '../../plugin/pnotify-2.0.0/js/pnotify.all.js',
+                    '../../plugin/perfectScrollbar/perfectScrollbar.js',
+                    '../../plugin/select2/js/select2.min.js',
+                    '../../plugin/select2/js/ng-select.js',
+                    '../../plugin/clipboard/clipboard.js',
+                    '../../plugin/ngAnimation/angular-animate.min.js',
+                    '../../plugin/echarts/echarts-3.5.3.min.js',
+                    '../../plugin/echarts/theme/dark.js',
+                    '../../plugin/echarts/theme/macarons.js',
+                    '../../plugin/echarts/map/china.js',
+                    '../../plugin/echarts/TextIconOverlay.js',
+                    '../../plugin/echarts/DistanceTool_min.js',
+                    '../../plugin/echarts/MarkerClusterer.js',
+                    '../../plugin/echarts/map/chinaTree.js',
+                    '../../plugin/Threejs/three.js',
+                    '../../plugin/Threejs/stats-min.js',
+                    '../../plugin/Threejs/OBJLoader.js',
+                    '../../plugin/Threejs/OrbitControls.js',
+                    '../../plugin/Threejs/tween.js',
+                    '../../plugin/Threejs/THREEx.prototype.js',
+                    '../../plugin/videojs/video.js',
+                    '../../js/scloud.main.js',
+                ]
+            
+                Cache.connectToDB(function () {
+
+                    var index = 0
+                    function load (url) {
+                        var DBUrl = location.pathname.split('/');
+                        DBUrl.pop();
+                        var subUrl = url.replace(/\.\.\//g, function () { DBUrl.pop(); return ''; });
+                        DBUrl = DBUrl.join('/') + '/' + subUrl;
+                        Cache.queryCache('js', DBUrl, function (value) {
+                            function execute (res, noUpdate) {
+                                if (!noUpdate) {
+                                    Cache.addCache('js', {url: DBUrl, value: res});
+                                }
+                                res.value = '//@ sourceURL=' + DBUrl + '\n' + res.value
+                                window[ "eval" ].call( window, String.prototype.trim.call(noUpdate ? res.value : res));
+                                if (index +1 < list.length) { load(list[++index]); }
+                                else {
+                                    callback()
+                                }
+                            }
+                            if (value) {
+                                execute(value, true)
+                            } else {
+                                Ajax.get(url, execute)
+                            }
+                        })
+                    }
+                    load(list[0])
+                
+                    css.forEach(function (v) {
+                        var DBUrl = location.pathname.split('/');
+                        DBUrl.pop();
+                        var subUrl = v.replace(/\.\.\//g, function () { DBUrl.pop(); return ''; });
+                        DBUrl = DBUrl.join('/') + '/' + subUrl;
+                        Cache.queryCache('css', DBUrl, function (value) {
+                            function execute (res, noUpdate) {
+                                if (!noUpdate) {
+                                    Cache.addCache('css', {url: DBUrl, value: res});
+                                }
+                                var style = document.createElement('style');
+                                style.innerText = (noUpdate ? res.value : res).replace(/\.\.\//g, '../../');
+                                document.head.append(style)
+                            }
+                            if (value) {
+                                execute(value, true)
+                            } else {
+                                Ajax.get(v, execute)
+                            }
+                        })
+                    })
+                        
+                });
+
+            })(function () {
+                registerMainRouter(
+                    '../../page/setting/privilege.html', 
+                    '../../js/controller/setting/privilege.js', 
+                    'settingPrivilegeController'
+                )
+                angular.init();
+            })            
+        </script>
+    </head>
+    
+    <body>
+                                    <link rel="stylesheet" href="../../css/content/setting/privilege.css" />
+                                    <div id="page-wrapper" class="scroll"><div id="page-content" ui-view="" class="toggle"></div></div>
+                                </body>
+</html>

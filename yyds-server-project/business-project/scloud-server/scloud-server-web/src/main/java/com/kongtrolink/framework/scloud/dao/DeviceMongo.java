@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.scloud.dao;
 
 import com.kongtrolink.framework.scloud.constant.CollectionSuffix;
+import com.kongtrolink.framework.scloud.constant.CommonConstant;
 import com.kongtrolink.framework.scloud.entity.DeviceEntity;
 import com.kongtrolink.framework.scloud.entity.DeviceSpecialInfoEntity;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
@@ -16,7 +17,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,19 +36,25 @@ public class DeviceMongo {
         List<String> siteCodes = deviceQuery.getSiteCodes();    //站点编码
         String deviceTypeCode = deviceQuery.getDeviceTypeCode();	//设备类型编码
         String deviceCode = deviceQuery.getDeviceCode();	//设备编码（模糊搜索）
+        List<String> deviceCodeList = deviceQuery.getDeviceCodes();
         String manufacturer = deviceQuery.getManufacturer();	//设备厂家(模糊搜索)
         Long startTime = deviceQuery.getStartTime();	//开始时间
         Long endTime = deviceQuery.getEndTime();	//结束时间
         String state = deviceQuery.getState();	//注册状态（FSU类型、摄像机类型）：在线、离线
         String operationState = deviceQuery.getOperationState();	//运行状态（FSU类型）：工程态、测试态、交维态
-
-        Criteria criteria = Criteria.where("siteCode").in(siteCodes);
+        Criteria criteria = new Criteria();
+        if(null != siteCodes) {
+             criteria = Criteria.where("siteCode").in(siteCodes);
+        }
         if (!StringUtil.isNUll(deviceTypeCode)){
             criteria.and("typeCode").is(deviceTypeCode);
         }
         if (!StringUtil.isNUll(deviceCode)){
             deviceCode = MongoRegexUtil.escapeExprSpecialWord(deviceCode);
             criteria.and("code").regex("^" + deviceCode + ".*?");
+        }
+        if(null != deviceCodeList){
+            criteria.and("code").in(deviceCodeList);
         }
         if (!StringUtil.isNUll(manufacturer)){
             manufacturer = MongoRegexUtil.escapeExprSpecialWord(manufacturer);
@@ -268,5 +274,54 @@ public class DeviceMongo {
         Criteria criteria = Criteria.where("siteCode").in(siteCodeList);
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 更新FSU注册状态及相关属性
+     * 【使用场景】：网关上报FSU在线(注册)/离线
+     */
+    public void updateFsu(DeviceEntity deviceEntity){
+        Criteria criteria = Criteria.where("code").is(deviceEntity.getCode());
+
+        Update update = new Update();
+        update.set("state", deviceEntity.getState());
+        update.set("ip", deviceEntity.getIp());
+        update.set("enterpriseCode", deviceEntity.getEnterpriseCode());
+        update.set("serverCode", deviceEntity.getServerCode());
+        update.set("gatewayServerCode", deviceEntity.getGatewayServerCode());
+        if (!StringUtil.isNUll(deviceEntity.getIp())){
+            update.set("ip", deviceEntity.getIp());
+        }
+        if (deviceEntity.getOfflineTime() != null) {
+            update.set("offlineTime", deviceEntity.getOfflineTime());
+        }
+
+        mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, deviceEntity.getEnterpriseCode() + CollectionSuffix.DEVICE);
+    }
+
+    public boolean isExistFsu(String uniqueCode,String code){
+        Criteria criteria = Criteria.where("code").is(code).and("typeCode").is(CommonConstant.DEVICE_TYPE_CODE_FSU);
+        return mongoTemplate.count(new Query(criteria),uniqueCode + CollectionSuffix.DEVICE) > 0;
+    }
+
+    /**
+     * 更新FSU运行状态
+     */
+    public void updateFsuOperationState(String uniqueCode, String fsuCode, String fsuOperationState){
+        Criteria criteria = Criteria.where("code").is(fsuCode);
+
+        Update update = new Update();
+        if (fsuOperationState != null){
+            update.set("operationState", fsuOperationState);
+        }
+        mongoTemplate.updateFirst(new Query(criteria), update, DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
+    }
+
+    /**
+     * 根据设备类型编码, 查询出所有指定设备
+     */
+    public List<DeviceEntity> findSpecificDevices(String uniqueCode, String deviceTypeCode){
+        Criteria criteria = Criteria.where("typeCode").is(deviceTypeCode);
+        return mongoTemplate.find(new Query(criteria), DeviceEntity.class, uniqueCode + CollectionSuffix.DEVICE);
     }
 }

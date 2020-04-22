@@ -1,8 +1,5 @@
 package com.kongtrolink.framework.scloud.entity;
 
-import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
-import com.kongtrolink.framework.scloud.entity.model.SiteModel;
-
 import java.util.Date;
 
 /**
@@ -15,19 +12,17 @@ public class AlarmFocus {
     private String id;
     private String enterpriseCode;
     private String serverCode;
-    private int siteId;
-    private String deviceId;  //设备编码
-    private String signalId;      //signalType中cntbId
+    private String siteCode;
+    private String siteName;
+    private String siteAddress;
+    private String deviceCode;  //设备编码
+    private String deviceName;
+    private String cntbId;      //signalType中cntbId
     private String signalName;
     private String userId;
     private String username;
     private Date focusTime;
     private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
-
-    private String siteCode;
-    private String siteName;
-    private String siteAddress;
-    private String deviceName;
 
     public String getEntDevSig() {
         return entDevSig;
@@ -43,14 +38,6 @@ public class AlarmFocus {
 
     public void setEntDevSig(String entDevSig) {
         this.entDevSig = entDevSig;
-    }
-
-    public int getSiteId() {
-        return siteId;
-    }
-
-    public void setSiteId(int siteId) {
-        this.siteId = siteId;
     }
 
     public String getId() {
@@ -93,28 +80,12 @@ public class AlarmFocus {
         this.siteAddress = siteAddress;
     }
 
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
-
     public String getDeviceName() {
         return deviceName;
     }
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
-    }
-
-    public String getSignalId() {
-        return signalId;
-    }
-
-    public void setSignalId(String signalId) {
-        this.signalId = signalId;
     }
 
     public String getSignalName() {
@@ -149,32 +120,47 @@ public class AlarmFocus {
         this.username = username;
     }
 
+    public String getDeviceCode() {
+        return deviceCode;
+    }
+
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
+    }
+
+    public String getCntbId() {
+        return cntbId;
+    }
+
+    public void setCntbId(String cntbId) {
+        this.cntbId = cntbId;
+    }
+
     public String initEntDevSig(){
-        this.entDevSig = enterpriseCode + "_" + deviceId+ "_" +signalId;
+        this.entDevSig = enterpriseCode + "_" + deviceCode+ "_" + cntbId;
         return this.entDevSig;
     }
 
-    public void initSiteInfo(SiteModel siteModel){
-        if(null == siteModel){
-            return;
-        }
-        this.siteName = siteModel.getName();
-        this.siteCode = siteModel.getCode();
-        this.siteAddress = siteModel.getAddress();
-    }
-
-    public void initDeviceInfo(DeviceModel deviceModel){
-        if(null == deviceModel){
-            return;
-        }
-        this.siteId = deviceModel.getSiteId();
-        this.deviceName = deviceModel.getName();
-    }
-
-    public void initSignalInfo(SignalType signalType){
-        if(null == signalType){
-            return;
-        }
-        this.signalName = signalType.getTypeName();
-    }
+//    public void initSiteInfo(SiteModel siteModel){
+//        if(null == siteModel){
+//            return;
+//        }
+//        this.siteName = siteModel.getName();
+//        this.siteCode = siteModel.getCode();
+//        this.siteAddress = siteModel.getAddress();
+//    }
+//
+//    public void initDeviceInfo(DeviceModel deviceModel){
+//        if(null == deviceModel){
+//            return;
+//        }
+//        this.deviceName = deviceModel.getName();
+//    }
+//
+//    public void initSignalInfo(SignalType signalType){
+//        if(null == signalType){
+//            return;
+//        }
+//        this.signalName = signalType.getTypeName();
+//    }
 }

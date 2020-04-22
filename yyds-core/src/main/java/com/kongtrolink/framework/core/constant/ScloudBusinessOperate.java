@@ -6,6 +6,7 @@ package com.kongtrolink.framework.core.constant;
  */
 public class ScloudBusinessOperate {
     public static final String LOGIN = "business_login";
+    public static final String LOGIN_OFFINE = "business_offline";
     public static final String GET_DATA = "business_getData";
     public static final String SET_POINT = "business_setPoint";
     public static final String GET_THRESHOLD = "business_getThreshold";

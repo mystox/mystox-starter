@@ -63,12 +63,12 @@ public class InformRuleController extends BaseController {
             return new JsonResult("规则名称"+name+"已存在！", false);
         }
         User user = getUser(request);
-        if(null != user){
+        if(null == user){
             user = new User();
             user.setId("admin");
             user.setName("超级管理员");
-            informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         }
+        informRule.setOperator(new FacadeView(user.getId(), user.getName()));
         Date curDate = new Date();
         informRule.setUpdateTime(curDate);
         informRule.initDateInt();
@@ -443,7 +443,7 @@ public class InformRuleController extends BaseController {
         alarm.setSerial(""+serial);
         alarm.setFlag("1");
         alarm.setLevel(3);
-        alarm.setValue(666);
+        alarm.setValue(666+"");
         return alarm;
     }
 }

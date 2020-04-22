@@ -82,7 +82,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
 				<configuration>
-					<mainClass>com.kongtrolink.framework.business.scloud.his.GatewayTowerHeartApplication</mainClass>
+					<mainClass>com.kongtrolink.framework.business.scloud.his.ScloudHistoryApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>

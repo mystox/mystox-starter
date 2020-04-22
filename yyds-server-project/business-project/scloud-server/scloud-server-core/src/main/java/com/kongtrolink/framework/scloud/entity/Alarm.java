@@ -1,5 +1,8 @@
 package com.kongtrolink.framework.scloud.entity;
 
+import com.kongtrolink.framework.scloud.constant.BaseConstant;
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -15,10 +18,11 @@ public class Alarm {
     private String serverCode;
     private String serial;              //告警序列号
     private String name;                //告警名称
-    private float value;                //告警值
+    private String value;                //告警值
     private Integer level;               //告警等级
-    private int siteId;
+    private String siteCode;
     private String siteName;
+    private String siteType;	        //站点类型
     private String tierName;
     private String siteAddress;
     private String deviceType;          //设备类型，设备类型，与资管一致
@@ -32,14 +36,91 @@ public class Alarm {
     private String color;               //告警颜色
     private Date treport;               //上报时间
     private Date trecover;              //消除时间
+    private FacadeView recoverMan;      //消除人
     private String state;               //告警状态(待处理，已消除)
     private Map<String, String> AuxilaryMap;    //附加属性列map
     private Map<String, String> deviceInfos;    //设备信息map
     private String type;                //告警类型（实时/历史）
     private Date checkTime;             //确认时间
     private String checkContant;        //确认内容
+    private String checkState = BaseConstant.NOCHECK;          //告警确认状态
     private FacadeView checker;         //确认人
     private Boolean shield;             //是否屏蔽
+    private String key ;                //唯一键，可作为索引
+    private String entDevSig;           //enterprise_CodedeviceId_signalId， 用于告警关注，屏蔽等功能
+    private String workCode;            //工单编码，用于前端展示
+    private int flag;                //告警标志（0-结束；1-上报）
+    private String focusId;             //关注点id，用于前端取消关注
+
+    public FacadeView getRecoverMan() {
+        return recoverMan;
+    }
+
+    public void setRecoverMan(FacadeView recoverMan) {
+        this.recoverMan = recoverMan;
+    }
+
+    public String getFocusId() {
+        return focusId;
+    }
+
+    public void setFocusId(String focusId) {
+        this.focusId = focusId;
+    }
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public String getWorkCode() {
+        return workCode;
+    }
+
+    public void setWorkCode(String workCode) {
+        this.workCode = workCode;
+    }
+
+    public String getEntDevSig() {
+        return entDevSig;
+    }
+
+    public void setEntDevSig(String entDevSig) {
+        this.entDevSig = entDevSig;
+    }
+
+    public String initKey(){
+        this.key = enterpriseCode + WorkConstants.UNDERLINE + serverCode + WorkConstants.COLON + deviceId + WorkConstants.UNDERLINE + serial;
+        return key;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getCheckState() {
+
+        return checkState;
+    }
+
+    public void setCheckState(String checkState) {
+        this.checkState = checkState;
+    }
+
+    public String getSiteType() {
+        return siteType;
+    }
+
+    public void setSiteType(String siteType) {
+        this.siteType = siteType;
+    }
 
     public Boolean getShield() {
         return shield;
@@ -57,12 +138,12 @@ public class Alarm {
         this.signalName = signalName;
     }
 
-    public int getSiteId() {
-        return siteId;
+    public String getSiteCode() {
+        return siteCode;
     }
 
-    public void setSiteId(int siteId) {
-        this.siteId = siteId;
+    public void setSiteCode(String siteCode) {
+        this.siteCode = siteCode;
     }
 
     public String getSiteName() {
@@ -137,11 +218,11 @@ public class Alarm {
         this.name = name;
     }
 
-    public float getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -300,5 +381,24 @@ public class Alarm {
                 ", state='" + state + '\'' +
                 ", type='" + type + '\'' +
                 '}';
+    }
+
+    public void initByBusiness(AlarmBusiness alarmBusiness){
+        if(null == alarmBusiness){
+            return;
+        }
+        this.setLevel(alarmBusiness.getLevel());
+        this.setSiteCode(alarmBusiness.getSiteCode());
+        this.setSiteName(alarmBusiness.getSiteName());
+        this.setSiteType(alarmBusiness.getSiteType());
+        this.setDeviceName(alarmBusiness.getDeviceName());
+        this.setTargetLevelName(alarmBusiness.getLevelName());
+        this.setShield(alarmBusiness.getShield());
+        this.setCheckState(alarmBusiness.getCheckState());
+        this.setCheckContant(alarmBusiness.getCheckContant());
+        this.setChecker(alarmBusiness.getChecker());
+        this.setCheckTime(alarmBusiness.getCheckTime());
+        this.setWorkCode(alarmBusiness.getWorkCode());
+        this.entDevSig = alarmBusiness.getEntDevSig();
     }
 }

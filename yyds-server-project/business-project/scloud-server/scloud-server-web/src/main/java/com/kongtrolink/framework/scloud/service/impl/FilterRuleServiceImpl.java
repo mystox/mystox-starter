@@ -48,10 +48,14 @@ public class FilterRuleServiceImpl implements FilterRuleService {
     @Override
     public boolean updateState(String uniqueCode, FilterRuleQuery ruleQuery) {
         Boolean state = ruleQuery.getState();
-        if(state){
-            filterRuleDao.unUse(uniqueCode, ruleQuery);
+        if(!state){
+            return filterRuleDao.unUse(uniqueCode, ruleQuery.getId(), ruleQuery.getOperatorId());
         }
-        return filterRuleDao.use(uniqueCode, ruleQuery);
+        FilterRule userInUse = getUserInUse(uniqueCode, ruleQuery.getOperatorId());
+        if(null != userInUse){
+            filterRuleDao.unUse(uniqueCode, userInUse.getId(), ruleQuery.getOperatorId());
+        }
+        return filterRuleDao.use(uniqueCode, ruleQuery.getId(), ruleQuery.getOperatorId());
     }
 
     /**
@@ -63,6 +67,6 @@ public class FilterRuleServiceImpl implements FilterRuleService {
      */
     @Override
     public FilterRule getUserInUse(String uniqueCode, String creatorId) {
-        return filterRuleDao.getUserInUse(uniqueCode, uniqueCode);
+        return filterRuleDao.getUserInUse(uniqueCode, creatorId);
     }
 }

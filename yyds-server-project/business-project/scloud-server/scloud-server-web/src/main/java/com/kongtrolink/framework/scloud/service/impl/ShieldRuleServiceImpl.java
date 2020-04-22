@@ -1,13 +1,17 @@
 package com.kongtrolink.framework.scloud.service.impl;
 
 import com.kongtrolink.framework.core.entity.Const;
+import com.kongtrolink.framework.scloud.constant.WorkConstants;
 import com.kongtrolink.framework.scloud.dao.ShieldRuleDao;
 import com.kongtrolink.framework.scloud.entity.Alarm;
+import com.kongtrolink.framework.scloud.entity.AlarmBusiness;
 import com.kongtrolink.framework.scloud.entity.ShieldAlarm;
 import com.kongtrolink.framework.scloud.entity.ShieldRule;
 import com.kongtrolink.framework.scloud.entity.model.DeviceModel;
 import com.kongtrolink.framework.scloud.entity.model.SiteModel;
+import com.kongtrolink.framework.scloud.query.DeviceQuery;
 import com.kongtrolink.framework.scloud.query.ShieldRuleQuery;
+import com.kongtrolink.framework.scloud.query.SiteQuery;
 import com.kongtrolink.framework.scloud.service.DeviceService;
 import com.kongtrolink.framework.scloud.service.ShieldAlarmService;
 import com.kongtrolink.framework.scloud.service.ShieldRuleService;
@@ -40,8 +44,18 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
     }
 
     @Override
-    public int delete(String uniqueCode, String shieldRuleId) {
+    public boolean delete(String uniqueCode, String shieldRuleId) {
         return shieldRuleDao.delete(uniqueCode, shieldRuleId);
+    }
+
+    @Override
+    public boolean update(String uniqueCode, ShieldRule shieldRule) {
+        if(delete(uniqueCode, shieldRule.getId())){
+            if(add(uniqueCode, shieldRule)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -70,62 +84,45 @@ public class ShieldRuleServiceImpl implements ShieldRuleService {
      * 功能描述:填充信息
      */
     @Override
-    public void initInfo(String uniqueCode, ShieldRule shieldRule) {
+    public void initInfo(String uniqueCode, ShieldRule shieldRule) throws Exception{
         //获取设备列表
-        List<String> deviceCodeList = shieldRule.getDeviceIdList();
-        List<DeviceModel> deviceList = deviceService.getByCodeList(uniqueCode, deviceCodeList);
-        Map<Integer, List<DeviceModel>> siteIdDeviceListMap = new HashMap<>();
-        List<Integer> siteIdList = new ArrayList<>();
+        List<String> deviceCodeList = shieldRule.getDeviceCodeList();
+        DeviceQuery deviceQuery = new DeviceQuery();
+        deviceQuery.setServerCode(shieldRule.getServerCode());
+        deviceQuery.setPageSize(Integer.MAX_VALUE);
+        deviceQuery.setDeviceCodes(deviceCodeList);
+        List<DeviceModel> deviceList = deviceService.findDeviceList(uniqueCode, deviceQuery);
         for(DeviceModel deviceModel : deviceList){
-            int siteId = deviceModel.getSiteId();
-            if(!siteIdList.contains(siteId)){
-                siteIdList.add(siteId);
-            }
-            List<DeviceModel> siteIdDeviceList = siteIdDeviceListMap.get(siteId);
-            if(null == siteIdDeviceList){
-                siteIdDeviceList = new ArrayList<>();
-            }
-            siteIdDeviceList.add(deviceModel);
-            siteIdDeviceListMap.put(siteId, siteIdDeviceList);
+            String tierName = deviceModel.getTierName();
+            String siteName = deviceModel.getSiteName();
+            String name = deviceModel.getName();
+            String deviceInfo = tierName + WorkConstants.COLON + siteName + WorkConstants.COLON + name;
+            shieldRule.getDeviceInfoList().add(deviceInfo);
         }
-        List<SiteModel> siteList = siteService.getByIdList(uniqueCode, siteIdList);
-        for(SiteModel siteModel : siteList){
-            List<DeviceModel> siteIdDeviceList = siteIdDeviceListMap.get(siteModel.getSiteId());
-            for(DeviceModel deviceModel : siteIdDeviceList){
-                shieldRule.getSiteModelList().add(siteModel);
-                shieldRule.getDeviceModelList().add(deviceModel);
-            }
-
-        }
-
     }
 
     /**
-     * @param alarmList
      * @auther: liudd
      * @date: 2020/3/4 16:08
      * 功能描述:匹配告警屏蔽规则
      */
     @Override
-    public void matchRule(String uniqueCode, List<Alarm> alarmList) {
+    public void matchRule(String uniqueCode, List<AlarmBusiness> alarmBusinessList) {
         List<ShieldRule> rules = shieldRuleDao.getEnables(uniqueCode);
-        List<ShieldAlarm> shieldAlarmList = new ArrayList<>();
-        for (Alarm alarm : alarmList) {
+        for (AlarmBusiness alarm : alarmBusinessList) {
             for (ShieldRule rule : rules) {
-                String deviceId = alarm.getDeviceId();
-                if (rule.getDeviceIdList().contains(deviceId) && rule.getAlarmlevel().contains(alarm.getLevel())) {
-                    ShieldAlarm shieldAlarm = new ShieldAlarm();
-                    shieldAlarm.setRuleId(rule.getId());
-                    shieldAlarm.setAlarmId(alarm.getId());
-                    shieldAlarm.setAlarmLevel(alarm.getTargetLevelName());
-                    shieldAlarm.setTreport(alarm.getTreport());
-                    shieldAlarm.setSignalId(alarm.getSignalId());
-                    shieldAlarm.setDeviceId(alarm.getDeviceId());
-                    shieldAlarmList.add(shieldAlarm);
+                String deviceId = alarm.getDeviceCode();
+                if (rule.getDeviceCodeList().contains(deviceId)) {
                     alarm.setShield(true);
+                    alarm.setShieldRuleId(rule.getId());
+                    List<Integer> alarmlevelList = rule.getAlarmlevelList();
+                    if(null != alarmlevelList && !alarmlevelList.contains(alarm.getLevel())) {
+                        alarm.setShield(false);
+                        alarm.setShieldRuleId(null);
+                    }
                 }
             }
         }
-        shieldAlarmService.add(uniqueCode, shieldAlarmList);
+//        shieldAlarmService.add(uniqueCode, shieldAlarmList);
     }
 }

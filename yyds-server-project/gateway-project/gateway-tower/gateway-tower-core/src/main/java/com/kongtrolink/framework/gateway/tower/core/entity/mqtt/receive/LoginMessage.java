@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class LoginMessage implements Serializable {
     private static final long serialVersionUID = -1091307218001851760L;
+    private String fsuId;
     private String username;
     private String password;
     private String ip;
@@ -57,5 +58,13 @@ public class LoginMessage implements Serializable {
 
     public void setGatewayServerCode(String gatewayServerCode) {
         this.gatewayServerCode = gatewayServerCode;
+    }
+
+    public String getFsuId() {
+        return fsuId;
+    }
+
+    public void setFsuId(String fsuId) {
+        this.fsuId = fsuId;
     }
 }

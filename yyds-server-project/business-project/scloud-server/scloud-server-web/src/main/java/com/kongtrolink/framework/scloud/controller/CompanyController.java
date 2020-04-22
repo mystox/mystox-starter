@@ -56,7 +56,6 @@ public class CompanyController extends BaseController{
     MqttOpera mqttOpera;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyController.class);
-    private String uniqueCode = "YYDS"; //写死，为了自测用
 
     /**
      * 获取企业信息、企业业务配置、企业告警提醒配置
@@ -64,7 +63,7 @@ public class CompanyController extends BaseController{
     @RequestMapping(value = "getCompany", method = RequestMethod.POST)
     public @ResponseBody JsonResult getCompany(){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             CompanyEntity companyEntity = companyMongo.findCompanyInfo(uniqueCode);
             if (companyEntity != null) {
                 CompanyModel companyModel = companyService.getCompanyModel(companyEntity);
@@ -86,7 +85,7 @@ public class CompanyController extends BaseController{
     @RequestMapping(value = "updateCompany", method = RequestMethod.POST)
     public @ResponseBody JsonResult updateCompany(@RequestBody CompanyEntity companyEntity){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             companyService.updateCompany(uniqueCode, companyEntity);
             return new JsonResult("提交成功");
         }catch (Exception e){
@@ -100,7 +99,7 @@ public class CompanyController extends BaseController{
      */
     @RequestMapping(value = "importSignalType", method = RequestMethod.POST)
     public synchronized @ResponseBody JsonResult importSignalType(MultipartFile file){
-//        String uniqueCode = getUniqueCode();
+        String uniqueCode = getUniqueCode();
         CommonsMultipartFile cmf = (CommonsMultipartFile)file;
         DiskFileItem dfi = (DiskFileItem)cmf.getFileItem();
         File f = dfi.getStoreLocation();
@@ -126,7 +125,7 @@ public class CompanyController extends BaseController{
     @RequestMapping(value = "getContacts", method = RequestMethod.POST)
     public @ResponseBody JsonResult getContacts(){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             //从【云管】获取企业下所有用户
             MsgResult msgResult = mqttOpera.opera(OperaCodeConstant.GET_USER_LIST_BY_ENTERPRISE_CODE, uniqueCode);
             int stateCode = msgResult.getStateCode();
@@ -148,7 +147,7 @@ public class CompanyController extends BaseController{
     @RequestMapping(value = "getSignalType", method = RequestMethod.POST)
     public @ResponseBody JsonResult getSignalType(){
         try {
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<DeviceType> deviceTypes = deviceSignalTypeService.querySignalType(uniqueCode);
             return new JsonResult(deviceTypes);
         }catch (Exception e){
@@ -163,7 +162,7 @@ public class CompanyController extends BaseController{
     @RequestMapping(value = "exportSignalType", method = RequestMethod.GET)
     public @ResponseBody void exportSignalType(HttpServletResponse response){
         try{
-//            String uniqueCode = getUniqueCode();
+            String uniqueCode = getUniqueCode();
             List<DeviceTypeExport> list = deviceSignalTypeService.getDeviceTypeExport(uniqueCode);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             String title = "信号点映射表"+sdf.format(new Date());

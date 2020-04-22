@@ -59,6 +59,13 @@ public class InformRuleUserDao {
         return remove.getN()>0 ? true : false;
     }
 
+    public boolean deleteByUserId(String userId) {
+        Criteria criteria = Criteria.where("user.strId").is(userId);
+        Query query = Query.query(criteria);
+        WriteResult remove = mongoTemplate.remove(query, table);
+        return remove.getN()>0 ? true : false;
+    }
+
     public List<InformRuleUser> getByRuleId(String ruleId) {
         Criteria criteria = Criteria.where("informRule.strId").is(ruleId);
         Query query = Query.query(criteria);

@@ -57,9 +57,9 @@ public class FilterRuleDao {
     }
 
     Criteria baseCriteria(Criteria criteria, FilterRuleQuery ruleQuery){
-        if(!StringUtil.isNUll(ruleQuery.getCreatorId())){
-            criteria.and("creator.strId").is(ruleQuery.getCreatorId());
-        }
+//        if(!StringUtil.isNUll(ruleQuery.getCreatorId())){
+//            criteria.and("creator.strId").is(ruleQuery.getCreatorId());
+//        }
         return criteria;
     }
 
@@ -75,25 +75,33 @@ public class FilterRuleDao {
      * @date: 2020/3/5 15:33
      * 功能描述:禁用用户下已经启用的规则
      */
-    public boolean unUse(String uniqueCode, FilterRuleQuery ruleQuery){
-        Criteria criteria = Criteria.where("creator.strId").is(ruleQuery.getCreatorId());
-        criteria.and("state").is(true);
+    public boolean unUse(String uniqueCode, String ruleId, String operatorId){
+        Criteria criteria = Criteria.where("_id").is(ruleId);
+        Query query = Query.query(criteria);
+        FilterRule filterRule = mongoTemplate.findOne(query, FilterRule.class, uniqueCode + table);
+        filterRule.getUserIdList().remove(operatorId);
+        filterRule.setUseCount(filterRule.getUseCount()-1);
+        return updateUserIdList(uniqueCode, filterRule);
+    }
+
+    private boolean updateUserIdList(String uniqueCode, FilterRule filterRule){
+        Criteria criteria = Criteria.where("_id").is(filterRule.getId());
         Query query = Query.query(criteria);
         Update update = new Update();
-        update.set("state", false);
-        update.set("updateTime", ruleQuery.getUpdateTime());
+        update.set("userIdList", filterRule.getUserIdList());
+        update.set("useCount", filterRule.getUseCount());
         WriteResult result = mongoTemplate.updateFirst(query, update, uniqueCode + table);
         return result.getN()>0 ? true : false;
     }
 
-    public boolean use(String uniqueCode, FilterRuleQuery ruleQuery) {
-        Criteria criteria = Criteria.where("_id").is(ruleQuery.getId());
+    public boolean use(String uniqueCode, String ruleId, String operatorId) {
+        //先禁用用户上个启用的
+        Criteria criteria = Criteria.where("_id").is(ruleId);
         Query query = Query.query(criteria);
-        Update update = new Update();
-        update.set("state", ruleQuery.getState());
-        update.set("updateTime", ruleQuery.getUpdateTime());
-        WriteResult result = mongoTemplate.updateFirst(query, update, uniqueCode + table);
-        return result.getN()>0 ? true : false;
+        FilterRule filterRule = mongoTemplate.findOne(query, FilterRule.class, uniqueCode + table);
+        filterRule.setUseCount(filterRule.getUseCount()+1);
+        filterRule.getUserIdList().add(operatorId);
+        return updateUserIdList(uniqueCode, filterRule);
     }
 
     /**
@@ -104,8 +112,7 @@ public class FilterRuleDao {
      * 功能描述:获取用户正在启用的过滤规则
      */
     public FilterRule getUserInUse(String uniqueCode, String creatorId) {
-        Criteria criteria = Criteria.where("creator.strId").is(creatorId);
-        criteria.and("state").is(true);
+        Criteria criteria = Criteria.where("userIdList").is(creatorId);
         return mongoTemplate.findOne(Query.query(criteria), FilterRule.class, uniqueCode + table);
     }
 }

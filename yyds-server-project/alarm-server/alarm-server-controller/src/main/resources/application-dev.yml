@@ -15,7 +15,7 @@ spring:
         max-idle: 100
       ## 连接池中的最小空闲连接
         min-idle: 20
-      host: 172.16.5.26
+      host: 172.16.5.60
       port: 6379
       pendingAlarm: pendingAlarm  #redis中待处理告警key和相关表类型
 
@@ -35,7 +35,9 @@ mqtt:
   url: tcp://172.16.5.62:1883 #\u63A8\u9001\u4FE1\u606F\u7684\u8FDE\u63A5\u5730\u5740\uFF0C\u5982\u679C\u6709\u591A\u4E2A\uFF0C\u7528\u9017\u53F7\u9694\u5F00\uFF0C\u5982\uFF1Atcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 
 mongodb:
-  uri: mongodb://172.16.5.61:27017/alarm_server
+#  uri: mongodb://172.16.5.61:27017/alarm_server
+  uri: mongodb://172.16.5.61:27017/alarm-server
+
 
 executor:
   threadPool:
@@ -47,15 +49,21 @@ management:   #动态刷新配置文件
     enabled: false
 #告警产生操作流程
 reportOperate:
+#  operate[0]:
+#    enterServerCode: YYDS_TOWER_SERVER_1.0.0
+#    operaCode: handleLevel
+#  operate[1]:
+#    enterServerCode: YYDS_TOWER_SERVER_1.0.0
+#    operaCode: handleDeliver
   operate[0]:
     enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    operaCode: handleLevel
-  operate[1]:
-    enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    operaCode: handleDeliver
+    operaCode: sdgdScloudAlarmReport
 
 #告警消除操作流程
 resloveOperate:
+#  operate[0]:
+#    enterServerCode: YYDS_TOWER_SERVER_1.0.0
+#    operaCode: handleDeliver
   operate[0]:
     enterServerCode: YYDS_TOWER_SERVER_1.0.0
-    operaCode: handleDeliver
+    operaCode: sdgdScloudAlarmResolve

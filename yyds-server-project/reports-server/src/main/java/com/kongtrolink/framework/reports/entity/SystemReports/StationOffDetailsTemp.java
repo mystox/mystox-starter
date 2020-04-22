@@ -22,7 +22,33 @@ public class StationOffDetailsTemp {
     private Date startTime; //停电时长
     private Date endTime; //停电次数
     private Double duration;//平均站点停电时长（分钟）
+    private String fsuManufactory; //fsu 厂家
+    private String operationState; //站点状态
+    private Boolean deleteFlag = false; //删除标记
 
+    public String getFsuManufactory() {
+        return fsuManufactory;
+    }
+
+    public void setFsuManufactory(String fsuManufactory) {
+        this.fsuManufactory = fsuManufactory;
+    }
+
+    public String getOperationState() {
+        return operationState;
+    }
+
+    public void setOperationState(String operationState) {
+        this.operationState = operationState;
+    }
+
+    public Boolean getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Boolean deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
 
     public String getId() {
         return id;

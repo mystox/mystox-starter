@@ -1,0 +1,536 @@
+<section id="operationProjectPage">
+    <!-- <div class="nav-tree cloak filter-online" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+        <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">
+        <div class="scroll-wrap">
+            <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+            <div ng-show="zTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </!--> -->
+
+    <div class="_bg card-bg"></div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>站点名称</label>
+            <scloud-tree-select tree-id="areaTree" tree-type="checkboxSiteTree" callback="getNodesByParamFuzzy" z-tree="zTree"></scloud-tree-select>
+
+
+            <label>测试单状态</label>
+            <select ng-model="orderQuery.state" ng-options="item as item for item in CONST.orderState.list" ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select>
+
+            <label>FSU厂家</label>
+            <input type="text" ng-model="orderQuery.manufacturer" />
+
+            <label>FSU注册状态</label>
+            <select ng-model="orderQuery.fsuState"
+                    ng-options="item as item for item in CONST.fsuStateOptions" ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select>
+        </div>
+        <div class="form-inline">
+            <label>申请时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="orderQuery.tStart">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="orderQuery.tEnd">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+
+    <div class="bottom card-bg">
+        <div class="page-header">
+            <h3>测试单列表</h3>
+            <button class="btn btn-primary" ng-click="addOrder.toModal();">创建测试单</button>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>所属区域</th><th>站点名称</th><th>站点编号</th><th>FSU名称</th><th>FSU编号</th><th>FSU厂家</th><th>FSU注册状态</th><th>FSU运行状态</th><th>测试单状态</th><th>申请时间</th><th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in orderList">
+                    <td ng-bind="getSiteFromTree(item.siteCode).tierName"></td>
+                    <td ng-bind="getSiteFromTree(item.siteCode).name"></td>
+                    <td ng-bind="item.siteCode"></td>
+                    <td ng-bind="item.fsuName"></td>
+                    <td ng-bind="item.fsuCode"></td>
+                    <td ng-bind="item.manufacturer"></td>
+                    <td>
+                        <label class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[item.fsuState]" ng-bind="item.fsuState"></label>
+                    </td>
+                    <td>
+                        <label class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[item.operationState]" ng-bind="item.operationState"></label>
+                    </td>
+                    <td>
+                        <label class="label" ng-class="{'font-info':item.state === CONST.orderState.SUBMIT,
+                            'font-warning':item.state === CONST.orderState.CHECK,
+                            'font-success':item.state === CONST.orderState.PASS,
+                            'font-danger':item.state === CONST.orderState.CANCEL}" ng-bind="item.state"></label>
+                        </td>
+                    <td ng-bind="item.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td>
+                        <a title="查看" class="ic ic-detail" ng-click="showOrder.toModal(item);"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="isLoading || paginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+
+    <!--创建测试单-->
+    <form class="modal hide form-horizontal" data-backdrop="static" id="addOrderModal"
+          name="addOrder.form" novalidate ng-submit="addOrder.execute();">
+        <div class="nav-tree nav-tree-sm">
+            <div scloud-toggle target="target2" position="right" init-state="true" handler="toggleNavTree2"></div>
+
+            <input type="text" placeholder="搜索站点" ng-model="searchKey2" ng-change="getNodesByParamFuzzy2(searchKey2,'areaTree2','radioSiteTree');">
+
+            <div class="scroll-wrap">
+                <ul id="areaTree2" class="ztree scroll" ng-hide="zTree2.isEmpty"></ul>
+                <div ng-show="zTree2.isEmpty" class="no-data">
+                    <div class="img img-2x"></div>
+                </div>
+            </div>
+            <div class="loader" ng-show="treeLoading2">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+        </div>
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="addOrder.clear();"><i class="ic ic-close"></i></button>
+            <h3>创建测试单</h3>
+        </div>
+        <div class="modal-body scroll">
+            <div class="flex-container">
+                <div class="flex-6">
+                    <div class="control-group">
+                        <h4>选择FSU</h4>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">选择站点</label>
+                        <div class="controls">
+                            <input type="text" class="cursor-point" required placeholder="点击选择站点"
+                                   ng-click="toggleNavTree2();"
+                                   ng-model="addOrder.obj.siteName">
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">站点经纬度</label>
+                        <div class="controls">
+                            <span ng-bind="addOrder.obj.coordinate | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">站点负责人</label>
+                        <div class="controls">
+                            <span ng-bind="addOrder.obj.siteRespName | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">联系电话</label>
+                        <div class="controls">
+                            <span ng-bind="addOrder.obj.siteRespPhone | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">选择FSU</label>
+                        <div class="controls">
+                            <select name="alarmLevel" ng-model="addOrder.obj.fsu" required
+                                    ng-options="item as item.deviceName + '(' + item.operationState + ')' for item in fsuList"></select>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">FSU编码</label>
+                        <div class="controls">
+                            <span ng-bind="addOrder.obj.fsu.deviceCode | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">FSU厂家</label>
+                        <div class="controls">
+                            <span ng-bind="addOrder.obj.fsu.manufacturer | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">FSU状态</label>
+                        <div class="controls">
+                            <span class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[addOrder.obj.fsu.state]" ng-bind="addOrder.obj.fsu.state | nullFilter"></span>
+                            <span class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[addOrder.obj.fsu.operationState]" ng-bind="addOrder.obj.fsu.operationState | nullFilter"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-6">
+                    <div class="control-group">
+                        <h4>入网信息</h4>
+                    </div>
+                    <div class="control-group" ng-class="getValidClass(addOrder.form.desc);">
+                        <label class="control-label">入网说明</label>
+                        <div class="controls">
+                            <input type="text" name="desc" ng-model="addOrder.obj.desc" required>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group" ng-class="getValidClass(addOrder.form.applicantName);">
+                        <label class="control-label">联系人</label>
+                        <div class="controls">
+                            <input type="text" name="applicantName" ng-model="addOrder.obj.applicantName" ng-pattern="REGEX.personName" required>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group" ng-class="getValidClass(addOrder.form.applicantPhone);">
+                        <label class="control-label">联系电话</label>
+                        <div class="controls">
+                            <input type="text" name="applicantPhone" ng-model="addOrder.obj.applicantPhone" ng-pattern="REGEX.cellphone" required>
+                            <span class="help-inline"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" ng-disabled="addOrder.form.$invalid || addOrder.obj.fsu.operationState !== CONST.operationState.PROJECT">确认</button>
+            <button type="reset" class="btn btn-default" ng-click="addOrder.clear();">取消</button>
+        </div>
+    </form>
+
+    <!--测试单-->
+    <form class="modal hide form-horizontal" data-backdrop="static" id="showOrderModal">
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="showOrder.clear();">
+                <i class="ic ic-close"></i>
+            </button>
+            <h3>测试单</h3>
+        </div>
+        <div class="modal-body scroll">
+            <div class="flex-container">
+                <div class="flex-4">
+                    <div class="title">
+                        <h4>工程信息</h4>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">申请时间</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.applyTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">处理状态</label>
+                        <div class="controls">
+                            <span class="label" ng-class="{'font-info':currentOrder.state === CONST.orderState.SUBMIT,
+                            'font-warning':currentOrder.state === CONST.orderState.CHECK,
+                            'font-success':currentOrder.state === CONST.orderState.PASS,
+                            'font-danger':currentOrder.state === CONST.orderState.CANCEL}" ng-bind="currentOrder.state"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">入网说明</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.desc"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">联系人</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.applicantName | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">联系电话</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.applicantPhone | nullFilter"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-4">
+                    <div class="title">
+                        <h4>站点信息</h4>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">所属区域</label>
+                        <div class="controls">
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).tierName"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">站点名称</label>
+                        <div class="controls">
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).name"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">经纬度</label>
+                        <div class="controls">
+                            <span ng-bind="getSiteFromTree(currentOrder.siteCode).coordinate"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">负责人</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.site.respName | nullFilter"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">联系电话</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.site.respPhone | nullFilter"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-4">
+                    <div class="title">
+                        <h4>FSU信息</h4>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">名称</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.fsuName"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">编码</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.fsuCode"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">状态</label>
+                        <div class="controls">
+                            <span class="label" ng-class="{'在线':'font-success','离线':'font-danger'}[currentOrder.fsuState]" ng-bind="currentOrder.fsuState"></span>
+                            <span class="label" ng-class="{'工程态':'font-danger','测试态':'font-warning','交维态':'font-success'}[currentOrder.operationState]" ng-bind="currentOrder.operationState"></span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">厂家</label>
+                        <div class="controls">
+                            <span ng-bind="currentOrder.fsu.manufactory | nullFilter"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div>
+                <div class="title">
+                    <h4>操作记录</h4>
+                </div>
+                <div class="content">
+                    <div class="table-box scroll">
+                        <table class="table table-bordered table-hover td-min-width">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>操作人</th>
+                                <th>操作动作</th>
+                                <th>审批意见</th>
+                                <th>备注</th>
+                                <th>操作时间</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="log in currentOrder.logList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td>
+                                <td ng-bind="log.operator.name"></td>
+                                <td ng-bind="log.action"></td>
+                                <td ng-bind="log.suggestion | nullFilter"></td>
+                                <td ng-bind="log.remark | nullFilter"></td>
+                                <td ng-bind="log.time | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" ng-click="showOrder.hide();testOrder.toModal();">
+                <span ng-if="currentOrder.state === CONST.orderState.SUBMIT">生成测试报告</span>
+                <span ng-if="currentOrder.state !== CONST.orderState.SUBMIT">查看测试报告</span>
+            </button>
+            <button type="reset" class="btn btn-default" ng-click="showOrder.clear();">关闭</button>
+        </div>
+    </form>
+
+    <!--测试项-->
+    <form class="modal hide form-horizontal" data-backdrop="static" id="testOrderModal"
+         name="testOrder.form" novalidate>
+        <div class="modal-header">
+            <button type="reset" class="close" ng-click="testOrder.clear();">
+                <i class="ic ic-close"></i>
+            </button>
+            <h3>测试报告</h3>
+        </div>
+        <div class="modal-body scroll">
+
+            <div>
+                <div class="title">
+                    <h4>设备明细</h4>
+                </div>
+                <div class="content">
+                    <div class="table-box scroll">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>设备名称</th>
+                                <th>设备编号</th>
+                                <th>设备型号</th>
+                                <th>设备厂家</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="device in currentOrder.deviceList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td>
+                                <td ng-bind="device.deviceName"></td>
+                                <td ng-bind="device.deviceCode"></td>
+                                <td ng-bind="device.model | nullFilter"></td>
+                                <td ng-bind="device.manufacturer | nullFilter"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="title">
+                    <h4 ng-if="currentOrder.state !== CONST.orderState.SUBMIT">测试项目明细</h4>
+                    <h4 ng-if="currentOrder.state === CONST.orderState.SUBMIT">测试项目明细
+                        <button type="button" class="btn btn-primary" ng-click="getOrderTestHistoryAndCurrent();">测试并刷新</button>
+                        <button type="button" class="btn btn-primary" ng-click="createOrderTest()">生成测试项</button>
+                    </h4>
+                </div>
+                <div class="content">
+                    <div class="table-box scroll">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>设备名称</th>
+                                <th>信号类型</th>
+                                <th>信号量名称</th>
+                                <th>历史状态</th>
+                                <th>当前状态</th>
+                                <th>测试结果
+                                    <i class="ic ic-help" scloud-tooltip data-content = "【遥测信号】的通过条件：1、读取到实时值。<br>【遥信信号】的通过条件：1、读取到实时状态为正常；2、产生过告警。"></i>
+                                </th>
+                                <th>备注
+                                    <i class="ic ic-help" scloud-tooltip data-content = "未通过的测试项必须填写备注。"></i>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="test in currentOrder.orderTestList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td>
+                                <td ng-bind="test.deviceName"></td>
+                                <td ng-bind="test.signalType | signalTypeFilter"></td>
+                                <td ng-bind="test.signalName"></td>
+                                <td ng-bind="test.history | nullFilter"></td>
+                                <td>
+                                    <label ng-if="test.signalType === CONST.signalType.DI"
+                                           ng-class="{0:'font-success',1:'font-danger'}[test.current]" class="label"
+                                           ng-bind="test.current | signalStateFilter | nullFilter"></label>
+                                    <label ng-if="test.signalType === CONST.signalType.AI"
+                                           ng-class="{true:'font-success',false:'font-danger'}[test.current !== null]" class="label">
+                                        <span ng-bind="test.current | nullFilter"></span>
+                                        <span ng-bind="test.measurement"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="label" ng-bind="test.result | orderTestResultFilter" ng-class="{true:'font-success', false:'font-danger'}[!!test.result]"></label>
+                                </td>
+                                <td>
+                                    <input ng-if="currentOrder.state === CONST.orderState.SUBMIT" type="text" ng-model="test.remark" ng-required="!test.result">
+                                    <span class="help-inline"></span>
+                                    <span ng-if="currentOrder.state !== CONST.orderState.SUBMIT" ng-bind="test.remark | nullFilter"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+
+            <div ng-if="currentOrder.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
+                <div class="control-group" ng-class="getValidClass(testOrder.form.suggestion);">
+                    <label class="control-label">审核意见</label>
+                    <div class="controls">
+                        <input type="text" name="suggestion" class="long-input" ng-model="testOrder.obj.suggestion" required>
+                        <span  class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">备注</label>
+                    <div class="controls">
+                        <input type="text" class="long-input" ng-model="testOrder.obj.remark">
+                        <span  class="help-inline"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="display-inline" ng-if="currentOrder.state === CONST.orderState.SUBMIT">
+                <button type="submit" class="btn btn-primary" ng-disabled="testOrder.form.$invalid || !currentOrder.orderTestList.length" ng-click="testOrder.execute();">提交审核</button>
+            </div>
+            <div class="display-inline" ng-if="currentOrder.state === CONST.orderState.CHECK && (user.type !== CONST.userType.ordinary || util.checkPrivilege(2513))">
+                <button type="submit" class="btn btn-primary" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.PASS);">通过</button>
+                <button type="submit" class="btn btn-default" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.SUBMIT);">不通过(退回重测)</button>
+                <button type="submit" class="btn btn-default" ng-disabled="testOrder.form.$invalid" ng-click="testOrder.execute(CONST.orderState.CANCEL);">作废</button>
+            </div>
+            <button type="reset" class="btn btn-default" ng-click="testOrder.clear();">返回</button>
+        </div>
+        <div class="loader" ng-show="isLoading2">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </form>
+
+</section>

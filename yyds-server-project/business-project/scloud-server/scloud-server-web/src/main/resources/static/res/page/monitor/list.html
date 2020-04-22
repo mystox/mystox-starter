@@ -1,0 +1,793 @@
+<section id="monitorListPage">
+    <div class="side" ng-style="{top: __navbarTreeTop + 'px'}">
+        <div class="nav-tree filter-online">
+            <scloud-checkbox selected="searchKey.online" content="在线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+            <scloud-checkbox selected="searchKey.offline" content="离线" callback="getNodesByParamFuzzy"></scloud-checkbox>
+            <input type="text" placeholder="搜索站点位置" ng-model="searchKey.keyword" ng-change="getNodesByParamFuzzy()">            <div class="scroll-wrap">
+                <ul id="areaTree" class="ztree scroll" ng-hide="zTree.isEmpty"></ul>
+                <div ng-show="zTree.isEmpty" class="no-data">
+                    <div class="img img-1x"></div>
+                </div>
+            </div>
+            <div class="loader" ng-show="treeLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+        </div>
+
+        <div class="left card-bg scroll">
+            <p ng-repeat="item in deviceList" ng-bind="item.name" class="{{CONST.animation.list}}" ng-class="{active:deviceManager.isActive($index)}"
+               ng-click="deviceManager.toSelect(item,$index)"></p>
+            <div class="loader" ng-show="deviceLoading">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div class="no-data" ng-hide="deviceLoading || deviceList.length">
+                <div class="img img-1x"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="top">
+        <ul class="nav nav-tabs">
+            <li ng-repeat="item in tabPage.pageList" ng-class="{active:tabPage.isActive($index)}">
+                <a ng-click="changeTopTab($index);" ng-bind="item"></a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="right card-bg" ng-show="tabPage.isActive(0)">
+        <div class="center-video">
+            <div class="videos" ng-class="window_col">
+                <div class="video" ng-repeat="v in videoList" ng-class="{active:windowManager.isActive($index)}"
+                     ng-hide="v.hide" on-finish-render-filters>
+                    <video id="{{v.id}}" class="video-js vjs-big-play-centered" controls preload="auto"
+                           poster="http://ppt.downhot.com/d/file/p/2014/08/12/9d92575b4962a981bd9af247ef142449.jpg">
+
+                        <!-- <source src="rtmp://live.hkstv.hk.lxdns.com/live/hks" type="rtmp/flv"> -->
+
+                        <p class="vjs-no-js">播放视频需要启用 JavaScript，推荐使用支持HTML5和flash的浏览器访问。
+                            <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                        </p>
+                    </video>
+                    <div class="videoBg" ng-click="windowManager.selectWindow($index)">
+                        <i class="ic ic-close" ng-click="windowManager.closeWindow($index)"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="pull-left">
+                <a class="ic ic-partition-1" ng-click="changeWindow(1)" title="1x1窗口"></a>
+                <a class="ic ic-partition-4" ng-click="changeWindow(2)" title="2x2窗口"></a>
+                <a class="ic ic-partition-9" ng-click="changeWindow(3)" title="3x3窗口"></a>
+            </div>
+            
+            <div class="dd-menu-warp">
+                <span class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">
+                        画面尺寸
+                    </a>
+                    <ul class="dropdown-menu" id="resolutionList">
+                        <li ng-repeat="item in resolutionList" ng-click="updateAspect(item)">{{item}}</li>
+                    </ul>
+                </span>
+            </div>
+            
+            <div class="pull-right">
+                <a class="ic ic-stop" ng-click="videoPause()" ng-if="!videoPauseing" title="暂停"></a>
+                <a class="ic ic-start" ng-click="videoPause()" ng-if="videoPauseing" title="播放"></a>
+                <a class="ic ic-camera" ng-click="videoCapture()" title="截图"></a>
+                <a class="ic ic-video" ng-click="startVideoRecord()" ng-if="!recording" title="开始录制"></a>
+                <a class="ic ic-video active" ng-click="stopVideoRecord()" ng-if="recording" title="停止录制"></a>
+                <a class="ic ic-full-screen" ng-click="fullScreen()" title="全屏播放"></a>
+            </div>
+        </div>
+
+        <div class="right-bar">
+            <div class="page-header">
+                <h3>云台控制</h3>
+            </div>
+            <div class="ctrl-btn">
+                <svg width="200" height="200">
+                    <circle cx="100" cy="100" r="70" stroke="#00B0FF" stroke-width="3" fill="none"></circle>
+                    <circle cx="100" cy="100" r="90" stroke="#00B0FF" stroke-width="1" fill="none"></circle>
+                    <circle cx="100" cy="100" r="95" stroke="#00B0FF" stroke-width="1" fill="none"></circle>
+                    <circle cx="100" cy="100" r="98" stroke="#00B0FF" stroke-width="2" fill="none"></circle>
+
+                    <path class="rotate_n speed3" fill="none" stroke="#00B0FF"
+                          d="M61.1,61.1 A55,55, 0,1, 1, 100,155" stroke-width="2"/>
+                    <path class="rotate_s speed2" fill="none" stroke="#00B0FF"
+                          d="M64.4,64.4 A50,50, 0,1, 1, 100,150" stroke-width="4"/>
+                    <path class="rotate_n speed1" fill="none" stroke="#00B0FF"
+                          d="M71.7,128.3 A40,40, 0,1, 1, 140,100" stroke-dasharray="1,5" stroke-width="4"/>
+                    <path class="rotate_s speed1" fill="none" stroke="#00B0FF"
+                          d="M78.8,121.2 A30,30, 0,1, 1, 130,100" stroke-dasharray="20,5,10,5" stroke-width="1"/>
+                </svg>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(9);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-left-up"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(8);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-up"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(7);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-right-up"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(6);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-left"></i>
+                </button>
+                <button class="btn sound" ng-click="cameraCtrlStop();"><i class="ic ic-rotate"></i></button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(4);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-right"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(3);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-left-down"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(2);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-down"></i>
+                </button>
+                <button class="btn sound" ng-mousedown="cameraCtrlStart(1);" ng-mouseup="cameraCtrlStop();">
+                    <i class="ic ic-caret-right-down"></i>
+                </button>
+            </div>
+
+            <div class="setting-btn">
+                <div>
+                    <a class="ic ic-plus-circle" ng-mousedown="cameraCtrlStart('+');"
+                       ng-mouseup="cameraCtrlStop();"></a>
+                    <span>调焦</span>
+                    <a class="ic ic-minus-circle" ng-mousedown="cameraCtrlStart('-');"
+                       ng-mouseup="cameraCtrlStop();"></a>
+                </div>
+                <div>
+                    <a class="ic ic-plus-circle" ng-mousedown="startFocus(1)" ng-mouseup="stopFocus();"></a>
+                    <span>聚焦</span>
+                    <a class="ic ic-minus-circle" ng-mousedown="startFocus(-1)" ng-mouseup="stopFocus();"></a>
+                </div>
+                <div>
+                    <a class="ic ic-plus-circle"></a>
+                    <span>光圈</span>
+                    <a class="ic ic-minus-circle"></a>
+                </div>
+                <div>
+                    <a class="ic ic-plus-circle"></a>
+                    <span>转速</span>
+                    <a class="ic ic-minus-circle" ng-click=""></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right" ng-show="tabPage.isActive(1)">
+        <div class="center-video">
+            <div class="videos window_col1">
+                <div class="video backplayer" ng-repeat="v in backVideoList" on-finish-render-filters>
+                    <!-- <video id="{{v.id}}" class="video-js vjs-big-play-centered" controls preload="auto"
+                            crossorigin="anonymous"> -->
+					<video id="{{v.id}}" class="video-js vjs-big-play-centered" controls preload="auto">
+                        <!-- <source src="rtmp://live.hkstv.hk.lxdns.com/live/hks" type="rtmp/flv"> -->
+
+                        <p class="vjs-no-js">播放视频需要启用 JavaScript，推荐使用支持HTML5和flash的浏览器访问。
+                            <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                        </p>
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-bar card-bg">
+            <div class="pull-left">
+                <a class="ic ic-fast-backward" ng-click="speedDown()" title="减速播放"></a>
+                <a class="ic ic-pause" ng-click="backVideoPause()" ng-if="!backVideoPauseing" title="暂停"></a>
+                <a class="ic ic-play" ng-click="backVideoPause()" ng-if="backVideoPauseing" title="播放"></a>
+                <a class="ic ic-fast-forward" ng-click="speedUp()" title="加速播放"></a>
+                <a class="ic ic-step-forward" ng-click="nextBackVideo()" title="下一个"></a>
+            </div>
+
+            <div class="pull-right">
+                <!-- <a class="ic ic-camera" ng-click="backVideoCapture()" title="截图"></a> -->
+                <a class="ic ic-download" ng-click="downBackVideo()" title="下载文件"></a>
+            </div>
+        </div>
+
+        <div class="right-top-query query-form">
+            <div class="form-inline">
+                <label>开始时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="videoQuery.model.tStart">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+            </div>
+            <div class="form-inline">
+                <label>结束时间</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="videoQuery.model.tEnd">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+            </div>
+            <div class="form-inline text-center">
+                <button class="btn btn-primary" ng-click="videoQuery.confirm();">查询</button>
+            </div>
+        </div>
+
+        <div class="right-bottom-table card-bg">
+            <div class="page-header">
+                <h3>录像文件</h3>
+            </div>
+
+            <div class="table-box scroll">
+                <div ng-repeat="item in videoFileList" class="file {{CONST.animation.list}}" ng-class="{active: $index == currentFile}"
+                     title="{{item.fileName}}">
+                    <a class="fileItem" ng-click="setBackVideoUrl(item, $index)" ng-bind="item.fileName"></a>
+                    <!-- <a class="ic ic-delete" ng-click="" title="删除录像"></a> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right card-bg" ng-show="tabPage.isActive(2)">
+        <form class="query-form">
+            <div class="form-inline">
+                <label>文件类型</label>
+                <select ng-model="captureQuery.model.type"
+                        ng-change="captureQuery.confirm();"
+                        ng-options="item as item for item in captureQuery.options.type">
+                    <option ng-bind="'全部'"></option>
+                </select>
+
+                <label>起止时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" ng-model="captureQuery.model.tStart">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" ng-model="captureQuery.model.tEnd">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+
+                <button class="btn btn-primary" ng-click="captureQuery.confirm();">查询</button>
+                <button class="btn btn-default" ng-click="captureQuery.cancel();">清除</button>
+            </div>
+        </form>
+
+        <div class="bottom-table card-bg">
+            <div class="page-header">
+                <h3>文件列表</h3>
+            </div>
+            <div class="table-box scroll">
+                <table scloud-table-head-fix class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>序号</th><th>文件类型</th><th>文件名称</th><th>抓拍时间</th><th>文件大小</th><th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in captureList" ng-class="CONST.animation.list">
+                        <td ng-bind="$index+1"></td>
+                        <td ng-bind="item.imageType | nullFilter"></td>
+                        <td>
+                            <a ng-bind="item.fileName | nullFilter" ng-click="previewImg.toModal(item)"></a>
+                        </td>
+                        <td ng-bind="item.ctime | nullFilter | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="item.size | nullFilter"></td>
+                        <td>
+                            <a class="ic ic-save" ng-click="downGion(item)" title="保存图片"></a>
+                            <a class="ic ic-delete" ng-click="captureDelete(item)" title="删除图片"></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="loader" ng-show="isLoading1">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div class="no-data" ng-hide="isLoading1 || paginationConf1.totalItems">
+                <div class="img img-2x"></div>
+            </div>
+            <tm-pagination conf="paginationConf1"></tm-pagination>
+        </div>
+
+        <div>
+            <form class="modal hide form-horizontal" data-backdrop="static" id="previewImg"
+                  name="previewImg.form">
+                <div class="modal-header">
+                    <button type="reset" class="close" ng-click="previewImg.clear();"><i class="ic ic-close"></i>
+                    </button>
+                    <h3>图像预览</h3>
+                </div>
+
+                <img ng-src="{{previewImg.url}}">
+            </form>
+        </div>
+
+    </div>
+
+    <div class="right card-bg" ng-show="tabPage.isActive(3)">
+        <form class="query-form">
+            <div class="form-inline">
+                <label>文件类型</label>
+                <select ng-model="LogQuery.model.type"
+                        ng-change="LogQuery.confirm();"
+                        ng-options="item as item for item in LogQuery.options.type">
+                    <option ng-bind="'全部'"></option>
+                </select>
+
+                <label>起止时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="LogQuery.model.tStart">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="LogQuery.model.tEnd">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+
+                <button class="btn btn-primary" ng-click="LogQuery.confirm();">查询</button>
+                <button class="btn btn-default" ng-click="LogQuery.cancel();">清除</button>
+            </div>
+        </form>
+
+        <div class="bottom-table card-bg">
+            <div class="page-header">
+                <h3>日志列表</h3>
+            </div>
+            <div class="table-box scroll">
+                <table scloud-table-head-fix class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>类型</th><th>操作人</th><th>操作内容</th><th>操作对象</th><th>操作结果</th><th>记录时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="log in LogList" ng-class="CONST.animation.list">
+                        <td ng-class="util.logTypeColor(log.logType);">
+                            <label class="label" ng-bind="log.logType"></label>
+                        </td>
+                        <td ng-bind="log.user.name"></td>
+                        <td>
+                            <span ng-bind="log.operate"></span>
+                            <span ng-if="log.ip" ng-bind="'(' + log.ip + ')'"></span>
+                        </td>
+                        <td>
+                            <span class="title-tip" title="{{log.target.name}}" ng-bind="log.target.name | nullFilter"></span>
+                            <a class="ic ic-copy clipboard cursor-point" data-clipboard-text="{{log.target.name}}"></a>
+                        </td>
+                        <td>
+                            <span class="title-tip" title="{{log.result}}" ng-bind="log.result | nullFilter"></span>
+                            <a class="ic ic-copy clipboard cursor-point" data-clipboard-text="{{log.result}}"></a>
+                        </td>
+                        <td ng-bind="log.tRecord | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="loader" ng-show="isLoading2">
+                <i class="ic ic-spinner ic-spin ic-5x"></i>
+            </div>
+            <div class="no-data" ng-hide="isLoading2 || paginationConf2.totalItems">
+                <div class="img img-2x"></div>
+            </div>
+            <tm-pagination conf="paginationConf2"></tm-pagination>
+        </div>
+    </div>
+
+    <div class="right card-bg" ng-show="tabPage.isActive(4)" id="configTab">
+        <div class="left-nav scroll">
+            <ul class="nav nav-tabs nav-stacked">
+                <li ng-repeat="item in tabPage2.pageList" ng-class="{active:tabPage2.isActive($index)}"
+                    ng-click="tabPage2.showPage($index);">
+                    <a ng-bind="item"></a>
+                </li>
+            </ul>
+        </div>
+        <div class="right-content scroll" id="content">
+            <div class="item" ng-show="tabPage2.isActive(0)">
+                <div class="setting">
+                    <div class="page-header">
+                        <h3>基本信息</h3>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="control-label">设备名称：</label>
+                        <div class="controls">
+                            <input type="text" ng-model="currentCameraInfo.hostName">
+                        </div>
+                        <br>
+                        <label class="control-label">设备编码：</label>
+                        <div class="controls">
+                            <input type="text" ng-model="currentCameraInfo.hardwareId" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">设备型号：</label>
+                        <div class="controls">
+                            <input type="text" ng-model="currentCameraInfo.model" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">程序版本：</label>
+                        <div class="controls">
+                            <input type="text" ng-model="currentCameraInfo.firmwareVersion" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting">
+                    <div class="page-header">
+                        <h3>通信设置</h3>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="control-label">波特率：</label>
+                        <div class="controls">
+                            <input type="text" value="9600" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">数据位：</label>
+                        <div class="controls">
+                            <input type="text" value="1" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">停止位：</label>
+                        <div class="controls">
+                            <input type="text" value="1" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">校验：</label>
+                        <div class="controls">
+                            <input type="text" value="无" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting">
+                    <div class="page-header">
+                        <h3>时间配置</h3>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="control-label">当前时间：</label>
+                        <div class="controls">
+                            <input type="text" value="" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">手动设置：</label>
+                        <div class="controls">
+                            <input type="text" ng-model="currentTimeConfig" readonly>
+                        </div>
+                        <br>
+                        <label class="control-label">网络同步：</label>
+                        <div class="controls">
+                            <input type="text" value="" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-horizontal mgt">
+                    <div class="controls">
+                        <button class="btn btn-primary" ng-click="getCurrentTime()">修改</button>
+                        <button class="btn btn-primary" ng-click="setDeviceInfomation()">保存</button>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <h3>系统维护</h3>
+                </div>
+                <div class="form-horizontal">
+                    <div class="controls">
+                        <button class="btn btn-primary" disabled>重启系统</button>
+                        <button class="btn btn-primary" disabled>恢复默认</button>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <h3>用户管理</h3>
+                    <button class="btn btn-primary" ng-click="addUserMotal.toModal();">添加用户</button>
+                </div>
+                <div class="table-box scroll operate-bg">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>序号</th><th>用户名</th><th>用户类型</th><th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="item in cameraUserList" ng-class="CONST.animation.list">
+                            <td ng-bind="$index"></td>
+                            <td ng-bind="item.name | nullFilter"></td>
+                            <td ng-bind="item.userLevel | nullFilter"></td>
+                            <td>
+                                <a class="ic ic-edit" ng-click="updateUserModal.toModal(item);" title="修改"></a>
+                                <a class="ic ic-delete" ng-click="deleteUser(item.name)" title="删除"></a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <form class="modal hide form-horizontal" data-backdrop="static" id="addUserModal"
+                      name="addUserMotal.form" novalidate ng-submit="addUserMotal.execute();">
+                    <div class="modal-header">
+                        <button type="reset" class="close" ng-click="addUserMotal.clear();"><i class="ic ic-close"></i></button>
+                        <h3>添加用户</h3>
+                    </div>
+                    <div class="modal-body scroll">
+                        <div class="control-group">
+                            <div class="control-group">
+                                <label class="control-label">用户名</label>
+                                <div class="controls">
+                                    <input type="text" name="name" ng-model="addUserMotal.obj.name">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">密码</label>
+                                <div class="controls">
+                                    <input type="text" name="password" ng-model="addUserMotal.obj.password">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">用户类型</label>
+                                <div class="controls">
+                                    <select name="addUserType" ng-model="addUserMotal.obj.userType" ng-init="addUserMotal.obj.userType = addUserMotal.userTypeList[0].key"
+                                            ng-options="item.key as item.value for item in addUserMotal.userTypeList"></select>
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确认</button>
+                        <button type="reset" class="btn btn-default" ng-click="addUserMotal.clear();">取消</button>
+                    </div>
+                </form>
+
+                <form class="modal hide form-horizontal" data-backdrop="static" id="updateUserModal"
+                      name="updateUserModal.form" novalidate ng-submit="updateUserModal.execute();">
+                    <div class="modal-header">
+                        <button type="reset" class="close" ng-click="updateUserModal.clear();"><i class="ic ic-close"></i></button>
+                        <h3>修改用户信息</h3>
+                    </div>
+                    <div class="modal-body scroll">
+                        <div class="control-group">
+                            <div class="control-group">
+                                <label class="control-label">用户名</label>
+                                <div class="controls">
+                                    <input type="text" name="name" ng-model="updateUserModal.obj.name" readonly>
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">密码</label>
+                                <div class="controls">
+                                    <input type="text" name="password" ng-model="updateUserModal.obj.password">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">用户类型</label>
+                                <div class="controls">
+                                    <select name="updateUserType" ng-model="updateUserModal.obj.userType"
+                                            ng-options="item.key as item.value for item in updateUserModal.userTypeList"></select>
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确认</button>
+                        <button type="reset" class="btn btn-default" ng-click="updateUserModal.clear();">取消</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="item" ng-show="tabPage2.isActive(1)">
+                <div class="page-header">
+                    <h3>网络</h3>
+                </div>
+                <div class="form-horizontal">
+                    <label class="control-label">IPv4地址：</label>
+                    <div class="controls">
+                        <input type="text" value="10.0.6.151" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">IPv4子网掩码：</label>
+                    <div class="controls">
+                        <input type="text" value="255.255.255.0" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">IPv4默认网关：</label>
+                    <div class="controls">
+                        <input type="text" value="10.0.6.1" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">首选DNS服务器：</label>
+                    <div class="controls">
+                        <input type="text" value="221.1.172.35" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">备用DNS服务器：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">HTTP端口：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">RTSP端口：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">HTTPS端口：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">服务端口：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <div class="controls">
+                        <button class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="item" ng-show="tabPage2.isActive(2)">
+                <div class="page-header">
+                    <h3>视频</h3>
+                </div>
+
+                <div class="form-horizontal">
+                    <label class="control-label">码流类型：</label>
+                    <div class="controls">
+                        <input type="text" value="主流码（定时）" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">视频类型：</label>
+                    <div class="controls">
+                        <input type="text" value="复合流" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">分辨率：</label>
+                    <div class="controls">
+                        <input type="text" value="1280*960" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">视频帧率：</label>
+                    <div class="controls">
+                        <input type="text" value="25" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">视频编码：</label>
+                    <div class="controls">
+                        <input type="text" value="H-264" readonly>
+                    </div>
+                    <br>
+                    <div class="controls">
+                        <button class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item" ng-show="tabPage2.isActive(3)">
+                <div class="page-header">
+                    <h3>图像</h3>
+                </div>
+
+                <div class="form-horizontal">
+                    <label class="control-label">图像质量：</label>
+                    <div class="controls">
+                        <input type="text" value="中" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">亮度：</label>
+                    <div class="controls">
+                        <input type="range" ng-model="currentImageConfig.brightness">
+                    </div>
+                    <br>
+                    <label class="control-label">对比度：</label>
+                    <div class="controls">
+                        <input type="range" ng-model="currentImageConfig.contrast">
+                    </div>
+                    <br>
+                    <label class="control-label">饱和度：</label>
+                    <div class="controls">
+                        <input type="range" ng-model="currentImageConfig.colorSaturation">
+                    </div>
+                    <br>
+                    <label class="control-label">锐度：</label>
+                    <div class="controls">
+                        <input type="range" ng-model="currentImageConfig.sharpness">
+                    </div>
+                    <br>
+                    <label class="control-label">OSD设置：</label>
+                    <div class="controls">
+                        <div scloud-checkbox selected="isShowDate"></div><span>显示日期</span>
+                        <div scloud-checkbox selected="isShowSiteName"></div><span>显示站名</span>
+                    </div>
+                    <br>
+                    <div class="controls">
+                        <button class="btn btn-primary" ng-click="setImageConfig()">保存</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="item" ng-show="tabPage2.isActive(4)">
+                <div class="page-header">
+                    <h3>存储地址</h3>
+                </div>
+                <div class="form-horizontal">
+                    <h4>视频文件保存路径</h4>
+                    <label class="control-label">SD卡：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">网络：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <h4>图像文件保存路径</h4>
+                    <label class="control-label">SD卡：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                    <br>
+                    <label class="control-label">网络：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                </div>
+                <div class="page-header">
+                    <h3>下载地址</h3>
+                </div>
+                <div class="form-horizontal">
+                    <label class="control-label">本地：</label>
+                    <div class="controls">
+                        <input type="text" value="" readonly>
+                    </div>
+                </div>
+                <div class="page-header">
+                    <h3>存储配额</h3>
+                </div>
+                <div class="form-horizontal">
+
+                    <label class="control-label">图像容量：</label>
+                    <div class="controls">
+                        <div class="progress">
+                            <div id="imgCapacity" class="bar bar-info" style="width:100%;"></div>
+                        </div>
+                        <label>{{(localStoreConfig.imageSize - localStoreConfig.imageSizeNow*localStoreConfig.imageSize) | nullFilter}}G可用(共{{localStoreConfig.imageSize | nullFilter}}G)</label>
+                    </div>
+                    <br>
+                    <label class="control-label">视频容量：</label>
+                    <div class="controls">
+                        <div class="progress">
+                            <div id="videoCapacity" class="bar bar-info" style="width:100%;"></div>
+                        </div>
+                        <label>{{(localStoreConfig.videoSize - localStoreConfig.videoSizeNow*localStoreConfig.videoSize) | nullFilter}}G可用(共{{localStoreConfig.videoSize | nullFilter}}G)</label>
+                    </div>
+                    <br>
+                    <label class="control-label">图像配额：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="storeConfig.img" placeholder="请输入1-100的整数">
+                    </div>
+                    <br>
+                    <label class="control-label">视频配额：</label>
+                    <div class="controls">
+                        <input type="text" ng-model="storeConfig.video" placeholder="请输入1-100的整数">
+                    </div>
+                    <br>
+                    <div class="controls">
+                        <button class="btn btn-primary" ng-click="setStoreSize()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

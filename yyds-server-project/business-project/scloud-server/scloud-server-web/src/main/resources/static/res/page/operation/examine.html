@@ -1,0 +1,1145 @@
+<section id="operationExaminePage">
+    <div class="nav-tree cloak" ng-show="tabPage.isActive(2) && !showExamineDetail" ng-style="{top: __navbarTreeTop + 'px', display: 'block'}">
+        <input type="text" placeholder="搜索站点位置" ng-model="siteExamineTreeSearchKey"
+               ng-change="getNodesByParamFuzzy(siteExamineTreeSearchKey, 'siteExamineTree', 'checkboxTierTree');">
+        <div class="scroll-wrap">
+            <ul id="siteExamineTree" class="ztree scroll" ng-hide="siteExamineTree.isEmpty"></ul>
+            <div ng-show="siteExamineTree.isEmpty" class="no-data">
+                <div class="img img-2x"></div>
+            </div>
+        </div>
+        <div class="loader" ng-show="treeLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" ng-show="!showExamineDetail">
+        <li ng-repeat="item in tabPage.pageList" ng-class="{active:tabPage.isActive($index)}">
+            <a ng-click="tabPage.showPage($index); changeHasTree($index);" ng-bind="item"></a>
+        </li>
+    </ul>
+    <div class="bottom card-bg page1 df dfv" ng-show="tabPage.isActive(0) && !showExamineDetail">
+        <div class="top query-form">
+            <div class="form-inline">
+                <label>巡检工单流水号</label>
+                <input type="text" ng-model="examineQuery.code">
+                
+                <label>站点名称</label>
+                <input type="text" ng-model="examineQuery.siteName">
+
+                <label>巡检状态</label>
+                <select ng-model="examineQuery.examStatus" ng-options="item as item for item in examineStatusList">
+                    <option value="">全部</option>
+                </select>
+                <label>巡检类型</label>
+                <select ng-model="examineQuery.examType" ng-options="item as item for item in examineTypeList">
+                    <option value="">全部</option>
+                </select>
+            </div>
+            <div class="form-inline">                
+                <label>巡检时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="examineQuery.examBeginTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="examineQuery.examEndTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+            </div>
+            <div class="form-inline">
+                <button class="btn btn-primary" ng-click="doExamineQuery();">查询</button>
+                <button class="btn btn-default" type="reset" ng-click="clearExamineQuery();">清除</button>
+            </div>
+        </div>
+        <div class="content-wrapper">
+        <div class="page-header">
+            <h3>巡检工单列表</h3>
+            <button class="btn pull-right btn-primary" ng-if="util.checkPrivilege(2907)" ng-click="exportExaminList()"><i class="ic ic-download"></i> 导出Excel</button>
+            <button class="btn pull-right btn-primary" ng-if="util.checkPrivilege(2902)" ng-click="addExamineTask.toModal('emergency')">新增应急巡检任务</button>
+            <button class="btn pull-right btn-primary" ng-if="util.checkPrivilege(2902)" ng-click="addExamineTask.toModal('regular')">新增定期巡检任务</button>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>巡检工单流水号</th>
+                        <th>巡检状态</th>
+                        <th>巡检类型</th>
+                        <th>巡检开始时间</th>
+                        <th>巡检结束时间</th>
+                        <th>操作开始时间</th>
+                        <th>操作结束时间</th>
+                        <th>是否超时</th>
+                        <th ng-show="util.checkPrivilege(2916)||util.checkPrivilege(2904)||util.checkPrivilege(2905)">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in examineList" ng-class="CONST.animation.list">
+                        <td ng-bind="item.code"></td>
+                        <td ng-bind="item.examStatus" ng-class="{
+                            '未开始': 'font-white', '巡检中': 'font-warning', '已完成': 'font-success'
+                        }[item.examStatus]"></td>
+                        <td ng-bind="item.examType"></td>
+                        <td ng-bind="item.examBeginTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.examEndTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.realBeginTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.realEndTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.isExamOverTime"></td>
+                        <td ng-show="util.checkPrivilege(2916)||util.checkPrivilege(2904)||util.checkPrivilege(2905)">
+                            <a ng-if="util.checkPrivilege(2904) && item.examStatus === '未开始'" title="修改" class="ic ic-edit" ng-click="addExamineTask.toModal('modify', item)"></a>
+                            <a ng-if="util.checkPrivilege(2916)" title="详情" class="ic ic-detail" ng-click="getExamineDetail(item)"></a>
+                            <a ng-if="util.checkPrivilege(2905) && item.examStatus === '未开始'" title="删除" class="ic ic-delete" ng-click="deleteExamine.toModal(item)"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="examineIsLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="examineIsLoading || examinePaginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="examinePaginationConf"></tm-pagination>
+        </div>
+    </div>
+
+    <div class="bottom card-bg page2 df dfv" ng-show="tabPage.isActive(1) && !showExamineDetail">
+        <div class="top query-form">
+            <div class="form-inline">
+                <label>巡检工单流水号</label>
+                <input type="text" ng-model="repairExamineQuery.examineCode">
+                
+                <label>站点名称</label>
+                <input type="text" ng-model="repairExamineQuery.siteName">
+
+                <label>巡检人员</label>
+                <input type="text" ng-model="repairExamineQuery.maintainerName">
+
+                <label>审批状态</label>
+                <select ng-model="repairExamineQuery.approStatus" ng-options="item as item for item in approvalTypeList">
+                    <option value="">全部</option>
+                </select>
+
+            </div>
+            <div class="form-inline">   
+                <label>报修处理状态</label>
+                <select ng-model="repairExamineQuery.handleStatus" ng-options="item as item for item in repairStatusList">
+                    <option value="">全部</option>
+                </select>
+                <label>故障级别</label>
+                <select ng-model="repairExamineQuery.troubleLevel" ng-options="item as item for item in malfunctionLevelList">
+                    <option value="">全部</option>
+                </select>     
+                <label>大修维护</label>
+                <select ng-model="repairExamineQuery.needService" ng-options="item as item for item in needLargeRepairdList">
+                    <option value="">全部</option>
+                </select>        
+                <label>上报时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="repairExamineQuery.beginReportTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="repairExamineQuery.endReportTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+            </div>
+            <div class="form-inline">        
+                <button class="btn btn-primary" ng-click="doRepairExamineQuery();">查询</button>
+                <button class="btn btn-default" type="reset" ng-click="clearRepairExamineQuery();">清除</button>
+            </div>
+        </div>
+        <div class="content-wrapper">
+        <div class="page-header">
+            <h3>报修列表</h3>
+            <button ng-if="util.checkPrivilege(7007)" class="btn pull-right btn-primary" ng-click="exportRepairExamineList()"><i class="ic ic-download"></i> 导出Excel</button>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>巡检工单流水号</th>
+                        <th>站点名称</th>
+                        <th>巡检人员</th>
+                        <th>上报时间</th>
+                        <th>结束时间</th>
+                        <th>故障级别</th>
+                        <th>大修维护</th>
+                        <th>目前审批人</th>
+                        <th>审批状态</th>
+                        <th>报修处理状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in repairExamineList" ng-class="CONST.animation.list">
+                        <td ng-bind="item.examineCode"></td>
+                        <td ng-bind="item.siteName"></td>
+                        <td ng-bind="item.maintainer.name"></td>
+                        <td ng-bind="item.tReport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.finashDate | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.troubleLevel" ng-class="{
+                            '一般故障': 'font-white', '严重故障': 'font-warning', '重大故障': 'font-danger'
+                        }[item.troubleLevel]"></td>
+                        <td ng-bind="item.needService"></td>
+                        <td ng-bind="item.approvaler.name | nullFilter"></td>
+                        <td ng-bind="item.approStatus" ng-class="{
+                            '未审批': 'font-white', '审批中': 'font-warning', '已审批': 'font-success'
+                        }[item.approStatus]"></td>
+                        <td ng-bind="item.handleStatus | nullFilter"  ng-class="{
+                            '未处理': 'font-danger', '待处理': 'font-warning', '已处理': 'font-success'
+                        }[item.handleStatus]"></td></td>
+                        <td>
+                            <a title="详情" class="ic ic-detail" ng-click="getRepairExamineDetail(item, false)"></a>
+                            <a title="审批" ng-if="util.checkPrivilege(7016)" ng-show="item.isPaaroval === '是' && (item.approStatus === '未审批' || item.approStatus === '审批中')" class="ic ic-approve" ng-click="getRepairExamineDetail(item, true)"></a>
+                            <a title="报修" ng-if="util.checkPrivilege(7017)" ng-show="item.handleStatus === '未处理'" class="ic ic-work-urge" ng-click="reportToRepair.toModal(item)"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="repairExamineIsLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="repairExamineIsLoading || repairExaminePaginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="repairExaminePaginationConf"></tm-pagination>
+        </div>
+    </div>
+
+    <div class="bottom card-bg page3 df dfv" ng-show="tabPage.isActive(2) && !showExamineDetail">
+        <div class="top query-form">
+            <div class="form-inline">
+                <label>站点层级</label>
+                <input type="text" ng-model="siteExamineQuery.tierString" readonly class="cursor-point">
+
+                <label>站点名称</label>
+                <input type="text" ng-model="siteExamineQuery.siteName">
+                
+                <label>站点编号</label>
+                <input type="text" ng-model="siteExamineQuery.siteCode">
+
+                <label>巡检人员</label>
+                <input type="text" ng-model="siteExamineQuery.maintainerName">
+
+                <label>巡检状态</label>
+                <select ng-model="siteExamineQuery.examStatus" ng-options="item as item for item in examineStatusList">
+                    <option value="">全部</option>
+                </select>
+
+            </div>
+            <div class="form-inline">   
+                <label>巡检类型</label>
+                <select ng-model="siteExamineQuery.examType" ng-options="item as item for item in examineTypeList">
+                    <option value="">全部</option>
+                </select>      
+                <label>巡检时间</label>
+                <div class="startTime input-append date">
+                    <input size="16" type="text" value="" ng-model="siteExamineQuery.realBeginTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <label>-</label>
+                <div class="endTime input-append date">
+                    <input size="16" type="text" value="" ng-model="siteExamineQuery.realEndTime">
+                    <span class="add-on"><i class="icon-th icon-white"></i></span>
+                </div>
+                <button class="btn btn-primary" ng-click="doSiteExamineQuery();">查询</button>
+                <button class="btn btn-default" type="reset" ng-click="clearSiteExamineQuery();">清除</button>
+            </div>
+        </div>
+        <div class="content-wrapper">
+        <div class="page-header">
+            <h3>站点巡检实时明细表</h3>
+            <button ng-if="util.checkPrivilege(7107)" class="btn pull-right btn-primary" ng-click="exportSiteExamineList()"><i class="ic ic-download"></i> 导出Excel</button>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>站点编号</th>
+                        <th>站点名称</th>
+                        <th>经度</th>
+                        <th>纬度</th>
+                        <th>巡检类型</th>
+                        <th>巡检状态</th>
+                        <th>巡检人员</th>
+                        <th>代维公司名称</th>
+                        <th>巡检时间</th>
+                        <th>报修情况</th>
+                        <th>历史记录</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in siteExamineList" ng-class="CONST.animation.list">
+                        <td ng-bind="item.siteCode"></td>
+                        <td ng-bind="item.siteName"></td>
+                        <td ng-bind="item.coordinate.split(',')[0] | nullFilter"></td>
+                        <td ng-bind="item.coordinate.split(',')[1] | nullFilter"></td>
+                        <td ng-bind="item.examType"></td>
+                        <td ng-bind="item.examStatus" ng-class="{
+                            '未开始': 'font-white', '巡检中': 'font-warning', '已完成': 'font-success'
+                        }[item.examStatus]"></td>
+                        <td ng-bind="item.maintainer.name | nullFilter"></td>
+                        <td ng-bind="item.companyName | nullFilter"></td>
+                        <td ng-bind="item.realBeginTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                        <td ng-bind="item.repairsStatus | nullFilter"></td></td>
+                        <td>
+                            <label class="cursor-point btn-border" ng-click="getSiteExamineDetail(item, 'examine')">巡检记录</label>
+                            <label class="cursor-point btn-border" ng-click="getSiteExamineDetail(item, 'repairs')">报修记录</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="siteExamineIsLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div ng-hide="siteExamineIsLoading || siteExaminePaginationConf.totalItems" class="no-data">
+            <div class="img img-2x"></div>
+        </div>
+        <tm-pagination conf="siteExaminePaginationConf"></tm-pagination>
+        </div>
+    </div>
+
+    <div id="examineDetail" ng-show="showExamineDetail && tabPage.isActive(0) && !examineToRepairsFlag">        
+        <div id="back" ng-click = "showExamineDetail = false">
+            <i class="ic ic-angle-left"></i> <span>返回</span>
+        </div>
+        <div class="info card-bg">            
+            <div class="page-header">
+                <h3>巡检工单信息</h3>            
+            </div>
+            <div class="page-body query-form">            
+                <div class="form-inline ">
+                    <div class="form-inline item">
+                        <label>巡检工单流水号</label>
+                        <span ng-bind = "curExamine.code"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>巡检类型</label>
+                        <span ng-bind = "curExamine.examType"></span>
+                    </div>
+                    <div class="form-inline item" ng-show="curExamine.examType==='应急巡检'">
+                        <label>备注</label>
+                        <span ng-bind = "curExamine.operateDescribe"></span>
+                    </div>
+                    <br/>
+                    <div class="form-inline item">
+                        <label>巡检开始时间</label>
+                        <span ng-bind = "curExamine.examBeginTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>巡检结束时间</label>
+                        <span ng-bind = "curExamine.examEndTime | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>委托巡检时限</label>
+                        <span ng-bind = "curExamine.timeLimit + '小时'"></span>
+                    </div>                    
+                    <div class="form-inline item">
+                        <label>是否超时</label>
+                        <span ng-bind = "curExamine.isExamOverTime"></span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="detail card-bg">   
+            <div class="page-header">
+                <h3>巡检工单详情</h3> <small><a title="刷新" class="ic ic-refresh" ng-click="getExamineDetail(curExamine);"></a></small> 
+            </div>
+            <div class="page-body">     
+                <div class="table-box scroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>站点编码</th>
+                                <th>站点名称</th>
+                                <th>站点层级</th>
+                                <th>是否超时</th>
+                                <th>巡检状态</th>
+                                <th>操作开始时间</th>
+                                <th>操作结束时间</th>
+                                <th>巡检操作</th>
+                                <th>报修信息</th>
+                                <th>巡检图片</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in curExamine.recordList" ng-class="CONST.animation.list">
+                                <td ng-bind="item.siteCode"></td>
+                                <td ng-bind="item.siteName"></td>
+                                <td ng-bind="item.siteTierName"></td>
+                                <td ng-bind="item.isExamOverTime"></td>
+                                <td ng-bind="item.examStatus" ng-class="{
+                                    '未开始': 'font-white', '巡检中': 'font-warning', '已完成': 'font-success'
+                                }[item.examStatus]"></td>
+                                <td ng-bind="item.realBeginTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                                <td ng-bind="item.realEndTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                                <td>
+                                    <label ng-show="item.operateRight === '是' && item.examStatus === '未开始'" class="cursor-point btn-border" ng-click="beginExamine(item)">开始巡检</label>
+                                    <label ng-show="item.operateRight === '是' && item.examStatus === '巡检中' && !item.repairsId" class="cursor-point btn-border" ng-click="malfunctionReport.toModal(item)">故障上报</label>
+                                    <label ng-show="item.operateRight === '是' && item.examStatus === '巡检中'" class="cursor-point btn-border" ng-click="finishExamineReport.toModal(item)">完成巡检</label>
+                                    <lable ng-show="item.operateRight != '是' || item.operateRight === '是' && item.examStatus === '已完成'">-</lable>
+                                </td>
+                                <td>
+                                    <a class="ic ic-detail cursor-point" ng-show="item.repairsId" ng-click="examineToRepairs(item.repairsId)" title="详情"></a>
+                                    <lable ng-show="!item.repairsId">-</lable>
+                                </td>
+                                <td>
+                                    <a ng-repeat="img in item.imgIdList" ng-bind="'图片'+ ($index + 1)" ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + img)'></a>
+                                    <lable ng-show="item.imgIdList.length === 0">-</lable>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="repairExamineDetail" ng-show="showExamineDetail && tabPage.isActive(1) || examineToRepairsFlag">        
+        <div id="back" ng-click = "examineToRepairsFlag ? ((curExamine = lastExamine) && (examineToRepairsFlag = false)) : (showExamineDetail = false)">
+            <i class="ic ic-angle-left"></i> <span>返回</span>
+        </div>
+        <div class="info card-bg">            
+            <div class="page-header">
+                <h3>报修信息</h3>            
+            </div>
+            <div class="page-body query-form">            
+                <div class="form-inline ">
+                    <div class="form-inline item">
+                        <label>巡检人员</label>
+                        <span ng-bind = "curExamine.maintainer.name"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>上报时间</label>
+                        <span ng-bind = "curExamine.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>巡检图片</label>
+                        <span>
+                            <a ng-repeat = "item in curExamine.examImgIdList" ng-bind="'图片' + ($index + 1)" ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></a>
+                        </span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>报修图片</label>
+                        <span>
+                            <a ng-repeat = "item in curExamine.repaImgIdList" ng-bind="'图片' + ($index + 1)" ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></a>
+                        </span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>站点名称</label>
+                        <span ng-bind = "curExamine.siteName"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>站点编号</label>
+                        <span ng-bind = "curExamine.siteCode"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>经度</label>
+                        <span ng-bind = "curExamine.coordinate.split(',')[0] | nullFilter"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>纬度</label>
+                        <span ng-bind = "curExamine.coordinate.split(',')[1] | nullFilter"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>故障等级</label>
+                        <span ng-bind = "curExamine.troubleLevel"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>大修维护</label>
+                        <span ng-bind = "curExamine.needService"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>预计金额</label>
+                        <span ng-bind = "curExamine.money"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>是否审批</label>
+                        <span ng-bind = "curExamine.isPaaroval"></span>
+                    </div>
+                    <div class="form-inline item col-2">
+                        <label>故障原因</label>
+                        <span ng-bind = "curExamine.troubleReason"></span>
+                    </div>
+                    <div class="form-inline item col-2">
+                        <label>故障处理方案</label>
+                        <span class="overflow" ng-bind = "curExamine.troubleSolution"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="detail card-bg" ng-style="{bottom: showExamineDetailApproval?'45px':'0'}">   
+            <div class="page-header">
+                <h3>审批流程列表</h3> <small><a title="刷新" class="ic ic-refresh" ng-click="getRepairExamineDetail(curExamine, showExamineDetailApproval);"></a></small> 
+            </div>
+            <div class="page-body">     
+                <div class="table-box scroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>审批人</th>
+                                <th>职位</th>
+                                <th>部门</th>
+                                <th>公司</th>
+                                <th>审批时间</th>
+                                <th>备注</th>
+                                <th>审批状态</th>
+                                <th>审批结果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in curExamine.recordList" ng-class="CONST.animation.list">
+                                <td ng-bind="$index + 1"></td>
+                                <td ng-bind="item.approvaler.name | nullFilter"></td>
+                                <td ng-bind="item.job | nullFilter"></td>
+                                <td ng-bind="item.department | nullFilter"></td>
+                                <td ng-bind="item.companyName | nullFilter"></td>
+                                <td ng-bind="item.approDate | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                                <td ng-bind="item.operateDescribe | nullFilter"></td>
+                                <td ng-bind="item.approStatus"></td>                                
+                                <td ng-bind="item.approResult"></td>                                
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>     
+        </div>
+        <div class="btns" ng-show="
+            showExamineDetailApproval &&
+            curExamine.isPaaroval === '是' &&
+            (curExamine.approStatus === '未审批' || curExamine.approStatus === '审批中') &&
+            curExamine.operateRight === '是'
+        ">
+            <button class="btn btn-primary" ng-click="examineApproval.toModal('send')">上级审批</button>
+            <button class="btn btn-primary" ng-click="examineApproval.toModal('pass')">通过</button>
+            <button class="btn btn-primary" ng-click="examineApproval.toModal('reject')">驳回</button>
+            <button class="btn btn-primary" ng-click="examineApproval.toModal('cancle')">撤销</button>
+        </div>
+    </div>
+
+    <div id="examineDetail" ng-show="showExamineDetail && tabPage.isActive(2)">        
+        <div id="back" ng-click = "showExamineDetail = false">
+            <i class="ic ic-angle-left"></i> <span>返回</span>
+        </div>
+        <div class="info card-bg">            
+            <div class="page-header">
+                <h3>站点详情</h3>            
+            </div>
+            <div class="page-body query-form">            
+                <div class="form-inline ">
+                    <div class="form-inline item">
+                        <label>站点名称</label>
+                        <span ng-bind = "curExamine.siteName"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>站点编号</label>
+                        <span ng-bind = "curExamine.siteCode"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>站点层级</label>
+                        <span ng-bind = "curExamine.siteTierName"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>站点地址</label>
+                        <span ng-bind = "curExamine.siteAddress"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>经度</label>
+                        <span ng-bind = "curExamine.coordinate.split(',')[0] | nullFilter"></span>
+                    </div>
+                    <div class="form-inline item">
+                        <label>纬度</label>
+                        <span ng-bind = "curExamine.coordinate.split(',')[1] | nullFilter"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="detail card-bg">   
+            <div class="page-header">
+                <h3 ng-bind="{repairs: '历史报修工单列表', examine: '历史巡检工单列表'}[siteExamineDetailType]"></h3> <small><a title="刷新" class="ic ic-refresh" ng-click="getSiteExamineDetail(curExamine, siteExamineDetailType);"></a></small>        
+            </div>
+            <div class="page-body" ng-show="siteExamineDetailType === 'repairs'">     
+                <div class="table-box scroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>报修工单流水号</th>
+                                <th>报修时间</th>
+                                <th>上报人</th>
+                                <th>代维公司名称</th>
+                                <th>故障等级</th>
+                                <th>大修维护</th>
+                                <th>预计费用</th>
+                                <th>故障原因</th>
+                                <th>故障处理方案</th>
+                                <th>审批状态</th>
+                                <th>最终审批人</th>
+                                <th>巡检照片</th>
+                                <th>处理照片</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in curExamine.recordList" ng-class="CONST.animation.list">
+                                <td ng-bind="item.examineCode"></td>
+                                <td ng-bind="item.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                                <td ng-bind="item.maintainer.name | nullFilter"></td>
+                                <td ng-bind="item.companyName | nullFilter"></td>
+                                <td ng-bind="item.troubleLevel" ng-class="{
+                                    '一般故障': 'font-white', '严重故障': 'font-warning', '重大故障': 'font-danger'
+                                }[item.troubleLevel]"></td>
+                                <td ng-bind="item.needService"></td>
+                                <td ng-bind="item.money"></td>
+                                <td ng-bind="item.troubleReason"></td>
+                                <td ng-bind="item.troubleSolution"></td>
+                                <td ng-bind="item.approStatus"></td>
+                                <td ng-bind="item.approvaler.name | nullFilter"></td>
+                                <td>
+                                    <a ng-bind="'图片' + ($index + 1)" ng-repeat = 'item in item.examImgIdList' ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></a>
+                                </td>
+                                <td>
+                                    <a ng-bind="'图片' + ($index + 1)" ng-repeat = 'item in item.repaImgIdList' ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="loader" ng-show="siteExaminerepairsIsLoading">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+                <div ng-hide="siteExaminerepairsIsLoading || siteExaminerepairsPaginationConf.totalItems" class="no-data">
+                    <div class="img img-2x"></div>
+                </div>
+                <tm-pagination conf="siteExaminerepairsPaginationConf"></tm-pagination>
+            </div>
+            <div class="page-body" ng-show="siteExamineDetailType === 'examine'">     
+                <div class="table-box scroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>巡检工单流水号</th>
+                                <th>巡检类型</th>
+                                <th>巡检时间</th>
+                                <th>巡检状态</th>
+                                <th>报修情况</th>
+                                <th>巡检人员</th>
+                                <th>代维公司名称</th>
+                                <th>巡检照片</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in curExamine.recordList" ng-class="CONST.animation.list">
+                                <td ng-bind="item.code"></td>
+                                <td ng-bind="item.examType"></td>
+                                <td ng-bind="item.recordBeginTime | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                                <td ng-bind="item.examStatus | nullFilter" ng-class="{
+                                    '未开始': 'font-white', '巡检中': 'font-warning', '已完成': 'font-success'
+                                }[item.examStatus]"></td>
+                                <td ng-bind="item.repairsStatus | nullFilter"></td>
+                                <td ng-bind="item.maintainer.name | nullFilter"></td>
+                                <td ng-bind="item.companyName | nullFilter"></td>
+                                <td>
+                                    <a ng-bind="'图片' + ($index + 1)" ng-repeat = 'item in item.imgIdList' ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="loader" ng-show="siteExamineExamineIsLoading">
+                    <i class="ic ic-spinner ic-spin ic-5x"></i>
+                </div>
+                <div ng-hide="siteExamineExamineIsLoading || siteExamineExaminePaginationConf.totalItems" class="no-data">
+                    <div class="img img-2x"></div>
+                </div>
+                <tm-pagination conf="siteExamineExaminePaginationConf"></tm-pagination>
+            </div>
+        </div>
+    </div>
+        
+    <!-- modals -->
+    <div>
+        
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addExamineTaskModal" name="addExamineTask.form" novalidate ng-submit="addExamineTask.execute();">   
+            <div class="nav-tree nav-tree-sm">
+                <div scloud-toggle target="addExamineTaskTarget" position="right" init-state="true" handler="addExamineTaskToggleNavTree"></div>
+                <input type="text" placeholder="搜索站点" ng-model="addExamineTaskSearchKey" ng-change="addExamineTaskGetNodesByParamFuzzy(addExamineTaskSearchKey,'addExamineTaskTree','checkboxSiteTree');">
+                <div class="scroll-wrap">
+                    <ul id="addExamineTaskTree" class="ztree scroll" ng-hide="addExamineTaskTree.isEmpty"></ul>
+                    <div ng-show="addExamineTaskTree.isEmpty" class="no-data">
+                        <div class="img img-2x"></div>
+                    </div>
+                </div>
+            </div>        
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addExamineTask.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind="addExamineTask.title"></h3>
+            </div> 
+            <div class="modal-body scroll">                
+                <div class="control-group">
+                    <label class="control-label">巡检工单流水号</label>
+                    <div class="controls">
+                        <span ng-bind="addExamineTask.obj.code"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-show = "addExamineTask.type === 'regular'">
+                    <label class="control-label">巡检类型</label>
+                    <div class="controls">
+                        <select ng-model="addExamineTask.obj.examType" ng-options="item as item for item in regularExamineTypeList"></select><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group startTime input-append date" setting='{"format": "YYYY/MM/DD hh:00:00"}'>
+                    <label class="control-label">任务开始时间</label>
+                    <div class="controls">
+                        <input size="16" type="text" value=""
+                               ng-model="addExamineTask.obj.examBeginTime">
+                        <span class="help-inline required"></span>
+                        <span class="add-on"><i class="icon-th icon-white"></i></span>
+                    </div>
+                </div>
+                <div class="control-group startTime input-append date" setting='{"format": "YYYY/MM/DD hh:00:00"}'>
+                    <label class="control-label">任务结束时间</label>
+                    <div class="controls">
+                        <input size="16" type="text" value=""
+                               ng-model="addExamineTask.obj.examEndTime">
+                        <span class="help-inline required"></span>
+                        <span class="add-on"><i class="icon-th icon-white"></i></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">任务巡检时限</label>
+                    <div class="controls">
+                        <input name="timeLimit" type="text" required readonly ng-model="addExamineTask.obj.timeLimit">
+                        小时
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">巡检站点</label>
+                    <div class="controls">
+                        <input type="text" ng-model="addExamineTask.obj.siteName" class="cursor-point" ng-click="addExamineTaskToggleNavTree()" required readonly placeholder="站点列表"><!--
+                     --><span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">审批人</label>
+                    <div class="controls">
+                        <select ng-model="addExamineTask.obj.approvaler" ng-options="item as item.name for item in approvalerList"></select><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-show = "addExamineTask.type === 'emergency'">
+                    <label class="control-label">备注</label>
+                    <div class="controls">
+                        <input type="text" ng-model="addExamineTask.obj.operateDescribe">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="addExamineTask.form.$invalid">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="addExamineTask.clear();">取消</button>
+            </div>
+        </form>
+                
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteExamineModal" name="deleteExamine.form" novalidate ng-submit="deleteExamine.execute();">   
+       
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteExamine.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除巡检工单</h3>
+            </div> 
+            <div class="modal-body scroll">       
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该巡检工单？</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="deleteExamine.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="malfunctionReportModal" name="malfunctionReport.form" novalidate ng-submit="malfunctionReport.execute();">   
+       
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="malfunctionReport.clear();"><i class="ic ic-close"></i></button>
+                <h3>故障上报</h3>
+            </div> 
+            <div class="modal-body scroll">                
+                <div class="control-group">
+                    <label class="control-label">巡检人员</label>
+                    <div class="controls">
+                        <span ng-bind="malfunctionReport.obj.maintainer.name"></span>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">上报时间</label>
+                            <div class="controls">
+                                <span ng-bind="malfunctionReport.tReport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点编号</label>
+                            <div class="controls">
+                                <span ng-bind="malfunctionReport.obj.siteCode"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">经度</label>
+                            <div class="controls">
+                                <span ng-bind="malfunctionReport.obj.coordinate.split(',')[0] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">巡检工单流水号</label>
+                            <div class="controls">
+                                <span ng-bind="curExamine.code"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点名称</label>
+                            <div class="controls">
+                                <span ng-bind="malfunctionReport.obj.siteName"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">纬度</label>
+                            <div class="controls">
+                                <span ng-bind="malfunctionReport.obj.coordinate.split(',')[1] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">大修维护</label>
+                    <div class="controls">
+                        <select ng-model="malfunctionReport.obj.needService" required ng-options="item as item for item in needLargeRepairdList"></select><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障等级</label>
+                    <div class="controls">
+                        <select ng-model="malfunctionReport.obj.troubleLevel" required ng-options="item as item for item in malfunctionLevelList"></select><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group" ng-class="getValidClass(malfunctionReport.form.money);">
+                    <label class="control-label">预计费用</label>
+                    <div class="controls">
+                        <input type="text" name = "money" required ng-model="malfunctionReport.obj.money" ng-pattern = "REGEX.teleAdjustValue">
+                        元
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障原因</label>
+                    <div class="controls">
+                        <textarea placeholder="请输入" style="resize: none" required maxlength="120" ng-model="malfunctionReport.obj.troubleReason" rows="5"></textarea><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障处理方案</label>
+                    <div class="controls">
+                        <textarea placeholder="请输入" style="resize: none" required maxlength="120" ng-model="malfunctionReport.obj.troubleSolution" rows="5"></textarea><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">是否审批</label>
+                    <div class="controls">
+                        <select ng-model="malfunctionReport.obj.isPaaroval" required ng-disabled="malfunctionReport.isPaarovalDisabled">
+                            <option value="是">是</option>
+                            <option value="否">否</option>
+                        </select><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">巡检照片</label>
+                    <div class="controls">
+                        <div class="preview" ng-if="item" ng-repeat="item in malfunctionReport.fileUrl">
+                            <img ng-src="{{item || ''}}" class="">
+                            <div class="remove ic-error ic" title="删除" ng-click="malfunctionReport.fileUrl.splice($index, 1); malfunctionReport.fileUpload.files.splice($index, 1)"></div>
+                        </div>
+                        <label ng-show="!(malfunctionReport.fileUrl.length >= 3)" for="malfunctionReportFileUploadBtn" class="file">
+                            <input style="display:none" id="malfunctionReportFileUploadBtn" name="file" type="file" accept=".png,.jpg,jpeg,.bmp" multiple ng-file-select="malfunctionReport.fileUpload.onFileSelect($files, 'image');"/>
+                        </label>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="malfunctionReport.form.$invalid || !malfunctionReport.fileUrl || malfunctionReport.fileUrl.length === 0">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="malfunctionReport.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="finishExamineReportModal" name="finishExamineReport.form" novalidate ng-submit="finishExamineReport.execute();">   
+       
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="finishExamineReport.clear();"><i class="ic ic-close"></i></button>
+                <h3>完成巡检</h3>
+            </div> 
+            <div class="modal-body scroll">                
+                <div class="control-group">
+                    <label class="control-label">巡检人员</label>
+                    <div class="controls">
+                        <span ng-bind="finishExamineReport.obj.maintainer.name"></span>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">上报时间</label>
+                            <div class="controls">
+                            <span ng-bind="finishExamineReport.tReport | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点编号</label>
+                            <div class="controls">
+                            <span ng-bind="finishExamineReport.obj.siteCode"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">经度</label>
+                            <div class="controls">
+                            <span ng-bind="finishExamineReport.obj.coordinate.split(',')[0] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">巡检工单流水号</label>
+                            <div class="controls">
+                            <span ng-bind="curExamine.code"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点名称</label>
+                            <div class="controls">
+                            <span ng-bind="finishExamineReport.obj.siteName"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">纬度</label>
+                            <div class="controls">
+                            <span ng-bind="finishExamineReport.obj.coordinate.split(',')[1] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">巡检是否超时</label>
+                    <div class="controls">
+                        <span ng-bind="finishExamineReport.obj.isExamOverTime ? '是' : '否'"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">超时时长</label>
+                    <div class="controls">
+                        <span ng-bind="finishExamineReport.obj.overTime | nullFilter | secondFilter"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">巡检照片</label>
+                    <div class="controls">
+                        <div class="preview" ng-if="item" ng-repeat="item in finishExamineReport.fileUrl">
+                            <img ng-src="{{item || ''}}" class="">
+                            <div class="remove ic-error ic" title="删除" ng-click="finishExamineReport.fileUrl.splice($index, 1); finishExamineReport.fileUpload.files.splice($index, 1)"></div>
+                        </div>
+                        <label ng-show="!(finishExamineReport.fileUrl.length >= 3)" for="finishExamineReportFileUploadBtn" class="file">
+                            <input style="display:none" id="finishExamineReportFileUploadBtn" name="file" type="file" accept=".png,.jpg,jpeg,.bmp" multiple ng-file-select="finishExamineReport.fileUpload.onFileSelect($files, 'image');"/>
+                        </label>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="!finishExamineReport.fileUrl || finishExamineReport.fileUrl.length === 0">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="finishExamineReport.clear();">取消</button>
+            </div>
+        </form>
+        
+        <form class="modal hide form-horizontal" data-backdrop="static" id="examineApprovalModal" name="examineApproval.form" novalidate ng-submit="examineApproval.execute();">   
+       
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="examineApproval.clear();"><i class="ic ic-close"></i></button>
+                <h3 ng-bind='examineApproval.title'></h3>
+            </div> 
+            <div class="modal-body scroll">                
+                <div class="control-group">
+                    <label class="control-label">当前审批人</label>
+                    <div class="controls">
+                        <span ng-bind="user.name"></span>
+                    </div>
+                </div>                
+                <div class="control-group" ng-if="examineApproval.type === 'send'">
+                    <label class="control-label">上级审批人</label>
+                    <div class="controls">
+                        <select ng-model="examineApproval.obj.superior" ng-options="item as item.name for item in approvalerList"></select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">备注</label>
+                    <div class="controls">
+                        <textarea placeholder="请输入" style="resize: none" maxlength="120" ng-model="examineApproval.obj.operateDescribe" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="examineApproval.type === 'send' && !examineApproval.obj.superior">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="examineApproval.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="reportToRepairModal" name="reportToRepair.form" novalidate ng-submit="reportToRepair.execute();">   
+       
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="reportToRepair.clear();"><i class="ic ic-close"></i></button>
+                <h3>报修处理</h3>
+            </div> 
+            <div class="modal-body scroll">                
+                <div class="control-group">
+                    <label class="control-label">巡检人员</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.maintainer.name"></span>
+                    </div>
+                </div>
+                <div class="col-2">
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">报修处理时间</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.tReport | date: 'yyyy-MM-dd HH:mm:ss'"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点编号</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.siteCode"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">经度</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.coordinate.split(',')[0] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">                                    
+                        <div class="control-group">
+                            <label class="control-label">巡检工单流水号</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.examineCode"></span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">站点名称</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.siteName"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">纬度</label>
+                            <div class="controls">
+                                <span ng-bind="reportToRepair.repairs.coordinate.split(',')[0] | nullFilter"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">大修维护</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.repairs.needService"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障等级</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.repairs.troubleLevel"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">预计费用</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.repairs.money"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障原因</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.repairs.troubleReason"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">最终审批人</label>
+                    <div class="controls">
+                        <span ng-bind="reportToRepair.repairs.approvaler.name"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">故障处理方案</label>
+                    <div class="controls">
+                        <textarea placeholder="请输入" style="resize: none" required name="troubleSolution" maxlength="120" ng-model="reportToRepair.obj.troubleSolution" rows="5"></textarea><!--
+                     --><span class="help-inline required"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">巡检照片</label>
+                    <div class="controls">
+                        <div class="image-list">
+                            <image ng-src="{{'/examRecordFunc/queryImg?imgId=' + item}}" class="cursor-point" ng-repeat = "item in reportToRepair.repairs.examImgIdList" ng-click = 'showImage("/examRecordFunc/queryImg?imgId=" + item)'></image>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">处理照片</label>
+                    <div class="controls">
+                        <div class="preview" ng-if="item" ng-repeat="item in reportToRepair.fileUrl">
+                            <img ng-src="{{item || ''}}" class="">
+                            <div class="remove ic-error ic" title="删除" ng-click="reportToRepair.fileUrl.splice($index, 1); reportToRepair.fileUpload.files.splice($index, 1)"></div>
+                        </div>
+                        <label ng-show="!(reportToRepair.fileUrl.length >= 3)" for="reportToRepairFileUploadBtn" class="file">
+                            <input style="display:none" id="reportToRepairFileUploadBtn" name="file" type="file" accept=".png,.jpg,jpeg,.bmp" multiple ng-file-select="reportToRepair.fileUpload.onFileSelect($files, 'image');"/>
+                        </label>
+                        <span class="help-inline required"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="reportToRepair.form.$invalid || !reportToRepair.fileUrl || reportToRepair.fileUrl.length === 0">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="reportToRepair.clear();">取消</button>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal imageModal" data-backdrop="static" id="imageShowModal">
+            <div class="mask" ng-click="hidemage()">
+                <div class="img-wrapper">
+                    <img ng-if="showSIteimage" ng-src="{{curImage}}" alt="暂无图片" ng-click="$event.stopPropagation()">
+                </div>                
+            </div>
+        </form>
+    </div>
+
+</section>

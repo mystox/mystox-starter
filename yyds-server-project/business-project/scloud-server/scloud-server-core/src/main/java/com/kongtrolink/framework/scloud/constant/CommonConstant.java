@@ -23,4 +23,10 @@ public class CommonConstant {
     //--------------------连接类型----------------------
     public static final String RELATIONSHIP_TYPE_INSTALL = "Install";   //安装于
 
+    //--------------------设备类型----------------------
+    public static final String DEVICE_TYPE_FSU = "FSU动环主机";
+    public static final String DEVICE_TYPE_CODE_FSU = "038";
+
+    //--------------------角色----------------------
+    public static final String ROLE_MAINTAINER = "维护人员";
 }

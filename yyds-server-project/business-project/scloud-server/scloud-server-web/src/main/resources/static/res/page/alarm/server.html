@@ -1,0 +1,66 @@
+<section id="alarmServerPage">
+    <div class="_bg card-bg"></div>
+    <form class="top query-form">
+        <div class="form-inline">
+            <label>告警状态</label>
+            <select ng-model="alarmQuery.alarmState"
+                    ng-options="item.key as item.key+'（'+item.value+'）' for item in CONST.alarmStateList"
+                    ng-change="query();">
+            </select>
+
+            <label>开始时间</label>
+            <div class="startTime input-append date">
+                <input size="16" type="text" value="" ng-model="alarmQuery.startTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+            <label>-</label>
+            <div class="endTime input-append date">
+                <input size="16" type="text" value="" ng-model="alarmQuery.endTime">
+                <span class="add-on"><i class="icon-th icon-white"></i></span>
+            </div>
+
+            <button class="btn btn-primary" ng-click="query();">查询</button>
+            <button class="btn btn-default" type="reset" ng-click="reset();">清除</button>
+        </div>
+    </form>
+
+    <div class="bottom-left card-bg">
+        <div class="page-header">
+            <h3>实时性能</h3>
+        </div>
+        <div id="serverDataGauge"></div>
+        <div id="serverDataLine"></div>
+    </div>
+
+    <div class="bottom-right card-bg">
+        <div class="page-header">
+            <h3>服务器告警列表</h3>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>告警序列号</th><th>告警名称</th><th>告警等级</th><th>告警值</th><th>开始时间</th>
+                    <th ng-show="alarmQuery.alarmState === HISTORY_ALARM" ng-bind="alarmQuery.alarmState === HISTORY_ALARM?'恢复时间':''"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="alarm in alarmList" ng-class="CONST.animation.list">
+                    <td ng-bind="alarm.alarmNo"></td>
+                    <td ng-bind="alarm.signal.name"></td>
+                    <td ng-style="util.alarmColor(alarm.level);" ng-bind="alarm.level | alarmLevelFilter"></td>
+                    <td ng-bind="alarm.value | nullFilter"></td>
+                    <td ng-bind="alarm.tReport | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-if="alarmQuery.alarmState === HISTORY_ALARM" ng-bind="alarm.tRecover | date: 'yyyy-MM-dd HH:mm:ss' | nullFilter"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || alarmList.length">
+            <div class="img img-2x"></div>
+        </div>
+    </div>
+</section>

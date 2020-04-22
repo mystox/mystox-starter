@@ -1,0 +1,260 @@
+<section id="alarmShieldPage">
+    <div class="_top card-bg">
+        <div class="page-header">
+            <h3 ng-bind="UPDATE_MODE === 'MODIFY' ? '修改屏蔽规则' : '添加屏蔽规则'"></h3>
+        </div>
+
+        <div class="page-body" ng-class="{'inset-shadow':UPDATE_MODE === 'MODIFY'}">
+            <form class="form-horizontal _top_left scroll" id="addRuleModal" name="addRule.form" novalidate ng-submit="addRule.execute();">
+
+                <div class="control-group" ng-class="getValidClass(addRule.form.name);">
+                    <label class="control-label">规则名称</label>
+                    <div class="controls">
+                        <input type="text" name="name" ng-model="addRule.obj.name" required>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">屏蔽等级</label>
+                    <div class="controls">
+                        <input type="text" class="form-control" multiple
+                               select2 config="alarmLevelList"
+                               select2-model="addRule.obj.alarmLevels" />
+                    </div>
+                </div>
+
+                <div class="control-group" ng-class="getValidClass(addRule.form.reason);">
+                    <label class="control-label">原因</label>
+                    <div class="controls">
+                        <textarea name="reason" ng-model="addRule.obj.reason"></textarea>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-primary"
+                                ng-if="util.checkPrivilege(1102)"
+                                ng-disabled="addRule.form.$invalid || addRule.obj.selectedDeviceList.length < 1 || addRule.obj.alarmLevels.length < 1">保存</button>
+
+                        <button type="reset" class="btn btn-default" ng-click="addRule.clear();">清除</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <form class="form-horizontal _top_right">
+
+            <div class="control-group">
+                <label class="control-label">屏蔽设备</label>
+                <div class="controls">
+                    <input type="text" placeholder="搜索站点" ng-model="searchKey" ng-change="getNodesByParamFuzzy(searchKey, 'areaTree', 'radioSiteTree');">
+                </div>
+            </div>
+
+            <div class="control-group" ng-class="getValidClass(addRule.form.addDevice);">
+                <div class="controls">
+                    <div class="tree-box scroll">
+                        <ul id="areaTree" class="ztree" ng-hide="zTree.isEmpty"></ul>
+                        <div ng-show="zTree.isEmpty" class="no-data">
+                            <div class="img img-1x"></div>
+                        </div>
+                        <div class="loader" ng-show="treeLoading">
+                            <i class="ic ic-spinner ic-spin ic-5x"></i>
+                        </div>
+                    </div>
+                    &nbsp;
+                    <select multiple="multiple" required class="multiselect scroll"
+                            ng-disabled="addRule.obj.deviceList.length === 0"
+                            ng-model="addRule.obj.addDevice"
+                            ng-click="multiSelect.add(addRule.obj.addDevice,addRule.obj.selectedDeviceList);"
+                            ng-options="item as item.name + '（' + item.code + '）' group by item.siteName for item in addRule.obj.deviceList"></select>
+                    <i class="ic ic-angle-right"></i>
+                    <select multiple="multiple" class="multiselect scroll"
+                            ng-model="addRule.obj.removeDevice"
+                            ng-click="multiSelect.remove(addRule.obj.removeDevice,addRule.obj.selectedDeviceList);"
+                            ng-options="item as item.name + '（' + item.code + '）' group by item.siteName for item in addRule.obj.selectedDeviceList"></select>
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+    <div class="_left card-bg">
+        <div class="page-header">
+            <h3>屏蔽规则</h3>
+            <select title="启用状态" ng-model="ruleQuery.enabled" ng-options="item.key as item.value for item in CONST.enabledStateOptions" ng-change="query();">
+                <option ng-bind="'全部'"></option>
+            </select>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-complicate table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>规则名称</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="r in ruleList" class="cursor-point {{CONST.animation.list}}">
+                    <tr ng-click="getShieldAlarmList(r.id);">
+                        <td ng-bind="r.name"></td>
+                        <td>
+                            <label class="label" ng-class="{true:'font-success',false:'font-danger'}[r.enabled]" ng-bind="r.enabled | enabledFilter"></label>
+                        </td>
+                        <td ng-bind="r.creator.name"></td>
+                        <td ng-bind="r.updateTime | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td>
+                            <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="changeState(r, $event);" title="启用" class="ic ic-check"></a>
+                            <a ng-if="util.checkPrivilege(1112) && r.enabled" ng-click="changeState(r, $event);" title="禁用" class="ic ic-times"></a>
+                            <!-- <a ng-if="util.checkPrivilege(1504) && !r.enabled" ng-click="addTimeRange.toModal(r, $event);" title="自动启用时段" class="ic ic-calendar"></a> -->
+                            <a ng-if="util.checkPrivilege(1112) && !r.enabled" ng-click="addRule.toModal(r, $event);" title="编辑" class="ic ic-edit"></a>
+                            <a ng-click="getRuleDetail(r, $index, $event);" title="详情" class="ic ic-detail"></a>
+                            <a ng-if="!r.enabled" ng-click="deleteRule.toModal(r, $event);" title="删除" class="ic ic-delete"></a>
+                        </td>
+                    </tr>
+                    <tr ng-if="openDetailIndex !== null && openDetailIndex === $index" ng-class="CONST.animation.detail" ng-cloak>
+                        <td colspan="5" class="detail">
+                            <ul>
+                                <li>屏蔽等级：
+                                    <span ng-repeat="item in ruleDetail.alarmlevelList">
+                                        <span ng-bind="item | SDGD_alarmLevelFilter:alarmLevelListForFilter"></span><span ng-hide="$last">、</span>
+                                    </span>
+                                    <span ng-if="ruleDetail.alarmLevel.length === 0">-</span>
+                                </li>
+                                <li>屏蔽设备：
+                                    <select multiple="multiple" readonly>
+                                        <option ng-repeat="item in ruleDetail.device track by $index" ng-bind="item"></option>
+                                    </select>
+                                </li>
+                                <li>原因：<span ng-bind="ruleDetail.reason | nullFilter"></span></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || paginationConf.totalItems">
+            <div class="img img-1x"></div>
+        </div>
+        <tm-pagination conf="paginationConf"></tm-pagination>
+    </div>
+        
+    <div class="_right card-bg">
+        <div class="page-header">
+            <h3>屏蔽列表
+                <small>
+                    <i class="ic ic-help" scloud-tooltip data-content = "【1】根据启用的屏蔽规则，来屏蔽产生的实时告警。<br>
+                       【2】告警屏蔽不与用户绑定，您屏蔽的告警，其他用户也同样无法查看到。"></i>
+                </small>
+            </h3>
+        </div>
+        <div class="table-box scroll">
+            <table scloud-table-head-fix class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>信号名称</th><th>设备名称</th><th>站点名称</th><th>站点位置</th><th>告警等级</th><th>开始时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="s in shieldList" ng-class="CONST.animation.list">
+                        <td ng-bind="s.signalName;"></td>
+                        <td ng-bind="s.deviceName;"></td>
+                        <td ng-bind="s.siteName;"></td>
+                        <td ng-bind="s.tierName;"></td>
+                        <td ng-style="util.alarmColor(s.level);">
+                            <i class="ic ic-alarm"></i>
+                            <span ng-bind="s.levelName"></span>
+                        </td>
+                        <td ng-bind="s.treport | date: 'yyyy-MM-dd HH:mm:ss'"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading2">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading2 || paginationConf2.totalItems">
+            <div class="img img-1x"></div>
+        </div>
+        <tm-pagination conf="paginationConf2"></tm-pagination>
+    </div>
+
+    <div>
+        <form class="modal hide form-horizontal" data-backdrop="static" id="addTimeRangeModal"
+              name="addTimeRange.form" novalidate ng-submit="addTimeRange.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="addTimeRange.clear();"><i class="ic ic-close"></i></button>
+                <h3>自动启用时间</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="control-group" ng-class="getValidClass(addTimeRange.form.name);">
+                    <label class="control-label">规则名称</label>
+                    <div class="controls">
+                        <span ng-bind="addTimeRange.obj.ruleName"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">开始时间</label>
+                    <div class="controls">
+                        <div class="startTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addTimeRange.obj.tStart">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">结束时间</label>
+                    <div class="controls">
+                        <div class="endTime input-append date">
+                            <input size="16" type="text" value="" ng-model="addTimeRange.obj.tEnd">
+                            <span class="add-on"><i class="icon-th icon-white"></i></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary" ng-disabled="!addTimeRange.obj.tEnd || !addTimeRange.obj.tStart || (addTimeRange.obj.tStart >= addTimeRange.obj.tEnd)">添加</button>
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>开始时间</th><th>结束时间</th><th>创建者</th><th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in addTimeRange.obj.timeRanges">
+                        <td ng-bind="item.tEnable | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="item.tDisable | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                        <td ng-bind="item.creator.name"></td>
+                        <td>
+                            <a ng-click="deleteTimeRange(item.id);" class="ic ic-delete" title="删除此时段"></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteRuleModal"
+              name="deleteRule.form" novalidate ng-submit="deleteRule.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteRule.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除屏蔽规则</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该规则？</h4>
+                    <p class="content">
+                        确定要删除 <strong class="font-danger" ng-bind="deleteRule.obj.name"></strong> 这条屏蔽规则吗？
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteRule.form.$invalid">确认</button>
+                <button type="reset" class="btn btn-default" ng-click="deleteRule.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+</section>

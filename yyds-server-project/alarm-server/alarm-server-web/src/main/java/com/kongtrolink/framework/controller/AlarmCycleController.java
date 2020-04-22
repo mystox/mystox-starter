@@ -107,7 +107,7 @@ public class AlarmCycleController extends BaseController {
      * @date: 2019/12/27 14:58
      * 功能描述:判定规则名称是否已存在，用于添加规则或者修改规则
      */
-    @RequestMapping
+    @RequestMapping("/checkName")
     @ResponseBody
     public JsonResult checkName(@RequestBody AlarmCycleQuery cycleQuery){
         AlarmCycle byName = cycleService.getByName(cycleQuery.getEnterpriseCode(), cycleQuery.getServerCode(), cycleQuery.getName());

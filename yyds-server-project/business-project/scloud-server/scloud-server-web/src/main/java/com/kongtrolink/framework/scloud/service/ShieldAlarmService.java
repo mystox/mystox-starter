@@ -19,6 +19,4 @@ public interface ShieldAlarmService {
     List<ShieldAlarm> list(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery);
 
     int count(String uniqueCode, ShieldAlarmQuery shieldAlarmQuery);
-
-    void initInfo(String uniqueCode, List<ShieldAlarm> shieldAlarmList);
 }

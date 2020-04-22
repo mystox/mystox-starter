@@ -1,0 +1,104 @@
+<section id="settingPrivilegePage">
+    <div class="left card-bg">
+        <div class="page-header">
+            <h3 ng-show="UPDATE_MODE === 'ADD'">添加用户组</h3>
+            <h3 ng-show="UPDATE_MODE === 'MODIFY'">修改用户组</h3>
+        </div>
+        <div class="page-body" ng-class="{'inset-shadow':UPDATE_MODE === 'MODIFY'}">
+            <form class="form-horizontal pdt" id="updateUserGroupModal"
+                  name="updateUserGroup.form" novalidate ng-submit="updateUserGroup.execute();">
+                <div class="control-group" ng-class="getValidClass(updateUserGroup.form.name);">
+                    <label class="control-label">用户组名称</label>
+                    <div class="controls">
+                        <input type="text" name="name" required
+                               ng-readonly="UPDATE_MODE === 'MODIFY'"
+                               ng-model='updateUserGroup.obj.name'
+                               placeholder="{{REGEX.userGroupDesc}}"
+                               ng-pattern="REGEX.userGroup">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">用户组权限</label>
+                    <div class="controls">
+                        <div class="tree-box scroll">
+                            <ul id="privilegeTree" class="ztree"></ul>
+                            <div class="loader" ng-show="treeLoading">
+                                <i class="ic ic-spinner ic-spin ic-5x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-primary"
+                                ng-if="UPDATE_MODE === 'MODIFY' ? util.checkPrivilege(3204) : util.checkPrivilege(3202)"
+                                ng-disabled="updateUserGroup.form.$invalid">保存</button>
+                        <button type="reset" class="btn btn-default" ng-click="updateUserGroup.clear();">取消</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="right card-bg">
+        <div class="page-header">
+            <h3>用户组信息</h3>
+        </div>
+        <div class="table-box scroll">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>用户组名称</th><th>用户组权限</th><th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="item in userGroupList" ng-class="CONST.animation.list">
+                    <td ng-bind="item.name"></td>
+                    <td class="single-user-group">
+                        <span ng-repeat="code in item.privilegeCodes">
+                            <span ng-bind="privilegeMap[code]"></span><span ng-hide="$last">、</span>
+                        </span>
+                    </td>
+                    <td>
+                        <a title="修改" class="ic ic-edit" ng-if="(!CONST.userGroup.list.containsObj(item.name) || user.classes==='技术支持用户') && util.checkPrivilege(3204)" ng-click="updateUserGroup.toModal(item);"></a>
+                        <a title="删除" class="ic ic-delete" ng-if="!CONST.userGroup.list.containsObj(item.name) && util.checkPrivilege(3205)" ng-click="deleteUserGroup.toModal(item);"></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="loader" ng-show="isLoading">
+            <i class="ic ic-spinner ic-spin ic-5x"></i>
+        </div>
+        <div class="no-data" ng-hide="isLoading || userGroupList.length">
+            <div class="img img-2x"></div>
+        </div>
+    </div>
+
+    <div>
+        <form class="modal hide form-horizontal" data-backdrop="static" id="deleteUserGroupModal"
+              name="deleteUserGroup.form" novalidate ng-submit="deleteUserGroup.execute();">
+            <div class="modal-header">
+                <button type="reset" class="close" ng-click="deleteUserGroup.clear();"><i class="ic ic-close"></i></button>
+                <h3>删除用户组</h3>
+            </div>
+            <div class="modal-body scroll">
+                <div class="notification">
+                    <h4 class="title"><i class="ic ic-warning font-warning"></i>确定要删除该用户组？</h4>
+                    <p class="content">
+                        注意，将要删除的用户组是
+                        <strong class="font-danger" ng-bind="deleteUserGroup.obj.name"></strong>
+                        ，删除用户组前，请确保没有用户属于该用户组！
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" ng-disabled="deleteUserGroup.form.$invalid">确认</button>
+                <button type="button" class="btn btn-default" ng-click="deleteUserGroup.clear();">取消</button>
+            </div>
+        </form>
+    </div>
+</section>

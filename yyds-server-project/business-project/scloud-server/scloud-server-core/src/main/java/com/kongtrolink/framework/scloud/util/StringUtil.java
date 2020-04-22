@@ -14,7 +14,7 @@ public class StringUtil {
         if(null == str){
             return true ;
         }
-        if("".equals(str) || "".equals(str.trim())){
+        if("".equals(str) || "".equals(str.trim()) || "null".equals(str)){
             return true ;
         }
         return false ;
