@@ -225,61 +225,10 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 导入用户列表
-     * @param file
+     * @param list
      */
     @Override
-    public boolean importUserList(String uniqueCode, MultipartFile file) throws IOException, ParseException {
-        InputStream is = file.getInputStream();
-        HSSFWorkbook wb = new HSSFWorkbook(is);
-        Sheet sheet = wb.getSheetAt(0);
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
-        int rows = sheet.getPhysicalNumberOfRows();// 得到所有的行数
-        List<List<String>> allData = new ArrayList<>(); // 所有的数据
-        int cols = sheet.getRow(0).getPhysicalNumberOfCells();
-        for (int j = 1; j < rows; j++) {// 越过第一行 它是列名称
-            Row row = sheet.getRow(j);
-            List<String> oneData = new ArrayList<>();            // 得到每一行的单元格的数据
-            for (int k = 0; k < cols; k++) {
-                Cell cells = row.getCell(k);//每一列
-                if (cells == null){
-                    cells = row.createCell(k);
-                    oneData.add(null);
-                }else {
-                    oneData.add(cells.toString());
-                }
-            }            // 存储每一条数据
-            allData.add(oneData);
-        }
-        List<UserModel> userModels = new ArrayList<>();
-        for (int i = 0;i <allData.size();i++){
-            List<String> list = allData.get(i);
-            Map<String,Object> userMap = new HashMap<>();
-            UserModel user = new UserModel();
-            for (int j = 0;j <list.size();j++){
-                if (j == 0){
-                    user.setUsername(list.get(j));
-                }else if (j == 1){
-                    user.setCurrentRoleName(list.get(j));
-                }else if (j == 2){
-                    user.setName(list.get(j));
-                }else if (j == 3){
-                    user.setPhone(list.get(j));
-                }else if (j == 4){
-                    user.setEmail(list.get(j));
-                }else if (j == 5){
-                    if (list.get(j) == null){
-                        user.setUserTime(null);
-                    }
-                }else if (j == 6){
-                    if (list.get(j) == null){
-                        user.setValidTime(null);
-                    }else {
-                        user.setValidTime(sd.parse(list.get(j)));
-                    }
-                }
-            }
-            userModels.add(user);
-        }
+    public JsonResult importUserList(String uniqueCode, List<UserModel> list) {
         Map<String,Object> map = new HashMap<>();
         map.put("enterpriseCode",uniqueCode);
         String msg = JSONObject.toJSONString(map);
@@ -300,57 +249,55 @@ public class UserServiceImpl implements UserService {
                 userList.add(user);
             }
         }else {
-            return false;
+            return new JsonResult("导入失败",false);
         }
-        for (int i = 0;i <userModels.size();i++) {
+        for (int i = 0;i <list.size();i++) {
             for (int j = 0;j <userList.size();j++){
-                String roleName = userModels.get(i).getCurrentRoleName();
+                String roleName = list.get(i).getCurrentRoleName();
                 if (userList.get(j).getCurrentRoleName().equals(roleName)){
-                    userModels.get(i).setCurrentPostId(userList.get(j).getCurrentPostId());
+                    list.get(i).setCurrentPostId(userList.get(j).getCurrentPostId());
                 }
             }
-            if (!name.contains(userModels.get(i).getCurrentRoleName())){
-                userModels.remove(i);
+            if (!name.contains(list.get(i).getCurrentRoleName())){
+                return new JsonResult("第"+(i+2)+"行角色名称不存在,请修改",false);
             }
         }
-        String msg1 = JSON.toJSONString(userModels);
+        String msg1 = JSON.toJSONString(list);
+        String info = null;
         try {
             MsgResult opera1 = mqttOpera.opera("addUserBatch", msg1);//云管批量添加用户
             if (opera1.getStateCode() == CommonConstant.SUCCESSFUL) {
                 JSONObject msg2 = JSONObject.parseObject(opera1.getMsg(), JSONObject.class);
                 String data = msg2.getString("data");
                 JSONArray jsonArray = JSONArray.parseArray(data);
+                info = msg2.getString("info");
                 for (int i = 0;i <jsonArray.size();i++){
                     JSONObject result = (JSONObject) jsonArray.get(i);
                     String username = result.get("username").toString();
                     String userId = result.get("userId").toString();
-                    for (int j = 0;j <userModels.size();j++){
-                        if (userModels.get(j).getUsername().equals(username)){
-                            userModels.get(j).setUserId(userId);
+                    for (int j = 0;j <list.size();j++){
+                        if (list.get(j).getUsername().equals(username)){
+                            list.get(j).setUserId(userId);
                         }
                     }
                 }
             }else {
-                return false;
+                return new JsonResult("添加失败",false);
             }
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            return new JsonResult(info,false);
         }
         List<UserEntity> userEntities = new ArrayList<>();
-        for (UserModel user:userModels){
+        for (UserModel user:list){
             UserEntity u = new UserEntity();
             u.setUserId(user.getUserId());
-            u.setUserStatus(user.getUserStatus());
             u.setValidTime(user.getValidTime());
-            u.setWorkId(user.getWorkId());
-            u.setRemark(user.getRemark());
-            u.setGender(user.getGender());
-            u.setUserTime(user.getUserTime() == null?"长期":user.getUserTime());
+            u.setUserTime(user.getUserTime());
             userEntities.add(u);
         }
         userMongo.addUserBatch(uniqueCode,userEntities);
-        return true;
+        return new JsonResult("导入成功",true);
     }
 
     /**

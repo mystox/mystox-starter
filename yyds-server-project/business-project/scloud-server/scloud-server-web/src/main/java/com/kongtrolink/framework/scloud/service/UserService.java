@@ -61,5 +61,5 @@ public interface UserService {
     /**
      * 导入用户列表
      */
-    boolean importUserList(String uniqueCode,MultipartFile file) throws IOException, ParseException;
+    JsonResult importUserList(String uniqueCode,List<UserModel> list) throws IOException, ParseException;
 }
