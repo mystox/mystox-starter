@@ -216,8 +216,10 @@ public class AlarmLevel {
         System.out.println("map2222:" + map);
     }
 
-    public String getKey(){
-        return enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel + Contant.EXCLAM + sourceLevel;
+    public String initKey(){
+        //key：企业编码：服务编码：设备类型：设备型号：告警原等级
+        String key =  enterpriseCode + Contant.EXCLAM + serverCode + Contant.EXCLAM + deviceType + Contant.EXCLAM + deviceModel + Contant.EXCLAM + sourceLevel;
+        return key;
     }
 
     @Override
