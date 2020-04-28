@@ -60,4 +60,6 @@ public interface DBService {
     DBResult searchCIModel(JSONObject jsonObject);
 
     DBResult searchCIIds(JSONObject jsonObject);
+
+    DBResult distinctCI(JSONObject jsonObject);
 }

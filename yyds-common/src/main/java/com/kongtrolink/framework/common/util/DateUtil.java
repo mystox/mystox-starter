@@ -160,20 +160,27 @@ public class DateUtil {
         return calendar.getTime();
     }
 
+    public static void Wait(long time)
+    {
+        long referencetime=System.currentTimeMillis();
+        while(System.currentTimeMillis()-referencetime<time) { ; }
+    }
+
 
     public static void main(String[] args)
     {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date time = DateUtil.getInstance().getLastDayOfMonth();
-        System.out.println(format.format(time));
-        System.out.println(time.getTime());
-        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfMonth(2020, 1)));
-        System.out.println(format.format(DateUtil.getInstance().getLastDayOfMonth(2020, 1)));
-        int weeksInWeekYear = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfWeek(2020, weeksInWeekYear)));
-        System.out.println(format.format(DateUtil.getInstance().getLastDayOfWeek(2020, weeksInWeekYear)));
-
-        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfYear(2020)));
-        System.out.println(format.format(DateUtil.getInstance().getLastDayOfYear(2020)));
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        Date time = DateUtil.getInstance().getLastDayOfMonth();
+//        System.out.println(format.format(time));
+//        System.out.println(time.getTime());
+//        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfMonth(2020, 1)));
+//        System.out.println(format.format(DateUtil.getInstance().getLastDayOfMonth(2020, 1)));
+//        int weeksInWeekYear = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+//        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfWeek(2020, weeksInWeekYear)));
+//        System.out.println(format.format(DateUtil.getInstance().getLastDayOfWeek(2020, weeksInWeekYear)));
+//
+//        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfYear(2020)));
+//        System.out.println(format.format(DateUtil.getInstance().getLastDayOfYear(2020)));
+        DateUtil.Wait(3000);
     }
 }

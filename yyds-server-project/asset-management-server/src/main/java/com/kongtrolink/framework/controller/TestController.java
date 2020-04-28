@@ -3,9 +3,15 @@ package com.kongtrolink.framework.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.impl.MqttService;
+import com.kongtrolink.framework.common.util.MqttUtils;
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.DBResult;
+import com.kongtrolink.framework.entity.MsgResult;
+
+import com.kongtrolink.framework.service.MsgHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/Test")
@@ -22,6 +29,13 @@ public class TestController {
     @Autowired
     Neo4jDBService neo4jDBService;
 
+
+//    @Autowired
+//    MqttOpera mqttOpera;
+
+
+    @Autowired
+    IaContext iaContext;
     @Autowired
     MqttService mqttService;
 
@@ -209,5 +223,21 @@ public class TestController {
     @RequestMapping("/modifyCI")
     public String modifyCI(@RequestBody JSONObject requestBody) {
         return mqttService.modifyCISCloud(JSONObject.toJSONString(requestBody));
+    }
+
+
+    @RequestMapping("/distinctCI")
+    public String distinctCI(@RequestBody JSONObject requestBody) {
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        try {
+            String operaCode = "getDistinctList";
+            String payload = JSONObject.toJSONString(requestBody);
+
+            MsgResult result = msgHandler.opera(operaCode,payload);
+            return JSONObject.toJSONString(result);
+//            return mqttService.getDistinctList(JSONObject.toJSONString(requestBody));
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

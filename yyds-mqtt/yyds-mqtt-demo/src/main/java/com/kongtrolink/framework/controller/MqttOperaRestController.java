@@ -1,8 +1,9 @@
 package com.kongtrolink.framework.controller;
 
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.service.MqttOpera;
+import com.kongtrolink.framework.service.MsgHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,59 +22,29 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/operaRest")
 public class MqttOperaRestController {
 
-    @Autowired
-    MqttOpera mqttOpera;
+//    @Autowired
+//    MqttOpera mqttOpera;
 
+
+    @Autowired
+    IaContext iaContext;
     @RequestMapping("/operaSync")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
-
-
-
-
-
-
-
-
-        //
-
-
-
-        MsgResult opera = mqttOpera.opera("getDevice",message,2,120, TimeUnit.SECONDS);
-
-
-
-        //
-
-
-
-
-
-
-
-
-
-
-
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgResult opera = msgHandler.opera("getDevice",message,2,120, TimeUnit.SECONDS);
         return new JsonResult(opera);
     }
 
     @RequestMapping("/operaAsync")
     public JsonResult operaAsync(@RequestParam String operaCode,@RequestBody String message) {
-
-
-
-        mqttOpera.operaAsync(operaCode,message);
-
-
-
-
-
-
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        msgHandler.operaAsync(operaCode,message);
         return new JsonResult();
     }
     @RequestMapping("/broadcast")
     public JsonResult broadcast(@RequestParam String operaCode,@RequestBody String message) {
-        mqttOpera.broadcast(operaCode,message);
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        msgHandler.broadcast(operaCode,message);
         return new JsonResult("ok");
     }
 

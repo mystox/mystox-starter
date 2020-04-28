@@ -1,10 +1,11 @@
 package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MsgHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,12 @@ import java.util.concurrent.atomic.LongAdder;
 public class PerformanceController {
 
     Logger logger = LoggerFactory.getLogger(PerformanceController.class);
+//    @Autowired
+//    MqttSender mqttSender;
+
     @Autowired
-    MqttSender mqttSender;
+    IaContext iaContext;
+
     @Autowired
     ThreadPoolTaskExecutor demoExecutor;
     private boolean breakFlag = false;
@@ -36,8 +41,6 @@ public class PerformanceController {
 
     @RequestMapping("/msgSendLogic")
     public JsonResult msgSendLogic(@RequestBody JSONObject condition) {
-
-
         Long count = condition.getLong("count");
         int qos = condition.getInteger("qos");
         long timeSeconds = condition.getLong("timeSeconds");
@@ -77,13 +80,13 @@ public class PerformanceController {
                     logger.info("count: {}, pool size: {} active count: {}, core pool size: {}", i * intensityF, poolSize, activeCount, corePoolSize);
                 }
                 String msg = baseMsg + i;
-
+                MsgHandler msgHandler = iaContext.getIaENV().getMsgScheudler().getIahander();
                 demoExecutor.execute(() -> {
                     for (int j = 0; j < intensityF; j++)
                         if (syn != null && !syn)
-                            mqttSender.sendToMqtt("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos, msg);
+                            msgHandler.sendToMqtt("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos, msg);
                         else {
-                            MsgResult countStatistic1 = mqttSender.
+                            MsgResult countStatistic1 = msgHandler.
                                     sendToMqttSync("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos,msg,100, TimeUnit.SECONDS);
                             if (countStatistic1 != null && StateCode.SUCCESS != countStatistic1.getStateCode()) {
                                 logger.error("send error...");

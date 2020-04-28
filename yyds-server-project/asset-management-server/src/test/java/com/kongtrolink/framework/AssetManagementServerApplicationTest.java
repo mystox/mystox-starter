@@ -1,14 +1,13 @@
 package com.kongtrolink.framework;
-
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.impl.MqttPublish;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.controller.CITypeController;
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.ServerName;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
+import com.kongtrolink.framework.service.MsgHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,11 @@ public class AssetManagementServerApplicationTest {
     @Autowired
     MqttPublish mqttPublish;
 
+//    @Autowired
+//    MqttSender mqttSender;
+
     @Autowired
-    MqttSender mqttSender;
+    IaContext iaContext;
 
     @Test
     public void testCIType() {
@@ -75,6 +77,7 @@ public class AssetManagementServerApplicationTest {
     @Test
     public void testGetCIModel() {
 
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
         String serverCode = MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER, "1.0.0");
         String operaCode = "getCIModel";
 
@@ -82,7 +85,7 @@ public class AssetManagementServerApplicationTest {
         jsonObject.put("enterpriseCode", "Skongtrolink");
         jsonObject.put("serverCode", "AUTH_PLATFORM");
 
-        MsgResult result = mqttSender.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
+        MsgResult result = msgHandler.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(jsonObject));
 
         System.out.println(JSONObject.toJSONString(result));
     }
@@ -270,9 +273,9 @@ public class AssetManagementServerApplicationTest {
     }
 
     private void request(int threadIndex, JSONObject request, String serverCode, String operaCode) {
-
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
         for (int i = 0; i < 100; ++i) {
-            MsgResult msgResult = mqttSender.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(request));
+            MsgResult msgResult = msgHandler.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(request));
             System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());
         }
     }

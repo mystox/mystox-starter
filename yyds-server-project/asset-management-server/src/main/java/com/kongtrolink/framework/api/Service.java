@@ -32,4 +32,7 @@ public interface Service {
 
     @OperaCode
     String modifyCISCloud(String payload);
+
+    @OperaCode
+    String getDistinctList(String payload) throws Exception;
 }

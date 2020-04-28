@@ -40,7 +40,6 @@ public class MqttUtils {
      * @Description //完整路径 /mqtt/operaRoute/groupCode/serverCode/operaCode
      **/
     public static String preconditionRoutePath(String groupCodeServerCode, String operaCode) {
-//        return TopicPrefix.OPERA_ROUTE + "/" + groupCodeServerCode + "/" + operaCode;
         return preconditionOperaCodePath(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE, groupCodeServerCode), operaCode);
     }
 

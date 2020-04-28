@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.config.OperaRouteConfig;
 import com.kongtrolink.framework.config.OperaRouteConfigTest;
-import com.kongtrolink.framework.register.config.OperaRouteConfig;
-import com.kongtrolink.framework.register.config.WebPrivFuncConfig;
+import com.kongtrolink.framework.config.WebPrivFuncConfig;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,10 @@ import java.util.Map;
 public class ResoucesController {
 
 
+
     Logger logger = LoggerFactory.getLogger(ResoucesController.class);
     @Autowired
     OperaRouteConfigTest operaRouteConfigTest;
-
 
     @RequestMapping("/updateJarRes")
     public String updateJarResources() {
@@ -90,9 +90,6 @@ public class ResoucesController {
         }
         return "ok";
     }
-
-
-
 
 
 }

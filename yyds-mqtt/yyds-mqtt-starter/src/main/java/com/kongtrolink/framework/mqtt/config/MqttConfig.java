@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.mqtt.config;
 
+import com.kongtrolink.framework.config.YamlPropertySourceFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -78,7 +79,7 @@ public class MqttConfig {
     /**
      * MQTT连接器选项
      *
-     * @return {@link org.eclipse.paho.client.mqttv3.MqttConnectOptions}
+     * @return {@link MqttConnectOptions}
      */
     @Bean
     public MqttConnectOptions getMqttConnectOptions() {
@@ -103,7 +104,7 @@ public class MqttConfig {
     /**
      * MQTT客户端
      *
-     * @return {@link org.springframework.integration.mqtt.core.MqttPahoClientFactory}
+     * @return {@link MqttPahoClientFactory}
      */
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
@@ -113,9 +114,9 @@ public class MqttConfig {
     }
 
     /**
-     * MQTT信息通道（生产者）
+     * MQTT信息通道（生产者:订阅人）
      *
-     * @return {@link org.springframework.messaging.MessageChannel}
+     * @return {@link MessageChannel}
      */
     @Bean(name = CHANNEL_NAME_OUT)
     public MessageChannel mqttOutboundChannel() {
@@ -126,23 +127,23 @@ public class MqttConfig {
     public MessageChannel mqttReplyChannel() {
         return new DirectChannel();
     }
-
+    /**
+     * MQTT信息通道（消费者）
+     *
+     * @return {@link MessageChannel}
+     */
+    @Bean(name = CHANNEL_NAME_IN)
+    public MessageChannel mqttInboundChannel() {
+        return new DirectChannel();
+    }
     /**
      * MQTT消息处理器（生产者）
      *
-     * @return {@link org.springframework.messaging.MessageHandler}
+     * @return {@link MessageHandler}
      */
     @Bean
     @ServiceActivator(inputChannel = CHANNEL_NAME_OUT)
     public MessageHandler mqttOutbound() {
-        /*MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(
-                producerClientId,
-                mqttClientFactory());
-        messageHandler.setAsync(true); //异步
-        messageHandler.setAsyncEvents(true);
-        messageHandler.setDefaultTopic(producerDefaultTopic);
-        messageHandler.setCompletionTimeout(1000);
-        return messageHandler;*/
         return new MultiMqttMessageHandler();
     }
     public MessageHandler createMqttOutbound()
@@ -160,7 +161,7 @@ public class MqttConfig {
     /**
      * MQTT消息订阅绑定（消费者）
      *
-     * @return {@link org.springframework.integration.core.MessageProducer}
+     * @return {@link MessageProducer}
      */
     @Bean("inbound")
     public MessageProducer inbound() {
@@ -180,7 +181,7 @@ public class MqttConfig {
     /**
      * MQTT消息订阅回复消息
      *
-     * @return {@link org.springframework.integration.core.MessageProducer}
+     * @return {@link MessageProducer}
      */
     @Bean("replyProducer")
     public MessageProducer replyProducer() {
@@ -197,15 +198,7 @@ public class MqttConfig {
         return adapter;
     }
 
-    /**
-     * MQTT信息通道（消费者）
-     *
-     * @return {@link org.springframework.messaging.MessageChannel}
-     */
-    @Bean(name = CHANNEL_NAME_IN)
-    public MessageChannel mqttInboundChannel() {
-        return new DirectChannel();
-    }
+
 
 
 }

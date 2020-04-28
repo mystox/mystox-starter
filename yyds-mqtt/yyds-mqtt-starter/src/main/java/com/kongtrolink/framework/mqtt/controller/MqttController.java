@@ -2,12 +2,12 @@ package com.kongtrolink.framework.mqtt.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MqttResp;
-import com.kongtrolink.framework.mqtt.service.MqttRestService;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
 import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
-import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
+import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
+import com.kongtrolink.framework.mqtt.service.impl.MqttRestService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
@@ -34,11 +34,9 @@ public class MqttController {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttController.class);
     @Autowired
-    MqttSender mqttSender;
-
+    IaContext iaContext;
     @Autowired
     MqttRestService mqttRestService;
-
 
 
     /**
@@ -117,7 +115,7 @@ public class MqttController {
     public JsonResult getCallBack(@RequestBody JSONObject condition)
     {
         String msgId = condition.getString("msgId");
-        MqttSenderImpl mqttSender = (MqttSenderImpl) this.mqttSender;
+        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheudler();
         Map<String, CallBackTopic> callbacks = mqttSender.getCALLBACKS();
         CallBackTopic callBackTopic = callbacks.get(msgId);
         MqttResp call = null;

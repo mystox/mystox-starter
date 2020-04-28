@@ -1,9 +1,9 @@
 package com.kongtrolink.framework.controller;
 
+import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
-import com.kongtrolink.framework.service.MqttHandler;
+import com.kongtrolink.framework.service.MsgHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,12 +29,15 @@ public class MqttRestController {
     @Resource
     private IMqttSender iMqttSender;
 
-    @Autowired
-    @Qualifier("mqttHandlerImpl")
-    MqttHandler mqttHandler;
+//    @Autowired
+//    @Qualifier("mqttHandlerImpl")
+//    MqttHandler mqttHandler;
 
     @Autowired
-    MqttSender mqttSender;
+    IaContext iaContext;
+
+//    @Autowired
+//    MqttSender mqttSender;
 
     @RequestMapping("/sendMqtt")
     public String sendMqtt(@RequestParam String topic, @RequestBody String message) {
@@ -52,7 +55,8 @@ public class MqttRestController {
     @RequestMapping("/sendMsg")
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        mqttSender.sendToMqtt(serverCode, operaCode, message);
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        msgHandler.sendToMqtt(serverCode, operaCode, message);
         return "ok";
     }
 
@@ -66,19 +70,22 @@ public class MqttRestController {
     @RequestMapping("/sendMsgSyn")
     public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgResult s = mqttSender.sendToMqttSync(serverCode, operaCode, message);
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgResult s = msgHandler.sendToMqttSync(serverCode, operaCode, message);
         return s;
     }
 
     @RequestMapping("/addTopic")
     public String addTopic(@RequestParam String topic) {
-        mqttHandler.addSubTopic(topic, 2);
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        msgHandler.addSubTopic(topic, 2);
         return "ok";
     }
 
     @RequestMapping("/addPub")
     public String addTopic(@RequestParam String serviceCode, @RequestParam String operaCode) {
-        mqttHandler.addSubTopic(serviceCode + "/" + operaCode, 2);
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        msgHandler.addSubTopic(serviceCode + "/" + operaCode, 2);
         return "ok";
     }
 

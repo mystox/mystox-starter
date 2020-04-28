@@ -1,6 +1,7 @@
 package com.kongtrolink.framework.mqtt.service;
 
-import com.kongtrolink.framework.mqtt.service.impl.MqttSenderImpl;
+import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class ExecutorRunner implements ApplicationRunner {
     ScheduledExecutorService mqttScheduled;
 
     @Autowired
-    MqttSender mqttSender;
+    ChannelSenderImpl mqttSender;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -60,7 +61,6 @@ public class ExecutorRunner implements ApplicationRunner {
         logger.debug("mqtt ack executor status: pool size:[{}], active count:[{}], max pool size:[{}] ",
                 mqttSenderAckExecutor.getPoolSize(), mqttSenderAckExecutorActiveCount, mqttSenderAckExecutor.getMaxPoolSize());
         //callback 内存
-        MqttSenderImpl mqttSender = (MqttSenderImpl) this.mqttSender;
         int callbackSize = mqttSender.getCALLBACKS().size();
         if (callbackSize >= 50 && callbackSize % 10 == 0)
             logger.warn("mqtt sender callback map size: [{}]", callbackSize);

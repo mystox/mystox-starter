@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@DependsOn(value = "registerRunner")
+@DependsOn(value = "zkHandlerImpl")
 @Order
 public class AssetManagementTask implements ApplicationRunner {
 

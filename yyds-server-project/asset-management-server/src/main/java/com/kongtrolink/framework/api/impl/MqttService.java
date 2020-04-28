@@ -255,4 +255,19 @@ public class MqttService implements Service {
 
         return JSONObject.toJSONString(result);
     }
+
+    public String getDistinctList(String payload) throws Exception {
+        try {
+            DBResult dbResult = dbService.distinctCI(JSONObject.parseObject(payload));
+            if (dbResult.getResult() == 1) {
+                return JSONObject.toJSONString(dbResult.getJsonArray());
+            } else {
+                logger.error(JSONObject.toJSONString(dbResult), serverCode);
+                throw new Exception(dbResult.getInfo());
+            }
+        } catch (Exception e) {
+            logger.error(JSONObject.toJSONString(e), serverCode);
+            throw e;
+        }
+    }
 }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 @Service("Neo4jDBService")
@@ -1834,6 +1833,84 @@ public class Neo4jDBService implements DBService {
                 transaction.success();
                 result.setResult(1);
                 result.setInfo("CI id查询成功");
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 根据条件查询指定CI属性值的去重结果
+     * @param jsonObject 查询信息
+     * @return  去重结果
+     */
+    @Override
+    public DBResult distinctCI(JSONObject jsonObject) {
+
+        DBResult result = new DBResult();
+        result.setResult(0);
+        result.setInfo("去重查询失败，未知错误");
+        result.setJsonArray(new JSONArray());
+
+        if (jsonObject == null) {
+            result.setInfo("去重查询失败，无输入参数");
+            return result;
+        }
+
+        openDriver();
+
+        List<String> conditionList = new ArrayList<>();
+        List<String> distinctList = new ArrayList<>();
+        conditionList.add("ci.id is not null");
+
+        for (String propName : jsonObject.keySet()) {
+            if (propName.equals("_distinct")) {
+                JSONArray fields = jsonObject.getJSONObject("_distinct").getJSONArray("value");
+                for (Object field : fields) {
+                    distinctList.add(field.toString());
+                }
+            } else {
+                conditionList.add("ci." + getCondition(propName, jsonObject.getJSONObject(propName), true));
+            }
+        }
+
+        StringBuilder condition = new StringBuilder();
+        if (conditionList.size() > 0) {
+            condition = new StringBuilder(" where ").append(conditionList.get(0));
+            for (int i = 1; i < conditionList.size(); ++i) {
+                condition.append(" and ").append(conditionList.get(i));
+            }
+        }
+        StringBuilder distinct;
+        if (distinctList.size() > 0) {
+            distinct = new StringBuilder(" return distinct ").append("ci.").append(distinctList.get(0)).append(" as ").append(distinctList.get(0));
+            for (int i = 1; i < distinctList.size(); ++i) {
+                distinct.append(",").append("ci.").append(distinctList.get(i)).append(" as ").append(distinctList.get(i));
+            }
+        } else {
+            result.setResult(0);
+            result.setInfo("去重查询失败，无去重字段信息");
+            return result;
+        }
+
+        try (Session session = driver.session()) {
+            try (Transaction transaction = session.beginTransaction()) {
+
+                String cmd = "match (ci:" + Neo4jDBNodeType.CI + ")" + condition + distinct;
+                StatementResult statementResult = transaction.run(cmd );
+                List<Record> recordList = statementResult.list();
+
+                for (Record record : recordList) {
+                    JSONObject tmp = new JSONObject();
+                    for (String str : distinctList) {
+                        tmp.put(str, record.get(str).asObject());
+                    }
+                    result.getJsonArray().add(tmp);
+                }
+
+                transaction.success();
+                result.setResult(1);
+                result.setInfo("去重查询成功");
             }
         }
 
