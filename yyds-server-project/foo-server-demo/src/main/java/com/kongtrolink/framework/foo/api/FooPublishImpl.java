@@ -1,8 +1,6 @@
 package com.kongtrolink.framework.foo.api;
 
 import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.mqtt.service.MqttSender;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,8 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class FooPublishImpl implements FooPublish {
 
-    @Autowired
-    MqttSender mqttSender;
+//    @Autowired
+//    MqttSender mqttSender;
 
     /**
      * 异步的接口实现案例
@@ -25,7 +23,7 @@ public class FooPublishImpl implements FooPublish {
      */
     @Override
     public void sendMsg(String serverCode, String operaCode, String payload) {
-        mqttSender.sendToMqtt(serverCode, operaCode, payload);
+//        mqttSender.sendToMqtt(serverCode, operaCode, payload);
     }
 
     /**
@@ -37,7 +35,7 @@ public class FooPublishImpl implements FooPublish {
      */
     @Override
     public MsgResult sendMsgSyn(String serverCode, String operaCode, String payload) {
-        MsgResult s = mqttSender.sendToMqttSync(serverCode, operaCode, payload);
-        return s;
+//        MsgResult s = mqttSender.sendToMqttSync(serverCode, operaCode, payload);
+        return null;
     }
 }
