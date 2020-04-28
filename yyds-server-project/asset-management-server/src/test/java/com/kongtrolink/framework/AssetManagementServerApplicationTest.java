@@ -77,7 +77,7 @@ public class AssetManagementServerApplicationTest {
     @Test
     public void testGetCIModel() {
 
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         String serverCode = MqttUtils.preconditionServerCode(ServerName.ASSET_MANAGEMENT_SERVER, "1.0.0");
         String operaCode = "getCIModel";
 
@@ -273,7 +273,7 @@ public class AssetManagementServerApplicationTest {
     }
 
     private void request(int threadIndex, JSONObject request, String serverCode, String operaCode) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         for (int i = 0; i < 100; ++i) {
             MsgResult msgResult = msgHandler.sendToMqttSync(serverCode, operaCode, JSONObject.toJSONString(request));
             System.out.println((new Date()).toString() + ":threadIndex:" + threadIndex + ",count:" + i + " " + msgResult.getStateCode());

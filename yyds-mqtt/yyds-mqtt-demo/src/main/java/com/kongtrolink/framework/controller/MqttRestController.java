@@ -5,7 +5,6 @@ import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,7 +54,7 @@ public class MqttRestController {
     @RequestMapping("/sendMsg")
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         msgHandler.sendToMqtt(serverCode, operaCode, message);
         return "ok";
     }
@@ -70,21 +69,21 @@ public class MqttRestController {
     @RequestMapping("/sendMsgSyn")
     public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         MsgResult s = msgHandler.sendToMqttSync(serverCode, operaCode, message);
         return s;
     }
 
     @RequestMapping("/addTopic")
     public String addTopic(@RequestParam String topic) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         msgHandler.addSubTopic(topic, 2);
         return "ok";
     }
 
     @RequestMapping("/addPub")
     public String addTopic(@RequestParam String serviceCode, @RequestParam String operaCode) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         msgHandler.addSubTopic(serviceCode + "/" + operaCode, 2);
         return "ok";
     }

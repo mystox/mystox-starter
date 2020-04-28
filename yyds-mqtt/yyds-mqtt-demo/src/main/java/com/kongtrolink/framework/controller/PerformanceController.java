@@ -80,7 +80,7 @@ public class PerformanceController {
                     logger.info("count: {}, pool size: {} active count: {}, core pool size: {}", i * intensityF, poolSize, activeCount, corePoolSize);
                 }
                 String msg = baseMsg + i;
-                MsgHandler msgHandler = iaContext.getIaENV().getMsgScheudler().getIahander();
+                MsgHandler msgHandler = iaContext.getIaENV().getMsgScheduler().getIahander();
                 demoExecutor.execute(() -> {
                     for (int j = 0; j < intensityF; j++)
                         if (syn != null && !syn)

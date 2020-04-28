@@ -115,7 +115,7 @@ public class MqttController {
     public JsonResult getCallBack(@RequestBody JSONObject condition)
     {
         String msgId = condition.getString("msgId");
-        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheudler();
+        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
         Map<String, CallBackTopic> callbacks = mqttSender.getCALLBACKS();
         CallBackTopic callBackTopic = callbacks.get(msgId);
         MqttResp call = null;

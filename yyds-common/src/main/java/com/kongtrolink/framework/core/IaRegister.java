@@ -3,7 +3,7 @@ package com.kongtrolink.framework.core;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.entity.RegisterMsg;
 import com.kongtrolink.framework.entity.RegisterSub;
-import com.kongtrolink.framework.scheudler.MsgScheudler;
+import com.kongtrolink.framework.scheudler.MsgScheduler;
 import com.kongtrolink.framework.scheudler.RegScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,19 +11,22 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * 注册类
+ */
 public class IaRegister {
     private Logger logger = LoggerFactory.getLogger(IaRegister.class);
     IaConf iaConf;
-    IaENV iaENV;
+    IaENV iaEnv;
     RegisterMsg registerMsg;
-    private MsgScheudler msgScheudler;
+    private MsgScheduler msgScheduler;
     private RegScheduler regScheduler;
-    public IaRegister(IaENV iaENV) {
-        this.iaENV=iaENV;
-        iaConf=iaENV.getConf();
-        this.msgScheudler=iaENV.getMsgScheudler();
-        this.regScheduler=iaENV.getRegScheudler();
-        msgScheudler.build(this.iaENV);
+    public IaRegister(IaENV iaEnv) {
+        this.iaEnv = iaEnv;
+        iaConf= iaEnv.getConf();
+        this.msgScheduler = iaEnv.getMsgScheduler();
+        this.regScheduler= iaEnv.getRegScheudler();
+        msgScheduler.build(this.iaEnv);
     }
 
     /**
@@ -38,12 +41,12 @@ public class IaRegister {
 
     public void subTopic(){
         List<RegisterSub> subList=this.regScheduler.GetRegLocalList();
-        this.msgScheudler.subTopic(subList);
+        this.msgScheduler.subTopic(subList);
 
     }
     public void connect()
     {
-        registerMsg=this.msgScheudler.getIahander().whereIsCentre();
+        registerMsg=this.msgScheduler.getIahander().whereIsCentre();
         this.iaConf.setRegisterUrl(registerMsg.getRegistURI());
         this.regScheduler.connect(registerMsg.getRegisterUrl());
     }

@@ -2,7 +2,6 @@ package com.kongtrolink.framework.register.runner;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.common.util.DateUtil;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.config.OperaRouteConfig;
@@ -21,12 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import static com.alibaba.fastjson.JSON.parseObject;
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 @Service(value = "zkHandlerImpl")
@@ -255,11 +257,13 @@ public class ZkHandlerImpl implements RegHandler,Watcher {
     private boolean locks() throws KeeperException, InterruptedException, InterruptedIOException {
         //获取服务信息并注册
         ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
-                iaconf.getRouteMark(),iaconf.getPageRoute() ,iaconf.getServerUri(),iaconf.getTitle(), groupCode,iaconf.getMyid());
+                iaconf.getRouteMark(),iaconf.getPageRoute() ,iaconf.getServerUri(),iaconf.getTitle(), groupCode,iaconf.getMyId());
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion)));
 
+        // long sessionId = zk.getSessionId();
+        // System.out.println(sessionId);
         while(true)
         {
             if (exists(onlineStatus)) {
@@ -267,7 +271,7 @@ public class ZkHandlerImpl implements RegHandler,Watcher {
               //  throw new InterruptedIOException();
                 String nodeData=getData(onlineStatus);
                 ServerMsg nodeMsg=JSONObject.parseObject(nodeData, ServerMsg.class);
-                if(nodeMsg.getMyid().equals(iaconf.getMyid())){//如果是我，则刷新，不是我，则等待
+                if(nodeMsg.getMyid().equals(iaconf.getMyId())){//如果是我，则刷新，不是我，则等待
                     logger.warn("is mine.....id is [{}]",nodeMsg.getMyid());
                     setData(onlineStatus,JSONObject.toJSONBytes(serverMsg));
                     return true;
@@ -420,6 +424,8 @@ public class ZkHandlerImpl implements RegHandler,Watcher {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        long sessionId = zk.getSessionId();
+        iaconf.setMyId(String.valueOf(sessionId));
         logger.info("connected to zookeeper " + zk.getState());
     }
 

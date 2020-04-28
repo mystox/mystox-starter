@@ -1,9 +1,6 @@
 package com.kongtrolink.framework.mqtt.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.kongtrolink.framework.common.util.DateUtil;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.IaENV;
@@ -11,7 +8,7 @@ import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerAck;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerSub;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
-import com.kongtrolink.framework.scheudler.MsgScheudler;
+import com.kongtrolink.framework.scheudler.MsgScheduler;
 import com.kongtrolink.framework.scheudler.RegScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -268,7 +265,7 @@ public class MqttHandler implements MsgHandler {
     }
 
     MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
-        MsgScheudler msgScheudler=iaContext.getIaENV().getMsgScheudler();
+        MsgScheduler msgScheduler =iaContext.getIaENV().getMsgScheduler();
         if (async) {
             boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
@@ -350,7 +347,7 @@ public class MqttHandler implements MsgHandler {
 
         IaENV iaENV= iaContext.getIaENV();
         RegScheduler regScheduler=iaENV.getRegScheudler();
-        MsgScheudler msgScheudler=iaENV.getMsgScheudler();
+        MsgScheduler msgScheduler =iaENV.getMsgScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
         String groupCode=iaconf.getGroupCode();

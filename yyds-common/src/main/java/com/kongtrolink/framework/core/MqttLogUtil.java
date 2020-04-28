@@ -43,7 +43,7 @@ public class MqttLogUtil {
         if (!logServerCode.equals(targetServerCode) && !OperaCode.SLOGIN.equals(operaCode)) { //发送至日志服务产生的错误日志不重复发送至日志服务
             MqttLog mqttLog = logBuilder(msgId, stateCode, operaCode, targetServerCode);
             logExecutor.execute(() ->
-                    iaContext.getIaENV().getMsgScheudler().getIahander().operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
+                    iaContext.getIaENV().getMsgScheduler().getIahander().operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
         } else {
             //日志信息发送错误的错误日志 不记录日志
             logger.warn("log msg send to log server exception...");
@@ -57,7 +57,7 @@ public class MqttLogUtil {
         }
         MqttLog mqttLog = operaRouteLogBuilder(UUID.randomUUID().toString(), stateCode, operaCode);
             logExecutor.execute(() ->
-                    iaContext.getIaENV().getMsgScheudler().getIahander().operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
+                    iaContext.getIaENV().getMsgScheduler().getIahander().operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
     }
 
 

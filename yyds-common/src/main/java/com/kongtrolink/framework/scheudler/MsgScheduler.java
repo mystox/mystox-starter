@@ -7,7 +7,7 @@ import com.kongtrolink.framework.service.MsgHandler;
 
 import java.util.List;
 
-public interface MsgScheudler  {
+public interface MsgScheduler {
     public void subTopic(List<RegisterSub> subList);
     public void removerSubTopic(List<RegisterSub> subList);
     public void build(IaENV iaENV);

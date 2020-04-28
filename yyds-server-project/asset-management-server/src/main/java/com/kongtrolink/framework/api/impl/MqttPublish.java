@@ -23,7 +23,7 @@ public class MqttPublish implements Publish {
 
     @Override
     public MsgResult getRegionCode(String payload) {
-       MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+       MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
 
         String operaCode = "getRegionCode";
 
@@ -32,7 +32,7 @@ public class MqttPublish implements Publish {
 
     @Override
     public void publishCIProps(String payload) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
         String operaCode = "getCIProps";
 
         msgHandler.operaAsync(operaCode, payload);
@@ -40,7 +40,7 @@ public class MqttPublish implements Publish {
 
     @Override
     public void deviceGet(String sn, String gatewayServerCode) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
 
         String operaCode = "deviceGet";
 

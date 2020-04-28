@@ -3,7 +3,6 @@ package com.kongtrolink.framework.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.api.impl.MqttService;
-import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.dao.impl.Neo4jDBService;
 import com.kongtrolink.framework.entity.DBResult;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/Test")
@@ -228,7 +226,7 @@ public class TestController {
 
     @RequestMapping("/distinctCI")
     public String distinctCI(@RequestBody JSONObject requestBody) {
-        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIahander();
         try {
             String operaCode = "getDistinctList";
             String payload = JSONObject.toJSONString(requestBody);

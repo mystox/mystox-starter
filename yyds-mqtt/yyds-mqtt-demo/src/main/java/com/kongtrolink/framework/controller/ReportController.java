@@ -37,7 +37,7 @@ public class ReportController {
 
     @RequestMapping("/testSyn")
     JsonResult reportsTest(@RequestBody(required = false) JSONObject body) {
-        MsgHandler msgHandler=iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler=iaContext.getIaENV().getMsgScheduler().getIahander();
         String operaCode = body.getString("operaCode");
         body.put("serverCode", MqttUtils.preconditionServerCode(serverName, serverVersion));
 //        body.put("asyn", true);//是否异步

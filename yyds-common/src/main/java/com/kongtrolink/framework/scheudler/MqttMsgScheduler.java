@@ -21,7 +21,7 @@ import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 @Component("mqttMsgSheculder")
 @Lazy
-public class MqttMsgScheudler implements MsgScheudler{
+public class MqttMsgScheduler implements MsgScheduler {
 
     @Autowired
     @Qualifier("MqttHandler")
@@ -31,12 +31,12 @@ public class MqttMsgScheudler implements MsgScheudler{
     private String groupCode;
     private String serverName;
     private String serverVersion;
-    private Logger logger = LoggerFactory.getLogger(MqttMsgScheudler.class);
+    private Logger logger = LoggerFactory.getLogger(MqttMsgScheduler.class);
 
 
-    public MqttMsgScheudler()
+    public MqttMsgScheduler()
     {
-        logger.debug("-----the class "+ MqttMsgScheudler .class+" instructed");
+        logger.debug("-----the class "+ MqttMsgScheduler.class+" instructed");
     }
     /**
      * @Date 0:22 2020/1/6

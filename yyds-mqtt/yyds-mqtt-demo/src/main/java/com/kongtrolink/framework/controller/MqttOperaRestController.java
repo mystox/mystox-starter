@@ -30,20 +30,20 @@ public class MqttOperaRestController {
     IaContext iaContext;
     @RequestMapping("/operaSync")
     public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
-        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIahander();
         MsgResult opera = msgHandler.opera("getDevice",message,2,120, TimeUnit.SECONDS);
         return new JsonResult(opera);
     }
 
     @RequestMapping("/operaAsync")
     public JsonResult operaAsync(@RequestParam String operaCode,@RequestBody String message) {
-        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIahander();
         msgHandler.operaAsync(operaCode,message);
         return new JsonResult();
     }
     @RequestMapping("/broadcast")
     public JsonResult broadcast(@RequestParam String operaCode,@RequestBody String message) {
-        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheudler().getIahander();
+        MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIahander();
         msgHandler.broadcast(operaCode,message);
         return new JsonResult("ok");
     }

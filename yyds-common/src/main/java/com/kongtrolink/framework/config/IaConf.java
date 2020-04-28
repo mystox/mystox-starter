@@ -15,10 +15,16 @@ public class IaConf {
     //    @Autowired
 //    @Qualifier("remotezkHandlerImpl")
 //    RegHandler zkhandlerImpl;
-    String myid="1122";
-    public String getMyid() {
-        return myid;
+    String myId="0";
+
+    public String getMyId() {
+        return myId;
     }
+
+    public void setMyId(String myId) {
+        this.myId = myId;
+    }
+
     /**
      * The znode will not be automatically deleted upon client's disconnect.
      */
@@ -86,7 +92,7 @@ public class IaConf {
 
     @Value("${register.type:zookeeper}")
     private String registertype;
-    @Value("${register.url:zookeeper://192.168.111.11:2181,192.168.111.12:2181}")
+    @Value("${register.url:}")
     private String registerUrl;
     @Value("${register.serverName:" + ServerName.AUTH_PLATFORM + "}")
     private String registerServerName;
