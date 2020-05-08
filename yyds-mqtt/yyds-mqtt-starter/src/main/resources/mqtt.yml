@@ -1,8 +1,8 @@
 mqtt:
   producer:
-    clientId: ${server.groupCode}_${server.name}_${server.version}_producer
+    clientId: ${server.groupCode}_${server.name}_${server.version}_producer_${random.uuid}
     defaultTopic: topic
   completionTimeout: 3000
   consumer:
-    clientId: ${server.groupCode}_${server.name}_${server.version}_consumer
+    clientId: ${server.groupCode}_${server.name}_${server.version}_consumer_${random.uuid}
     defaultTopic: topic
