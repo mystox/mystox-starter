@@ -17,7 +17,7 @@ public class FooServiceImpl implements FooService {
 
     @Override
     public String boo(String msg) {
-        System.out.println("============"+msg);
+        System.out.println("============" + msg);
         return "result";
       /*  JSONObject jsonObject = JSONObject.parseObject(foo);
         Integer a = jsonObject.getInteger("a");
@@ -42,7 +42,15 @@ public class FooServiceImpl implements FooService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("end"+coo);
+        System.out.println("end" + coo);
         return "end";
+    }
+
+    @Override
+    public String packageSum(String poo) {
+        StringBuffer s = new StringBuffer();
+        for (int i = 0; i < Integer.valueOf(poo); i++)
+            s.append("i");
+        return s.toString();
     }
 }
