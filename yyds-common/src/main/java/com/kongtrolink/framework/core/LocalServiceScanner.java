@@ -60,7 +60,10 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner {
         return this.environment;
     }
 
-    //TODO 扫描“basePackagePath”包下的资源，将对应注解资源封装。
+    /**
+     * 扫描“basePackagePath”包下的资源，将对应注解资源封装。
+     * @return
+     */
     @Override
     public List<RegisterSub> getSubList() {
         List<RegisterSub> subList = new ArrayList<>();

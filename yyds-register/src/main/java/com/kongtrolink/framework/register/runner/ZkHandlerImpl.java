@@ -46,7 +46,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private ZooKeeper zk;
 
 
-    private void registerConsummerRoute() throws KeeperException, InterruptedException {
+    private void registerConsumerRoute() throws KeeperException, InterruptedException {
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
         if (operaRoute != null) {
@@ -221,8 +221,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 initConsummerRoute();//定义消费路由目录
                 initprovider();//定义服务供给目录
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
-                registerprovider(GetRegLocalList());//订阅
-                registerConsummerRoute();
+                registerProvider(getRegLocalList());//订阅
+                registerConsumerRoute(); //注册路由
             }
         } catch (KeeperException e) {
             e.printStackTrace();
@@ -240,7 +240,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @throws KeeperException
      * @throws InterruptedException
      */
-    public void registerprovider(List<RegisterSub> subList) throws KeeperException, InterruptedException {
+    public void registerProvider(List<RegisterSub> subList) throws KeeperException, InterruptedException {
         for (RegisterSub sub : subList) {//注册provider
             registeringSub(sub);
         }
@@ -349,7 +349,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
 
-    public List<RegisterSub> GetRegLocalList() {
+    public List<RegisterSub> getRegLocalList() {
         return this.iaconf.getLocalServiceScanner().getSubList();
     }
 
