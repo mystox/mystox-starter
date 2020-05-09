@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class IaENV implements ApplicationContextAware ,callMe{
+public class IaENV implements ApplicationContextAware, RegCall {
     private MsgScheduler msgScheduler;
     private RegScheduler regScheudler;
     private IaConf conf;
@@ -24,56 +24,47 @@ public class IaENV implements ApplicationContextAware ,callMe{
 
     private Logger logger = LoggerFactory.getLogger(IaENV.class);
 
-    public IaENV()
-    {
-       logger.warn("----------------------the class "+ IaENV.class+" instructed");
-    }
 
-
-    public void build(IaConf conf)
-    {
-        this.conf=conf;
-        regScheudler=createRegScheudler(getRegType(conf));
-        msgScheduler =createMsgScheudler(getMsgType(conf));
+    public void build(IaConf conf) {
+        this.conf = conf;
+        regScheudler = createRegScheudler(getRegType(conf));
+        msgScheduler = createMsgScheudler(getMsgType(conf));
 
     }
 
     public String getRegType(IaConf conf) {
-       return conf.getRegistertype();
+        return conf.getRegistertype();
     }
 
     public String getMsgType(IaConf conf) {
         return conf.getMsgType();
     }
 
-    public MsgScheduler createMsgScheudler(String regType)
-    {
+    public MsgScheduler createMsgScheudler(String regType) {
         switch (regType) {
-  //        case MqttMsgBus :return new MqttMsgScheduler();
-            case IaConf.MqttMsgBus :
-            {
-                MqttMsgScheduler mqttMsgScheudler=applicationContext.getBean(MqttMsgScheduler.class);
+            //        case MqttMsgBus :return new MqttMsgScheduler();
+            case IaConf.MqttMsgBus: {
+                MqttMsgScheduler mqttMsgScheudler = applicationContext.getBean(MqttMsgScheduler.class);
                 mqttMsgScheudler.build(this);
-                return   mqttMsgScheudler;
+                return mqttMsgScheudler;
             }
-            default:{
-                MqttMsgScheduler mqttMsgScheudler=applicationContext.getBean(MqttMsgScheduler.class);
+            default: {
+                MqttMsgScheduler mqttMsgScheudler = applicationContext.getBean(MqttMsgScheduler.class);
                 mqttMsgScheudler.build(this);
-                return   mqttMsgScheudler;
+                return mqttMsgScheudler;
             }
         }
     }
 
-    public RegScheduler createRegScheudler(String regType)
-    {
+    public RegScheduler createRegScheudler(String regType) {
         switch (regType) {
             case IaConf.RomateZKtype: {
-                RegScheduler regScheduler= applicationContext.getBean(ZkRegScheudler.class);
+                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheudler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
-            default:{
-                RegScheduler regScheduler= applicationContext.getBean(ZkRegScheudler.class);
+            default: {
+                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheudler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
@@ -106,42 +97,45 @@ public class IaENV implements ApplicationContextAware ,callMe{
     }
 
     ApplicationContext applicationContext;
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext=applicationContext;
+        this.applicationContext = applicationContext;
     }
 
     @Override
     public void call(int code) throws InterruptedException {
-        switch (code)
-        {
-            case callMe.Disconnected:{
-                logger.error("连接断开:捕获异常");
-                List<RegisterSub> subList=this.regScheudler.GetRegLocalList();
+        switch (code) {
+            case RegCall.Disconnected: {
+                logger.error("[call] disconnected...");
+                List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
+                logger.warn("[call] cancellation msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                logger.warn("连接断开:注销MQ订阅");
-                RegisterMsg registerMsg =this.msgScheduler.getIahander().whereIsCentre();
-
+                RegisterMsg registerMsg = this.msgScheduler.getIahander().whereIsCentre();
                 getConf().setRegisterUrl(registerMsg.getRegistURI());
                 this.regScheudler.connect(registerMsg.getRegisterUrl());
-                logger.warn("连接断开:开始注册");
+                logger.warn("register reconnected [{}]", registerMsg.getRegisterUrl());
                 this.regScheudler.register();
-                this.msgScheduler.subTopic(subList);break;
+                this.msgScheduler.subTopic(subList);
+                break;
 
             }
-            case callMe.RebuidStatus:{
-                logger.error("服务掉线:捕获异常");
-                List<RegisterSub> subList=this.regScheudler.GetRegLocalList();
+
+            case RegCall.RebuildStatus: {
+                logger.error("[call]: register rebuild");
+                List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
                 this.msgScheduler.removerSubTopic(subList);
                 logger.warn("服务掉线:注销MQ订阅");
                 logger.warn("服务掉线:开始等待注册");
                 getRegScheudler().register();
-                this.msgScheduler.subTopic(subList);break;
+                this.msgScheduler.subTopic(subList);
+                break;
             }
         }
     }
-    public void subTopic(){
-        List<RegisterSub> subList=this.regScheudler.GetRegLocalList();
+
+    public void subTopic() {
+        List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
         this.msgScheduler.subTopic(subList);
 
     }

@@ -4,7 +4,7 @@ package com.kongtrolink.framework.scheudler;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.config.OperaRouteConfig;
 import com.kongtrolink.framework.core.IaENV;
-import com.kongtrolink.framework.core.callMe;
+import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.service.RegHandler;
 import org.slf4j.Logger;
@@ -28,12 +28,12 @@ public class ZkRegScheudler implements RegScheduler  {
     private String groupCode;
     private String serverName;
     private String serverVersion;
-    private callMe callme;
-
-    public ZkRegScheudler()
-    {
-        logger.debug("-----the class "+ ZkRegScheudler.class+" instructed");
-    }
+    private RegCall callme;
+    //
+    // public ZkRegScheudler()
+    // {
+    //     logger.debug("-----the class "+ ZkRegScheudler.class+" instructed");
+    // }
 
 
     @Override
@@ -46,9 +46,9 @@ public class ZkRegScheudler implements RegScheduler  {
         return regHandler.exists(nodeData);
     }
 
-    private callMe caller;
+    private RegCall caller;
     @Override
-    public void initCaller(callMe caller) {
+    public void initCaller(RegCall caller) {
         this.caller = caller;
     }
 
@@ -87,7 +87,7 @@ public class ZkRegScheudler implements RegScheduler  {
 
     @Override
     public void setData(String path, byte[] data) {
-
+        regHandler.setData(path,data);
     }
 
 

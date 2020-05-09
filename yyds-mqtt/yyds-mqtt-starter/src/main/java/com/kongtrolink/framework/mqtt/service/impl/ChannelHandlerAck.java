@@ -36,7 +36,7 @@ public class ChannelHandlerAck {
 
 
     public void addSubTopic(String topic, int qos) {
-        logger.debug("addACKtopic: [{}] qos: [{}] been added", topic,qos);
+        logger.debug("add ack topic: [{}] qos: [{}] been added", topic,qos);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.addTopic(topic, 2);
     }
@@ -57,7 +57,7 @@ public class ChannelHandlerAck {
 
 
     public void removeSubTopic(String... topics) {
-        logger.debug("delete ACKtopics: {}", topics);
+        logger.debug("remove ack topics: {}", topics);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.removeTopic(topics);
     }

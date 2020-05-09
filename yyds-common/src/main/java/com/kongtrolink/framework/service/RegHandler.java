@@ -15,6 +15,7 @@ public interface RegHandler {
 
     String getData(String path);
 
+    void setData(final String path,byte data[]);
     List<String> getChildren(String path);
 
     void deleteNode(String path);

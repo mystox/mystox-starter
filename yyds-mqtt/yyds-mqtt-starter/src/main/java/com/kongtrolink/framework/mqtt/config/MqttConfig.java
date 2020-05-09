@@ -73,6 +73,9 @@ public class MqttConfig {
      * 发布的bean名称
      */
     public static final String CHANNEL_NAME_OUT = "mqttOutboundChannel";
+    /**
+     * 回复通道
+     */
     public static final String CHANNEL_REPLY = "mqttReplyBoundChannel";
 
 
@@ -88,7 +91,7 @@ public class MqttConfig {
         // 这里设置为true表示每次连接到服务器都以新的身份连接
         options.setCleanSession(true);
         // 设置连接的用户名
-//        options.setUserName(username);
+       options.setUserName(username);
         // 设置连接的密码
 //        options.setPassword(password.toCharArray());
         options.setServerURIs(StringUtils.split(url, ","));

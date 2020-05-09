@@ -3,6 +3,7 @@ logging:
     root: info
     com.kongtrolink.framework.mqtt.service: DEBUG
     com.kongtrolink.framework.mqtt.service.ExecutorRunner: info
+    org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF

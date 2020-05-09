@@ -4,7 +4,7 @@ package com.kongtrolink.framework.scheudler;
 import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.core.IaENV;
-import com.kongtrolink.framework.core.callMe;
+import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class MqttMsgScheduler implements MsgScheduler {
              iaHandler.removeAckSubTopic(ackTopicId);
     }
     @Override
-    public void initCaller(callMe caller) {
+    public void initCaller(RegCall caller) {
 
     }
 

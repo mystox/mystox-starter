@@ -55,7 +55,7 @@ public class ChannelHandlerSub {
 
 
     public void removeSubTopic(String... topic) {
-        logger.debug("delete All SUB topics {}",topic);
+        logger.debug("remove sub topics {}",topic);
         MqttPahoMessageDrivenChannelAdapter messageProducer = (MqttPahoMessageDrivenChannelAdapter) this.messageProducer;
         messageProducer.removeTopic(topic);
     }
