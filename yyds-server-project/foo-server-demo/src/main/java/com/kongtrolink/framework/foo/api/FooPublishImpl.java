@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.foo.api;
 
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.mqtt.service.MqttSender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**

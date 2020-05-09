@@ -22,4 +22,7 @@ public interface FooService {
     @OperaCode
     String coo(String coo);
 
+    @OperaCode(code = "poo")
+    String packageSum(String poo);
+
 }
