@@ -208,7 +208,7 @@ public class MqttReceiver {
                         iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
                     }
                 } else
-                    iMqttSender.sendToMqtt(ackTopic, 1, ackPayload);
+                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
                 logger.error("[{}] message ", e);
             }
