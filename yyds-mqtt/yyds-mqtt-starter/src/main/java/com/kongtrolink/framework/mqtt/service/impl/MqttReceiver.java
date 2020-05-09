@@ -65,23 +65,23 @@ public class MqttReceiver {
     @Autowired
     private MqttLogUtil mqttLogUtil;
 
-    public MqttResp receive(String topic, MqttMsg payload) {
-        logger.debug("receive... ..." + JSONObject.toJSONString(payload));
+    public MqttResp receive(String topic, MqttMsg mqttMsg) {
+        logger.debug("receive... ..." + JSONObject.toJSONString(mqttMsg));
 
         String unit = getUnitBySubList(topic);
         MqttResp result = null;
         try {
             if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
-                result = localExecute(unit, payload);
+                result = localExecute(unit, mqttMsg);
             } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
-                result = jarExecute(unit, payload);
+                result = jarExecute(unit, mqttMsg);
             } else if (unit.startsWith(UnitHead.HTTP)) {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, payload.getOperaCode(), payload.getSourceAddress());
-            logger.error("msg execute error: [{}]", payload.getMsgId(), e.toString());
-            result = new MqttResp(payload.getMsgId(), e.toString());
+            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
+            logger.error("msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
+            result = new MqttResp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
         }
@@ -89,6 +89,7 @@ public class MqttReceiver {
        /* String topic_ack = getAcyBySubList();
         if (StringUtils.isNotBlank(topic_ack))
             iMqttSender.sendToMqtt(topic_ack, 2, result);*/
+        logger.debug("[{}] message execute result: [{}]", mqttMsg.getMsgId(), JSONObject.toJSONString(result));
         return result;
     }
 
@@ -189,14 +190,16 @@ public class MqttReceiver {
             if (!mqttMsg.getHasAck()) return; //如果不需返回
             String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
             result.setTopic(ackTopic);
-            String ackPayload = JSONObject.toJSONString(result);
-            logger.debug("[{}] message execute result: [{}]", mqttMsg.getMsgId(), ackPayload);
+            // String ackPayload = JSONObject.toJSONString(result);
 
-            int length = ackPayload.getBytes(Charset.forName("utf-8")).length;
+            String ackPayload = result.getPayload();
+
+            byte[] bytes = ackPayload.getBytes(Charset.forName("utf-8"));
+            int length = bytes.length;
             try {
                 if (length > MQTT_PAYLOAD_LIMIT) {
                     //分包
-                    List<MqttResp> resultArr = subpackage(result);
+                    List<MqttResp> resultArr = subpackage(bytes,mqttMsg.getMsgId());
                     logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
                     int size = resultArr.size();
                     for (int i = 0; i < size; i++) {
@@ -267,22 +270,27 @@ public class MqttReceiver {
     /**
      * 分包
      *
-     * @param ackPayload
+     * @param
      * @return
      */
-    private List<MqttResp> subpackage(MqttResp ackPayload) {
+    private List<MqttResp> subpackage(byte[] bytes,String msgId) {
         List<MqttResp> result = new ArrayList<>();
-        String payload = ackPayload.getPayload();
-        byte[] bytes = payload.getBytes(Charset.forName("utf-8"));
+        // String payload = ackPayload.getPayload();
+        // byte[] bytes = payload.getBytes(Charset.forName("utf-8"));
         int crc = ByteUtil.getCRC(bytes);
         int length = bytes.length;
         int count = length / MQTT_PAYLOAD_LIMIT + 1;
         for (int i = 0; i < count; i++) {
-            byte[] subarray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
-            MqttResp resp = new MqttResp(ackPayload.getMsgId(), subarray, true, i, count, crc);
+            byte[] subArray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
+            MqttResp resp = new MqttResp(msgId, subArray, true, i, count, crc);
             result.add(resp);
         }
         return result;
+    }
+
+    public static void main(String[] args)
+    {
+        System.out.println(100/99);
     }
 
 }

@@ -58,6 +58,8 @@ public class CallBackTopic implements Callable<MqttResp> {
             try {
                 payload = new String(bytes3, "utf-8");
             } catch (UnsupportedEncodingException e) {
+                logger.error("callback sub package error[{}]",e.toString());
+                if (logger.isDebugEnabled())
                 e.printStackTrace();
             }
             int crc = ByteUtil.getCRC(bytes3);
