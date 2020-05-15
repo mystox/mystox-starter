@@ -45,5 +45,6 @@ public interface RegScheduler {
 
     public void connect(String url);
 
+    public RegCall.RegState getState();
 
 }

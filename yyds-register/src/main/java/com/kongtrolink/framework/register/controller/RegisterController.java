@@ -53,15 +53,15 @@
 //    @RequestMapping("/getPath")
 //    public JsonResult getZookeeper(@RequestParam(required = false) String path) {
 //        IaENV iaENV =iaContext.getIaENV();
-//        long sessionId = iaENV.getRegScheudler().getSessionId();
+//        long sessionId = iaENV.getRegScheduler().getSessionId();
 //        JSONObject result = new JSONObject();
 //        result.put("zookeeperSession", sessionId);
 //        List<String> children = null;
 //        try {
-//            String data = iaENV.getRegScheudler().getData(path);
+//            String data = iaENV.getRegScheduler().getData(path);
 //            logger.info("data: [{}]", data);
 //            result.put("data", JSON.parse(data));
-//            children = iaENV.getRegScheudler().getChildren(path);
+//            children = iaENV.getRegScheduler().getChildren(path);
 //            result.put("children", children);
 //        }  catch (Exception e) {
 //            e.printStackTrace();
@@ -77,7 +77,7 @@
 //        logger.info(JSONObject.toJSONString(invoke));
 //        OperaResult operaResult = null;
 //        try {
-//            operaResult = iaENV.getRegScheudler().registerWebPriv(iaENV.getConf().getWebPrivFuncConfig());
+//            operaResult = iaENV.getRegScheduler().registerWebPriv(iaENV.getConf().getWebPrivFuncConfig());
 //        } catch (KeeperException | InterruptedException e) {
 //            e.printStackTrace();
 //        }

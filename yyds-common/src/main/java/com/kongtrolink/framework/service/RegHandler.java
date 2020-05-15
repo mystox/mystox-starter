@@ -1,5 +1,6 @@
 package com.kongtrolink.framework.service;
 
+import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.RegisterSub;
 
 import java.util.List;
@@ -25,5 +26,7 @@ public interface RegHandler {
     public void connect(String url);
 
     public void build();
+
+    RegCall.RegState getServerState();
 
 }

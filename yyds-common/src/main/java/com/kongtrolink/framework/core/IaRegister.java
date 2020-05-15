@@ -25,9 +25,13 @@ public class IaRegister {
         this.iaEnv = iaEnv;
         iaConf= iaEnv.getConf();
         this.msgScheduler = iaEnv.getMsgScheduler();
-        this.regScheduler= iaEnv.getRegScheudler();
+        this.regScheduler= iaEnv.getRegScheduler();
         msgScheduler.build(this.iaEnv);
     }
+
+    List<RegisterSub> subs;
+
+
 
     /**
      * 注册中心注册节点信息

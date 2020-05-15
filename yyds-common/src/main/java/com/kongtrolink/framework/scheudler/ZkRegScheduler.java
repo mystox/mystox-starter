@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("zkRegscheudler")
+@Component("zkRegScheduler")
 @Lazy
-public class ZkRegScheudler implements RegScheduler  {
+public class ZkRegScheduler implements RegScheduler  {
     private Logger logger = LoggerFactory.getLogger(MqttMsgScheduler.class);
     @Autowired
     @Qualifier("zkHandlerImpl")
@@ -28,11 +28,11 @@ public class ZkRegScheudler implements RegScheduler  {
     private String groupCode;
     private String serverName;
     private String serverVersion;
-    private RegCall callme;
-    //
-    // public ZkRegScheudler()
+    // private RegCall callme;
+    // //
+    // public ZkRegScheduler()
     // {
-    //     logger.debug("-----the class "+ ZkRegScheudler.class+" instructed");
+    //     logger.debug("-----the class "+ ZkRegScheduler.class+" instructed");
     // }
 
 
@@ -119,6 +119,12 @@ public class ZkRegScheudler implements RegScheduler  {
     public void connect(String registerUrl)
     {
        regHandler.connect(registerUrl);
+    }
+
+    @Override
+    public RegCall.RegState getState() {
+        RegCall.RegState state = regHandler.getServerState();
+        return state;
     }
 
 

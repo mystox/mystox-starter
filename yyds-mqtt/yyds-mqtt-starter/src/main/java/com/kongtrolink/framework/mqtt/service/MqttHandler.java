@@ -171,12 +171,13 @@ public class MqttHandler implements MsgHandler {
         MsgResult result;
 
         IaENV iaENV= iaContext.getIaENV();
-        RegScheduler regScheduler=iaENV.getRegScheudler();
+        RegScheduler regScheduler=iaENV.getRegScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
         String groupCode=iaconf.getGroupCode();
         String serverVersion=iaconf.getServerVersion();
-
+        //检查注册中心状态
+        // iaENV.getRegScheduler()
         try {
             //优先配置中获取
             // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
@@ -233,7 +234,7 @@ public class MqttHandler implements MsgHandler {
 
     private MsgResult operaBalance(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, List<String> topicArr, String routePath)   {
         IaENV iaENV= iaContext.getIaENV();
-        RegScheduler regScheduler=iaENV.getRegScheudler();
+        RegScheduler regScheduler=iaENV.getRegScheduler();
         //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
         int size = topicArr.size();
         String groupServerCode = "";
@@ -289,7 +290,7 @@ public class MqttHandler implements MsgHandler {
     private List<String> buildOperaMap(String operaCode)  {
 
         IaENV iaENV= iaContext.getIaENV();
-        RegScheduler regScheduler=iaENV.getRegScheudler();
+        RegScheduler regScheduler=iaENV.getRegScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
         String groupCode=iaconf.getGroupCode();
@@ -346,7 +347,7 @@ public class MqttHandler implements MsgHandler {
     private void broadcast(String operaCode, String msg, int qos, boolean setFlag) {
 
         IaENV iaENV= iaContext.getIaENV();
-        RegScheduler regScheduler=iaENV.getRegScheudler();
+        RegScheduler regScheduler=iaENV.getRegScheduler();
         MsgScheduler msgScheduler =iaENV.getMsgScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();

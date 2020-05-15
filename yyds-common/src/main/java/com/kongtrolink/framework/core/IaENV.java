@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 public class IaENV implements ApplicationContextAware, RegCall {
     private MsgScheduler msgScheduler;
-    private RegScheduler regScheudler;
+    private RegScheduler regScheduler;
     private IaConf conf;
 
 
@@ -27,44 +27,44 @@ public class IaENV implements ApplicationContextAware, RegCall {
 
     public void build(IaConf conf) {
         this.conf = conf;
-        regScheudler = createRegScheudler(getRegType(conf));
-        msgScheduler = createMsgScheudler(getMsgType(conf));
+        regScheduler = createRegScheduler(getRegType(conf));
+        msgScheduler = createMsgScheduler(getMsgType(conf));
 
     }
 
     public String getRegType(IaConf conf) {
-        return conf.getRegistertype();
+        return conf.getRegisterType();
     }
 
     public String getMsgType(IaConf conf) {
         return conf.getMsgType();
     }
 
-    public MsgScheduler createMsgScheudler(String regType) {
+    public MsgScheduler createMsgScheduler(String regType) {
         switch (regType) {
             //        case MqttMsgBus :return new MqttMsgScheduler();
             case IaConf.MqttMsgBus: {
-                MqttMsgScheduler mqttMsgScheudler = applicationContext.getBean(MqttMsgScheduler.class);
-                mqttMsgScheudler.build(this);
-                return mqttMsgScheudler;
+                MqttMsgScheduler mqttMsgScheduler = applicationContext.getBean(MqttMsgScheduler.class);
+                mqttMsgScheduler.build(this);
+                return mqttMsgScheduler;
             }
             default: {
-                MqttMsgScheduler mqttMsgScheudler = applicationContext.getBean(MqttMsgScheduler.class);
-                mqttMsgScheudler.build(this);
-                return mqttMsgScheudler;
+                MqttMsgScheduler mqttMsgScheduler = applicationContext.getBean(MqttMsgScheduler.class);
+                mqttMsgScheduler.build(this);
+                return mqttMsgScheduler;
             }
         }
     }
 
-    public RegScheduler createRegScheudler(String regType) {
+    public RegScheduler createRegScheduler(String regType) {
         switch (regType) {
-            case IaConf.RomateZKtype: {
-                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheudler.class);
+            case IaConf.ZkRegType: {
+                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheduler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
             default: {
-                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheudler.class);
+                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheduler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
@@ -75,7 +75,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public String getMsgBus(IaConf conf) {
         return conf.getMsgBusType();
     }
-//    public MsgScheduler createMsgScheudler(String regType)
+//    public MsgScheduler createMsgScheduler(String regType)
 //    {
 //        switch (regType) {
 //            case MqttMsgBus :{this.MsgScheduler.build(this.conf);return this.MsgScheduler};
@@ -83,8 +83,8 @@ public class IaENV implements ApplicationContextAware, RegCall {
 //        }
 //    }
 
-    public RegScheduler getRegScheudler() {
-        return regScheudler;
+    public RegScheduler getRegScheduler() {
+        return regScheduler;
     }
 
     public MsgScheduler getMsgScheduler() {
@@ -104,30 +104,30 @@ public class IaENV implements ApplicationContextAware, RegCall {
     }
 
     @Override
-    public void call(int code) throws InterruptedException {
-        switch (code) {
-            case RegCall.Disconnected: {
+    public void call(RegState state) throws InterruptedException {
+        switch (state) {
+            case Disconnected: {
                 logger.error("[call] disconnected...");
-                List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
+                List<RegisterSub> subList = this.regScheduler.GetRegLocalList();
                 logger.warn("[call] cancellation msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
                 RegisterMsg registerMsg = this.msgScheduler.getIahander().whereIsCentre();
                 getConf().setRegisterUrl(registerMsg.getRegistURI());
-                this.regScheudler.connect(registerMsg.getRegisterUrl());
-                logger.warn("register reconnected [{}]", registerMsg.getRegisterUrl());
-                this.regScheudler.register();
+                this.regScheduler.connect(registerMsg.getRegisterUrl());
+                logger.warn("[call] register reconnected [{}]", registerMsg.getRegisterUrl());
+                this.regScheduler.register();
                 this.msgScheduler.subTopic(subList);
                 break;
 
             }
 
-            case RegCall.RebuildStatus: {
-                logger.error("[call]: register rebuild");
-                List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
+            case RebuildStatus: {
+                logger.error("[call] register rebuild");
+                List<RegisterSub> subList = this.regScheduler.GetRegLocalList();
+                logger.warn("[call] cancellation msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                logger.warn("服务掉线:注销MQ订阅");
-                logger.warn("服务掉线:开始等待注册");
-                getRegScheudler().register();
+                logger.warn("[call] register offline, waiting for rebuild");
+                getRegScheduler().register();
                 this.msgScheduler.subTopic(subList);
                 break;
             }
@@ -135,7 +135,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     }
 
     public void subTopic() {
-        List<RegisterSub> subList = this.regScheudler.GetRegLocalList();
+        List<RegisterSub> subList = this.regScheduler.GetRegLocalList();
         this.msgScheduler.subTopic(subList);
 
     }

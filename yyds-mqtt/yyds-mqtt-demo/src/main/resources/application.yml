@@ -3,6 +3,9 @@ logging:
     root: info
     com.kongtrolink.framework.mqtt.service: DEBUG
     com.kongtrolink.framework.mqtt.service.ExecutorRunner: info
+    com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl: info
+    com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerSub: info
+    com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerAck: info
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF

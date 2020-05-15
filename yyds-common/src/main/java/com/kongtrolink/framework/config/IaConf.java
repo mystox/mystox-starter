@@ -4,18 +4,18 @@ import com.kongtrolink.framework.core.ServiceScanner;
 import com.kongtrolink.framework.entity.ServerName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@Configuration
+@ConfigurationProperties
 public class IaConf {
 
 
     //    @Autowired
 //    @Qualifier("remotezkHandlerImpl")
 //    RegHandler zkhandlerImpl;
-    String myId="0";
+    private String myId="0";
 
     public String getMyId() {
         return myId;
@@ -45,8 +45,13 @@ public class IaConf {
     public static final int EPHEMERAL_SEQUENTIAL =3;
 
     public static final String MqttMsgBus="mqtt";
-    public static final String RomateZKtype="zookeeper";
+    public static final String ZkRegType ="zookeeper";
 
+    //MQTT相关~~~~~~~~~~~~~~~~~~~~~~~~~~
+    private static final byte[] WILL_DATA;
+    static {
+        WILL_DATA = "offline".getBytes();
+    }
     @Value("${server.name}")
     private String serverName;
     @Value("${server.version}")
@@ -56,11 +61,6 @@ public class IaConf {
     @Value("${server.groupCode}")
     private  String groupCode;
 
-    //MQTT相关~~~~~~~~~~~~~~~~~~~~~~~~~~
-    private static final byte[] WILL_DATA;
-    static {
-        WILL_DATA = "offline".getBytes();
-    }
     @Value("${mqtt.username:root}")
     private String username;
     @Value("${mqtt.password:123456}")
@@ -91,7 +91,7 @@ public class IaConf {
 
 
     @Value("${register.type:zookeeper}")
-    private String registertype;
+    private String registerType;
     @Value("${register.url:}")
     private String registerUrl;
     @Value("${register.serverName:" + ServerName.AUTH_PLATFORM + "}")
@@ -141,7 +141,7 @@ public class IaConf {
     private String  MsgBusType;
 
     WebPrivFuncConfig webPrivFuncConfig;
-    //TODO 向注册中心注册功能列表
+    // 向注册中心注册功能列表
     @Autowired
     public void setWebPrivFuncConfig(WebPrivFuncConfig webPrivFuncConfig) {
         this.webPrivFuncConfig = webPrivFuncConfig;
@@ -196,12 +196,12 @@ public class IaConf {
         this.groupCode = groupCode;
     }
 
-    public String getRegistertype() {
-        return registertype;
+    public String getRegisterType() {
+        return registerType;
     }
 
-    public void setRegistertype(String registertype) {
-        this.registertype = registertype;
+    public void setRegisterType(String registerType) {
+        this.registerType = registerType;
     }
     public String getRegisterUrl() {
         return registerUrl;

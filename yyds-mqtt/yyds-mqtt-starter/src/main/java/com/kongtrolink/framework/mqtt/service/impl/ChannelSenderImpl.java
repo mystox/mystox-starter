@@ -245,7 +245,7 @@ public class ChannelSenderImpl {
     }
 
     private boolean addPubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) { //注册登录时跳过注册请求列表，因为注册服务客户端还未初始化
             logger.warn("server Slogin to {} jump pubList judged...", serverCode);
             return true;
@@ -261,7 +261,7 @@ public class ChannelSenderImpl {
         }
         String pubPath = topicId + "/" + this.serverCode; //请求列表的节点path 带上 pub的此服务serverCode做临时节点
         if (!regScheduler.exists(pubPath)) {
-            logger.warn("pubPath(nodePath) [{}] didn't registered...", pubPath);
+            logger.debug("pubPath(nodePath) [{}] didn't registered...", pubPath);
             regScheduler.create(pubPath, null, IaConf.EPHEMERAL);
         }
 
@@ -272,7 +272,7 @@ public class ChannelSenderImpl {
 //    ServiceRegistry serviceRegistry;
 
     private boolean isExistsBySubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
  //           logger.warn("server Slogin to {} jump subList judged...", serverCode);
             return true;

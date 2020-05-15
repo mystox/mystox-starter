@@ -81,7 +81,7 @@ public class MqttRestService {
 
     public JsonResult registerSub(JSONObject subJson) {
         MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIahander();
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         String operaCode = subJson.getString("operaCode");
         String executeUnit = subJson.getString("executeUnit");
         String ack = subJson.getString("ack");
@@ -122,7 +122,7 @@ public class MqttRestService {
 
     public JsonResult deleteSub(JSONObject body) {
         MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIahander();
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         String operaCode = body.getString("operaCode");
         String path = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         try {
@@ -159,7 +159,7 @@ public class MqttRestService {
 
 
     public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException, IOException {
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute == null) {
             operaRoute = new LinkedHashMap<>();

@@ -32,11 +32,6 @@
     <dependencies>
         <dependency>
             <groupId>com.kongtrolink.framework</groupId>
-            <artifactId>yyds-mqtt</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.kongtrolink.framework</groupId>
             <artifactId>yyds-core</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -61,17 +56,17 @@
             <version>1.2.58</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.kongtrolink.framework</groupId>
             <artifactId>yyds-common</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
+            &lt;!&ndash;<scope>compile</scope>&ndash;&gt;
+        </dependency>-->
         <dependency>
             <groupId>com.kongtrolink.framework</groupId>
             <artifactId>yyds-mqtt-starter</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
+            <!--<scope>compile</scope>-->
         </dependency>
     </dependencies>
 

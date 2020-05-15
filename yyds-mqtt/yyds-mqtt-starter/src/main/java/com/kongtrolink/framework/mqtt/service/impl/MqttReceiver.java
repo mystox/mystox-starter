@@ -145,7 +145,7 @@ public class MqttReceiver {
     }
 
     public String getUnitBySubList(String topic) {
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheudler();
+        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
 //        return SpringContextUtil.getServiceMap().get(topic);
         //todo
         String data = regScheduler.getData(topic);

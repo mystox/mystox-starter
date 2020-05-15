@@ -42,7 +42,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private String serverVersion;
     private Logger logger = LoggerFactory.getLogger(ZkHandlerImpl.class);
     private CountDownLatch latch = new CountDownLatch(1);
-    private static final int SESSION_TIMEOUT = 10000;//单位毫秒
+    private static final int SESSION_TIMEOUT = 100000;//单位毫秒
     private ZooKeeper zk;
 
 
@@ -217,9 +217,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             InitTree();//初始化目录信息
             if (locks()) //获取注册锁
             {
-                initConsummer();//定义消费目录
-                initConsummerRoute();//定义消费路由目录
-                initprovider();//定义服务供给目录
+                initConsumer();//定义消费目录
+                initConsumerRoute();//定义消费路由目录
+                initProvider();//定义服务供给目录
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
                 registerProvider(getRegLocalList());//订阅
                 registerConsumerRoute(); //注册路由
@@ -285,7 +285,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 定义sub节点
      */
-    private void initprovider() throws KeeperException, InterruptedException {
+    private void initProvider() throws KeeperException, InterruptedException {
 
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
@@ -296,8 +296,6 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                             preconditionServerCode(serverName, serverVersion)));
             if (!exists(nodename))
                 create(nodename, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        } else {
-
         }
 
     }
@@ -305,19 +303,16 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 定义Pub节点
      */
-    public void initConsummer() throws KeeperException, InterruptedException {
-
+    public void initConsumer() throws KeeperException, InterruptedException {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion)));
         if (exists(lock)) { //检测锁的情况
-            String nodename = preconditionGroupServerPath(TopicPrefix.PUB_PREFIX,
+            String nodeName = preconditionGroupServerPath(TopicPrefix.PUB_PREFIX,
                     preconditionGroupServerCode(groupCode,
                             preconditionServerCode(serverName, serverVersion)));
-            if (!exists(nodename))
-                create(nodename, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        } else {
-
+            if (!exists(nodeName))
+                create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
     }
@@ -325,18 +320,16 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 定义Pub节点
      */
-    public void initConsummerRoute() throws KeeperException, InterruptedException {
-
+    public void initConsumerRoute() throws KeeperException, InterruptedException {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion)));
         if (exists(lock)) { //检测锁的情况
-            String nodename = preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
+            String nodeName = preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     preconditionGroupServerCode(groupCode,
                             preconditionServerCode(serverName, serverVersion)));
-            if (!exists(nodename))
-                create(nodename, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        } else {
+            if (!exists(nodeName))
+                create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
     }
@@ -362,13 +355,15 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             return zk.exists(nodeData, true) != null;
         } catch (Exception e) {
+            logger.error("zk exists check error...[{}]",e.toString());
+            if(logger.isDebugEnabled())
             e.printStackTrace();
         }
         return false;
     }
 
     @Override
-    public void create(String path, byte[] data, int createMode) {
+    public synchronized void create(String path, byte[] data, int createMode) {
         CreateMode CM = null;
         switch (createMode) {
             case IaConf.EPHEMERAL:
@@ -388,7 +383,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             try {
                 zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CM);
             } catch (KeeperException | InterruptedException e) {
-                e.printStackTrace();
+                logger.warn("zk path exists...[{}]", e.toString());
+                if (logger.isDebugEnabled())
+                    e.printStackTrace();
             }
     }
 
@@ -401,6 +398,14 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         this.serverVersion = iaconf.getServerVersion();
         this.operaRouteConfig = iaconf.getOperaRouteConfig();
         initCaller(iaENV);
+    }
+
+    @Override
+    public RegCall.RegState getServerState() {
+        ZooKeeper.States state = zk.getState();
+        if (state.isConnected()) return RegCall.RegState.SyncConnected;
+        if (ZooKeeper.States.CLOSED.equals(state)) return RegCall.RegState.Closed;
+        return RegCall.RegState.Unknown;
     }
 
 
@@ -417,7 +422,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                     latch.await();
                 } else {
                     logger.warn("zk state is [{}], close zk and create new one...", JSONObject.toJSONString(zk.getState()));
-                    zk.close();
+                    close();
                     zk = new ZooKeeper(registerUrl, SESSION_TIMEOUT, this);
                     latch.await();
                 }
@@ -503,14 +508,14 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         Watcher.Event.EventType eventType = watchedEvent.getType();
         String path = watchedEvent.getPath();
         if (state == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
-            logger.warn("zk connect successful...");
+            logger.info("zk connect successful...");
             latch.countDown();
         } else if (Event.EventType.NodeDeleted == eventType) {
 
             if (path.startsWith(TopicPrefix.SERVER_STATUS)) {
                 logger.warn("serverStatus:" + path + "been delete, try recover...");
                 try {
-                    regCall.call(RegCall.RebuildStatus);
+                    regCall.call(RegCall.RegState.RebuildStatus);
                     logger.warn("Node:" + path + " recovered...");
                 } catch (InterruptedException e) {
                     logger.error("zk rebuild error...[{}]", e.toString());
@@ -524,7 +529,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             synchronized (ZkHandlerImpl.class) {
                 try {
                     latch = new CountDownLatch(1);
-                    regCall.call(RegCall.Disconnected);
+                    regCall.call(RegCall.RegState.Disconnected);
                 } catch (Exception e) {
                     logger.error("zk disconnect error...[{}]", e.toString());
                     if (logger.isDebugEnabled()) e.printStackTrace();
