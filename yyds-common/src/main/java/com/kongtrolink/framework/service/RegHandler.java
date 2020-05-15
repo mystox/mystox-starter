@@ -1,6 +1,8 @@
 package com.kongtrolink.framework.service;
 
+import com.kongtrolink.framework.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.core.RegCall;
+import com.kongtrolink.framework.entity.OperaResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 
 import java.util.List;
@@ -28,5 +30,7 @@ public interface RegHandler {
     public void build();
 
     RegCall.RegState getServerState();
+
+    public OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws Exception;
 
 }

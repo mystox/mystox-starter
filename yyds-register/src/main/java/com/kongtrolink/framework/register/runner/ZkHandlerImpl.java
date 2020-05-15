@@ -117,20 +117,20 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @throws InterruptedException
      * @throws IOException
      */
-    private void InitTree() throws KeeperException, InterruptedException, IOException {
+    private void initTree() throws KeeperException, InterruptedException, IOException {
         //创建根
         if (!exists(TopicPrefix.TOPIC_PREFIX))
             create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
-        initbranch(TopicPrefix.SUB_PREFIX, groupCode);
+        initBranch(TopicPrefix.SUB_PREFIX, groupCode);
         //请求列表目录
-        initbranch(TopicPrefix.PUB_PREFIX, groupCode);
+        initBranch(TopicPrefix.PUB_PREFIX, groupCode);
         //功能权限目录
-        initbranch(TopicPrefix.PRIV_PREFIX, groupCode);
+        initBranch(TopicPrefix.PRIV_PREFIX, groupCode);
         //在线标志目录
-        initbranch(TopicPrefix.SERVER_STATUS, groupCode);
+        initBranch(TopicPrefix.SERVER_STATUS, groupCode);
         //操作请求路由表目录
-        initbranch(TopicPrefix.OPERA_ROUTE, groupCode);
+        initBranch(TopicPrefix.OPERA_ROUTE, groupCode);
     }
 
     /**
@@ -161,7 +161,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @throws KeeperException
      * @throws InterruptedException
      */
-    void initbranch(String topicPrefix, String groupCode) throws KeeperException, InterruptedException {
+    void initBranch(String topicPrefix, String groupCode) throws KeeperException, InterruptedException {
         if (!exists(topicPrefix))
             create(topicPrefix, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (StringUtils.isNotBlank(groupCode)) {
@@ -214,7 +214,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      */
     public void register() {
         try {
-            InitTree();//初始化目录信息
+            initTree();//初始化目录信息
             if (locks()) //获取注册锁
             {
                 initConsumer();//定义消费目录
@@ -224,11 +224,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 registerProvider(getRegLocalList());//订阅
                 registerConsumerRoute(); //注册路由
             }
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (KeeperException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -291,11 +287,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion)));
         if (exists(lock)) { //检测锁的情况
-            String nodename = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
+            String nodeName = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
                     preconditionGroupServerCode(groupCode,
                             preconditionServerCode(serverName, serverVersion)));
-            if (!exists(nodename))
-                create(nodename, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            if (!exists(nodeName))
+                create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
     }

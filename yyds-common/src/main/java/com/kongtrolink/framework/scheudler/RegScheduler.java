@@ -1,8 +1,10 @@
 package com.kongtrolink.framework.scheudler;
 
 
+import com.kongtrolink.framework.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.core.RegCall;
+import com.kongtrolink.framework.entity.OperaResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 
 import java.util.List;
@@ -47,4 +49,5 @@ public interface RegScheduler {
 
     public RegCall.RegState getState();
 
+    OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws Exception;
 }

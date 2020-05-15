@@ -3,8 +3,10 @@ package com.kongtrolink.framework.scheudler;
 
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.config.OperaRouteConfig;
+import com.kongtrolink.framework.config.WebPrivFuncConfig;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.core.RegCall;
+import com.kongtrolink.framework.entity.OperaResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.service.RegHandler;
 import org.slf4j.Logger;
@@ -125,6 +127,12 @@ public class ZkRegScheduler implements RegScheduler  {
     public RegCall.RegState getState() {
         RegCall.RegState state = regHandler.getServerState();
         return state;
+    }
+
+    @Override
+    public OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws Exception {
+        OperaResult operaResult = regHandler.registerWebPriv(webPrivFuncConfig);
+        return operaResult;
     }
 
 
