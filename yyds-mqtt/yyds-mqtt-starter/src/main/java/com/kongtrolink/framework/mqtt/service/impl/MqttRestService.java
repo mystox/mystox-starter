@@ -12,7 +12,7 @@ import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
 
-import com.kongtrolink.framework.scheudler.RegScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.zookeeper.KeeperException;

@@ -8,13 +8,14 @@ import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerAck;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerSub;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
-import com.kongtrolink.framework.scheudler.MsgScheduler;
-import com.kongtrolink.framework.scheudler.RegScheduler;
+import com.kongtrolink.framework.scheduler.MsgScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 @Component("MqttHandler")
+@Scope("com.kongtrolink.framework.scheduler.MsgScheduler")
 public class MqttHandler implements MsgHandler {
     @Autowired
     IaContext iaContext;
@@ -32,24 +34,24 @@ public class MqttHandler implements MsgHandler {
     @Autowired
     ChannelHandlerAck mqttHandlerAck;
     @Autowired
-    ChannelHandlerSub mqttHandlermpl;
+    ChannelHandlerSub mqttHandlerImpl;
     @Autowired
-    ChannelSenderImpl mqttSender;
+    ChannelSenderImpl mqttSenderImpl;
 
     public ChannelHandlerAck getMqttHandlerAck() {
         return mqttHandlerAck;
     }
-    public ChannelHandlerSub getMqttHandlermpl() {
-        return mqttHandlermpl;
+    public ChannelHandlerSub getMqttHandler() {
+        return mqttHandlerImpl;
     }
     @Override
     public void addSubTopic(String topic, int qos) {
-        mqttHandlermpl.addSubTopic(topic, qos);
+        mqttHandlerImpl.addSubTopic(topic, qos);
     }
 
     @Override
     public void removeSubTopic(String... topic) {
-            mqttHandlermpl.removeSubTopic(topic);
+            mqttHandlerImpl.removeSubTopic(topic);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public boolean isExists(String topic) {
-        return mqttHandlermpl.isExists(topic);
+        return mqttHandlerImpl.isExists(topic);
 
     }
 
@@ -268,14 +270,14 @@ public class MqttHandler implements MsgHandler {
     MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
         // MsgScheduler msgScheduler =iaContext.getIaENV().getMsgScheduler();
         if (async) {
-            boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
+            boolean resultBoolean = mqttSenderImpl.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
                 return new MsgResult(StateCode.SUCCESS, StateCode.StateCodeEnum.toStateCodeName(StateCode.SUCCESS));
             else
                 return new MsgResult(StateCode.FAILED, StateCode.StateCodeEnum.toStateCodeName(StateCode.FAILED));
         } else {
-            return setFlag ? mqttSender.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
-                    : mqttSender.sendToMqttSync(groupServerCode, operaCode, msg);
+            return setFlag ? mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                    : mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, msg);
         }
 
     }
@@ -369,8 +371,8 @@ public class MqttHandler implements MsgHandler {
             }
             //全部广播发送
             topicArr.forEach(groupServerCode -> {
-                if (setFlag) mqttSender.sendToMqtt(groupServerCode, operaCode, qos, msg);
-                else mqttSender.sendToMqtt(groupServerCode, operaCode, msg);
+                if (setFlag) mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, qos, msg);
+                else mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, msg);
             });
 
         } catch ( Exception e) {

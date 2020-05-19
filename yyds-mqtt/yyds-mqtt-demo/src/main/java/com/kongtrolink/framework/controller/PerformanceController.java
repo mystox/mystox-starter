@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
 import com.kongtrolink.framework.entity.StateCode;
-import com.kongtrolink.framework.service.MsgHandler;
+import com.kongtrolink.framework.service.IaOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +27,12 @@ import java.util.concurrent.atomic.LongAdder;
 public class PerformanceController {
 
     Logger logger = LoggerFactory.getLogger(PerformanceController.class);
-//    @Autowired
-//    MqttSender mqttSender;
+   // @Autowired
+   // MqttSender mqttSender;
 
 
     @Autowired
-    MsgHandler msgHandler;
+    IaOpera msgHandler;
 
     @Autowired
     ThreadPoolTaskExecutor demoExecutor;
@@ -81,7 +81,7 @@ public class PerformanceController {
                 }
                 String msg = baseMsg + i;
                 demoExecutor.execute(() -> {
-                    for (int j = 0; j < intensityF; j++)
+                    /*for (int j = 0; j < intensityF; j++)
                         if (syn != null && !syn)
                             msgHandler.sendToMqtt("FOO_SERVER_DEMO_1.0.0", "countStatistic", qos, msg);
                         else {
@@ -95,7 +95,7 @@ public class PerformanceController {
                                 if (l % 1000 == 0)
                                     logger.info("ack count: {}", l);
                             }
-                        }
+                        }*/
                 });
                 try {
                     Thread.sleep(time);

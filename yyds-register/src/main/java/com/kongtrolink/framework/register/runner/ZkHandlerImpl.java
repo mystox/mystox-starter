@@ -10,7 +10,6 @@ import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.*;
-import com.kongtrolink.framework.service.MsgHandler;
 import com.kongtrolink.framework.service.RegHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.*;
@@ -198,12 +197,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @Author mystox
      * @Description 订阅统一AckTopic
      **/
-    private void ackTopic(MsgHandler mqttHandlerAck) {
+    /*private void ackTopic(MsgHandler mqttHandlerAck) {
         String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
         logger.info("add AckTopicId is [{}]", ackTopicId);
         if (!mqttHandlerAck.isExists(ackTopicId))
             mqttHandlerAck.addSubTopic(ackTopicId, 2);
-    }
+    }*/
 
     /**
      * 注册中心注册节点信息

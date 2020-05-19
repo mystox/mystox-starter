@@ -3,8 +3,8 @@ package com.kongtrolink.framework.core;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.entity.RegisterMsg;
 import com.kongtrolink.framework.entity.RegisterSub;
-import com.kongtrolink.framework.scheudler.MsgScheduler;
-import com.kongtrolink.framework.scheudler.RegScheduler;
+import com.kongtrolink.framework.scheduler.MsgScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

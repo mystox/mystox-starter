@@ -6,7 +6,7 @@ import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.MqttLogUtil;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
-import com.kongtrolink.framework.scheudler.RegScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

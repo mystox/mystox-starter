@@ -11,30 +11,42 @@ import java.util.concurrent.TimeUnit;
  * description:
  * update record:
  */
-public interface MsgHandler{
+public interface MsgHandler {
     public void addSubTopic(String topic, int qos);
+
     public void addAckTopic(String topic, int qos);
 
     public boolean isAckExists(String topic);
+
     public boolean isExists(String topic);
 
     public void removeSubTopic(String... topic);
+
     public void removeAckSubTopic(String... topic);
 
-    MsgResult opera(String operaCode, String msg);
-    MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
-    void operaAsync(String operaCode, String msg);
-    void broadcast(String operaCode, String msg);
+    public MsgResult opera(String operaCode, String msg);
+
+    public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
+
+    public void operaAsync(String operaCode, String msg);
+
+    public void broadcast(String operaCode, String msg);
+
     // MsgResult slogin(String registerServerName, String registerServerVersion);
-    RegisterMsg whereIsCentre();
+    public RegisterMsg whereIsCentre();
+
     void sendToMqtt(String serverCode, String operaCode,
                     String payload);
+
     void sendToMqtt(String serverCode, String operaCode,
                     int qos,
                     String payload);
+
     MsgResult sendToMqttSync(String serverCode, String operaCode,
                              String payload);
+
     MsgResult sendToMqttSync(String serverCode, String operaCode,
                              int qos, String payload, long timeout, TimeUnit timeUnit);
+
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload);
 }

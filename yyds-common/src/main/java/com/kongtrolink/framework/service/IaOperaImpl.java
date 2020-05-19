@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 @Service
-public class IaOperaImpl implements IaOpera{
+public class IaOperaImpl implements IaOpera {
     @Autowired
     IaContext iaContext;
     @Override

@@ -12,7 +12,7 @@ import com.kongtrolink.framework.mqtt.service.IMqttSender;
 
 
 
-import com.kongtrolink.framework.scheudler.RegScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

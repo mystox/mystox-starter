@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.scheudler;
+package com.kongtrolink.framework.scheduler;
 
 
 import com.kongtrolink.framework.common.util.MqttUtils;
