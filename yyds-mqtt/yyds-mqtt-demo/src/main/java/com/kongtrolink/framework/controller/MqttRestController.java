@@ -54,7 +54,7 @@ public class MqttRestController {
     @RequestMapping("/sendMsg")
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         msgHandler.sendToMqtt(serverCode, operaCode, message);
         return "ok";
     }
@@ -69,21 +69,21 @@ public class MqttRestController {
     @RequestMapping("/sendMsgSyn")
     public MsgResult sendMqttSyn(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         MsgResult s = msgHandler.sendToMqttSync(serverCode, operaCode, message);
         return s;
     }
 
     @RequestMapping("/addTopic")
     public String addTopic(@RequestParam String topic) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         msgHandler.addSubTopic(topic, 2);
         return "ok";
     }
 
     @RequestMapping("/addPub")
     public String addTopic(@RequestParam String serviceCode, @RequestParam String operaCode) {
-        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         msgHandler.addSubTopic(serviceCode + "/" + operaCode, 2);
         return "ok";
     }

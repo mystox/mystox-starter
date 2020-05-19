@@ -25,7 +25,7 @@ public interface MsgHandler{
     MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
     void operaAsync(String operaCode, String msg);
     void broadcast(String operaCode, String msg);
-    MsgResult slogin(String registerServerName, String registerServerVersion);
+    // MsgResult slogin(String registerServerName, String registerServerVersion);
     RegisterMsg whereIsCentre();
     void sendToMqtt(String serverCode, String operaCode,
                     String payload);

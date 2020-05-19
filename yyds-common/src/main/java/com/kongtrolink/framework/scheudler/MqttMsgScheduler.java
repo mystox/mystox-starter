@@ -103,7 +103,7 @@ public class MqttMsgScheduler implements MsgScheduler {
     }
 
     @Override
-    public MsgHandler getIahander() {
+    public MsgHandler getIaHandler() {
         return this.iaHandler;
     }
 

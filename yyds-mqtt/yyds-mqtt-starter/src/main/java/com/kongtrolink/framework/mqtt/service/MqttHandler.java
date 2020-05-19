@@ -76,7 +76,7 @@ public class MqttHandler implements MsgHandler {
     /////////////IaOperate/////////////
     @Override
     public MsgResult opera(String operaCode, String msg) {
-        return opera(operaCode,msg);
+        return opera(operaCode, msg, 1, 0, null, false, false);
     }
 
 
@@ -266,7 +266,7 @@ public class MqttHandler implements MsgHandler {
     }
 
     MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
-        MsgScheduler msgScheduler =iaContext.getIaENV().getMsgScheduler();
+        // MsgScheduler msgScheduler =iaContext.getIaENV().getMsgScheduler();
         if (async) {
             boolean resultBoolean = mqttSender.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
@@ -330,12 +330,12 @@ public class MqttHandler implements MsgHandler {
 
 
 
-    @Override
+   /* @Override
     public MsgResult slogin(String registerGroupServerCode, String sLoginPayload) {
         MsgResult slogin = mqttSender.sendToMqttSync(registerGroupServerCode,
                 OperaCode.SLOGIN, 2, sLoginPayload, 30000L, TimeUnit.MILLISECONDS);
         return slogin;
-    }
+    }*/
 
     /**
      * @return com.kongtrolink.framework.entity.MsgResult

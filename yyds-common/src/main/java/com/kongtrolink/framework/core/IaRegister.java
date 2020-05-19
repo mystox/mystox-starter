@@ -50,7 +50,7 @@ public class IaRegister {
     }
     public void connect()
     {
-        registerMsg=this.msgScheduler.getIahander().whereIsCentre();
+        registerMsg=this.msgScheduler.getIaHandler().whereIsCentre();
         this.iaConf.setRegisterUrl(registerMsg.getRegistURI());
         this.regScheduler.connect(registerMsg.getRegisterUrl());
     }

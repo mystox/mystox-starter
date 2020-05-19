@@ -111,7 +111,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 List<RegisterSub> subList = this.regScheduler.GetRegLocalList();
                 logger.warn("[call] cancellation msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                RegisterMsg registerMsg = this.msgScheduler.getIahander().whereIsCentre();
+                RegisterMsg registerMsg = this.msgScheduler.getIaHandler().whereIsCentre();
                 getConf().setRegisterUrl(registerMsg.getRegistURI());
                 this.regScheduler.connect(registerMsg.getRegisterUrl());
                 logger.warn("[call] register reconnected [{}]", registerMsg.getRegisterUrl());

@@ -80,7 +80,7 @@ public class MqttRestService {
 
 
     public JsonResult registerSub(JSONObject subJson) {
-        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         String operaCode = subJson.getString("operaCode");
         String executeUnit = subJson.getString("executeUnit");
@@ -121,7 +121,7 @@ public class MqttRestService {
 
 
     public JsonResult deleteSub(JSONObject body) {
-        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIahander();
+        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIaHandler();
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         String operaCode = body.getString("operaCode");
         String path = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
