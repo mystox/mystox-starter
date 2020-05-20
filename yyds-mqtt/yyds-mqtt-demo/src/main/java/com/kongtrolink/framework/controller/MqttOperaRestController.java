@@ -2,7 +2,7 @@ package com.kongtrolink.framework.controller;
 
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.MsgResult;
-import com.kongtrolink.framework.service.MsgHandler;
+import com.kongtrolink.framework.service.IaOpera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +23,7 @@ public class MqttOperaRestController {
 //    MqttOpera mqttOpera;
 
     @Autowired
-    MsgHandler msgHandler;
+    IaOpera msgHandler;
 
     // @Autowired
     // IaContext iaContext;

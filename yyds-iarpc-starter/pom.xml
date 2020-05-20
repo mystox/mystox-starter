@@ -8,10 +8,10 @@
         <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>yyds-rpc-starter</name>
+    <name>yyds-iarpc-starter</name>
     <!--<version>1.1.0</version>-->
-    <description>yy远程rpc</description>
-    <artifactId>yyds-rpc-starter</artifactId>
+    <description>yyds-iarpc惊蛰服务端远程消息框架</description>
+    <artifactId>yyds-iarpc-starter</artifactId>
 
     <dependencies>
         <dependency>

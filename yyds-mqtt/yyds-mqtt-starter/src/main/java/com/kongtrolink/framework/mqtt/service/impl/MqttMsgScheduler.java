@@ -1,4 +1,4 @@
-package com.kongtrolink.framework.scheduler;
+package com.kongtrolink.framework.mqtt.service.impl;
 
 
 import com.kongtrolink.framework.common.util.MqttUtils;
@@ -6,11 +6,13 @@ import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.RegisterSub;
+import com.kongtrolink.framework.scheduler.MsgScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -21,12 +23,13 @@ import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 @Component("mqttMsgScheduler")
 @Lazy
-public class MqttMsgScheduler implements MsgScheduler {
+public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
 
-    @Autowired
-    @Qualifier("MqttHandler")
+    // @Autowired
+    // @Qualifier("MqttHandler")
     MsgHandler iaHandler;
 
+    private ApplicationContext applicationContext;
     private IaConf iaconf;
     private String groupCode;
     private String serverName;
@@ -36,7 +39,7 @@ public class MqttMsgScheduler implements MsgScheduler {
 
     public MqttMsgScheduler()
     {
-        logger.debug("-----the class "+ MqttMsgScheduler.class+" instructed");
+
     }
     /**
      * @Date 0:22 2020/1/6
@@ -52,6 +55,7 @@ public class MqttMsgScheduler implements MsgScheduler {
         this.groupCode=iaconf.getGroupCode();
         this.serverName=iaconf.getServerName();
         this.serverVersion=iaconf.getServerVersion();
+        this.iaHandler = new MqttHandler(iaENV,applicationContext);
     }
 
     private void ackTopic() {
@@ -107,4 +111,8 @@ public class MqttMsgScheduler implements MsgScheduler {
         return this.iaHandler;
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

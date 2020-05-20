@@ -1,7 +1,8 @@
-package com.kongtrolink.framework.service;
+package com.kongtrolink.framework.service.Impl;
 
 import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.entity.MsgResult;
+import com.kongtrolink.framework.service.IaOpera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

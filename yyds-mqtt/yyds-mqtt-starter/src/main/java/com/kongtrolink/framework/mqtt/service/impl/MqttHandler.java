@@ -2,7 +2,6 @@ package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.kongtrolink.framework.config.IaConf;
-import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.scheduler.MsgScheduler;
@@ -11,9 +10,7 @@ import com.kongtrolink.framework.service.MsgHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -23,25 +20,40 @@ import java.util.concurrent.TimeUnit;
 
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
-@Component("MqttHandler")
-@Lazy
+// @Component("MqttHandler")
+// @Lazy
 public class MqttHandler implements MsgHandler {
-    @Autowired
-    IaContext iaContext;
+    private  IaENV iaENV;
     Logger logger = LoggerFactory.getLogger(ChannelHandlerSub.class);
-    @Autowired
-    ChannelHandlerAck mqttHandlerAck;
-    @Autowired
-    ChannelHandlerSub mqttHandlerImpl;
-    @Autowired
-    ChannelSenderImpl mqttSenderImpl;
+    private  ChannelHandlerAck mqttHandlerAck;
+    private  ChannelHandlerSub mqttHandlerImpl;
+    private  ChannelSenderImpl mqttSenderImpl;
+    private ApplicationContext applicationContext;
 
-    public ChannelHandlerAck getMqttHandlerAck() {
-        return mqttHandlerAck;
+    public MqttHandler(IaENV iaENV, ApplicationContext applicationContext) {
+        this.iaENV = iaENV;
+        this.applicationContext = applicationContext;
+        this.mqttHandlerAck = applicationContext.getBean(ChannelHandlerAck.class);
+        this.mqttHandlerImpl = applicationContext.getBean(ChannelHandlerSub.class);
+        this.mqttSenderImpl = applicationContext.getBean(ChannelSenderImpl.class);
     }
-    public ChannelHandlerSub getMqttHandler() {
-        return mqttHandlerImpl;
-    }
+
+    // @Autowired
+    // public MqttHandler(IaENV iaENV) {
+    //
+    //     this.iaENV = iaENV;
+    //     // this.mqttHandlerAck = mqttHandlerAck;
+    //     // this.mqttHandlerImpl = mqttHandlerImpl;
+    //     // this.mqttSenderImpl = mqttSenderImpl;
+    // }
+
+
+    // public ChannelHandlerAck getMqttHandlerAck() {
+    //     return mqttHandlerAck;
+    // }
+    // public ChannelHandlerSub getMqttHandler() {
+    //     return mqttHandlerImpl;
+    // }
     @Override
     public void addSubTopic(String topic, int qos) {
         mqttHandlerImpl.addSubTopic(topic, qos);
@@ -82,7 +94,7 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public RegisterMsg whereIsCentre() {
-        IaENV iaENV= iaContext.getIaENV();
+        // IaENV iaENV= this.iaENV.getIaENV();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
         String groupCode=iaconf.getGroupCode();
@@ -170,7 +182,7 @@ public class MqttHandler implements MsgHandler {
     private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async) {
         MsgResult result;
 
-        IaENV iaENV= iaContext.getIaENV();
+        // IaENV iaENV= this.iaENV.getIaENV();
         RegScheduler regScheduler=iaENV.getRegScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
@@ -233,7 +245,7 @@ public class MqttHandler implements MsgHandler {
     }
 
     private MsgResult operaBalance(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, List<String> topicArr, String routePath)   {
-        IaENV iaENV= iaContext.getIaENV();
+        // IaENV iaENV= this.iaENV.getIaENV();
         RegScheduler regScheduler=iaENV.getRegScheduler();
         //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
         int size = topicArr.size();
@@ -266,7 +278,7 @@ public class MqttHandler implements MsgHandler {
     }
 
     MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
-        // MsgScheduler msgScheduler =iaContext.getIaENV().getMsgScheduler();
+        // MsgScheduler msgScheduler =iaENV.getIaENV().getMsgScheduler();
         if (async) {
             boolean resultBoolean = mqttSenderImpl.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
@@ -289,7 +301,7 @@ public class MqttHandler implements MsgHandler {
      **/
     private List<String> buildOperaMap(String operaCode)  {
 
-        IaENV iaENV= iaContext.getIaENV();
+        // IaENV iaENV= this.iaENV.getIaENV();
         RegScheduler regScheduler=iaENV.getRegScheduler();
         IaConf iaconf= iaENV.getConf();
         String serverName=iaconf.getServerName();
@@ -346,7 +358,7 @@ public class MqttHandler implements MsgHandler {
      **/
     private void broadcast(String operaCode, String msg, int qos, boolean setFlag) {
 
-        IaENV iaENV= iaContext.getIaENV();
+        // IaENV iaENV= this.iaENV.getIaENV();
         RegScheduler regScheduler=iaENV.getRegScheduler();
         MsgScheduler msgScheduler =iaENV.getMsgScheduler();
         IaConf iaconf= iaENV.getConf();

@@ -6,7 +6,6 @@ import com.kongtrolink.framework.common.util.MqttUtils;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.config.OperaRouteConfig;
 import com.kongtrolink.framework.config.WebPrivFuncConfig;
-import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.core.RegCall;
 import com.kongtrolink.framework.entity.*;
@@ -17,8 +16,7 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -30,12 +28,13 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
-@Service(value = "zkHandlerImpl")
+// @Service(value = "zkHandlerImpl")
 public class ZkHandlerImpl implements RegHandler, Watcher {
     private OperaRouteConfig operaRouteConfig;
-    @Autowired
-    IaContext iaContext;
+    // @Autowired
+    // IaContext iaContext;
     private IaConf iaconf;
+    private IaENV iaENV;
     private String groupCode;
     private String serverName;
     private String serverVersion;
@@ -44,6 +43,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private static final int SESSION_TIMEOUT = 100000;//单位毫秒
     private ZooKeeper zk;
 
+    public ZkHandlerImpl(IaENV iaENV, ApplicationContext applicationContext) {
+        this.iaENV = iaENV;
+        this.iaconf = iaENV.getConf();
+    }
 
     private void registerConsumerRoute() throws KeeperException, InterruptedException {
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
@@ -95,10 +98,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         if (!exists(nodePath))
             try {
                 create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-            } catch (KeeperException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (KeeperException | InterruptedException e) {
+                logger.error("set data to registry error [{}]", e.toString());
+                if (logger.isDebugEnabled())
+                    e.printStackTrace();
             }
         else {
             setData(nodePath, JSONObject.toJSONBytes(sub));
@@ -112,9 +115,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 注册服务信息
      *
-     * @throws KeeperException
-     * @throws InterruptedException
-     * @throws IOException
+     * @throws KeeperException      zk异常
+     * @throws InterruptedException zk中断异常
+     * @throws IOException          io异常
      */
     private void initTree() throws KeeperException, InterruptedException, IOException {
         //创建根
@@ -132,12 +135,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         initBranch(TopicPrefix.OPERA_ROUTE, groupCode);
     }
 
+
     /**
-     * @param topicPrefix
-     * @param groupCode
-     * @param serverCode
-     * @throws KeeperException
-     * @throws InterruptedException
+     * @param topicPrefix 前缀
+     * @param groupCode   服务组code
+     * @param serverCode  服务code
+     * @throws KeeperException      zk异常
+     * @throws InterruptedException zk中断异常
      */
     void createPath(String topicPrefix, String groupCode, String serverCode) throws KeeperException, InterruptedException {
         if (!exists(topicPrefix))
@@ -350,9 +354,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             return zk.exists(nodeData, true) != null;
         } catch (Exception e) {
-            logger.error("zk exists check error...[{}]",e.toString());
-            if(logger.isDebugEnabled())
-            e.printStackTrace();
+            logger.error("zk exists check error...[{}]", e.toString());
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
         }
         return false;
     }
@@ -386,8 +390,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
 
     public void build() {
-        IaENV iaENV = iaContext.getIaENV();
-        this.iaconf = iaContext.getIaENV().getConf();
+        // IaENV iaENV = iaContext.getIaENV();
+        // this.iaconf = iaContext.getIaENV().getConf();
         this.groupCode = iaconf.getGroupCode();
         this.serverName = iaconf.getServerName();
         this.serverVersion = iaconf.getServerVersion();

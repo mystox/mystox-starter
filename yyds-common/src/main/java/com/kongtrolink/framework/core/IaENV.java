@@ -3,9 +3,8 @@ package com.kongtrolink.framework.core;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.entity.RegisterMsg;
 import com.kongtrolink.framework.entity.RegisterSub;
-import com.kongtrolink.framework.scheduler.*;
-import com.kongtrolink.framework.scheduler.MqttMsgScheduler;
 import com.kongtrolink.framework.scheduler.MsgScheduler;
+import com.kongtrolink.framework.scheduler.RegScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -44,12 +43,12 @@ public class IaENV implements ApplicationContextAware, RegCall {
         switch (regType) {
             //        case MqttMsgBus :return new MqttMsgScheduler();
             case IaConf.MqttMsgBus: {
-                MqttMsgScheduler mqttMsgScheduler = applicationContext.getBean(MqttMsgScheduler.class);
+                MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
                 mqttMsgScheduler.build(this);
                 return mqttMsgScheduler;
             }
             default: {
-                MqttMsgScheduler mqttMsgScheduler = applicationContext.getBean(MqttMsgScheduler.class);
+                MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
                 mqttMsgScheduler.build(this);
                 return mqttMsgScheduler;
             }
@@ -59,12 +58,12 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public RegScheduler createRegScheduler(String regType) {
         switch (regType) {
             case IaConf.ZkRegType: {
-                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheduler.class);
+                RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
             default: {
-                RegScheduler regScheduler = applicationContext.getBean(ZkRegScheduler.class);
+                RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
                 regScheduler.build(this);
                 return regScheduler;
             }
@@ -102,6 +101,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 
     @Override
     public void call(RegState state) throws InterruptedException {

@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>com.kongtrolink.framework</groupId>
-            <artifactId>yyds-rpc-starter</artifactId>
+            <artifactId>yyds-iarpc-starter</artifactId>
             <version>1.1.0</version>
             <optional>true</optional>
         </dependency>

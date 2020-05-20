@@ -7,7 +7,6 @@ package com.kongtrolink.framework.mqtt.service;
  * update record:
  */
 
-import com.kongtrolink.framework.entity.MqttMsg;
 import com.kongtrolink.framework.mqtt.config.MqttConfig;
 import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
@@ -35,6 +34,7 @@ public interface IMqttSender {
 
     /**
      * 发送信息到MQTT服务器
+
      *
      * @param topic 主题
      * @param payload 消息主体
