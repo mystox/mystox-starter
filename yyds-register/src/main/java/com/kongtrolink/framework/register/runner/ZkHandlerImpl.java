@@ -125,8 +125,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
         initBranch(TopicPrefix.SUB_PREFIX, groupCode);
-        //请求列表目录
-        initBranch(TopicPrefix.PUB_PREFIX, groupCode);
+        // //请求列表目录
+        // initBranch(TopicPrefix.PUB_PREFIX, groupCode);
         //功能权限目录
         initBranch(TopicPrefix.PRIV_PREFIX, groupCode);
         //在线标志目录
@@ -220,7 +220,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             initTree();//初始化目录信息
             if (locks()) //获取注册锁
             {
-                initConsumer();//定义消费目录
+                // initConsumer();//定义消费目录
                 initConsumerRoute();//定义消费路由目录
                 initProvider();//定义服务供给目录
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
@@ -302,7 +302,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 定义Pub节点
      */
-    public void initConsumer() throws KeeperException, InterruptedException {
+    /*public void initConsumer() throws KeeperException, InterruptedException {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion)));
@@ -314,7 +314,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
-    }
+    }*/
 
     /**
      * 定义Pub节点
