@@ -40,7 +40,6 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private String serverVersion;
     private Logger logger = LoggerFactory.getLogger(ZkHandlerImpl.class);
     private CountDownLatch latch = new CountDownLatch(1);
-    private static final int SESSION_TIMEOUT = 100000;//单位毫秒
     private ZooKeeper zk;
 
     public ZkHandlerImpl(IaENV iaENV, ApplicationContext applicationContext) {
@@ -412,17 +411,17 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void connect(String registerUrl) {
         try {
             if (zk == null) {
-                zk = new ZooKeeper(registerUrl, SESSION_TIMEOUT, this);
+                zk = new ZooKeeper(registerUrl, iaconf.getRegSessionTimeout(), this);
                 latch.await();
             } else {
                 if (!zk.getState().isAlive()) {
                     logger.warn("zk state is not alive create new connector...");
-                    zk = new ZooKeeper(registerUrl, SESSION_TIMEOUT, this);
+                    zk = new ZooKeeper(registerUrl, iaconf.getRegSessionTimeout(), this);
                     latch.await();
                 } else {
                     logger.warn("zk state is [{}], close zk and create new one...", JSONObject.toJSONString(zk.getState()));
                     close();
-                    zk = new ZooKeeper(registerUrl, SESSION_TIMEOUT, this);
+                    zk = new ZooKeeper(registerUrl, iaconf.getRegSessionTimeout(), this);
                     latch.await();
                 }
             }

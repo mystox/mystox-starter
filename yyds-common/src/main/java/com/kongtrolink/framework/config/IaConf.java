@@ -76,7 +76,9 @@ public class IaConf {
     @Value("${mqtt.consumer.defaultTopic}")
     private String consumerDefaultTopic;
     @Value("${mqtt.completionTimeout}")
-    private int completionTimeout;   //连接超时
+    private int completionTimeout;   //mqtt连接超时
+    @Value("${zookeeper.sessionTimeout:100}")
+    private int regSessionTimeout; //zookeeper session超时时间
     /**
      * 订阅的bean名称
      */
@@ -311,7 +313,15 @@ public class IaConf {
         this.jarServiceScanner = jarServiceScanner;
     }
 
-//    public MqttHandler getMqttHandlerAck() {
+    public int getRegSessionTimeout() {
+        return regSessionTimeout;
+    }
+
+    public void setRegSessionTimeout(int regSessionTimeout) {
+        this.regSessionTimeout = regSessionTimeout;
+    }
+
+    //    public MqttHandler getMqttHandlerAck() {
 //        return mqttHandlerAck;
 //    }
 //
