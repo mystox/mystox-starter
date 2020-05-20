@@ -14,9 +14,8 @@
         <source>1.8</source>
         <target>1.8</target>
     </properties>
-    <groupId>com.kongtrolink.framework</groupId>
     <artifactId>yyds-common</artifactId>
-    <version>1.1.0</version>
+    <!--<version>1.1.0</version>-->
     <name>yyds-common</name>
     <description>通用包</description>
     <packaging>jar</packaging>
@@ -93,10 +92,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.8.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.integration</groupId>
-            <artifactId>spring-integration-core</artifactId>
-        </dependency>
+
     </dependencies>
     <build>
         <plugins>

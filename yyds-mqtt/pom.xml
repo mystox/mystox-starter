@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yyds-mqtt</artifactId>
-    <version>1.1.0</version>
+    <!--<version>1.1.0</version>-->
     <packaging>pom</packaging>
     <modules>
         <module>yyds-mqtt-starter</module>

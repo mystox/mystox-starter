@@ -12,7 +12,7 @@
     <artifactId>yyds-mqtt-starter</artifactId>
     <name>yyds-mqtt-start</name>
     <description>mqtt通讯框架</description>
-    <version>1.1.0</version>
+    <!--<version>1.1.0</version>-->
     <properties>
         <java.version>1.8</java.version>
         <testSkip>true</testSkip>
@@ -46,6 +46,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-stream</artifactId>
         </dependency>
         <dependency>
@@ -64,15 +68,11 @@
             <version>1.2.2</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+       <!-- <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
         </dependency>
-        <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.8.1</version>
-    </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -82,7 +82,7 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.17</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
     <build>
         <plugins>
