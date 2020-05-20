@@ -21,7 +21,7 @@ import java.util.List;
 @Component("zkRegScheduler")
 @Lazy
 public class ZkRegScheduler implements RegScheduler  {
-    private Logger logger = LoggerFactory.getLogger(MqttMsgScheduler.class);
+    private Logger logger = LoggerFactory.getLogger(ZkRegScheduler.class);
     @Autowired
     @Qualifier("zkHandlerImpl")
     RegHandler regHandler;

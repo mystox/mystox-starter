@@ -19,7 +19,7 @@ import java.util.List;
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 
-@Component("mqttMsgSheculder")
+@Component("mqttMsgScheduler")
 @Lazy
 public class MqttMsgScheduler implements MsgScheduler {
 

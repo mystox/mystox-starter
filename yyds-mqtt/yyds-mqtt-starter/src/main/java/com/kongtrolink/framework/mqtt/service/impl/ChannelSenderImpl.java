@@ -7,7 +7,6 @@ import com.kongtrolink.framework.core.MqttLogUtil;
 import com.kongtrolink.framework.entity.*;
 import com.kongtrolink.framework.mqtt.service.IMqttSender;
 import com.kongtrolink.framework.scheduler.RegScheduler;
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +75,7 @@ public class ChannelSenderImpl {
         MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
         //获取目标topic列表，判断sub_list是否有人订阅处理
-        try {
+        // try {
             if (isExistsBySubList(serverCode, operaCode)) {
                 // boolean existsByPubList = addPubList(serverCode, operaCode);
                 // if (existsByPubList) {
@@ -91,7 +90,7 @@ public class ChannelSenderImpl {
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
             }
 
-        } catch (KeeperException e) {
+        /*} catch (KeeperException e) {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
             e.printStackTrace();
@@ -99,7 +98,7 @@ public class ChannelSenderImpl {
             mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
-        }
+        }*/
     }
 
 
@@ -112,7 +111,7 @@ public class ChannelSenderImpl {
         //组建消息体
         MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
         String msgId = mqttMsg.getMsgId();
-        try {
+        // try {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
                 // boolean existsByPubList = addPubList(serverCode, operaCode);
@@ -126,15 +125,15 @@ public class ChannelSenderImpl {
                 mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
             }
-        } catch (KeeperException e) {
+      /*  } catch (KeeperException e) {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+            e.printStackTrace();*/
+       /* } catch (InterruptedException e) {
             mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             e.printStackTrace();
-        }
+        }*/
     }
 
     public boolean sendToMqttBoolean(String serverCode, String operaCode,
@@ -163,7 +162,7 @@ public class ChannelSenderImpl {
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
                 return false;
             }
-        } catch (KeeperException e) {
+       /* } catch (KeeperException e) {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
@@ -172,7 +171,7 @@ public class ChannelSenderImpl {
             mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
-            return false;
+            return false;*/
         } catch (MessagingException e) {
             mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
@@ -269,7 +268,7 @@ public class ChannelSenderImpl {
 //    @Autowired
 //    ServiceRegistry serviceRegistry;
 
-    private boolean isExistsBySubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
+    private boolean isExistsBySubList(String serverCode, String operaCode) /*throws KeeperException, InterruptedException */{
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         /*if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
            logger.warn("server Slogin to {} jump subList judged...", serverCode);

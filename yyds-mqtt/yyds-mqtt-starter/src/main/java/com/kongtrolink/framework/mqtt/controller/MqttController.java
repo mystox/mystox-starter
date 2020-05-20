@@ -9,7 +9,6 @@ import com.kongtrolink.framework.mqtt.service.impl.CallBackTopic;
 import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
 import com.kongtrolink.framework.mqtt.service.impl.MqttRestService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +140,7 @@ public class MqttController {
 //        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         try {
             mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
-        } catch (KeeperException | InterruptedException |IOException e) {
+        } catch ( InterruptedException |IOException e) {
             logger.error("update opera route error: [{}]",e.toString());
             if (logger.isDebugEnabled())
                 e.printStackTrace();

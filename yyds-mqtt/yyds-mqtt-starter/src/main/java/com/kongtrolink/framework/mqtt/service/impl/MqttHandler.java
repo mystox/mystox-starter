@@ -1,13 +1,10 @@
-package com.kongtrolink.framework.mqtt.service;
+package com.kongtrolink.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.kongtrolink.framework.config.IaConf;
 import com.kongtrolink.framework.core.IaContext;
 import com.kongtrolink.framework.core.IaENV;
 import com.kongtrolink.framework.entity.*;
-import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerAck;
-import com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerSub;
-import com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl;
 import com.kongtrolink.framework.scheduler.MsgScheduler;
 import com.kongtrolink.framework.scheduler.RegScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
@@ -15,9 +12,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -26,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static com.kongtrolink.framework.common.util.MqttUtils.*;
 
 @Component("MqttHandler")
-@Scope("com.kongtrolink.framework.scheduler.MsgScheduler")
+@Lazy
 public class MqttHandler implements MsgHandler {
     @Autowired
     IaContext iaContext;

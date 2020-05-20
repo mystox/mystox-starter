@@ -11,11 +11,9 @@ import com.kongtrolink.framework.entity.AckEnum;
 import com.kongtrolink.framework.entity.JsonResult;
 import com.kongtrolink.framework.entity.RegisterSub;
 import com.kongtrolink.framework.entity.UnitHead;
-
 import com.kongtrolink.framework.scheduler.RegScheduler;
 import com.kongtrolink.framework.service.MsgHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +156,7 @@ public class MqttRestService {
     }
 
 
-    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws KeeperException, InterruptedException, IOException {
+    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws  InterruptedException, IOException {
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute == null) {
