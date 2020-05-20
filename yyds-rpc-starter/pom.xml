@@ -8,7 +8,9 @@
         <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>yyds-rpc-starter</name>
+    <!--<version>1.1.0</version>-->
+    <description>yy远程rpc</description>
     <artifactId>yyds-rpc-starter</artifactId>
 
     <dependencies>
