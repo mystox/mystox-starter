@@ -1,3 +1,0 @@
-历史数据处理服务
-
-配置文件修改说明 在application-${spring.profiles.active}.yml 后添加配置信息，然后访问 curl -d post ip:port/gatewayConfig/refreshConfig

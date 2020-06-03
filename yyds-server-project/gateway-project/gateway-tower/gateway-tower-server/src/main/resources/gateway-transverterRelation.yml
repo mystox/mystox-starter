@@ -1,5 +1,0 @@
-transverter:
-  alarmTransverter:
-    - PushAlarm
-  asset:
-    - PushDeviceAsset

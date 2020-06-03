@@ -1,1 +1,1 @@
-org.springframework.boot.env.EnvironmentPostProcessor=com.kongtrolink.framework.config.EnvironmentPostProcessor
+org.springframework.boot.env.EnvironmentPostProcessor=tech.mystox.framework.config.EnvironmentPostProcessor

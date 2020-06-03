@@ -23,7 +23,7 @@ server:
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
-  scanBasePackage: com.kongtrolink.framework.foo.api #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
+  scanBasePackage: tech.mystox.framework.foo.api #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
 mqtt:
   username: root #可选配置 mqtt配置相关
@@ -34,8 +34,8 @@ mqtt:
 logging:
   level:
     root: info
-    com.kongtrolink.framework.mqtt.service: DEBUG
-    com.kongtrolink.framework.mqtt.service.ExecutorRunner: info
+    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.mqtt.service.ExecutorRunner: info
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF

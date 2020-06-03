@@ -1,1 +1,0 @@
-org.springframework.boot.env.EnvironmentPostProcessor=com.kongtrolink.framework.gateway.tower.server.config.GatewayEnvironmentPostProcessor

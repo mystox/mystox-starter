@@ -1,9 +1,0 @@
-transverter:
-  alarmTransverter:
-    - PushAlarm
-  asset:
-    - PushDeviceAsset
-  businessTransverter:
-    - Register
-    - PushRealtimeData
-    - GatewaySystemSetDevType

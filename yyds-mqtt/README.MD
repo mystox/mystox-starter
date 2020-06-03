@@ -11,14 +11,14 @@ jdk版本为1.8+。
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=com.kongtrolink.framework -DartifactId=yyds-mqtt-starter -Dversion=1.0.0 -Dpackaging=jar -Dfile=E:\IdeaProjects\YYDS\yyds-mqtt\yyds-mqtt-starter\target\yyds-mqtt-starter-1.0.0.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=1.0.0 -Dpackaging=jar -Dfile=E:\IdeaProjects\YYDS\yyds-mqtt\yyds-mqtt-starter\target\yyds-mqtt-starter-1.0.0.jar
 ```
 
 
 项目基于springboot框架，引入yyds-mqtt-starter依赖
 ```
 <dependency>
-	<groupId>com.kongtrolink.framework</groupId>
+	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-mqtt-starter</artifactId>
 	<version>1.0.0</version>
 </dependency>
@@ -38,7 +38,7 @@ server:
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
-  scanBasePackage: com.kongtrolink.framework.demo.api #默认配置com.kongtrolink.framework 如果项目的包名不一致需要手动配置
+  scanBasePackage: tech.mystox.framework.demo.api #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.26:2181,172.16.5.26:2182,172.16.5.26:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
 mqtt:
   username: root #可选配置 mqtt配置相关
@@ -53,7 +53,7 @@ mqtt:
 ### 初始化相关
 
 ```
-@SpringBootApplication(scanBasePackages = {"com.kongtrolink.framework.mqtt"})
+@SpringBootApplication(scanBasePackages = {"tech.mystox.framework.mqtt"})
 public class ServerDemoApplication {
 
 	public static void main(String[] args) {
@@ -63,7 +63,7 @@ public class ServerDemoApplication {
 }
 ```
 
-如果项目的基本包路径不包含com.kongtrolink.framework.mqtt，则注解需要自定义配置增加scanBasePackages={"com.kongtrolink.framework.mqtt","项目基本包名"}。
+如果项目的基本包路径不包含tech.mystox.framework.mqtt，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework.mqtt","项目基本包名"}。
 
 ### local处理单元
 
@@ -85,10 +85,10 @@ public interface FooService {
 处理单元注解对应处理单元实体：
 
 ```
-{"ack":"NA","executeUnit":"local://com.kongtrolink.framework.demo.api.FooService/foo","operaCode":"fooo"}
+{"ack":"NA","executeUnit":"local://tech.mystox.framework.demo.api.FooService/foo","operaCode":"fooo"}
 ```
 
-- @Register 对应注册单元的服务名com.kongtrolink.framework.demo.api.FooService。
+- @Register 对应注册单元的服务名tech.mystox.framework.demo.api.FooService。
 - @OperaCode 对应注册单元操作码"operaCode":"fooo"，如果code不进行配置,则默认以方法（函数）名作为operaCode。
 其中ack的类型由返回值是否为void判断：如果方法返回值为void，则对应ack的值为NA,否则为ACK。
 - 处理单元服务以实现类的方式实现具体消息接口的业务逻辑，并使用@Service/@Compenent。

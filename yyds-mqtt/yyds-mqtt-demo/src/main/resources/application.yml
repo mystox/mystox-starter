@@ -1,11 +1,11 @@
 logging:
   level:
     root: info
-    com.kongtrolink.framework.mqtt.service: DEBUG
-    com.kongtrolink.framework.mqtt.service.ExecutorRunner: info
-    com.kongtrolink.framework.mqtt.service.impl.ChannelSenderImpl: info
-    com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerSub: info
-    com.kongtrolink.framework.mqtt.service.impl.ChannelHandlerAck: info
+    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.mqtt.service.ExecutorRunner: info
+    tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
+    tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
+    tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
@@ -36,7 +36,7 @@ server:
 jarResources:
   path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
-  scanBasePackage1: com.kongtrolink.framework.api
+  scanBasePackage1: tech.mystox.framework.api
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
 
 mqtt:

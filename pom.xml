@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kongtrolink.framework</groupId>
+    <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
     <version>1.1.0</version>
     <modules>
@@ -14,6 +14,7 @@
         <module>yyds-register</module>
         <module>yyds-server-project</module>
         <module>yyds-iarpc-starter</module>
+        <module>yyds-balancer</module>
     </modules>
     <packaging>pom</packaging>
 

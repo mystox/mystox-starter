@@ -1,1 +1,0 @@
-@keyframes wrapper{0%{opacity:0}100%{opacity:1}}@keyframes bg{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-2250px,0,0)}}@keyframes float{0%{transform:translate3d(0,30px,0)}100%{transform:translate3d(0,0,0)}}.index-animate{animation:float 1s ease}
