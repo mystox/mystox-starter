@@ -1,0 +1,26 @@
+logging:
+  level:
+    root: info
+    tech.mystox.framework.*: DEBUG
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+
+spring:
+  application:
+    name: yytd-mqtt-demo
+server:
+  name: FOO_SERVER_DEMO_2
+  version: 1.0.0
+  port: 52003
+#jarResources:
+#  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
+register:
+  scanBasePackage1: tech.mystox.framework.demo.api
+mqtt:
+  username: root
+  password: 123456
+  url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613

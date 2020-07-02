@@ -1,0 +1,52 @@
+logging:
+  level:
+    root: info
+    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.balancer: DEBUG
+    tech.mystox.framework.mqtt.service.ExecutorRunner: info
+    tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
+    tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
+    tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
+    org.apache.zookeeper: OFF
+    org.apache.hadoop.util.Shell: OFF
+    org.mongodb.driver.*: OFF
+    org.apache.zookeeper.ZooKeeper: OFF
+  pattern:
+    console: "%clr(%d{MM-dd HH:mm:ss}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+  mqtt:
+    error:
+      flag: true
+
+spring:
+  application:
+    name: yytd-mqtt-demo
+#  config:
+#    name: privFuncConfig
+#  config:
+#    name: privFuncConfig
+management:
+  security:
+    enabled: false
+server:
+  groupCode: GROUP_DEMO1
+  name: YYTD_MQTT_DEMO3
+  version: 1.0.0
+  port: 58000
+  title: 消息框架DEMO
+#  serverUri: /home #首页名
+  pageRoute: proxy_mqtt_demo
+  routeMark: proxy_mqtt_demo
+jarResources:
+  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
+register:
+  scanBasePackage: tech.mystox.framework
+  url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+  sessionTimeout: 100000
+mqtt:
+  username: root
+  password: 123456
+  url: tcp://172.16.5.62:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+#  url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+test:
+ config: aaa

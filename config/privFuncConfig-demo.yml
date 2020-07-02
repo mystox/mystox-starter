@@ -1,0 +1,24 @@
+privFunc:
+  type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+  name: foo_demo111dfdfdfdd #权限名称 必填
+  code: agc1111 #权限编码 必填同级不可重复
+  priority: 1 #权限权重
+  remark: abc #备注 可填
+  uri: /abc/ac #uri路径 page类型填写
+  routerMark: proxy_demo #路由标记，不填写继承父节点的标记 服务节点不写默认为当前服务的路由表标记
+  pageRoute: proxy_demo #页面标记，不填写继承父节点的标记 服务节点不写默认为当前服务的路由表标记
+  children:
+  - type: PAGE #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+    name: name1 #权限名称 必填
+    code: code1 #权限编码 必填同级不可重复
+    uri: /abc/ac #uri路径 必填
+  - type: PAGE #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+    name: name2 #权限名称 必填
+    code: code2 #权限编码 必填同级不可重复
+    uri: /abc/ac #uri路径 必填
+    root: true #管理权限的标记
+#  - type: PAGE #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
+#    name: name3 #权限名称 必填
+#    code: code3 #权限编码 必填同级不可重复
+#    uri: /abc/ac #uri路径 必填
+
