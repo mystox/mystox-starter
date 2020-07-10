@@ -20,7 +20,7 @@ public interface PerformanceService {
     public long clearCount(String param);
 
     @OperaCode
-    public Integer countStatistics(String msg);
+    public long countStatistics(String msg);
 
 
 }

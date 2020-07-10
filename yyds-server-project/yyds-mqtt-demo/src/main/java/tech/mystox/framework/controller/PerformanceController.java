@@ -232,7 +232,7 @@ public class PerformanceController {
                             msgHandler.operaAsync("countStatistic", msg);
                         else {
                             try {
-                                Integer integer = performanceService.countStatistics(msg);
+                                long integer = performanceService.countStatistics(msg);
                                 if (integer % 1000 == 0)
                                     logger.info("ack count: {}", integer);
 //                                longAdder.add(1);

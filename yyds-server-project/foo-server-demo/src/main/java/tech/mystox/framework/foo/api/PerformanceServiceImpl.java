@@ -38,4 +38,13 @@ public class PerformanceServiceImpl implements PerformanceService {
         return longAdder.sumThenReset();
     }
 
+    @Override
+    public long countStatistics(String msg) {
+        longAdder.add(1);
+        long i = longAdder.longValue();
+        if (i%1000 == 0)
+            logger.info("count >= {}", i);
+        return i;
+    }
+
 }
