@@ -1,4 +1,4 @@
-package tech.mystox.framework.foo.api;
+package tech.mystox.framework.api.test;
 
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;
@@ -18,6 +18,9 @@ public interface PerformanceService {
     public long getCount();
     @OperaCode
     public long clearCount(String param);
+
+    @OperaCode
+    public Integer countStatistics(String msg);
 
 
 }
