@@ -220,16 +220,27 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             initTree();//初始化目录信息
             if (locks()) //获取注册锁
             {
+                //订阅消息能力
+                List<RegisterSub> subList = this.iaENV.getRegScheduler().getSubList();
+                registerMsgAbility(subList);
                 // initConsumer();//定义消费目录
                 initConsumerRoute();//定义消费路由目录
                 initProvider();//定义服务供给目录
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
-                registerProvider(this.iaENV.getRegScheduler().getSubList());//订阅
+                registerProvider(subList);//订阅
                 registerConsumerRoute(); //注册路由
             }
         } catch (KeeperException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 注册消息能力
+     */
+    private void registerMsgAbility(List<RegisterSub> subList) {
+        logger.info("register msg topic ability...");
+        iaENV.getMsgScheduler().subTopic(subList);
     }
 
     /**
