@@ -18,6 +18,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 
     Logger logger = LoggerFactory.getLogger(PerformanceServiceImpl.class);
     private LongAdder longAdder = new LongAdder();
+    private LongAdder longAdder2 = new LongAdder();
 
     @Override
     public void countStatistic(String msg) {
@@ -35,13 +36,15 @@ public class PerformanceServiceImpl implements PerformanceService {
 
     @Override
     public long clearCount(String param) {
+        long l = longAdder2.sumThenReset();
+        if (l != 0) return l;
         return longAdder.sumThenReset();
     }
 
     @Override
     public long countStatistics(String msg) {
-        longAdder.add(1);
-        long i = longAdder.longValue();
+        longAdder2.add(1);
+        long i = longAdder2.longValue();
         if (i%1000 == 0)
             logger.info("count >= {}", i);
         return i;
