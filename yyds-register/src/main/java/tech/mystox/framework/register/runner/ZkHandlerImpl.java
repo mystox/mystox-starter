@@ -2,7 +2,13 @@ package tech.mystox.framework.register.runner;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.common.util.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
@@ -11,13 +17,6 @@ import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.service.RegHandler;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -244,11 +243,14 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             initTree();//初始化目录信息
             if (locks()) //获取注册锁
             {
+                //订阅消息能力
+                List<RegisterSub> subList = this.iaENV.getRegScheduler().getSubList();
+                registerMsgAbility(subList);
                 // initConsumer();//定义消费目录
                 initConsumerRoute();//定义消费路由目录
                 initProvider();//定义服务供给目录
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
-                registerProvider(this.iaENV.getRegScheduler().getSubList());//订阅
+                registerProvider(subList);//订阅
                 registerConsumerRoute(); //注册路由
                 iaENV.setServerStatus(ServerStatus.ONLINE);
             }
@@ -260,6 +262,14 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             logger.error("register other exception... ");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 注册消息能力
+     */
+    private void registerMsgAbility(List<RegisterSub> subList) {
+        logger.info("register msg topic ability...");
+        iaENV.getMsgScheduler().subTopic(subList);
     }
 
     /**
