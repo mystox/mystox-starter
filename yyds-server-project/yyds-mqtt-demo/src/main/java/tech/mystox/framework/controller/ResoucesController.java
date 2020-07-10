@@ -1,6 +1,8 @@
 package tech.mystox.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.cloud.context.environment.EnvironmentManager;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.config.OperaRouteConfigTest;
 import tech.mystox.framework.config.WebPrivFuncConfig;
@@ -8,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.endpoint.GenericPostableMvcEndpoint;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,12 +54,11 @@ public class ResoucesController {
         }
         return "ok";
     }
-    private GenericPostableMvcEndpoint genericPostableMvcEndpoint;
-
+    ContextRefresher contextRefresher;
     @Autowired
     @Lazy
-    private void setGenericPostableMvcEndpoint(GenericPostableMvcEndpoint genericPostableMvcEndpoint) {
-        this.genericPostableMvcEndpoint = genericPostableMvcEndpoint;
+    public void setContextRefresher(ContextRefresher contextRefresher) {
+        this.contextRefresher = contextRefresher;
     }
 
     @Autowired
@@ -77,9 +77,9 @@ public class ResoucesController {
         try {
             File file = FileUtils.getFile("./config/operaRoute-test-1.yml");
             Map testLoad = (Map) yaml.load(new FileInputStream(file));
-//            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
-//            Object invoke = genericPostableMvcEndpoint.invoke();
-//            logger.info(JSONObject.toJSONString(invoke));
+            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
+            Object invoke = contextRefresher.refresh();
+            logger.info(JSONObject.toJSONString(invoke));
             System.out.println(JSONObject.toJSONString(operaRouteConfig.getOperaRoute()));
             System.out.println(JSONObject.toJSONString(webPrivFuncConfig.getPrivFunc()));
             return JSONObject.toJSONString(testLoad);

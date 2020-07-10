@@ -25,12 +25,17 @@ spring:
 #    name: privFuncConfig
 #  config:
 #    name: privFuncConfig
+#management:
+#  security:
+#    enabled: false
 management:
-  security:
-    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: env,refresh
 server:
   groupCode: GROUP_DEMO1
-  name: YYTD_MQTT_DEMO3
+  name: YYTD_MQTT_DEMO89
   version: 1.0.0
   port: 58000
   title: 消息框架DEMO

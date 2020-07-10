@@ -15,6 +15,7 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * Created by mystoxlol on 2019/11/11, 13:57.
@@ -69,13 +70,13 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
                 InputStream inputStream = null;
                 try {
                     inputStream = resource.getInputStream();
-                    if (inputStream != null) {
+//                    if (inputStream != null) {
                         s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
                         if (StringUtils.isNotBlank(s)) {
-                            environment.getPropertySources().addLast(loadProfiles(resource));
+                            environment.getPropertySources().addLast(loadProfiles(resource).get(0));
                             continue;
                         }
-                    }
+//                    }
                 } finally {
                     if (inputStream != null)
                         inputStream.close();
@@ -90,11 +91,11 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
     }
 
     //加载单个配置文件
-    private PropertySource<?> loadProfiles(Resource resource) {
+    private List<PropertySource<?>> loadProfiles(Resource resource) {
         try {
             //从输入流中加载一个Properties对象
             String filename = resource.getFilename();
-            return this.loader.load(filename, resource, null);
+            return this.loader.load(filename, resource);
         } catch (IOException ex) {
             throw new IllegalStateException("load Yaml Property Source error" + resource, ex);
         }

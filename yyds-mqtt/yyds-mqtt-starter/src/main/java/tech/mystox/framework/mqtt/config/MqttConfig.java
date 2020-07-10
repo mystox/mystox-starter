@@ -101,6 +101,7 @@ public class MqttConfig {
         options.setKeepAliveInterval(20);
         // 设置“遗嘱”消息的话题，若客户端与服务器之间的连接意外中断，服务器将发布客户端的“遗嘱”消息。
         options.setWill("willTopic", WILL_DATA, 1, false);
+        options.setMaxInflight(1000);
         return options;
     }
 

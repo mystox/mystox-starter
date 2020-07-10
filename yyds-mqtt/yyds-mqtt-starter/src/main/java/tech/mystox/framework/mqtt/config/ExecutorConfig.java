@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import tech.mystox.framework.config.CommonExecutorConfig;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * update record:
  */
 @Configuration
-public class ExecutorConfig {
+public class ExecutorConfig extends CommonExecutorConfig {
     @Value("${executor.threadPool.corePoolSize:10}")
     private int CORE_POOL_SIZE;
     @Value("${executor.threadPool.maxPoolSize:100000}")
@@ -51,18 +52,5 @@ public class ExecutorConfig {
         return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttAck-");
     }
 
-    protected ThreadPoolTaskExecutor builder(int corePoolSize, int maxPoolSize, int queueCapacity, int aliveSecondis, String threadName) {
-        ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
-        //线程池维护线程的最少数量
-        poolTaskExecutor.setCorePoolSize(corePoolSize);
-        //线程池维护线程的最大数量
-        poolTaskExecutor.setMaxPoolSize(maxPoolSize);
-        //线程池所使用的缓冲队列
-        poolTaskExecutor.setQueueCapacity(queueCapacity);
-        //线程池维护线程所允许的空闲时间
-        poolTaskExecutor.setKeepAliveSeconds(aliveSecondis);
-        poolTaskExecutor.setThreadNamePrefix(threadName);
-        return poolTaskExecutor;
-    }
 
 }

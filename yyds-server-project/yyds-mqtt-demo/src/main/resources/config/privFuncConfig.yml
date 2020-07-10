@@ -1,7 +1,7 @@
 privFunc:
   type: ROOT #权限类型 可选比填，类型为：PAGE-页面 ROOT-顶级节点 BUTTON-按钮 DROP_LIST-下拉列表 URL-链接
   name: ${server.name} #权限名称 必填
-  code: agc1111 #权限编码 必填同级不可重复
+  code: agc1111ddddddd #权限编码 必填同级不可重复
   priority: 1 #权限权重
   remark: abc #备注 可填
   uri: /abc/ac #uri路径 page类型填写

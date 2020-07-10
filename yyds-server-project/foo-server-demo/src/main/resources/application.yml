@@ -1,7 +1,4 @@
 spring:
-  http:
-    multipart:
-      enabled: false
   application:
     name: yytd-mqtt-demo
   session:
@@ -34,6 +31,7 @@ mqtt:
 logging:
   level:
     root: info
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: trace
     tech.mystox.framework.mqtt.service: DEBUG
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     org.apache.hadoop.util.Shell: OFF
@@ -42,3 +40,8 @@ logging:
   pattern:
     console: "%clr(%d{MM-dd HH:mm:ss}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
     file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,refresh

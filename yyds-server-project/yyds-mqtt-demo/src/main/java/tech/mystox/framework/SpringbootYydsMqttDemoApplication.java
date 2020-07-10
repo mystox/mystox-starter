@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
-@ComponentScan("tech.mystox.framework")
+//@ComponentScan("tech.mystox.framework")
 public class SpringbootYydsMqttDemoApplication {
 
     public static void main(String[] args) {
