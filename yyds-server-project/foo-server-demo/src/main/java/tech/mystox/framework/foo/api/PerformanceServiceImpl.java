@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.api.test.PerformanceService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -30,15 +32,23 @@ public class PerformanceServiceImpl implements PerformanceService {
     }
 
 
-    public long getCount() {
-        return longAdder.sum();
+    public Map<String,Long> getCount() {
+        long sum = longAdder.sum();
+        long sum2 = longAdder2.sum();
+        Map<String, Long> sumResult = new HashMap<>();
+        sumResult.put("sum1", sum);
+        sumResult.put("sum2", sum2);
+        return sumResult;
     }
 
     @Override
     public long clearCount(String param) {
-        long l = longAdder2.sumThenReset();
-        if (l != 0) return l;
-        return longAdder.sumThenReset();
+        long l2 = longAdder2.sumThenReset();
+        System.out.println("sum2:"+l2);
+        if (l2 != 0) return l2;
+        long l1 = longAdder.sumThenReset();
+        System.out.println("sum1:"+l1);
+        return l1;
     }
 
     @Override
