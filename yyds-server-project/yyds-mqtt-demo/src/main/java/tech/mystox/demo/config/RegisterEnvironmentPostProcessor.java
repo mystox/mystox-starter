@@ -1,9 +1,10 @@
-package tech.mystox.framework.config;
+package tech.mystox.demo.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
@@ -23,9 +24,9 @@ import java.util.List;
  * description:
  * update record:
  */
-public class EnvironmentPostProcessor implements org.springframework.boot.env.EnvironmentPostProcessor {
+public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
-    Logger logger = LoggerFactory.getLogger(EnvironmentPostProcessor.class);
+    Logger logger = LoggerFactory.getLogger(RegisterEnvironmentPostProcessor.class);
 
     protected boolean ignoreFileNotFound = true;
     //Properties对象
@@ -36,13 +37,13 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             "file:config/privFuncConfig.yml",
             "classpath:config/operaRoute.yml",
             "file:config/operaRoute.yml",
+            "classpath:config/operaRoute-test.yml",
+            "file:config/operaRoute-test.yml",
     };
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         loadResources(environment, application,this.profiles);
-//        environment.resolveRequiredPlaceholders("tech.mystox.framework");
-//        environment.setRequiredProperties("tech.mystox.framework");
         if (logger.isInfoEnabled())
             logger.info("load register environment post processor success...");
         else
@@ -72,13 +73,13 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
                 InputStream inputStream = null;
                 try {
                     inputStream = resource.getInputStream();
-//                    if (inputStream != null) {
+                    if (inputStream != null) {
                         s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
                         if (StringUtils.isNotBlank(s)) {
                             environment.getPropertySources().addLast(loadProfiles(resource).get(0));
                             continue;
                         }
-//                    }
+                    }
                 } finally {
                     if (inputStream != null)
                         inputStream.close();

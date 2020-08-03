@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties
+//@ConfigurationProperties(prefix = "")
 public class IaConf {
 
 
@@ -74,22 +74,22 @@ public class IaConf {
     @Value("${server.groupCode}")
     private String groupCode;
 
-    @Value("${mqtt.username:root}")
-    private String username;
-    @Value("${mqtt.password:123456}")
-    private String password;
-    @Value("${mqtt.url}")
-    private String url;
-    @Value("${mqtt.producer.clientId}")
-    private String producerClientId;
-    @Value("${mqtt.producer.defaultTopic}")
-    private String producerDefaultTopic;
-    @Value("${mqtt.consumer.clientId}")
-    private String consumerClientId;
-    @Value("${mqtt.consumer.defaultTopic}")
-    private String consumerDefaultTopic;
-    @Value("${mqtt.completionTimeout}")
-    private int completionTimeout;   //mqtt连接超时
+//    @Value("${mqtt.username:root}")
+//    private String username;
+//    @Value("${mqtt.password:123456}")
+//    private String password;
+//    @Value("${mqtt.url}")
+//    private String url;
+//    @Value("${mqtt.producer.clientId}")
+//    private String producerClientId;
+//    @Value("${mqtt.producer.defaultTopic}")
+//    private String producerDefaultTopic;
+//    @Value("${mqtt.consumer.clientId}")
+//    private String consumerClientId;
+//    @Value("${mqtt.consumer.defaultTopic}")
+//    private String consumerDefaultTopic;
+//    @Value("${mqtt.completionTimeout}")
+//    private int completionTimeout;   //mqtt连接超时
     @Value("${register.sessionTimeout:100}")
     private int regSessionTimeout; //zookeeper session超时时间
     // /**
