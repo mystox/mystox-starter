@@ -5,7 +5,7 @@
 ## 前提说明：
 - 此消息框架基于mqtt消息中间件实现的分布式远程调用。
 - 此消息框架需要消息中间件mqtt、注册中心中间件zookeeper(redis暂不支持)环境支持。
-- 此框架bean管理依赖于springboot 1.x。
+- 此框架bean管理依赖于springboot 2.x。
 - 此框架消息队列中间件、注册中心、负载均衡策略可自定义开发，友好性配置开发正在进行...
 
 - jdk版本为1.8+。
@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>1.2.0</version>
+	<version>2.0.1</version>
 </dependency>
 
 ```
@@ -56,7 +56,8 @@ mqtt:
 ### 初始化相关
 
 ```
-@SpringBootApplication(scanBasePackages = {"tech.mystox.framework.mqtt"})
+@SpringBootApplication
+@EnableOpera
 public class ServerDemoApplication {
 
 	public static void main(String[] args) {
@@ -66,7 +67,8 @@ public class ServerDemoApplication {
 }
 ```
 
-如果项目的基本包路径不包含tech.mystox.framework.mqtt，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework.mqtt","项目基本包名"}。
+如果项目的基本包路径不包含tech.mystox.framework，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework","项目基本包名"}。
+2.0.1版本已经通过@EnableOpera注解实现组件包的注入。
 
 ### local处理单元
 
@@ -140,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>1.2.0</version>
+        <version>2.0.1</version>
     </dependency>
 ```
 common接口
