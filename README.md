@@ -214,6 +214,7 @@ public class LocalServiceImpl implements LocalService {
 * yyds-balancer: 负载均衡模块的实现，默认基本模式BaseLoadBalancerClient。
 * yyds-register: 注册模块的实现，默认实现zookeeper为注册中心。
 * yyds-mqtt: 消息中间件组件，实现消息的消费和生产，集成注册模块与负载均衡模块实现消息的分布式远程调用，支持‘函数式’与‘topic式’调用。
+* yyds-server-project: 使用的案例示例
 
 contact: 
 - e-mail: mystox@163.com 
