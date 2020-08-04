@@ -201,13 +201,14 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                     }
                     if (bound != 0)
                         topicArr.set(i, topicArr.get(size - count - 1));//尾数交换
-
                     count += 1;
-                } while (count <= size);
+                } while (count < size);
                 if (count > 0 && count < size) { //删除错误服务，重置路由表
+                    logger.warn("delete error server reset opera route...");
                     // System.out.println(count);
                     topicArr = topicArr.subList(0, size - count);
                 } else if (count == size) { //遍历所有路由皆请求错误，重建路由
+                    logger.warn("all route was failed...rebuild and try once again");
                     topicArr = regScheduler.buildOperaMap(operaCode);
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次
@@ -224,8 +225,12 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                     topicArr = new ArrayList<>();
                 }*/
 
+            } else {
+                logger.warn("[{}]request route topic arr is null", operaCode);
+                result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
             }
-            logger.warn("[{}] mqtt sender route code has changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
+            if (size != topicArr.size())
+                logger.warn("[{}] mqtt sender route code have changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
             regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
         }
 

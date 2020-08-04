@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.StateCode;
@@ -36,7 +37,8 @@ public class OperaInterceptor implements MethodInterceptor {
         String operaCodeName;
         Method method = invocation.getMethod();
         OperaCode operaCode = method.getAnnotation(OperaCode.class);
-        operaCodeName = operaCode == null ? method.getName() : operaCode.code();
+        if (operaCode == null) throw new MsgResultFailException("opera is null or code is blank");
+        operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
         Type genericReturnType = method.getGenericReturnType();
         // Class<?> returnType = method.getReturnType();
         Object[] arguments = invocation.getArguments();
@@ -65,7 +67,10 @@ public class OperaInterceptor implements MethodInterceptor {
             }
         } else if (returnType.getClass().isInstance(parse)) {
             return parse;
-        }
+        } else if (returnType == Long.class|| "long".equals(returnType.getTypeName()))
+            return Long.parseLong(msg);
+        else if (returnType == Byte.class|| "byte".equals(returnType.getTypeName()))
+            return Byte.parseByte(msg);
         return parse;
     }
 
