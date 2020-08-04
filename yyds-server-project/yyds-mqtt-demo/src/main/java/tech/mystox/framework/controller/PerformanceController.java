@@ -1,6 +1,7 @@
 package tech.mystox.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import tech.mystox.framework.api.test.PerformanceService;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.StateCode;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.mystox.framework.stereotype.Opera;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -37,7 +39,8 @@ public class PerformanceController {
     @Autowired
     ThreadPoolTaskExecutor demoExecutor;
     private boolean breakFlag = false;
-
+    @Opera
+    PerformanceService performanceService;
 
     @RequestMapping("/msgSendLogic")
     public JsonResult msgSendLogic(@RequestBody JSONObject condition) {
@@ -163,6 +166,78 @@ public class PerformanceController {
                                 long l = longAdder.longValue();
                                 if (l % 1000 == 0)
                                     logger.info("ack count: {}", l);
+                            }
+                        }
+                    }
+                });
+                try {
+                    Thread.sleep(time);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            logger.info("send ending...");
+        });
+        return new JsonResult("totalCount is: " + count * intensity + " lastTime count is: " /*+ countStatistic.getMsg()*/);
+    }
+
+    @RequestMapping("/msgFuncLogic")
+    public JsonResult msgFuncLogic(@RequestBody JSONObject condition) {
+        Long count = condition.getLong("count");
+        int qos = condition.getInteger("qos");
+        long timeSeconds = condition.getLong("timeSeconds");
+        Integer intensity = condition.getInteger("intensity"); //密集度
+        Integer coreSize = condition.getInteger("coreSize");
+
+        if (intensity == null) {
+            intensity = 1;
+        }
+        final int intensityF = intensity;
+        Boolean aBreak = condition.getBoolean("break");
+        Boolean syn = condition.getBoolean("syn");
+        if (aBreak) {
+            breakFlag = true;
+            return new JsonResult("中断");
+        } else {
+            breakFlag = false;
+        }
+
+        long time = 1000 / timeSeconds;
+
+//        MsgResult countStatistic = mqttSender.sendToMqttSync("FOO_SERVER_DEMO_1.0.0", "clearCount", "");
+//        MsgResult countStatistic = new MsgResult();
+        String baseMsg = condition.getString("msg");
+        if (coreSize != null) demoExecutor.setCorePoolSize(coreSize);
+        demoExecutor.execute(() -> {
+            LongAdder longAdder = new LongAdder();
+            for (long i = 0; i < count; i++) {
+                if (breakFlag) {
+                    logger.warn("task break count is {}", i);
+                    return;
+                }
+                if (i % 1000 == 0) {
+                    int activeCount = demoExecutor.getActiveCount();
+                    int poolSize = demoExecutor.getPoolSize();
+                    int corePoolSize = demoExecutor.getCorePoolSize();
+                    logger.info("count: {}, pool size: {} active count: {}, core pool size: {}", i * intensityF, poolSize, activeCount, corePoolSize);
+                }
+                String msg = baseMsg + i;
+                demoExecutor.execute(() -> {
+                    for (int j = 0; j < intensityF; j++) {
+                        if (syn != null && !syn)
+                            msgHandler.operaAsync("countStatistic", msg);
+                        else {
+                            try {
+                                long integer = performanceService.countStatistics(msg);
+                                if (integer % 1000 == 0)
+                                    logger.info("ack count: {}", integer);
+//                                longAdder.add(1);
+//                                long l = longAdder.longValue();
+//                                if (l % 1000 == 0)
+//                                    logger.info("ack count: {}", l);
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         }
                     }

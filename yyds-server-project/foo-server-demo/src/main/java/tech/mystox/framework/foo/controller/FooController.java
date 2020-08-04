@@ -1,5 +1,6 @@
 package tech.mystox.framework.foo.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.foo.api.PerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 /**
  * \* @Author: mystox
@@ -18,15 +21,15 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/foo")
 public class FooController {
-    @Autowired
+    @Autowired(required = false)
     ThreadPoolTaskExecutor mqttExecutor;
     @Autowired
     PerformanceService performanceService;
 
     @RequestMapping("/getCount")
     public String getCount() {
-        long count = performanceService.getCount();
-        return "统计数量： " + count;
+        Map<String,Long> count = performanceService.getCount();
+        return "统计数量： " + JSONObject.toJSONString(count);
     }
 
     @RequestMapping("/clearCount")

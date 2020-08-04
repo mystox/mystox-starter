@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import tech.mystox.framework.stereotype.EnableOpera;
 
 /**
  * Created by mystoxlol on 2019/8/12, 15:32.
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
-@ComponentScan("tech.mystox.framework")
+@EnableOpera
 public class SpringbootYydsMqttDemoApplication {
 
     public static void main(String[] args) {

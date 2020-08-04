@@ -2,7 +2,7 @@ logging:
   level:
     root: info
     tech.mystox.framework.mqtt.service: DEBUG
-    tech.mystox.framework.balancer: DEBUG
+    tech.mystox.framework.balancer: info
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
