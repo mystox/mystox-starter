@@ -21,7 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/foo")
 public class FooController {
-    @Autowired
+    @Autowired(required = false)
     ThreadPoolTaskExecutor mqttExecutor;
     @Autowired
     PerformanceService performanceService;

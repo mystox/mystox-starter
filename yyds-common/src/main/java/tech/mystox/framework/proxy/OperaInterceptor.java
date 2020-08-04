@@ -37,6 +37,7 @@ public class OperaInterceptor implements MethodInterceptor {
         String operaCodeName;
         Method method = invocation.getMethod();
         OperaCode operaCode = method.getAnnotation(OperaCode.class);
+        if (operaCode == null) throw new MsgResultFailException("opera is null or code is blank");
         operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
         Type genericReturnType = method.getGenericReturnType();
         // Class<?> returnType = method.getReturnType();
