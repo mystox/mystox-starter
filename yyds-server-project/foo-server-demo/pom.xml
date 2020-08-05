@@ -5,10 +5,10 @@
 	<parent>
 		<artifactId>yyds-server-project</artifactId>
 		<groupId>tech.mystox.framework</groupId>
-		<version>1.0.0</version>
+		<version>1.2.1</version>
 	</parent>
 	<artifactId>foo-server-demo</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<name>foo-server-demo</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -23,12 +23,12 @@
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-opera-api</artifactId>
-			<version>1.0.0</version>
+			<version>1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-iarpc-starter</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
