@@ -203,6 +203,18 @@ public class LocalServiceImpl implements LocalService {
 ```
 描述：实现类实现LocalService接口内容，@Service注解为spring实例化注解
 
+
+## 源码相关
+
+### 代码模块描述
+
+* yyds-iarpc-starter: 框架pom管理模块。
+* yyds-common: 对外接口控制服务模块，实现服务控制选择初始化、bean实例管理、接口暴露、服务初始化、动态代理、环境配置、web资源配置、路由配置、核心工具类。
+* yyds-balancer: 负载均衡模块的实现，默认基本模式BaseLoadBalancerClient。
+* yyds-register: 注册模块的实现，默认实现zookeeper为注册中心。
+* yyds-mqtt: 消息中间件组件，实现消息的消费和生产，集成注册模块与负载均衡模块实现消息的分布式远程调用，支持‘函数式’与‘topic式’调用。
+* yyds-server-project: 使用的案例示例。
+
 ## 性能说明
 硬件条件：（cpu： Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz 网络:单服务带宽100mps）
 mqtt+zookeeper 8*cpu 
