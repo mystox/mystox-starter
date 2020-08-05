@@ -205,7 +205,6 @@ public class LocalServiceImpl implements LocalService {
 ```
 描述：实现类实现LocalService接口内容，@Service注解为spring实例化注解
 
----
 
 ## 源码相关
 
@@ -217,6 +216,19 @@ public class LocalServiceImpl implements LocalService {
 * yyds-register: 注册模块的实现，默认实现zookeeper为注册中心。
 * yyds-mqtt: 消息中间件组件，实现消息的消费和生产，集成注册模块与负载均衡模块实现消息的分布式远程调用，支持‘函数式’与‘topic式’调用。
 * yyds-server-project: 使用的案例示例。
+
+## 性能说明
+硬件条件：（cpu： Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz 网络:单服务带宽100mps）
+mqtt+zookeeper 8*cpu 
+mqtt消息中间件作为粗略测试结果：
+* 单服务的生产者: 
+  * 异步 通讯 >10000/s 并发效率，受限于mqtt发布带宽
+  * 同步 通讯4717/s 并发效率，受限于mqtt发布带宽
+* 单服务消费者: 
+  * 异步 通讯 10000/s并发效率，受限于mqtt服务的下行带宽
+  * 同步 通讯 4717/s 并发效率，受限于mqtt服务的上下行带宽
+  
+---
 
 contact: 
 - e-mail: mystox@163.com 
