@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 </dependency>
 
 ```
@@ -140,7 +140,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </dependency>
 ```
 common接口
@@ -202,6 +202,18 @@ public class LocalServiceImpl implements LocalService {
     }
 ```
 描述：实现类实现LocalService接口内容，@Service注解为spring实例化注解
+
+## 性能说明
+硬件条件：（cpu： Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz 网络:单服务带宽100mps）
+mqtt+zookeeper 8*cpu 
+mqtt消息中间件作为粗略测试结果：
+* 单服务的生产者: 
+  * 异步 通讯 >10000/s 并发效率，受限于mqtt发布带宽
+  * 同步 通讯4717/s 并发效率，受限于mqtt发布带宽
+* 单服务消费者: 
+  * 异步 通讯 10000/s并发效率，受限于mqtt服务的下行带宽
+  * 同步 通讯 4717/s 并发效率，受限于mqtt服务的上下行带宽
+
 
 ---
 
