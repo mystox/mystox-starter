@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <name>yyds-iarpc-starter</name>
     <!--<version>1.1.0</version>-->
-    <description>yyds-iarpc惊蛰服务端远程消息框架</description>
+    <description>yyds-iarpc服务端远程消息框架</description>
     <artifactId>yyds-iarpc-starter</artifactId>
     <dependencies>
         <dependency>
