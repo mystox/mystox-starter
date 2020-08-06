@@ -1,4 +1,4 @@
-FOO_SERVER_DEMO3_1.0.0:
+YYTD_MQTT_DEMO_1.0.0:
   sayHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/sayHello:ACK
   fooHi: jarName.jar/**.*.*/foo
   addHello: mystoxUtil.jar/tech.mystox.test.util.MystoxUtil/addHello:NA

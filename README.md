@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.0 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.0.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.0.1 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.0.1.jar
 ```
 
 
