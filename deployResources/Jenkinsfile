@@ -50,8 +50,8 @@ pipeline {
             }
             steps {
                 script {
-                    remoteExecutor('yyds-server-project/yyds-mqtt-demo/target/yyds-mqtt-demo-2.0.1.jar', \
-                    '/home/yyds/mqtt-demo','yyds-mqtt-demo-2.0.1.jar',10,'deployResources/mqtt-demo.ini','mqtt-demo')
+                    remoteExecutor('yyds-server-project/yyds-mqtt-demo/target/yyds-mqtt-demo-2.1.1.jar', \
+                    '/home/yyds/mqtt-demo','yyds-mqtt-demo-2.1.1.jar',10,'deployResources/mqtt-demo.ini','mqtt-demo')
                 }
             }
         }
@@ -67,8 +67,8 @@ pipeline {
             }
             steps {
                 script {
-                    remoteExecutor('yyds-server-project/foo-server-demo/target/foo-server-demo-2.0.1.jar', \
-                    '/home/yyds/foo-demo','foo-server-demo-2.0.1.jar',10,'deployResources/foo-demo.ini','foo-demo')
+                    remoteExecutor('yyds-server-project/foo-server-demo/target/foo-server-demo-2.1.1.jar', \
+                    '/home/yyds/foo-demo','foo-server-demo-2.1.1.jar',10,'deployResources/foo-demo.ini','foo-demo')
                 }
             }
         }
