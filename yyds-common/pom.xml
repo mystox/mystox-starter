@@ -13,7 +13,7 @@
         <log4j.version>2.9.1</log4j.version>
         <source>1.8</source>
         <target>1.8</target>
-        <spring-cloud.version>Greenwich.SR6</spring-cloud.version>
+        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
     </properties>
     <artifactId>yyds-common</artifactId>
     <name>yyds-common</name>
