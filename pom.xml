@@ -15,6 +15,7 @@
         <module>yyds-server-project</module>
         <module>yyds-iarpc-starter</module>
         <module>yyds-balancer</module>
+        <module>yyds-kafka</module>
     </modules>
     <packaging>pom</packaging>
 

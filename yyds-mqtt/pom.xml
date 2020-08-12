@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>yyds-mqtt-starter</module>
+        <module>yyds-kafka-starter</module>
         <!--<module>yyds-mqtt-demo</module>-->
     </modules>
 

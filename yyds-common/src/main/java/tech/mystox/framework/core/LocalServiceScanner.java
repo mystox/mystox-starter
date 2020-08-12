@@ -75,6 +75,9 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner,A
     public List<RegisterSub> getSubList() {
         Set<String> operaSet = new HashSet<String>();
         List<RegisterSub> subList = new ArrayList<>();
+        if(tech.mystox.framework.common.util.StringUtils.isBlank(basePackage)){
+
+        }
         String basePackagePath = ClassUtils.convertClassNameToResourcePath(getEnvironment().resolveRequiredPlaceholders(basePackage));
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
                 basePackagePath + '/' + resourcePattern;
