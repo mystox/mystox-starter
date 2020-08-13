@@ -22,5 +22,8 @@ public class Application {
 //        context.close();
 
         kafkaSender.sendToMqtt("abc","11111111111111111");
+
+
+//        MessageChannel toKafka = context.getBean("toKafka", MessageChannel.class);
     }
 }

@@ -45,7 +45,7 @@ import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.security.jaas.KafkaJaasLoginModuleInitializer;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.unit.DataSize;
-import tech.mystox.framework.config.YamlPropertySourceFactory;
+//import tech.mystox.framework.config.YamlPropertySourceFactory;
 
 /**
  * Configuration properties for Spring for Apache Kafka.
@@ -61,7 +61,7 @@ import tech.mystox.framework.config.YamlPropertySourceFactory;
  */
 @Configuration
 @ConfigurationProperties(prefix = "spring.kafka")
-@PropertySource(factory = YamlPropertySourceFactory.class, value = {"classpath:kafka.yml"})
+//@PropertySource(factory = YamlPropertySourceFactory.class, value = {"classpath:kafka.yml"})
 public class KafkaProperties {
 
     /**
