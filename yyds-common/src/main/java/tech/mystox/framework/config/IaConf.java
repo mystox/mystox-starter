@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 //@ConfigurationProperties(prefix = "")
 public class IaConf {
@@ -15,7 +17,7 @@ public class IaConf {
     //    @Autowired
 //    @Qualifier("remotezkHandlerImpl")
 //    RegHandler zkhandlerImpl;
-    private String myId = "0";
+    private String myId = UUID.randomUUID().toString();
 
     @Autowired
     public IaConf(ServiceScanner localServiceScanner, ServiceScanner jarServiceScanner) {
@@ -74,6 +76,10 @@ public class IaConf {
     @Value("${server.groupCode}")
     private String groupCode;
 
+    @Value("${register.isDuplicate:true}")
+    private boolean isDuplicate;
+
+    private Long sequence;
 //    @Value("${mqtt.username:root}")
 //    private String username;
 //    @Value("${mqtt.password:123456}")
@@ -328,7 +334,13 @@ public class IaConf {
         return jarServiceScanner;
     }
 
+    public boolean isDuplicate() {
+        return isDuplicate;
+    }
 
+    public void setDuplicate(boolean duplicate) {
+        isDuplicate = duplicate;
+    }
 
     public int getRegSessionTimeout() {
         return regSessionTimeout;
@@ -358,4 +370,11 @@ public class IaConf {
         return operaRouteConfig;
     }
 
+    public Long getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Long sequence) {
+        this.sequence = sequence;
+    }
 }
