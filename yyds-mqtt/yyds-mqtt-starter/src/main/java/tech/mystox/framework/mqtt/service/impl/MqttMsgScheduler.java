@@ -37,44 +37,45 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
     private Logger logger = LoggerFactory.getLogger(MqttMsgScheduler.class);
 
 
-    public MqttMsgScheduler()
-    {
+    public MqttMsgScheduler() {
 
     }
+
     /**
+     * @return void
      * @Date 0:22 2020/1/6
      * @Param No such property: code for class: Script1
-     * @return void
      * @Author mystox
      * @Description 订阅统一AckTopic
      **/
 
     @Override
     public void build(IaENV iaENV) {
-        this.iaconf=iaENV.getConf();
-        this.groupCode=iaconf.getGroupCode();
-        this.serverName=iaconf.getServerName();
+        this.iaconf = iaENV.getConf();
+        this.groupCode = iaconf.getGroupCode();
+        this.serverName = iaconf.getServerName();
         this.serverVersion=iaconf.getServerVersion();
-        this.iaHandler = new MqttHandler(iaENV,applicationContext);
+        this.iaHandler = new MqttHandler(iaENV, applicationContext);
     }
 
     private void ackTopic() {
-        String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
+        String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
         if (!iaHandler.isAckExists(ackTopicId))
             iaHandler.addAckTopic(ackTopicId, 2);
     }
+
     /**
+     * @return void
      * @Date 0:22 2020/1/6
      * @Param No such property: code for class: Script1
-     * @return void
      * @Author mystox
      * @Description 订阅订阅表信息
      **/
-    public  void subTopic(List<RegisterSub> subList) {
+    public void subTopic(List<RegisterSub> subList) {
         subList.forEach(sub -> {
             String operaCode = sub.getOperaCode();
             String topicId = MqttUtils.preconditionSubTopicId(
-                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)), operaCode);
+                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
             if (iaHandler != null) {
                 if (!iaHandler.isExists(topicId))
                     //logger.info("订阅了:{} ",topicId);
@@ -85,22 +86,22 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
     }
 
     @Override
-    public void  removerSubTopic(List<RegisterSub> subList)
-    {
+    public void removerSubTopic(List<RegisterSub> subList) {
         subList.forEach(sub -> {
             String operaCode = sub.getOperaCode();
             String topicId = MqttUtils.preconditionSubTopicId(
-                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)), operaCode);
+                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
             if (iaHandler != null) {
                 if (iaHandler.isExists(topicId))
                     //logger.info("订阅了:{} ",topicId);
                     iaHandler.removeSubTopic(topicId);
             }
         });
-        String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
-       if (iaHandler.isAckExists(ackTopicId))
-             iaHandler.removeAckSubTopic(ackTopicId);
+        String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
+        if (iaHandler.isAckExists(ackTopicId))
+            iaHandler.removeAckSubTopic(ackTopicId);
     }
+
     @Override
     public void initCaller(OperaCall caller) {
 
