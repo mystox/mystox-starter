@@ -180,7 +180,8 @@ public class MqttHandler implements MsgHandler {
         // }
         String targetServerCode = "";
         if (chooseServer != null)
-            targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(), preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion()));
+            targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(),
+                    preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion(),chooseServer.getSequence()));
 
         MsgResult result = loadBalanceScheduler.operaCall((oCode, retryServerCode) -> operaTarget(oCode, context.getMsg(),
                 context.getQos(), context.getTimeout(), context.getTimeUnit(),

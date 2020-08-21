@@ -79,7 +79,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         String serverVersion = iaconf.getServerVersion();
         //优先配置中获取
         // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
-        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
         if (!regScheduler.exists(routePath))
@@ -163,7 +163,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String serverName = iaconf.getServerName();
             String groupCode = iaconf.getGroupCode();
             String serverVersion = iaconf.getServerVersion();
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
             if (!regScheduler.exists(routePath))

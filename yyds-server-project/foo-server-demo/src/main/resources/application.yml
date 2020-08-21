@@ -22,6 +22,7 @@ jarResources:
 register:
   scanBasePackage: tech.mystox.framework #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+  isDuplicate: true
 mqtt:
   username: root #可选配置 mqtt配置相关
   password: 123456 #可选配置 mqtt配置相关
