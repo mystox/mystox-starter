@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.LongAdder;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -42,6 +43,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private Logger logger = LoggerFactory.getLogger(ZkHandlerImpl.class);
     private CountDownLatch latch = new CountDownLatch(1);
     private ZooKeeper zk;
+    private LongAdder longAdder = new LongAdder();
 
     public ZkHandlerImpl(IaENV iaENV, ApplicationContext applicationContext) {
         this.iaENV = iaENV;
@@ -94,7 +96,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void setDataToRegistry(RegisterSub sub) {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
-                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)), operaCode);
+                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
         if (!exists(nodePath))
             try {
                 create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
@@ -168,7 +170,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         if (!exists(topicPrefix))
             create(topicPrefix, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (StringUtils.isNotBlank(groupCode)) {
-            String groupPath = preconditionGroupServerPath(topicPrefix,groupCode);
+            String groupPath = preconditionGroupServerPath(topicPrefix, groupCode);
             if (!exists(groupPath))
                 create(groupPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
@@ -185,7 +187,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void registeringSub(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
-                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)), operaCode);
+                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
         if (!exists(nodePath))
             create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
@@ -256,15 +258,32 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         //获取服务信息并注册
         ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
                 iaconf.getRouteMark(), iaconf.getPageRoute(), iaconf.getServerUri(), iaconf.getTitle(), groupCode, iaconf.getMyId());
+        //如果是可重复注册服务，则获取服务id
+//        if (iaconf.isDuplicate()) {
+//            logger.info("server is duplicate status append my id [{}]", iaconf.getMyId());
+//            serverVersion += "_" + iaconf.getMyId();
+//
+//            iaconf.setServerVersion(serverVersion);
+//        }
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
-                        preconditionServerCode(serverName, serverVersion)));
-
+                        preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
         // long sessionId = zk.getSessionId();
         // System.out.println(sessionId);
         while (true) {
+            long sequence = longAdder.longValue();
+            if (iaconf.isDuplicate()) {
+                logger.info("server[{}] is duplicate status append sequence [{}]", preconditionGroupServerCode(groupCode,
+                        preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), sequence);
+                onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
+                        preconditionGroupServerCode(groupCode,
+                                preconditionServerCode(serverName, serverVersion, sequence)));
+                iaconf.setSequence(sequence);
+                serverMsg.setSequence(sequence);
+            }
             if (exists(onlineStatus)) {
-                logger.warn("server[{}] status is already online ... exits", preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
+                if (iaconf.isDuplicate()) longAdder.add(1);
+                logger.warn("server[{}] status is already online ... exits", preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
                 //  throw new InterruptedIOException();
                 String nodeData = getData(onlineStatus);
                 ServerMsg nodeMsg = JSONObject.parseObject(nodeData, ServerMsg.class);
@@ -288,11 +307,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
-                        preconditionServerCode(serverName, serverVersion)));
+                        preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
         if (exists(lock)) { //检测锁的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
                     preconditionGroupServerCode(groupCode,
-                            preconditionServerCode(serverName, serverVersion)));
+                            preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
             if (!exists(nodeName))
                 create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
@@ -322,7 +341,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void initConsumerRoute() throws KeeperException, InterruptedException {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
-                        preconditionServerCode(serverName, serverVersion)));
+                        preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
         if (exists(lock)) { //检测锁的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     preconditionGroupServerCode(groupCode,
@@ -339,7 +358,6 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         //todo 暂不实现
         return subList;
     }
-
 
 
     public List<RegisterSub> getRegLocalList() {
@@ -511,8 +529,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             logger.info("zk connect successful...");
             latch.countDown();
         } else if (Event.EventType.NodeDeleted == eventType) {
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
-            if (/*path.startsWith(TopicPrefix.SERVER_STATUS)&&*/path.equals(preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,groupCodeServerCode))) {
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
+            if (/*path.startsWith(TopicPrefix.SERVER_STATUS)&&*/path.equals(preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupCodeServerCode))) {
                 logger.warn("serverStatus:" + path + "been delete, try recover...");
                 try {
                     regCall.call(RegCall.RegState.RebuildStatus);
@@ -524,7 +542,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             }
         } else if (state == Watcher.Event.KeeperState.Expired
                 || state == Watcher.Event.KeeperState.Disconnected
-                ) {
+        ) {
             logger.warn("zookeeper Expired|Disconnected event [{}] ...", state);
             synchronized (ZkHandlerImpl.class) {
                 try {

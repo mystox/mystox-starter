@@ -22,6 +22,7 @@ public class ServerMsg {
     private String groupCode; //对应云服务编码
 //    private String serverMark; //服务端标识 对应云管的serviceVersion 默认为*
 
+    private Long sequence;
     public ServerMsg(String host, int port, String serverName, String serverVersion, String routeMark,
                      String pageRoute, String serviceUri, String title,String groupCode,String myid) {
         this.myid=myid;
@@ -57,7 +58,13 @@ public class ServerMsg {
     }
 
 
+    public Long getSequence() {
+        return sequence;
+    }
 
+    public void setSequence(Long sequence) {
+        this.sequence = sequence;
+    }
 
     public String getMyid() { return myid; }
     public void setMyid(String myid) { this.myid = myid; }

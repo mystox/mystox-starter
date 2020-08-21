@@ -1,7 +1,7 @@
 logging:
   level:
     root: info
-    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.mqtt.service: info
     tech.mystox.framework.balancer: info
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
@@ -30,7 +30,7 @@ management:
     enabled: false
 server:
   groupCode: GROUP_DEMO1
-  name: YYTD_MQTT_DEMO3
+  name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000
   title: 消息框架DEMO
