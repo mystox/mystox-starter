@@ -180,7 +180,7 @@ public class MqttRestService {
                 }
                 boolean newFile = file.createNewFile();
             }
-            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+//            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
             if (!regScheduler.exists(routePath))
