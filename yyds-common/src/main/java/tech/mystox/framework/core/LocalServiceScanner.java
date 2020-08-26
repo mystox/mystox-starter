@@ -1,6 +1,7 @@
 package tech.mystox.framework.core;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -22,6 +23,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.entity.AckEnum;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.UnitHead;
@@ -32,10 +34,7 @@ import tech.mystox.framework.stereotype.Register;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by mystoxlol on 2019/8/28, 15:40.
@@ -44,7 +43,7 @@ import java.util.Set;
  * update record:
  */
 @Service
-public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner,ApplicationContextAware {
+public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner, ApplicationContextAware {
 
     private Logger logger = LoggerFactory.getLogger(LocalServiceScanner.class);
 
@@ -69,65 +68,70 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner,A
 
     /**
      * 扫描“basePackagePath”包下的资源，将对应注解资源封装。
+     *
      * @return
      */
     @Override
     public List<RegisterSub> getSubList() {
         Set<String> operaSet = new HashSet<String>();
         List<RegisterSub> subList = new ArrayList<>();
-        String basePackagePath = ClassUtils.convertClassNameToResourcePath(getEnvironment().resolveRequiredPlaceholders(basePackage));
-        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-                basePackagePath + '/' + resourcePattern;
-        try {
-            ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
-            for (Resource resource : resources) {
-                boolean readable = resource.isReadable();
-                if (!readable) continue;
-                MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
-                MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
-                AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
-                boolean b = annotationMetadata.hasAnnotation(Register.class.getName());
-                if (b) {
-                    ClassMetadata classMetadata = metadataReader.getClassMetadata();
-                    String className = classMetadata.getClassName();
-                    Class<?> aClass = Class.forName(className);
-                    try {
-                        Object springBean = applicationContext.getBean(aClass);
-                        if (springBean == null) {
+        List<String> baseDefaultPackages = Arrays.asList("tech.mystox.framework.balancer.service", basePackage);
+        baseDefaultPackages.forEach(basePackage -> {
+            String basePackagePath = ClassUtils.convertClassNameToResourcePath(getEnvironment().resolveRequiredPlaceholders(basePackage));
+            String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+                    basePackagePath + '/' + resourcePattern;
+            try {
+                ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+                Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+                for (Resource resource : resources) {
+                    boolean readable = resource.isReadable();
+                    if (!readable) continue;
+                    MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
+                    MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+                    AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+                    boolean b = annotationMetadata.hasAnnotation(Register.class.getName());
+                    if (b) {
+                        ClassMetadata classMetadata = metadataReader.getClassMetadata();
+                        String className = classMetadata.getClassName();
+                        Class<?> aClass = Class.forName(className);
+                        try {
+                            Object springBean = applicationContext.getBean(aClass);
+                            if (springBean == null) {
+                                logger.debug("no such bean definition, jump to next register");
+                                continue;
+                            }
+                        } catch (BeansException e) {
                             logger.debug("no such bean definition, jump to next register");
                             continue;
                         }
-                    } catch (BeansException e) {
-                        logger.debug("no such bean definition, jump to next register");
-                        continue;
-                    }
-                    Method[] methods = aClass.getMethods();
-                    for (Method method : methods) {
-                        RegisterSub sub = new RegisterSub();
-                        OperaCode annotation = method.getAnnotation(OperaCode.class);
-                        if (annotation == null) continue;
-                        String code = annotation.code();
-                        if (StringUtils.isEmpty(code)) {
-                            code = method.getName();
+                        Method[] methods = aClass.getMethods();
+                        for (Method method : methods) {
+                            RegisterSub sub = new RegisterSub();
+                            OperaCode annotation = method.getAnnotation(OperaCode.class);
+                            if (annotation == null) continue;
+                            String code = annotation.code();
+                            if (StringUtils.isEmpty(code)) {
+                                code = method.getName();
+                            }
+                            Type genericReturnType = method.getGenericReturnType();
+                            sub.setAck("void".equals(genericReturnType.getTypeName()) ? AckEnum.NA : AckEnum.ACK);
+                            Class<?>[] parameterTypes = method.getParameterTypes();
+                            sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName() + "/" + JSONObject.toJSON(parameterTypes));
+                            sub.setOperaCode(code);
+                            if (operaSet.contains(code)) throw new RegisterAnalyseException("opera duplicate:" + code);
+                            operaSet.add(code);
+                            subList.add(sub);
                         }
-                        Type genericReturnType = method.getGenericReturnType();
-                        sub.setAck("void".equals(genericReturnType.getTypeName()) ? AckEnum.NA : AckEnum.ACK);
-                        Class<?>[] parameterTypes = method.getParameterTypes();
-                        sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName()+"/"+JSONObject.toJSON(parameterTypes));
-                        sub.setOperaCode(code);
-                        if (operaSet.contains(code)) throw new RegisterAnalyseException("opera duplicate:"+code);
-                        operaSet.add(code);
-                        subList.add(sub);
                     }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-            logger.info("local scanner result: [{}]", JSONObject.toJSONString(subList));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        });
+
+        logger.info("local scanner result: [{}]", JSONObject.toJSONString(subList));
         return subList;
     }
 

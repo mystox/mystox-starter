@@ -27,7 +27,7 @@ public interface LoadBalanceScheduler extends Schedule/*,Callable<MsgResult> */{
 
     <T> T operaCall(OperaCall<T> operaCall, String targetServerCode, Object key);
 
-
+    List<String> getOperaRouteArr(String operaCode);
 
     // ServerMsg retryServer(Object key);
 }
