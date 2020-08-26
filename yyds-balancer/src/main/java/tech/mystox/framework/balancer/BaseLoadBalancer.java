@@ -12,6 +12,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import tech.mystox.framework.balancer.client.BaseLoadBalancerClient;
+import tech.mystox.framework.balancer.client.LoadBalancerClient;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MsgCall;
@@ -44,6 +46,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     private ApplicationContext applicationContext;
     private IaENV iaENV;
+    private LoadBalancerClient loadBalancerClient;
 
 
     private MsgCall msgCall;
@@ -55,12 +58,13 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     }
 
-    @Override
     public void initCaller(OperaCall caller) {
     }
 
     @Override
     public void build(IaENV iaENV) {
+        this.loadBalancerClient = new BaseLoadBalancerClient(iaENV);
+        loadBalancerClient.execute();
         this.iaENV = iaENV;
     }
 
@@ -88,7 +92,8 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         List<String> topicArr = JSONArray.parseArray(data, String.class);
         if (CollectionUtils.isEmpty(topicArr)) {
             //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
-            List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+//          List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
             regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
             topicArr = subTopicArr;
@@ -134,6 +139,14 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
     @Override
     public void markServerDown(String ser) {
 
+    }
+
+    public LoadBalancerClient getLoadBalancerClient() {
+        return loadBalancerClient;
+    }
+
+    public void setLoadBalancerClient(LoadBalancerClient loadBalancerClient) {
+        this.loadBalancerClient = loadBalancerClient;
     }
 
     @Override
@@ -245,6 +258,11 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         //     return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
         // }
         return (T) result;
+    }
+
+    @Override
+    public List<String> getOperaRouteArr(String operaCode) {
+        return getLoadBalancerClient().getOperaRouteMap().get(operaCode);
     }
 
     public static void main(String[] args) {

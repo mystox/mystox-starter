@@ -410,8 +410,9 @@ public class MqttHandler implements MsgHandler {
             List<String> topicArr = JSONArray.parseArray(data, String.class);
             if (CollectionUtils.isEmpty(topicArr)) {
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
-                List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
-                regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
+                //          List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
+//                regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
                 topicArr = subTopicArr;
             }
             //全部广播发送
