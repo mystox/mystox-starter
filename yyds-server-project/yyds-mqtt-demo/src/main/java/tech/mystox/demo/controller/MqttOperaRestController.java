@@ -33,23 +33,24 @@ public class MqttOperaRestController {
     // @Autowired
     // IaContext iaContext;
     @RequestMapping("/operaSync")
-    public JsonResult operaSyn(@RequestParam String operaCode,@RequestBody String message) {
+    public JsonResult operaSync(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
         // MsgResult opera = msgHandler.opera(operaCode,message,2,10, TimeUnit.SECONDS);
-        MsgResult opera  = msgHandler.opera(operaCode, message);
+        MsgResult opera = msgHandler.opera(operaCode, message);
         return new JsonResult(opera);
     }
 
     @RequestMapping("/operaAsync")
-    public JsonResult operaAsync(@RequestParam String operaCode,@RequestBody String message) {
+    public JsonResult operaAsync(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        msgHandler.operaAsync(operaCode,message);
+        msgHandler.operaAsync(operaCode, message);
         return new JsonResult();
     }
+
     @RequestMapping("/broadcast")
-    public JsonResult broadcast(@RequestParam String operaCode,@RequestBody String message) {
+    public JsonResult broadcast(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        msgHandler.broadcast(operaCode,message);
+        msgHandler.broadcast(operaCode, message);
         return new JsonResult("ok");
     }
 
