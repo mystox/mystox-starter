@@ -17,6 +17,8 @@
 package tech.mystox.framework.common.util;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CollectionUtils {
 
@@ -199,6 +201,16 @@ public class CollectionUtils {
 
     public static boolean isNotEmpty(Collection<?> collection) {
         return collection != null && !collection.isEmpty();
+    }
+
+    /**
+     * Java8 数组转为List
+     * @param arrays
+     * @return
+     */
+    public static <T> List<T> arrayToList(T[] arrays) {
+        List<T> collect = Arrays.stream(arrays).collect(Collectors.toList());
+        return collect;
     }
 
 }

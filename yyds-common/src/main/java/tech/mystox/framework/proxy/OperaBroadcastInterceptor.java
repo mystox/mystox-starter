@@ -22,13 +22,13 @@ import java.util.Set;
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
  * company: kongtrolink
- * description:
+ * description: 广播拦截
  * update record:
  */
-public class OperaInterceptor implements MethodInterceptor {
+public class OperaBroadcastInterceptor implements MethodInterceptor {
     private IaContext iaContext;
 
-    public OperaInterceptor(IaContext iaContext) {
+    public OperaBroadcastInterceptor(IaContext iaContext) {
         this.iaContext = iaContext;
     }
 
@@ -39,40 +39,12 @@ public class OperaInterceptor implements MethodInterceptor {
         OperaCode operaCode = method.getAnnotation(OperaCode.class);
         if (operaCode == null) throw new MsgResultFailException("opera is null or code is blank");
         operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
-        Type genericReturnType = method.getGenericReturnType();
-        // Class<?> returnType = method.getReturnType();
         Object[] arguments = invocation.getArguments();
-        // Class<?>[] parameterTypes = method.getParameterTypes();
-        // new InvocationData(arguments,parameterTypes)
-        MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCodeName, JSONObject.toJSONString(arguments));
-        if (opera.getStateCode() != StateCode.SUCCESS) throw new MsgResultFailException("opera result is failed ["+opera.getStateCode()+"]");
-        String msg = opera.getMsg();
-        return deserialize(msg, genericReturnType);
+        //广播
+        iaContext.getIaENV().getMsgScheduler().getIaHandler().broadcast(operaCodeName, JSONObject.toJSONString(arguments));
+        return null;
     }
 
-    private Object deserialize(String msg, Type returnType) {
-        if (String.class == returnType) return msg;
-        Object parse = JSON.parse(msg);
-        if (parse instanceof JSONObject) {
-            return ((JSONObject) parse).toJavaObject(returnType);
-        } else if (parse instanceof JSONArray) {
-            if (returnType == List.class) {
-                Type type = ((ParameterizedType) returnType).getActualTypeArguments()[0];
-                return ((JSONArray) parse).toJavaList(type.getClass());
-            } else if (returnType == Map.class) {
-                return parse;
-            } else if (returnType == Set.class) {
-                Type type = ((ParameterizedType) returnType).getActualTypeArguments()[0];
-                return ((JSONArray) parse).toJavaList(type.getClass());
-            }
-        } else if (returnType.getClass().isInstance(parse)) {
-            return parse;
-        } else if (returnType == Long.class|| "long".equals(returnType.getTypeName()))
-            return Long.parseLong(msg);
-        else if (returnType == Byte.class|| "byte".equals(returnType.getTypeName()))
-            return Byte.parseByte(msg);
-        return parse;
-    }
 
 
    /* public static void main(String[] args) {

@@ -145,7 +145,7 @@ public class MqttController {
         try {
             mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
             //修改完成需要广播
-//            operaRouteService.broadcastOperaRoute(operaCode, subGroupServerList);
+            operaRouteService.broadcastOperaRoute(operaCode, subGroupServerList);
         } catch ( InterruptedException |IOException e) {
             logger.error("update opera route error: [{}]",e.toString());
             if (logger.isDebugEnabled())
