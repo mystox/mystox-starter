@@ -13,7 +13,7 @@ spring:
 ###########服务及消息框架相关配置#############
 server:
   groupCode: GROUP_DEMO1
-  name: FOO_SERVER_DEMO3 #服务编码
+  name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本
   port: 58106 #服务占用web端口
   title: FOO实例名

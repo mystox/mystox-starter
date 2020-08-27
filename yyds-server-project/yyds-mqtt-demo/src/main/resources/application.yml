@@ -7,7 +7,7 @@ logging:
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
-#    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
+    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
