@@ -25,10 +25,10 @@ import java.util.Set;
  * description:
  * update record:
  */
-public class OperaInterceptor implements MethodInterceptor {
+public class OperaSyncInterceptor implements MethodInterceptor {
     private IaContext iaContext;
 
-    public OperaInterceptor(IaContext iaContext) {
+    public OperaSyncInterceptor(IaContext iaContext) {
         this.iaContext = iaContext;
     }
 
