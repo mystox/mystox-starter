@@ -86,7 +86,6 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
             logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
         });
         this.operaRouteMap = operaMap;
-        operaRouteConfig.setOperaRoute(operaRouteMap);
     }
 
     public Map<String, List<String>> getOperaRouteMap() {
