@@ -91,14 +91,17 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
         }
         //ROOT 节点获取服务接口信息即云管等
         String rootSubPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, GroupCode.ROOT);
-        List<String> rootServerArr = this.getChildren(rootSubPath); //获取订阅表的服务列表
-        //遍历订阅服务列表
-        for (String serverCode : rootServerArr) {
-            String groupServerCode = preconditionGroupServerCode(GroupCode.ROOT, serverCode);
-            String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
-            List<String> serverOperaCodeArr = this.getChildren(serverPath);
-            if (serverOperaCodeArr.contains(operaCode)) {
-                result.add(groupServerCode);
+        boolean exists = this.exists(rootSubPath);
+        if (exists) {
+            List<String> rootServerArr = this.getChildren(rootSubPath); //获取订阅表的服务列表
+            //遍历订阅服务列表
+            for (String serverCode : rootServerArr) {
+                String groupServerCode = preconditionGroupServerCode(GroupCode.ROOT, serverCode);
+                String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
+                List<String> serverOperaCodeArr = this.getChildren(serverPath);
+                if (serverOperaCodeArr.contains(operaCode)) {
+                    result.add(groupServerCode);
+                }
             }
         }
         return result;
