@@ -3,9 +3,13 @@ package tech.mystox.demo.controller;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.mystox.framework.api.test.BroadcastService;
 import tech.mystox.framework.api.test.LocalService;
+import tech.mystox.framework.common.util.CollectionUtils;
+import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +25,8 @@ public class OperaController {
     @Opera
     LocalService localService;
 
+    @Opera(requestType = OperaType.Broadcast)
+    BroadcastService broadcastService;
 
     @RequestMapping("/hello")
     public JSONObject testOpera() {
@@ -45,6 +51,13 @@ public class OperaController {
         result.put("helloaaaa", aaaaaaaaaa);
         localService.helloParams("dd",1,222222222L);
         return result;
+    }
+    @RequestMapping("/broadcast")
+    public void broadcastOperaCode() {
+        List<String> msg = new ArrayList<>();
+        msg.add("cast");
+        msg.add("dddd");
+        broadcastService.callHelloWorld("mystox", msg);
     }
 
     public static void main(String[] args)

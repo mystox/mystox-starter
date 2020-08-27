@@ -13,6 +13,7 @@ import tech.mystox.framework.config.CommonExecutorConfig;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.core.IaENV;
+import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.TopicPrefix;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
@@ -46,7 +47,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     private ScheduledExecutorService scheduledExecutorService;
 
     public BaseLoadBalancerClient(IaENV iaENV) {
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(10);
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         this.iaENV = iaENV;
     }
 
@@ -55,11 +56,17 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     }
 
     void runner() {
-        logger.debug("balancer client update ...");
         RegScheduler regScheduler = iaENV.getRegScheduler();
+        RegCall.RegState state = regScheduler.getState();
+        if (RegCall.RegState.SyncConnected != state) {
+            logger.debug("register state is not connected ...");
+            return;
+        }
+//        logger.debug("balancer client update ...");
         IaConf conf = iaENV.getConf();
         String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
                 preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
+//        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
         List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                 groupServerCode));
         Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
@@ -79,6 +86,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
             logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
         });
         this.operaRouteMap = operaMap;
+        operaRouteConfig.setOperaRoute(operaRouteMap);
     }
 
     public Map<String, List<String>> getOperaRouteMap() {
@@ -88,4 +96,8 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     public void setOperaRouteMap(Map<String, List<String>> operaRouteMap) {
         this.operaRouteMap = operaRouteMap;
     }
+
+//    public static void main(String[] args) {
+//        System.out.println(RegCall.RegState.SyncConnected == RegCall.RegState.SyncConnected );
+//    }
 }

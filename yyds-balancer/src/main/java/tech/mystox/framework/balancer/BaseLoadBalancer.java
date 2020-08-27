@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -83,17 +84,18 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         String serverVersion = iaconf.getServerVersion();
         //优先配置中获取
         // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
-        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
+        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
         if (!regScheduler.exists(routePath))
             regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-        String data = regScheduler.getData(routePath);
-        List<String> topicArr = JSONArray.parseArray(data, String.class);
+//        String data = regScheduler.getData(routePath);
+//        List<String> topicArr = JSONArray.parseArray(data, String.class);
+        List<String> topicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
         if (CollectionUtils.isEmpty(topicArr)) {
             //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
-//          List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
-            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
+            List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+//            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
             regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
             topicArr = subTopicArr;
@@ -176,7 +178,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String serverName = iaconf.getServerName();
             String groupCode = iaconf.getGroupCode();
             String serverVersion = iaconf.getServerVersion();
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence()));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
             if (!regScheduler.exists(routePath))

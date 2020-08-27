@@ -34,7 +34,7 @@ logging:
   level:
     root: info
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: trace
-    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.mqtt.service: info
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
