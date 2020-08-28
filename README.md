@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.1.1 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.1.1.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.1.2 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.1.2.jar
 ```
 
 
@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>2.1.1</version>
+	<version>2.1.2</version>
 </dependency>
 
 ```
@@ -68,7 +68,7 @@ public class ServerDemoApplication {
 ```
 
 如果项目的基本包路径不包含tech.mystox.framework，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework","项目基本包名"}。
-2.1.1版本已经通过@EnableOpera注解实现组件包的注入。
+2.1.*版本已经通过@EnableOpera注解实现组件包的注入。
 
 ### local处理单元
 
@@ -142,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.1.1</version>
+        <version>2.1.2</version>
     </dependency>
 ```
 common接口
@@ -167,6 +167,17 @@ public interface LocalService {
         String helloPrams = localService.helloParams("hello", 76);
         result.put("helloParams", helloPrams);
         return result;
+    }
+    ...
+    @Opera(operaType = OperaType.Broadcast)
+    OperaRouteService operaRouteService;
+    ...
+    @RequestMapping("/broadcast")
+    public void broadcastOperaCode() {
+        List<String> msg = new ArrayList<>();
+        msg.add("cat");
+        msg.add("dog");
+        broadcastService.callHelloWorld("mystox", msg);
     }
     ...
 ```
