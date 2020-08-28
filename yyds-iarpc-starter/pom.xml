@@ -5,7 +5,7 @@
     <parent>
         <artifactId>YYDS</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>yyds-iarpc-starter</name>
@@ -16,17 +16,17 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-mqtt-starter</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-balancer</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-register</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </dependency>
     </dependencies>
     <build>
