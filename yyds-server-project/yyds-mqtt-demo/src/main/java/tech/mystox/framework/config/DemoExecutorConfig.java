@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * \
  */
 @Configuration
-public class DemoExecutorConfig extends ExecutorConfig {
+public class DemoExecutorConfig extends CommonExecutorConfig {
     @Bean(name = "demoExecutor")
     public ThreadPoolTaskExecutor demoExecutor()
     {
