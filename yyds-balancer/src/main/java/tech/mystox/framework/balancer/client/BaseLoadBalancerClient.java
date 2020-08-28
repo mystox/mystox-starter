@@ -56,36 +56,40 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     }
 
     void runner() {
-        RegScheduler regScheduler = iaENV.getRegScheduler();
-        RegCall.RegState state = regScheduler.getState();
-        if (RegCall.RegState.SyncConnected != state) {
-            logger.debug("register state is not connected ...");
-            return;
-        }
-//        logger.debug("balancer client update ...");
-        IaConf conf = iaENV.getConf();
-        String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
-                preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
-//        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
-        List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
-                groupServerCode));
-        Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
-        OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
-        Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
-        children.forEach(operaCode -> {
-            String routePath = preconditionRoutePath(groupServerCode, operaCode);
-            //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
-            List<String> operaRouteArr = new ArrayList<>();
-            if (localOperaRouteMap.containsKey(operaCode)) {
-                operaRouteArr = localOperaRouteMap.get(operaCode);
-            } else {
-                operaRouteArr = regScheduler.buildOperaMap(operaCode);
-                regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+        try {
+            RegScheduler regScheduler = iaENV.getRegScheduler();
+            RegCall.RegState state = regScheduler.getState();
+            if (RegCall.RegState.SyncConnected != state) {
+                logger.debug("register state is not connected ...");
+                return;
             }
-            operaMap.put(operaCode, operaRouteArr);
-            logger.info("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
-        });
-        this.operaRouteMap = operaMap;
+            IaConf conf = iaENV.getConf();
+            String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
+                    preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
+//        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
+            List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
+                    groupServerCode));
+            Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
+            OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
+            Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
+            children.forEach(operaCode -> {
+                String routePath = preconditionRoutePath(groupServerCode, operaCode);
+                //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
+                List<String> operaRouteArr = new ArrayList<>();
+                if (localOperaRouteMap.containsKey(operaCode)) {
+                    operaRouteArr = localOperaRouteMap.get(operaCode);
+                } else {
+                    operaRouteArr = regScheduler.buildOperaMap(operaCode);
+                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                }
+                operaMap.put(operaCode, operaRouteArr);
+                logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
+            });
+            this.operaRouteMap = operaMap;
+        } catch (Exception e) {
+            if (logger.isDebugEnabled()) e.printStackTrace();
+            logger.error("base load balancer error [{}]", e.toString());
+        }
     }
 
     public Map<String, List<String>> getOperaRouteMap() {
