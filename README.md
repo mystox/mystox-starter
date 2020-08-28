@@ -56,7 +56,8 @@ mqtt:
 ### 初始化相关
 
 ```
-@SpringBootApplication(scanBasePackages = {"tech.mystox.framework.mqtt"})
+@SpringBootApplication
+@EnableOpera
 public class ServerDemoApplication {
 
 	public static void main(String[] args) {
@@ -66,7 +67,8 @@ public class ServerDemoApplication {
 }
 ```
 
-如果项目的基本包路径不包含tech.mystox.framework.mqtt，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework.mqtt","项目基本包名"}。
+如果项目的基本包路径不包含tech.mystox.framework，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework","项目基本包名"}。
+2.1.1版本已经通过@EnableOpera注解实现组件包的注入。
 
 ### local处理单元
 
@@ -167,6 +169,17 @@ public interface LocalService {
         return result;
     }
     ...
+    @Opera(operaType = OperaType.Broadcast)
+    OperaRouteService operaRouteService;
+    ...
+    @RequestMapping("/broadcast")
+    public void broadcastOperaCode() {
+        List<String> msg = new ArrayList<>();
+        msg.add("cat");
+        msg.add("dog");
+        broadcastService.callHelloWorld("mystox", msg);
+    }
+    ...
 ```
 描述：@Opera注解注入远程调用接口方法，直接对接口中的方法进行参数调用即可。
 
@@ -225,7 +238,6 @@ mqtt消息中间件作为粗略测试结果：
 * 单服务消费者: 
   * 异步 通讯 10000/s并发效率，受限于mqtt服务的下行带宽
   * 同步 通讯 4717/s 并发效率，受限于mqtt服务的上下行带宽
-
 
 ---
 
