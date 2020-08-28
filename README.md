@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>2.0.1</version>
+	<version>2.0.2</version>
 </dependency>
 
 ```
@@ -142,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2</version>
     </dependency>
 ```
 common接口
