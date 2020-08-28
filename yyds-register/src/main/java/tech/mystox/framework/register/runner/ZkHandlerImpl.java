@@ -420,9 +420,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     @Override
     public RegCall.RegState getServerState() {
-        ZooKeeper.States state = zk.getState();
-        if (state.isConnected()) return RegCall.RegState.SyncConnected;
-        if (ZooKeeper.States.CLOSED.equals(state)) return RegCall.RegState.Closed;
+        if (zk!=null) {
+            ZooKeeper.States state = zk.getState();
+            if (state.isConnected()) return RegCall.RegState.SyncConnected;
+            if (ZooKeeper.States.CLOSED.equals(state)) return RegCall.RegState.Closed;
+        }
         return RegCall.RegState.Unknown;
     }
 
