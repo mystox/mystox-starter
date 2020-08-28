@@ -40,7 +40,7 @@ public class MqttController {
     @Autowired
     MqttRestService mqttRestService;
 
-    @Opera(requestType = OperaType.Broadcast)
+    @Opera(operaType = OperaType.Broadcast)
     OperaRouteService operaRouteService;
     /**
      * 注册订阅表
