@@ -5,7 +5,7 @@
 ## 前提说明：
 - 此消息框架基于mqtt消息中间件实现的分布式远程调用。
 - 此消息框架需要消息中间件mqtt、注册中心中间件zookeeper(redis暂不支持)环境支持。
-- 此框架bean管理依赖于springboot 1.x。
+- 此框架bean管理依赖于springboot 1.5.x。
 - 此框架消息队列中间件、注册中心、负载均衡策略可自定义开发，友好性配置开发正在进行...
 
 - jdk版本为1.8+。
@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.1 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.1.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.2 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.2.jar
 ```
 
 
@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 </dependency>
 
 ```
@@ -142,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </dependency>
 ```
 common接口
