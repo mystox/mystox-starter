@@ -118,7 +118,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
         ProxyFactory proxyFactory = applicationContext.getBean(ProxyFactory.class);
 
         proxyFactory.setInterfaces(interfaceClass);
-        OperaType operaType = opera.requestType();
+        OperaType operaType = opera.operaType();
         switch (operaType) {
             case Broadcast:
                 proxyFactory.addAdvice(new OperaBroadcastInterceptor(iaContext));

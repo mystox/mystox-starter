@@ -14,5 +14,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Opera {
-    OperaType requestType() default OperaType.Sync;
+    OperaType operaType() default OperaType.Sync;
 }
