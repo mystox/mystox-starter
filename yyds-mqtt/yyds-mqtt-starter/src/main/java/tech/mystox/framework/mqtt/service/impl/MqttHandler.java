@@ -180,7 +180,8 @@ public class MqttHandler implements MsgHandler {
         // }
         String targetServerCode = "";
         if (chooseServer != null)
-            targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(), preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion()));
+            targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(),
+                    preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion(), chooseServer.getSequence()));
 
         MsgResult result = loadBalanceScheduler.operaCall((oCode, retryServerCode) -> operaTarget(oCode, context.getMsg(),
                 context.getQos(), context.getTimeout(), context.getTimeUnit(),
@@ -405,11 +406,13 @@ public class MqttHandler implements MsgHandler {
         try {
             if (!regScheduler.exists(routePath))
                 regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-            String data = regScheduler.getData(routePath);
-            List<String> topicArr = JSONArray.parseArray(data, String.class);
+//        String data = regScheduler.getData(routePath);
+//        List<String> topicArr = JSONArray.parseArray(data, String.class);
+            List<String> topicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
             if (CollectionUtils.isEmpty(topicArr)) {
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
                 List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+//                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
                 regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
                 topicArr = subTopicArr;
             }

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MqttResp;
+import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.mqtt.service.impl.CallBackTopic;
 import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 import tech.mystox.framework.mqtt.service.impl.MqttRestService;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tech.mystox.framework.service.common.OperaRouteService;
+import tech.mystox.framework.stereotype.Opera;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +40,8 @@ public class MqttController {
     @Autowired
     MqttRestService mqttRestService;
 
-
+    @Opera(operaType = OperaType.Broadcast)
+    OperaRouteService operaRouteService;
     /**
      * 注册订阅表
      *
@@ -140,6 +144,8 @@ public class MqttController {
 //        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         try {
             mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
+            //修改完成需要广播
+            operaRouteService.broadcastOperaRoute(operaCode, subGroupServerList);
         } catch ( InterruptedException |IOException e) {
             logger.error("update opera route error: [{}]",e.toString());
             if (logger.isDebugEnabled())

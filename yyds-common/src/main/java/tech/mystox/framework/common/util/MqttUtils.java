@@ -21,6 +21,12 @@ public class MqttUtils {
         return serverName + "_" + version;
     }
 
+    public static String preconditionServerCode(String serverName, String version, Long sequence) {
+        if (sequence != null)
+            return preconditionServerCode(serverName, version) + "_" + sequence;
+        else return preconditionServerCode(serverName, version);
+    }
+
     /**
      * @return java.lang.String
      * @Date 10:02 2020/1/3
@@ -74,6 +80,6 @@ public class MqttUtils {
      * @Description 构建服务的统一ack topic 格式样例 /mqtt/sub/GROUP_CODE/SERVER_CODE/+/ack
      **/
     public static String preconditionSubACKTopicId(String groupServerCode) {
-        return preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode) +"/+"+ "/ack";
+        return preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode) + "/+" + "/ack";
     }
 }

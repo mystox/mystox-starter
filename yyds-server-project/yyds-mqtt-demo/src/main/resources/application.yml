@@ -7,6 +7,7 @@ logging:
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
+    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
@@ -35,7 +36,7 @@ management:
         include: env,refresh
 server:
   groupCode: GROUP_DEMO1
-  name: YYTD_MQTT_DEMO89
+  name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000
   title: 消息框架DEMO

@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import tech.mystox.framework.balancer.client.BaseLoadBalancerClient;
+import tech.mystox.framework.balancer.client.LoadBalancerClient;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MsgCall;
@@ -37,6 +40,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  */
 @Lazy
 @Component("baseLoadBalancer")
+@DependsOn("zkRegScheduler")
 public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceScheduler {
 
     Logger logger = LoggerFactory.getLogger(BaseLoadBalancer.class);
@@ -44,6 +48,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     private ApplicationContext applicationContext;
     private IaENV iaENV;
+    private LoadBalancerClient loadBalancerClient;
 
 
     private MsgCall msgCall;
@@ -55,12 +60,13 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     }
 
-    @Override
     public void initCaller(OperaCall caller) {
     }
 
     @Override
     public void build(IaENV iaENV) {
+        this.loadBalancerClient = new BaseLoadBalancerClient(iaENV);
+        loadBalancerClient.execute();
         this.iaENV = iaENV;
     }
 
@@ -84,11 +90,13 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 //            if (CollectionUtils.isEmpty(topicArr)) {
         if (!regScheduler.exists(routePath))
             regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-        String data = regScheduler.getData(routePath);
-        List<String> topicArr = JSONArray.parseArray(data, String.class);
+//        String data = regScheduler.getData(routePath);
+//        List<String> topicArr = JSONArray.parseArray(data, String.class);
+        List<String> topicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
         if (CollectionUtils.isEmpty(topicArr)) {
             //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
             List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
+//            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
             regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
             topicArr = subTopicArr;
@@ -136,6 +144,14 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     }
 
+    public LoadBalancerClient getLoadBalancerClient() {
+        return loadBalancerClient;
+    }
+
+    public void setLoadBalancerClient(LoadBalancerClient loadBalancerClient) {
+        this.loadBalancerClient = loadBalancerClient;
+    }
+
     @Override
     public List<String> getReachableServers() {
         return null;
@@ -163,7 +179,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String serverName = iaconf.getServerName();
             String groupCode = iaconf.getGroupCode();
             String serverVersion = iaconf.getServerVersion();
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence()));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
             if (!regScheduler.exists(routePath))
@@ -245,6 +261,11 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         //     return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
         // }
         return (T) result;
+    }
+
+    @Override
+    public List<String> getOperaRouteArr(String operaCode) {
+        return getLoadBalancerClient().getOperaRouteMap().get(operaCode);
     }
 
     public static void main(String[] args) {

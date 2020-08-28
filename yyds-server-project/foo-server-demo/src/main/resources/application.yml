@@ -10,7 +10,7 @@ spring:
 ###########服务及消息框架相关配置#############
 server:
   groupCode: GROUP_DEMO1
-  name: FOO_SERVER_DEMO3 #服务编码
+  name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本
   port: 58106 #服务占用web端口
   title: FOO实例名
@@ -22,6 +22,7 @@ jarResources:
 register:
   scanBasePackage: tech.mystox.framework #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+  isDuplicate: true
 mqtt:
   username: root #可选配置 mqtt配置相关
   password: 123456 #可选配置 mqtt配置相关
@@ -33,7 +34,7 @@ logging:
   level:
     root: info
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: trace
-    tech.mystox.framework.mqtt.service: DEBUG
+    tech.mystox.framework.mqtt.service: info
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF

@@ -10,7 +10,9 @@ import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.ReflectUtils;
 import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.proxy.OperaInterceptor;
+import tech.mystox.framework.proxy.OperaAsyncInterceptor;
+import tech.mystox.framework.proxy.OperaBroadcastInterceptor;
+import tech.mystox.framework.proxy.OperaSyncInterceptor;
 import tech.mystox.framework.stereotype.Opera;
 
 import java.io.Serializable;
@@ -19,13 +21,15 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
+import static tech.mystox.framework.entity.OperaType.*;
+
 /**
  * Created by mystoxlol on 2020/6/23, 10:28.
  * company: kongtrolink
  * description:
  * update record:
  */
-public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
+public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable {
 
 
     private static final long serialVersionUID = 3273322183327163519L;
@@ -45,11 +49,16 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
     private transient volatile boolean destroyed;
     private static final ProxyFactory proxyFactory = null;
     private IaContext iaContext;
+    private Opera opera;
+
     public OperaBean() {
     }
+
     public OperaBean(Opera opera) {
         this.appendAnnotation(Opera.class, opera);
+        this.opera = opera;
     }
+
     @Override
     public Object getObject() throws Exception {
         return get();
@@ -100,6 +109,7 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
 
         ref = createProxy();
     }
+
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy() {
 
@@ -108,8 +118,21 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
         ProxyFactory proxyFactory = applicationContext.getBean(ProxyFactory.class);
 
         proxyFactory.setInterfaces(interfaceClass);
-        proxyFactory.addAdvice(new OperaInterceptor(iaContext));
-        return (T)proxyFactory.getProxy();
+        OperaType operaType = opera.operaType();
+        switch (operaType) {
+            case Broadcast:
+                proxyFactory.addAdvice(new OperaBroadcastInterceptor(iaContext));
+                break;
+            case Async:
+                proxyFactory.addAdvice(new OperaAsyncInterceptor(iaContext));
+                break;
+            case Sync:
+            default:
+                proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
+
+        }
+//        proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
+        return (T) proxyFactory.getProxy();
 
         // return (T)  OperaProxy.createOpera(interfaceClass);
     }
@@ -166,7 +189,7 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
     }
 
     public Class<?> getInterfaceClass() {
-        if(this.interfaceClass != null) {
+        if (this.interfaceClass != null) {
             return this.interfaceClass;
         } /*else if(!this.isGeneric().booleanValue() && (this.getConsumer() == null || !this.getConsumer().isGeneric().booleanValue())) {
             try {
@@ -184,7 +207,9 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
         return null;
     }
 
-    /** @deprecated */
+    /**
+     * @deprecated
+     */
     @Deprecated
     public void setInterfaceClass(Class<?> interfaceClass) {
         this.setInterface(interfaceClass);
@@ -195,48 +220,54 @@ public class OperaBean<T> implements FactoryBean,InitializingBean,Serializable {
     }
 
     public void setInterface(Class<?> interfaceClass) {
-        if(interfaceClass != null && !interfaceClass.isInterface()) {
+        if (interfaceClass != null && !interfaceClass.isInterface()) {
             throw new IllegalStateException("The interface class " + interfaceClass + " is not a interface!");
         } else {
             this.interfaceClass = interfaceClass;
-            this.setInterface(interfaceClass == null?(String)null:interfaceClass.getName());
+            this.setInterface(interfaceClass == null ? (String) null : interfaceClass.getName());
         }
     }
 
     public void setInterface(String interfaceName) {
         this.interfaceName = interfaceName;
-        if(this.id == null || this.id.length() == 0) {
+        if (this.id == null || this.id.length() == 0) {
             this.id = interfaceName;
         }
 
     }
 
+    /**
+     * 校验作用
+     *
+     * @param annotationClass
+     * @param annotation
+     */
     protected void appendAnnotation(Class<?> annotationClass, Object annotation) {
         Method[] methods = annotationClass.getMethods();
         Method[] arr$ = methods;
         int len$ = methods.length;
 
-        for(int i$ = 0; i$ < len$; ++i$) {
+        for (int i$ = 0; i$ < len$; ++i$) {
             Method method = arr$[i$];
-            if(method.getDeclaringClass() != Object.class && method.getReturnType() != Void.TYPE && method.getParameterTypes().length == 0 && Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
+            if (method.getDeclaringClass() != Object.class && method.getReturnType() != Void.TYPE && method.getParameterTypes().length == 0 && Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers())) {
                 try {
                     String e = method.getName();
-                    if("interfaceClass".equals(e) || "interfaceName".equals(e)) {
+                    if ("interfaceClass".equals(e) || "interfaceName".equals(e)) {
                         e = "interface";
                     }
 
                     String setter = "set" + e.substring(0, 1).toUpperCase() + e.substring(1);
                     Object value = method.invoke(annotation, new Object[0]);
-                    if(value != null && !value.equals(method.getDefaultValue())) {
+                    if (value != null && !value.equals(method.getDefaultValue())) {
                         Class parameterType = ReflectUtils.getBoxedClass(method.getReturnType());
-                        if(!"filter".equals(e) && !"listener".equals(e)) {
-                            if("parameters".equals(e)) {
+                        if (!"filter".equals(e) && !"listener".equals(e)) {
+                            if ("parameters".equals(e)) {
                                 parameterType = Map.class;
-                                value = CollectionUtils.toStringMap((String[])((String[])value));
+                                value = CollectionUtils.toStringMap((String[]) ((String[]) value));
                             }
                         } else {
                             parameterType = String.class;
-                            value = StringUtils.join((String[])((String[])value), ",");
+                            value = StringUtils.join((String[]) ((String[]) value), ",");
                         }
 
                         try {

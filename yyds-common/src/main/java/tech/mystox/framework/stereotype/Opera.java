@@ -1,5 +1,7 @@
 package tech.mystox.framework.stereotype;
 
+import tech.mystox.framework.entity.OperaType;
+
 import java.lang.annotation.*;
 
 /**
@@ -12,4 +14,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Opera {
+    OperaType operaType() default OperaType.Sync;
 }
