@@ -47,6 +47,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     private ScheduledExecutorService scheduledExecutorService;
 
     public BaseLoadBalancerClient(IaENV iaENV) {
+        System.out.println("-----------------------------------------------------------");
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         this.iaENV = iaENV;
     }
