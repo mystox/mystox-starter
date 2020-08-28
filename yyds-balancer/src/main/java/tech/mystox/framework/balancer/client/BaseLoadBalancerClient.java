@@ -83,7 +83,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                 regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
             }
             operaMap.put(operaCode, operaRouteArr);
-            logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
+            logger.info("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
         });
         this.operaRouteMap = operaMap;
     }
