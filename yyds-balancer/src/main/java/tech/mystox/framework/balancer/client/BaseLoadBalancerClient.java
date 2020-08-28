@@ -57,15 +57,12 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
 
     void runner() {
         try {
-            System.out.println(1111111111);
             RegScheduler regScheduler = iaENV.getRegScheduler();
             RegCall.RegState state = regScheduler.getState();
-            System.out.println(state);
             if (RegCall.RegState.SyncConnected != state) {
                 logger.debug("register state is not connected ...");
                 return;
             }
-//        logger.debug("balancer client update ...");
             IaConf conf = iaENV.getConf();
             String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
                     preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
@@ -86,11 +83,12 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                 }
                 operaMap.put(operaCode, operaRouteArr);
-                logger.info("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
+                logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
             });
             this.operaRouteMap = operaMap;
         } catch (Exception e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled()) e.printStackTrace();
+            logger.error("base load balancer error [{}]", e.toString());
         }
     }
 
