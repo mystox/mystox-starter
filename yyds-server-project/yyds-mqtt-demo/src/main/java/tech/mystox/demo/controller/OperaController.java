@@ -25,7 +25,7 @@ public class OperaController {
     @Opera
     LocalService localService;
 
-    @Opera(requestType = OperaType.Broadcast)
+    @Opera(operaType = OperaType.Broadcast)
     BroadcastService broadcastService;
 
     @RequestMapping("/hello")
