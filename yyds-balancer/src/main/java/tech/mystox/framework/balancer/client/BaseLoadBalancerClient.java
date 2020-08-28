@@ -74,15 +74,15 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
         children.forEach(operaCode -> {
             String routePath = preconditionRoutePath(groupServerCode, operaCode);
-            //判断本地是否存在自定义配置，如有，使用本地配置文件的配置
+            //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
             List<String> operaRouteArr = new ArrayList<>();
             if (localOperaRouteMap.containsKey(operaCode)) {
                 operaRouteArr = localOperaRouteMap.get(operaCode);
             } else {
                 operaRouteArr = regScheduler.buildOperaMap(operaCode);
+                regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
             }
             operaMap.put(operaCode, operaRouteArr);
-            regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
             logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
         });
         this.operaRouteMap = operaMap;
