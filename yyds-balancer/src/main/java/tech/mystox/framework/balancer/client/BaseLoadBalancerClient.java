@@ -47,7 +47,6 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     private ScheduledExecutorService scheduledExecutorService;
 
     public BaseLoadBalancerClient(IaENV iaENV) {
-        System.out.println("-----------------------------------------------------------");
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
         this.iaENV = iaENV;
     }
@@ -57,8 +56,10 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
     }
 
     void runner() {
+        System.out.println(1111111111);
         RegScheduler regScheduler = iaENV.getRegScheduler();
         RegCall.RegState state = regScheduler.getState();
+        System.out.println(state);
         if (RegCall.RegState.SyncConnected != state) {
             logger.debug("register state is not connected ...");
             return;
