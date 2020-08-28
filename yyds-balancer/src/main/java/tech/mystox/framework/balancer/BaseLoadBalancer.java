@@ -40,6 +40,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  */
 @Lazy
 @Component("baseLoadBalancer")
+@DependsOn("zkRegScheduler")
 public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceScheduler {
 
     Logger logger = LoggerFactory.getLogger(BaseLoadBalancer.class);
