@@ -51,3 +51,6 @@ mqtt:
 #  url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 test:
  config: aaa
+executor:
+  threadPool:
+    corePoolSize: 40
