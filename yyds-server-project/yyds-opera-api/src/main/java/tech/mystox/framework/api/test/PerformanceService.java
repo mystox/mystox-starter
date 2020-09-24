@@ -24,5 +24,7 @@ public interface PerformanceService {
     @OperaCode
     public long countStatistics(String msg);
 
+    @OperaCode
+    public long requestAck(long msg);
 
 }
