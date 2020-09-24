@@ -80,6 +80,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                 List<String> operaRouteArr = new ArrayList<>();
                 if (localOperaRouteMap.containsKey(operaCode)) {
                     operaRouteArr = localOperaRouteMap.get(operaCode);
+                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                 } else {
                     operaRouteArr = regScheduler.buildOperaMap(operaCode);
                     String data = regScheduler.getData(routePath);
