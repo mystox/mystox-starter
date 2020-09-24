@@ -82,7 +82,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                 } else {
                     operaRouteArr = regScheduler.buildOperaMap(operaCode);
                     List<String> localRoute = operaMap.get(operaCode);
-                    if (!CollectionUtils.listEqual(operaRouteArr, localRoute))//判断路由是否发生变化，变化则更新
+                    if (CollectionUtils.isNotEmpty(localRoute) && !CollectionUtils.listEqual(operaRouteArr, localRoute))//判断路由是否发生变化，变化则更新
                         regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                 }
                 operaMap.put(operaCode, operaRouteArr);
