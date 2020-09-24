@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -210,7 +211,7 @@ public class MqttReceiver {
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-            if (mqtt_duplicate) {
+            if (mqtt_duplicate != null && mqtt_duplicate) {
                 logger.warn("message receive duplicate [{}]", message);
                 return;
             }
@@ -230,7 +231,7 @@ public class MqttReceiver {
 
             String ackPayload = result.getPayload();
 
-            byte[] bytes = ackPayload.getBytes(Charset.forName("utf-8"));
+            byte[] bytes = ackPayload.getBytes(StandardCharsets.UTF_8);
             int length = bytes.length;
             try {
                 if (length > MQTT_PAYLOAD_LIMIT) {
@@ -246,7 +247,7 @@ public class MqttReceiver {
                 } else
                     iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
-                logger.error("[{}] message ", e);
+                logger.error("[{}] message ", e.toString());
             }
         });
 //        int activeCount = mqttExecutor.getActiveCount();
