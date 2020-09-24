@@ -53,4 +53,4 @@ test:
  config: aaa
 executor:
   threadPool:
-    corePoolSize: 40
+    corePoolSize: 60

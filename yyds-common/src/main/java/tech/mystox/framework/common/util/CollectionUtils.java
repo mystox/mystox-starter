@@ -213,4 +213,7 @@ public class CollectionUtils {
         return collect;
     }
 
+    public static <T> boolean listEqual(List<T> operaRouteArr, List<T> localRoute) {
+        return operaRouteArr.size() == localRoute.size() && operaRouteArr.containsAll(localRoute);
+    }
 }

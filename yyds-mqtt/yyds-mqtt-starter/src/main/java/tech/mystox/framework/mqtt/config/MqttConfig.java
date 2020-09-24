@@ -63,13 +63,15 @@ public class MqttConfig {
 
     @Value("${mqtt.completionTimeout}")
     private int completionTimeout;   //连接超时
-    @Value("${mqtt.maxInflight:1000}")
+
+    @Value("${mqtt.maxInflight:100}")
     private int maxInflight;
+
 
     /**
      * 订阅的bean名称
      */
-    public static final String CHANNEL_NAME_IN = "mqttInboundChannel";
+    public final static String CHANNEL_NAME_IN = "mqttInboundChannel";
     /**
      * 发布的bean名称
      */
