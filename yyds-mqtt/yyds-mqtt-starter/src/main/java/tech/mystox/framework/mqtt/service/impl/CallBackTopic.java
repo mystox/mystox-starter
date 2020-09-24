@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.concurrent.CountDownLatch;
 public class CallBackTopic implements Callable<MqttResp> {
     Logger logger = LoggerFactory.getLogger(CallBackTopic.class);
 
-    private CountDownLatch latch = new CountDownLatch(1);
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     private ConcurrentHashMap<Integer, MqttResp> map = new ConcurrentHashMap<>();
 
@@ -50,18 +51,12 @@ public class CallBackTopic implements Callable<MqttResp> {
                 MqttResp resp = map.get(i);
                 list.addAll(Arrays.asList(ArrayUtils.toObject(resp.getBytePayload())));
             }
-            Byte[] bytes1 = list.toArray(new Byte[list.size()]);
+            Byte[] bytes1 = list.toArray(new Byte[0]);
 
             byte[] bytes3 = ArrayUtils.toPrimitive(bytes1);
 
             String payload = null;
-            try {
-                payload = new String(bytes3, "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                logger.error("callback sub package error[{}]",e.toString());
-                if (logger.isDebugEnabled())
-                e.printStackTrace();
-            }
+            payload = new String(bytes3, StandardCharsets.UTF_8);
             int crc = ByteUtil.getCRC(bytes3);
             int msgCrc = result.getCrc();
             if (crc != msgCrc) {

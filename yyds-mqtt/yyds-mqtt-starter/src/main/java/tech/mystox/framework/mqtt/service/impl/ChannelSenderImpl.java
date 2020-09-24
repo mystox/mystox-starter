@@ -83,7 +83,7 @@ public class ChannelSenderImpl {
         if (isExistsBySubList(serverCode, operaCode)) {
             // boolean existsByPubList = addPubList(serverCode, operaCode);
             // if (existsByPubList) {
-            logger.debug("[{}]message send...topic[{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
+            logger.debug("[{}]message send...topic[{}][{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
             mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
             // } else {
             //     mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
@@ -204,7 +204,7 @@ public class ChannelSenderImpl {
         int size = CALLBACKS.size();
         if (size > callbackMaxCount) {
             mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
-            logger.error("[{}]message, system callback map is full[{}]", msgId);
+            logger.error("[{}]message, system callback map is full[{}]", msgId,size);
             return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
         }
         ExecutorService es = Executors.newSingleThreadExecutor();
@@ -316,7 +316,7 @@ public class ChannelSenderImpl {
                     else
                         callBackTopic.callback(resp);
                 } else {
-                    logger.warn("[{}]message ack [{}] is null...", msgId);
+                    logger.warn("[{}]message ack [{}] is null...", msgId,resp.getTopic());
                 }
             } catch (Exception e) {
                 logger.warn("message ack receive error[{}] is Invalidation...", e.toString());
