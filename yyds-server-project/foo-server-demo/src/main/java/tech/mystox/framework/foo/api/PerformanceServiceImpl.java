@@ -59,4 +59,13 @@ public class PerformanceServiceImpl implements PerformanceService {
         return i;
     }
 
+    @Override
+    public long requestAck(long msg) {
+//        longAdder2.add(1);
+//        long i = longAdder2.longValue();
+        if (msg%1000 == 0)
+            logger.info("requestAck count >= {}", msg);
+        return msg;
+    }
+
 }
