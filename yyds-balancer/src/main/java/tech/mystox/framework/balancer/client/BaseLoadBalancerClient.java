@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.CommonExecutorConfig;
 import tech.mystox.framework.config.IaConf;
@@ -80,7 +81,9 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     operaRouteArr = localOperaRouteMap.get(operaCode);
                 } else {
                     operaRouteArr = regScheduler.buildOperaMap(operaCode);
-                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                    List<String> localRoute = operaMap.get(operaCode);
+                    if (!CollectionUtils.listEqual(operaRouteArr, localRoute))//判断路由是否发生变化，变化则更新
+                        regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                 }
                 operaMap.put(operaCode, operaRouteArr);
                 logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
