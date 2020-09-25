@@ -3,6 +3,7 @@ package tech.mystox.framework.balancer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import tech.mystox.framework.scheduler.RegScheduler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -182,10 +184,11 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
-            if (!regScheduler.exists(routePath))
-                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
+//            if (!regScheduler.exists(routePath))
+//                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
             String data = regScheduler.getData(routePath);
-            List<String> topicArr = JSONArray.parseArray(data, String.class);
+            List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
+
             /*boolean contains = topicArr.contains(targetServerCode);
             if (contains) {
                 topicArr.remove(targetServerCode);
@@ -196,7 +199,8 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                 logger.debug("opera map rebuild result is {}", JSON.toJSON(topicArr));
             }*/
             //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
-            int size = topicArr.size();
+            int size = localTopicArr.size();
+            List<String> topicArr = new ArrayList<>(localTopicArr);
             if (size > 0) { //默认数组多于1的情况下，识别为负载均衡
                 Random r = new Random();
                 int count = 0;
@@ -245,9 +249,11 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                 logger.warn("[{}]request route topic arr is null", operaCode);
                 result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
             }
-            if (size != topicArr.size())
+            if (size != topicArr.size()) {
                 logger.warn("[{}] mqtt sender route code have changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
-            regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
+                loadBalancerClient.getOperaRouteMap().put(operaCode, topicArr);
+            }
+//            regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
         }
 
         // targetServerCode = topicArr.get(i);
