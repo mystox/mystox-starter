@@ -186,7 +186,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 //            if (CollectionUtils.isEmpty(topicArr)) {
 //            if (!regScheduler.exists(routePath))
 //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-            String data = regScheduler.getData(routePath);
+//            String data = regScheduler.getData(routePath);
             List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
 
             /*boolean contains = topicArr.contains(targetServerCode);
