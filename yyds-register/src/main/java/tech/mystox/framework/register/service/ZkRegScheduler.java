@@ -91,7 +91,7 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
                     groupServerCode);
             String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
             if (!regHandler.exists(onlineStatus)) { //检测服务是否已经注销
-                logger.warn("server [{}] is not online status now...", onlineStatus);
+                logger.debug("server [{}] is not online status now...", onlineStatus);
                 if (regHandler.exists(serverPath)) {
                     List<String> children = regHandler.getChildren(serverPath);
                     if (!CollectionUtils.isNotEmpty(children))
