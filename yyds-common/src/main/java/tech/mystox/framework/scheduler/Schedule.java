@@ -12,4 +12,6 @@ import tech.mystox.framework.core.IaENV;
 public interface Schedule {
     public void initCaller(OperaCall caller);//设置回调方法
     public void build(IaENV iaENV);
+
+    void unregister();
 }

@@ -31,6 +31,7 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
 
     private ApplicationContext applicationContext;
     private IaConf iaconf;
+    private IaENV iaENV;
     private String groupCode;
     private String serverName;
     private String serverVersion;
@@ -51,11 +52,17 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
 
     @Override
     public void build(IaENV iaENV) {
+        this.iaENV = iaENV;
         this.iaconf = iaENV.getConf();
         this.groupCode = iaconf.getGroupCode();
         this.serverName = iaconf.getServerName();
-        this.serverVersion=iaconf.getServerVersion();
+        this.serverVersion = iaconf.getServerVersion();
         this.iaHandler = new MqttHandler(iaENV, applicationContext);
+    }
+
+    @Override
+    public void unregister() {
+        removerSubTopic(this.iaENV.getRegScheduler().getSubList());
     }
 
     private void ackTopic() {
@@ -75,7 +82,7 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
         subList.forEach(sub -> {
             String operaCode = sub.getOperaCode();
             String topicId = MqttUtils.preconditionSubTopicId(
-                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
+                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
             if (iaHandler != null) {
                 if (!iaHandler.isExists(topicId))
                     //logger.info("订阅了:{} ",topicId);
