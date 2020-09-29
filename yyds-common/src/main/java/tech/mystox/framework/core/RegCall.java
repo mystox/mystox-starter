@@ -22,6 +22,7 @@ public interface RegCall {
         AuthFailed(4),
         ConnectedReadOnly(5),
         SaslAuthenticated(6),
+        Unregister(7),
         RebuildStatus(10),
         Expired(-112);
 
@@ -45,6 +46,7 @@ public interface RegCall {
                 case  4: return RegState.AuthFailed;
                 case  5: return RegState.ConnectedReadOnly;
                 case  6: return RegState.SaslAuthenticated;
+                case  7: return RegState.Unregister;
                 case  10: return RegState.RebuildStatus;
                 default:
                     throw new RuntimeException("Invalid integer value for conversion to RegState");

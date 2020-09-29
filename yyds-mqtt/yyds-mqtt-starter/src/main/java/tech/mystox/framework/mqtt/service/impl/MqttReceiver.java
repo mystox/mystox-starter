@@ -8,13 +8,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
-import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
 import tech.mystox.framework.core.IaContext;
@@ -24,6 +27,7 @@ import tech.mystox.framework.mqtt.config.MqttConfig;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -31,10 +35,10 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -79,7 +83,7 @@ public class MqttReceiver {
             }
         } catch (Exception e) {
             mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
-            logger.error("msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
+            logger.error(" [{}] msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
             result = new MqttResp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
@@ -325,8 +329,31 @@ public class MqttReceiver {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println(100 / 99);
+    @Autowired
+            @Qualifier(MqttConfig.CHANNEL_NAME_IN)
+    DirectChannel inChanel;
+
+    @PreDestroy
+    public void destroy() {
+        logger.info("mqtt receiver destroy...");
+        try {
+            logger.info("destroy inChanel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        while (mqttExecutor.getActiveCount() > 0) {
+            int mqttExecutorActiveCount = mqttExecutor.getActiveCount();
+            if (mqttExecutorActiveCount >= 50) {
+                logger.warn("mqtt task executor status: pool size:[{}], active count:[{}], max pool size:[{}] ",
+                        mqttExecutor.getPoolSize(), mqttExecutorActiveCount, mqttExecutor.getMaxPoolSize());
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
 }

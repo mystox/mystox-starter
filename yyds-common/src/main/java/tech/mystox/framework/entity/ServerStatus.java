@@ -7,5 +7,5 @@ package tech.mystox.framework.entity;
  * update record:
  */
 public enum ServerStatus {
-    ONLINE,OFFLINE
+    ONLINE,OFFLINE,UNREGISTER,STARTING,RESTARTING,WAITING
 }

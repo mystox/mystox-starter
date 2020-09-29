@@ -26,8 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
-import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerPath;
+import static tech.mystox.framework.common.util.MqttUtils.*;
 
 @Component("zkRegScheduler")
 @Lazy
@@ -53,6 +52,11 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
     @Override
     public void register() {
         regHandler.register();
+    }
+
+    @Override
+    public void unregister() {
+        regHandler.unregister();
     }
 
     @Override
@@ -83,7 +87,18 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
         //遍历订阅服务列表
         for (String serverCode : serverArr) {
             String groupServerCode = preconditionGroupServerCode(groupCode, serverCode);
+            String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
+                    groupServerCode);
             String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
+            if (!regHandler.exists(onlineStatus)) { //检测服务是否已经注销
+                logger.warn("server [{}] is not online status now...", onlineStatus);
+                if (regHandler.exists(serverPath)) {
+                    List<String> children = regHandler.getChildren(serverPath);
+                    if (!CollectionUtils.isNotEmpty(children))
+                        regHandler.deleteNode(serverPath);
+                }
+                continue;
+            }
             List<String> serverOperaCodeArr = this.getChildren(serverPath);
             if (serverOperaCodeArr.contains(operaCode)) {
                 result.add(groupServerCode);
@@ -190,6 +205,7 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
         this.regHandler = new ZkHandlerImpl(iaENV, applicationContext);
         this.regHandler.build();
     }
+
 
     @Override
     public void connect(String registerUrl) {
