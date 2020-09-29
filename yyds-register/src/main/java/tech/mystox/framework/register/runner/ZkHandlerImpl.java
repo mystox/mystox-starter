@@ -540,7 +540,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     @Override
     public synchronized void deleteNode(String path) {
         try {
-            if (!exists(path))
+            if (exists(path))
             zk.delete(path, -1);
         } catch (InterruptedException | KeeperException e) {
             e.printStackTrace();
