@@ -28,11 +28,15 @@ public class ApplicationCloseEventListener implements ApplicationListener<Contex
     final IaContext iaContext;
     final IaConf iaConf;
     final ThreadPoolTaskExecutor mqttExecutor;
+    final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    public ApplicationCloseEventListener(IaContext iaContext, IaConf iaConf, @Qualifier("mqttExecutor") ThreadPoolTaskExecutor mqttExecutor) {
+    public ApplicationCloseEventListener(IaContext iaContext, IaConf iaConf,
+                                         @Qualifier("mqttExecutor") ThreadPoolTaskExecutor mqttExecutor,
+                                         @Qualifier("mqttSenderAckExecutor") ThreadPoolTaskExecutor mqttSenderAckExecutor) {
         this.iaContext = iaContext;
         this.iaConf = iaConf;
         this.mqttExecutor = mqttExecutor;
+        this.mqttSenderAckExecutor = mqttSenderAckExecutor;
     }
 
     @Override
@@ -44,17 +48,17 @@ public class ApplicationCloseEventListener implements ApplicationListener<Contex
                 preconditionGroupServerCode(iaConf.getGroupCode(),
                         preconditionServerCode(iaConf.getServerName(), iaConf.getServerVersion(), iaConf.getSequence())));
         iaContext.getIaENV().getRegScheduler().deleteNode(onlineStatus);//关闭服务注册发现
-        {
+        do {
             try {
-                logger.warn("active count > 0");
+                logger.warn("mqttExecutor active count [{}], mqttSenderAckExecutor active count [{}]",
+                        mqttExecutor.getActiveCount(), mqttSenderAckExecutor.getActiveCount());
                 Thread.sleep(3000L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        while (mqttExecutor.getActiveCount() > 0)
-
-            iaContext.getIaENV().getRegScheduler().unregister();
+        while (mqttExecutor.getActiveCount() > 0 && mqttSenderAckExecutor.getActiveCount() > 0);
+        iaContext.getIaENV().getRegScheduler().unregister();
         iaContext.getIaENV().getMsgScheduler().unregister();
         iaContext.getIaRegister().unregister();
         iaContext.getIaENV().setServerStatus(ServerStatus.OFFLINE);
