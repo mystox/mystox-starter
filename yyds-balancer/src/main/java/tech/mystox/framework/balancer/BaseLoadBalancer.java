@@ -73,6 +73,11 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
     }
 
     @Override
+    public void unregister() {
+
+    }
+
+    @Override
     public void addServers(List<String> serList) {
 
     }
