@@ -3,6 +3,7 @@ package tech.mystox.framework.core;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import org.slf4j.Logger;
@@ -43,6 +44,12 @@ public class IaRegister {
         this.regScheduler.register();
     }
 
+    public void unregister()  {
+        iaEnv.setServerStatus(ServerStatus.UNREGISTER);
+        this.regScheduler.unregister();
+        this.msgScheduler.unregister();
+        iaEnv.setServerStatus(ServerStatus.OFFLINE);
+    }
     public void subTopic(){
         List<RegisterSub> subList=this.regScheduler.getSubList();
         this.msgScheduler.subTopic(subList);

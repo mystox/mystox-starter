@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
@@ -22,16 +23,16 @@ public class IaENV implements ApplicationContextAware, RegCall {
     private RegScheduler regScheduler;
     private LoadBalanceScheduler loadBalanceScheduler;
     private IaConf conf;
-
+    private ServerStatus serverStatus = ServerStatus.OFFLINE;
     private Logger logger = LoggerFactory.getLogger(IaENV.class);
 
 
     public void build(IaConf conf) {
+        setServerStatus(ServerStatus.STARTING);
         this.conf = conf;
         regScheduler = createRegScheduler(getRegType(conf));
         msgScheduler = createMsgScheduler(getMsgType(conf));
         loadBalanceScheduler = createLoadBalancerScheduler(getLoadBalancer(conf));
-
     }
 
     private IaConf.LoadBalanceType getLoadBalancer(IaConf conf) {
@@ -39,6 +40,32 @@ public class IaENV implements ApplicationContextAware, RegCall {
         return IaConf.LoadBalanceType.valueOf(StringUtils.upperCase(loadBalancerType));
     }
 
+
+    public ServerStatus getServerStatus() {
+        return serverStatus;
+    }
+
+    public boolean setServerStatus(ServerStatus serverStatus) {
+        switch (serverStatus) {
+            case ONLINE: {//切换至在线状态
+                logger.info("server status is [{}]", serverStatus);
+                this.serverStatus = serverStatus;
+                break;
+            }
+            case UNREGISTER: { //注销状态
+                this.serverStatus = serverStatus;
+            }
+            case RESTARTING:{ //重启命令 在注销状态和启动状态时 不修改状态
+                if (getServerStatus().equals(ServerStatus.UNREGISTER)
+                        || getServerStatus().equals(ServerStatus.STARTING)) {
+                    return false;
+                }
+            }
+            default:
+                this.serverStatus = serverStatus;
+        }
+        return true;
+    }
 
     public String getRegType(IaConf conf) {
         return conf.getRegisterType();
@@ -78,6 +105,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
             }
         }
     }
+
     public LoadBalanceScheduler createLoadBalancerScheduler(IaConf.LoadBalanceType balanceType) {
         switch (balanceType) {
             case BASE: {
@@ -133,6 +161,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public void call(RegState state) throws InterruptedException {
         switch (state) {
             case Disconnected: {
+                setServerStatus(ServerStatus.OFFLINE);
                 logger.error("[operaCall] disconnected...");
                 List<RegisterSub> subList = this.regScheduler.getSubList();
                 logger.warn("[operaCall] cancellation msg-schedule sub session");
@@ -143,11 +172,12 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 logger.warn("[operaCall] register reconnected [{}]", registerMsg.getRegisterUrl());
                 this.regScheduler.register();
                 this.msgScheduler.subTopic(subList);
+                setServerStatus(ServerStatus.ONLINE);
                 break;
-
             }
 
             case RebuildStatus: {
+                setServerStatus(ServerStatus.STARTING);
                 logger.error("[operaCall] register rebuild");
                 List<RegisterSub> subList = this.regScheduler.getSubList();
                 logger.warn("[operaCall] cancellation msg-schedule sub session");
@@ -155,6 +185,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 logger.warn("[operaCall] register offline, waiting for rebuild");
                 getRegScheduler().register();
                 this.msgScheduler.subTopic(subList);
+                setServerStatus(ServerStatus.ONLINE);
                 break;
             }
         }
