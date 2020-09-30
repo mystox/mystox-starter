@@ -62,9 +62,9 @@ public class ExecutorRunner implements ApplicationRunner {
                 mqttSenderAckExecutor.getPoolSize(), mqttSenderAckExecutorActiveCount, mqttSenderAckExecutor.getMaxPoolSize());
         //callback 内存
         int callbackSize = mqttSender.getCALLBACKS().size();
-        if (callbackSize >= 50 && callbackSize % 10 == 0)
-            logger.warn("mqtt sender callback map size: [{}]", callbackSize);
-        if (l>0&&l % rhythm == 0) {
+        if (l > 0 && l % rhythm == 0) {
+            if (callbackSize >= 50 /*&& callbackSize % 10 == 0*/)
+                logger.warn("mqtt sender callback map size: [{}]", callbackSize);
             longAdder.reset();
             logger.debug("mqtt task executor status: pool size:[{}], active count:[{}], max pool size:[{}] ",
                     mqttExecutor.getPoolSize(), mqttExecutorActiveCount, mqttExecutor.getMaxPoolSize());

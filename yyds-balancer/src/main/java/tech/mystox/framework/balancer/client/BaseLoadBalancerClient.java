@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.MqttUtils;
+import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.config.CommonExecutorConfig;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
@@ -78,9 +80,19 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                 List<String> operaRouteArr = new ArrayList<>();
                 if (localOperaRouteMap.containsKey(operaCode)) {
                     operaRouteArr = localOperaRouteMap.get(operaCode);
+                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                 } else {
                     operaRouteArr = regScheduler.buildOperaMap(operaCode);
-                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                    String data = regScheduler.getData(routePath);
+                    if (StringUtils.isNotEmpty(data)) {
+                        List<String> registerRoute = JSONArray.parseArray(data, String.class);
+                        if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute))//判断路由是否发生变化，变化则更新
+                        {
+                            logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
+                            regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                        }
+                    }
+
                 }
                 operaMap.put(operaCode, operaRouteArr);
                 logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);

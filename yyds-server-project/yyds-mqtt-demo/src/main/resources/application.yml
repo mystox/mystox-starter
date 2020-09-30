@@ -7,7 +7,8 @@ logging:
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
-    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
+#    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
+    tech.mystox.framework.register.service.ZkRegScheduler: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
@@ -57,3 +58,6 @@ mqtt:
 #  url: tcp://172.16.5.26:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
 test:
  config: aaa
+executor:
+  threadPool:
+    corePoolSize: 60

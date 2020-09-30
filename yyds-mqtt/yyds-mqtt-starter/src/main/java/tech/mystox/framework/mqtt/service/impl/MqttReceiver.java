@@ -8,13 +8,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
-import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
 import tech.mystox.framework.core.IaContext;
@@ -24,6 +27,7 @@ import tech.mystox.framework.mqtt.config.MqttConfig;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -31,9 +35,10 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by mystoxlol on 2019/8/13, 11:05.
@@ -78,7 +83,7 @@ public class MqttReceiver {
             }
         } catch (Exception e) {
             mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
-            logger.error("msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
+            logger.error(" [{}] msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
             result = new MqttResp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
@@ -210,7 +215,7 @@ public class MqttReceiver {
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
-            if (mqtt_duplicate) {
+            if (mqtt_duplicate != null && mqtt_duplicate) {
                 logger.warn("message receive duplicate [{}]", message);
                 return;
             }
@@ -230,7 +235,7 @@ public class MqttReceiver {
 
             String ackPayload = result.getPayload();
 
-            byte[] bytes = ackPayload.getBytes(Charset.forName("utf-8"));
+            byte[] bytes = ackPayload.getBytes(StandardCharsets.UTF_8);
             int length = bytes.length;
             try {
                 if (length > MQTT_PAYLOAD_LIMIT) {
@@ -246,7 +251,7 @@ public class MqttReceiver {
                 } else
                     iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
-                logger.error("[{}] message ", e);
+                logger.error("[{}] message ", e.toString());
             }
         });
 //        int activeCount = mqttExecutor.getActiveCount();
@@ -324,8 +329,31 @@ public class MqttReceiver {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println(100 / 99);
+    @Autowired
+            @Qualifier(MqttConfig.CHANNEL_NAME_IN)
+    DirectChannel inChanel;
+
+    @PreDestroy
+    public void destroy() {
+        logger.info("mqtt receiver destroy...");
+        try {
+            logger.info("destroy inChanel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        while (mqttExecutor.getActiveCount() > 0) {
+            int mqttExecutorActiveCount = mqttExecutor.getActiveCount();
+            if (mqttExecutorActiveCount >= 50) {
+                logger.warn("mqtt task executor status: pool size:[{}], active count:[{}], max pool size:[{}] ",
+                        mqttExecutor.getPoolSize(), mqttExecutorActiveCount, mqttExecutor.getMaxPoolSize());
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
 }

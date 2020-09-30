@@ -6,7 +6,7 @@
 
     <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
-    <version>2.1.2</version>
+    <version>2.1.3</version>
     <modules>
         <!--<module>yyds-core</module>-->
         <module>yyds-common</module>
@@ -26,7 +26,7 @@
     <!--</parent>-->
 
     <properties>
-        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.3.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

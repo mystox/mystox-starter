@@ -85,6 +85,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         return null;
     }
 
+
     /**
      * 往注册中心注册数据
      *
@@ -96,7 +97,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void setDataToRegistry(RegisterSub sub) {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
-                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
+                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
         if (!exists(nodePath))
             try {
                 create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
@@ -187,12 +188,33 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void registeringSub(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
-                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence())), operaCode);
+                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
         if (!exists(nodePath))
             create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
             setData(nodePath, JSONObject.toJSONBytes(sub));
         }
+    }
+
+    /**
+     * 注销注册中心能力
+     *
+     * @param sub
+     * @throws KeeperException
+     * @throws InterruptedException
+     */
+    public void unregisteringSub(RegisterSub sub) {
+        String operaCode = sub.getOperaCode();
+        String nodePath = MqttUtils.preconditionSubTopicId(
+                preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
+        if (exists(nodePath))
+            deleteNode(nodePath);
+    }
+
+    @Override
+    public void unregister() {
+        List<RegisterSub> subList = iaENV.getRegScheduler().getSubList();
+        unregisterProvider(subList); //清除服务注册表
     }
 
 
@@ -231,6 +253,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 registerWebPriv(this.iaconf.getWebPrivFuncConfig());//注册WEB功能权限
                 registerProvider(subList);//订阅
                 registerConsumerRoute(); //注册路由
+                iaENV.setServerStatus(ServerStatus.ONLINE);
             }
         } catch (KeeperException | IOException | InterruptedException e) {
             e.printStackTrace();
@@ -255,6 +278,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void registerProvider(List<RegisterSub> subList) throws KeeperException, InterruptedException {
         for (RegisterSub sub : subList) {//注册provider
             registeringSub(sub);
+        }
+    }
+
+    public void unregisterProvider(List<RegisterSub> subList) {
+        for (RegisterSub sub : subList) {//注册provider
+            unregisteringSub(sub);
         }
     }
 
@@ -293,6 +322,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 serverMsg.setSequence(sequence);
             }
             if (exists(onlineStatus)) {
+                iaENV.setServerStatus(ServerStatus.WAITING);
                 if (iaconf.isDuplicate()) longAdder.add(1);
                 logger.warn("server[{}] status is already online ... exits", preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
                 //  throw new InterruptedIOException();
@@ -303,7 +333,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                     setData(onlineStatus, JSONObject.toJSONBytes(serverMsg));
                     return true;
                 } else
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
             } else {
                 create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 return true;
@@ -318,11 +348,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
-                        preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
+                        preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
         if (exists(lock)) { //检测锁的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
                     preconditionGroupServerCode(groupCode,
-                            preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
+                            preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
             if (!exists(nodeName))
                 create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
@@ -352,7 +382,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public void initConsumerRoute() throws KeeperException, InterruptedException {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
-                        preconditionServerCode(serverName, serverVersion,iaconf.getSequence())));
+                        preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
         if (exists(lock)) { //检测锁的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     preconditionGroupServerCode(groupCode,
@@ -431,7 +461,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     @Override
     public RegCall.RegState getServerState() {
-        if (zk!=null) {
+        if (zk != null) {
             ZooKeeper.States state = zk.getState();
             if (state.isConnected()) return RegCall.RegState.SyncConnected;
             if (ZooKeeper.States.CLOSED.equals(state)) return RegCall.RegState.Closed;
@@ -480,9 +510,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             data = zk.getData(path, true, null);
         } catch (KeeperException e) {
-            e.printStackTrace();
+            if ((logger.isDebugEnabled()))
+                e.printStackTrace();
+            logger.warn("get data KeeperException error[{}]",path);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            logger.warn("get data InterruptedException error[{}]",path);
         }
         if (data != null)
             return new String(data);
@@ -519,9 +553,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
     @Override
-    public void deleteNode(String path) {
+    public synchronized void deleteNode(String path) {
         try {
-            zk.delete(path, -1);
+            if (exists(path))
+                zk.delete(path, -1);
         } catch (InterruptedException | KeeperException e) {
             e.printStackTrace();
         }
@@ -542,8 +577,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             logger.info("zk connect successful...");
             latch.countDown();
         } else if (Event.EventType.NodeDeleted == eventType) {
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion,iaconf.getSequence()));
-            if (/*path.startsWith(TopicPrefix.SERVER_STATUS)&&*/path.equals(preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupCodeServerCode))) {
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence()));
+            if (iaENV.getServerStatus().equals(ServerStatus.ONLINE) && StringUtils.equals(path, preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupCodeServerCode)))/*path.startsWith(TopicPrefix.SERVER_STATUS)&&*/ {
                 logger.warn("serverStatus:" + path + "been delete, try recover...");
                 try {
                     regCall.call(RegCall.RegState.RebuildStatus);

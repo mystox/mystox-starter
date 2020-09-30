@@ -2,6 +2,7 @@ package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import tech.mystox.framework.api.test.PerformanceService;
+import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.StateCode;
@@ -29,11 +30,11 @@ import java.util.concurrent.atomic.LongAdder;
 public class PerformanceController {
 
     Logger logger = LoggerFactory.getLogger(PerformanceController.class);
-   // @Autowired
-   // MqttSender mqttSender;
+    // @Autowired
+    // MqttSender mqttSender;
 
 
-    @Autowired
+    @Autowired(required = false)
     IaOpera msgHandler;
 
     @Autowired
@@ -199,6 +200,7 @@ public class PerformanceController {
         final int intensityF = intensity;
         Boolean aBreak = condition.getBoolean("break");
         Boolean syn = condition.getBoolean("syn");
+        String func = condition.getString("func");
         if (aBreak) {
             breakFlag = true;
             return new JsonResult("中断");
@@ -226,13 +228,19 @@ public class PerformanceController {
                     logger.info("count: {}, pool size: {} active count: {}, core pool size: {}", i * intensityF, poolSize, activeCount, corePoolSize);
                 }
                 String msg = baseMsg + i;
+                long finalI = i;
                 demoExecutor.execute(() -> {
                     for (int j = 0; j < intensityF; j++) {
                         if (syn != null && !syn)
                             msgHandler.operaAsync("countStatistic", msg);
                         else {
                             try {
-                                long integer = performanceService.countStatistics(msg);
+                                long integer;
+                                if (StringUtils.isEquals(func, "requestAck")) {
+                                    integer = performanceService.requestAck(finalI);
+                                } else
+                                    integer = performanceService.countStatistics(msg);
+
                                 if (integer % 1000 == 0)
                                     logger.info("ack count: {}", integer);
 //                                longAdder.add(1);

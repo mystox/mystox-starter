@@ -10,6 +10,8 @@ import java.util.List;
 public interface RegHandler {
     public void register();
 
+
+    void unregister();
     public boolean exists(String nodeData);
 
     void create(final String path, byte data[], int createMode);
