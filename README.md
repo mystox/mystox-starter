@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.1.2 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.1.2.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.1.3 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.1.3.jar
 ```
 
 
@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>2.1.2</version>
+	<version>2.1.3</version>
 </dependency>
 
 ```
@@ -142,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.1.2</version>
+        <version>2.1.3</version>
     </dependency>
 ```
 common接口
@@ -238,7 +238,9 @@ mqtt消息中间件作为粗略测试结果：
 * 单服务消费者: 
   * 异步 通讯 10000/s并发效率，受限于mqtt服务的下行带宽
   * 同步 通讯 4717/s 并发效率，受限于mqtt服务的上下行带宽
-  
+* 多服务的生产者：
+  * 异步 18000/s 并发效率，受限于emqtt服务的性能
+  * 同步 
 ---
 
 contact: 
