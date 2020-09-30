@@ -1,4 +1,4 @@
-package tech.mystox.framework.config;
+package tech.mystox.demo.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;

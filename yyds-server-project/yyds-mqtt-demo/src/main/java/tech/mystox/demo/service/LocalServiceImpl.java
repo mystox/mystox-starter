@@ -1,4 +1,4 @@
-package tech.mystox.framework.service;
+package tech.mystox.demo.service;
 
 import tech.mystox.framework.api.test.LocalService;
 

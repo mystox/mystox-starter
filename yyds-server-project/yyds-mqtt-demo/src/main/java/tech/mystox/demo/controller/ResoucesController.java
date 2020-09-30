@@ -2,7 +2,7 @@ package tech.mystox.framework.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import tech.mystox.framework.config.OperaRouteConfig;
-import tech.mystox.framework.config.OperaRouteConfigTest;
+import tech.mystox.demo.config.OperaRouteConfigTest;
 import tech.mystox.framework.config.WebPrivFuncConfig;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

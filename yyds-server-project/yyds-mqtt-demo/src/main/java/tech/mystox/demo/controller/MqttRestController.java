@@ -1,4 +1,4 @@
-package tech.mystox.framework.controller;
+package tech.mystox.demo.controller;
 
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;

@@ -1,4 +1,4 @@
-package tech.mystox.framework.controller;
+package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;

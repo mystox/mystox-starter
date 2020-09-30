@@ -54,7 +54,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>tech.mystox.framework.SpringbootYydsMqttDemoApplication</mainClass>
+                    <mainClass>tech.mystox.demo.SpringbootYydsMqttDemoApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

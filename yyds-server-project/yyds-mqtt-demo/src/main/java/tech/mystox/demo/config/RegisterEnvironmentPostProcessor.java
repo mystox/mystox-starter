@@ -1,4 +1,4 @@
-package tech.mystox.framework.config;
+package tech.mystox.demo.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

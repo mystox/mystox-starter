@@ -1,4 +1,4 @@
-package tech.mystox.framework.entity;
+package tech.mystox.demo.entity;
 
 import java.util.List;
 import java.util.Map;

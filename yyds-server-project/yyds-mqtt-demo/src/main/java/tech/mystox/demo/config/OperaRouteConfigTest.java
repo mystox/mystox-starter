@@ -1,6 +1,6 @@
-package tech.mystox.framework.config;
+package tech.mystox.demo.config;
 
-import tech.mystox.framework.entity.OperaResourceTest;
+import tech.mystox.demo.entity.OperaResourceTest;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
