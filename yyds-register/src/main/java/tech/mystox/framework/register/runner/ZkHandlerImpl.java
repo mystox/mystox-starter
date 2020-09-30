@@ -510,9 +510,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             data = zk.getData(path, true, null);
         } catch (KeeperException e) {
-            e.printStackTrace();
+            if ((logger.isDebugEnabled()))
+                e.printStackTrace();
+            logger.warn("get data KeeperException error[{}]",path);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            logger.warn("get data InterruptedException error[{}]",path);
         }
         if (data != null)
             return new String(data);
@@ -552,7 +556,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public synchronized void deleteNode(String path) {
         try {
             if (exists(path))
-            zk.delete(path, -1);
+                zk.delete(path, -1);
         } catch (InterruptedException | KeeperException e) {
             e.printStackTrace();
         }
