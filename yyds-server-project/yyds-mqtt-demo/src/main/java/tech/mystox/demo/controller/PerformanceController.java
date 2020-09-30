@@ -34,7 +34,7 @@ public class PerformanceController {
     // MqttSender mqttSender;
 
 
-    @Autowired
+    @Autowired(required = false)
     IaOpera msgHandler;
 
     @Autowired
