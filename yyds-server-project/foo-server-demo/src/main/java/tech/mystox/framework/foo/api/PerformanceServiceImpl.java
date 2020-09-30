@@ -3,6 +3,7 @@ package tech.mystox.framework.foo.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tech.mystox.framework.api.test.PerformanceService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class PerformanceServiceImpl implements PerformanceService {
         longAdder.add(1);
         int i = longAdder.intValue();
         if (i%1000 == 0)
-            logger.info("count >= {}", i);
+        logger.info("count >= {}", i);
 
     }
 

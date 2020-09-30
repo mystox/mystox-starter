@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.2 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.2.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.3 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.3.jar
 ```
 
 
@@ -23,7 +23,7 @@ mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -Dar
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>1.2.2</version>
+	<version>1.2.3</version>
 </dependency>
 
 ```
@@ -142,7 +142,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
     </dependency>
 ```
 common接口
