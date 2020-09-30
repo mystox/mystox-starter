@@ -333,7 +333,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                     setData(onlineStatus, JSONObject.toJSONBytes(serverMsg));
                     return true;
                 } else
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
             } else {
                 create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 return true;
