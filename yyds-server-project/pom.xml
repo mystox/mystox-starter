@@ -12,7 +12,9 @@
     <name>yyds-server-project</name>
     <artifactId>yyds-server-project</artifactId>
     <packaging>pom</packaging>
-
+    <properties>
+        <docker.image.prefix>172.16.5.27:23760</docker.image.prefix>
+    </properties>
     <modules>
         <module>foo-server-demo</module>
         <module>yyds-mqtt-demo</module>
