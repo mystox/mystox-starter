@@ -3,16 +3,15 @@ package tech.mystox.framework.kafka.config;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.kafka.inbound.KafkaMessageDrivenChannelAdapter;
 import org.springframework.integration.kafka.outbound.KafkaProducerMessageHandler;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -26,7 +25,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.PollableChannel;
 //import tech.mystox.framework.config.YamlPropertySourceFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -111,7 +109,8 @@ public class KafkaConfig {
      */
     @Bean(name = CHANNEL_NAME_IN)
     public MessageChannel mqttInboundChannel() {
-        return new DirectChannel();
+        DirectChannel directChannel = new DirectChannel();
+        return directChannel;
     }
 
     /**
@@ -121,7 +120,7 @@ public class KafkaConfig {
      */
     @Bean
     @ServiceActivator(inputChannel = CHANNEL_NAME_OUT)
-    public MessageHandler mqttOutbound(KafkaTemplate<String, String> kafkaTemplate) {
+    public MessageHandler mqttOutbound(KafkaTemplate kafkaTemplate) {
         KafkaProducerMessageHandler<String, String> handler =
                 new KafkaProducerMessageHandler<>(kafkaTemplate);
         handler.setMessageKeyExpression(new LiteralExpression("mystox.kafka.key"));
@@ -129,7 +128,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<?, ?> kafkaConsumerFactory(KafkaProperties properties) {
+    public ConsumerFactory kafkaConsumerFactory(KafkaProperties properties) {
         Map<String, Object> consumerProperties = properties
                 .buildConsumerProperties();
         consumerProperties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 15000);
@@ -137,24 +136,24 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<String, String> container(ConsumerFactory<String, String> kafkaConsumerFactory) {
-        return new KafkaMessageListenerContainer<>(kafkaConsumerFactory,
+    public KafkaMessageListenerContainer container(ConsumerFactory kafkaConsumerFactory) {
+        KafkaMessageListenerContainer topic = new KafkaMessageListenerContainer<>(kafkaConsumerFactory,
                 new ContainerProperties(new TopicPartitionInitialOffset("topic", 0)));
+        return topic;
     }
 
-    @Bean
-    public KafkaMessageDrivenChannelAdapter<String, String>
+    @Bean("inbound")
+    public MessageProducer
     adapter(KafkaMessageListenerContainer<String, String> container) {
         KafkaMessageDrivenChannelAdapter<String, String> kafkaMessageDrivenChannelAdapter =
                 new KafkaMessageDrivenChannelAdapter<>(container);
-        kafkaMessageDrivenChannelAdapter.setOutputChannel(fromKafka());
+        kafkaMessageDrivenChannelAdapter.setOutputChannel(mqttInboundChannel());
         return kafkaMessageDrivenChannelAdapter;
     }
 
-    @Bean
-    public PollableChannel fromKafka() {
-        return new QueueChannel();
-    }
-
+//    @Bean
+//    public PollableChannel fromKafka() {
+//        return new QueueChannel();
+//    }
 
 }
