@@ -1,7 +1,6 @@
 package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.api.test.PerformanceService;
 import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MsgResult;
@@ -40,8 +39,7 @@ public class PerformanceController {
     @Autowired
     ThreadPoolTaskExecutor demoExecutor;
     private boolean breakFlag = false;
-    @Opera
-    PerformanceService performanceService;
+
 
     @RequestMapping("/msgSendLogic")
     public JsonResult msgSendLogic(@RequestBody JSONObject condition) {
@@ -183,6 +181,10 @@ public class PerformanceController {
         return new JsonResult("totalCount is: " + count * intensity + " lastTime count is: " /*+ countStatistic.getMsg()*/);
     }
 
+    @Opera
+    PerformanceService performanceService;
+
+
     @RequestMapping("/msgFuncLogic")
     public JsonResult msgFuncLogic(@RequestBody JSONObject condition) {
         Long count = condition.getLong("count");
@@ -261,7 +263,6 @@ public class PerformanceController {
         });
         return new JsonResult("totalCount is: " + count * intensity + " lastTime count is: " /*+ countStatistic.getMsg()*/);
     }
-
 
     @RequestMapping("/createThread")
     public JsonResult createThread(@RequestBody JSONObject condition) {

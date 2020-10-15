@@ -3,20 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>yyds-mqtt</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.2.3</version>
+        <artifactId>yyds-iarpc-dependencies</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yyds-mqtt-starter</artifactId>
-    <name>yyds-mqtt-start</name>
+    <name>yyds-mqtt-starter</name>
     <description>mqtt通讯框架</description>
-    <!--<version>1.1.0</version>-->
     <properties>
         <java.version>1.8</java.version>
         <testSkip>true</testSkip>
-        <!--<main.basedir>${basedir}/../..</main.basedir>-->
+        <main.basedir>${basedir}/../..</main.basedir>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-common</artifactId>
-            <version>1.2.3</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -63,33 +63,5 @@
             <version>1.2.3</version>
             <scope>compile</scope>
         </dependency>
-       <!-- <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.17</version>
-        </dependency>-->
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>utf-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

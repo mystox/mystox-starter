@@ -6,34 +6,94 @@
 
     <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
-    <version>1.2.3</version>
+    <version>${revision}</version>
+    <prerequisites>
+        <maven>3.2.5</maven>
+    </prerequisites>
+
     <modules>
-        <!--<module>yyds-core</module>-->
         <module>yyds-common</module>
         <module>yyds-mqtt</module>
         <module>yyds-register</module>
-        <module>yyds-server-project</module>
         <module>yyds-iarpc-starter</module>
         <module>yyds-balancer</module>
+        <module>yyds-iarpc-dependencies</module>
     </modules>
     <packaging>pom</packaging>
 
-    <!--<parent>-->
-        <!--<groupId>org.springframework.boot</groupId>-->
-        <!--<artifactId>spring-boot-starter-parent</artifactId>-->
-        <!--&lt;!&ndash;<version>${spring-boot.version}</version>&ndash;&gt;-->
-        <!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
-    <!--</parent>-->
+    <dependencyManagement>
+        <dependencies>
+            <!--<dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-mqtt-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-register</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-balancer</artifactId>
+                <version>${project.version}</version>
+            </dependency>-->
+        </dependencies>
+
+    </dependencyManagement>
 
     <properties>
+        <revision>1.2.4</revision>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
+        <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <base.jar.path>${main.basedir}/baseJar</base.jar.path>
+        <main.basedir>${basedir}</main.basedir>
         <skipTest>true</skipTest>
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <inherited>true</inherited>
+                <executions>
+                    <execution>
+                        <!-- Flatten and simplify our own POM for install/deploy -->
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <configuration>
+                            <updatePomFile>true</updatePomFile>
+                            <flattenMode>oss</flattenMode>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <flattenedPomFilename>${artifactId}-${version}.xml</flattenedPomFilename>
+                            <pomElements>
+                                <pluginManagement>keep</pluginManagement>
+                                <repositories>remove</repositories>
+                                <properties>keep</properties>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -43,6 +103,35 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${build.plugins.antrun.version}</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <echo>delete ${base.jar.path}/${artifactId}-${version}.jar</echo>
+<!--                                <delete file="${base.jar.path}/${artifactId}-${version}.jar">-->
+                                <delete file="${base.jar.path}/${artifactId}-${version}.*">
+                                </delete>
+                                <echo>copy ${project.build.outputDirectory} *.jar to ${base.jar.path}</echo>
+                                <copy todir="${base.jar.path}">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                        <include name="*.xml"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

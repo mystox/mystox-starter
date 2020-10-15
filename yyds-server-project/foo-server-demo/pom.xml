@@ -5,10 +5,9 @@
 	<parent>
 		<artifactId>yyds-server-project</artifactId>
 		<groupId>tech.mystox.framework</groupId>
-		<version>1.2.3</version>
+		<version>1.2.0</version>
 	</parent>
 	<artifactId>foo-server-demo</artifactId>
-	<version>1.2.3</version>
 	<name>foo-server-demo</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -23,22 +22,14 @@
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-opera-api</artifactId>
-			<version>1.2.3</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-iarpc-starter</artifactId>
-			<version>1.2.3</version>
+			<version>${yyds.iarpc.starter.version}</version>
+			<type>pom</type>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<!--<dependency>
-			<groupId>com.kongtrolink.framework</groupId>
-			<artifactId>yyds-core</artifactId>
-			<version>1.0.0</version>
-		</dependency>-->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
@@ -59,6 +50,17 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>tech.mystox.framework</groupId>
+				<artifactId>yyds-iarpc-dependencies</artifactId>
+				<version>${yyds.iarpc.starter.version}</version>
+				<type>pom</type>
+			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>tech.mystox.framework</groupId>-->
+<!--				<artifactId>yyds-iarpc-starter</artifactId>-->
+<!--				<version>${yyds.iarpc.starter.version}</version>-->
+<!--			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -93,6 +95,7 @@
 				<executions>
 					<execution>
 						<id>default</id>
+						<phase>${docker.build}</phase>
 						<goals>
 							<goal>build</goal>
 							<goal>push</goal>

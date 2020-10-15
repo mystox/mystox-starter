@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 //@PropertySource(value = "privFuncConfig.yml",
 //        ignoreResourceNotFound = true,factory = YamlPropertySourceFactory.class)
-@ConfigurationProperties/*(prefix = ServerName.LOG_SERVER)*/
+@ConfigurationProperties()/*(prefix = ServerName.LOG_SERVER)*/
 @RefreshScope
 public class WebPrivFuncConfig {
     private PrivFuncEntity privFunc;

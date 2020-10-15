@@ -11,9 +11,7 @@ pipeline {
         string(name: 'password', defaultValue: 'yytd1234', description: '')
         //string(name: 'deployServer', defaultValue: 'all', description: '')
         choice(name: 'deployServer', choices: \
-        ['skipModule', 'all','SCLOUD_SERVER_WEB','ALARM_SERVER_WEB', 'REPORTS_SERVER','LOG_SERVER','ASSET_SERVER',\
-        'ALARM_CONTROLLER','ALARM_SENDER','ALARM_CYCLE','ALARM_LEVEL','ALARM_DELIVER',\
-        'SCLOUD_SERVER_TASK','SCLOUD_SERVER_HISTORY','GATEWAY_TOWER_SERVER','GATEWAY_TOWER_HEART' \
+        ['skipModule', 'all','MQTT_DEMO','FOO_DEMO',\
         ],\
          description: 'serverChoices')
     }
@@ -37,6 +35,40 @@ pipeline {
                     remote.password = "${params.password}"
                     remote.host = "${params.host}"
                     remote.allowAnyHosts = true
+                }
+            }
+        }
+        //测试demo
+        stage ('MQTT_DEMO') {
+            when {
+                expression {
+                    def serverCode = 'MQTT_DEMO'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/yyds-mqtt-demo/target/yyds-mqtt-demo-2.0.4.jar', \
+                    '/home/yyds/mqtt-demo','yyds-mqtt-demo-2.0.4.jar',10,'deployResources/mqtt-demo.ini','mqtt-demo')
+                }
+            }
+        }
+        //测试demo
+        stage ('FOO_DEMO') {
+            when {
+                expression {
+                    def serverCode = 'FOO_DEMO'
+                    def deployServer = params.deployServer
+                    return (deployServer == 'all' || deployServer == serverCode \
+                    || deployServer =~ serverCode+',' || deployServer =~ ','+serverCode)
+                }
+            }
+            steps {
+                script {
+                    remoteExecutor('yyds-server-project/foo-server-demo/target/foo-server-demo-2.0.4.jar', \
+                    '/home/yyds/foo-demo','foo-server-demo-2.0.4.jar',10,'deployResources/foo-demo.ini','foo-demo')
                 }
             }
         }

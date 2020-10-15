@@ -1,9 +1,6 @@
-package tech.mystox.framework.controller;
+package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.config.OperaRouteConfig;
-import tech.mystox.demo.config.OperaRouteConfigTest;
-import tech.mystox.framework.config.WebPrivFuncConfig;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import tech.mystox.demo.config.OperaRouteConfigTest;
+import tech.mystox.framework.config.OperaRouteConfig;
+import tech.mystox.framework.config.WebPrivFuncConfig;
 
 import java.io.*;
 import java.util.Map;
@@ -77,9 +77,9 @@ public class ResoucesController {
         try {
             File file = FileUtils.getFile("./config/operaRoute-test-1.yml");
             Map testLoad = (Map) yaml.load(new FileInputStream(file));
-//            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
-//            Object invoke = genericPostableMvcEndpoint.invoke();
-//            logger.info(JSONObject.toJSONString(invoke));
+            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
+            Object invoke = contextRefresher.refresh();
+            logger.info(JSONObject.toJSONString(invoke));
             System.out.println(JSONObject.toJSONString(operaRouteConfig.getOperaRoute()));
             System.out.println(JSONObject.toJSONString(webPrivFuncConfig.getPrivFunc()));
             return JSONObject.toJSONString(testLoad);

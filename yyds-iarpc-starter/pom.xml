@@ -3,43 +3,38 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>YYDS</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.2.3</version>
+        <artifactId>yyds-iarpc-dependencies</artifactId>
+        <version>${revision}</version>
+        <relativePath>../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>yyds-iarpc-starter</name>
-    <!--<version>1.1.0</version>-->
+    <packaging>pom</packaging>
+    <properties>
+        <!--解决格式提示问题-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <base.jar.path>${main.basedir}/baseJar</base.jar.path>
+        <main.basedir>${basedir}/..</main.basedir>
+        <skipTest>true</skipTest>
+    </properties>
     <description>yyds-iarpc远程消息框架</description>
     <artifactId>yyds-iarpc-starter</artifactId>
     <dependencies>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-mqtt-starter</artifactId>
-            <version>1.2.3</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-balancer</artifactId>
-            <version>1.2.3</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-register</artifactId>
-            <version>1.2.3</version>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>utf-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

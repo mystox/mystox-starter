@@ -1,16 +1,15 @@
 package tech.mystox.framework.config;
 
-import tech.mystox.framework.core.ServiceScanner;
-import tech.mystox.framework.entity.ServerName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import tech.mystox.framework.core.ServiceScanner;
+import tech.mystox.framework.entity.ServerName;
 
 import java.util.UUID;
 
 @Component
-@ConfigurationProperties
+//@ConfigurationProperties(prefix = "")
 public class IaConf {
 
 

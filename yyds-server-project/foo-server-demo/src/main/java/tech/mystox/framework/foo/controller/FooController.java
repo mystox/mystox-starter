@@ -1,8 +1,8 @@
 package tech.mystox.framework.foo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import tech.mystox.framework.api.test.PerformanceService;
 import tech.mystox.framework.entity.JsonResult;
-import tech.mystox.framework.foo.api.PerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestMapping;

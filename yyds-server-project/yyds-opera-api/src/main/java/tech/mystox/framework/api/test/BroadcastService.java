@@ -1,6 +1,5 @@
 package tech.mystox.framework.api.test;
 
-import tech.mystox.framework.stereotype.Opera;
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;
 

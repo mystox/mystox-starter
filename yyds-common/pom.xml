@@ -4,20 +4,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>tech.mystox.framework</groupId>
-        <artifactId>YYDS</artifactId>
-        <version>1.2.3</version>
+        <artifactId>yyds-iarpc-dependencies</artifactId>
+        <version>${revision}</version>
+        <relativePath>../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>yyds-common</artifactId>
+    <name>yyds-common</name>
+    <description>通用包</description>
+    <packaging>jar</packaging>
+
+
+
     <properties>
         <java.version>1.8</java.version>
         <log4j.version>2.9.1</log4j.version>
         <source>1.8</source>
         <target>1.8</target>
+        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
+        <main.basedir>${basedir}/..</main.basedir>
     </properties>
-    <artifactId>yyds-common</artifactId>
-    <name>yyds-common</name>
-    <description>通用包</description>
-    <packaging>jar</packaging>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -42,34 +49,22 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
             <version>1.4.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <version>${spring-boot.version}</version>
             <optional>true</optional>
         </dependency>
-
-
-        <!-- https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper -->
-        <!--<dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <version>3.4.13</version>
-        </dependency>-->
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -91,20 +86,5 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.8.1</version>
         </dependency>
-
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>utf-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

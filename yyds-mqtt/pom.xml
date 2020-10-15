@@ -5,14 +5,13 @@
     <parent>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>YYDS</artifactId>
-        <version>1.2.3</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yyds-mqtt</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>yyds-mqtt-starter</module>
-        <!--<module>yyds-mqtt-demo</module>-->
     </modules>
 
 

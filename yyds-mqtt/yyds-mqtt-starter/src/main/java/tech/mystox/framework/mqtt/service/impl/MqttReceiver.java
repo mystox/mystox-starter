@@ -10,12 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
@@ -219,7 +217,12 @@ public class MqttReceiver {
                 logger.warn("message receive duplicate [{}]", message);
                 return;
             }
-            String topic = message.getHeaders().get("mqtt_topic").toString();
+            Object mqtt_receivedTopic = message.getHeaders().get("mqtt_receivedTopic");
+            if (mqtt_receivedTopic == null) {
+                logger.error("message mqtt_receivedTopic is null [{}]", message);
+                return;
+            }
+            String topic = mqtt_receivedTopic.toString();
             String payload = message.getPayload();
             MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
             MqttResp result = receive(topic, mqttMsg);

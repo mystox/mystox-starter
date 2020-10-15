@@ -42,6 +42,8 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         loadResources(environment, application,this.profiles);
+//        environment.resolveRequiredPlaceholders("tech.mystox.framework");
+//        environment.setRequiredProperties("tech.mystox.framework");
         if (logger.isInfoEnabled())
             logger.info("load register environment post processor success...");
         else

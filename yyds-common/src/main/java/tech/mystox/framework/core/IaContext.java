@@ -31,7 +31,6 @@ public class IaContext implements ApplicationRunner {
         iaEnv.build(conf);
         iaRegister = new IaRegister(iaEnv);
         iaRegister.connect();
-//         iaRegister.subTopic();
         iaRegister.register();
 
     }

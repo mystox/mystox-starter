@@ -13,8 +13,19 @@
 
 ## maven安装依赖
 
+windows 环境下执行 baseJar/install.bat
+windows 环境下执行 baseJar/install.sh
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.3 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-1.2.3.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-common-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-balancer-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-register-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-mqtt-starter-2.0.4.jar
+
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-iarpc-starter-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-common-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-balancer-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-register-2.0.4.xml
+mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-mqtt-starter-2.0.4.xml
 ```
 
 
@@ -68,7 +79,7 @@ public class ServerDemoApplication {
 ```
 
 如果项目的基本包路径不包含tech.mystox.framework，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework","项目基本包名"}。
-2.1.1版本已经通过@EnableOpera注解实现组件包的注入。
+1.2.*版本已经通过@EnableOpera注解实现组件包的注入。
 
 ### local处理单元
 
@@ -227,6 +238,7 @@ public class LocalServiceImpl implements LocalService {
 * yyds-register: 注册模块的实现，默认实现zookeeper为注册中心。
 * yyds-mqtt: 消息中间件组件，实现消息的消费和生产，集成注册模块与负载均衡模块实现消息的分布式远程调用，支持‘函数式’与‘topic式’调用。
 * yyds-server-project: 使用的案例示例。
+* yyds-iarpc-dependencies：版本依赖管理模块
 
 ## 性能说明
 硬件条件：（cpu： Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz 网络:单服务带宽100mps）
@@ -238,7 +250,9 @@ mqtt消息中间件作为粗略测试结果：
 * 单服务消费者: 
   * 异步 通讯 10000/s并发效率，受限于mqtt服务的下行带宽
   * 同步 通讯 4717/s 并发效率，受限于mqtt服务的上下行带宽
-
+* 多服务的生产者：
+  * 异步 18000/s 并发效率，受限于emqtt服务的性能
+  * 同步 9500/s 并发效率，，受限于emqtt服务的性能
 ---
 
 contact: 

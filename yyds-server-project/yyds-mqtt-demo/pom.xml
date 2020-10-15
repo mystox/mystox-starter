@@ -5,7 +5,7 @@
     <parent>
         <artifactId>yyds-server-project</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.2.3</version>
+        <version>1.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yyds-mqtt-demo</artifactId>
@@ -32,8 +32,9 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-iarpc-starter</artifactId>
-            <version>1.2.3</version>
-            <optional>true</optional>
+            <version>${yyds.iarpc.starter.version}</version>
+            <type>pom</type>
+<!--            <scope>import</scope>-->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,9 +44,35 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-opera-api</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.0</version>
         </dependency>
-
+        <!--Swagger2 - RESTful API文档-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <!--Swagger2 - 导出 API文档-->
+        <dependency>
+            <groupId>io.github.swagger2markup</groupId>
+            <artifactId>swagger2markup</artifactId>
+            <version>1.3.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.vavr</groupId>
+                    <artifactId>vavr</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -79,6 +106,7 @@
                 <executions>
                     <execution>
                         <id>default</id>
+                        <phase>${docker.build}</phase>
                         <goals>
                             <goal>build</goal>
                             <goal>push</goal>
@@ -95,4 +123,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
 </project>

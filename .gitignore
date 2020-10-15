@@ -1,6 +1,10 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 /AppResources/sn/
+/testResources/
+/reportsResources/
+/baseJar/*.jar
+/baseJar/*.xml
 ### STS ###
 .apt_generated
 .classpath
@@ -23,3 +27,6 @@
 /nbdist/
 /.nb-gradle/
 /build/
+
+.flattened-pom.xml
+target
