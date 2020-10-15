@@ -11,7 +11,7 @@ import tech.mystox.framework.entity.TopicPrefix;
 public class KafkaUtils {
 
     public static String toKafkaTopic(String topic) {
-        return topic.replace("/", ".").replace("+","*");
+        return topic.replace("/", ".").replace("+","*").substring(1);
     }
 
 
