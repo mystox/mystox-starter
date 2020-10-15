@@ -83,6 +83,11 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 mqttMsgScheduler.build(this);
                 return mqttMsgScheduler;
             }
+            case IaConf.KafkaMsgBus:{
+                MsgScheduler kafkaMsgScheduler = applicationContext.getBean("kafkaMsgScheduler", MsgScheduler.class);
+                kafkaMsgScheduler.build(this);
+                return kafkaMsgScheduler;
+            }
             default: {
                 MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
                 mqttMsgScheduler.build(this);

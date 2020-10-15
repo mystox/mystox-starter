@@ -6,8 +6,14 @@ logging:
     tech.mystox.framework.mqtt.service.ExecutorRunner: info
     tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl: info
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerSub: info
-    tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
+    tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: debug
+    tech.mystox.framework.kafka.service.impl.ChannelHandlerSub: info
 #    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
+    org:
+      apache:
+        kafka:
+          clients:
+            consumer: OFF
     tech.mystox.framework.register.service.ZkRegScheduler: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
@@ -36,7 +42,7 @@ management:
       exposure:
         include: env,refresh
 server:
-  groupCode: GROUP_DEMO1
+  groupCode: GROUP_DEMO_KAFKA4
   name: YYTD_MQTT_DEMO
   version: 1.0.0
   port: 58000
@@ -49,7 +55,10 @@ jarResources:
 register:
   scanBasePackage: tech.mystox.framework
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
-  sessionTimeout: 100000
+  sessionTimeout: 1000
+  msgType: kafka
+  kafka:
+    url: 172.16.5.27:9093,172.16.5.27:9094,172.16.5.27:9095
 mqtt:
   username: root
   password: 123456

@@ -9,3 +9,8 @@
 - 增加服务的优雅退出功能，检测是否有任务线程执行，在服务离线后再关闭服务
 - 测试案例增加docker镜像插件
 - 优化注册配置及其环境IaEnv增加服务状态属性ServerStatus，跟踪服务的启动、等待、注销、在线、离线、重启等状态
+
+2.1.4
+- 增加kafka消息组件，导入yyds-iarpc-kafka-starter，同时配置kafka配置信息即可，详见README.md
+- mqtt模块目录调整，kafka与mqtt统一为mq模块
+- 日志的配置显示新增默认配置文件logger.yml

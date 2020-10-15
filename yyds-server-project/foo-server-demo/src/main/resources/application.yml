@@ -9,7 +9,7 @@ spring:
     database: 2
 ###########服务及消息框架相关配置#############
 server:
-  groupCode: GROUP_DEMO1
+  groupCode: GROUP_DEMO_KAFKA4
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本
   port: 58106 #服务占用web端口
@@ -23,11 +23,15 @@ register:
   scanBasePackage: tech.mystox.framework #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
   url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
   isDuplicate: true
-mqtt:
-  username: root #可选配置 mqtt配置相关
-  password: 123456 #可选配置 mqtt配置相关
-  url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
-  maxInflight: 1000
+  sessionTimeout: 30000
+  msgType: kafka
+  kafka:
+    url: 172.16.5.27:9093,172.16.5.27:9094,172.16.5.27:9095
+#mqtt:
+#  username: root #可选配置 mqtt配置相关
+#  password: 123456 #可选配置 mqtt配置相关
+#  url: tcp://172.16.5.62:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+#  maxInflight: 1000
 
 ###########日志配置###########
 logging:
@@ -39,9 +43,6 @@ logging:
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
     org.apache.zookeeper.ZooKeeper: OFF
-  pattern:
-    console: "%clr(%d{MM-dd HH:mm:ss}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20logger{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
-    file: "%clr(%d{MM-dd HH:mm:ss.SSS}){faint} %clr(${server.name} ${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr([%5.5t]){faint} %clr(%-20.20{39} %5.5line){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}}"
 management:
   endpoints:
     web:

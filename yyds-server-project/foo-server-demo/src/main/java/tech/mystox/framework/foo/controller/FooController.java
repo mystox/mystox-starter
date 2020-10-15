@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/foo")
 public class FooController {
     @Autowired(required = false)
-    ThreadPoolTaskExecutor mqttExecutor;
+    ThreadPoolTaskExecutor mqExecutor;
     @Autowired
     PerformanceService performanceService;
 
@@ -40,10 +40,10 @@ public class FooController {
 
     @RequestMapping("/getTaskPoolMsg")
     public JsonResult getTaskPoolMsg() {
-        int corePoolSize = mqttExecutor.getCorePoolSize();
-        int poolSize = mqttExecutor.getPoolSize();
-        int activeCount = mqttExecutor.getActiveCount();
-        int maxPoolSize = mqttExecutor.getMaxPoolSize();
+        int corePoolSize = mqExecutor.getCorePoolSize();
+        int poolSize = mqExecutor.getPoolSize();
+        int activeCount = mqExecutor.getActiveCount();
+        int maxPoolSize = mqExecutor.getMaxPoolSize();
         return new JsonResult("corePoolSize"+corePoolSize+"\n poolSize"+poolSize+"\n activeCount"+activeCount+"\n maxPoolSize"+maxPoolSize);
     }
 
