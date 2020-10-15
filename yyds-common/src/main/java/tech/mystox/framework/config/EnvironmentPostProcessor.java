@@ -35,6 +35,8 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             "file:config/privFuncConfig.yml",
             "classpath:config/operaRoute.yml",
             "file:config/operaRoute.yml",
+            "classpath:config/logger.yml",
+            "file:config/logger.yml",
     };
 
     @Override
