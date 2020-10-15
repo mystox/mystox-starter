@@ -253,6 +253,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 iaENV.setServerStatus(ServerStatus.ONLINE);
             }
         } catch (KeeperException | IOException | InterruptedException e) {
+            logger.error("register exception... ");
+            e.printStackTrace();
+        } catch (Exception e)
+        {
+            logger.error("register other exception... ");
             e.printStackTrace();
         }
     }
