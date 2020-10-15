@@ -6,15 +6,16 @@
 
     <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
-    <version>2.1.3</version>
+    <version>2.1.4</version>
     <modules>
         <!--<module>yyds-core</module>-->
         <module>yyds-common</module>
-        <module>yyds-mqtt</module>
+        <module>yyds-mq</module>
         <module>yyds-register</module>
         <module>yyds-server-project</module>
         <module>yyds-iarpc-starter</module>
         <module>yyds-balancer</module>
+        <module>yyds-iarpc-kafka-starter</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -31,6 +32,7 @@
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skipTest>true</skipTest>
+        <yyds.starter.version>2.1.4</yyds.starter.version>
     </properties>
     <build>
         <plugins>

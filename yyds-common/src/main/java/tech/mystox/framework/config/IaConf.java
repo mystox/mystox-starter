@@ -4,7 +4,6 @@ import tech.mystox.framework.core.ServiceScanner;
 import tech.mystox.framework.entity.ServerName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -53,6 +52,7 @@ public class IaConf {
     public static final int EPHEMERAL_SEQUENTIAL = 3;
 
     public static final String MqttMsgBus = "mqtt";
+    public static final String KafkaMsgBus = "kafka";
     public static final String ZkRegType = "zookeeper";
 
 
@@ -121,8 +121,8 @@ public class IaConf {
     @Value("${register.balancer:base}")
     private String loadBalancerType;
 
-    @Value("${register.MsgType:mqtt}")
-    private String MsgType;
+    @Value("${register.msgType:mqtt}")
+    private String msgType;
 
     @Value("${spring.profiles.active:dev}")
     private String devFlag;
@@ -138,6 +138,9 @@ public class IaConf {
     private String pageRoute;
     @Value("${server.routeMark:}")
     private String routeMark;
+
+    @Value("${jarResources.path:./jarResources}")
+    private String jarPath;
     //    @Autowired
 //    ServiceRegistry serviceRegistry;
     final ServiceScanner localServiceScanner;
@@ -321,11 +324,11 @@ public class IaConf {
 
 
     public String getMsgType() {
-        return MsgType;
+        return msgType;
     }
 
     public void setMsgType(String msgType) {
-        MsgType = msgType;
+        this.msgType = msgType;
     }
 
 
@@ -376,5 +379,13 @@ public class IaConf {
 
     public void setSequence(Long sequence) {
         this.sequence = sequence;
+    }
+
+    public String getJarPath() {
+        return jarPath;
+    }
+
+    public void setJarPath(String jarPath) {
+        this.jarPath = jarPath;
     }
 }

@@ -31,12 +31,12 @@ public class ApplicationCloseEventListener implements ApplicationListener<Contex
     final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
     public ApplicationCloseEventListener(IaContext iaContext, IaConf iaConf,
-                                         @Qualifier("mqttExecutor") ThreadPoolTaskExecutor mqttExecutor,
-                                         @Qualifier("mqttSenderAckExecutor") ThreadPoolTaskExecutor mqttSenderAckExecutor) {
+                                         @Qualifier("mqExecutor") ThreadPoolTaskExecutor mqExecutor,
+                                         @Qualifier("mqSenderAckExecutor") ThreadPoolTaskExecutor mqSenderAckExecutor) {
         this.iaContext = iaContext;
         this.iaConf = iaConf;
-        this.mqttExecutor = mqttExecutor;
-        this.mqttSenderAckExecutor = mqttSenderAckExecutor;
+        this.mqttExecutor = mqExecutor;
+        this.mqttSenderAckExecutor = mqSenderAckExecutor;
     }
 
     @Override

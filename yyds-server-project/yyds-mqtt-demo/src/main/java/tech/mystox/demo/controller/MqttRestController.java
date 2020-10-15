@@ -2,7 +2,7 @@ package tech.mystox.demo.controller;
 
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
-import tech.mystox.framework.mqtt.service.IMqttSender;
+//import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.service.MsgHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +25,8 @@ public class MqttRestController {
     /**
      * 注入发送MQTT的Bean
      */
-    @Resource
-    private IMqttSender iMqttSender;
+//    @Resource
+//    private IMqttSender iMqttSender;
 
 //    @Autowired
 //    @Qualifier("mqttHandlerImpl")
@@ -40,7 +40,7 @@ public class MqttRestController {
 
     @RequestMapping("/sendMqtt")
     public String sendMqtt(@RequestParam String topic, @RequestBody String message) {
-        iMqttSender.sendToMqtt(topic, message);
+//        iMqttSender.sendToMqtt(topic, message);
         return "ok";
     }
 

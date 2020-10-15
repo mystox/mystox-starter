@@ -2,7 +2,6 @@ package tech.mystox.demo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import tech.mystox.framework.config.CommonExecutorConfig;
-import tech.mystox.framework.mqtt.config.ExecutorConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
