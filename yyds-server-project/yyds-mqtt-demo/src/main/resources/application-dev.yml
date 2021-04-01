@@ -27,8 +27,6 @@ logging:
       flag: true
 
 spring:
-  profiles:
-    active: dev
   application:
     name: yytd-mqtt-demo
 #  config:
