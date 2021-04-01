@@ -27,6 +27,8 @@ logging:
       flag: true
 
 spring:
+  profiles:
+    active: dev
   application:
     name: yytd-mqtt-demo
 #  config:
@@ -54,7 +56,7 @@ jarResources:
   path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
   scanBasePackage: tech.mystox.framework
-  url: zookeeper://172.16.5.62:2181,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+  url: zookeeper://192.168.0.234,172.16.5.62:2182,172.16.5.62:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
   sessionTimeout: 1000
   msgType: kafka
   kafka:
