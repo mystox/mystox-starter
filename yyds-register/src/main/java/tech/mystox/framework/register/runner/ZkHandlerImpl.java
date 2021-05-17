@@ -299,6 +299,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 //
 //            iaconf.setServerVersion(serverVersion);
 //        }
+        serverMsg.setExtension(iaconf.getExtensionConfig().getExtension());
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));

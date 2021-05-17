@@ -15,8 +15,8 @@ public class IaConf {
 
 
     //    @Autowired
-//    @Qualifier("remotezkHandlerImpl")
-//    RegHandler zkhandlerImpl;
+    //    @Qualifier("remotezkHandlerImpl")
+    //    RegHandler zkhandlerImpl;
     private String myId = UUID.randomUUID().toString();
 
     @Autowired
@@ -80,33 +80,8 @@ public class IaConf {
     private boolean isDuplicate;
 
     private Long sequence;
-//    @Value("${mqtt.username:root}")
-//    private String username;
-//    @Value("${mqtt.password:123456}")
-//    private String password;
-//    @Value("${mqtt.url}")
-//    private String url;
-//    @Value("${mqtt.producer.clientId}")
-//    private String producerClientId;
-//    @Value("${mqtt.producer.defaultTopic}")
-//    private String producerDefaultTopic;
-//    @Value("${mqtt.consumer.clientId}")
-//    private String consumerClientId;
-//    @Value("${mqtt.consumer.defaultTopic}")
-//    private String consumerDefaultTopic;
-//    @Value("${mqtt.completionTimeout}")
-//    private int completionTimeout;   //mqtt连接超时
     @Value("${register.sessionTimeout:100}")
     private int regSessionTimeout; //zookeeper session超时时间
-    // /**
-    //  * 订阅的bean名称
-    //  */
-    // public static final String CHANNEL_NAME_IN = "mqttInboundChannel";
-    // /**
-    //  * 发布的bean名称
-    //  */
-    // public static final String CHANNEL_NAME_OUT = "mqttOutboundChannel";
-    // public static final String CHANNEL_REPLY = "mqttReplyBoundChannel";
 
 
     @Value("${register.type:zookeeper}")
@@ -139,19 +114,19 @@ public class IaConf {
     @Value("${server.routeMark:}")
     private String routeMark;
     //    @Autowired
-//    ServiceRegistry serviceRegistry;
+    //    ServiceRegistry serviceRegistry;
     final ServiceScanner localServiceScanner;
     final ServiceScanner jarServiceScanner;
 
-//    @Autowired
-//    @Qualifier("mqttHandlerAck")
-//    private MqttHandler mqttHandlerAck;
-//    private MqttHandler mqttHandlerImpl;
-//    @Autowired(required = false)
-//    @Qualifier("mqttHandlerImpl")
-//    public void setMqttHandler(MqttHandler mqttHandler) {
-//        this.mqttHandlerImpl = mqttHandler;
-//    }
+    //    @Autowired
+    //    @Qualifier("mqttHandlerAck")
+    //    private MqttHandler mqttHandlerAck;
+    //    private MqttHandler mqttHandlerImpl;
+    //    @Autowired(required = false)
+    //    @Qualifier("mqttHandlerImpl")
+    //    public void setMqttHandler(MqttHandler mqttHandler) {
+    //        this.mqttHandlerImpl = mqttHandler;
+    //    }
 
 
     @Value("${server.MsgBus:mqtt}")
@@ -167,6 +142,18 @@ public class IaConf {
 
     public WebPrivFuncConfig getWebPrivFuncConfig() {
         return webPrivFuncConfig;
+    }
+
+    ExtensionConfig extensionConfig;
+
+
+    public ExtensionConfig getExtensionConfig() {
+        return extensionConfig;
+    }
+
+    @Autowired
+    public void setExtensionConfig(ExtensionConfig extensionConfig) {
+        this.extensionConfig = extensionConfig;
     }
 
     private OperaRouteConfig operaRouteConfig;
@@ -329,7 +316,6 @@ public class IaConf {
     }
 
 
-
     public ServiceScanner getJarServiceScanner() {
         return jarServiceScanner;
     }
@@ -351,20 +337,20 @@ public class IaConf {
     }
 
     //    public MqttHandler getMqttHandlerAck() {
-//        return mqttHandlerAck;
-//    }
-//
-//    public void setMqttHandlerAck(MqttHandler mqttHandlerAck) {
-//        this.mqttHandlerAck = mqttHandlerAck;
-//    }
-//
-//    public MqttHandler getMqttHandlerImpl() {
-//        return mqttHandlerImpl;
-//    }
-//
-//    public void setMqttHandlerImpl(MqttHandler mqttHandlerImpl) {
-//        this.mqttHandlerImpl = mqttHandlerImpl;
-//    }
+    //        return mqttHandlerAck;
+    //    }
+    //
+    //    public void setMqttHandlerAck(MqttHandler mqttHandlerAck) {
+    //        this.mqttHandlerAck = mqttHandlerAck;
+    //    }
+    //
+    //    public MqttHandler getMqttHandlerImpl() {
+    //        return mqttHandlerImpl;
+    //    }
+    //
+    //    public void setMqttHandlerImpl(MqttHandler mqttHandlerImpl) {
+    //        this.mqttHandlerImpl = mqttHandlerImpl;
+    //    }
 
     public OperaRouteConfig getOperaRouteConfig() {
         return operaRouteConfig;

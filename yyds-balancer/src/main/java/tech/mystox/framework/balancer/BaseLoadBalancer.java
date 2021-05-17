@@ -1,9 +1,7 @@
 package tech.mystox.framework.balancer;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +18,13 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MsgCall;
 import tech.mystox.framework.core.OperaCall;
-import tech.mystox.framework.entity.MsgResult;
-import tech.mystox.framework.entity.ServerMsg;
-import tech.mystox.framework.entity.StateCode;
-import tech.mystox.framework.entity.TopicPrefix;
+import tech.mystox.framework.entity.*;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -166,7 +160,25 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
 
     @Override
     public List<String> getAllServers() {
-        return null;
+        //获取可以消息框架可以访达的服务列表
+        List<String> groupServerCodes = new ArrayList<>();
+        RegScheduler regScheduler = iaENV.getRegScheduler();
+        String thisGroupCode = iaENV.getConf().getGroupCode();
+        String statusGroupPath = TopicPrefix.SERVER_STATUS + "/" + thisGroupCode;//状态组路径
+        String rootStatusGroupPtah = TopicPrefix.SERVER_STATUS + "/" + GroupCode.ROOT;//root状态组路径
+        List<String> children = regScheduler.getChildren(statusGroupPath);
+        List<String> rootChildren = regScheduler.getChildren(rootStatusGroupPtah);
+        if (children != null)
+            children.forEach(serverCode -> {
+                String groupServerCode = preconditionGroupServerPath(thisGroupCode, serverCode); //构造
+                groupServerCodes.add(groupServerCode);
+            });
+        if (rootChildren != null)
+            rootChildren.forEach(serverCode -> {
+                String groupServerCode = preconditionGroupServerCode(GroupCode.ROOT, serverCode); //构造
+                groupServerCodes.add(groupServerCode);
+            });
+        return groupServerCodes;
     }
 
     @Override

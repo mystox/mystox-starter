@@ -23,6 +23,10 @@ public interface LoadBalanceScheduler extends Schedule/*,Callable<MsgResult> */{
      */
     List<String> getReachableServers();
 
+    /**
+     * 获取所有服务列表
+     * @return
+     */
     List<String> getAllServers();
 
     <T> T operaCall(OperaCall<T> operaCall, String targetServerCode, Object key);
