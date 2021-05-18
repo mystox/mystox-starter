@@ -1,9 +1,6 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 /AppResources/sn/
-/testResources/
-/reportsResources/
-/baseJar
 ### STS ###
 .apt_generated
 .classpath
