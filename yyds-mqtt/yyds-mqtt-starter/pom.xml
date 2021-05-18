@@ -5,14 +5,13 @@
     <parent>
         <artifactId>yyds-mqtt</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>2.0.3</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yyds-mqtt-starter</artifactId>
     <name>yyds-mqtt-start</name>
     <description>mqtt通讯框架</description>
-    <!--<version>1.1.0</version>-->
     <properties>
         <java.version>1.8</java.version>
         <testSkip>true</testSkip>
@@ -33,7 +32,7 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-common</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

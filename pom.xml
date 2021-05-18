@@ -6,7 +6,11 @@
 
     <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
-    <version>2.0.3</version>
+    <version>${revision}</version>
+
+<!--    <prerequisites>-->
+<!--        <maven>3.2.5</maven>-->
+<!--    </prerequisites>-->
     <modules>
         <!--<module>yyds-core</module>-->
         <module>yyds-common</module>
@@ -24,8 +28,40 @@
         <!--&lt;!&ndash;<version>${spring-boot.version}</version>&ndash;&gt;-->
         <!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
     <!--</parent>-->
+    <dependencyManagement>
+
+        <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-mqtt-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-register</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>yyds-balancer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
 
     <properties>
+        <revision>2.0.4</revision>
         <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <!--解决格式提示问题-->
