@@ -3,6 +3,7 @@
 /AppResources/sn/
 /testResources/
 /reportsResources/
+/baseJar
 ### STS ###
 .apt_generated
 .classpath

@@ -1,6 +1,7 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 /AppResources/sn/
+/src/main/resources/application-dev.yml
 ### STS ###
 .apt_generated
 .classpath

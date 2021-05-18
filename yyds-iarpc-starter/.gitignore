@@ -1,9 +1,6 @@
-HELP.md
-target/
+/target/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**
-!**/src/test/**
-/src/main/resources/application-dev.yml
+/AppResources/sn/
 ### STS ###
 .apt_generated
 .classpath
@@ -25,7 +22,4 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-
-### VS Code ###
-.vscode/
+/build/

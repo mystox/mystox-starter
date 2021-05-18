@@ -5,7 +5,7 @@
     <parent>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>YYDS</artifactId>
-        <version>2.1.3</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <properties>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-<!--            <version>${spring-boot.version}</version>-->
+            <!--            <version>${spring-boot.version}</version>-->
         </dependency>
 
         <dependency>
@@ -102,15 +102,43 @@
     </dependencies>
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>utf-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${build.plugins.antrun.version}</version>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <echo>copy ${project.build.outputDirectory} *.jar to ../${base.jar.path}</echo>
+                                <copy todir="../${base.jar.path}">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>delete</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <target>
+                                <echo>delete ../${base.jar.path}/${artifactId}-${version}.jar</echo>
+                                <delete file="../${base.jar.path}/${artifactId}-${version}.jar">
+                                </delete>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
