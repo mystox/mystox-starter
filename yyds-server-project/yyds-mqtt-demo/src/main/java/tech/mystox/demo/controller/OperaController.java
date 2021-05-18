@@ -1,11 +1,13 @@
 package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import tech.mystox.framework.api.test.BroadcastService;
 import tech.mystox.framework.api.test.LocalService;
-import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
 
@@ -19,6 +21,8 @@ import java.util.Map;
  * description:
  * update record:
  */
+
+@Api(tags = "operaBean函数动态代理测试")
 @RestController
 @RequestMapping("/operaBean")
 public class OperaController {
@@ -28,7 +32,8 @@ public class OperaController {
     @Opera(operaType = OperaType.Broadcast)
     BroadcastService broadcastService;
 
-    @RequestMapping("/hello")
+    @ApiOperation(value = "同步/异步接口测试")
+    @RequestMapping(value = "/hello",method = RequestMethod.GET)
     public JSONObject testOpera() {
         JSONObject result = new JSONObject();
 
@@ -52,7 +57,8 @@ public class OperaController {
         localService.helloParams("dd",1,222222222L);
         return result;
     }
-    @RequestMapping("/broadcast")
+    @ApiOperation(value = "广播接口测试")
+    @RequestMapping(value = "/broadcast",method = RequestMethod.GET)
     public void broadcastOperaCode() {
         List<String> msg = new ArrayList<>();
         msg.add("cast");
