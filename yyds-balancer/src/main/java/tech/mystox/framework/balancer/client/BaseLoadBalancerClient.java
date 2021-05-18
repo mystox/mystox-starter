@@ -3,21 +3,15 @@ package tech.mystox.framework.balancer.client;
 import com.alibaba.fastjson.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import tech.mystox.framework.common.util.CollectionUtils;
-import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.config.CommonExecutorConfig;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
+import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.entity.TopicPrefix;
-import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.util.ArrayList;
@@ -28,8 +22,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static ch.qos.logback.core.CoreConstants.CORE_POOL_SIZE;
-import static ch.qos.logback.core.CoreConstants.MAX_POOL_SIZE;
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
 /**
@@ -61,14 +53,19 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         try {
             RegScheduler regScheduler = iaENV.getRegScheduler();
             RegCall.RegState state = regScheduler.getState();
+            ServerStatus serverStatus = iaENV.getServerStatus();
             if (RegCall.RegState.SyncConnected != state) {
-                logger.debug("register state is not connected ...");
+                logger.warn("register state is[{}] not connected ...", state);
+                return;
+            }
+            if (!ServerStatus.ONLINE.equals(serverStatus)) {
+                logger.warn("server state is[{}] not connected ...", serverStatus);
                 return;
             }
             IaConf conf = iaENV.getConf();
             String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
                     preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
-//        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
+            //        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
             List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     groupServerCode));
             Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
@@ -112,7 +109,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         this.operaRouteMap = operaRouteMap;
     }
 
-//    public static void main(String[] args) {
-//        System.out.println(RegCall.RegState.SyncConnected == RegCall.RegState.SyncConnected );
-//    }
+    //    public static void main(String[] args) {
+    //        System.out.println(RegCall.RegState.SyncConnected == RegCall.RegState.SyncConnected );
+    //    }
 }

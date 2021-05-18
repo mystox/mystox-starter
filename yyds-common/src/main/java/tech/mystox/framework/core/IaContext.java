@@ -8,8 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.CountDownLatch;
-
 @Component
 public class IaContext implements ApplicationRunner {
     @Autowired
