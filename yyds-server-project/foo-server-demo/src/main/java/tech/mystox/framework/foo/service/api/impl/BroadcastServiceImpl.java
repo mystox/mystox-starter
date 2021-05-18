@@ -9,6 +9,6 @@ import java.util.List;
 public class BroadcastServiceImpl implements BroadcastService {
     @Override
     public void callHelloWorld(String name, List<String> home) {
-        System.out.println("name:"+name+"msg:"+home.toString());
+        System.out.println("broadcast body: name:"+name+"msg:"+home.toString());
     }
 }
