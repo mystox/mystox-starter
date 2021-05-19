@@ -13,8 +13,19 @@
 
 ## maven安装依赖
 
+windows 环境下执行 baseJar/install.bat
+windows 环境下执行 baseJar/install.sh
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.0.4 -Dpackaging=jar -Dfile=yyds-iarpc-starter/target/yyds-iarpc-starter-2.1.1.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-common-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-balancer-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-register-2.0.4.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.0.4 -Dpackaging=jar -Dfile=$BASE_DI/yyds-mqtt-starter-2.0.4.jar
+
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-iarpc-starter-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-common-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-balancer-2.0.4.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-register-2.0.4.xml
+mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.0.4 -Dpackaging=pom -Dfile=$BASE_DI/yyds-mqtt-starter-2.0.4.xml
 ```
 
 
@@ -227,6 +238,7 @@ public class LocalServiceImpl implements LocalService {
 * yyds-register: 注册模块的实现，默认实现zookeeper为注册中心。
 * yyds-mqtt: 消息中间件组件，实现消息的消费和生产，集成注册模块与负载均衡模块实现消息的分布式远程调用，支持‘函数式’与‘topic式’调用。
 * yyds-server-project: 使用的案例示例。
+* yyds-iarpc-dependencies：版本依赖管理模块
 
 ## 性能说明
 硬件条件：（cpu： Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz 网络:单服务带宽100mps）
