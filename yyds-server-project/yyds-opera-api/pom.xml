@@ -6,6 +6,7 @@
         <artifactId>yyds-server-project</artifactId>
         <groupId>tech.mystox.framework</groupId>
         <version>${revision}</version>
+<!--        <relativePath>../pom.xml</relativePath>-->
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +15,7 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-common</artifactId>
-            <version>${revision}</version>
+            <version>${yyds.iarpc.starter.version}</version>
         </dependency>
     </dependencies>
 
