@@ -3,8 +3,7 @@
 /AppResources/sn/
 /testResources/
 /reportsResources/
-/baseJar/*.jar
-/baseJar/*.xml
+/baseJar
 ### STS ###
 .apt_generated
 .classpath
@@ -27,6 +26,3 @@
 /nbdist/
 /.nb-gradle/
 /build/
-
-.flattened-pom.xml
-target
