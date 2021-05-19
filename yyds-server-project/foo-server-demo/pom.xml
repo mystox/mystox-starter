@@ -22,12 +22,12 @@
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-opera-api</artifactId>
-			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-iarpc-starter</artifactId>
-			<version>${revision}</version>
+			<version>${yyds.iarpc.starter.version}</version>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -49,6 +49,17 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>tech.mystox.framework</groupId>
+				<artifactId>yyds-iarpc-dependencies</artifactId>
+				<version>${yyds.iarpc.starter.version}</version>
+				<type>pom</type>
+			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>tech.mystox.framework</groupId>-->
+<!--				<artifactId>yyds-iarpc-starter</artifactId>-->
+<!--				<version>${yyds.iarpc.starter.version}</version>-->
+<!--			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 	<build>

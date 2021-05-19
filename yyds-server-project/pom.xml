@@ -2,40 +2,70 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>YYDS</artifactId>
-        <groupId>tech.mystox.framework</groupId>
-        <version>${revision}</version>
-    </parent>
+    <!--    <parent>-->
+    <!--        <artifactId>YYDS</artifactId>-->
+    <!--        <groupId>tech.mystox.framework</groupId>-->
+    <!--        <version>${revision}</version>-->
+    <!--    </parent>-->
+
     <modelVersion>4.0.0</modelVersion>
 
+    <version>${revision}</version>
     <name>yyds-server-project</name>
+    <groupId>tech.mystox.framework</groupId>
     <artifactId>yyds-server-project</artifactId>
     <packaging>pom</packaging>
     <properties>
+        <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
+        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
         <docker.image.prefix>172.16.5.27:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
+        <yyds.iarpc.starter.version>2.0.4</yyds.iarpc.starter.version>
+        <revision>1.0.0</revision>
+        <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
+        <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
     </properties>
     <modules>
         <module>foo-server-demo</module>
         <module>yyds-mqtt-demo</module>
         <module>yyds-opera-api</module>
-        <!--<module>asset-management-server</module>-->
-        <!--<module>alarm-server</module>-->
-        <!--<module>log-server</module>-->
-        <!--<module>gateway-project</module>-->
-        <!--<module>reports-server</module>-->
-        <!--<module>business-project</module>-->
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>tech.mystox.framework</groupId>
+                <artifactId>yyds-opera-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.mystox.framework</groupId>
+                <artifactId>yyds-iarpc-starter</artifactId>
+                <version>${yyds.iarpc.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.mystox.framework</groupId>
+                <artifactId>yyds-common</artifactId>
+                <version>${yyds.iarpc.starter.version}</version>
+            </dependency>
+        </dependencies>
 
-    <!--<properties>
-        <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
-        <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
-        &lt;!&ndash;解决格式提示问题&ndash;&gt;
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipTest>true</skipTest>
-    </properties>
+    </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -49,6 +79,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>-->
-
+    </build>
 </project>

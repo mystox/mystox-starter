@@ -4,21 +4,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>tech.mystox.framework</groupId>
-        <artifactId>YYDS</artifactId>
+        <artifactId>yyds-iarpc-dependencies</artifactId>
         <version>${revision}</version>
+        <relativePath>../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>yyds-common</artifactId>
+    <name>yyds-common</name>
+    <description>通用包</description>
+    <packaging>jar</packaging>
+
+
+
     <properties>
         <java.version>1.8</java.version>
         <log4j.version>2.9.1</log4j.version>
         <source>1.8</source>
         <target>1.8</target>
         <spring-cloud.version>Greenwich.SR6</spring-cloud.version>
+        <main.basedir>${basedir}/..</main.basedir>
     </properties>
-    <artifactId>yyds-common</artifactId>
-    <name>yyds-common</name>
-    <description>通用包</description>
-    <packaging>jar</packaging>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -54,29 +60,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <!--            <version>${spring-boot.version}</version>-->
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <version>${spring-boot.version}</version>
             <optional>true</optional>
         </dependency>
-
-
-        <!-- https://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper -->
-        <!--<dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-            <version>3.4.13</version>
-        </dependency>-->
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -98,49 +88,5 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.8.1</version>
         </dependency>
-
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${build.plugins.antrun.version}</version>
-                <executions>
-                    <execution>
-                        <id>package</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <echo>copy ${project.build.outputDirectory} *.jar to ../${base.jar.path}</echo>
-                                <copy todir="../${base.jar.path}">
-                                    <fileset dir="${project.build.directory}">
-                                        <include name="*.jar"/>
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>delete</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <target>
-                                <echo>delete ../${base.jar.path}/${artifactId}-${version}.jar</echo>
-                                <delete file="../${base.jar.path}/${artifactId}-${version}.jar">
-                                </delete>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>

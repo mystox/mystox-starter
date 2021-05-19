@@ -32,8 +32,9 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-iarpc-starter</artifactId>
-            <version>${revision}</version>
-            <optional>true</optional>
+            <version>${yyds.iarpc.starter.version}</version>
+            <type>pom</type>
+<!--            <scope>import</scope>-->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,7 +44,6 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-opera-api</artifactId>
-            <version>${revision}</version>
         </dependency>
         <!--Swagger2 - RESTful API文档-->
         <dependency>

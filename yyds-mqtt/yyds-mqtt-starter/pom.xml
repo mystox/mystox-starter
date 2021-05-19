@@ -3,19 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>yyds-mqtt</artifactId>
-        <groupId>tech.mystox.framework</groupId>
+      <groupId>tech.mystox.framework</groupId>
+        <artifactId>yyds-iarpc-dependencies</artifactId>
         <version>${revision}</version>
+        <relativePath>../../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yyds-mqtt-starter</artifactId>
-    <name>yyds-mqtt-start</name>
+    <name>yyds-mqtt-starter</name>
     <description>mqtt通讯框架</description>
     <properties>
         <java.version>1.8</java.version>
         <testSkip>true</testSkip>
-        <!--<main.basedir>${basedir}/../..</main.basedir>-->
+        <main.basedir>${basedir}/../..</main.basedir>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -62,62 +63,5 @@
             <version>1.2.2</version>
             <scope>compile</scope>
         </dependency>
-        <!-- <dependency>
-             <groupId>org.apache.commons</groupId>
-             <artifactId>commons-lang3</artifactId>
-             <version>3.8.1</version>
-         </dependency>
-         <dependency>
-             <groupId>commons-io</groupId>
-             <artifactId>commons-io</artifactId>
-             <version>2.6</version>
-         </dependency>
-         <dependency>
-             <groupId>org.yaml</groupId>
-             <artifactId>snakeyaml</artifactId>
-             <version>1.17</version>
-         </dependency>-->
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${build.plugins.antrun.version}</version>
-                <executions>
-                    <execution>
-                        <id>package</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <echo>copy ${project.build.outputDirectory} *.jar to ../../${base.jar.path}</echo>
-                                <copy todir="../../${base.jar.path}">
-                                    <fileset dir="${project.build.directory}">
-                                        <include name="*.jar"/>
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>delete</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <target>
-                                <echo>delete ../../${base.jar.path}/${artifactId}-${version}.jar</echo>
-                                <delete file="../../${base.jar.path}/${artifactId}-${version}.jar">
-                                </delete>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
