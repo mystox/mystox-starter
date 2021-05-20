@@ -29,7 +29,6 @@ import java.util.Map;
 public class ResoucesController {
 
 
-
     Logger logger = LoggerFactory.getLogger(ResoucesController.class);
     @Autowired
     OperaRouteConfigTest operaRouteConfigTest;
@@ -45,7 +44,7 @@ public class ResoucesController {
         try {
             File file = FileUtils.getFile("jarResources/jarRes.yml");
             Map load = (Map) yaml.load(new FileInputStream(file));
-            yaml.dump(load,new FileWriter(file));
+            yaml.dump(load, new FileWriter(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -53,6 +52,7 @@ public class ResoucesController {
         }
         return "ok";
     }
+
     private GenericPostableMvcEndpoint genericPostableMvcEndpoint;
 
     @Autowired
@@ -65,6 +65,7 @@ public class ResoucesController {
     WebPrivFuncConfig webPrivFuncConfig;
     @Autowired
     OperaRouteConfig operaRouteConfig;
+
     @RequestMapping("/updateOperaRoute")
     public String updateOperaRoute() {
         DumperOptions dumperOptions = new DumperOptions();
@@ -73,12 +74,12 @@ public class ResoucesController {
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
         OperaRouteConfigTest test = new OperaRouteConfigTest();
-//        test.setOpoeraResource(map);
+        //        test.setOpoeraResource(map);
         try {
             File file = FileUtils.getFile("./config/operaRoute-test-1.yml");
             Map testLoad = (Map) yaml.load(new FileInputStream(file));
-            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
-            Object invoke = contextRefresher.refresh();
+            yaml.dump(JSONObject.toJSON(test), new FileWriter(file));
+            Object invoke = genericPostableMvcEndpoint.invoke();
             logger.info(JSONObject.toJSONString(invoke));
             System.out.println(JSONObject.toJSONString(operaRouteConfig.getOperaRoute()));
             System.out.println(JSONObject.toJSONString(webPrivFuncConfig.getPrivFunc()));

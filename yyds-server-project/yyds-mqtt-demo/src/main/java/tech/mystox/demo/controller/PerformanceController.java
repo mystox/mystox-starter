@@ -1,11 +1,6 @@
 package tech.mystox.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.common.util.StringUtils;
-import tech.mystox.framework.entity.JsonResult;
-import tech.mystox.framework.entity.MsgResult;
-import tech.mystox.framework.entity.StateCode;
-import tech.mystox.framework.service.IaOpera;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +8,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tech.mystox.framework.api.test.PerformanceService;
+import tech.mystox.framework.common.util.StringUtils;
+import tech.mystox.framework.entity.JsonResult;
+import tech.mystox.framework.entity.MsgResult;
+import tech.mystox.framework.entity.StateCode;
+import tech.mystox.framework.service.IaOpera;
 import tech.mystox.framework.stereotype.Opera;
 
 import java.util.concurrent.TimeUnit;
