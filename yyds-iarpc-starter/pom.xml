@@ -12,7 +12,6 @@
     <name>yyds-iarpc-starter</name>
     <packaging>pom</packaging>
     <properties>
-        <revision>2.0.4</revision>
         <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
