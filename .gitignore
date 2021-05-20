@@ -3,8 +3,6 @@
 /AppResources/sn/
 /testResources/
 /reportsResources/
-/baseJar/*.jar
-/baseJar/*.xml
 ### STS ###
 .apt_generated
 .classpath
@@ -30,3 +28,5 @@
 
 .flattened-pom.xml
 target
+baseJar/*.jar
+baseJar/*.xml
