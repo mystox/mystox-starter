@@ -217,9 +217,9 @@ public class MqttReceiver {
                 logger.warn("message receive duplicate [{}]", message);
                 return;
             }
-            Object mqtt_receivedTopic = message.getHeaders().get("mqtt_receivedTopic");
+            Object mqtt_receivedTopic = message.getHeaders().get("mqtt_topic");//1.2.*版本获取topic方式不一样
             if (mqtt_receivedTopic == null) {
-                logger.error("message mqtt_receivedTopic is null [{}]", message);
+                logger.error("message mqtt_topic is null [{}]", message);
                 return;
             }
             String topic = mqtt_receivedTopic.toString();
