@@ -3,16 +3,11 @@ package tech.mystox.framework.proxy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
-import tech.mystox.framework.stereotype.OperaCode;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -25,7 +20,7 @@ import java.util.Set;
  * description:
  * update record:
  */
-public class OperaSyncInterceptor implements MethodInterceptor {
+public class OperaSyncInterceptor extends OperaBaseInterceptor {
     private IaContext iaContext;
 
     public OperaSyncInterceptor(IaContext iaContext) {
@@ -33,22 +28,13 @@ public class OperaSyncInterceptor implements MethodInterceptor {
     }
 
     @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        String operaCodeName;
-        Method method = invocation.getMethod();
-        OperaCode operaCode = method.getAnnotation(OperaCode.class);
-        if (operaCode == null) throw new MsgResultFailException("opera is null or code is blank");
-        operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
-        Type genericReturnType = method.getGenericReturnType();
-        // Class<?> returnType = method.getReturnType();
-        Object[] arguments = invocation.getArguments();
-        // Class<?>[] parameterTypes = method.getParameterTypes();
-        // new InvocationData(arguments,parameterTypes)
-        MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCodeName, JSONObject.toJSONString(arguments));
+    public Object opera(String operaCode, Object[] arguments, Type genericReturnType) {
+        MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(arguments));
         if (opera.getStateCode() != StateCode.SUCCESS) throw new MsgResultFailException("opera result is failed ["+opera.getStateCode()+"]");
         String msg = opera.getMsg();
         return deserialize(msg, genericReturnType);
     }
+
 
     private Object deserialize(String msg, Type returnType) {
         if (String.class == returnType) return msg;
@@ -73,6 +59,9 @@ public class OperaSyncInterceptor implements MethodInterceptor {
             return Byte.parseByte(msg);
         return parse;
     }
+
+
+
 
 
    /* public static void main(String[] args) {

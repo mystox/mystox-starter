@@ -118,7 +118,7 @@
 <!--                                <delete file="${base.jar.path}/${artifactId}-${version}.jar">-->
                                 <delete file="${base.jar.path}/${artifactId}-${version}.*">
                                 </delete>
-                                <echo>copy ${project.build.outputDirectory} *.jar to ${base.jar.path}</echo>
+                                <echo>copy ${project.build.outputDirectory} *.jar or *.xml to ${base.jar.path}</echo>
                                 <copy todir="${base.jar.path}">
                                     <fileset dir="${project.build.directory}">
                                         <include name="*.jar"/>

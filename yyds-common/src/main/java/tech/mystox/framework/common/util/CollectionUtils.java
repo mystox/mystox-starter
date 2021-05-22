@@ -16,9 +16,11 @@
  */
 package tech.mystox.framework.common.util;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CollectionUtils {
 
@@ -215,5 +217,17 @@ public class CollectionUtils {
 
     public static <T> boolean listEqual(List<T> operaRouteArr, List<T> localRoute) {
         return operaRouteArr.size() == localRoute.size() && operaRouteArr.containsAll(localRoute);
+    }
+
+    public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
+        if (iterator != null) {
+            while (iterator.hasNext()) {
+                Object candidate = iterator.next();
+                if (ObjectUtils.nullSafeEquals(candidate, element)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
