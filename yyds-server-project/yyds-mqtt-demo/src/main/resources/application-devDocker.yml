@@ -1,0 +1,20 @@
+server:
+  groupCode: GROUP_DEMO
+  name: YYTD_MQTT_DEMO
+  version: 1.0.0
+  port: 58000
+jarResources:
+  path: ./jarResources #jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
+register:
+  url: zookeeper://192.168.0.234:2181,192.168.0.234:2182,192.168.0.234:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+  sessionTimeout: 100000
+mqtt:
+  username: root
+  password: 123456
+  url: tcp://192.168.0.234:1883 # 推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
+  maxInflight: 1000
+test:
+ config: aaa
+executor:
+  threadPool:
+    corePoolSize: 60

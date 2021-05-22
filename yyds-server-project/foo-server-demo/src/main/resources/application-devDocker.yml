@@ -1,0 +1,17 @@
+spring:
+  redis:
+    host: 192.168.0.234
+    port: 6379
+    database: 2
+###########服务及消息框架相关配置#############
+server:
+  groupCode: GROUP_DEMO
+  name: FOO_SERVER_DEMO #服务编码
+  version: 1.0.0 #服务版本
+  port: 58106 #服务占用web端口
+register:
+  url: zookeeper://192.168.0.234:2181,192.168.0.234:2182,192.168.0.234:2183 #开发态的服务和云管服务配置，开发态服务可以不依赖云管进行部分功能服务的开发
+mqtt:
+  username: root #可选配置 mqtt配置相关
+  password: 123456 #可选配置 mqtt配置相关
+  url: tcp://192.168.0.234:1883 #推送信息的连接地址，如果有多个，用逗号隔开，如：tcp://127.0.0.1:61613,tcp://192.168.1.61:61613
