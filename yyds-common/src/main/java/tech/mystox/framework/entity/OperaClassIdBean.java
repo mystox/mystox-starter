@@ -1,5 +1,7 @@
 package tech.mystox.framework.entity;
 
+import java.util.Objects;
+
 /**
  * Created by mystoxlol on 2020/6/23, 9:25.
  * company: kongtrolink
@@ -12,11 +14,13 @@ public class OperaClassIdBean {
     private final Class<?> interfaceClass;
     private final String group;
     private final String version;
+    private final OperaType operaType;
 
-    public OperaClassIdBean(Class<?> interfaceClass, String group, String version) {
+    public OperaClassIdBean(Class<?> interfaceClass, String group, String version, OperaType operaType) {
         this.interfaceClass = interfaceClass;
         this.group = group;
         this.version = version;
+        this.operaType = operaType;
     }
 
     public Class<?> getInterfaceClass() {
@@ -40,15 +44,14 @@ public class OperaClassIdBean {
             return false;
         }
         OperaClassIdBean classIdBean = (OperaClassIdBean) obj;
-        if (this.interfaceClass == null ? classIdBean.interfaceClass != null
-                : !this.interfaceClass.equals(classIdBean.interfaceClass)) {
+        if (!Objects.equals(this.interfaceClass, classIdBean.interfaceClass)) {
             return false;
         }
-        if (this.group == null ? classIdBean.group != null : !this.group.equals(classIdBean.group)) {
+        if (!Objects.equals(this.group, classIdBean.group)) {
             return false;
         }
-        return this.version == null ? classIdBean.version == null
-                : this.version.equals(classIdBean.version);
+        if(!Objects.equals(this.version, classIdBean.version)) return false;
+        return Objects.equals(this.operaType, classIdBean.operaType);
     }
 
     @Override
@@ -57,12 +60,17 @@ public class OperaClassIdBean {
         hashCode = 31 * hashCode + (this.interfaceClass == null ? 0 : this.interfaceClass.hashCode());
         hashCode = 31 * hashCode + (this.group == null ? 0 : this.group.hashCode());
         hashCode = 31 * hashCode + (this.version == null ? 0 : this.version.hashCode());
+        hashCode = 31 * hashCode + (this.operaType == null ? 0 : this.operaType.hashCode());
         return hashCode;
     }
 
     @Override
     public String toString() {
-        return "ClassIdBean [interfaceClass=" + this.interfaceClass + ", group=" + this.group
-                + ", version=" + this.version + "]";
+        return "OperaClassIdBean{" +
+                "interfaceClass=" + interfaceClass +
+                ", group='" + group + '\'' +
+                ", version='" + version + '\'' +
+                ", operaType=" + operaType +
+                '}';
     }
 }

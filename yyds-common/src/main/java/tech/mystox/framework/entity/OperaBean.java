@@ -15,13 +15,12 @@ import tech.mystox.framework.proxy.OperaBroadcastInterceptor;
 import tech.mystox.framework.proxy.OperaSyncInterceptor;
 import tech.mystox.framework.stereotype.Opera;
 
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-
-import static tech.mystox.framework.entity.OperaType.*;
 
 /**
  * Created by mystoxlol on 2020/6/23, 10:28.
@@ -121,14 +120,18 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
         OperaType operaType = opera.operaType();
         switch (operaType) {
             case Broadcast:
-                proxyFactory.addAdvice(new OperaBroadcastInterceptor(iaContext));
-                break;
+                OperaBroadcastInterceptor broadcast = new OperaBroadcastInterceptor(iaContext);
+                proxyFactory.addAdvice(broadcast);
+                return (T) ProxyFactory.getProxy(interfaceClass,broadcast);
+//                break;
             case Async:
-                proxyFactory.addAdvice(new OperaAsyncInterceptor(iaContext));
-                break;
+                OperaAsyncInterceptor async = new OperaAsyncInterceptor(iaContext);
+                proxyFactory.addAdvice(async);
+                return (T) ProxyFactory.getProxy(interfaceClass,async);
+//                break;
             case Sync:
             default:
-                proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
+                proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext)); //默认代理
 
         }
 //        proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
@@ -274,6 +277,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
                             Method setterMethod = this.getClass().getMethod(setter, new Class[]{parameterType});
                             setterMethod.invoke(this, new Object[]{value});
                         } catch (NoSuchMethodException var13) {
+//                            logger.error(var13.getMessage(), var13);
                             ;
                         }
                     }
@@ -288,5 +292,63 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
     @Override
     public void afterPropertiesSet() throws Exception {
 
+    }
+
+
+
+    public static void main(String[] args) throws FileNotFoundException {
+        /*File cpuFile = new File("C:\\Users\\lhr\\Desktop\\CPU.txt");
+        FileInputStream fileInputStream = new FileInputStream(cpuFile);
+
+        System.out.println(parseCPU(fileInputStream,"127.0.0.1").toJSONString());*/
+
+        String method = "Disk";
+
+        switch (method) {
+            case "Base":
+                //                contend = parseBase(fileInputStream, ip);
+                break;
+            case "Cpu":
+                //                contend = parseCPU(fileInputStream, ip);
+                break;
+            case "Mem":
+                //                contend = parseMem(fileInputStream, ip);
+                break;
+            //case "MemFree":contend = parseMemFree(fileInputStream,ip).toJSONString();break;
+            case "Swap":
+                //                contend = new JSONObject();
+                break;
+            //parseSwapSpecially(fileInputStream,ip);break;
+            //case "SwapTotalUsed":contend = parseSwapTotalused(fileInputStream,ip).toJSONString();break;
+            case "ProcessZombieCount":
+                //                contend = parseProcessZombiecount(fileInputStream, ip);
+                break;
+            //case "HostName":contend = parseHostName(fileInputStream,ip).toJSONString();break;
+            case "Disk":
+                //                contend = parseDisk(fileInputStream, ip);
+                break;
+            case "Net":
+                //                contend = parseNet(fileInputStream, ip);
+                break;
+            //case "AveLoad":contend = parseAveLoad(fileInputStream,ip).toJSONString();break;
+            //case "OS":contend = parseOs(fileInputStream,ip).toJSONString();break;
+            case "PlantForm":
+                //                contend = parsePlantForm(fileInputStream, ip);
+                break;
+            //case "SystemFrameWork":contend = parseSystemFrameWork(fileInputStream,ip).toJSONString();break;
+            //case "Env":contend = parseEnv(fileInputStream,ip).toJSONString();break;
+            //case "BootTime":contend = parseBootTime(fileInputStream,ip).toJSONString();break;
+            case "UpTime":
+                //                contend = parseUpTime(fileInputStream, ip);
+                break;
+            //case "PVersion":contend = parsePVersion(fileInputStream,ip).toJSONString();break;
+            //case "CpuMode":contend = parseCpuMode(fileInputStream,ip).toJSONString();break;
+            //case "LsCPU":contend = parseLsCPU(fileInputStream,ip).toJSONString();break;
+            default: {
+                System.out.println("方法类型有误，请检查method字段拼写");
+                return;
+            }
+        }
+        System.out.println("11111111111111");
     }
 }

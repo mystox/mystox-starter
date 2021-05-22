@@ -50,6 +50,7 @@ public class OperaAutoConfig {
                 }
 
                 try {
+                    //todo 不同operaType类型应该注册多个
                     for (Field field : objClz.getDeclaredFields()) {
                         Opera opera = field.getAnnotation(Opera.class);
                         if (opera != null) {
@@ -58,7 +59,7 @@ public class OperaAutoConfig {
                             Class<?> interfaceClass = operaBean.getInterfaceClass();
                             String group = operaBean.getGroup();
                             String version = operaBean.getVersion();
-                            OperaClassIdBean classIdBean = new OperaClassIdBean(interfaceClass, group, version);
+                            OperaClassIdBean classIdBean = new OperaClassIdBean(interfaceClass, group, version, opera.operaType());
                             Object yydsOpera = OPERA_CONSUMER_MAP.get(classIdBean);
                             if (yydsOpera == null) {
                                 synchronized (this) {

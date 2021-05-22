@@ -1,14 +1,9 @@
 package tech.mystox.framework.proxy;
 
 import com.alibaba.fastjson.JSONObject;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.apache.commons.lang3.StringUtils;
 import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.exception.MsgResultFailException;
-import tech.mystox.framework.stereotype.OperaCode;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
@@ -16,27 +11,19 @@ import java.lang.reflect.Method;
  * description: 异步处理
  * update record:
  */
-public class OperaAsyncInterceptor implements MethodInterceptor {
+public class OperaAsyncInterceptor extends OperaBaseInterceptor {
     private IaContext iaContext;
 
     public OperaAsyncInterceptor(IaContext iaContext) {
         this.iaContext = iaContext;
     }
 
+
     @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        String operaCodeName;
-        Method method = invocation.getMethod();
-        OperaCode operaCode = method.getAnnotation(OperaCode.class);
-        if (operaCode == null) throw new MsgResultFailException("opera is null or code is blank");
-        operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
-        Object[] arguments = invocation.getArguments();
-        //广播
-        iaContext.getIaENV().getMsgScheduler().getIaHandler().operaAsync(operaCodeName, JSONObject.toJSONString(arguments));
+    public Object opera(String operaCode, Object[] arguments, Type genericReturnType) {
+        iaContext.getIaENV().getMsgScheduler().getIaHandler().operaAsync(operaCode, JSONObject.toJSONString(arguments));
         return null;
     }
-
-
 
    /* public static void main(String[] args) {
 
