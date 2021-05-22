@@ -1,4 +1,4 @@
-FROM ascdc/jdk8:latest
+FROM williamyeh/java8:latest
 VOLUME /tmp
 ARG JAR_FILE
 COPY target/${JAR_FILE} /opt/app.jar
