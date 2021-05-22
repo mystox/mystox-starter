@@ -1,6 +1,5 @@
 package tech.mystox.framework.api.test;
 
-import tech.mystox.framework.stereotype.Opera;
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;
 
@@ -11,6 +10,8 @@ public interface BroadcastService {
 
     @OperaCode
     public void callHelloWorld(String name, List<String> home);
+
+    public void callHelloWorld2(String name, List<String> home);
 
 
 }

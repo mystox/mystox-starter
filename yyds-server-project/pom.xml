@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <!--    <parent>-->
-    <!--        <artifactId>YYDS</artifactId>-->
-    <!--        <groupId>tech.mystox.framework</groupId>-->
-    <!--        <version>${revision}</version>-->
-    <!--    </parent>-->
+<!--        <parent>-->
+<!--            <artifactId>YYDS</artifactId>-->
+<!--            <groupId>tech.mystox.framework</groupId>-->
+<!--            <version>2.0.4</version>-->
+<!--        </parent>-->
 
     <modelVersion>4.0.0</modelVersion>
 
-    <version>${revision}</version>
+    <version>1.0.0</version>
     <name>yyds-server-project</name>
     <groupId>tech.mystox.framework</groupId>
     <artifactId>yyds-server-project</artifactId>
@@ -21,7 +21,7 @@
         <docker.image.prefix>172.16.5.27:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
         <yyds.iarpc.starter.version>2.0.4</yyds.iarpc.starter.version>
-        <revision>1.0.0</revision>
+<!--        <revision>1.0.0</revision>-->
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
     </properties>

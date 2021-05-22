@@ -20,5 +20,6 @@ public class SpringbootYydsMqttDemoApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SpringbootYydsMqttDemoApplication.class, args);
+
     }
 }
