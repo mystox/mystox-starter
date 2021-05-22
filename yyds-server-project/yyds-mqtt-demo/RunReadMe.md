@@ -1,12 +1,12 @@
 `
-serverHost=172.16.5.27 && serverPort=18204 && \
+serverHost=192.168.0.234 && serverPort=18204 && \
 docker run --name mqtt-demo --net=host  -d \
 -p $serverPort:$serverPort \
 -e JAVA_OPTS='-server -Xms128m -Xmx512m ' \
 -e server.port=$serverPort \
 -e server.host=$serverHost \
 -e spring.cloud.zookeeper.discovery.instance-host=$serverHost \
-172.16.5.27:23760/yyds-mqtt-demo:2.0.4 
+192.168.0.234:23760/yyds-mqtt-demo:1.0.0
 `
 
 查看日志

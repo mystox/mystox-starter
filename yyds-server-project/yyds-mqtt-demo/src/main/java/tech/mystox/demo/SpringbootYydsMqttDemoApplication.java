@@ -11,6 +11,7 @@ import tech.mystox.framework.stereotype.EnableOpera;
  * company: mystox
  * description:
  * update record:
+ *
  */
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
