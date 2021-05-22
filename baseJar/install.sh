@@ -1,5 +1,4 @@
-source ~/.bash_profile
-#!/bin/bash
+#!/bin/sh
 export BASE_DIR=`cd $(dirname $0); pwd`
 
 mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.0.4 -Dpackaging=jar -Dfile=BASE_DIR/yyds-common-2.0.4.jar
