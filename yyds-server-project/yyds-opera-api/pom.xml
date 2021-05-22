@@ -5,8 +5,7 @@
     <parent>
         <artifactId>yyds-server-project</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.0.0</version>
-<!--        <relativePath>../pom.xml</relativePath>-->
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
