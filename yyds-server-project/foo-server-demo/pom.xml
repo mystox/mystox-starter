@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>yyds-server-project</artifactId>
 		<groupId>tech.mystox.framework</groupId>
-		<version>1.2.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>foo-server-demo</artifactId>
 	<name>foo-server-demo</name>
@@ -22,7 +22,6 @@
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>
 			<artifactId>yyds-opera-api</artifactId>
-			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>tech.mystox.framework</groupId>

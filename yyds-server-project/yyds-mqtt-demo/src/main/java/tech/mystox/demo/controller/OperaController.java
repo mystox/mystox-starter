@@ -3,6 +3,7 @@ package tech.mystox.demo.controller;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,8 +30,18 @@ public class OperaController {
     @Opera
     LocalService localService;
 
+
+    @Autowired
+    BroadcastService broadcastServiceAuto;
     @Opera(operaType = OperaType.Broadcast)
     BroadcastService broadcastService;
+
+    @Opera(operaType = OperaType.Async)
+    BroadcastService broadcastService2;
+
+    @Opera(operaType = OperaType.Sync)
+    BroadcastService broadcastService3;
+
 
     @ApiOperation(value = "同步/异步接口测试")
     @RequestMapping(value = "/hello",method = RequestMethod.GET)
@@ -63,7 +74,21 @@ public class OperaController {
         List<String> msg = new ArrayList<>();
         msg.add("cast");
         msg.add("dddd");
-        broadcastService.callHelloWorld("mystox", msg);
+        broadcastServiceAuto.callHelloWorld2("mystoxdemo",msg);
+        System.out.println("autowired动态加载end");
+        broadcastService3.callHelloWorld2("msytox",msg);
+        System.out.println("service2动态加载end");
+        broadcastService.callHelloWorld("mystox1", msg);
+        System.out.println(broadcastService.toString());
+        broadcastService2.callHelloWorld("mystox2",msg);
+        System.out.println(broadcastService2.toString());
+        broadcastService3.callHelloWorld("mystox3",msg);
+        System.out.println(broadcastService3.toString());
+        //next
+        //
+
+
+
     }
 
     public static void main(String[] args)

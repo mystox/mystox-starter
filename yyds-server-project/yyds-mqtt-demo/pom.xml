@@ -5,7 +5,7 @@
     <parent>
         <artifactId>yyds-server-project</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <version>1.2.0</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yyds-mqtt-demo</artifactId>
@@ -44,13 +44,19 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-opera-api</artifactId>
-            <version>1.2.0</version>
+            <version>${revision}</version>
         </dependency>
         <!--Swagger2 - RESTful API文档-->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
             <version>2.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>

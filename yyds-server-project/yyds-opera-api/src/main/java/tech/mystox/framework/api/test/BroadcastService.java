@@ -11,5 +11,7 @@ public interface BroadcastService {
     @OperaCode
     public void callHelloWorld(String name, List<String> home);
 
+    public void callHelloWorld2(String name, List<String> home);
+
 
 }
