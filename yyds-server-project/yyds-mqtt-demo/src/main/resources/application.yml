@@ -2,7 +2,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: yytd-mqtt-demo
+    name: yyds-mqtt-demo
 management:
   endpoints:
     web:
@@ -10,7 +10,7 @@ management:
         include: env,refresh
 server:
   groupCode: GROUP_DEMO1
-  name: YYTD_MQTT_DEMO
+  name: YYDS_MQTT_DEMO
   version: 1.0.0
   port: 58000
   title: 消息框架DEMO

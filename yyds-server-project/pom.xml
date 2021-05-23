@@ -18,7 +18,7 @@
     <properties>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
-        <docker.image.prefix>172.16.5.27:23760</docker.image.prefix>
+        <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
         <yyds.iarpc.starter.version>1.2.4</yyds.iarpc.starter.version>
         <revision>1.2.0</revision>
@@ -63,6 +63,7 @@
                 <version>${yyds.iarpc.starter.version}</version>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <build>
