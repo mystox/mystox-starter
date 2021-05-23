@@ -16,7 +16,6 @@
  */
 package tech.mystox.framework.common.util;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -219,7 +218,7 @@ public class CollectionUtils {
         return operaRouteArr.size() == localRoute.size() && operaRouteArr.containsAll(localRoute);
     }
 
-    public static boolean contains(@Nullable Iterator<?> iterator, Object element) {
+    public static boolean contains(Iterator<?> iterator, Object element) {
         if (iterator != null) {
             while (iterator.hasNext()) {
                 Object candidate = iterator.next();
