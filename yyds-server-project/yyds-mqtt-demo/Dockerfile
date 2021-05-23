@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM williamyeh/java8:latest
 VOLUME /tmp
 ARG JAR_FILE
 COPY target/${JAR_FILE} /opt/app.jar
