@@ -198,14 +198,15 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String serverName = iaconf.getServerName();
             String groupCode = iaconf.getGroupCode();
             String serverVersion = iaconf.getServerVersion();
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
+            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
+                    serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
 //            if (CollectionUtils.isEmpty(topicArr)) {
 //            if (!regScheduler.exists(routePath))
 //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
 //            String data = regScheduler.getData(routePath);
             List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
-
+            if (localTopicArr == null) localTopicArr = new ArrayList<>();
             /*boolean contains = topicArr.contains(targetServerCode);
             if (contains) {
                 topicArr.remove(targetServerCode);
