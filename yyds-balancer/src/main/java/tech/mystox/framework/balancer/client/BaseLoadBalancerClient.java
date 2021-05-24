@@ -10,7 +10,6 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
-import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.entity.TopicPrefix;
 import tech.mystox.framework.scheduler.RegScheduler;
 
@@ -53,13 +52,8 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         try {
             RegScheduler regScheduler = iaENV.getRegScheduler();
             RegCall.RegState state = regScheduler.getState();
-            ServerStatus serverStatus = iaENV.getServerStatus();
             if (RegCall.RegState.SyncConnected != state) {
-                logger.warn("register state is[{}] not connected ...", state);
-                return;
-            }
-            if (!ServerStatus.ONLINE.equals(serverStatus)) {
-                logger.warn("server state is[{}] not connected ...", serverStatus);
+                logger.debug("register state is not connected ...");
                 return;
             }
             IaConf conf = iaENV.getConf();
@@ -71,29 +65,31 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
             Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
             OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
             Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
-            children.forEach(operaCode -> {
-                String routePath = preconditionRoutePath(groupServerCode, operaCode);
-                //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
-                List<String> operaRouteArr = new ArrayList<>();
-                if (localOperaRouteMap.containsKey(operaCode)) {
-                    operaRouteArr = localOperaRouteMap.get(operaCode);
-                    regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
-                } else {
-                    operaRouteArr = regScheduler.buildOperaMap(operaCode);
-                    String data = regScheduler.getData(routePath);
-                    if (StringUtils.isNotEmpty(data)) {
-                        List<String> registerRoute = JSONArray.parseArray(data, String.class);
-                        if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute))//判断路由是否发生变化，变化则更新
-                        {
-                            logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
-                            regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+            if (CollectionUtils.isNotEmpty(children)) {
+                children.forEach(operaCode -> {
+                    String routePath = preconditionRoutePath(groupServerCode, operaCode);
+                    //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
+                    List<String> operaRouteArr = new ArrayList<>();
+                    if (localOperaRouteMap !=null && localOperaRouteMap.containsKey(operaCode)) {
+                        operaRouteArr = localOperaRouteMap.get(operaCode);
+                        regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                    } else {
+                        operaRouteArr = regScheduler.buildOperaMap(operaCode);
+                        String data = regScheduler.getData(routePath);
+                        if (StringUtils.isNotEmpty(data)) {
+                            List<String> registerRoute = JSONArray.parseArray(data, String.class);
+                            if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute))//判断路由是否发生变化，变化则更新
+                            {
+                                logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
+                                regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                            }
                         }
-                    }
 
-                }
-                operaMap.put(operaCode, operaRouteArr);
-                logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
-            });
+                    }
+                    operaMap.put(operaCode, operaRouteArr);
+                    logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
+                });
+            }
             this.operaRouteMap = operaMap;
         } catch (Exception e) {
             if (logger.isDebugEnabled()) e.printStackTrace();
