@@ -35,6 +35,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
 	<version>2.1.4</version>
+	<type>pom</type>
 </dependency>
 
 ```
@@ -79,7 +80,7 @@ public class ServerDemoApplication {
 ```
 
 如果项目的基本包路径不包含tech.mystox.framework，则注解需要自定义配置增加scanBasePackages={"tech.mystox.framework","项目基本包名"}。
-2.1.*版本已经通过@EnableOpera注解实现组件包的注入。
+2.0.*版本已经通过@EnableOpera注解实现组件包的注入。
 
 ### local处理单元
 
@@ -153,7 +154,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.1.4</version>
+        <version>2.0.4</version>
     </dependency>
 ```
 common接口
