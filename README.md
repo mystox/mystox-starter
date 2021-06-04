@@ -32,11 +32,11 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 项目基于springboot框架，引入yyds-iarpc-starter依赖
 ```
 <dependency>
-	<groupId>tech.mystox.framework</groupId>
-	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>2.0.4</version>
+    <groupId>tech.mystox.framework</groupId>
+    <artifactId>yyds-iarpc-starter</artifactId>
+    <version>2.0.4</version>
+    <type>pom</type>
 </dependency>
-
 ```
 
 ## 配置文件说明
