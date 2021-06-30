@@ -106,7 +106,12 @@ public class MqttReceiver {
             Method method = clazz.getDeclaredMethod(methodName, classes.toArray(new Class[0]));
             String payload = mqttMsg.getPayload();
             JSONArray jsonArray = JSONObject.parseArray(payload);
-            Object invoke = method.invoke(bean, jsonArray.toArray());
+            Object[] arguments =new Object[classes.size()];
+            for (int i = 0; i < arguments.length; i++) {
+                Class paramType = classes.get(i);
+                arguments[i] = jsonArray.getObject(i,paramType);
+            }
+            Object invoke = method.invoke(bean, arguments);
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
             resp = new MqttResp(mqttMsg.getMsgId(), result);
             return resp;
