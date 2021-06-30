@@ -1,18 +1,12 @@
 package tech.mystox.framework.proxy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.util.TypeUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
@@ -28,7 +22,7 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
     }
 
     @Override
-    public Object opera(String operaCode, Object[] arguments, Type genericReturnType) {
+    public Object opera(String operaCode, Object[] arguments, Class<?> genericReturnType) {
         MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(arguments));
         if (opera.getStateCode() != StateCode.SUCCESS) throw new MsgResultFailException("opera result is failed ["+opera.getStateCode()+"]");
         String msg = opera.getMsg();
@@ -36,7 +30,9 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
     }
 
 
-    private Object deserialize(String msg, Type returnType) {
+    private Object deserialize(String msg, Class<?> returnType) {
+        return TypeUtils.castToJavaBean(JSON.parse(msg), returnType);
+/*
         if (String.class == returnType) return msg;
         Object parse = JSON.parse(msg);
         if (parse instanceof JSONObject) {
@@ -57,11 +53,8 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
             return Long.parseLong(msg);
         else if (returnType == Byte.class|| "byte".equals(returnType.getTypeName()))
             return Byte.parseByte(msg);
-        return parse;
+        return parse;*/
     }
-
-
-
 
 
    /* public static void main(String[] args) {

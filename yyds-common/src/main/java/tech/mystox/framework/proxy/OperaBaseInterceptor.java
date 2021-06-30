@@ -11,7 +11,6 @@ import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.stereotype.OperaCode;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 
 /**
@@ -47,11 +46,11 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
                     .invoke(bean, invocation.getArguments());
         }
         operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
-        Type genericReturnType = method.getGenericReturnType();
-        return opera(operaCodeName, arguments,genericReturnType);
+//        Type genericReturnType = method.getReturnType();
+        return opera(operaCodeName, arguments,method.getReturnType());
 
     }
 
 
-    public abstract Object opera(String operaCode, Object[] arguments, Type genericReturnType);
+    public abstract Object opera(String operaCode, Object[] arguments, Class<?> genericReturnType);
 }

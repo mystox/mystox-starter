@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import tech.mystox.framework.api.test.BroadcastService;
+import tech.mystox.framework.api.test.EntityService;
 import tech.mystox.framework.api.test.LocalService;
+import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ReturnEntity;
 import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
 
@@ -87,6 +90,22 @@ public class OperaController {
         //next
         //
 
+
+
+    }
+
+    @Opera
+    EntityService entityService;
+
+    @ApiOperation(value = "实体接口测试")
+    @RequestMapping(value = "/getEntity",method = RequestMethod.GET)
+    public void testEntity() {
+
+        OperaParam operaParam = new OperaParam();
+        operaParam.setParam("aaaaaaaaaaaaa");
+        operaParam.setContext("1231231312312313");
+        ReturnEntity entity = entityService.getEntity(operaParam);
+        System.out.println(JSONObject.toJSONString(entity));
 
 
     }
