@@ -3,8 +3,6 @@ package tech.mystox.framework.proxy;
 import com.alibaba.fastjson.JSONObject;
 import tech.mystox.framework.core.IaContext;
 
-import java.lang.reflect.Type;
-
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
  * company: kongtrolink
@@ -20,7 +18,7 @@ public class OperaAsyncInterceptor extends OperaBaseInterceptor {
 
 
     @Override
-    public Object opera(String operaCode, Object[] arguments, Type genericReturnType) {
+    public Object opera(String operaCode, Object[] arguments, Class<?> genericReturnType) {
         iaContext.getIaENV().getMsgScheduler().getIaHandler().operaAsync(operaCode, JSONObject.toJSONString(arguments));
         return null;
     }
