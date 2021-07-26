@@ -552,6 +552,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             return zk.getChildren(path, true);
         } catch (KeeperException | InterruptedException e) {
+            logger.warn("Zookeeper get child node is no");
+            if(logger.isDebugEnabled())
             e.printStackTrace();
         }
         return null;

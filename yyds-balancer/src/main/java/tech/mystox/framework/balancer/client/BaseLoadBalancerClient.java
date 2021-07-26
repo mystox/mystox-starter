@@ -10,6 +10,7 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
+import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.entity.TopicPrefix;
 import tech.mystox.framework.scheduler.RegScheduler;
 
@@ -52,19 +53,24 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         try {
             RegScheduler regScheduler = iaENV.getRegScheduler();
             RegCall.RegState state = regScheduler.getState();
-            if (RegCall.RegState.SyncConnected != state) {
-                logger.debug("register state is not connected ...");
+//            if (RegCall.RegState.SyncConnected != state) {
+//                logger.debug("register state is not connected ...");
+//                return;
+//            }
+            ServerStatus serverStatus = iaENV.getServerStatus();
+            if (!ServerStatus.ONLINE.equals(serverStatus)) {
+                logger.debug("server state is[{}] not connected ...", serverStatus);
                 return;
             }
             IaConf conf = iaENV.getConf();
             String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
                     preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
             //        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
-            List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
-                    groupServerCode));
             Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
             OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
             Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
+            List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
+                    groupServerCode));
             if (CollectionUtils.isNotEmpty(children)) {
                 children.forEach(operaCode -> {
                     String routePath = preconditionRoutePath(groupServerCode, operaCode);
