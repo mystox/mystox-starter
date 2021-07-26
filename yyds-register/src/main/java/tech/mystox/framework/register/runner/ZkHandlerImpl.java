@@ -2,7 +2,13 @@ package tech.mystox.framework.register.runner;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.common.util.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
@@ -11,13 +17,6 @@ import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.service.RegHandler;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -553,6 +552,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             return zk.getChildren(path, true);
         } catch (KeeperException | InterruptedException e) {
+            logger.warn("Zookeeper get child node is no");
+            if(logger.isDebugEnabled())
             e.printStackTrace();
         }
         return null;
