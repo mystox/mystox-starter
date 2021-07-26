@@ -48,7 +48,7 @@
     </dependencyManagement>
 
     <properties>
-        <revision>2.1.4</revision>
+        <revision>2.1.5</revision>
         <spring-boot.version>2.1.17.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
