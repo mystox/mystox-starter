@@ -52,5 +52,6 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
     }
 
 
+
     public abstract Object opera(String operaCode, Object[] arguments, Class<?> genericReturnType);
 }

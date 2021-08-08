@@ -1,8 +1,11 @@
 package tech.mystox.framework.foo.service.api.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tech.mystox.framework.api.test.LocalService;
+import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ReturnEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,5 +64,17 @@ public class LocalServiceImpl implements LocalService {
     @Override
     public void helloParams(String param1, Integer param2, long param3) {
         System.out.println("hello param3 void");
+    }
+
+    @Override
+    public ReturnEntity helloWait(String param, OperaParam operaParam) {
+        try {
+            System.out.println(param+ JSONObject.toJSON(operaParam));
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("time out end");
+        return new ReturnEntity();
     }
 }

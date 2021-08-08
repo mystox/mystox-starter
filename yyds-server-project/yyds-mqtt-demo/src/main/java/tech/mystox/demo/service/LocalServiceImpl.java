@@ -1,6 +1,8 @@
 package tech.mystox.demo.service;
 
 import tech.mystox.framework.api.test.LocalService;
+import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ReturnEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -49,5 +51,10 @@ public class LocalServiceImpl implements LocalService {
     @Override
     public void helloParams(String param1, Integer param2, long param3) {
 
+    }
+
+    @Override
+    public ReturnEntity helloWait(String param, OperaParam operaParam) {
+        return null;
     }
 }
