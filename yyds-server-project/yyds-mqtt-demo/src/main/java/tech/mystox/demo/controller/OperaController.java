@@ -14,6 +14,7 @@ import tech.mystox.framework.api.test.entity.OperaParam;
 import tech.mystox.framework.api.test.entity.ReturnEntity;
 import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
+import tech.mystox.framework.stereotype.OperaTimeout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,8 @@ import java.util.Map;
 public class OperaController {
     @Opera
     LocalService localService;
-
+    @Opera(operaType = OperaType.Sync,operaTimeout = @OperaTimeout(timeout = 5))
+    LocalService localService2;
 
     @Autowired
     BroadcastService broadcastServiceAuto;
@@ -44,6 +46,8 @@ public class OperaController {
 
     @Opera(operaType = OperaType.Sync)
     BroadcastService broadcastService3;
+
+
 
 
     @ApiOperation(value = "同步/异步接口测试")
@@ -106,6 +110,23 @@ public class OperaController {
         operaParam.setContext("1231231312312313");
         ReturnEntity entity = entityService.getEntity(operaParam);
         System.out.println(JSONObject.toJSONString(entity));
+
+
+    }
+
+
+
+    @ApiOperation(value = "实体接口测试")
+    @RequestMapping(value = "/sendTimeout",method = RequestMethod.GET)
+    public void sendTimeout() {
+
+        System.out.println("发送超时接口");
+        List<String> msg = new ArrayList<>();
+        msg.add("cast");
+        msg.add("dddd");
+        ReturnEntity param = localService2.helloWait("param", new OperaParam());
+        System.out.println(param);
+        System.out.println(JSONObject.toJSONString(param));
 
 
     }

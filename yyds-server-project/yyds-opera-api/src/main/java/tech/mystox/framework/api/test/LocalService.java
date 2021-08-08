@@ -1,5 +1,7 @@
 package tech.mystox.framework.api.test;
 
+import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ReturnEntity;
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;
 
@@ -27,6 +29,8 @@ public interface LocalService {
     String helloParams(String param1,Integer param2);
     @OperaCode(code = "sayVoid")
     void helloParams(String param1,Integer param2,long param3);
+    @OperaCode(code = "helloWait")
+    ReturnEntity helloWait(String param, OperaParam operaParam);
     public static void main(String[] args)
     {
         try {

@@ -14,6 +14,7 @@ import tech.mystox.framework.proxy.OperaAsyncInterceptor;
 import tech.mystox.framework.proxy.OperaBroadcastInterceptor;
 import tech.mystox.framework.proxy.OperaSyncInterceptor;
 import tech.mystox.framework.stereotype.Opera;
+import tech.mystox.framework.stereotype.OperaTimeout;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
@@ -49,13 +50,14 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
     private static final ProxyFactory proxyFactory = null;
     private IaContext iaContext;
     private Opera opera;
-
+    private OperaTimeout operaTimeout;
     public OperaBean() {
     }
 
     public OperaBean(Opera opera) {
         this.appendAnnotation(Opera.class, opera);
         this.opera = opera;
+        this.operaTimeout = opera.operaTimeout();
     }
 
     @Override
@@ -122,20 +124,26 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
             case Broadcast:
                 OperaBroadcastInterceptor broadcast = new OperaBroadcastInterceptor(iaContext);
                 proxyFactory.addAdvice(broadcast);
-                return (T) ProxyFactory.getProxy(interfaceClass,broadcast);
-//                break;
+                return (T) ProxyFactory.getProxy(interfaceClass, broadcast);
+            //                break;
             case Async:
                 OperaAsyncInterceptor async = new OperaAsyncInterceptor(iaContext);
                 proxyFactory.addAdvice(async);
-                return (T) ProxyFactory.getProxy(interfaceClass,async);
-//                break;
+                return (T) ProxyFactory.getProxy(interfaceClass, async);
+            //                break;
             case Sync:
-            default:
-                proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext)); //默认代理
+            default: {
+
+                OperaSyncInterceptor advice = new OperaSyncInterceptor(iaContext);
+                advice.setTimeout(operaTimeout.timeout());
+                advice.setTimeUnit(operaTimeout.timeUnit());
+                proxyFactory.addAdvice(advice); //默认代理
+                return (T) ProxyFactory.getProxy(interfaceClass, advice);
+            }
 
         }
-//        proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
-        return (T) proxyFactory.getProxy();
+        //        proxyFactory.addAdvice(new OperaSyncInterceptor(iaContext));
+        //        return (T) proxyFactory.getProxy();
 
         // return (T)  OperaProxy.createOpera(interfaceClass);
     }
@@ -277,7 +285,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
                             Method setterMethod = this.getClass().getMethod(setter, new Class[]{parameterType});
                             setterMethod.invoke(this, new Object[]{value});
                         } catch (NoSuchMethodException var13) {
-//                            logger.error(var13.getMessage(), var13);
+                            //                            logger.error(var13.getMessage(), var13);
                             ;
                         }
                     }
@@ -293,7 +301,6 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
     public void afterPropertiesSet() throws Exception {
 
     }
-
 
 
     public static void main(String[] args) throws FileNotFoundException {

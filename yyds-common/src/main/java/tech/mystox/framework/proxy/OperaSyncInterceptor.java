@@ -5,8 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
+import tech.mystox.framework.entity.OperaContext;
 import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
@@ -21,14 +24,37 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         this.iaContext = iaContext;
     }
 
+    private long timeout;
+
+    private TimeUnit timeUnit;
+
     @Override
-    public Object opera(String operaCode, Object[] arguments, Class<?> genericReturnType) {
-        MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(arguments));
+    public Object opera(
+            String operaCode, Object[] arguments, Class<?> genericReturnType) {
+        MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(
+                new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
+                        iaContext.getIaENV().getLoadBalanceScheduler(),
+                        true, false));
         if (opera.getStateCode() != StateCode.SUCCESS) throw new MsgResultFailException("opera result is failed ["+opera.getStateCode()+"]");
         String msg = opera.getMsg();
         return deserialize(msg, genericReturnType);
     }
 
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(TimeUnit timeUnit) {
+        this.timeUnit = timeUnit;
+    }
 
     private Object deserialize(String msg, Class<?> returnType) {
         return TypeUtils.castToJavaBean(JSON.parse(msg), returnType);

@@ -1,5 +1,7 @@
 package tech.mystox.framework.entity;
 
+import tech.mystox.framework.stereotype.OperaTimeout;
+
 import java.util.Objects;
 
 /**
@@ -15,12 +17,14 @@ public class OperaClassIdBean {
     private final String group;
     private final String version;
     private final OperaType operaType;
+    private final OperaTimeout operaTimeout;
 
-    public OperaClassIdBean(Class<?> interfaceClass, String group, String version, OperaType operaType) {
+    public OperaClassIdBean(Class<?> interfaceClass, String group, String version, OperaType operaType, OperaTimeout operaTimeout) {
         this.interfaceClass = interfaceClass;
         this.group = group;
         this.version = version;
         this.operaType = operaType;
+        this.operaTimeout = operaTimeout;
     }
 
     public Class<?> getInterfaceClass() {
@@ -35,22 +39,23 @@ public class OperaClassIdBean {
         return this.version;
     }
 
+    public OperaType getOperaType() {
+        return operaType;
+    }
+
+    public OperaTimeout getOperaTimeout() {
+        return operaTimeout;
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof OperaClassIdBean)) {
-            return false;
-        }
+        if (this == obj) return true;
+        if (!(obj instanceof OperaClassIdBean)) return false;
         OperaClassIdBean classIdBean = (OperaClassIdBean) obj;
-        if (!Objects.equals(this.interfaceClass, classIdBean.interfaceClass)) {
-            return false;
-        }
-        if (!Objects.equals(this.group, classIdBean.group)) {
-            return false;
-        }
-        if(!Objects.equals(this.version, classIdBean.version)) return false;
+        if (!Objects.equals(this.interfaceClass, classIdBean.interfaceClass)) return false;
+        if (!Objects.equals(this.group, classIdBean.group)) return false;
+        if (!Objects.equals(this.version, classIdBean.version)) return false;
+        if (!Objects.equals(this.operaTimeout, classIdBean.operaTimeout)) return false;
         return Objects.equals(this.operaType, classIdBean.operaType);
     }
 
@@ -60,6 +65,7 @@ public class OperaClassIdBean {
         hashCode = 31 * hashCode + (this.interfaceClass == null ? 0 : this.interfaceClass.hashCode());
         hashCode = 31 * hashCode + (this.group == null ? 0 : this.group.hashCode());
         hashCode = 31 * hashCode + (this.version == null ? 0 : this.version.hashCode());
+        hashCode = 31 * hashCode + (this.operaTimeout == null ? 0 : this.operaTimeout.hashCode());
         hashCode = 31 * hashCode + (this.operaType == null ? 0 : this.operaType.hashCode());
         return hashCode;
     }
@@ -71,6 +77,7 @@ public class OperaClassIdBean {
                 ", group='" + group + '\'' +
                 ", version='" + version + '\'' +
                 ", operaType=" + operaType +
+                ", operaTimeout=" + operaTimeout +
                 '}';
     }
 }
