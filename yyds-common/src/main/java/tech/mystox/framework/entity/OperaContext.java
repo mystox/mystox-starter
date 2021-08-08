@@ -17,7 +17,7 @@ public class OperaContext {
     private long timeout;
     private TimeUnit timeUnit;
     private LoadBalanceScheduler loadBalanceScheduler;
-    private boolean setFlag;
+    private boolean setFlag;//context个性化标签
     private boolean async;
 
     public OperaContext() {

@@ -59,7 +59,7 @@ public class OperaAutoConfig {
                             Class<?> interfaceClass = operaBean.getInterfaceClass();
                             String group = operaBean.getGroup();
                             String version = operaBean.getVersion();
-                            OperaClassIdBean classIdBean = new OperaClassIdBean(interfaceClass, group, version, opera.operaType());
+                            OperaClassIdBean classIdBean = new OperaClassIdBean(interfaceClass, group, version, opera.operaType(),opera.operaTimeout());
                             Object yydsOpera = OPERA_CONSUMER_MAP.get(classIdBean);
                             if (yydsOpera == null) {
                                 synchronized (this) {
