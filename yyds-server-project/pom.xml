@@ -29,6 +29,7 @@
         <module>foo-server-demo</module>
         <module>yyds-mqtt-demo</module>
         <module>yyds-opera-api</module>
+        <module>yyds-server-example</module>
     </modules>
 
     <dependencyManagement>
