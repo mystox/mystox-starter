@@ -12,6 +12,7 @@ privFunc:
     name: name1 #权限名称 必填
     code: code1 #权限编码 必填同级不可重复
     uri: /abc/ac #uri路径 必填
+    staticPath: /abc/abc/ddd/route.js
     children:
     - type: BUTTON
       name: name3

@@ -73,6 +73,12 @@ public class OperaController {
         String aaaaaaaaaa = localService.hello("aaaaaaaaaa");
         result.put("helloaaaa", aaaaaaaaaa);
         localService.helloParams("dd",1,222222222L);
+        OperaParam operaParam = new OperaParam();
+        operaParam.setParam("aaaaaaaaaaaaa");
+        operaParam.setContext("1231231312312313");
+        ReturnEntity entity = entityService.getEntity(operaParam);
+        System.out.println(JSONObject.toJSONString(entity));
+        result.put("getEntity", entity);
         return result;
     }
     @ApiOperation(value = "广播接口测试")
