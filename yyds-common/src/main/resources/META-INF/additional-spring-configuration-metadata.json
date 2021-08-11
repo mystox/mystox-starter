@@ -1,0 +1,64 @@
+{
+  "properties": [
+    {
+      "name": "logging.mqtt.error.flag",
+      "type": "java.lang.Boolean",
+      "description": "异常消息框架存储."
+    },
+    {
+      "name": "server.groupCode",
+      "type": "java.lang.String",
+      "description": "Description for server.groupCode."
+    },
+    {
+      "name": "server.version",
+      "type": "java.lang.String",
+      "description": "Description for server.version."
+    },
+    {
+      "name": "server.name",
+      "type": "java.lang.String",
+      "description": "Description for server.name."
+    },
+    {
+      "name": "jarResources.path",
+      "type": "java.lang.String",
+      "description": "Description for jarResources.path."
+    },
+    {
+      "name": "register.url",
+      "type": "java.lang.String",
+      "description": "Description for register.url."
+    },
+    {
+      "name": "register.sessionTimeout",
+      "type": "java.lang.String",
+      "description": "Description for register.sessionTimeout."
+    },
+    {
+      "name": "mqtt.username",
+      "type": "java.lang.String",
+      "description": "Description for mqtt.username."
+    },
+    {
+      "name": "mqtt.password",
+      "type": "java.lang.String",
+      "description": "Description for mqtt.password."
+    },
+    {
+      "name": "mqtt.url",
+      "type": "java.lang.String",
+      "description": "Description for mqtt.url."
+    },
+    {
+      "name": "mqtt.maxInflight",
+      "type": "java.lang.String",
+      "description": "Description for mqtt.maxInflight."
+    },
+    {
+      "name": "executor.threadPool.corePoolSize",
+      "type": "java.lang.String",
+      "description": "Description for executor.threadPool.corePoolSize."
+    }
+  ]
+}

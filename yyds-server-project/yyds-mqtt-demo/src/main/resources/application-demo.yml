@@ -1,6 +1,6 @@
 server:
   groupCode: GROUP_DEMO
-  name: YYTD_MQTT_DEMO
+  name: YYDS_MQTT_DEMO
   version: 1.0.0
   port: 58000
 jarResources:
