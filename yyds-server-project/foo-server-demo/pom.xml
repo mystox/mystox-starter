@@ -55,11 +55,11 @@
 				<version>${yyds.iarpc.starter.version}</version>
 				<type>pom</type>
 			</dependency>
-<!--			<dependency>-->
-<!--				<groupId>tech.mystox.framework</groupId>-->
-<!--				<artifactId>yyds-iarpc-starter</artifactId>-->
-<!--				<version>${yyds.iarpc.starter.version}</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>tech.mystox.framework</groupId>
+				<artifactId>yyds-iarpc-starter</artifactId>
+				<version>${yyds.iarpc.starter.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>

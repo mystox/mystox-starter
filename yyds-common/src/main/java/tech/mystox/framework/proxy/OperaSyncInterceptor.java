@@ -2,6 +2,7 @@ package tech.mystox.framework.proxy;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONValidator;
 import com.alibaba.fastjson.util.TypeUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
@@ -57,7 +58,12 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
     }
 
     private Object deserialize(String msg, Class<?> returnType) {
-        return TypeUtils.castToJavaBean(JSON.parse(msg), returnType);
+        if (String.class == returnType) {
+            return msg;
+        } else {
+            boolean validate = JSONValidator.from(msg).validate();
+            return validate ? TypeUtils.castToJavaBean(JSON.parse(msg), returnType) : TypeUtils.castToJavaBean(msg, String.class);
+        }
 /*
         if (String.class == returnType) return msg;
         Object parse = JSON.parse(msg);
@@ -108,6 +114,26 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         result = parse instanceof JSONObject ? ((JSONObject) parse) : null;
         System.out.println(parse);
         JSONObject.parseObject(a, MsgResult.class);
+
+    }*/
+
+   /* public static void main(String[] args) {
+        Map<String, String> map = new HashMap<>();
+        map.put("abc", "ddd");
+        OperaContext operaContext = new OperaContext();
+        operaContext.setOperaCode("123123123123123");
+        String msg = JSONObject.toJSONString(operaContext);
+        msg = "1111111111111111111111111.11111111111";
+        boolean validate = JSONValidator.from(msg).validate();
+        System.out.println(validate);
+        if (validate) {
+            Object parse = JSON.parse(msg);
+            String abc = TypeUtils.castToJavaBean(parse, String.class);
+        System.out.println(JSONObject.toJSON(abc));
+        }else {
+            String s = TypeUtils.castToJavaBean(msg, String.class);
+            System.out.println(s);
+        }
 
     }*/
 }

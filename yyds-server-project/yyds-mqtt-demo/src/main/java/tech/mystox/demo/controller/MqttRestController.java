@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 @RequestMapping("/rest")
 public class MqttRestController {
 
+    
     /**
      * 注入发送MQTT的Bean
      */

@@ -1,9 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "logging.mqtt.error.flag",
-      "type": "java.lang.Boolean",
-      "description": "异常消息框架存储."
-    }
-  ]
-}

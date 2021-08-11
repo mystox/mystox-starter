@@ -15,8 +15,9 @@ public class PrivFuncEntity {
     private String remark;
     private String type;
     private String uri;
-    private String routeMark;
-    private String pageRoute;
+    private String staticPath; //前端静态文件地址，配置路由使用，在权限类型为PAGE时有效
+    private String routeMark; //后端请求默认路由
+    private String pageRoute; //前端请求默认路由
     private Boolean root;
     private List<PrivFuncEntity> children;
 
@@ -28,7 +29,13 @@ public class PrivFuncEntity {
         this.root = root;
     }
 
+    public String getStaticPath() {
+        return staticPath;
+    }
 
+    public void setStaticPath(String staticPath) {
+        this.staticPath = staticPath;
+    }
 
     public String getName() {
         return name;
