@@ -3,5 +3,5 @@
   \ \_/ /  \ \_/ /| |  | | (___
    \   /    \   / | |  | |\___ \
     | |      | |  | |__| |____) |
-    |_|mystox|_|v:|2.1.3/|_____/ http://tech.mystox.com
+    |_|mystox|_|v:|2.1.6/|_____/
 === ::serverCode:: ${server.name}_${server.version}
