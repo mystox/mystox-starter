@@ -13,6 +13,7 @@ import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.config.WebPrivFuncConfig;
+import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.*;
@@ -32,8 +33,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 // @Service(value = "zkHandlerImpl")
 public class ZkHandlerImpl implements RegHandler, Watcher {
     private OperaRouteConfig operaRouteConfig;
-    // @Autowired
-    // IaContext iaContext;
+    private IaContext iaContext;
     private IaConf iaconf;
     private IaENV iaENV;
     private String groupCode;
@@ -257,8 +257,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         } catch (KeeperException | IOException | InterruptedException e) {
             logger.error("register exception... ");
             e.printStackTrace();
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             logger.error("register other exception... ");
             e.printStackTrace();
         }
@@ -303,12 +302,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
                 iaconf.getRouteMark(), iaconf.getPageRoute(), iaconf.getServerUri(), iaconf.getTitle(), groupCode, iaconf.getMyId());
         //如果是可重复注册服务，则获取服务id
-//        if (iaconf.isDuplicate()) {
-//            logger.info("server is duplicate status append my id [{}]", iaconf.getMyId());
-//            serverVersion += "_" + iaconf.getMyId();
-//
-//            iaconf.setServerVersion(serverVersion);
-//        }
+        //        if (iaconf.isDuplicate()) {
+        //            logger.info("server is duplicate status append my id [{}]", iaconf.getMyId());
+        //            serverVersion += "_" + iaconf.getMyId();
+        //
+        //            iaconf.setServerVersion(serverVersion);
+        //        }
         serverMsg.setExtension(iaconf.getExtensionConfig().getExtension());
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
@@ -465,7 +464,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
     @Override
-    public RegCall.RegState getServerState() {
+    public RegCall.RegState getRegState() {
         if (zk != null) {
             ZooKeeper.States state = zk.getState();
             if (state.isConnected()) return RegCall.RegState.SyncConnected;
@@ -517,11 +516,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         } catch (KeeperException e) {
             if ((logger.isDebugEnabled()))
                 e.printStackTrace();
-            logger.warn("get data KeeperException error[{}]",path);
+            logger.warn("get data KeeperException error[{}]", path);
         } catch (InterruptedException e) {
             if (logger.isDebugEnabled())
                 e.printStackTrace();
-            logger.warn("get data InterruptedException error[{}]",path);
+            logger.warn("get data InterruptedException error[{}]", path);
         }
         if (data != null)
             return new String(data);
@@ -553,8 +552,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             return zk.getChildren(path, true);
         } catch (KeeperException | InterruptedException e) {
             logger.warn("Zookeeper get child node is no");
-            if(logger.isDebugEnabled())
-            e.printStackTrace();
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
         }
         return null;
     }
@@ -594,6 +593,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                     logger.error("zk rebuild error...[{}]", e.toString());
                     if (logger.isDebugEnabled()) e.printStackTrace();
                 }
+                if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus())) {
+                    logger.info("rebuild service error to restart service....");
+                    iaENV.getRegScheduler().connect(iaconf.getRegisterUrl());//注册异常重连异常重启服务
+                }
+
             }
         } else if (state == Watcher.Event.KeeperState.Expired
                 || state == Watcher.Event.KeeperState.Disconnected
@@ -606,6 +610,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 } catch (Exception e) {
                     logger.error("zk disconnect error...[{}]", e.toString());
                     if (logger.isDebugEnabled()) e.printStackTrace();
+                }
+                if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus())) {
+                    logger.info("connect zk error to restart service....");
+                    iaENV.getRegScheduler().connect(iaconf.getRegisterUrl());//zookeeper重连异常重启服务
                 }
             }
         }

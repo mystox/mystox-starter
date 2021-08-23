@@ -94,19 +94,24 @@ public class MqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
 
     @Override
     public void removerSubTopic(List<RegisterSub> subList) {
-        subList.forEach(sub -> {
-            String operaCode = sub.getOperaCode();
-            String topicId = MqttUtils.preconditionSubTopicId(
-                    preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
-            if (iaHandler != null) {
-                if (iaHandler.isExists(topicId))
-                    //logger.info("订阅了:{} ",topicId);
-                    iaHandler.removeSubTopic(topicId);
-            }
-        });
-        String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
-        if (iaHandler.isAckExists(ackTopicId))
-            iaHandler.removeAckSubTopic(ackTopicId);
+        try {
+            subList.forEach(sub -> {
+                String operaCode = sub.getOperaCode();
+                String topicId = MqttUtils.preconditionSubTopicId(
+                        preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())), operaCode);
+                if (iaHandler != null) {
+                    if (iaHandler.isExists(topicId))
+                        //logger.info("订阅了:{} ",topicId);
+                        iaHandler.removeSubTopic(topicId);
+                }
+            });
+            String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
+            if (iaHandler.isAckExists(ackTopicId))
+                iaHandler.removeAckSubTopic(ackTopicId);
+        } catch (Exception e) {
+            logger.error("remove sub topic list error...",e);
+            if (logger.isDebugEnabled()) e.printStackTrace();
+        }
     }
 
     @Override
