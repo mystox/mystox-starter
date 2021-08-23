@@ -214,7 +214,7 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
 
     @Override
     public RegCall.RegState getState() {
-        RegCall.RegState state = regHandler.getServerState();
+        RegCall.RegState state = regHandler.getRegState();
         return state;
     }
 

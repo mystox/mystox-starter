@@ -31,7 +31,7 @@ public interface RegHandler {
 
     public void build();
 
-    RegCall.RegState getServerState();
+    RegCall.RegState getRegState();
 
     public OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws Exception;
 
