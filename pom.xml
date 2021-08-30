@@ -48,7 +48,7 @@
     </dependencyManagement>
 
     <properties>
-        <revision>1.2.6</revision>
+        <revision>1.2.7</revision>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
@@ -133,6 +133,35 @@
                     </execution>
                 </executions>
             </plugin>
+           <!-- <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            &lt;!&ndash; 项目版本号 &ndash;&gt;
+                            <Project-Version>${project.version}</Project-Version>
+                            &lt;!&ndash; buildnumber插件提供的 SCM(git/svn等)版本号 &ndash;&gt;
+                            <Scm-Version>${buildNumber}</Scm-Version>
+                            &lt;!&ndash; 时间戳 &ndash;&gt;
+                            <Timestamp>${maven.build.timestamp}</Timestamp>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>-->
         </plugins>
     </build>
 </project>
