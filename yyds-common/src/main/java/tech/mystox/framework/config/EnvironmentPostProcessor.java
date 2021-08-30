@@ -36,8 +36,9 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             "file:config/privFuncConfig.yml",
             "classpath:config/operaRoute.yml",
             "file:config/operaRoute.yml",
-            "classpath:config/logger.yml",
             "file:config/logger.yml",
+            "classpath:config/logger.yml",
+            "classpath:config/project-properties.yml",
     };
 
     @Override
@@ -85,8 +86,8 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
                     if (inputStream != null)
                         inputStream.close();
                 }
-                if (logger.isWarnEnabled()) logger.warn("file is blank {}", resource.getFilename());
-                else System.out.println("file is blank " + resource.getFilename());
+//                if (logger.isWarnEnabled()) logger.warn("file is blank {}", resource.getFilename());
+//                else System.out.println("file is blank " + resource.getFilename());
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(0);
