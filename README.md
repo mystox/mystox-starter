@@ -34,7 +34,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 <dependency>
     <groupId>tech.mystox.framework</groupId>
     <artifactId>yyds-iarpc-starter</artifactId>
-    <version>2.0.5</version>
+    <version>2.0.7</version>
     <type>pom</type>
 </dependency>
 ```
