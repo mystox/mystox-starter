@@ -1,0 +1,3 @@
+iarpc:
+  starter:
+    version: ${project.version}
