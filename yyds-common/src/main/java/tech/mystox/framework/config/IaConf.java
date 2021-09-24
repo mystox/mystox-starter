@@ -100,7 +100,7 @@ public class IaConf {
 
     @Value("${spring.profiles.active:dev}")
     private String devFlag;
-    @Value("${server.host:127.0.0.1}")
+    @Value("${server.host}")
     private String host;
     @Value("${server.port}")
     private int port;

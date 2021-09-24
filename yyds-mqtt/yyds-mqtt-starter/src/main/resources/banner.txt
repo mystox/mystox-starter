@@ -3,5 +3,5 @@
   \ \_/ /  \ \_/ /| |  | | (___
    \   /    \   / | |  | |\___ \
     | |      | |  | |__| |____) |
-    |_|mystox|_|v:|${starter.version}/|_____/
-=== ::serverCode:: ${server.name}_${server.version}
+    |_|mystox|_|v:|${iarpc.starter.version}/|_____/
+===::groupCode:: ${server.groupCode} ::serverCode:: ${server.name}_${server.version} ::serverUrl:: ${server.host}:${server.port}
