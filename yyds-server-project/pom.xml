@@ -17,7 +17,7 @@
     <packaging>pom</packaging>
     <properties>
         <spring-boot.version>2.1.17.RELEASE</spring-boot.version>
-        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
+        <spring-cloud.version>Greenwich.SR6</spring-cloud.version>
         <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
         <yyds.iarpc.starter.version>2.1.7</yyds.iarpc.starter.version>

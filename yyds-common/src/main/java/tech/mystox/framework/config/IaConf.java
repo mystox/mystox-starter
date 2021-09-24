@@ -1,11 +1,10 @@
 package tech.mystox.framework.config;
 
-import tech.mystox.framework.core.ServiceScanner;
-import tech.mystox.framework.entity.ServerName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import tech.mystox.framework.core.ServiceScanner;
+import tech.mystox.framework.entity.ServerName;
 
 import java.util.UUID;
 
@@ -101,7 +100,7 @@ public class IaConf {
 
     @Value("${spring.profiles.active:dev}")
     private String devFlag;
-    @Value("${server.host:127.0.0.1}")
+    @Value("${server.host}")
     private String host;
     @Value("${server.port}")
     private int port;
