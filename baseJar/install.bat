@@ -1,16 +1,17 @@
 title install-common
 set BASE_DIR=%~dp0
+set VERSION=1.2.7
 
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=1.2.7 -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-common-1.2.7.jar
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=1.2.7 -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-balancer-1.2.7.jar
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=1.2.7 -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-register-1.2.7.jar
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=1.2.7 -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-mqtt-starter-1.2.7.jar
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-common-%VERSION%.jar
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-balancer-%VERSION%.jar
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-register-%VERSION%.jar
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-mqtt-starter-%VERSION%.jar
 
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.7 -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-iarpc-starter-1.2.7.xml
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=1.2.7 -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-common-1.2.7.xml
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=1.2.7 -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-balancer-1.2.7.xml
-call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=1.2.7 -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-register-1.2.7.xml
-call mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=1.2.7 -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-mqtt-starter-1.2.7.xml
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=%VERSION% -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-iarpc-starter-%VERSION%.xml
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=%VERSION% -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-common-%VERSION%.xml
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=%VERSION% -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-balancer-%VERSION%.xml
+call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=%VERSION% -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-register-%VERSION%.xml
+call mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=%VERSION% -Dpackaging=pom -Dfile=%BASE_DIR%/yyds-mqtt-starter-%VERSION%.xml
 
 
 
