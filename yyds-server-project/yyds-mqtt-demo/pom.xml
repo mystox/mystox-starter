@@ -44,7 +44,7 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-opera-api</artifactId>
-            <version>1.0.0</version>
+            <version>${revision}</version>
         </dependency>
         <!--Swagger2 - RESTful API文档-->
         <dependency>

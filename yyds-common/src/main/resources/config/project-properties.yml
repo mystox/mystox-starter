@@ -1,3 +1,5 @@
 iarpc:
   starter:
     version: ${project.version}
+server:
+  host: ${server.address}
