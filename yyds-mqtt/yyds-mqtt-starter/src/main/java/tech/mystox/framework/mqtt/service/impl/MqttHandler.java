@@ -1,6 +1,7 @@
 package tech.mystox.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.MsgHandler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -146,22 +148,26 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
-
+        mqttSenderImpl.sendToMqtt(serverCode,operaCode,payload);
     }
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) {
-
+        mqttSenderImpl.sendToMqtt(serverCode,operaCode,qos,payload);
     }
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
-        return null;
+        return opera(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
+                iaENV.getLoadBalanceScheduler(),
+                true, false));
     }
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
-        return null;
+        return opera(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), qos, timeout, timeUnit,
+                iaENV.getLoadBalanceScheduler(),
+                true, false));
     }
 
     @Override
