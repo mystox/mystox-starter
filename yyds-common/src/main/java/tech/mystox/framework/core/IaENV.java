@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.ServerMsg;
 import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.MsgScheduler;
@@ -24,6 +25,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     private LoadBalanceScheduler loadBalanceScheduler;
     private IaConf conf;
     private ServerStatus serverStatus = ServerStatus.OFFLINE;
+    private ServerMsg serverMsg;
     private Logger logger = LoggerFactory.getLogger(IaENV.class);
 
 
@@ -40,6 +42,13 @@ public class IaENV implements ApplicationContextAware, RegCall {
         return IaConf.LoadBalanceType.valueOf(StringUtils.upperCase(loadBalancerType));
     }
 
+    public ServerMsg getServerMsg() {
+        return serverMsg;
+    }
+
+    public void setServerMsg(ServerMsg serverMsg) {
+        this.serverMsg = serverMsg;
+    }
 
     public ServerStatus getServerStatus() {
         return serverStatus;
