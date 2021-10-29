@@ -16,26 +16,29 @@
 windows 环境下执行 baseJar/install.bat
 windows 环境下执行 baseJar/install.sh
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.1.7 -Dpackaging=jar -Dfile=$BASE_DI/yyds-common-2.1.7.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.1.7 -Dpackaging=jar -Dfile=$BASE_DI/yyds-balancer-2.1.7.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.1.7 -Dpackaging=jar -Dfile=$BASE_DI/yyds-register-2.1.7.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.1.7 -Dpackaging=jar -Dfile=$BASE_DI/yyds-mqtt-starter-2.1.7.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-common-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-balancer-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-register-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-mqtt-starter-$VERSION.jar
 
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=2.1.7 -Dpackaging=pom -Dfile=$BASE_DI/yyds-iarpc-starter-2.1.7.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=2.1.7 -Dpackaging=pom -Dfile=$BASE_DI/yyds-common-2.1.7.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=2.1.7 -Dpackaging=pom -Dfile=$BASE_DI/yyds-balancer-2.1.7.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=2.1.7 -Dpackaging=pom -Dfile=$BASE_DI/yyds-register-2.1.7.xml
-mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=2.1.7 -Dpackaging=pom -Dfile=$BASE_DI/yyds-mqtt-starter-2.1.7.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-iarpc-starter-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-common-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-balancer-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-register-$VERSION.xml
+mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-mqtt-starter-$VERSION.xml
+
+
+
 ```
 
 
 项目基于springboot框架，引入yyds-iarpc-starter依赖
 ```
 <dependency>
-	<groupId>tech.mystox.framework</groupId>
-	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>2.1.7</version>
-	<type>pom</type>
+    <groupId>tech.mystox.framework</groupId>
+    <artifactId>yyds-iarpc-starter</artifactId>
+    <version>2.1.8</version>
+    <type>pom</type>
 </dependency>
 ```
 
@@ -153,7 +156,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.1.7</version>
+        <version>2.1.8</version>
     </dependency>
 ```
 common接口

@@ -20,7 +20,7 @@
         <spring-cloud.version>Greenwich.SR6</spring-cloud.version>
         <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
-        <yyds.iarpc.starter.version>2.1.7</yyds.iarpc.starter.version>
+        <yyds.iarpc.starter.version>2.1.8</yyds.iarpc.starter.version>
         <revision>1.0.0</revision>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
