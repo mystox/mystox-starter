@@ -158,9 +158,10 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
-        return opera(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
-                iaENV.getLoadBalanceScheduler(),
-                true, false));
+        return mqttSenderImpl.sendToMqttSync(serverCode, operaCode, payload);
+//        return operaTarget(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
+//                iaENV.getLoadBalanceScheduler(),
+//                true, false));
     }
 
     @Override

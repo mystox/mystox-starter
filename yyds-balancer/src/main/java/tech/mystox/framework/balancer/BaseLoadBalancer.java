@@ -88,16 +88,16 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
         // 获取operaCode 路由表 /mqtt/operaRoute/groupCode/serverCode/operaCode
         String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-//            if (CollectionUtils.isEmpty(topicArr)) {
+        //            if (CollectionUtils.isEmpty(topicArr)) {
         if (!regScheduler.exists(routePath))
             regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-//        String data = regScheduler.getData(routePath);
-//        List<String> topicArr = JSONArray.parseArray(data, String.class);
+        //        String data = regScheduler.getData(routePath);
+        //        List<String> topicArr = JSONArray.parseArray(data, String.class);
         List<String> topicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
         if (CollectionUtils.isEmpty(topicArr)) {
             //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
             List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
-//            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
+            //            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
             regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
             topicArr = subTopicArr;
@@ -201,10 +201,10 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
                     serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-//            if (CollectionUtils.isEmpty(topicArr)) {
-//            if (!regScheduler.exists(routePath))
-//                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-//            String data = regScheduler.getData(routePath);
+            //            if (CollectionUtils.isEmpty(topicArr)) {
+            //            if (!regScheduler.exists(routePath))
+            //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
+            //            String data = regScheduler.getData(routePath);
             List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             if (localTopicArr == null) localTopicArr = new ArrayList<>();
             /*boolean contains = topicArr.contains(targetServerCode);
@@ -231,10 +231,10 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                     if (!StringUtils.equals(retryServerCode, targetServerCode)) {
                         result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
                         if (result.getStateCode() == StateCode.SUCCESS) {
-                            logger.debug("opera target success server, serverCode is [{}]", retryServerCode);
+                            logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                             break;
                         } else {
-                            logger.warn("opera target failed [{}]", retryServerCode);
+                            logger.warn("opera[{}] target failed [{}]", operaCode, retryServerCode);
                         }
                     }
                     if (bound != 0)
@@ -246,7 +246,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                     // System.out.println(count);
                     topicArr = topicArr.subList(0, size - count);
                 } else if (count == size) { //遍历所有路由皆请求错误，重建路由
-                    logger.warn("all route was failed...rebuild and try once again");
+                    logger.warn("operaCode[{}] all route was failed...rebuild and try once again", operaCode);
                     topicArr = regScheduler.buildOperaMap(operaCode);
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次
@@ -254,9 +254,9 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                         String retryServerCode = topicArr.get(i);
                         result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
                         if (result.getStateCode() == StateCode.SUCCESS) {
-                            logger.debug("opera target success server, serverCode is [{}]", retryServerCode);
+                            logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                         } else {
-                            logger.warn("opera target failed [{}]", retryServerCode);
+                            logger.warn("opera[{}] target failed [{}]", operaCode, retryServerCode);
                         }
                     }
                 } /*{
@@ -271,7 +271,7 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
                 logger.warn("[{}] mqtt sender route code have changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
                 loadBalancerClient.getOperaRouteMap().put(operaCode, topicArr);
             }
-//            regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
+            //            regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
         }
 
         // targetServerCode = topicArr.get(i);

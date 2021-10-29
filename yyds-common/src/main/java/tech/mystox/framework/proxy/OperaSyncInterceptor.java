@@ -3,13 +3,13 @@ package tech.mystox.framework.proxy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONValidator;
-import com.alibaba.fastjson.util.TypeUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.OperaContext;
 import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
 
+import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,7 +31,7 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
 
     @Override
     public Object opera(
-            String operaCode, Object[] arguments, Class<?> genericReturnType) {
+            String operaCode, Object[] arguments, Type genericReturnType) {
         MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
                         iaContext.getIaENV().getLoadBalanceScheduler(),
@@ -57,12 +57,12 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         this.timeUnit = timeUnit;
     }
 
-    private Object deserialize(String msg, Class<?> returnType) {
+    private Object deserialize(String msg, Type returnType) {
         if (String.class == returnType) {
             return msg;
         } else {
             boolean validate = JSONValidator.from(msg).validate();
-            return validate ? TypeUtils.castToJavaBean(JSON.parse(msg), returnType) : TypeUtils.castToJavaBean(msg, String.class);
+            return validate ? JSON.parseObject(msg, returnType) : JSON.parseObject(msg, String.class);
         }
 /*
         if (String.class == returnType) return msg;
@@ -136,4 +136,14 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         }
 
     }*/
+
+
+    public static void main(String[] args) {
+        String msg = "[{\"code\":11,\"list\":[{\"$ref\":\"..\"}],\"result\":\"11111111111\"},{\"$ref\":\"$[0]\"}]";
+        boolean validate = JSONValidator.from(msg).validate();
+        System.out.println(validate);
+        msg = "111";
+        Integer integer = JSON.parseObject(msg, Integer.class);
+        System.out.println(integer);
+    }
 }
