@@ -81,6 +81,7 @@ public class OperaController {
         result.put("getEntity", entity);
         return result;
     }
+
     @ApiOperation(value = "广播接口测试")
     @RequestMapping(value = "/broadcast",method = RequestMethod.GET)
     public void broadcastOperaCode() {
@@ -120,7 +121,21 @@ public class OperaController {
 
     }
 
-
+    @ApiOperation(value = "实体数组接口测试")
+    @RequestMapping(value = "/operaEntity",method = RequestMethod.GET)
+    public JSONObject testOperaEntity() {
+        JSONObject result = new JSONObject();
+        OperaParam operaParam = new OperaParam();
+        operaParam.setParam("aaaaaaaaaaaaa");
+        operaParam.setContext("1231231312312313");
+        List<OperaParam> params = new ArrayList<>();
+        params.add(operaParam);
+        params.add(operaParam);
+        List<ReturnEntity> listEntity = entityService.getEntityList(params);
+        listEntity.forEach(System.out::println);
+//        result.put("getEntityList", listEntity);
+        return result;
+    }
 
     @ApiOperation(value = "实体接口测试")
     @RequestMapping(value = "/sendTimeout",method = RequestMethod.GET)
@@ -131,7 +146,6 @@ public class OperaController {
         msg.add("cast");
         msg.add("dddd");
         ReturnEntity param = localService2.helloWait("param", new OperaParam());
-        System.out.println(param);
         System.out.println(JSONObject.toJSONString(param));
 
 
@@ -176,6 +190,9 @@ public class OperaController {
                 }
             }
         });*/
+
+
+
     }
 
 }
