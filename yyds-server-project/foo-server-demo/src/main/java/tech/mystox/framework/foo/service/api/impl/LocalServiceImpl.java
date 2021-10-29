@@ -39,9 +39,9 @@ public class LocalServiceImpl implements LocalService {
     public List<String> helloList(String param) {
         ArrayList<String> strings = new ArrayList<>();
         System.out.println(param);
-        strings.add("abc");
-        strings.add("123");
-        strings.add(serverName);
+//        strings.add("abc");
+//        strings.add("123");
+//        strings.add(serverName);
         return strings;
     }
 
