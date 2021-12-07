@@ -59,8 +59,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
                 if (!exists(routePath))
                     create(routePath, JSONArray.toJSONBytes(subServerArr), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-                else
+                else {
                     setData(routePath, JSONArray.toJSONBytes(subServerArr));
+                }
             }
         }
     }
@@ -514,13 +515,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             data = zk.getData(path, true, null);
         } catch (KeeperException e) {
-            if ((logger.isDebugEnabled()))
-                e.printStackTrace();
-            logger.warn("get data KeeperException error[{}]", path);
+            //            if ((logger.isDebugEnabled()))
+            //                e.printStackTrace();
+            logger.warn("get data KeeperException error[{}]", path, e);
         } catch (InterruptedException e) {
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
-            logger.warn("get data InterruptedException error[{}]", path);
+            //            if (logger.isDebugEnabled())
+            //                e.printStackTrace();
+            logger.warn("get data InterruptedException error[{}]", path, e);
         }
         if (data != null)
             return new String(data);
@@ -531,12 +532,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         Stat stat = null;
         try {
             stat = zk.setData(path, data, -1);
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+            logger.debug("zk setData path[{}],stat[{}]",path, stat.toString());
+        } catch (KeeperException | InterruptedException e) {
+            logger.error("zk setData path[{}] error!!",path, e);
             e.printStackTrace();
         }
-        logger.debug(stat.toString());
+
         // return stat;
     }
 
@@ -551,9 +552,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             return zk.getChildren(path, true);
         } catch (KeeperException | InterruptedException e) {
-            logger.warn("Zookeeper[{}] get child node is no",path);
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
+            logger.warn("Zookeeper[{}] get child node is no", path, e);
+            //            if (logger.isDebugEnabled())
+            //                e.printStackTrace();
         }
         return null;
     }
