@@ -16,6 +16,7 @@ import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
 import tech.mystox.framework.stereotype.OperaTimeout;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -151,8 +152,25 @@ public class OperaController {
 
     }
 
+    @ApiOperation(value = "泛型接口测试")
+    @RequestMapping(value = "/sentT",method = RequestMethod.GET)
+    public void testT() {
+        JSONObject j = new JSONObject();
+        j.put("dsfasdaf", "dsfdf");
+        OperaParam operaParam = new OperaParam();
+        operaParam.setParam("123A");
+        operaParam.setContext("123123");
+        Object t = entityService.getT(operaParam,"123132",123);
+        Float.valueOf(t.toString());
+//        Float t = entityService.getT(operaParam,"123132",123);
+        System.out.println(t);
+    }
+
     public static void main(String[] args)
     {
+
+        Method[] methods = EntityService.class.getMethods();
+        System.out.println(methods);
 /*
         ReflectionUtils.doWithFields(OperaController.class, new ReflectionUtils.FieldCallback() {
             @Override
