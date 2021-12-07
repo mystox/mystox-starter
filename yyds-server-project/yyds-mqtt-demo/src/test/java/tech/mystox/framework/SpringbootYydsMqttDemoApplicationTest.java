@@ -1,3 +1,15 @@
+package tech.mystox.framework;
+
+import com.alibaba.fastjson.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import tech.mystox.demo.SpringbootYydsMqttDemoApplication;
+import tech.mystox.framework.api.test.EntityService;
+import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.stereotype.Opera;
+
 //
 //import com.alibaba.fastjson.JSONObject;
 //import org.apache.commons.io.FileUtils;
@@ -21,9 +33,25 @@
 // * description:
 // * update record:
 // */
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
-//public class SpringbootYydsMqttDemoApplicationTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = SpringbootYydsMqttDemoApplication.class)
+public class SpringbootYydsMqttDemoApplicationTest {
+
+    @Opera
+    EntityService entityService;
+    @Test
+    public void testT() {
+        JSONObject j = new JSONObject();
+        j.put("dsfasdaf", "dsfdf");
+        OperaParam operaParam = new OperaParam();
+        operaParam.setParam("123A");
+        operaParam.setContext("123123");
+//        OperaParam t = entityService.getT(operaParam);
+//        System.out.println(t);
+
+    }
+
+
 //    @MockBean
 //    private MqttConfig mqttConfig;
 //    @MockBean
@@ -76,4 +104,4 @@
 //
 //
 //
-//}
+}

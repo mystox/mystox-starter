@@ -52,6 +52,22 @@ public class EntityServiceImpl implements EntityService {
         return result;
     }
 
+    @Override
+    public <T> Object getT(T t, String abc, Integer i) {
+        String s = JSONObject.toJSONString(t);
+
+
+        return 0.1f;
+    }
+
+
+
+    //    @Override
+//    public <T> T getT(T t) {
+//        System.out.println(t);
+//        return t;
+//    }
+
     public static void main(String[] args) {
         ReturnEntity returnEntity = new ReturnEntity();
         returnEntity.setResult("11111111111");

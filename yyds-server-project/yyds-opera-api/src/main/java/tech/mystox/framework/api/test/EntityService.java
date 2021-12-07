@@ -20,5 +20,7 @@ public interface EntityService {
     @OperaCode
     public List<ReturnEntity> getEntityList(List<OperaParam> operaParam);
 
+    @OperaCode
+    public <T> Object getT(T t,String abc,Integer i);
 
 }
