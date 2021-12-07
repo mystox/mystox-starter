@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
+import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.MsgHandler;
@@ -148,16 +149,22 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) {
+        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException("Server status is not online!");
         mqttSenderImpl.sendToMqtt(serverCode,operaCode,payload);
     }
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) {
+        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException("Server status is not online!");
         mqttSenderImpl.sendToMqtt(serverCode,operaCode,qos,payload);
     }
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
+        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException("Server status is not online!");
         return mqttSenderImpl.sendToMqttSync(serverCode, operaCode, payload);
 //        return operaTarget(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
 //                iaENV.getLoadBalanceScheduler(),
@@ -177,6 +184,8 @@ public class MqttHandler implements MsgHandler {
     }
 
     public MsgResult opera(OperaContext context) {
+        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException("Server status is not online!");
         String operaCode = context.getOperaCode();
         LoadBalanceScheduler loadBalanceScheduler = iaENV.getLoadBalanceScheduler();
         ServerMsg chooseServer = loadBalanceScheduler.chooseServer(operaCode);
