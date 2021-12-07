@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerPath;
 
 @Component("zkRegScheduler")
 @Lazy
@@ -77,12 +78,44 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
         // IaENV iaENV= this.iaENV.getIaENV();
         // RegScheduler regScheduler = getRegScheduler();
         // IaConf iaconf = iaENV.getConf();
-        String serverName = this.iaconf.getServerName();
-        String groupCode = this.iaconf.getGroupCode();
+//        String serverName = this.iaconf.getServerName();
+//        String thisGroupCode = this.iaconf.getGroupCode();
 
-
+        List<String> groupCodeList = new ArrayList<>();
+        if (GroupCode.ROOT.equals(this.groupCode)){ //如果是root服务，则获取所有的服务节点
+            List<String> children = this.getChildren(TopicPrefix.SUB_PREFIX);
+            groupCodeList.addAll(children);
+        } else {
+            groupCodeList.add(this.groupCode);
+            groupCodeList.add(GroupCode.ROOT);
+        }
         List<String> result = new ArrayList<>();
-        String subPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupCode);
+        groupCodeList.forEach(groupCode->{
+            String subPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupCode);
+            List<String> serverArr = this.getChildren(subPath); //获取订阅表的服务列表
+            //遍历订阅服务列表
+            for (String serverCode : serverArr) {
+                String groupServerCode = preconditionGroupServerCode(groupCode, serverCode);
+                String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
+                        groupServerCode);
+                String serverPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode);
+                if (!regHandler.exists(onlineStatus)) { //检测服务是否已经注销
+                    logger.debug("server [{}] is not online status now...", onlineStatus);
+//                    if (regHandler.exists(serverPath)) { //不建议在此处清除订阅服务，容易产生分布式异步冲突
+//                        List<String> children = regHandler.getChildren(serverPath);
+//                        if (CollectionUtils.isEmpty(children))
+//                            regHandler.deleteNode(serverPath);
+//                    }
+                    continue;
+                }
+                List<String> serverOperaCodeArr = this.getChildren(serverPath);
+                if (serverOperaCodeArr.contains(operaCode)) {
+                    result.add(groupServerCode);
+                }
+            }
+        });
+
+       /* String subPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupCode);
         List<String> serverArr = this.getChildren(subPath); //获取订阅表的服务列表
         //遍历订阅服务列表
         for (String serverCode : serverArr) {
@@ -103,9 +136,9 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
             if (serverOperaCodeArr.contains(operaCode)) {
                 result.add(groupServerCode);
             }
-        }
+        }*/
         //ROOT 节点获取服务接口信息即云管等
-        String rootSubPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, GroupCode.ROOT);
+       /* String rootSubPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, GroupCode.ROOT);
         boolean exists = this.exists(rootSubPath);
         if (exists) {
             List<String> rootServerArr = this.getChildren(rootSubPath); //获取订阅表的服务列表
@@ -118,7 +151,7 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
                     result.add(groupServerCode);
                 }
             }
-        }
+        }*/
         return result;
     }
 
