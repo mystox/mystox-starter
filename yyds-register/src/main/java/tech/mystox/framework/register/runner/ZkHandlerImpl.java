@@ -310,6 +310,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         //            iaconf.setServerVersion(serverVersion);
         //        }
         serverMsg.setExtension(iaconf.getExtensionConfig().getExtension());
+        iaENV.setServerMsg(serverMsg);
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));
@@ -324,7 +325,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                         preconditionGroupServerCode(groupCode,
                                 preconditionServerCode(serverName, serverVersion, sequence)));
                 iaconf.setSequence(sequence);
-                serverMsg.setSequence(sequence);
+
             }
             if (exists(onlineStatus)) {
                 iaENV.setServerStatus(ServerStatus.WAITING);
@@ -335,11 +336,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 ServerMsg nodeMsg = JSONObject.parseObject(nodeData, ServerMsg.class);
                 if (nodeMsg.getMyid().equals(iaconf.getMyId())) {//如果是我，则刷新，不是我，则等待
                     logger.warn("is mine.....id is [{}]", nodeMsg.getMyid());
+                    serverMsg.setSequence(iaconf.getSequence());
                     setData(onlineStatus, JSONObject.toJSONBytes(serverMsg));
                     return true;
                 } else
                     Thread.sleep(1000);
             } else {
+                serverMsg.setSequence(iaconf.getSequence());
                 create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 return true;
             }
