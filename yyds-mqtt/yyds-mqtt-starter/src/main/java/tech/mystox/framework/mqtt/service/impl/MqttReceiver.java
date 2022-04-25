@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -104,12 +105,14 @@ public class MqttReceiver {
             Object bean = SpringContextUtil.getBean(clazz);//这里会是性能瓶颈
             List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class);
             Method method = clazz.getDeclaredMethod(methodName, classes.toArray(new Class[0]));
+            Type[] genericParameterTypes = method.getGenericParameterTypes();
             String payload = mqttMsg.getPayload();
             JSONArray jsonArray = JSONObject.parseArray(payload);
             Object[] arguments =new Object[classes.size()];
             for (int i = 0; i < arguments.length; i++) {
-                Class paramType = classes.get(i);
-                arguments[i] = jsonArray.getObject(i,paramType);
+//                Class paramType = classes.get(i);
+                Type genericParameterType = genericParameterTypes[i]; //真实泛型类型转换
+                arguments[i] = jsonArray.getObject(i,genericParameterType);
             }
             Object invoke = method.invoke(bean, arguments);
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
