@@ -235,7 +235,7 @@ public class ZkRegScheduler implements ApplicationContextAware, RegScheduler {
         this.serverName = iaconf.getServerName();
         this.serverVersion = iaconf.getServerVersion();
         this.operaRouteConfig = iaconf.getOperaRouteConfig();
-        this.regHandler = new ZkHandlerImpl(iaENV, applicationContext);
+        this.regHandler = new ZkHandlerImpl(iaENV);
         this.regHandler.build();
     }
 
