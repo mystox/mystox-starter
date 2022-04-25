@@ -42,6 +42,7 @@ public class IaRegister {
      */
     public void register()  {
         this.regScheduler.register();
+        iaEnv.setServerStatus(ServerStatus.ONLINE);
     }
 
     public void unregister()  {
