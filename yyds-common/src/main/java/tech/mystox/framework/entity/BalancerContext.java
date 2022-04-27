@@ -4,7 +4,7 @@ import tech.mystox.framework.config.IaConf;
 
 /**
  * Created by mystoxlol on 2020/6/9, 14:03.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */

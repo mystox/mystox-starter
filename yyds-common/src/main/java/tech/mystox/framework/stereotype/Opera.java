@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mystoxlol on 2020/6/18, 9:45.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */

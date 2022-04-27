@@ -30,7 +30,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 
 /**
  * Created by mystoxlol on 2020/6/8, 14:36.
- * company: kongtrolink
+ * company: ink
  * description:
  * update record:
  */
@@ -190,7 +190,8 @@ public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceSch
             result = (MsgResult) operaCall.operaTarget(operaCode, targetServerCode);
         assert result != null;
         if (StringUtils.isBlank(targetServerCode) || result.getStateCode() != StateCode.SUCCESS) {
-            if (StringUtils.isBlank(targetServerCode)) logger.warn("[{}]targetServerCode is null", operaCode);
+            if (StringUtils.isBlank(targetServerCode))
+                logger.warn("[{}]targetServerCode is null", operaCode);
             else if (result.getStateCode() != StateCode.SUCCESS)
                 logger.warn("[{}]targetServerCode request failed", targetServerCode);
             IaConf iaconf = iaENV.getConf();

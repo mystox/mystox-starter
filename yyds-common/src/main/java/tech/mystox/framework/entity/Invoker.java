@@ -2,7 +2,7 @@ package tech.mystox.framework.entity;
 
 /**
  * Created by mystoxlol on 2020/6/23, 17:16.
- * company: kongtrolink
+ * company: ink
  * description:
  * update record:
  */
