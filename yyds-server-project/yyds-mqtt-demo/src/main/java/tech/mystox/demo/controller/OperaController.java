@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +12,9 @@ import tech.mystox.framework.api.test.BroadcastService;
 import tech.mystox.framework.api.test.EntityService;
 import tech.mystox.framework.api.test.LocalService;
 import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ParamEnum;
 import tech.mystox.framework.api.test.entity.ReturnEntity;
+import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.stereotype.Opera;
 import tech.mystox.framework.stereotype.OperaTimeout;
@@ -23,7 +26,7 @@ import java.util.Map;
 
 /**
  * Created by mystoxlol on 2020/6/18, 10:46.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */
@@ -48,8 +51,26 @@ public class OperaController {
     @Opera(operaType = OperaType.Sync)
     BroadcastService broadcastService3;
 
-
-
+    @ApiOperation(value = "拆包接口测试")
+    @RequestMapping(value = "/testPackage",method = RequestMethod.POST)
+    public JsonResult<String> testPackage(@RequestBody String payload) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        while (i < 1024 * 47 * 3) {
+            i++;
+            sb.append(i+"-");
+        }
+        System.out.println(i);
+        String s = sb.toString();
+        for (int j = 0; j < 5; j++) {
+            int finalJ = j;
+            new Thread(() -> {
+                String hello = localService.testPackage(s);
+                System.out.println("hello "+ finalJ +" "+ hello.length());
+            }).start();
+        }
+        return new JsonResult<>("hello");
+    }
 
     @ApiOperation(value = "同步/异步接口测试")
     @RequestMapping(value = "/hello",method = RequestMethod.GET)
@@ -129,9 +150,13 @@ public class OperaController {
         OperaParam operaParam = new OperaParam();
         operaParam.setParam("aaaaaaaaaaaaa");
         operaParam.setContext("1231231312312313");
+        OperaParam operaParam2 = new OperaParam();
+        operaParam2.setParam("aaaaaaaaaaaaa");
+        operaParam2.setContext("1231231312312313");
         List<OperaParam> params = new ArrayList<>();
         params.add(operaParam);
         params.add(operaParam);
+        params.add(operaParam2);
         List<ReturnEntity> listEntity = entityService.getEntityList(params);
         listEntity.forEach(System.out::println);
 //        result.put("getEntityList", listEntity);
@@ -146,8 +171,12 @@ public class OperaController {
         List<String> msg = new ArrayList<>();
         msg.add("cast");
         msg.add("dddd");
-        ReturnEntity param = localService2.helloWait("param", new OperaParam());
-        System.out.println(JSONObject.toJSONString(param));
+//        ReturnEntity param = localService2.helloWait("param", new OperaParam());
+//        System.out.println(JSONObject.toJSONString(param));
+        ParamEnum paramEnum = localService2.helloEnum(ParamEnum.ALARM);
+        ParamEnum paramEnum2 = localService2.helloEnumEntity(new OperaParam(),ParamEnum.ALARM);
+        System.out.println(paramEnum);
+        System.out.println(paramEnum2);
 
 
     }

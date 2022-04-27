@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
- * company: kongtrolink
+ * company:
  * description: 广播拦截
  * update record:
  */

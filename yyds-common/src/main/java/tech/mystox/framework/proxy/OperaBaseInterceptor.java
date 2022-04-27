@@ -7,6 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
+import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.stereotype.OperaCode;
 
@@ -41,7 +42,7 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
                 }
                 bean = applicationContext.getBean(declaringClass);
             } catch (BeansException e) {
-                throw new MsgResultFailException("opera is null or code is blank and no local service available...");//todo 是否应该本地执行
+                throw new MsgResultFailException(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION,"opera is null or code is blank and no local service available...");//todo 是否应该本地执行
             }
             return bean.getClass().getMethod(method.getName(), invocation.getMethod().getParameterTypes())
                     .invoke(bean, invocation.getArguments());
