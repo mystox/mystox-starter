@@ -15,11 +15,12 @@ import java.util.List;
  */
 @Register
 public interface EntityService {
+    @OperaCode(code = "helloEntity")
+    String hello();
     @OperaCode
     public ReturnEntity getEntity(OperaParam operaParam);
     @OperaCode
     public List<ReturnEntity> getEntityList(List<OperaParam> operaParam);
-
     @OperaCode
     public <T> Object getT(T t,String abc,Integer i);
 

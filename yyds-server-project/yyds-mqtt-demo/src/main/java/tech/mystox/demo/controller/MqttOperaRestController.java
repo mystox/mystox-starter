@@ -1,13 +1,10 @@
 package tech.mystox.demo.controller;
 
+import org.springframework.web.bind.annotation.*;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.service.IaOpera;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * \* @Author: mystox
@@ -20,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MqttOperaRestController {
 
     //    @Autowired
-//    MqttOpera mqttOpera;
+    //    MqttOpera mqttOpera;
 
     final
     IaOpera msgHandler;
@@ -32,7 +29,7 @@ public class MqttOperaRestController {
 
     // @Autowired
     // IaContext iaContext;
-    @RequestMapping("/operaSync")
+    @RequestMapping(value = "/operaSync", method = RequestMethod.POST)
     public JsonResult operaSync(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
         // MsgResult opera = msgHandler.opera(operaCode,message,2,10, TimeUnit.SECONDS);
@@ -40,14 +37,14 @@ public class MqttOperaRestController {
         return new JsonResult(opera);
     }
 
-    @RequestMapping("/operaAsync")
+    @RequestMapping(value = "/operaAsync", method = RequestMethod.POST)
     public JsonResult operaAsync(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
         msgHandler.operaAsync(operaCode, message);
         return new JsonResult();
     }
 
-    @RequestMapping("/broadcast")
+    @RequestMapping(value = "/broadcast", method = RequestMethod.POST)
     public JsonResult broadcast(@RequestParam String operaCode, @RequestBody String message) {
         // MsgHandler msgHandler =iaContext.getIaENV().getMsgScheduler().getIaHandler();
         msgHandler.broadcast(operaCode, message);
