@@ -26,7 +26,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 
 /**
  * Created by mystoxlol on 2020/6/17, 10:29.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */

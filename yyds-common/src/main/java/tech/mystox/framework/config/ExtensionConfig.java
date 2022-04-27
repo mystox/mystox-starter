@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Created by mystox on 2021/4/16, 16:20.
- * company: kongtrolink
+ * company:
  * description: 注册一些扩展字段，扩展字段以key-v的形式在yaml中的register.extension字段下注册
  * update record:
  */

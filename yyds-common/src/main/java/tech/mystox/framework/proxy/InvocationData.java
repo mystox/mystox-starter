@@ -2,7 +2,7 @@ package tech.mystox.framework.proxy;
 
 /**
  * Created by mystoxlol on 2020/7/1, 10:05.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */

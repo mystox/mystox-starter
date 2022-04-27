@@ -5,7 +5,7 @@ import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 
 /**
  * Created by mystoxlol on 2020/6/8, 10:37.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */
