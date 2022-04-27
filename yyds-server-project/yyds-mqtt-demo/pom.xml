@@ -132,7 +132,7 @@
         </repository>
         <repository>
             <id>maven-releases</id>
-            <name>Fastech Nexus repository</name>
+            <name>Nexus repository</name>
             <url>http://192.168.0.234:8881/nexus/repository/maven-releases/</url>
         </repository>
     </repositories>

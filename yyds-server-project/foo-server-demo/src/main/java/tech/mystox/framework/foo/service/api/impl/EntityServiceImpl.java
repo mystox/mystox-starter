@@ -24,6 +24,13 @@ import java.util.List;
 public class EntityServiceImpl implements EntityService {
 
     @Override
+    public String hello() {
+        String x = this.getClass().getSimpleName() + " [hello]";
+        System.out.println(x);
+        return x;
+    }
+
+    @Override
     public ReturnEntity getEntity(OperaParam operaParam) {
         System.out.println(JSONObject.toJSONString(operaParam));
         ReturnEntity returnEntity = new ReturnEntity();
@@ -31,10 +38,12 @@ public class EntityServiceImpl implements EntityService {
         returnEntity.setCode(11);
         return returnEntity;
     }
-
     @Override
     public List<ReturnEntity> getEntityList(List<OperaParam> operaParam) {
         System.out.println("getEntityList: "+JSONObject.toJSONString(operaParam));
+        OperaParam operaParam1 = operaParam.get(0);
+        String param = operaParam1.getParam();
+        System.out.println(param);
         ReturnEntity returnEntity = new ReturnEntity();
         returnEntity.setResult("11111111111");
         returnEntity.setCode(11);
