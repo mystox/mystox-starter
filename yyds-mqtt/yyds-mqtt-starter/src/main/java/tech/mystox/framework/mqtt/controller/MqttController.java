@@ -2,13 +2,6 @@ package tech.mystox.framework.mqtt.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.entity.JsonResult;
-import tech.mystox.framework.entity.MqttResp;
-import tech.mystox.framework.entity.OperaType;
-import tech.mystox.framework.mqtt.service.impl.CallBackTopic;
-import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
-import tech.mystox.framework.mqtt.service.impl.MqttRestService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tech.mystox.framework.common.util.SpringContextUtil;
+import tech.mystox.framework.core.IaContext;
+import tech.mystox.framework.entity.JsonResult;
+import tech.mystox.framework.entity.MqttMsg;
+import tech.mystox.framework.entity.MsgRsp;
+import tech.mystox.framework.entity.OperaType;
+import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
+import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
+import tech.mystox.framework.mqtt.service.impl.MqttReceiver;
+import tech.mystox.framework.mqtt.service.impl.MqttRestService;
 import tech.mystox.framework.service.common.OperaRouteService;
 import tech.mystox.framework.stereotype.Opera;
 
@@ -42,6 +45,8 @@ public class MqttController {
 
     @Opera(operaType = OperaType.Broadcast)
     OperaRouteService operaRouteService;
+
+
     /**
      * 注册订阅表
      *
@@ -114,43 +119,59 @@ public class MqttController {
         return new JsonResult();
     }
 
-    @RequestMapping("/getCallBack")
-    public JsonResult getCallBack(@RequestBody JSONObject condition)
-    {
-        String msgId = condition.getString("msgId");
-        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
-        Map<String, CallBackTopic> callbacks = mqttSender.getCALLBACKS();
-        CallBackTopic callBackTopic = callbacks.get(msgId);
-        MqttResp call = null;
-        try {
-            if (callBackTopic != null) {
-                System.out.println(callBackTopic.toString());
-                call = callBackTopic.call();
+    @RequestMapping("/getReceiverPackageCallBack")
+    public JsonResult getReceiverPackageCallBack(@RequestParam(required = false) String msgId) {
+        MqttReceiver bean = SpringContextUtil.getApplicationContext().getBean(MqttReceiver.class);
+        Map<String, CallSubpackageMsg<MqttMsg>> callbacks = bean.getCALLBACKS();
+        if (StringUtils.isNotBlank(msgId)) {
+            CallSubpackageMsg<MqttMsg> callBackTopic = callbacks.get(msgId);
+            MqttMsg call = null;
+            try {
+                if (callBackTopic != null) {
+                    call = callBackTopic.call();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return new JsonResult(call);
         }
-        if (StringUtils.isBlank(msgId))
-            return new JsonResult(callbacks.size());
-        return new JsonResult(call);
+        return new JsonResult(callbacks);
     }
 
+    @RequestMapping("/getSenderSyncCallBack")
+    public JsonResult getSenderSyncCallBack(@RequestParam(required = false) String msgId) {
+        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
+        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = mqttSender.getCALLBACKS();
+        if (StringUtils.isNotBlank(msgId)) {
+            CallSubpackageMsg<MsgRsp> callBackTopic = callbacks.get(msgId);
+            MsgRsp call = null;
+            try {
+                if (callBackTopic != null) {
+                    call = callBackTopic.call();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return new JsonResult(call);
+        }
+        return new JsonResult(callbacks.size());
+    }
 
     @RequestMapping("/updateOperaRoute")
     public JsonResult updateOperaRoute(@RequestBody JSONObject body) {
         String operaCode = body.getString("operaCode");
         JSONArray subGroupServerArr = body.getJSONArray("subGroupServerArr");
         List<String> subGroupServerList = subGroupServerArr.toJavaList(String.class);
-//        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
+        //        Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         try {
-            mqttRestService.updateOperaRoute(operaCode,subGroupServerList);
+            mqttRestService.updateOperaRoute(operaCode, subGroupServerList);
             //修改完成需要广播
             operaRouteService.broadcastOperaRoute(operaCode, subGroupServerList);
-        } catch ( InterruptedException |IOException e) {
-            logger.error("update opera route error: [{}]",e.toString());
+        } catch (InterruptedException | IOException e) {
+            logger.error("update opera route error: [{}]", e.toString());
             if (logger.isDebugEnabled())
                 e.printStackTrace();
-            return new JsonResult("update opera route error: [{}]"+e.toString(), false);
+            return new JsonResult("update opera route error: [{}]" + e.toString(), false);
         }
         return new JsonResult();
 

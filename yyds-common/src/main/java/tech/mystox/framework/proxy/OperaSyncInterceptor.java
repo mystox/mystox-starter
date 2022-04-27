@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mystoxlol on 2020/6/29, 20:48.
- * company: kongtrolink
+ * company:
  * description:
  * update record:
  */
@@ -36,10 +36,12 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
                         iaContext.getIaENV().getLoadBalanceScheduler(),
                         true, false));
-        if (opera.getStateCode() != StateCode.SUCCESS) throw new MsgResultFailException("opera result is failed ["+opera.getStateCode()+"]");
+        if (opera.getStateCode() != StateCode.SUCCESS)
+            throw new MsgResultFailException(StateCode.StateCodeEnum.resolveByStateCode(opera.getStateCode()),"Opera result is failed ");
         String msg = opera.getMsg();
         return deserialize(msg, genericReturnType);
     }
+
 
     public long getTimeout() {
         return timeout;

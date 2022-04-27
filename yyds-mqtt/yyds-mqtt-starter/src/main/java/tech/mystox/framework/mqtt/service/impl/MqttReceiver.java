@@ -35,6 +35,8 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
 
 /**
@@ -46,11 +48,17 @@ import java.util.List;
 @MessageEndpoint
 public class MqttReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MqttReceiver.class);
-    private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小
+    //    private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小
+    @Value("${mqtt.payload.limit:#{47 * 1024}}")
+    private int mqttPayloadLimit;
     @Value("${jarResources.path:./jarResources}")
     private String jarPath;
     @Value("${server.name}_${server.version}")
     private String serverCode;
+    @Value("${mqtt.callback.maxCount:10000}")
+    private long callbackMaxCount;
+    @Value("${mqtt.package.timeout:30}")
+    private long packageMsgTimeout;
 
     @Autowired
     IaContext iaContext;
@@ -64,11 +72,14 @@ public class MqttReceiver {
     @Autowired
     private MqttLogUtil mqttLogUtil;
 
-    public MqttResp receive(String topic, MqttMsg mqttMsg) {
+    protected static final Map<String, CallSubpackageMsg<MqttMsg>> CALLBACKS = new ConcurrentHashMap<>();
+
+
+    public MsgRsp receive(String topic, MqttMsg mqttMsg) {
         logger.debug("receive... ..." + JSONObject.toJSONString(mqttMsg));
 
         String unit = getUnitBySubList(topic);
-        MqttResp result = null;
+        MsgRsp result = null;
         try {
             if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
                 result = localExecute(unit, mqttMsg);
@@ -78,9 +89,9 @@ public class MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(result.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
+            mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
             logger.error(" [{}] msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
-            result = new MqttResp(mqttMsg.getMsgId(), e.toString());
+            result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
         }
@@ -88,7 +99,7 @@ public class MqttReceiver {
         return result;
     }
 
-    MqttResp localExecute(String unit, MqttMsg mqttMsg) {
+    MsgRsp localExecute(String unit, MqttMsg mqttMsg) {
         String[] entity = unit.replace(UnitHead.LOCAL, "").split("/");
         String className = entity[0];
         String methodName = entity[1];
@@ -99,7 +110,7 @@ public class MqttReceiver {
             paramsTypeStr = "[\"java.lang.String\"]";
 
         String result = "";
-        MqttResp resp;
+        MsgRsp resp;
         try {
             Class<?> clazz = Class.forName(className);
             Object bean = SpringContextUtil.getBean(clazz);//这里会是性能瓶颈
@@ -108,20 +119,20 @@ public class MqttReceiver {
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             String payload = mqttMsg.getPayload();
             JSONArray jsonArray = JSONObject.parseArray(payload);
-            Object[] arguments =new Object[classes.size()];
+            Object[] arguments = new Object[classes.size()];
             for (int i = 0; i < arguments.length; i++) {
-//                Class paramType = classes.get(i);
+                //                Class paramType = classes.get(i);
                 Type genericParameterType = genericParameterTypes[i]; //真实泛型类型转换
-                arguments[i] = jsonArray.getObject(i,genericParameterType);
+                arguments[i] = jsonArray.getObject(i, genericParameterType);
             }
             Object invoke = method.invoke(bean, arguments);
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
-            resp = new MqttResp(mqttMsg.getMsgId(), result);
+            resp = new MsgRsp(mqttMsg.getMsgId(), result);
             return resp;
         } catch (Exception e) {
             mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), serverCode);
             logger.error("[{}]local execute exception:{}", mqttMsg.getMsgId(), e.toString());
-            resp = new MqttResp(mqttMsg.getMsgId(), e.toString());
+            resp = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             resp.setStateCode(StateCode.FAILED);
             e.printStackTrace();
         }
@@ -148,7 +159,7 @@ public class MqttReceiver {
     //     return parse;
     // }
 
-    MqttResp jarExecute(String unit, MqttMsg mqttMsg) {
+    MsgRsp jarExecute(String unit, MqttMsg mqttMsg) {
         String[] entity = unit.replace(UnitHead.JAR, "").split("/");
         String jarName = entity[0];
         String className = entity[1];
@@ -171,9 +182,9 @@ public class MqttReceiver {
             String payload = mqttMsg.getPayload();
             JSONArray jsonArray = JSONObject.parseArray(payload);
             Object invoke = taskMethod.invoke(clazz.newInstance(), jsonArray.toArray());
-//            Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
+            //            Object invoke = taskMethod.invoke(clazz.newInstance(), mqttMsg.getPayload());
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
-            MqttResp resp = new MqttResp(mqttMsg.getMsgId(), result);
+            MsgRsp resp = new MsgRsp(mqttMsg.getMsgId(), result);
             logger.info("jar result: {}", result);
             return resp;
         } catch (MalformedURLException | InstantiationException | IllegalAccessException
@@ -185,7 +196,7 @@ public class MqttReceiver {
 
     public String getUnitBySubList(String topic) {
         RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
-//        return SpringContextUtil.getServiceMap().get(topic);
+        //        return SpringContextUtil.getServiceMap().get(topic);
         //todo
         String data = regScheduler.getData(topic);
         if (StringUtils.isNotBlank(data)) {
@@ -221,52 +232,114 @@ public class MqttReceiver {
             String topic = mqtt_receivedTopic.toString();
             String payload = message.getPayload();
             MqttMsg mqttMsg = JSONObject.parseObject(payload, MqttMsg.class);
-            MqttResp result = receive(topic, mqttMsg);
-            if (!mqttMsg.getHasAck()) return; //如果不需返回
             String ackTopic = MqttUtils.preconditionSubTopicId(mqttMsg.getSourceAddress(), mqttMsg.getOperaCode()) + "/ack";
+            //组包判断
+            boolean subpackage = mqttMsg.isSubpackage();
+            if (subpackage) {
+                String packageMsg = null;
+                try {
+                    packageMsg = stickPackageMsg(mqttMsg);
+                    mqttMsg.setPayload(packageMsg);
+                } catch (ExecutionException | InterruptedException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                    logger.error("[{}]Subpackage msg[{}] result excepted...[{}]", mqttMsg.getMsgId(), mqttMsg.getTopic(), e.toString());
+                    if (logger.isDebugEnabled()) e.printStackTrace();
+                    MsgRsp result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
+                    result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
+                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+                } catch (TimeoutException e) {
+                    //解包超时
+                    logger.error("[{}]Subpackage msg[{}] timeout[{}s]...[{}]", mqttMsg.getMsgId(), mqttMsg.getTopic(), packageMsgTimeout * 3, e.toString());
+                    if (logger.isDebugEnabled()) e.printStackTrace();
+                    MsgRsp result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
+                    result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
+                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+                }
+                if (StringUtils.isBlank(packageMsg)) {
+                    //返回空则说明此包为子包废弃
+                    return;
+                }
+            }
+            //执行函数
+            MsgRsp result = receive(topic, mqttMsg);
+            if (!mqttMsg.getHasAck()) return; //如果不需返回
             result.setTopic(ackTopic);
-            // String ackPayload = JSONObject.toJSONString(result);
-
             String ackPayload = result.getPayload();
-
             byte[] bytes = ackPayload.getBytes(StandardCharsets.UTF_8);
             int length = bytes.length;
             try {
-                if (length > MQTT_PAYLOAD_LIMIT) {
-                    //分包
-                    List<MqttResp> resultArr = subpackage(bytes, mqttMsg.getMsgId());
-                    logger.info("[{}] message subpackage, package count:[{}]", mqttMsg.getMsgId(), resultArr.size());
-                    int size = resultArr.size();
-                    for (int i = 0; i < size; i++) {
-                        MqttResp resp = resultArr.get(i);
+                if (length > mqttPayloadLimit) {
+                    //分包回复消息
+                    List<MsgRsp> resultArr = subpackage(bytes, mqttMsg.getMsgId());
+                    for (MsgRsp resp : resultArr) {
                         Thread.sleep(10L);
+                        resp.setTopic(topic);
                         iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
                     }
                 } else
                     iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
                 logger.error("[{}] message ", e.toString());
+                if (logger.isDebugEnabled()) e.printStackTrace();
             }
         });
 
     }
 
+    /**
+     * 接收组包
+     *
+     * @param mqttMsg
+     * @return 返回空则为空包，不执行对应逻辑
+     */
+    private String stickPackageMsg(MqttMsg mqttMsg) throws ExecutionException, InterruptedException, TimeoutException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        String msgId = mqttMsg.getMsgId();
+        int size = CALLBACKS.size();
+        String operaCode = mqttMsg.getOperaCode();
+        if (size > callbackMaxCount) {
+            mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
+            logger.error("[{}]message, system callback map is full[{}]", msgId, size);
+            return null;
+        }
+        CallSubpackageMsg<MqttMsg> callSubpackageMsg = new CallSubpackageMsg<>();
+        CallSubpackageMsg<MqttMsg> put = CALLBACKS.putIfAbsent(msgId, callSubpackageMsg);
+        if (put == null) {
+            logger.debug("[{}]Message[{}] receive size package start...", msgId, mqttMsg.getTopic());
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            FutureTask<MqttMsg> mqttMsgFutureTask = new FutureTask<>(callSubpackageMsg);
+            try {
+                CALLBACKS.get(msgId).callbackSubPackage(mqttMsg);
+                es.submit(mqttMsgFutureTask);
+                MqttMsg resultMsg = mqttMsgFutureTask.get(packageMsgTimeout * 3, TimeUnit.SECONDS);//组装结果,三倍请求超时间
+                return resultMsg.getPayload();
+            } finally {
+                mqttMsgFutureTask.cancel(true);
+                es.shutdown();
+                CALLBACKS.remove(msgId);
+            }
+        } else {
+            put.callbackSubPackage(mqttMsg);
+        }
+        return null;
+    }
 
 
     /**
      * 分包
      *
-     * @param
+     * @param bytes 分包流
      * @return
+     * @Parem msgId 消息id
      */
-    private List<MqttResp> subpackage(byte[] bytes, String msgId) {
-        List<MqttResp> result = new ArrayList<>();
+    private List<MsgRsp> subpackage(byte[] bytes, String msgId) {
+        List<MsgRsp> result = new ArrayList<>();
         int crc = ByteUtil.getCRC(bytes);
         int length = bytes.length;
-        int count = length / MQTT_PAYLOAD_LIMIT + 1;
+        int count = length / mqttPayloadLimit + 1;
+        logger.warn("[{}]Subpackage response msg length[{}] is large than mqtt payload limit[{}], count[{}]", msgId, length, mqttPayloadLimit, count);
         for (int i = 0; i < count; i++) {
-            byte[] subArray = ArrayUtils.subarray(bytes, i * MQTT_PAYLOAD_LIMIT, MQTT_PAYLOAD_LIMIT * (i + 1));
-            MqttResp resp = new MqttResp(msgId, subArray, true, i, count, crc);
+            byte[] subArray = ArrayUtils.subarray(bytes, i * mqttPayloadLimit, mqttPayloadLimit * (i + 1));
+            MsgRsp resp = new MsgRsp(msgId, subArray, true, i, count, crc);
             result.add(resp);
         }
         return result;
@@ -293,6 +366,10 @@ public class MqttReceiver {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Map<String, CallSubpackageMsg<MqttMsg>> getCALLBACKS() {
+        return CALLBACKS;
     }
 
 
