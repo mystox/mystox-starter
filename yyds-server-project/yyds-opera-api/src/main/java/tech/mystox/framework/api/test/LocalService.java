@@ -1,6 +1,7 @@
 package tech.mystox.framework.api.test;
 
 import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.api.test.entity.ParamEnum;
 import tech.mystox.framework.api.test.entity.ReturnEntity;
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;
@@ -17,7 +18,7 @@ import java.util.Map;
  // */
 @Register
 public interface LocalService {
-    @OperaCode(code = "say")
+    @OperaCode
     String hello();
     @OperaCode(code = "sayHi")
     String hello(String param);
@@ -31,6 +32,8 @@ public interface LocalService {
     void helloParams(String param1,Integer param2,long param3);
     @OperaCode(code = "helloWait")
     ReturnEntity helloWait(String param, OperaParam operaParam);
+    @OperaCode
+    ParamEnum helloEnum(ParamEnum alarm);
     public static void main(String[] args)
     {
         try {
@@ -42,4 +45,8 @@ public interface LocalService {
             e.printStackTrace();
         }
     }
+    @OperaCode
+    ParamEnum helloEnumEntity(OperaParam operaParam, ParamEnum alarm);
+    @OperaCode
+    String testPackage(String payload);
 }

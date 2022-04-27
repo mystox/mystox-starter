@@ -3,6 +3,7 @@ package tech.mystox.framework;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import tech.mystox.demo.SpringbootYydsMqttDemoApplication;
@@ -49,6 +50,17 @@ public class SpringbootYydsMqttDemoApplicationTest {
 //        OperaParam t = entityService.getT(operaParam);
 //        System.out.println(t);
 
+    }
+    @Value("${a:#{47 + 1024}}")
+    private Integer mqttPayloadLimit;
+    @Test
+    public void testEntity() {
+        String hello = entityService.hello();
+        System.out.println(hello);
+    }
+    @Test
+    public void testValue() {
+        System.out.println(mqttPayloadLimit);
     }
 
 
