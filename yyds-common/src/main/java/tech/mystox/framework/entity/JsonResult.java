@@ -1,66 +1,50 @@
 /**
  * *****************************************************
  * Copyright (C) mystox techology Co.ltd - All Rights Reserved
- *
+ * <p>
  * This file is part of mystox techology Co.Ltd property.
- *
+ * <p>
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
- ******************************************************
+ * *****************************************************
  */
 package tech.mystox.framework.entity;
 
-public class JsonResult {
-    
-    private String info = "请求成功！";
-    private Boolean success = true;
-    private Object data;
-    private int count;  //liudd添加
-    private Object otherInfo;   //liudd添加
 
-    public int getCount() {
-        return count;
-    }
+import java.io.Serializable;
 
-    public void setCount(int count) {
-        this.count = count;
-    }
+public class JsonResult<T> extends BaseResult implements Serializable {
+
+    private T data;
 
     public JsonResult() {
-        printResult();
     }
 
-    public JsonResult(Object data) {
+    public JsonResult(T data) {
         this.data = data;
-        printResult();
     }
 
-    public JsonResult(Object data, int count){
+    public JsonResult(T data, String info) {
+        super(true, info);
         this.data = data;
-        this.count = count;
-        printResult();
     }
 
-    public JsonResult(String info, Boolean success) {
+    public JsonResult(Boolean success, String info) {
         this.info = info;
         this.success = success;
-        printResult();
     }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public Object getOtherInfo() {
-        return otherInfo;
-    }
-
-    public void setOtherInfo(Object otherInfo) {
-        this.otherInfo = otherInfo;
+    public JsonResult(String info,Boolean success) {
+        this.info = info;
+        this.success = success;
     }
 
     public String getInfo() {
         return info;
+    }
+
+
+    public Boolean getSuccess() {
+        return success;
     }
 
     public void setInfo(String info) {
@@ -75,22 +59,21 @@ public class JsonResult {
         this.success = success;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 
     @Override
     public String toString() {
-        return "JsonResult{" + "info=" + info + ", success=" + success + ", data=" + data + '}';
+        return "JsonResult{" +
+                "info='" + info + '\'' +
+                ", success=" + success +
+                ", data=" + data +
+                '}';
     }
-    
-    private void printResult() {
-//    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            System.out.println(sdf.format(new Date())+" >> "+this);
-    }
-    
+
 }

@@ -2,6 +2,8 @@ package tech.mystox.framework.common.util;
 
 import tech.mystox.framework.entity.TopicPrefix;
 
+import java.util.UUID;
+
 /**
  * Created by mystoxlol on 2019/9/3, 9:26.
  * company: mystox
@@ -82,4 +84,14 @@ public class MqttUtils {
     public static String preconditionSubACKTopicId(String groupServerCode) {
         return preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode) + "/+" + "/ack";
     }
+
+    /**
+     * 生成消息id
+     * @return
+     */
+    public static String assembleMsgId() {
+        return UUID.randomUUID().toString();
+    }
+
+
 }

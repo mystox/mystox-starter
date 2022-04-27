@@ -1,24 +1,32 @@
 package tech.mystox.framework.entity;
 
-import java.util.Arrays;
-import java.util.UUID;
-
 /**
  * Created by mystoxlol on 2019/8/13, 10:35.
  * company: mystox
  * description:
  * update record:
  */
-public class MqttMsg {
-    private String msgId = UUID.randomUUID().toString();
-    private String topic;
+public class MqttMsg extends MsgPackage {
     private String operaCode;
     private String sourceAddress; //消息源地址，一般为生产消息的服务code serverName+"_"+serverVersion
     private Boolean hasAck = false;
     private PayloadType payloadType;
-    private String payload;
-    private byte[] bytePayload;
 
+
+    public MqttMsg(String msgId, byte[] bytePayload, boolean subpackage, Integer packageNum, Integer packageCount, Integer crc) {
+        super(msgId, bytePayload, subpackage, packageNum, packageCount, crc);
+    }
+
+    public MqttMsg(String msgId, String topic,String payload,String operaCode,String sourceAddress,Boolean hasAck) {
+        super(msgId, topic,payload);
+        this.operaCode = operaCode;
+        this.sourceAddress = sourceAddress;
+        this.hasAck = hasAck;
+    }
+
+    public MqttMsg() {
+
+    }
 
     public Boolean getHasAck() {
         return hasAck;
@@ -44,29 +52,6 @@ public class MqttMsg {
         this.sourceAddress = sourceAddress;
     }
 
-    public String getMsgId() {
-        return msgId;
-    }
-
-    public void setMsgId(String msgId) {
-        this.msgId = msgId;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public String getPayload() {
-        return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
 
     public PayloadType getPayloadType() {
         return payloadType;
@@ -76,22 +61,15 @@ public class MqttMsg {
         this.payloadType = payloadType;
     }
 
-    public byte[] getBytePayload() {
-        return bytePayload;
-    }
-
-    public void setBytePayload(byte[] bytePayload) {
-        this.bytePayload = bytePayload;
-    }
 
     @Override
     public String toString() {
         return "MqttMsg{" +
-                "msgId='" + msgId + '\'' +
-                ", topic='" + topic + '\'' +
+                "msgId='" + getMsgId() + '\'' +
+                ", topic='" + getTopic() + '\'' +
                 ", payloadType=" + payloadType +
-                ", payload='" + payload + '\'' +
-                ", bytePayload=" + Arrays.toString(bytePayload) +
+                ", payload='" + getPayload() + '\'' +
+//                ", bytePayload=" + Arrays.toString(getBytePayload()) +
                 '}';
     }
 }
