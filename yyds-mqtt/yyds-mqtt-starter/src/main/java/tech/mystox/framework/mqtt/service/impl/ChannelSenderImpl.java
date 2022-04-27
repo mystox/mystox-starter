@@ -1,13 +1,7 @@
 package tech.mystox.framework.mqtt.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import tech.mystox.framework.common.util.MqttUtils;
-import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.core.MqttLogUtil;
-import tech.mystox.framework.entity.*;
-import tech.mystox.framework.mqtt.service.IMqttSender;
-import tech.mystox.framework.scheduler.RegScheduler;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +11,24 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import tech.mystox.framework.common.util.ByteUtil;
+import tech.mystox.framework.common.util.MqttUtils;
+import tech.mystox.framework.config.IaConf;
+import tech.mystox.framework.core.IaContext;
+import tech.mystox.framework.core.MqttLogUtil;
+import tech.mystox.framework.entity.*;
 import tech.mystox.framework.mqtt.config.MqttConfig;
+import tech.mystox.framework.mqtt.service.IMqttSender;
+import tech.mystox.framework.scheduler.RegScheduler;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
-import static tech.mystox.framework.common.util.MqttUtils.preconditionServerCode;
+import static tech.mystox.framework.common.util.MqttUtils.*;
 
 /**
  * Created by mystoxlol on 2019/8/19, 8:28.
@@ -34,7 +39,8 @@ import static tech.mystox.framework.common.util.MqttUtils.preconditionServerCode
 @Service("mqttSenderImpl")
 public class ChannelSenderImpl {
 
-
+    @Value("${mqtt.payload.limit:#{47 * 1024}}")
+    private int mqttPayloadLimit;
     @Autowired
     IaContext iaContext;
 
@@ -43,22 +49,7 @@ public class ChannelSenderImpl {
 
     Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);
 
-    protected static final Map<String, CallBackTopic> CALLBACKS = new ConcurrentHashMap<>();
-
-    @Value("${mqtt.producer.defaultTopic}")
-    private String producerDefaultTopic;
-
-//    @Value("${server.name}")
-//    private String serverName;
-//
-//    @Value("${server.version}")
-//    private String serverVersion;
-//
-//    @Value("${server.name}_${server.version}")
-//    private String serverCode;
-
-//    @Value("${server.groupCode}")
-//    private String groupCode;
+    protected static final Map<String, CallSubpackageMsg<MsgRsp>> CALLBACKS = new ConcurrentHashMap<>();
 
     @Autowired
     private IMqttSender mqttSender;
@@ -76,112 +67,86 @@ public class ChannelSenderImpl {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
-        String msgId = mqttMsg.getMsgId();
+        String msgId = assembleMsgId();
+        List<MqttMsg> mqttMsgList = buildMqttMsg(msgId, topic, payload, operaCode, false);
         //获取目标topic列表，判断sub_list是否有人订阅处理
-        // try {
         if (isExistsBySubList(serverCode, operaCode)) {
-            // boolean existsByPubList = addPubList(serverCode, operaCode);
-            // if (existsByPubList) {
-            logger.debug("[{}]message send...topic[{}][{}]", msgId, topic, JSONObject.toJSONString(mqttMsg));
-            mqttSender.sendToMqtt(topic, JSONObject.toJSONString(mqttMsg));
-            // } else {
-            //     mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            //     logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
-            // }
+            boolean packageFlag = false; //分包标记
+            for (MqttMsg mqttMsg : mqttMsgList) {
+                if (packageFlag) {
+                    try {
+                        Thread.sleep(10L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
+                logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
+                mqttSender.sendToMqtt(topic, mqttMsgJson);
+                packageFlag = true;
+            }
         } else {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
         }
-
-        /*} catch (KeeperException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
-            e.printStackTrace();
-        }*/
     }
 
 
-    public void sendToMqtt(String serverCode, String operaCode,
-                           int qos, String payload) {
+    public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
-        String msgId = mqttMsg.getMsgId();
-        // try {
+        String msgId = assembleMsgId();
+        List<MqttMsg> mqttMsgList = buildMqttMsg(msgId, topic, payload, operaCode, false);
         //获取目标topic列表，判断sub_list是否有人订阅处理
         if (isExistsBySubList(serverCode, operaCode)) {
-            // boolean existsByPubList = addPubList(serverCode, operaCode);
-            // if (existsByPubList) {
-            mqttSender.sendToMqtt(topic, qos, JSONObject.toJSONString(mqttMsg));
-            // } else {
-            //     mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            //     logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
-            // }
+            boolean packageFlag = false; //分包标记
+            for (MqttMsg mqttMsg : mqttMsgList) {
+                if (packageFlag) {
+                    try {
+                        Thread.sleep(10L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
+                logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
+                mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                packageFlag = true;
+            }
         } else {
             mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
         }
-      /*  } catch (KeeperException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
-            e.printStackTrace();*/
-       /* } catch (InterruptedException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
-            e.printStackTrace();
-        }*/
     }
 
-    public boolean sendToMqttBoolean(String serverCode, String operaCode,
-                                     int qos, MqttMsg mqttMsg) {
-//        String localServerCode = this.serverName + "_" + this.serverVersion;
-        String msgId = mqttMsg.getMsgId();
+    public boolean sendToMqttBoolean(String msgId, String serverCode, String operaCode,
+                                     int qos, List<MqttMsg> mqttMsgArr) {
         try {
             //获取目标topic列表，判断sub_list是否有人订阅处理
             if (isExistsBySubList(serverCode, operaCode)) {
-                // boolean existsByPubList = addPubList(serverCode, operaCode); //将此请求注册至请求列表，
-                // if (existsByPubList) {
                 //组建topicid
                 String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
-                mqttMsg.setOperaCode(operaCode);
-                String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
-                logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
-                mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                boolean packageFlag = false; //分包标记
+                for (MqttMsg mqttMsg : mqttMsgArr) {
+                    if (packageFlag) Thread.sleep(10L);
+                    String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
+                    logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
+                    mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                    packageFlag = true;
+                }
                 return true;
-                // } else {
-                //     mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-                //     logger.error("[{}]message send error[{}]... pub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
-                // }
             } else {
                 mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
                 return false;
             }
-       /* } catch (KeeperException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.UNREGISTERED, e.toString());
-            if (logger.isDebugEnabled()) e.printStackTrace();
-            return false;
-        } catch (InterruptedException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.CONNECT_INTERRUPT, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.CONNECT_INTERRUPT, e.toString());
-            if (logger.isDebugEnabled()) e.printStackTrace();
-            return false;*/
-        } catch (MessagingException e) {
+        } catch (MessagingException | InterruptedException e) {
             mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
         }
-        // mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-        // logger.error("[{}]message send error[{}]...", msgId, StateCode.UNREGISTERED);
-        // return false;
     }
 
 
@@ -189,32 +154,32 @@ public class ChannelSenderImpl {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
-        return sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
+        String msgId = assembleMsgId();
+        List<MqttMsg> mqttMsgs = buildMqttMsg(msgId, topic, payload, operaCode, false);
+        return sendToMqttBoolean(msgId, serverCode, operaCode, qos, mqttMsgs);
     }
 
 
     public MsgResult sendToMqttSync(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
-        MqttMsg mqttMsg = buildMqttMsg(topic, payload, operaCode);
-        mqttMsg.setHasAck(true);
-        String msgId = mqttMsg.getMsgId();
-        CallBackTopic callBackTopic = new CallBackTopic();
+        String msgId = assembleMsgId();
+        List<MqttMsg> mqttMsgArr = buildMqttMsg(msgId, topic, payload, operaCode, true);
+        CallSubpackageMsg<MsgRsp> callBackTopic = new CallSubpackageMsg<>();
         int size = CALLBACKS.size();
         if (size > callbackMaxCount) {
             mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
-            logger.error("[{}]message, system callback map is full[{}]", msgId,size);
+            logger.error("[{}]message, system callback map is full[{}]", msgId, size);
             return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
         }
         ExecutorService es = Executors.newSingleThreadExecutor();
         CALLBACKS.put(msgId, callBackTopic);
-        FutureTask<MqttResp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
+        FutureTask<MsgRsp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
         try {
-            boolean sendResult = sendToMqttBoolean(serverCode, operaCode, qos, mqttMsg);
+            boolean sendResult = sendToMqttBoolean(msgId, serverCode, operaCode, qos, mqttMsgArr);
             if (sendResult) {
                 es.submit(mqttMsgFutureTask);
-                MqttResp resp = mqttMsgFutureTask.get(timeout, timeUnit);
+                MsgRsp resp = mqttMsgFutureTask.get(timeout, timeUnit);
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -232,7 +197,7 @@ public class ChannelSenderImpl {
             es.shutdown();
             CALLBACKS.remove(msgId);
         }
-//        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
+        //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
 
         return new MsgResult(StateCode.FAILED, "request failed");
     }
@@ -266,8 +231,8 @@ public class ChannelSenderImpl {
         return true;
     }*/
 
-//    @Autowired
-//    ServiceRegistry serviceRegistry;
+    //    @Autowired
+    //    ServiceRegistry serviceRegistry;
 
     private boolean isExistsBySubList(String serverCode, String operaCode) /*throws KeeperException, InterruptedException */ {
         RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
@@ -284,15 +249,51 @@ public class ChannelSenderImpl {
     }
 
 
-    private MqttMsg buildMqttMsg(String topicId, String payload, String operaCode) {
+    private List<MqttMsg> buildMqttMsg(String msgId, String topicId, String payload, String operaCode, Boolean hashAck) {
+        byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+        int length = bytes.length;
+        if (length > mqttPayloadLimit) {
+            //分包
+            return subpackage(bytes, topicId, operaCode, msgId, hashAck);
+        }
         MqttMsg mqttMsg = new MqttMsg();
+        mqttMsg.setMsgId(msgId);
         mqttMsg.setTopic(topicId);
         mqttMsg.setPayloadType(PayloadType.STRING);
         mqttMsg.setOperaCode(operaCode);
         mqttMsg.setPayload(payload);
+        mqttMsg.setHasAck(hashAck);
         mqttMsg.setSourceAddress(preconditionGroupServerCode(iaConf.getGroupCode(),
                 preconditionServerCode(iaConf.getServerName(), iaConf.getServerVersion(), iaConf.getSequence())));
-        return mqttMsg;
+        return Collections.singletonList(mqttMsg);
+    }
+
+    /**
+     * 发送消息过大分包处理
+     *
+     * @param
+     * @param hashAck
+     * @return
+     */
+    private List<MqttMsg> subpackage(byte[] bytes, String topicId, String operaCode, String msgId, Boolean hashAck) {
+        List<MqttMsg> result = new ArrayList<>();
+        int crc = ByteUtil.getCRC(bytes);
+        int length = bytes.length;
+        int count = length / mqttPayloadLimit + 1;
+        logger.warn("[{}]Subpackage mqtt msg length[{}] is large than mqtt payload limit[{}], count[{}]", msgId, length, mqttPayloadLimit, count);
+        for (int i = 0; i < count; i++) {
+            byte[] subArray = ArrayUtils.subarray(bytes, i * mqttPayloadLimit, mqttPayloadLimit * (i + 1));
+            MqttMsg mqttMsg = new MqttMsg(msgId, subArray, true, i, count, crc);
+            mqttMsg.setMsgId(msgId);
+            mqttMsg.setTopic(topicId);
+            mqttMsg.setPayloadType(PayloadType.STRING);
+            mqttMsg.setOperaCode(operaCode);
+            mqttMsg.setHasAck(hashAck);
+            mqttMsg.setSourceAddress(preconditionGroupServerCode(iaConf.getGroupCode(),
+                    preconditionServerCode(iaConf.getServerName(), iaConf.getServerVersion(), iaConf.getSequence())));
+            result.add(mqttMsg);
+        }
+        return result;
     }
 
     /**
@@ -305,10 +306,10 @@ public class ChannelSenderImpl {
         mqttSenderAckExecutor.execute(() -> {
             try {
                 String payload = message.getPayload();
-                MqttResp resp = JSONObject.parseObject(payload, MqttResp.class);
+                MsgRsp resp = JSONObject.parseObject(payload, MsgRsp.class);
                 String msgId = resp.getMsgId();
                 logger.debug("[{}]message ack is [{}]", msgId, payload);
-                CallBackTopic callBackTopic = CALLBACKS.get(msgId); //使用删除返回已经设置的callback对象
+                CallSubpackageMsg<MsgRsp> callBackTopic = CALLBACKS.get(msgId); //使用删除返回已经设置的callback对象
                 if (callBackTopic != null) {
                     boolean subpackage = resp.isSubpackage();
                     if (subpackage)
@@ -316,20 +317,20 @@ public class ChannelSenderImpl {
                     else
                         callBackTopic.callback(resp);
                 } else {
-                    logger.warn("[{}]message ack [{}] is null...", msgId,resp.getTopic());
+                    logger.warn("[{}]message[{}] ack find callback is null...", msgId, resp.getTopic());
                 }
             } catch (Exception e) {
-                logger.warn("message ack receive error[{}] is Invalidation...", e.toString());
+                logger.warn("message ack receive error[{}] is invalidation...", e.toString());
                 e.printStackTrace();
             }
         });
-//        int activeCount = mqttSenderAckExecutor.getActiveCount();
-//        if (activeCount>=50 && activeCount % 5 == 0)
-//            logger.warn("mqtt ack executor pool active count is [{}]", activeCount);
+        //        int activeCount = mqttSenderAckExecutor.getActiveCount();
+        //        if (activeCount>=50 && activeCount % 5 == 0)
+        //            logger.warn("mqtt ack executor pool active count is [{}]", activeCount);
 
     }
 
-    public Map<String, CallBackTopic> getCALLBACKS() {
+    public Map<String, CallSubpackageMsg<MsgRsp>> getCALLBACKS() {
         return CALLBACKS;
     }
 }

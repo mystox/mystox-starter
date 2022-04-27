@@ -1,12 +1,11 @@
 package tech.mystox.framework.mqtt.service.impl;
 
 import tech.mystox.framework.common.util.ByteUtil;
-import tech.mystox.framework.entity.MqttResp;
+import tech.mystox.framework.entity.MsgRsp;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,16 +20,16 @@ import java.util.concurrent.CountDownLatch;
  * description: 回调加锁函数，从ack topic 回复中获取消息结果
  * update record:
  */
-public class CallBackTopic implements Callable<MqttResp> {
+public class CallBackTopic implements Callable<MsgRsp> {
     Logger logger = LoggerFactory.getLogger(CallBackTopic.class);
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private ConcurrentHashMap<Integer, MqttResp> map = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, MsgRsp> map = new ConcurrentHashMap<>();
 
-    private MqttResp result;
+    private MsgRsp result;
 
-    public void callback(MqttResp result) {
+    public void callback(MsgRsp result) {
         this.result = result;
         latch.countDown();
     }
@@ -41,14 +40,14 @@ public class CallBackTopic implements Callable<MqttResp> {
      *
      * @param result
      */
-    public void callbackSubPackage(MqttResp result) {
+    public void callbackSubPackage(MsgRsp result) {
         int packageNum = result.getPackageNum();
         int packageCount = result.getPackageCount();
         map.put(packageNum, result);
         if (map.size() == packageCount) {
             List<Byte> list = new ArrayList<>();
             for (int i = 0; i < packageCount; i++) {
-                MqttResp resp = map.get(i);
+                MsgRsp resp = map.get(i);
                 list.addAll(Arrays.asList(ArrayUtils.toObject(resp.getBytePayload())));
             }
             Byte[] bytes1 = list.toArray(new Byte[0]);
@@ -62,14 +61,14 @@ public class CallBackTopic implements Callable<MqttResp> {
             if (crc != msgCrc) {
                 logger.error("[{}] stickPackage crc is wrong msgCrc: [{}] resultCrc: [{}]", this.result.getMsgId(), msgCrc, crc);
             }
-            this.result = new MqttResp(result.getMsgId(), payload);
+            this.result = new MsgRsp(result.getMsgId(), payload);
             logger.info("[{}] stickPackage success..{}, {}, {}", this.result.getMsgId(), packageCount, packageNum, crc);
             latch.countDown();
         }
     }
 
     @Override
-    public MqttResp call() throws Exception {
+    public MsgRsp call() throws Exception {
         latch.await();
         return result;
     }
