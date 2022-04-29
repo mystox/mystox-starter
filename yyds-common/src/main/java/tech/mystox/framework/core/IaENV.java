@@ -12,6 +12,7 @@ import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.ServerMsg;
 import tech.mystox.framework.entity.ServerStatus;
+import tech.mystox.framework.scheduler.DefaultMsgScheduler;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
@@ -93,7 +94,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 return mqttMsgScheduler;
             }
             default: {
-                MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
+                MsgScheduler mqttMsgScheduler = new DefaultMsgScheduler();
                 mqttMsgScheduler.build(this);
                 return mqttMsgScheduler;
             }

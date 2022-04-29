@@ -4,17 +4,15 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.core.IaContext;
+import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MqttLogUtil;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.mqtt.config.MqttConfig;
@@ -39,31 +37,29 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 @Service("mqttSenderImpl")
 public class ChannelSenderImpl {
 
+    Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);
     @Value("${mqtt.payload.limit:#{47 * 1024}}")
     private int mqttPayloadLimit;
-    @Autowired
-    IaContext iaContext;
-
-    @Autowired
-    IaConf iaConf;
-
-    Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);
-
     protected static final Map<String, CallSubpackageMsg<MsgRsp>> CALLBACKS = new ConcurrentHashMap<>();
-
-    @Autowired
-    private IMqttSender mqttSender;
 
     @Value("${mqtt.callback.maxCount:10000}")
     private long callbackMaxCount;
+    final IaENV iaEnv;
+    final IaConf iaConf;
+    private final IMqttSender mqttSender;
+    private final MqttLogUtil mqttLogUtil;
+    private final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    @Autowired
-    private MqttLogUtil mqttLogUtil;
-    @Autowired
-    private ThreadPoolTaskExecutor mqttSenderAckExecutor;
+    public ChannelSenderImpl(IaENV iaEnv,IaConf iaConf, IMqttSender mqttSender, MqttLogUtil mqttLogUtil, ThreadPoolTaskExecutor mqttSenderAckExecutor) {
+        this.iaEnv = iaEnv;
+        this.iaConf = iaConf;
+        this.mqttSender = mqttSender;
+        this.mqttLogUtil = mqttLogUtil;
+        this.mqttSenderAckExecutor = mqttSenderAckExecutor;
+    }
 
 
-    public void sendToMqtt(String serverCode, String operaCode, String payload) {
+    public void sendToMqtt(String serverCode, String operaCode, String payload) throws Exception {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
@@ -92,7 +88,7 @@ public class ChannelSenderImpl {
     }
 
 
-    public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) {
+    public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) throws Exception {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
@@ -141,7 +137,7 @@ public class ChannelSenderImpl {
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
                 return false;
             }
-        } catch (MessagingException | InterruptedException e) {
+        } catch (Exception e) {
             mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
@@ -235,7 +231,7 @@ public class ChannelSenderImpl {
     //    ServiceRegistry serviceRegistry;
 
     private boolean isExistsBySubList(String serverCode, String operaCode) /*throws KeeperException, InterruptedException */ {
-        RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
+        RegScheduler regScheduler = iaEnv.getRegScheduler();
         /*if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
            logger.warn("server Slogin to {} jump subList judged...", serverCode);
             return true;

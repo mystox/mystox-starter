@@ -1,11 +1,10 @@
 package tech.mystox.framework.service.Impl;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.service.IaOpera;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -18,8 +17,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class IaOperaImpl implements IaOpera {
-    @Autowired
-    IaContext iaContext;
+    private final IaContext iaContext;
+
+    public IaOperaImpl(IaContext iaContext) {
+        this.iaContext = iaContext;
+    }
+
     @Override
     public MsgResult opera(String operaCode, String msg) {
         return iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(Collections.singletonList(msg)));
@@ -27,7 +30,7 @@ public class IaOperaImpl implements IaOpera {
 
     @Override
     public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit) {
-        return iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(Collections.singletonList(msg)),qos,timeout,timeUnit);
+        return iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(Collections.singletonList(msg)), qos, timeout, timeUnit);
     }
 
     @Override

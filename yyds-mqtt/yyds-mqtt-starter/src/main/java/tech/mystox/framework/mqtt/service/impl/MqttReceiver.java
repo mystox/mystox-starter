@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -24,7 +23,6 @@ import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,19 +58,23 @@ public class MqttReceiver {
     @Value("${mqtt.package.timeout:30}")
     private long packageMsgTimeout;
 
-    @Autowired
+    final
     IaContext iaContext;
     /**
      * 注入发送MQTT的Bean
      */
-    @Resource
-    private IMqttSender iMqttSender;
-    @Autowired
-    ThreadPoolTaskExecutor mqttExecutor;
-    @Autowired
-    private MqttLogUtil mqttLogUtil;
+    private final IMqttSender iMqttSender;
+    private final ThreadPoolTaskExecutor mqttExecutor;
+    private final MqttLogUtil mqttLogUtil;
 
     protected static final Map<String, CallSubpackageMsg<MqttMsg>> CALLBACKS = new ConcurrentHashMap<>();
+
+    public MqttReceiver(IaContext iaContext, IMqttSender iMqttSender, ThreadPoolTaskExecutor mqttExecutor, MqttLogUtil mqttLogUtil) {
+        this.iaContext = iaContext;
+        this.iMqttSender = iMqttSender;
+        this.mqttExecutor = mqttExecutor;
+        this.mqttLogUtil = mqttLogUtil;
+    }
 
 
     public MsgRsp receive(String topic, MqttMsg mqttMsg) {
@@ -99,6 +101,7 @@ public class MqttReceiver {
         return result;
     }
 
+    @SuppressWarnings({"rawtypes"})
     MsgRsp localExecute(String unit, MqttMsg mqttMsg) {
         String[] entity = unit.replace(UnitHead.LOCAL, "").split("/");
         String className = entity[0];
@@ -208,15 +211,8 @@ public class MqttReceiver {
 
     }
 
-
-    public String getAcyBySubList() {
-        return "topic_ack";
-    }
-
-
     @ServiceActivator(inputChannel = MqttConfig.CHANNEL_NAME_IN/*, outputChannel = CHANNEL_NAME_OUT*/)
     public void messageReceiver(Message<String> message) {
-
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
@@ -246,14 +242,13 @@ public class MqttReceiver {
                     if (logger.isDebugEnabled()) e.printStackTrace();
                     MsgRsp result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
                     result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
-                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+                    errorAck(ackTopic, result);
                 } catch (TimeoutException e) {
                     //解包超时
                     logger.error("[{}]Subpackage msg[{}] timeout[{}s]...[{}]", mqttMsg.getMsgId(), mqttMsg.getTopic(), packageMsgTimeout * 3, e.toString());
                     if (logger.isDebugEnabled()) e.printStackTrace();
                     MsgRsp result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
-                    result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
-                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+                    errorAck(ackTopic, result);
                 }
                 if (StringUtils.isBlank(packageMsg)) {
                     //返回空则说明此包为子包废弃
@@ -284,6 +279,17 @@ public class MqttReceiver {
             }
         });
 
+    }
+
+    private void errorAck(String ackTopic, MsgRsp result) {
+        result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
+        try {
+            iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+        } catch (Exception ex) {
+            logger.error("[{}]Return errorAck[{}] message result exception[{}]", result.getMsgId(), ackTopic, ex.toString());
+            if (logger.isDebugEnabled()) ex.printStackTrace();
+            ex.printStackTrace();
+        }
     }
 
     /**

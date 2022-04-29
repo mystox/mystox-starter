@@ -26,9 +26,9 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 public class MqttHandler implements MsgHandler {
     private IaENV iaENV;
     Logger logger = LoggerFactory.getLogger(MqttHandler.class);
-    private ChannelHandlerAck mqttHandlerAck;
-    private ChannelHandlerSub mqttHandlerImpl;
-    private ChannelSenderImpl mqttSenderImpl;
+    protected ChannelHandlerAck mqttHandlerAck;
+    protected ChannelHandlerSub mqttHandlerImpl;
+    protected ChannelSenderImpl mqttSenderImpl;
     private ApplicationContext applicationContext;
 
     public MqttHandler(IaENV iaENV, ApplicationContext applicationContext) {
@@ -37,6 +37,10 @@ public class MqttHandler implements MsgHandler {
         this.mqttHandlerAck = applicationContext.getBean(ChannelHandlerAck.class);
         this.mqttHandlerImpl = applicationContext.getBean(ChannelHandlerSub.class);
         this.mqttSenderImpl = applicationContext.getBean(ChannelSenderImpl.class);
+    }
+
+    public MqttHandler(IaENV iaENV) {
+        this.iaENV = iaENV;
     }
 
     // @Autowired
@@ -105,35 +109,35 @@ public class MqttHandler implements MsgHandler {
         String registerUrl = iaconf.getRegisterUrl();
         RegisterMsg registerMsg = new RegisterMsg();
         //TODO 第三方机构实现注册中心客户端负载均衡
-//        if (!serverName.equals(registerServerName)) {  //非认证服务执行操作
-//            ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
-//                    iaconf.getRouteMark(),iaconf.getPageRoute() ,iaconf.getServerUri(),iaconf.getTitle(), groupCode,iaconf.getMyid());
-//
-//            String sLoginPayload = JSONObject.toJSONString(serverMsg);
-//            MsgResult slogin=null;
-//            do{
-//                    DateUtil.Wait(1000);
-//                    slogin=slogin(preconditionGroupServerCode(GroupCode.ROOT, preconditionServerCode(registerServerName,
-//                        registerServerVersion)), sLoginPayload);
-//                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), slogin.getMsg());
-//                    if ("dev".equals(iaconf.getDevFlag())) {
-//                        logger.warn("environment ${spring.profiles.active} is dev, set registerUrl is [{}]", registerUrl);
-//                    }
-//            }
-//            while(slogin.getStateCode()!=StateCode.SUCCESS);
-//
-//            String msg = slogin.getMsg();
-//            Object parse = JSON.parse(msg);
-//            if (parse instanceof JSONObject) {
-//                registerUrl=((JSONObject) parse).getString("registerUrl");
-//                if (StringUtils.isBlank(registerUrl)) {
-//                    String errorMsg = ((JSONObject) parse).getString("errorMsg");
-//                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), errorMsg);
-//                    return null;
-//                }
-//                logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
-//                }
-//            }
+        //        if (!serverName.equals(registerServerName)) {  //非认证服务执行操作
+        //            ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
+        //                    iaconf.getRouteMark(),iaconf.getPageRoute() ,iaconf.getServerUri(),iaconf.getTitle(), groupCode,iaconf.getMyid());
+        //
+        //            String sLoginPayload = JSONObject.toJSONString(serverMsg);
+        //            MsgResult slogin=null;
+        //            do{
+        //                    DateUtil.Wait(1000);
+        //                    slogin=slogin(preconditionGroupServerCode(GroupCode.ROOT, preconditionServerCode(registerServerName,
+        //                        registerServerVersion)), sLoginPayload);
+        //                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), slogin.getMsg());
+        //                    if ("dev".equals(iaconf.getDevFlag())) {
+        //                        logger.warn("environment ${spring.profiles.active} is dev, set registerUrl is [{}]", registerUrl);
+        //                    }
+        //            }
+        //            while(slogin.getStateCode()!=StateCode.SUCCESS);
+        //
+        //            String msg = slogin.getMsg();
+        //            Object parse = JSON.parse(msg);
+        //            if (parse instanceof JSONObject) {
+        //                registerUrl=((JSONObject) parse).getString("registerUrl");
+        //                if (StringUtils.isBlank(registerUrl)) {
+        //                    String errorMsg = ((JSONObject) parse).getString("errorMsg");
+        //                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), errorMsg);
+        //                    return null;
+        //                }
+        //                logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
+        //                }
+        //            }
         logger.info("{} registerUrl is: [{}]", serverName, registerUrl);
         String[] split = registerUrl.split("://");
         String registerUrlHeader = split[0];
@@ -148,27 +152,27 @@ public class MqttHandler implements MsgHandler {
     }
 
     @Override
-    public void sendToMqtt(String serverCode, String operaCode, String payload) {
-        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
-            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED,"Server status is not online!");
-        mqttSenderImpl.sendToMqtt(serverCode,operaCode,payload);
+    public void sendToMqtt(String serverCode, String operaCode, String payload) throws Exception {
+        if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
+        mqttSenderImpl.sendToMqtt(serverCode, operaCode, payload);
     }
 
     @Override
-    public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) {
-        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
-            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED,"Server status is not online!");
-        mqttSenderImpl.sendToMqtt(serverCode,operaCode,qos,payload);
+    public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) throws Exception {
+        if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
+        mqttSenderImpl.sendToMqtt(serverCode, operaCode, qos, payload);
     }
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
-        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
-            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED,"Server status is not online!");
+        if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
         return mqttSenderImpl.sendToMqttSync(serverCode, operaCode, payload);
-//        return operaTarget(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
-//                iaENV.getLoadBalanceScheduler(),
-//                true, false));
+        //        return operaTarget(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
+        //                iaENV.getLoadBalanceScheduler(),
+        //                true, false));
     }
 
     @Override
@@ -184,8 +188,8 @@ public class MqttHandler implements MsgHandler {
     }
 
     public MsgResult opera(OperaContext context) {
-        if(!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
-            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED,"Server status is not online!");
+        if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
+            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
         String operaCode = context.getOperaCode();
         LoadBalanceScheduler loadBalanceScheduler = iaENV.getLoadBalanceScheduler();
         ServerMsg chooseServer = loadBalanceScheduler.chooseServer(operaCode);
@@ -422,20 +426,24 @@ public class MqttHandler implements MsgHandler {
         try {
             if (!regScheduler.exists(routePath))
                 regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-//        String data = regScheduler.getData(routePath);
-//        List<String> topicArr = JSONArray.parseArray(data, String.class);
+            //        String data = regScheduler.getData(routePath);
+            //        List<String> topicArr = JSONArray.parseArray(data, String.class);
             List<String> topicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
             if (CollectionUtils.isEmpty(topicArr)) {
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
                 List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
-//                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
+                //                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
                 regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
                 topicArr = subTopicArr;
             }
             //全部广播发送
             topicArr.forEach(groupServerCode -> {
-                if (setFlag) mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, qos, msg);
-                else mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, msg);
+                try {
+                    if (setFlag) mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, qos, msg);
+                    else mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, msg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
 
         } catch (Exception e) {

@@ -40,7 +40,7 @@ public interface IMqttSender {
      * @param payload 消息主体
      */
     void sendToMqtt(@Header(MqttHeaders.TOPIC) String topic,
-                    String payload);
+                    String payload) throws Exception;
 
     /**
      * 发送信息到MQTT服务器
@@ -53,7 +53,7 @@ public interface IMqttSender {
      */
     void sendToMqtt(@Header(MqttHeaders.TOPIC) String topic,
                     @Header(MqttHeaders.QOS) int qos,
-                    String payload);
+                    String payload) throws Exception;
 
 
 //    @Gateway(requestChannel = MqttConfig.CHANNEL_NAME_OUT/*,replyChannel = MqttConfig.CHANNEL_REPLY,replyTimeout = 6000*/)
