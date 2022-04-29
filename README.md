@@ -14,7 +14,7 @@
 ## maven安装依赖
 
 windows 环境下执行 baseJar/install.bat
-windows 环境下执行 baseJar/install.sh
+bash 环境下执行 baseJar/install.sh
 ```
 mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-common-$VERSION.jar
 mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-balancer-$VERSION.jar
@@ -37,7 +37,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 <dependency>
     <groupId>tech.mystox.framework</groupId>
     <artifactId>yyds-iarpc-starter</artifactId>
-    <version>2.1.9</version>
+    <version>2.1.10</version>
     <type>pom</type>
 </dependency>
 ```
@@ -48,6 +48,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 ```
 ###########消息框架相关配置#############
 server:
+  address: 127.0.0.1 #对应服务对外暴露的ip/host
   groupCode: GROUP #组编码
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本,可以扩展为 * app
@@ -156,7 +157,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>2.0.5</version>
+        <version>2.1.10</version>
     </dependency>
 ```
 common接口
