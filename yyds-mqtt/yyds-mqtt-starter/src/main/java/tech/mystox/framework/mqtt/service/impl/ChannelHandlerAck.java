@@ -2,7 +2,6 @@ package tech.mystox.framework.mqtt.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.core.MessageProducer;
@@ -30,9 +29,12 @@ public class ChannelHandlerAck {
     @Value("${server.version}")
     private String serverVersion;
 
-    @Autowired
     @Qualifier(value = "replyProducer")
-    private MessageProducer messageProducer;
+    private final MessageProducer messageProducer;
+
+    public ChannelHandlerAck(@Qualifier(value = "replyProducer")MessageProducer replyProducer) {
+        this.messageProducer = replyProducer;
+    }
 
 
     public void addSubTopic(String topic, int qos) {

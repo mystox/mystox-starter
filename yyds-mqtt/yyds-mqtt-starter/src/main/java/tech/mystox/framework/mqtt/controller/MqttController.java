@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,13 +37,16 @@ import java.util.Map;
 public class MqttController {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttController.class);
-    @Autowired
-    IaContext iaContext;
-    @Autowired
-    MqttRestService mqttRestService;
+    final IaContext iaContext;
+    final MqttRestService mqttRestService;
 
     @Opera(operaType = OperaType.Broadcast)
     OperaRouteService operaRouteService;
+
+    public MqttController(IaContext iaContext, MqttRestService mqttRestService) {
+        this.iaContext = iaContext;
+        this.mqttRestService = mqttRestService;
+    }
 
 
     /**
