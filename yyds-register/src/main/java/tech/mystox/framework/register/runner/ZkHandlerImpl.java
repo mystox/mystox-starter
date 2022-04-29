@@ -41,6 +41,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private CountDownLatch latch = new CountDownLatch(1);
     private ZooKeeper zk;
     private final LongAdder longAdder = new LongAdder();
+    private final LongAdder connectErrorCount = new LongAdder();
 
     public ZkHandlerImpl(IaENV iaENV) {
         this.iaENV = iaENV;
@@ -249,7 +250,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 registerWebPriv(this.iaConf.getWebPrivFuncConfig());//注册WEB功能权限
                 registerProvider(subList);//订阅
                 registerConsumerRoute(); //注册路由
-//                iaENV.setServerStatus(ServerStatus.ONLINE);
+                //                iaENV.setServerStatus(ServerStatus.ONLINE);
             }
         } catch (KeeperException | IOException | InterruptedException e) {
             logger.error("register exception... ");
@@ -550,10 +551,21 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public List<String> getChildren(String path) {
         try {
             return zk.getChildren(path, true);
-        } catch (KeeperException | InterruptedException e) {
-            logger.warn("Zookeeper[{}] get child node is no", path, e);
-            //            if (logger.isDebugEnabled())
-            //                e.printStackTrace();
+        } catch (KeeperException.ConnectionLossException e) {
+            logger.error("Zookeeper[{}] get child node error[{}]", path, e.toString());
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            // 十次异常连接 尝试重新注册连接
+            connectErrorCount.add(1);
+            if (connectErrorCount.longValue() > 10) {
+                logger.warn("Zookeeper connect error count[{}], try reconnect...", connectErrorCount.sumThenReset());
+                disconnectedCall();
+            }
+        } catch (InterruptedException | KeeperException e) {
+            logger.warn("Zookeeper[{}] get child node is null[{}]", path, e.toString());
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }

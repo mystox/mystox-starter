@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import tech.mystox.framework.core.ServiceScanner;
 import tech.mystox.framework.entity.ServerName;
 
+import java.util.Properties;
 import java.util.UUID;
 
 @Component
@@ -17,8 +18,9 @@ public class IaConf {
     //    @Qualifier("remotezkHandlerImpl")
     //    RegHandler zkhandlerImpl;
     private String myId = UUID.randomUUID().toString();
+    final ServiceScanner localServiceScanner;
+    final ServiceScanner jarServiceScanner;
 
-    @Autowired
     public IaConf(ServiceScanner localServiceScanner, ServiceScanner jarServiceScanner) {
         this.localServiceScanner = localServiceScanner;
         this.jarServiceScanner = jarServiceScanner;
@@ -52,7 +54,9 @@ public class IaConf {
     public static final int EPHEMERAL_SEQUENTIAL = 3;
 
     public static final String MqttMsgBus = "mqtt";
+    private Properties mqMsgProperties;
     public static final String ZkRegType = "zookeeper";
+    private Properties registerProperties;
 
 
     public enum LoadBalanceType {
@@ -114,8 +118,6 @@ public class IaConf {
     private String routeMark;
     //    @Autowired
     //    ServiceRegistry serviceRegistry;
-    final ServiceScanner localServiceScanner;
-    final ServiceScanner jarServiceScanner;
 
     //    @Autowired
     //    @Qualifier("mqttHandlerAck")
@@ -350,6 +352,22 @@ public class IaConf {
     //    public void setMqttHandlerImpl(MqttHandler mqttHandlerImpl) {
     //        this.mqttHandlerImpl = mqttHandlerImpl;
     //    }
+
+    public Properties getMqMsgProperties() {
+        return mqMsgProperties;
+    }
+
+    public void setMqMsgProperties(Properties mqMsgProperties) {
+        this.mqMsgProperties = mqMsgProperties;
+    }
+
+    public Properties getRegisterProperties() {
+        return registerProperties;
+    }
+
+    public void setRegisterProperties(Properties registerProperties) {
+        this.registerProperties = registerProperties;
+    }
 
     public OperaRouteConfig getOperaRouteConfig() {
         return operaRouteConfig;

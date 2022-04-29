@@ -1,22 +1,24 @@
 package tech.mystox.framework.core;
 
-import tech.mystox.framework.config.IaConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import tech.mystox.framework.config.IaConf;
 
 @Component
 public class IaContext implements ApplicationRunner {
-    @Autowired
-    private IaConf conf;
-    @Autowired
-    private IaENV iaEnv;
-
-    private IaRegister iaRegister;
     private Logger logger = LoggerFactory.getLogger(IaContext.class);
+
+    private final IaConf conf;
+    private final IaENV iaEnv;
+    private IaRegister iaRegister;
+
+    public IaContext(IaConf conf, IaENV iaEnv) {
+        this.conf = conf;
+        this.iaEnv = iaEnv;
+    }
 
     public IaENV getIaENV() {
         return iaEnv;

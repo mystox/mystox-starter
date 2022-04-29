@@ -41,34 +41,36 @@ import static tech.mystox.framework.entity.UnitHead.*;
 public class MqttRestService {
     Logger logger = LoggerFactory.getLogger(MqttRestService.class);
 
-    @Autowired
-    IaContext iaContext;
-
     @Value("${server.name}")
     private String serverName;
 
     @Value("${server.version}")
     private String serverVersion;
 
-    @Value("${server.mark:*}")
-    private String serverMark;
+//    @Value("${server.mark:*}")
+//    private String serverMark;
 
     @Value("${server.groupCode}")
     private String groupCode;
     @Value("${server.name}_${server.version}")
     private String serverCode;
 
-//
-//    @Autowired
-//    RegisterRunner registerRunner;
-//
-//    @Autowired
-//    ServiceRegistry serviceRegistry;
+    final IaContext iaContext;
+    //
+    //    @Autowired
+    //    RegisterRunner registerRunner;
+    //
+    //    @Autowired
+    //    ServiceRegistry serviceRegistry;
 
-    @Autowired
-    ServiceScanner jarServiceScanner;
+    final ServiceScanner jarServiceScanner;
 
     private OperaRouteConfig operaRouteConfig;
+
+    public MqttRestService(IaContext iaContext, ServiceScanner jarServiceScanner) {
+        this.iaContext = iaContext;
+        this.jarServiceScanner = jarServiceScanner;
+    }
 
     @Autowired
     public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
@@ -76,9 +78,9 @@ public class MqttRestService {
     }
 
 
-    public JsonResult registerSub(JSONObject subJson) {
-        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
+    public JsonResult<String> registerSub(JSONObject subJson) {
+        MsgHandler iahander = iaContext.getIaENV().getMsgScheduler().getIaHandler();
+        RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
         String operaCode = subJson.getString("operaCode");
         String executeUnit = subJson.getString("executeUnit");
         String ack = subJson.getString("ack");
@@ -98,9 +100,9 @@ public class MqttRestService {
             if (executeUnit.startsWith(JAR)) {
                 b = jarServiceScanner.addSub(sub);
             } else if (executeUnit.startsWith(LOCAL)) {
-                return new JsonResult("暂未实现" + head, false);
+                return new JsonResult<>("暂未实现" + head, false);
             } else if (executeUnit.startsWith(HTTP)) {
-                return new JsonResult("暂未实现" + head, false);
+                return new JsonResult<>("暂未实现" + head, false);
             }
             regScheduler.setDataToRegistry(sub);
 
@@ -109,17 +111,17 @@ public class MqttRestService {
                 logger.info("add sub topic[{}] to mqtt broker...", topic);
                 iahander.addSubTopic(topic, 2);
             }
-            return new JsonResult("add sub " + (b ? "success" : "false"), b);
+            return new JsonResult<>("add sub " + (b ? "success" : "false"), b);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new JsonResult();
+        return new JsonResult<>();
     }
 
 
-    public JsonResult deleteSub(JSONObject body) {
-        MsgHandler iahander= iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
+    public JsonResult<String> deleteSub(JSONObject body) {
+        MsgHandler iahander = iaContext.getIaENV().getMsgScheduler().getIaHandler();
+        RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
         String operaCode = body.getString("operaCode");
         String path = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         try {
@@ -142,21 +144,21 @@ public class MqttRestService {
                 if (b) {
                     logger.info("delete jar res key");
                 } else {
-                    return new JsonResult("更新jar文件失败", false);
+                    return new JsonResult<>("更新jar文件失败", false);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        String unitHead = body.getString("unitHead");
+        //        String unitHead = body.getString("unitHead");
 
 
-        return new JsonResult();
+        return new JsonResult<>();
     }
 
 
-    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws  InterruptedException, IOException {
-        RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
+    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws InterruptedException, IOException {
+        RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute == null) {
             operaRoute = new LinkedHashMap<>();
@@ -170,17 +172,17 @@ public class MqttRestService {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
-            File file = FileUtils.getFile("./config/operaRoute.yml");
+        File file = FileUtils.getFile("./config/operaRoute.yml");
         try {
 
-            if (!file.exists()) {
+            /*if (!file.exists()) {
                 File directory = new File("./config");
                 if (!directory.exists()) {
                     boolean mkdirs = directory.mkdirs();
                 }
                 boolean newFile = file.createNewFile();
-            }
-//            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+            }*/
+            //            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
             if (!regScheduler.exists(routePath))

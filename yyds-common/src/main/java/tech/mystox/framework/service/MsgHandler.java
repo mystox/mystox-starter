@@ -38,11 +38,11 @@ public interface MsgHandler {
     public RegisterMsg whereIsCentre();
 
     void sendToMqtt(String serverCode, String operaCode,
-                    String payload);
+                    String payload) throws Exception;
 
     void sendToMqtt(String serverCode, String operaCode,
                     int qos,
-                    String payload);
+                    String payload) throws Exception;
 
     MsgResult sendToMqttSync(String serverCode, String operaCode,
                              String payload);
