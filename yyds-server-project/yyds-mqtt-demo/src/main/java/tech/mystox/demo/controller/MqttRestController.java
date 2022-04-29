@@ -41,7 +41,11 @@ public class MqttRestController {
 
     @RequestMapping("/sendMqtt")
     public String sendMqtt(@RequestParam String topic, @RequestBody String message) {
-        iMqttSender.sendToMqtt(topic, message);
+        try {
+            iMqttSender.sendToMqtt(topic, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "ok";
     }
 
@@ -56,7 +60,11 @@ public class MqttRestController {
     public String sendMqtt(@RequestParam String serverCode, @RequestParam String operaCode,
                            @RequestBody String message) {
         MsgHandler msgHandler= iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        msgHandler.sendToMqtt(serverCode, operaCode, message);
+        try {
+            msgHandler.sendToMqtt(serverCode, operaCode, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "ok";
     }
 

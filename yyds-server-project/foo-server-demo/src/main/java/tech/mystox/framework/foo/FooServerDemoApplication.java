@@ -11,6 +11,13 @@ public class FooServerDemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(FooServerDemoApplication.class, args);
+
+
+
+
+
+
+
 	}
 
 }

@@ -19,8 +19,7 @@ public class MqttOperaRestController {
     //    @Autowired
     //    MqttOpera mqttOpera;
 
-    final
-    IaOpera msgHandler;
+    private final IaOpera msgHandler;
 
     @Autowired(required = false)
     public MqttOperaRestController(IaOpera msgHandler) {
