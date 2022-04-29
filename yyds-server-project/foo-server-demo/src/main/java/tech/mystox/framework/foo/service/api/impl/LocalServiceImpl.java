@@ -40,9 +40,9 @@ public class LocalServiceImpl implements LocalService {
     public List<String> helloList(String param) {
         ArrayList<String> strings = new ArrayList<>();
         System.out.println(param);
-        //        strings.add("abc");
-        //        strings.add("123");
-        //        strings.add(serverName);
+        strings.add("abc");
+        strings.add("123");
+        strings.add(serverName);
         return strings;
     }
 
@@ -94,14 +94,14 @@ public class LocalServiceImpl implements LocalService {
 
     @Override
     public String testPackage(String payload) {
-        System.out.println("testPackage receive payload length"+payload.length());
+        System.out.println("testPackage receive payload length" + payload.length());
         StringBuilder sb = new StringBuilder();
         int i = 0;
         while (i < 1024 * 47 * 3) {
             i++;
             sb.append(i).append("+");
         }
-        System.out.println("testPackage"+i);
+        System.out.println("testPackage" + i);
         return sb.toString();
     }
 }

@@ -20,8 +20,8 @@
         <spring-cloud.version>Greenwich.SR6</spring-cloud.version>
         <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
-        <yyds.iarpc.starter.version>2.1.9</yyds.iarpc.starter.version>
-        <revision>2.1.9</revision>
+        <yyds.iarpc.starter.version>2.1.10</yyds.iarpc.starter.version>
+        <revision>2.1.10</revision>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
     </properties>
@@ -55,13 +55,10 @@
             </dependency>
             <dependency>
                 <groupId>tech.mystox.framework</groupId>
-                <artifactId>yyds-iarpc-starter</artifactId>
+                <artifactId>yyds-iarpc-dependencies</artifactId>
                 <version>${yyds.iarpc.starter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>tech.mystox.framework</groupId>
-                <artifactId>yyds-common</artifactId>
-                <version>${yyds.iarpc.starter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
 
@@ -80,5 +77,6 @@
                 </configuration>
             </plugin>
         </plugins>
+
     </build>
 </project>
