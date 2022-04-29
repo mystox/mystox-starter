@@ -64,6 +64,18 @@
 
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <repository>
+            <id>maven-releases</id>
+            <name>Nexus repository</name>
+            <url>http://192.168.0.234:8881/nexus/repository/maven-releases/</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
