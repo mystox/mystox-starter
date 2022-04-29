@@ -5,10 +5,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import tech.mystox.demo.SpringbootYydsMqttDemoApplication;
 import tech.mystox.framework.api.test.EntityService;
 import tech.mystox.framework.api.test.entity.OperaParam;
+import tech.mystox.framework.common.util.SpringContextUtil;
+import tech.mystox.framework.config.IaConf;
+import tech.mystox.framework.core.IaContext;
+import tech.mystox.framework.core.IaENV;
+import tech.mystox.framework.service.IaOpera;
+import tech.mystox.framework.service.Impl.IaOperaImpl;
 import tech.mystox.framework.stereotype.Opera;
 
 //
@@ -63,6 +70,19 @@ public class SpringbootYydsMqttDemoApplicationTest {
         System.out.println(mqttPayloadLimit);
     }
 
+
+    public static void main(String[] args) {
+
+        ApplicationContext applicationContext = SpringContextUtil.getApplicationContext();
+
+        IaENV iaENV = new IaENV();
+        iaENV.createMsgScheduler(IaConf.MqttMsgBus);
+        //创建ia
+        IaConf iaConf = new IaConf(null,null);
+        IaContext iaContext = new IaContext(iaConf,iaENV);
+        IaOpera iaOpera = new IaOperaImpl(iaContext);
+        iaOpera.operaAsync("hello","hello opera");
+    }
 
 //    @MockBean
 //    private MqttConfig mqttConfig;

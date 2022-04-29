@@ -2,8 +2,7 @@ package tech.mystox.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import tech.mystox.framework.stereotype.EnableOpera;
 
 /**
  * Created by mystox on 2021/8/12, 17:51.
@@ -11,11 +10,18 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
  * description:
  * update record:
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class})
+@SpringBootApplication
+@EnableOpera
 public class ServerDemoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ServerDemoApplication.class, args);
+        try {
+            SpringApplication.run(ServerDemoApplication.class, args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            System.exit(0); //退出程序使用0命令优雅退出
+        }
     }
+
 }

@@ -15,7 +15,6 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-common</artifactId>
-            <version>${yyds.iarpc.starter.version}</version>
         </dependency>
     </dependencies>
 
