@@ -21,35 +21,10 @@
     </modules>
     <packaging>pom</packaging>
 
-    <dependencyManagement>
-        <dependencies>
-            <!--<dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yyds-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yyds-mqtt-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yyds-register</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>yyds-balancer</artifactId>
-                <version>${project.version}</version>
-            </dependency>-->
-        </dependencies>
-
-    </dependencyManagement>
-
     <properties>
-        <revision>1.2.9</revision>
+        <revision>1.2.10</revision>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
+        <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
         <!--解决格式提示问题-->
@@ -63,7 +38,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.0.1</version>
+                <version>1.1.0</version>
                 <inherited>true</inherited>
                 <executions>
                     <execution>
@@ -133,35 +108,6 @@
                     </execution>
                 </executions>
             </plugin>
-           <!-- <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            &lt;!&ndash; 项目版本号 &ndash;&gt;
-                            <Project-Version>${project.version}</Project-Version>
-                            &lt;!&ndash; buildnumber插件提供的 SCM(git/svn等)版本号 &ndash;&gt;
-                            <Scm-Version>${buildNumber}</Scm-Version>
-                            &lt;!&ndash; 时间戳 &ndash;&gt;
-                            <Timestamp>${maven.build.timestamp}</Timestamp>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>-->
         </plugins>
     </build>
     <!--<distributionManagement>

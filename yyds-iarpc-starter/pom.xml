@@ -3,10 +3,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>YYDS</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <artifactId>yyds-iarpc-dependencies</artifactId>
         <version>${revision}</version>
-        <relativePath>../yyds-iarpc-dependencies</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>yyds-iarpc-starter</name>
@@ -34,6 +34,11 @@
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-register</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.mystox.framework</groupId>
+            <artifactId>yyds-common</artifactId>
             <version>${revision}</version>
         </dependency>
     </dependencies>

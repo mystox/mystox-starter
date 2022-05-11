@@ -3,10 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>YYDS</artifactId>
         <groupId>tech.mystox.framework</groupId>
-        <artifactId>yyds-iarpc-dependencies</artifactId>
         <version>${revision}</version>
-        <relativePath>../yyds-iarpc-dependencies</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,22 +14,26 @@
     <description>通用包</description>
     <packaging>jar</packaging>
 
-
-
     <properties>
         <java.version>1.8</java.version>
-        <log4j.version>2.9.1</log4j.version>
         <source>1.8</source>
         <target>1.8</target>
-        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
         <main.basedir>${basedir}/..</main.basedir>
     </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -41,30 +44,43 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <scope>compile</scope>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-web</artifactId>-->
+        <!--&lt;!&ndash;            <optional>true</optional>&ndash;&gt;-->
+        <!--            <scope>compile</scope>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-            <version>1.4.4.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>${spring-boot.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.cloud</groupId>-->
+        <!--            <artifactId>spring-cloud-starter-config</artifactId>-->
+        <!--            <optional>true</optional>-->
+        <!--            <scope>compile</scope>-->
+        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
+        <!--            <optional>true</optional>-->
+        <!--            <scope>compile</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-configuration-processor</artifactId>-->
+        <!--&lt;!&ndash;            <version>${spring-boot.version}</version>&ndash;&gt;-->
+        <!--            <optional>true</optional>-->
+        <!--            <scope>compile</scope>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -74,7 +90,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.17</version>
+            <version>1.27</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -87,6 +103,7 @@
             <version>3.8.1</version>
         </dependency>
     </dependencies>
+
     <build>
         <resources>
             <resource>

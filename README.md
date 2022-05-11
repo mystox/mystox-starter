@@ -14,18 +14,20 @@
 ## maven安装依赖
 
 windows 环境下执行 baseJar/install.bat
-windows 环境下执行 baseJar/install.sh
+bash 环境下执行 baseJar/install.sh
 ```
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=1.2.5 -Dpackaging=jar -Dfile=$BASE_DI/yyds-common-1.2.5.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=1.2.5 -Dpackaging=jar -Dfile=$BASE_DI/yyds-balancer-1.2.5.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=1.2.5 -Dpackaging=jar -Dfile=$BASE_DI/yyds-register-1.2.5.jar
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=1.2.5 -Dpackaging=jar -Dfile=$BASE_DI/yyds-mqtt-starter-1.2.5.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-common-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-balancer-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-register-$VERSION.jar
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-mqtt-starter-$VERSION.jar
 
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=1.2.5 -Dpackaging=pom -Dfile=$BASE_DI/yyds-iarpc-starter-1.2.5.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=1.2.5 -Dpackaging=pom -Dfile=$BASE_DI/yyds-common-1.2.5.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=1.2.5 -Dpackaging=pom -Dfile=$BASE_DI/yyds-balancer-1.2.5.xml
-mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=1.2.5 -Dpackaging=pom -Dfile=$BASE_DI/yyds-register-1.2.5.xml
-mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=1.2.5 -Dpackaging=pom -Dfile=$BASE_DI/yyds-mqtt-starter-1.2.5.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-dependencies -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-iarpc-dependencies-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-iarpc-starter -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-iarpc-starter-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-common-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-balancer-$VERSION.xml
+mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-register -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-register-$VERSION.xml
+mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-mqtt-starter -Dversion=$VERSION -Dpackaging=pom -Dfile=$BASE_DIR/yyds-mqtt-starter-$VERSION.xml
+
 ```
 
 
@@ -34,7 +36,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 <dependency>
 	<groupId>tech.mystox.framework</groupId>
 	<artifactId>yyds-iarpc-starter</artifactId>
-	<version>1.2.9</version>
+	<version>1.2.10</version>
 	<type>pom</type>
 </dependency>
 
@@ -46,6 +48,7 @@ mvn install:install-file  -DgeneratePom=true -DgroupId=tech.mystox.framework -Da
 ```
 ###########消息框架相关配置#############
 server:
+  address: 127.0.0.1 #对应服务对外暴露的ip/host
   groupCode: GROUP #组编码
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本,可以扩展为 * app
@@ -154,7 +157,7 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
     <dependency>
         <groupId>tech.mystox.framework</groupId>
         <artifactId>yyds-common</artifactId>
-        <version>1.2.3</version>
+        <version>1.2.10</version>
     </dependency>
 ```
 common接口
