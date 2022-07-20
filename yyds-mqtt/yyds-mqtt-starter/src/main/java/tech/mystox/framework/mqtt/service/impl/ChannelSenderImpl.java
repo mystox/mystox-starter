@@ -50,7 +50,7 @@ public class ChannelSenderImpl {
     private final MqttLogUtil mqttLogUtil;
     private final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    public ChannelSenderImpl(IaENV iaEnv,IaConf iaConf, IMqttSender mqttSender, MqttLogUtil mqttLogUtil, ThreadPoolTaskExecutor mqttSenderAckExecutor) {
+    public ChannelSenderImpl(IaENV iaEnv, IaConf iaConf, IMqttSender mqttSender, MqttLogUtil mqttLogUtil, ThreadPoolTaskExecutor mqttSenderAckExecutor) {
         this.iaEnv = iaEnv;
         this.iaConf = iaConf;
         this.mqttSender = mqttSender;
@@ -180,9 +180,9 @@ public class ChannelSenderImpl {
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
-            logger.error("[{}]message{},{}, request timeout: [{}]", msgId, serverCode, operaCode, e.toString());
+            logger.error("[{}]message{},{}, request timeout: [{}][{}]", msgId, serverCode, operaCode, timeout, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
-            return new MsgResult(StateCode.TIMEOUT, e.toString());
+            return new MsgResult(StateCode.TIMEOUT, timeout + "|" + e.toString());
         } catch (Exception e) {
             mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
             logger.error("[{}]message, request exception: [{}]", msgId, e.toString());

@@ -5,9 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -37,24 +34,17 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 @Lazy
 @Component("baseLoadBalancer")
 @DependsOn("zkRegScheduler")
-public class BaseLoadBalancer implements ApplicationContextAware, LoadBalanceScheduler {
+public class BaseLoadBalancer implements LoadBalanceScheduler {
 
     Logger logger = LoggerFactory.getLogger(BaseLoadBalancer.class);
 
 
-    private ApplicationContext applicationContext;
     private IaENV iaENV;
     private LoadBalancerClient loadBalancerClient;
 
 
     private MsgCall msgCall;
 
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-
-    }
 
     public void initCaller(OperaCall caller) {
     }

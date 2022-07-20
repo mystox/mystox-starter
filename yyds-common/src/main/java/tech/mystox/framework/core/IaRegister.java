@@ -27,7 +27,7 @@ public class IaRegister {
         iaConf= iaEnv.getConf();
         this.msgScheduler = iaEnv.getMsgScheduler();
         this.regScheduler= iaEnv.getRegScheduler();
-        msgScheduler.build(this.iaEnv);
+//        msgScheduler.build(this.iaEnv);
     }
 
     List<RegisterSub> subs;
