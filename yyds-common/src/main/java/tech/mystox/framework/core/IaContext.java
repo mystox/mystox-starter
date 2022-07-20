@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
 
 @Component
-public class IaContext implements ApplicationRunner {
+public class IaContext implements ApplicationRunner, Ordered {
     private Logger logger = LoggerFactory.getLogger(IaContext.class);
 
     private final IaConf conf;
@@ -30,11 +31,17 @@ public class IaContext implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        logger.info("Ia rpc framework run beginning...");
         iaEnv.build(conf);
         iaRegister = new IaRegister(iaEnv);
         iaRegister.connect();
         // iaRegister.subTopic();
         iaRegister.register();
 
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 }
