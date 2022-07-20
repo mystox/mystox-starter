@@ -1,0 +1,23 @@
+{
+  "properties": [
+    {
+      "name": "server.version",
+      "type": "java.lang.String",
+      "description": "Description for server.version."
+    },
+    {
+      "name": "server.groupCode",
+      "type": "java.lang.String",
+      "description": "Description for server.groupCode."
+    },
+    {
+      "name": "server.title",
+      "type": "java.lang.String",
+      "description": "Description for server.title."
+    },
+    {
+      "name": "jarResources.path",
+      "type": "java.lang.String",
+      "description": "Description for jarResources.path."
+    }
+  ] }

@@ -62,7 +62,7 @@ public class CallSubpackageMsg<T extends MsgPackage> implements Callable<T> {
             this.result = msg.getClass().newInstance();
             BeanUtils.copyProperties(msg, this.result);
             result.setPayload(payload);
-            logger.info("[{}] [{}] StickPackage success..size{} count{}",
+            logger.info("[{}] [{}] StickPackage success...size[{}] count[{}]",
                     this.result.getMsgId(), msg.getClass().getSimpleName(), payload.length(), packageCount);
             latch.countDown();
         }
