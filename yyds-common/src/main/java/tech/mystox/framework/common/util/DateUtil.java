@@ -160,11 +160,11 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    public static void Wait(long time)
-    {
-        long referencetime=System.currentTimeMillis();
-        while(System.currentTimeMillis()-referencetime<time) { ; }
-    }
+//    public static void Wait(long time)
+//    {
+//        long referencetime=System.currentTimeMillis();
+//        while(System.currentTimeMillis()-referencetime<time) { ; }
+//    }
 
 
     public static void main(String[] args)
@@ -181,6 +181,6 @@ public class DateUtil {
 //
 //        System.out.println(format.format(DateUtil.getInstance().getFirstDayOfYear(2020)));
 //        System.out.println(format.format(DateUtil.getInstance().getLastDayOfYear(2020)));
-        DateUtil.Wait(3000);
+//        DateUtil.Wait(10000);
     }
 }

@@ -172,18 +172,21 @@ public final class StringUtils {
         }
         return sb == null ? src : sb.toString();
     }
-    public static String toLowerCaseFirstOne(String s){
-        if(Character.isLowerCase(s.charAt(0)))
+
+    public static String toLowerCaseFirstOne(String s) {
+        if (Character.isLowerCase(s.charAt(0)))
             return s;
         else
             return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
     }
-    public static String toUpperCaseFirstOne(String s){
-        if(Character.isUpperCase(s.charAt(0)))
+
+    public static String toUpperCaseFirstOne(String s) {
+        if (Character.isUpperCase(s.charAt(0)))
             return s;
         else
             return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
     }
+
     /**
      * split.
      *
@@ -207,6 +210,7 @@ public final class StringUtils {
             list.add(str.substring(ix));
         return list == null ? EMPTY_STRING_ARRAY : (String[]) list.toArray(EMPTY_STRING_ARRAY);
     }
+
     /**
      * <p>Splits the provided text into an array, separators specified.
      * This is an alternative to using StringTokenizer.</p>
@@ -227,26 +231,27 @@ public final class StringUtils {
      * StringUtils.split("ab:cd:ef", ":") = ["ab", "cd", "ef"]
      * </pre>
      *
-     * @param str  the String to parse, may be null
-     * @param separatorChars  the characters used as the delimiters,
-     *  {@code null} splits on whitespace
+     * @param str            the String to parse, may be null
+     * @param separatorChars the characters used as the delimiters,
+     *                       {@code null} splits on whitespace
      * @return an array of parsed Strings, {@code null} if null String input
      */
     public static String[] split(final String str, final String separatorChars) {
         return splitWorker(str, separatorChars, -1, false);
     }
+
     /**
      * Performs the logic for the {@code split} and
      * {@code splitPreserveAllTokens} methods that return a maximum array
      * length.
      *
-     * @param str  the String to parse, may be {@code null}
-     * @param separatorChars the separate character
-     * @param max  the maximum number of elements to include in the
-     *  array. A zero or negative value implies no limit.
+     * @param str               the String to parse, may be {@code null}
+     * @param separatorChars    the separate character
+     * @param max               the maximum number of elements to include in the
+     *                          array. A zero or negative value implies no limit.
      * @param preserveAllTokens if {@code true}, adjacent separators are
-     * treated as empty token separators; if {@code false}, adjacent
-     * separators are treated as one separator.
+     *                          treated as empty token separators; if {@code false}, adjacent
+     *                          separators are treated as one separator.
      * @return an array of parsed Strings, {@code null} if null String input
      */
     private static String[] splitWorker(final String str, final String separatorChars, final int max, final boolean preserveAllTokens) {
@@ -477,6 +482,46 @@ public final class StringUtils {
             }
         }
         return buf == null ? camelName : buf.toString();
+    }
+
+    // Equals
+    //-----------------------------------------------------------------------
+
+    /**
+     * <p>Compares two CharSequences, returning {@code true} if they represent
+     * equal sequences of characters.</p>
+     *
+     * <p>{@code null}s are handled without exceptions. Two {@code null}
+     * references are considered to be equal. The comparison is case sensitive.</p>
+     *
+     * <pre>
+     * StringUtils.equals(null, null)   = true
+     * StringUtils.equals(null, "abc")  = false
+     * StringUtils.equals("abc", null)  = false
+     * StringUtils.equals("abc", "abc") = true
+     * StringUtils.equals("abc", "ABC") = false
+     * </pre>
+     *
+     * @param cs1 the first CharSequence, may be {@code null}
+     * @param cs2 the second CharSequence, may be {@code null}
+     * @return {@code true} if the CharSequences are equal (case-sensitive), or both {@code null}
+     * @see Object#equals(Object)
+     * @since 3.0 Changed signature from equals(String, String) to equals(CharSequence, CharSequence)
+     */
+    public static boolean equals(final CharSequence cs1, final CharSequence cs2) {
+        if (cs1 == cs2) {
+            return true;
+        }
+        if (cs1 == null || cs2 == null) {
+            return false;
+        }
+        if (cs1.length() != cs2.length()) {
+            return false;
+        }
+        if (cs1 instanceof String && cs2 instanceof String) {
+            return cs1.equals(cs2);
+        }
+        return CharSequenceUtils.regionMatches(cs1, false, 0, cs2, 0, cs1.length());
     }
 
 }

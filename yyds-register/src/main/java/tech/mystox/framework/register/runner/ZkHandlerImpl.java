@@ -15,11 +15,12 @@ import tech.mystox.framework.config.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.*;
+import tech.mystox.framework.exception.RegisterException;
+import tech.mystox.framework.register.utils.DistributedLock;
 import tech.mystox.framework.service.RegHandler;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     private ZooKeeper zk;
     private final LongAdder longAdder = new LongAdder();
     private final LongAdder connectErrorCount = new LongAdder();
+    private DistributedLock registerLock;
 
     public ZkHandlerImpl(IaENV iaENV) {
         this.iaENV = iaENV;
@@ -56,7 +58,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             for (String operaCode : operaCodes) {
                 List<String> subServerArr = operaRoute.get(operaCode);
                 String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-                if (!exists(routePath))
+                if (!exists(routePath, true))
                     create(routePath, JSONArray.toJSONBytes(subServerArr), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 else {
                     setData(routePath, JSONArray.toJSONBytes(subServerArr));
@@ -74,12 +76,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             //获取服务信息并注册至注册中心
             String privPath = TopicPrefix.PRIV_PREFIX + "/" +
                     preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
-            if (exists(privPath))
+            if (exists(privPath, true))
                 setData(privPath, JSONObject.toJSONBytes(privFunc));
             else
                 create(privPath, JSONObject.toJSONBytes(privFunc), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         } else {
-            logger.warn("web privilege function config is null...");
+            logger.warn("Web privilege function config is null...");
         }
         return null;
     }
@@ -99,9 +101,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             try {
                 create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
             } catch (KeeperException | InterruptedException e) {
-                logger.error("set data to registry error [{}]", e.toString());
-                if (logger.isDebugEnabled())
-                    e.printStackTrace();
+                logger.error("Data set to node[{}] registry error", nodePath, e);
             }
         else {
             setData(nodePath, JSONObject.toJSONBytes(sub));
@@ -121,7 +121,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      */
     private void initTree() throws KeeperException, InterruptedException, IOException {
         //创建根
-        if (!exists(TopicPrefix.TOPIC_PREFIX))
+        if (!exists(TopicPrefix.TOPIC_PREFIX, true))
             create(TopicPrefix.TOPIC_PREFIX, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         //订阅列表目录
         initBranch(TopicPrefix.SUB_PREFIX, groupCode);
@@ -144,32 +144,32 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @throws InterruptedException zk中断异常
      */
     void createPath(String topicPrefix, String groupCode, String serverCode) throws KeeperException, InterruptedException {
-        if (!exists(topicPrefix))
+        if (!exists(topicPrefix, true))
             create(topicPrefix, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (StringUtils.isNotBlank(groupCode)) {
             String groupPath = topicPrefix + "/" + groupCode;
-            if (!exists(groupPath))
+            if (!exists(groupPath, true))
                 create(groupPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             if (StringUtils.isNotBlank(serverCode)) {
                 String serverPath = groupPath + "/" + serverCode;
-                if (!exists(serverPath))
+                if (!exists(serverPath, true))
                     create(serverPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
         }
     }
 
     /**
-     * @param topicPrefix
-     * @param groupCode
-     * @throws KeeperException
-     * @throws InterruptedException
+     * @param topicPrefix topic前缀
+     * @param groupCode   组编码前缀
+     * @throws KeeperException      zookeeper异常
+     * @throws InterruptedException 中断异常
      */
     void initBranch(String topicPrefix, String groupCode) throws KeeperException, InterruptedException {
-        if (!exists(topicPrefix))
+        if (!exists(topicPrefix, true))
             create(topicPrefix, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         if (StringUtils.isNotBlank(groupCode)) {
             String groupPath = preconditionGroupServerPath(topicPrefix, groupCode);
-            if (!exists(groupPath))
+            if (!exists(groupPath, true))
                 create(groupPath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
     }
@@ -178,15 +178,15 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 往注册中心注册数据
      *
-     * @param sub
-     * @throws KeeperException
-     * @throws InterruptedException
+     * @param sub 注册订阅数据
+     * @throws KeeperException      zookeeper异常
+     * @throws InterruptedException 中断异常
      */
     public void registeringSub(RegisterSub sub) throws KeeperException, InterruptedException {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
                 preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), operaCode);
-        if (!exists(nodePath))
+        if (!exists(nodePath, true))
             create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
             setData(nodePath, JSONObject.toJSONBytes(sub));
@@ -196,15 +196,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 注销注册中心能力
      *
-     * @param sub
-     * @throws KeeperException
-     * @throws InterruptedException
+     * @param sub 注册订阅数据
      */
     public void unregisteringSub(RegisterSub sub) {
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
                 preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), operaCode);
-        if (exists(nodePath))
+        if (exists(nodePath, false))
             deleteNode(nodePath);
     }
 
@@ -215,7 +213,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
 
-    /**
+    /*
      * @return void
      * @Date 0:22 2020/1/6
      * @Param No such property: code for class: Script1
@@ -231,16 +229,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     /**
      * 注册中心注册节点信息
-     *
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws KeeperException
      */
     public void register() {
         try {
             initTree();//初始化目录信息
-            if (locks()) //获取注册锁
-            {
+            if (locks()) {//获取注册锁
                 //订阅消息能力
                 List<RegisterSub> subList = this.iaENV.getRegScheduler().getSubList();
                 registerMsgAbility(subList);
@@ -253,11 +246,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 //                iaENV.setServerStatus(ServerStatus.ONLINE);
             }
         } catch (KeeperException | IOException | InterruptedException e) {
-            logger.error("register exception... ");
-            e.printStackTrace();
+            logger.error("Register exception... ", e);
+            System.exit(1);
+            //            e.printStackTrace();
         } catch (Exception e) {
-            logger.error("register other exception... ");
-            e.printStackTrace();
+            logger.error("Register other exception... ", e);
+            System.exit(1);
+            //            e.printStackTrace();
         }
     }
 
@@ -272,9 +267,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * //往服务节点注册订阅服务信息
      *
-     * @param subList
-     * @throws KeeperException
-     * @throws InterruptedException
+     * @param subList 注册订阅数据
+     * @throws KeeperException      zookeeper异常
+     * @throws InterruptedException 中断异常
      */
     public void registerProvider(List<RegisterSub> subList) throws KeeperException, InterruptedException {
         for (RegisterSub sub : subList) {//注册provider
@@ -313,37 +308,59 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                         preconditionServerCode(serverName, serverVersion, iaConf.getSequence())));
         // long sessionId = zk.getSessionId();
         // System.out.println(sessionId);
-        while (true) {
-            long sequence = longAdder.longValue();
-            if (iaConf.isDuplicate()) {
-                logger.info("server[{}] is duplicate status append sequence [{}]", preconditionGroupServerCode(groupCode,
+        boolean duplicate = iaConf.isDuplicate();
+        if (duplicate) {
+            while (exists(onlineStatus, true)) {
+                longAdder.add(1);
+                long sequence = longAdder.longValue();
+                iaConf.setSequence(sequence);
+                logger.info("Server[{}] is duplicate status append sequence [{}]", preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), sequence);
                 onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                         preconditionGroupServerCode(groupCode,
                                 preconditionServerCode(serverName, serverVersion, sequence)));
-                iaConf.setSequence(sequence);
-
             }
-            if (exists(onlineStatus)) {
-                iaENV.setServerStatus(ServerStatus.WAITING);
-                if (iaConf.isDuplicate()) longAdder.add(1);
-                logger.warn("server[{}] status is already online ... exits", preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())));
-                //  throw new InterruptedIOException();
-                String nodeData = getData(onlineStatus);
-                ServerMsg nodeMsg = JSONObject.parseObject(nodeData, ServerMsg.class);
-                if (nodeMsg.getMyid().equals(iaConf.getMyId())) {//如果是我，则刷新，不是我，则等待
-                    logger.warn("is mine.....node my id is [{}]", nodeMsg.getMyid());
-                    serverMsg.setSequence(iaConf.getSequence());
-                    setData(onlineStatus, JSONObject.toJSONBytes(serverMsg));
+        } else {
+            iaENV.setServerStatus(ServerStatus.WAITING);
+            if (registerLock.isLocked()) { //重复注册需要判定解锁重新加锁
+                logger.warn("Lock stat is locked unlocking...");
+                registerLock.unlock();
+            }
+            registerLock.lock();
+            boolean interrupted = Thread.currentThread().isInterrupted();
+            if (interrupted) {
+                throw new InterruptedException("Register lock errors happens!!");
+            }
+            Stat exists = zk.exists(onlineStatus, false);
+            if (exists != null) {
+                logger.warn("Server[{}] status is already exits ... recover it!", onlineStatus);
+                //是否应该删除节点再添加注册信息
+                long ephemeralOwner = exists.getEphemeralOwner();
+                long sessionId = zk.getSessionId();
+                if (ephemeralOwner != sessionId) {
+                    logger.warn("Server status path [{}] is not mine, zk: [{}] -> local: [{}] recreate", onlineStatus, ephemeralOwner, sessionId);
+                    recreate(onlineStatus, JSONObject.toJSONBytes(serverMsg));
                     return true;
-                } else
-                    Thread.sleep(1000);
-            } else {
-                serverMsg.setSequence(iaConf.getSequence());
-                create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-                return true;
+                }
             }
         }
+        serverMsg.setSequence(iaConf.getSequence());
+        create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        return true;
+    }
+
+    private void recreate(String path, byte[] data) throws InterruptedException, KeeperException {
+        try {
+            zk.delete(path, -1);
+        } catch (InterruptedException e) {
+            logger.error("Recreate InterruptedException", e);
+            throw e;
+        } catch (KeeperException e) {
+            if (KeeperException.Code.NONODE.equals(e.code())) {
+                logger.warn("Recreate zookeeper node[{}] error, continue...", path, e);
+            }
+        }
+        create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
     }
 
     /**
@@ -354,17 +371,17 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion, iaConf.getSequence())));
-        if (exists(lock)) { //检测锁的情况
+        if (exists(lock, true)) { //检测服務的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX,
                     preconditionGroupServerCode(groupCode,
                             preconditionServerCode(serverName, serverVersion, iaConf.getSequence())));
-            if (!exists(nodeName))
+            if (!exists(nodeName, true))
                 create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
     }
 
-    /**
+    /*
      * 定义Pub节点
      */
     /*public void initConsumer() throws KeeperException, InterruptedException {
@@ -388,11 +405,11 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         String lock = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
                         preconditionServerCode(serverName, serverVersion, iaConf.getSequence())));
-        if (exists(lock)) { //检测锁的情况
+        if (exists(lock, true)) { //检测锁的情况
             String nodeName = preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     preconditionGroupServerCode(groupCode,
                             preconditionServerCode(serverName, serverVersion)));
-            if (!exists(nodeName))
+            if (!exists(nodeName, true))
                 create(nodeName, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
 
@@ -400,9 +417,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
 
     public List<RegisterSub> getRegHttpList() {
-        List<RegisterSub> subList = new ArrayList<>();
+        //        List<RegisterSub> subList = new ArrayList<>();
         //todo 暂不实现
-        return subList;
+        return null;
     }
 
 
@@ -415,13 +432,15 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
     @Override
-    public boolean exists(String nodeData) {
+    public boolean exists(String nodePath) {
+        return exists(nodePath, false);
+    }
+
+    public boolean exists(String nodePath, boolean watch) {
         try {
-            return zk.exists(nodeData, true) != null;
-        } catch (Exception e) {
-            logger.error("zk exists check error...[{}]", e.toString());
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
+            return zk.exists(nodePath, watch) != null;
+        } catch (InterruptedException | KeeperException e) {
+            logger.error("Zookeeper exists check error...", e);
         }
         return false;
     }
@@ -443,14 +462,19 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 CM = CreateMode.PERSISTENT_SEQUENTIAL;
                 break;
         }
-        if (!exists(path))
-            try {
-                zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CM);
-            } catch (KeeperException | InterruptedException e) {
-                logger.warn("Zookeeper path[{}] exists error...", path, e);
-                if (logger.isDebugEnabled())
-                    e.printStackTrace();
-            }
+        try {
+            create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CM);
+        } catch (KeeperException | InterruptedException e) {
+            logger.warn("Zookeeper path[{}] create error...", path, e);
+        }
+        //        if (!exists(path,true))
+        //            try {
+        //                zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CM);
+        //            } catch (KeeperException | InterruptedException e) {
+        //                logger.warn("Zookeeper path[{}] exists error...", path, e);
+        //                if (logger.isDebugEnabled())
+        //                    e.printStackTrace();
+        //            }
     }
 
 
@@ -476,38 +500,41 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
 
     @Override
-    public void connect(String registerUrl) {
+    public void connect(String registerUrl) throws RegisterException {
         try {
             if (zk == null) {
                 zk = new ZooKeeper(registerUrl, iaConf.getRegSessionTimeout(), this);
                 latch.await();
             } else {
                 if (!zk.getState().isAlive()) {
-                    logger.warn("zk state is not alive create new connector...");
+                    logger.warn("Zookeeper state is not alive create new connector...");
                     zk = new ZooKeeper(registerUrl, iaConf.getRegSessionTimeout(), this);
                     latch.await();
                 } else {
-                    logger.warn("zk state is [{}], close zk and create new one...", JSONObject.toJSONString(zk.getState()));
+                    logger.warn("Zookeeper state is [{}], close zk and create new one...", JSONObject.toJSONString(zk.getState()));
                     close();
                     zk = new ZooKeeper(registerUrl, iaConf.getRegSessionTimeout(), this);
                     latch.await();
                 }
             }
-        } catch (IOException | InterruptedException e) {
+            long sessionId = zk.getSessionId();
+            iaConf.setMyId(String.valueOf(sessionId));
+            logger.info("Zookeeper connected state[{}] sessionId[0x{}]", zk.getState(), Long.toHexString(sessionId));
+            if (!iaConf.isDuplicate())
+                this.registerLock = new DistributedLock(registerUrl, iaConf.getRegSessionTimeout(), iaConf.getServerName());
+        } catch (IOException | InterruptedException | KeeperException e) {
             logger.error("Zookeeper connect error", e);
+            throw new RegisterException("Zookeeper connect error", e);
             //            if (logger.isDebugEnabled())
             //                e.printStackTrace();
         }
-        long sessionId = zk.getSessionId();
-        iaConf.setMyId(String.valueOf(sessionId));
-        logger.info("Zookeeper connected state[{}] sessionId[0x{}]", zk.getState(), Long.toHexString(sessionId));
     }
 
 
-    public String create(String path, byte[] data, List<ACL> acl, CreateMode createMode) throws KeeperException, InterruptedException {
-        if (!exists(path))
-            return zk.create(path, data, acl, createMode);
-        else return null;
+    public void create(String path, byte[] data, List<ACL> acl, CreateMode createMode) throws KeeperException, InterruptedException {
+        if (!exists(path, true)) {
+            zk.create(path, data, acl, createMode);
+        }
     }
 
     public String getData(String path) {
@@ -515,13 +542,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         try {
             data = zk.getData(path, true, null);
         } catch (KeeperException e) {
-            //            if ((logger.isDebugEnabled()))
-            //                e.printStackTrace();
-            logger.warn("get data KeeperException error[{}]", path, e);
+            logger.warn("Data get KeeperException error[{}]", path, e);
         } catch (InterruptedException e) {
-            //            if (logger.isDebugEnabled())
-            //                e.printStackTrace();
-            logger.warn("get data InterruptedException error[{}]", path, e);
+            logger.warn("Data get InterruptedException error[{}]", path, e);
         }
         if (data != null)
             return new String(data);
@@ -529,13 +552,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
     public void setData(String path, byte[] data) {
-        Stat stat = null;
+        Stat stat;
         try {
             stat = zk.setData(path, data, -1);
-            logger.debug("zk setData path[{}],stat[{}]", path, stat.toString());
+            logger.debug("Zookeeper setData path[{}],stat[{}]", path, stat.toString());
         } catch (KeeperException | InterruptedException e) {
-            logger.error("zk setData path[{}] error!!", path, e);
-            e.printStackTrace();
+            logger.error("Zookeeper setData path[{}] error!!", path, e);
         }
 
         // return stat;
@@ -550,22 +572,23 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     @Override
     public List<String> getChildren(String path) {
         try {
-            return zk.getChildren(path, true);
-        } catch (KeeperException.ConnectionLossException e) {
-            logger.error("Zookeeper[{}] get child node error[{}]", path, e.toString());
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
+            return zk.getChildren(path, this);
+        } catch (KeeperException.ConnectionLossException | KeeperException.SessionExpiredException e) {
+            logger.error("Zookeeper[{}] get child node error[{}]", path, e);
+            //            if (logger.isDebugEnabled())
+            //                e.printStackTrace();
             // 十次异常连接 尝试重新注册连接
             connectErrorCount.add(1);
-            if (connectErrorCount.longValue() > 10) {
+            if (connectErrorCount.longValue() >= 10) {
                 logger.warn("Zookeeper connect error count[{}], try reconnect...", connectErrorCount.sumThenReset());
+                connectErrorCount.reset();
                 disconnectedCall();
             }
         } catch (InterruptedException | KeeperException e) {
-            logger.warn("Zookeeper[{}] get child node is null[{}]", path, e.toString());
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
-            e.printStackTrace();
+            logger.warn("Zookeeper[{}] get child node is null[{}]", path, e);
+            //            if (logger.isDebugEnabled())
+            //                e.printStackTrace();
+            //            e.printStackTrace();
         }
         return null;
     }
@@ -573,10 +596,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     @Override
     public synchronized void deleteNode(String path) {
         try {
-            if (exists(path))
-                zk.delete(path, -1);
+            if (exists(path)) zk.delete(path, -1);
         } catch (InterruptedException | KeeperException e) {
-            e.printStackTrace();
+            logger.error("Delete node[{}] exception", path, e);
         }
     }
 
@@ -586,48 +608,82 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         this.regCall = regCall;
     }
 
+    boolean serverIsMine(String onlineStatus) {
+        Stat exists;
+        try {
+            exists = zk.exists(onlineStatus, false);
+        } catch (KeeperException | InterruptedException e) {
+            logger.error("Charge serverIsMine zookeeper exception error!!", e);
+            return false;
+        }
+        if (exists != null) {
+            //是否应该删除节点再添加注册信息
+            long ephemeralOwner = exists.getEphemeralOwner();
+            long sessionId = zk.getSessionId();
+            if (ephemeralOwner != sessionId)
+                logger.warn("Server status path data is different zk: [{}] -∞- local: [{}]", ephemeralOwner, sessionId);
+            return ephemeralOwner != sessionId;
+        }
+        return false;
+
+    }
 
     public void process(WatchedEvent watchedEvent) {
+        logger.debug("[{}]Zookeeper trigger event type: [{}] content: [{}] ", Thread.currentThread().getId(), watchedEvent.getType(), watchedEvent);
         Watcher.Event.KeeperState state = watchedEvent.getState();
         Watcher.Event.EventType eventType = watchedEvent.getType();
         String path = watchedEvent.getPath();
+        String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence()));
+        String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupCodeServerCode);
         if (state == Watcher.Event.KeeperState.SyncConnected && latch.getCount() != 0) {
-            logger.info("zk connect successful...");
+            logger.info("Zookeeper connect successful...");
             latch.countDown();
         } else if (Event.EventType.NodeDeleted == eventType) { //监听服务结点被删除事件重建服务结构
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence()));
-            if (iaENV.getServerStatus().equals(ServerStatus.ONLINE)
-                    && StringUtils.equals(path, preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupCodeServerCode))) {
-                logger.warn("serverStatus:" + path + " been delete, try recover...");
+            //如果当前服务状态为在线且注册
+            if (ServerStatus.ONLINE.equals(iaENV.getServerStatus()) && StringUtils.equals(path, onlineStatus)) {
+                logger.warn("serverStatus:" + path + "have been deleted, try recover...");
                 try {
                     regCall.call(RegCall.RegState.RebuildStatus);
                     logger.warn("Node:[{}] recovered...", path);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | RegisterException e) { //重建服务发生异常则升级为重连重建
                     logger.error("Zookeeper rebuild [{}] error...", path, e);
-                    if (logger.isDebugEnabled()) e.printStackTrace();
+                    disconnectedCall();
+                    return;
+                    //                    if (logger.isDebugEnabled()) e.printStackTrace();
                 }
                 if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus())) {
                     disconnectedCall();
-
                 }
 
             }
+        } else if (Event.EventType.NodeDataChanged == eventType || Event.EventType.NodeCreated == eventType) {
+            //如果当前服务状态为在线且注册
+            if (ServerStatus.ONLINE.equals(iaENV.getServerStatus()) && StringUtils.equals(path, onlineStatus)) {
+                //                String nodeData = getData(onlineStatus);
+                //                ServerMsg nodeMsg = JSONObject.parseObject(nodeData, ServerMsg.class);
+
+                if (serverIsMine(onlineStatus)) {
+                    disconnectedCall();
+                }
+            }
+
+
         } else if (state == Watcher.Event.KeeperState.Expired
                 || state == Watcher.Event.KeeperState.Disconnected) {
-            logger.warn("zookeeper Expired|Disconnected event [{}] ...", state);
+            logger.warn("Zookeeper Expired|Disconnected event [{}] ...", state);
             disconnectedCall();
         }
-        logger.debug("Zookeeper trigger event type: [{}] content: [{}] ", watchedEvent.getType(), watchedEvent);
     }
 
     private void disconnectedCall() {
         synchronized (ZkHandlerImpl.class) {
             try {
-                latch = new CountDownLatch(1);
+                if (latch.getCount() == 0)
+                    latch = new CountDownLatch(1);
                 regCall.call(RegCall.RegState.Disconnected);
             } catch (Exception e) {
-                logger.error("zk disconnect error...[{}]", e.toString());
-                if (logger.isDebugEnabled()) e.printStackTrace();
+                logger.error("DisconnectedCall zk disconnect error..", e);
+                //                if (logger.isDebugEnabled()) e.printStackTrace();
             }
         }
 
