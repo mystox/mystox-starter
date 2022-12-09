@@ -35,7 +35,7 @@ public class ConfigController {
     IaContext iaContext;
 //    @Autowired
 //    WebPrivFuncConfig webPrivFuncConfig;
-    @RequestMapping("/getWebPrivFuncTest")
+    @GetMapping("/getWebPrivFuncTest")
     public JsonResult getWebPrivFuncTest() {
         WebPrivFuncConfig webPrivFuncConfig=iaContext.getIaENV().getConf().getWebPrivFuncConfig();
         System.out.println(value);

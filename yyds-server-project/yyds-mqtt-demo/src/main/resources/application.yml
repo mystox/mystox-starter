@@ -30,6 +30,7 @@ logging:
     tech.mystox.framework.mqtt.service.impl.ChannelHandlerAck: info
     #    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
     tech.mystox.framework.register.service.ZkRegScheduler: info
+    tech.mystox.framework.register.utils.DistributedLock: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
