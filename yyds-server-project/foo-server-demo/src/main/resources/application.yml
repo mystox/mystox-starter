@@ -17,7 +17,7 @@ jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
 register:
   scanBasePackage: tech.mystox.framework #默认配置tech.mystox.framework 如果项目的包名不一致需要手动配置
-  isDuplicate: true #是否可以重复注册
+  isDuplicate: false #是否可以重复注册
 
 ###########日志配置###########
 logging:
