@@ -20,6 +20,7 @@ import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -89,7 +90,18 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
             List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
             //            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
-            regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
+            String data = regScheduler.getData(routePath);
+            List<String> exists = JSONArray.parseArray(data, String.class);
+            if (CollectionUtils.isEmpty(exists)) {
+                setRouteMap(routePath, subTopicArr);
+            } else {
+                exists.sort(Comparator.comparing(String::hashCode));
+                subTopicArr.sort(Comparator.comparing(String::hashCode));
+                if (!exists.toString().equals(subTopicArr.toString())) {
+                    setRouteMap(routePath, subTopicArr);
+                }
+            }
+
             topicArr = subTopicArr;
         }
         //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
@@ -129,6 +141,11 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         return null;
     }
 
+    void setRouteMap(String routePath, List<String> subTopicArr) {
+        logger.info("Route map set [{}] data {}", routePath, subTopicArr);
+        RegScheduler regScheduler = iaENV.getRegScheduler();
+        regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
+    }
 
     @Override
     public void markServerDown(String ser) {
