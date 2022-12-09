@@ -38,7 +38,7 @@
 - 一些代码结构autowired注入的一些结构调整以符合实例化风格,及其日志显示的修改,消息通讯异常枚举优化，及其一些日志优化
 - 注册逻辑的一些优化修改,iaEnv设置serverMsg对象
 - 添加jar包(非服务包)调用消息框架的实例实现demo，参考模块yyds-server-example
-##2.0.11
+##2.1.11
 - 重复注册锁修改为zk分布式锁, 重复标记isDuplicate=true启动流程重构
 - 负载均衡路由表更新的优化
 - fastjson upgrade to 2.0.21
