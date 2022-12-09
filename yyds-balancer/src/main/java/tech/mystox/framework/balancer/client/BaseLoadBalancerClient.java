@@ -53,10 +53,10 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
         try {
             RegScheduler regScheduler = iaENV.getRegScheduler();
             RegCall.RegState state = regScheduler.getState();
-//            if (RegCall.RegState.SyncConnected != state) {
-//                logger.debug("register state is not connected ...");
-//                return;
-//            }
+            //            if (RegCall.RegState.SyncConnected != state) {
+            //                logger.debug("register state is not connected ...");
+            //                return;
+            //            }
             ServerStatus serverStatus = iaENV.getServerStatus();
             if (!ServerStatus.ONLINE.equals(serverStatus)) {
                 logger.debug("server state is[{}] not connected ...", serverStatus);
@@ -76,16 +76,20 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     String routePath = preconditionRoutePath(groupServerCode, operaCode);
                     //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
                     List<String> operaRouteArr = new ArrayList<>();
-                    if (localOperaRouteMap !=null && localOperaRouteMap.containsKey(operaCode)) {
+                    if (localOperaRouteMap != null && localOperaRouteMap.containsKey(operaCode)) {
                         operaRouteArr = localOperaRouteMap.get(operaCode);
-                        regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                        String data = regScheduler.getData(routePath);
+                        List<String> exists = JSONArray.parseArray(data, String.class);
+                        if (!CollectionUtils.listEqual(exists, operaRouteArr)) {
+                            logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
+                            regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                        }
                     } else {
                         operaRouteArr = regScheduler.buildOperaMap(operaCode);
                         String data = regScheduler.getData(routePath);
                         if (StringUtils.isNotEmpty(data)) {
                             List<String> registerRoute = JSONArray.parseArray(data, String.class);
-                            if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute))//判断路由是否发生变化，变化则更新
-                            {
+                            if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute)) {//判断路由是否发生变化，变化则更新
                                 logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
                                 regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
                             }
