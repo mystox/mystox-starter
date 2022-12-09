@@ -4,6 +4,7 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.ServerStatus;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import org.slf4j.Logger;
@@ -56,8 +57,7 @@ public class IaRegister {
         this.msgScheduler.subTopic(subList);
 
     }
-    public void connect()
-    {
+    public void connect() throws RegisterException {
         registerMsg=this.msgScheduler.getIaHandler().whereIsCentre();
         this.iaConf.setRegisterUrl(registerMsg.getRegistURI());
         this.regScheduler.connect(registerMsg.getRegisterUrl());

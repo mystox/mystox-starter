@@ -1,6 +1,6 @@
 package tech.mystox.demo;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import tech.mystox.framework.api.test.LocalService;
@@ -27,12 +27,12 @@ public class TaskService  implements CommandLineRunner {
         System.out.println("开始执行任务...");
         IaContext bean1 = SpringContextUtil.getBean(IaContext.class);
         MsgResult hello = bean1.getIaENV().getMsgScheduler().getIaHandler().opera("hello", "");
-        System.out.println(JSONObject.toJSONString(hello));
+        System.out.println(JSON.toJSONString(hello));
         IaOpera bean = SpringContextUtil.getBean(IaOpera.class);
         MsgResult opera = bean.opera("sayHi", "hihihihihi");
-        System.out.println(JSONObject.toJSONString(opera));
+        System.out.println(JSON.toJSONString(opera));
         List<String> helloList = localService.helloList("helloList");
-        System.out.println("helloList:"+JSONObject.toJSONString(helloList));
+        System.out.println("helloList:"+JSON.toJSONString(helloList));
     }
 
 }

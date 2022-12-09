@@ -4,8 +4,8 @@ package tech.mystox.framework.scheduler;
 import tech.mystox.framework.config.WebPrivFuncConfig;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.OperaResult;
-import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.exception.RegisterException;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public interface RegScheduler extends Schedule {
 
     public void setDataToRegistry(RegisterSub sub) ;
 
-    public void connect(String url);
+    public void connect(String url) throws RegisterException;
 
     public RegCall.RegState getState();
 

@@ -12,6 +12,7 @@ import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.ServerMsg;
 import tech.mystox.framework.entity.ServerStatus;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.DefaultMsgScheduler;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.MsgScheduler;
@@ -58,14 +59,13 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public boolean setServerStatus(ServerStatus serverStatus) {
         switch (serverStatus) {
             case ONLINE: {//切换至在线状态
-                logger.info("server status is [{}]", serverStatus);
                 this.serverStatus = serverStatus;
                 break;
             }
             case UNREGISTER: { //注销状态
                 this.serverStatus = serverStatus;
             }
-            case RESTARTING:{ //重启命令 在注销状态和启动状态时 不修改状态
+            case RESTARTING: { //重启命令 在注销状态和启动状态时 不修改状态
                 if (getServerStatus().equals(ServerStatus.UNREGISTER)
                         || getServerStatus().equals(ServerStatus.STARTING)) {
                     return false;
@@ -74,6 +74,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
             default:
                 this.serverStatus = serverStatus;
         }
+        logger.info("Server status is [{}]", serverStatus);
         return true;
     }
 
@@ -135,13 +136,13 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public String getMsgBus(IaConf conf) {
         return conf.getMsgBusType();
     }
-//    public MsgScheduler createMsgScheduler(String regType)
-//    {
-//        switch (regType) {
-//            case MqttMsgBus :{this.MsgScheduler.build(this.conf);return this.MsgScheduler};
-//            default: return this.MsgScheduler.build(this.conf);
-//        }
-//    }
+    //    public MsgScheduler createMsgScheduler(String regType)
+    //    {
+    //        switch (regType) {
+    //            case MqttMsgBus :{this.MsgScheduler.build(this.conf);return this.MsgScheduler};
+    //            default: return this.MsgScheduler.build(this.conf);
+    //        }
+    //    }
 
     public RegScheduler getRegScheduler() {
         return regScheduler;
@@ -168,18 +169,19 @@ public class IaENV implements ApplicationContextAware, RegCall {
 
 
     @Override
-    public void call(RegState state) throws InterruptedException {
+    public void call(RegState state) throws RegisterException {
         switch (state) {
             case Disconnected: {
                 setServerStatus(ServerStatus.OFFLINE);
-                logger.error("[operaCall] disconnected...");
+                logger.warn("[operaCall] Register Disconnected...");
                 List<RegisterSub> subList = this.regScheduler.getSubList();
-                logger.warn("[operaCall] cancellation msg-schedule sub session");
+                logger.warn("[operaCall] Cancel msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
                 RegisterMsg registerMsg = this.msgScheduler.getIaHandler().whereIsCentre();
                 getConf().setRegisterUrl(registerMsg.getRegistURI());
+                logger.warn("[operaCall] Register reconnected [{}]", registerMsg.getRegisterUrl());
                 this.regScheduler.connect(registerMsg.getRegisterUrl());
-                logger.warn("[operaCall] register reconnected [{}]", registerMsg.getRegisterUrl());
+                logger.warn("[operaCall] Register waiting for rebuilding");
                 this.regScheduler.register();
                 this.msgScheduler.subTopic(subList);
                 setServerStatus(ServerStatus.ONLINE);
@@ -187,12 +189,12 @@ public class IaENV implements ApplicationContextAware, RegCall {
             }
 
             case RebuildStatus: {
-                setServerStatus(ServerStatus.STARTING);
-                logger.error("[operaCall] register rebuild");
+                setServerStatus(ServerStatus.RESTARTING);
+                logger.warn("[operaCall] Register rebuilding");
                 List<RegisterSub> subList = this.regScheduler.getSubList();
-                logger.warn("[operaCall] cancellation msg-schedule sub session");
+                logger.warn("[operaCall] Cancel msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                logger.warn("[operaCall] register offline, waiting for rebuild");
+                logger.warn("[operaCall] Register waiting for rebuilding");
                 getRegScheduler().register();
                 this.msgScheduler.subTopic(subList);
                 setServerStatus(ServerStatus.ONLINE);

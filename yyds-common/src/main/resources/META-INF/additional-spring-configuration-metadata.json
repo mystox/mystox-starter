@@ -8,57 +8,72 @@
     {
       "name": "server.groupCode",
       "type": "java.lang.String",
-      "description": "Description for server.groupCode."
+      "description": "服务组编码."
+    },
+    {
+      "name": "server.host",
+      "type": "java.lang.String",
+      "description": "服务启动环境hostname."
     },
     {
       "name": "server.version",
       "type": "java.lang.String",
-      "description": "Description for server.version."
+      "description": "服务版本."
     },
     {
       "name": "server.name",
       "type": "java.lang.String",
-      "description": "Description for server.name."
+      "description": "服务名称编码."
     },
     {
       "name": "jarResources.path",
       "type": "java.lang.String",
-      "description": "Description for jarResources.path."
+      "description": "服务jar能力文件路径地址url."
     },
     {
       "name": "register.url",
       "type": "java.lang.String",
-      "description": "Description for register.url."
+      "description": "注册中心地址."
     },
     {
       "name": "register.sessionTimeout",
       "type": "java.lang.String",
-      "description": "Description for register.sessionTimeout."
+      "description": "注册会话超时时间（毫秒）."
+    },
+    {
+      "name": "register.isDuplicate",
+      "type": "java.lang.String",
+      "description": "服务注册是否允许多服务重复注册默认false."
+    },
+    {
+      "name": "register.scanBasePackage",
+      "type": "java.lang.String",
+      "description": "注册opera扫描包路径."
     },
     {
       "name": "mqtt.username",
       "type": "java.lang.String",
-      "description": "Description for mqtt.username."
+      "description": "消息中间件用户名."
     },
     {
       "name": "mqtt.password",
       "type": "java.lang.String",
-      "description": "Description for mqtt.password."
+      "description": "消息中间件密码."
     },
     {
       "name": "mqtt.url",
       "type": "java.lang.String",
-      "description": "Description for mqtt.url."
+      "description": "消息中间件地址."
     },
     {
       "name": "mqtt.maxInflight",
       "type": "java.lang.String",
-      "description": "Description for mqtt.maxInflight."
+      "description": "消息最大处理消息树，默认值100."
     },
     {
       "name": "executor.threadPool.corePoolSize",
       "type": "java.lang.String",
-      "description": "Description for executor.threadPool.corePoolSize."
+      "description": "执行线程池核心线程树."
     }
   ]
 }

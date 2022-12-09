@@ -1,11 +1,8 @@
 package tech.mystox.framework.mqtt.config;
 
-import tech.mystox.framework.config.YamlPropertySourceFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,6 +18,7 @@ import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannel
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import tech.mystox.framework.config.YamlPropertySourceFactory;
 
 /**
  * Created by mystoxlol on 2019/8/5, 14:35.
@@ -33,7 +31,6 @@ import org.springframework.messaging.MessageHandler;
 @ComponentScan("tech.mystox.framework")
 @PropertySource(factory = YamlPropertySourceFactory.class, value = {"classpath:mqtt.yml"})
 public class MqttConfig {
-    private static final Logger logger = LoggerFactory.getLogger(MqttConfig.class);
     private static final byte[] WILL_DATA;
 
     static {
