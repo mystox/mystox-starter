@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
+import tech.mystox.framework.exception.RegisterException;
 
 @Component
 public class IaContext implements ApplicationRunner, Ordered {
@@ -30,7 +31,7 @@ public class IaContext implements ApplicationRunner, Ordered {
     }
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(ApplicationArguments args) throws RegisterException {
         logger.info("Ia rpc framework run beginning...");
         iaEnv.build(conf);
         iaRegister = new IaRegister(iaEnv);

@@ -1,7 +1,7 @@
 package tech.mystox.framework.mqtt.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,15 +186,15 @@ public class MqttRestService {
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
             if (!regScheduler.exists(routePath))
-                regScheduler.create(routePath, JSONArray.toJSONBytes(subGroupServerList), IaConf.EPHEMERAL);
+                regScheduler.create(routePath, JSON.toJSONBytes(subGroupServerList), IaConf.EPHEMERAL);
             else
-                regScheduler.setData(routePath, JSONArray.toJSONBytes(subGroupServerList));
+                regScheduler.setData(routePath, JSON.toJSONBytes(subGroupServerList));
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         } finally {
             operaRoute.put(operaCode, oldServerArr);
-            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+            yaml.dump(JSON.toJSON(operaRouteConfig), new FileWriter(file));
         }
 
     }

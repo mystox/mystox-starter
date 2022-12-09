@@ -1,5 +1,7 @@
 package tech.mystox.framework.core;
 
+import tech.mystox.framework.exception.RegisterException;
+
 public interface RegCall {
     // public  final static int Unknown=-1;
     // public  final static int Disconnected=0;
@@ -10,7 +12,7 @@ public interface RegCall {
     // public  final static int SaslAuthenticated=6;
     // public  final static int RebuildStatus =10;
     // public  final static int Expired=-112;
-    public void call(RegState code) throws InterruptedException;
+    public void call(RegState code) throws InterruptedException, RegisterException;
 
 
 
