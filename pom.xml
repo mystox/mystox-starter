@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>1.2.10</revision>
+        <revision>1.2.11</revision>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
