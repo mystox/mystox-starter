@@ -1,8 +1,8 @@
 title install-common
 set BASE_DIR=%~dp0
-set DEPLOY_URL=http://192.168.0.234:8881/nexus/repository/maven-releases/
+set DEPLOY_URL=http://nexus.mystox.tech:8881/repository/maven-releases/
 set REPOSITORY_Id=releases
-set VERSION=2.0.10
+set VERSION=2.0.11
 
 call mvn deploy:deploy-file -DrepositoryId=%REPOSITORY_Id% -Durl=%DEPLOY_URL% -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-common-%VERSION%.jar
 call mvn deploy:deploy-file -DrepositoryId=%REPOSITORY_Id% -Durl=%DEPLOY_URL% -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-balancer-%VERSION%.jar
