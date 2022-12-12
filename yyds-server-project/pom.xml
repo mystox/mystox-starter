@@ -18,6 +18,7 @@
     <properties>
         <spring-boot.version>1.5.14.RELEASE</spring-boot.version>
         <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
+        <fastjson.version>2.0.21</fastjson.version>
         <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
         <yyds.iarpc.starter.version>1.2.11</yyds.iarpc.starter.version>
