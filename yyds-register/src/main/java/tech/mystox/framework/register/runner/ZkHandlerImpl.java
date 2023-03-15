@@ -199,6 +199,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
      * @param sub 注册订阅数据
      */
     public void unregisteringSub(RegisterSub sub) {
+        if (!zk.getState().isAlive()) return;
         String operaCode = sub.getOperaCode();
         String nodePath = MqttUtils.preconditionSubTopicId(
                 preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), operaCode);
@@ -208,6 +209,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     @Override
     public void unregister() {
+        if (!zk.getState().isAlive()) return;
         List<RegisterSub> subList = iaENV.getRegScheduler().getSubList();
         unregisterProvider(subList); //清除服务注册表
     }
