@@ -102,6 +102,10 @@ public class IaENV implements ApplicationContextAware, RegCall {
         }
     }
 
+    public MsgScheduler createMsgScheduler() {
+        return createMsgScheduler("");
+    }
+
     public RegScheduler createRegScheduler(String regType) {
         switch (regType) {
             case IaConf.ZkRegType: {
@@ -182,7 +186,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 logger.warn("[operaCall] Register reconnected [{}]", registerMsg.getRegisterUrl());
                 this.regScheduler.connect(registerMsg.getRegisterUrl());
                 logger.warn("[operaCall] Register waiting for rebuilding");
-                this.regScheduler.register();
+                this.regScheduler.reRegister();
                 this.msgScheduler.subTopic(subList);
                 setServerStatus(ServerStatus.ONLINE);
                 break;
@@ -195,7 +199,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 logger.warn("[operaCall] Cancel msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
                 logger.warn("[operaCall] Register waiting for rebuilding");
-                getRegScheduler().register();
+                getRegScheduler().reRegister();
                 this.msgScheduler.subTopic(subList);
                 setServerStatus(ServerStatus.ONLINE);
                 break;

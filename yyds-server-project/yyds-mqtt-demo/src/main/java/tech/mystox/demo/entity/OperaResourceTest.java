@@ -1,6 +1,6 @@
 package tech.mystox.demo.entity;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 
 /**
  * \* @Author: mystox

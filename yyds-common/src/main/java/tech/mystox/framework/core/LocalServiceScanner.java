@@ -1,7 +1,7 @@
 package tech.mystox.framework.core;
 
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.ArrayUtils;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,7 +23,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.entity.AckEnum;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.UnitHead;
@@ -116,7 +115,7 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner, 
                             Type genericReturnType = method.getGenericReturnType();
                             sub.setAck("void".equals(genericReturnType.getTypeName()) ? AckEnum.NA : AckEnum.ACK);
                             Class<?>[] parameterTypes = method.getParameterTypes();
-                            sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName() + "/" + JSONObject.toJSON(parameterTypes));
+                            sub.setExecuteUnit(UnitHead.LOCAL + className + "/" + method.getName() + "/" + JSON.toJSON(parameterTypes));
                             sub.setOperaCode(code);
                             if (operaSet.contains(code)) throw new RegisterAnalyseException("opera duplicate:" + code);
                             operaSet.add(code);

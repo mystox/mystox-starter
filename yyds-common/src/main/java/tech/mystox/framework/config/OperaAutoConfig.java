@@ -4,12 +4,10 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import tech.mystox.framework.entity.OperaBean;
 import tech.mystox.framework.entity.OperaClassIdBean;
 import tech.mystox.framework.stereotype.Opera;
@@ -28,9 +26,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OperaAutoConfig {
     private static final Map<OperaClassIdBean, Object> OPERA_CONSUMER_MAP =
             new ConcurrentHashMap<OperaClassIdBean, Object>();
-    @Autowired
-    private ApplicationContext applicationContext;
 
+    private final ApplicationContext applicationContext;
+
+    public OperaAutoConfig(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     public static Object getOperaBean(OperaClassIdBean classIdBean) {
         return OPERA_CONSUMER_MAP.get(classIdBean);
@@ -109,7 +110,7 @@ public class OperaAutoConfig {
         operaBean.setInterface(field.getType());
         // }
 
-        Environment environment = this.applicationContext.getEnvironment();
+//        Environment environment = this.applicationContext.getEnvironment();
         // String application = opera.application();
         // operaBean.setApplication(this.parseApplication(application, this.properties, environment,
         //         beanName, field.getName(), "application", application));

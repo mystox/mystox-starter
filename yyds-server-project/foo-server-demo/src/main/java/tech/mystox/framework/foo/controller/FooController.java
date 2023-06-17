@@ -1,6 +1,6 @@
 package tech.mystox.framework.foo.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import tech.mystox.framework.api.test.PerformanceService;
 import tech.mystox.framework.entity.JsonResult;
 import org.springframework.beans.factory.annotation.Autowired;

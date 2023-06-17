@@ -1,24 +1,22 @@
 package tech.mystox.framework.register.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.cloud.context.environment.EnvironmentManager;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.refresh.ContextRefresher;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import tech.mystox.framework.config.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.OperaResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

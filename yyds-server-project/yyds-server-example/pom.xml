@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
+            <artifactId>fastjson2</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
 <!--        <dependency>-->

@@ -1,8 +1,8 @@
 package tech.mystox.framework.proxy;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONValidator;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONValidator;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.OperaContext;
@@ -19,19 +19,19 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 public class OperaSyncInterceptor extends OperaBaseInterceptor {
-    private IaContext iaContext;
-
-    public OperaSyncInterceptor(IaContext iaContext) {
-        this.iaContext = iaContext;
-    }
 
     private long timeout;
 
     private TimeUnit timeUnit;
 
+    public OperaSyncInterceptor(IaContext iaContext) {
+        super(iaContext);
+    }
+
     @Override
     public Object opera(
             String operaCode, Object[] arguments, Type genericReturnType) {
+        IaContext iaContext = super.getIaContext();
         MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
                         iaContext.getIaENV().getLoadBalanceScheduler(),
@@ -41,7 +41,6 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         String msg = opera.getMsg();
         return deserialize(msg, genericReturnType);
     }
-
 
     public long getTimeout() {
         return timeout;
@@ -140,12 +139,12 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
     }*/
 
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         String msg = "[{\"code\":11,\"list\":[{\"$ref\":\"..\"}],\"result\":\"11111111111\"},{\"$ref\":\"$[0]\"}]";
         boolean validate = JSONValidator.from(msg).validate();
         System.out.println(validate);
         msg = "111";
         Integer integer = JSON.parseObject(msg, Integer.class);
         System.out.println(integer);
-    }
+    }*/
 }

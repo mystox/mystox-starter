@@ -39,6 +39,11 @@ public class ZkRegScheduler implements  RegScheduler {
     public void register() {
         regHandler.register();
     }
+    @Override
+    public void reRegister() {
+        regHandler.register();
+    }
+
 
     @Override
     public void unregister() {

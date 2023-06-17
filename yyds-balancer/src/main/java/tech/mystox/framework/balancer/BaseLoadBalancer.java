@@ -1,7 +1,8 @@
 package tech.mystox.framework.balancer;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,13 +86,13 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         //        String data = regScheduler.getData(routePath);
         //        List<String> topicArr = JSONArray.parseArray(data, String.class);
         List<String> topicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
-        if (CollectionUtils.isEmpty(topicArr)) {
+        if (CollectionUtils.isEmpty(topicArr)) { //路由表为空，则新建路由表
             //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
             List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
             //            List<String> subTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             logger.debug("build opera map is {}", subTopicArr);
             String data = regScheduler.getData(routePath);
-            List<String> exists = JSONArray.parseArray(data, String.class);
+            List<String> exists = JSON.parseArray(data, String.class);
             if (CollectionUtils.isEmpty(exists)) {
                 setRouteMap(routePath, subTopicArr);
             } else {
@@ -144,7 +145,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     void setRouteMap(String routePath, List<String> subTopicArr) {
         logger.info("Route map set [{}] data {}", routePath, subTopicArr);
         RegScheduler regScheduler = iaENV.getRegScheduler();
-        regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
+        regScheduler.setData(routePath, JSON.toJSONBytes(subTopicArr));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package tech.mystox.framework.balancer.client;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.mystox.framework.common.util.CollectionUtils;
@@ -27,7 +27,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 /**
  * Created by mystoxlol on 2020/6/17, 10:29.
  * company:
- * description:
+ * description: 内存存放的路由表信息
  * update record:
  */
 public class BaseLoadBalancerClient extends CommonExecutorConfig implements LoadBalancerClient {
@@ -79,19 +79,19 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     if (localOperaRouteMap != null && localOperaRouteMap.containsKey(operaCode)) {
                         operaRouteArr = localOperaRouteMap.get(operaCode);
                         String data = regScheduler.getData(routePath);
-                        List<String> exists = JSONArray.parseArray(data, String.class);
+                        List<String> exists = JSON.parseArray(data, String.class);
                         if (!CollectionUtils.listEqual(exists, operaRouteArr)) {
                             logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
-                            regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                            regScheduler.setData(routePath, JSON.toJSONBytes(operaRouteArr));
                         }
                     } else {
                         operaRouteArr = regScheduler.buildOperaMap(operaCode);
                         String data = regScheduler.getData(routePath);
                         if (StringUtils.isNotEmpty(data)) {
-                            List<String> registerRoute = JSONArray.parseArray(data, String.class);
+                            List<String> registerRoute = JSON.parseArray(data, String.class);
                             if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute)) {//判断路由是否发生变化，变化则更新
                                 logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
-                                regScheduler.setData(routePath, JSONArray.toJSONBytes(operaRouteArr));
+                                regScheduler.setData(routePath, JSON.toJSONBytes(operaRouteArr));
                             }
                         }
 
@@ -100,7 +100,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
                 });
             }
-            this.operaRouteMap = operaMap;
+            setOperaRouteMap(operaMap);
         } catch (Exception e) {
             if (logger.isDebugEnabled()) e.printStackTrace();
             logger.error("base load balancer error [{}]", e.toString());

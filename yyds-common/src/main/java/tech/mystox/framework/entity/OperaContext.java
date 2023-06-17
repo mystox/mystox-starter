@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
  * update record:
  */
 public class OperaContext {
+    private String groupCode; //组编码
     private String operaCode;
     private String msg;
     private int qos;
@@ -19,11 +20,11 @@ public class OperaContext {
     private LoadBalanceScheduler loadBalanceScheduler;
     private boolean setFlag;//context个性化标签
     private boolean async;
-
-    public OperaContext() {
-    }
-
     public OperaContext(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, LoadBalanceScheduler loadBalanceScheduler, boolean setFlag, boolean async) {
+        this(null, operaCode, msg, qos, timeout, timeUnit, loadBalanceScheduler, setFlag, async);
+    }
+    public OperaContext(String groupCode, String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, LoadBalanceScheduler loadBalanceScheduler, boolean setFlag, boolean async) {
+        this.groupCode = groupCode;
         this.operaCode = operaCode;
         this.msg = msg;
         this.qos = qos;
@@ -32,6 +33,14 @@ public class OperaContext {
         this.loadBalanceScheduler = loadBalanceScheduler;
         this.setFlag = setFlag;
         this.async = async;
+    }
+
+    public String getGroupCode() {
+        return groupCode;
+    }
+
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
     }
 
     public String getOperaCode() {

@@ -1,3 +1,6 @@
+spring:
+  profiles:
+    active: dev
 server:
   groupCode: ROOT
   name: TASK_JAR_NAME

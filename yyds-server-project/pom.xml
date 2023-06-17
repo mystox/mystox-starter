@@ -16,13 +16,13 @@
     <artifactId>yyds-server-project</artifactId>
     <packaging>pom</packaging>
     <properties>
+        <revision>2.0.11</revision>
+        <yyds.iarpc.starter.version>2.0.11</yyds.iarpc.starter.version>
         <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
         <spring-cloud.version>Finchley.SR4</spring-cloud.version>
-        <fastjson.version>2.0.21</fastjson.version>
+        <fastjson.version>2.0.32</fastjson.version>
         <docker.image.prefix>192.168.0.234:23760</docker.image.prefix>
         <docker.build>deploy</docker.build>
-        <yyds.iarpc.starter.version>2.0.11</yyds.iarpc.starter.version>
-        <revision>2.0.11</revision>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
     </properties>

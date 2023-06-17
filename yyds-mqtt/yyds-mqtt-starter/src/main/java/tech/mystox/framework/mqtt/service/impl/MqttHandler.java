@@ -1,7 +1,7 @@
 package tech.mystox.framework.mqtt.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -433,7 +433,7 @@ public class MqttHandler implements MsgHandler {
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
                 List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
                 //                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
-                regScheduler.setData(routePath, JSONArray.toJSONBytes(subTopicArr));
+                regScheduler.setData(routePath, JSON.toJSONBytes(subTopicArr));
                 topicArr = subTopicArr;
             }
             //全部广播发送

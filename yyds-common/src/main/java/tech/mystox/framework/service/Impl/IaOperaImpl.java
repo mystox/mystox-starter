@@ -1,6 +1,6 @@
 package tech.mystox.framework.service.Impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.springframework.stereotype.Service;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;

@@ -15,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Opera {
+
+    String group() default "";
+
     OperaType operaType() default OperaType.Sync;
 
     OperaTimeout operaTimeout() default @OperaTimeout(timeout = 30, timeUnit = TimeUnit.SECONDS);

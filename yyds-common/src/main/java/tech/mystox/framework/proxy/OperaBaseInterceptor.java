@@ -7,6 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
+import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.StateCode;
 import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.stereotype.OperaCode;
@@ -22,6 +23,10 @@ import java.util.Arrays;
  * update record:
  */
 public abstract class OperaBaseInterceptor implements MethodInterceptor {
+    private IaContext iaContext;
+    public OperaBaseInterceptor(IaContext iaContext) {
+        this.iaContext = iaContext;
+    }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -53,7 +58,9 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
 
     }
 
-
+    public IaContext getIaContext() {
+        return iaContext;
+    }
 
     public abstract Object opera(String operaCode, Object[] arguments, Type genericReturnType);
 }

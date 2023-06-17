@@ -1,6 +1,6 @@
 package tech.mystox.framework.foo.service.api.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tech.mystox.framework.api.test.LocalService;
@@ -70,7 +70,7 @@ public class LocalServiceImpl implements LocalService {
     @Override
     public ReturnEntity helloWait(String param, OperaParam operaParam) {
         try {
-            System.out.println(param + JSONObject.toJSON(operaParam));
+            System.out.println(param + JSON.toJSON(operaParam));
             Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();

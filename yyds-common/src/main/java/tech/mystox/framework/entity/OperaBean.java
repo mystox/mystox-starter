@@ -16,7 +16,6 @@ import tech.mystox.framework.proxy.OperaSyncInterceptor;
 import tech.mystox.framework.stereotype.Opera;
 import tech.mystox.framework.stereotype.OperaTimeout;
 
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -58,6 +57,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
         this.appendAnnotation(Opera.class, opera);
         this.opera = opera;
         this.operaTimeout = opera.operaTimeout();
+        this.group = opera.group();
     }
 
     @Override
@@ -133,7 +133,6 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
             //                break;
             case Sync:
             default: {
-
                 OperaSyncInterceptor advice = new OperaSyncInterceptor(iaContext);
                 advice.setTimeout(operaTimeout.timeout());
                 advice.setTimeUnit(operaTimeout.timeUnit());
@@ -303,59 +302,59 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
     }
 
 
-    public static void main(String[] args) throws FileNotFoundException {
-        /*File cpuFile = new File("C:\\Users\\lhr\\Desktop\\CPU.txt");
-        FileInputStream fileInputStream = new FileInputStream(cpuFile);
-
-        System.out.println(parseCPU(fileInputStream,"127.0.0.1").toJSONString());*/
-
-        String method = "Disk";
-
-        switch (method) {
-            case "Base":
-                //                contend = parseBase(fileInputStream, ip);
-                break;
-            case "Cpu":
-                //                contend = parseCPU(fileInputStream, ip);
-                break;
-            case "Mem":
-                //                contend = parseMem(fileInputStream, ip);
-                break;
-            //case "MemFree":contend = parseMemFree(fileInputStream,ip).toJSONString();break;
-            case "Swap":
-                //                contend = new JSONObject();
-                break;
-            //parseSwapSpecially(fileInputStream,ip);break;
-            //case "SwapTotalUsed":contend = parseSwapTotalused(fileInputStream,ip).toJSONString();break;
-            case "ProcessZombieCount":
-                //                contend = parseProcessZombiecount(fileInputStream, ip);
-                break;
-            //case "HostName":contend = parseHostName(fileInputStream,ip).toJSONString();break;
-            case "Disk":
-                //                contend = parseDisk(fileInputStream, ip);
-                break;
-            case "Net":
-                //                contend = parseNet(fileInputStream, ip);
-                break;
-            //case "AveLoad":contend = parseAveLoad(fileInputStream,ip).toJSONString();break;
-            //case "OS":contend = parseOs(fileInputStream,ip).toJSONString();break;
-            case "PlantForm":
-                //                contend = parsePlantForm(fileInputStream, ip);
-                break;
-            //case "SystemFrameWork":contend = parseSystemFrameWork(fileInputStream,ip).toJSONString();break;
-            //case "Env":contend = parseEnv(fileInputStream,ip).toJSONString();break;
-            //case "BootTime":contend = parseBootTime(fileInputStream,ip).toJSONString();break;
-            case "UpTime":
-                //                contend = parseUpTime(fileInputStream, ip);
-                break;
-            //case "PVersion":contend = parsePVersion(fileInputStream,ip).toJSONString();break;
-            //case "CpuMode":contend = parseCpuMode(fileInputStream,ip).toJSONString();break;
-            //case "LsCPU":contend = parseLsCPU(fileInputStream,ip).toJSONString();break;
-            default: {
-                System.out.println("方法类型有误，请检查method字段拼写");
-                return;
-            }
-        }
-        System.out.println("11111111111111");
-    }
+//    public static void main(String[] args) throws FileNotFoundException {
+//        /*File cpuFile = new File("C:\\Users\\lhr\\Desktop\\CPU.txt");
+//        FileInputStream fileInputStream = new FileInputStream(cpuFile);
+//
+//        System.out.println(parseCPU(fileInputStream,"127.0.0.1").toJSONString());*/
+//
+//        String method = "Disk";
+//
+//        switch (method) {
+//            case "Base":
+//                //                contend = parseBase(fileInputStream, ip);
+//                break;
+//            case "Cpu":
+//                //                contend = parseCPU(fileInputStream, ip);
+//                break;
+//            case "Mem":
+//                //                contend = parseMem(fileInputStream, ip);
+//                break;
+//            //case "MemFree":contend = parseMemFree(fileInputStream,ip).toJSONString();break;
+//            case "Swap":
+//                //                contend = new JSONObject();
+//                break;
+//            //parseSwapSpecially(fileInputStream,ip);break;
+//            //case "SwapTotalUsed":contend = parseSwapTotalused(fileInputStream,ip).toJSONString();break;
+//            case "ProcessZombieCount":
+//                //                contend = parseProcessZombiecount(fileInputStream, ip);
+//                break;
+//            //case "HostName":contend = parseHostName(fileInputStream,ip).toJSONString();break;
+//            case "Disk":
+//                //                contend = parseDisk(fileInputStream, ip);
+//                break;
+//            case "Net":
+//                //                contend = parseNet(fileInputStream, ip);
+//                break;
+//            //case "AveLoad":contend = parseAveLoad(fileInputStream,ip).toJSONString();break;
+//            //case "OS":contend = parseOs(fileInputStream,ip).toJSONString();break;
+//            case "PlantForm":
+//                //                contend = parsePlantForm(fileInputStream, ip);
+//                break;
+//            //case "SystemFrameWork":contend = parseSystemFrameWork(fileInputStream,ip).toJSONString();break;
+//            //case "Env":contend = parseEnv(fileInputStream,ip).toJSONString();break;
+//            //case "BootTime":contend = parseBootTime(fileInputStream,ip).toJSONString();break;
+//            case "UpTime":
+//                //                contend = parseUpTime(fileInputStream, ip);
+//                break;
+//            //case "PVersion":contend = parsePVersion(fileInputStream,ip).toJSONString();break;
+//            //case "CpuMode":contend = parseCpuMode(fileInputStream,ip).toJSONString();break;
+//            //case "LsCPU":contend = parseLsCPU(fileInputStream,ip).toJSONString();break;
+//            default: {
+//                System.out.println("方法类型有误，请检查method字段拼写");
+//                return;
+//            }
+//        }
+//        System.out.println("11111111111111");
+//    }
 }

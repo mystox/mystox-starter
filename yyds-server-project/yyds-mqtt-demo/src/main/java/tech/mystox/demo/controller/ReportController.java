@@ -1,6 +1,6 @@
 package tech.mystox.demo.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.JsonResult;

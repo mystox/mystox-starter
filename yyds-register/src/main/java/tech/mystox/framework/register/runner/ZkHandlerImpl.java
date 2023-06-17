@@ -1,7 +1,7 @@
 package tech.mystox.framework.register.runner;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
@@ -59,9 +59,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 List<String> subServerArr = operaRoute.get(operaCode);
                 String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
                 if (!exists(routePath, true))
-                    create(routePath, JSONArray.toJSONBytes(subServerArr), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                    create(routePath, JSON.toJSONBytes(subServerArr), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
                 else {
-                    setData(routePath, JSONArray.toJSONBytes(subServerArr));
+                    setData(routePath, JSON.toJSONBytes(subServerArr));
                 }
             }
         }
@@ -77,9 +77,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             String privPath = TopicPrefix.PRIV_PREFIX + "/" +
                     preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             if (exists(privPath, true))
-                setData(privPath, JSONObject.toJSONBytes(privFunc));
+                setData(privPath, JSON.toJSONBytes(privFunc));
             else
-                create(privPath, JSONObject.toJSONBytes(privFunc), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                create(privPath, JSON.toJSONBytes(privFunc), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         } else {
             logger.warn("Web privilege function config is null...");
         }
@@ -99,12 +99,12 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), operaCode);
         if (!exists(nodePath))
             try {
-                create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+                create(nodePath, JSON.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
             } catch (KeeperException | InterruptedException e) {
                 logger.error("Data set to node[{}] registry error", nodePath, e);
             }
         else {
-            setData(nodePath, JSONObject.toJSONBytes(sub));
+            setData(nodePath, JSON.toJSONBytes(sub));
         }
     }
 
@@ -187,9 +187,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         String nodePath = MqttUtils.preconditionSubTopicId(
                 preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaConf.getSequence())), operaCode);
         if (!exists(nodePath, true))
-            create(nodePath, JSONObject.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            create(nodePath, JSON.toJSONBytes(sub), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         else {
-            setData(nodePath, JSONObject.toJSONBytes(sub));
+            setData(nodePath, JSON.toJSONBytes(sub));
         }
     }
 
@@ -341,13 +341,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 long sessionId = zk.getSessionId();
                 if (ephemeralOwner != sessionId) {
                     logger.warn("Server status path [{}] is not mine, zk: [{}] -> local: [{}] recreate", onlineStatus, ephemeralOwner, sessionId);
-                    recreate(onlineStatus, JSONObject.toJSONBytes(serverMsg));
+                    recreate(onlineStatus, JSON.toJSONBytes(serverMsg));
                     return true;
                 }
             }
         }
         serverMsg.setSequence(iaConf.getSequence());
-        create(onlineStatus, JSONObject.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        create(onlineStatus, JSON.toJSONBytes(serverMsg), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         return true;
     }
 

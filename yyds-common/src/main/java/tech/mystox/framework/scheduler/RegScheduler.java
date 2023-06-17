@@ -19,7 +19,15 @@ import java.util.List;
 
 public interface RegScheduler extends Schedule {
 
+    /**
+     * 注册
+     */
     public void register();
+
+    /**
+     * 重复注册
+     */
+    public void reRegister();
 
     public boolean exists(String nodeData);
 

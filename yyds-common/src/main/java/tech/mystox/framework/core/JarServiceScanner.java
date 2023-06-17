@@ -1,6 +1,6 @@
 package tech.mystox.framework.core;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import tech.mystox.framework.entity.AckEnum;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.entity.UnitHead;

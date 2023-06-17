@@ -1,6 +1,6 @@
 package tech.mystox.demo.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import tech.mystox.framework.api.test.PerformanceService;
 import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.entity.JsonResult;

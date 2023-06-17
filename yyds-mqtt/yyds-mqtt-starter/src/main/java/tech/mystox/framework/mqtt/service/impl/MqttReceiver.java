@@ -1,9 +1,9 @@
 package tech.mystox.framework.mqtt.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,7 +32,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 
@@ -118,11 +120,11 @@ public class MqttReceiver {
         try {
             Class<?> clazz = Class.forName(className);
             Object bean = SpringContextUtil.getBean(clazz);//这里会是性能瓶颈
-            List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class, Feature.SupportClassForName);
+            List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class, JSONReader.Feature.SupportClassForName);
             Method method = clazz.getDeclaredMethod(methodName, classes.toArray(new Class[0]));
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             String payload = mqttMsg.getPayload();
-            JSONArray jsonArray = JSONObject.parseArray(payload);
+            JSONArray jsonArray = JSON.parseArray(payload);
             Object[] arguments = new Object[classes.size()];
             for (int i = 0; i < arguments.length; i++) {
                 //                Class paramType = classes.get(i);
@@ -182,10 +184,10 @@ public class MqttReceiver {
             ClassLoader classLoader = new URLClassLoader(new URL[]{fileUrl});
             Thread.currentThread().setContextClassLoader(classLoader);
             Class<?> clazz = classLoader.loadClass(className);// 使用loadClass方法加载class,这个class是在urls参数指定的classpath下边。
-            List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class, Feature.SupportClassForName);
+            List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class, JSONReader.Feature.SupportClassForName);
             Method taskMethod = clazz.getDeclaredMethod(methodName, classes.toArray(new Class[0]));
             String payload = mqttMsg.getPayload();
-            JSONArray jsonArray = JSONObject.parseArray(payload);
+            JSONArray jsonArray = JSON.parseArray(payload);
             Object invoke = taskMethod.invoke(clazz.newInstance(), jsonArray.toArray());
             result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
             MsgRsp resp = new MsgRsp(mqttMsg.getMsgId(), result);

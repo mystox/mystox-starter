@@ -1,25 +1,16 @@
 package tech.mystox.framework;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import tech.mystox.demo.SpringbootYydsMqttDemoApplication;
 import tech.mystox.framework.api.test.EntityService;
 import tech.mystox.framework.api.test.entity.OperaParam;
-import tech.mystox.framework.common.util.SpringContextUtil;
-import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.service.IaOpera;
-import tech.mystox.framework.service.Impl.IaOperaImpl;
 import tech.mystox.framework.stereotype.Opera;
 
 //
-//import com.alibaba.fastjson.JSONObject;
+//import com.alibaba.fastjson2.JSONObject;
 //import org.apache.commons.io.FileUtils;
 //import org.junit.Test;
 //import org.junit.runner.RunWith;
@@ -41,12 +32,13 @@ import tech.mystox.framework.stereotype.Opera;
 // * description:
 // * update record:
 // */
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringbootYydsMqttDemoApplication.class)
 public class SpringbootYydsMqttDemoApplicationTest {
 
     @Opera
     EntityService entityService;
+
     @Test
     public void testT() {
         JSONObject j = new JSONObject();
@@ -54,86 +46,78 @@ public class SpringbootYydsMqttDemoApplicationTest {
         OperaParam operaParam = new OperaParam();
         operaParam.setParam("123A");
         operaParam.setContext("123123");
-//        OperaParam t = entityService.getT(operaParam);
-//        System.out.println(t);
+        //        OperaParam t = entityService.getT(operaParam);
+        //        System.out.println(t);
 
     }
+
     @Value("${a:#{47 + 1024}}")
     private Integer mqttPayloadLimit;
+
     @Test
     public void testEntity() {
         String hello = entityService.hello();
         System.out.println(hello);
     }
+
     @Test
     public void testValue() {
         System.out.println(mqttPayloadLimit);
     }
 
 
-    public static void main(String[] args) {
 
-        ApplicationContext applicationContext = SpringContextUtil.getApplicationContext();
 
-        IaENV iaENV = new IaENV();
-        iaENV.createMsgScheduler(IaConf.MqttMsgBus);
-        //创建ia
-        IaConf iaConf = new IaConf(null,null);
-        IaContext iaContext = new IaContext(iaConf,iaENV);
-        IaOpera iaOpera = new IaOperaImpl(iaContext);
-        iaOpera.operaAsync("hello","hello opera");
-    }
-
-//    @MockBean
-//    private MqttConfig mqttConfig;
-//    @MockBean
-//    private MqttSender mqttSender;
-//    @MockBean
-//    MqttReceiverImpl mqttReceiverImpl;
-//
-//    @MockBean
-//    RegisterRunner registerRunner;
-//
-//
-//    @Test
-//    public void testYaml() {
-//        DumperOptions dumperOptions = new DumperOptions();
-//        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-//        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-//        dumperOptions.setPrettyFlow(false);
-//        Yaml yaml = new Yaml(dumperOptions);
-//
-//        try {
-//            File file = FileUtils.getFile("E:\\IdeaProjects\\YYDS\\configResources\\gateway-transverterRelation.yml");
-//            System.out.println(file.getAbsolutePath());
-//            TransverterConfig load = yaml.loadAs(new FileInputStream(file),TransverterConfig.class);
-//
-//            Map<String, List<String>> values = new HashMap<>();
-//
-//            List<String> valueList = new ArrayList<>();
-//            valueList.add("abc");
-//            valueList.add("123");
-//            values.put("alarm", valueList);
-////            load.put("transverter", values);
-//            System.out.println(JSONObject.toJSONString(load));
-//
-//            yaml.dump(load,new FileWriter(file));
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @Autowired
-//    Environment environment;
-//
-//    @Test
-//    public void TestScan() {
-//    }
-//
-//
-//
-//
+    //    @MockBean
+    //    private MqttConfig mqttConfig;
+    //    @MockBean
+    //    private MqttSender mqttSender;
+    //    @MockBean
+    //    MqttReceiverImpl mqttReceiverImpl;
+    //
+    //    @MockBean
+    //    RegisterRunner registerRunner;
+    //
+    //
+    //    @Test
+    //    public void testYaml() {
+    //        DumperOptions dumperOptions = new DumperOptions();
+    //        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    //        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+    //        dumperOptions.setPrettyFlow(false);
+    //        Yaml yaml = new Yaml(dumperOptions);
+    //
+    //        try {
+    //            File file = FileUtils.getFile("E:\\IdeaProjects\\YYDS\\configResources\\gateway-transverterRelation.yml");
+    //            System.out.println(file.getAbsolutePath());
+    //            TransverterConfig load = yaml.loadAs(new FileInputStream(file),TransverterConfig.class);
+    //
+    //            Map<String, List<String>> values = new HashMap<>();
+    //
+    //            List<String> valueList = new ArrayList<>();
+    //            valueList.add("abc");
+    //            valueList.add("123");
+    //            values.put("alarm", valueList);
+    ////            load.put("transverter", values);
+    //            System.out.println(JSONObject.toJSONString(load));
+    //
+    //            yaml.dump(load,new FileWriter(file));
+    //
+    //        } catch (FileNotFoundException e) {
+    //            e.printStackTrace();
+    //        } catch (IOException e) {
+    //            e.printStackTrace();
+    //        }
+    //    }
+    //
+    //    @Autowired
+    //    Environment environment;
+    //
+    //    @Test
+    //    public void TestScan() {
+    //    }
+    //
+    //
+    //
+    //
 }

@@ -1,19 +1,20 @@
 package tech.mystox.demo.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.cloud.context.refresh.ContextRefresher;
-import tech.mystox.framework.config.OperaRouteConfig;
-import tech.mystox.demo.config.OperaRouteConfigTest;
-import tech.mystox.framework.config.WebPrivFuncConfig;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import tech.mystox.demo.config.OperaRouteConfigTest;
+import tech.mystox.framework.config.OperaRouteConfig;
+import tech.mystox.framework.config.WebPrivFuncConfig;
 
 import java.io.*;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class ResoucesController {
         try {
             File file = FileUtils.getFile("./config/operaRoute-test-1.yml");
             Map testLoad = (Map) yaml.load(new FileInputStream(file));
-            yaml.dump(JSONObject.toJSON(test),new FileWriter(file));
+            yaml.dump(JSON.toJSON(test),new FileWriter(file));
             Object invoke = contextRefresher.refresh();
             logger.info(JSONObject.toJSONString(invoke));
             System.out.println(JSONObject.toJSONString(operaRouteConfig.getOperaRoute()));

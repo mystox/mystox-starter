@@ -31,6 +31,7 @@ public class TaskService  implements CommandLineRunner {
         IaOpera bean = SpringContextUtil.getBean(IaOpera.class);
         MsgResult opera = bean.opera("sayHi", "hihihihihi");
         System.out.println(JSON.toJSONString(opera));
+
         List<String> helloList = localService.helloList("helloList");
         System.out.println("helloList:"+JSON.toJSONString(helloList));
     }

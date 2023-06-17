@@ -1,6 +1,6 @@
 package tech.mystox.framework.balancer.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +55,7 @@ public class OperaRouteUpdateImpl implements OperaRouteService {
                 }
                 boolean newFile = file.createNewFile();
             }
-            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+            yaml.dump(JSON.toJSON(operaRouteConfig), new FileWriter(file));
 //            String groupCodeServerCode = preconditionGroupServerCode(conf.getGroupCode(),
 //                    preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
 //            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
@@ -68,7 +68,7 @@ public class OperaRouteUpdateImpl implements OperaRouteService {
             throw e;
         } finally {
             operaRoute.put(operaCode, oldServerArr);
-            yaml.dump(JSONObject.toJSON(operaRouteConfig), new FileWriter(file));
+            yaml.dump(JSON.toJSON(operaRouteConfig), new FileWriter(file));
         }
 
 

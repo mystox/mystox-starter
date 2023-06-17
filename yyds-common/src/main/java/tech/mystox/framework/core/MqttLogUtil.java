@@ -1,6 +1,6 @@
 package tech.mystox.framework.core;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.entity.MqttLog;
 import tech.mystox.framework.entity.OperaCode;
