@@ -313,6 +313,15 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         boolean duplicate = iaConf.isDuplicate();
         if (duplicate) {
             while (exists(onlineStatus, true)) {
+                String nodeData = getData(onlineStatus, false);
+                if (StringUtils.isNotBlank(nodeData)) {
+                    ServerMsg nodeMsg = JSONObject.parseObject(nodeData, ServerMsg.class);
+                    if (nodeMsg.getMyid().equals(iaConf.getMyId())) {//如果已经存在节点且节点为是自己，则序号保持不变
+                        logger.warn("is mine.....node my id is [{}]", nodeMsg.getMyid());
+                        deleteNode(onlineStatus);
+                        break;
+                    }
+                }
                 longAdder.add(1);
                 long sequence = longAdder.longValue();
                 iaConf.setSequence(sequence);
@@ -539,10 +548,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         }
     }
 
-    public String getData(String path) {
+    public String getData(String path, boolean watch) {
         byte[] data = new byte[0];
         try {
-            data = zk.getData(path, true, null);
+            data = zk.getData(path, watch, null);
         } catch (KeeperException e) {
             logger.warn("Data get KeeperException error[{}]", path, e);
         } catch (InterruptedException e) {
@@ -551,6 +560,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         if (data != null)
             return new String(data);
         else return null;
+    }
+
+    public String getData(String path) {
+        return getData(path, true);
     }
 
     public void setData(String path, byte[] data) {
