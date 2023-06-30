@@ -39,3 +39,10 @@
 - fastjson upgrade to 2.0.21
 - 默认关闭日志的一些优化操作，及其一些日志显示的优化
 - 优雅关闭服务的优化，优化while-sleep相关过程逻辑
+##2.0.12
+- fastjson upgrade to 2.0.34 and fastjson->fastjson2
+- 注销的一些优化
+- 注解的一些优化
+- 其他代码结构及其日志显示的优化
+- [fix] 重复注册的问题修复
+

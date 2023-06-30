@@ -2,7 +2,7 @@
 export BASE_DIR=`cd $(dirname $0); pwd`
 DEPLOY_URL=http://nexus.mystox.tech:8881/repository/maven-releases/
 REPOSITORY_Id=releases
-VERSION=2.0.11
+VERSION=2.0.12
 
 mvn deploy:deploy-file -DrepositoryId=$REPOSITORY_Id -Durl=$DEPLOY_URL -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-common-$VERSION.jar
 mvn deploy:deploy-file -DrepositoryId=$REPOSITORY_Id -Durl=$DEPLOY_URL -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=$VERSION -Dpackaging=jar -Dfile=$BASE_DIR/yyds-balancer-$VERSION.jar

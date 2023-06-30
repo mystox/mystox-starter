@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>2.0.11</revision>
+        <revision>2.0.12</revision>
         <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
         <spring-cloud.version>Finchley.SR4</spring-cloud.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>

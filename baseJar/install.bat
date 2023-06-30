@@ -1,6 +1,6 @@
 title install-common
 set BASE_DIR=%~dp0
-set VERSION=2.0.11
+set VERSION=2.0.12
 
 call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-common -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-common-%VERSION%.jar
 call mvn install:install-file -DgeneratePom=true -DgroupId=tech.mystox.framework -DartifactId=yyds-balancer -Dversion=%VERSION% -Dpackaging=jar -Dfile=%BASE_DIR%/yyds-balancer-%VERSION%.jar
