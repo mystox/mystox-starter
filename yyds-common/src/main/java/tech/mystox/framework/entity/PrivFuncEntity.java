@@ -14,12 +14,21 @@ public class PrivFuncEntity {
     private Integer priority;
     private String remark;
     private String type;
+    private String funcTag; //功能权限组标签
     private String uri;
     private String staticPath; //前端静态文件地址，配置路由使用，在权限类型为PAGE时有效
     private String routeMark; //后端请求默认路由
     private String pageRoute; //前端请求默认路由
     private Boolean root;
     private List<PrivFuncEntity> children;
+
+    public String getFuncTag() {
+        return funcTag;
+    }
+
+    public void setFuncTag(String funcTag) {
+        this.funcTag = funcTag;
+    }
 
     public Boolean getRoot() {
         return root;
