@@ -1,6 +1,7 @@
 package tech.mystox.framework.entity;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mystoxlol on 2019/11/6, 20:45.
@@ -20,6 +21,7 @@ public class PrivFuncEntity {
     private String routeMark; //后端请求默认路由
     private String pageRoute; //前端请求默认路由
     private Boolean root;
+    private Map<String, Object> extension;
     private List<PrivFuncEntity> children;
 
     public String getFuncTag() {
@@ -28,6 +30,14 @@ public class PrivFuncEntity {
 
     public void setFuncTag(String funcTag) {
         this.funcTag = funcTag;
+    }
+
+    public Map<String, Object> getExtension() {
+        return extension;
+    }
+
+    public void setExtension(Map<String, Object> extension) {
+        this.extension = extension;
     }
 
     public Boolean getRoot() {

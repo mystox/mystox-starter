@@ -43,7 +43,7 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        loadResources(environment, application,this.profiles);
+        loadResources(environment, this.profiles);
 //        environment.resolveRequiredPlaceholders("tech.mystox.framework");
 //        environment.setRequiredProperties("tech.mystox.framework");
         if (logger.isInfoEnabled())
@@ -52,7 +52,7 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             System.out.println("load register environment post processor success...");
     }
 
-    protected void loadResources(ConfigurableEnvironment environment, SpringApplication application,String[] profiles) {
+    protected void loadResources(ConfigurableEnvironment environment, String[] profiles) {
         //循环添加
         for (String profile : profiles) {
             //从classpath路径下面查找文件
@@ -64,7 +64,7 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
                     if (logger.isWarnEnabled()) {
                         logger.warn("ignore file not exists..{}", profile);
                     } else {
-                        System.out.println("ignore file not exists..{}" + profile);
+//                        System.out.println("ignore file not exists..{}" + profile);
                     }
                     continue;
                 }

@@ -96,6 +96,9 @@ public class IaConf {
     @Value("${register.version:1.0.0}")
     private String registerServerVersion;
 
+    @Value("${register.webExtension:classpath:config/vueRouter.js}")
+    private String[] webExtension;
+
     @Value("${register.balancer:base}")
     private String loadBalancerType;
 
@@ -116,6 +119,7 @@ public class IaConf {
     private String pageRoute;
     @Value("${server.routeMark:}")
     private String routeMark;
+
     //    @Autowired
     //    ServiceRegistry serviceRegistry;
 
@@ -164,6 +168,13 @@ public class IaConf {
         this.operaRouteConfig = operaRouteConfig;
     }
 
+    public String[] getWebExtension() {
+        return webExtension;
+    }
+
+    public void setWebExtension(String[] webExtension) {
+        this.webExtension = webExtension;
+    }
 
     public String getLoadBalancerType() {
         return loadBalancerType;

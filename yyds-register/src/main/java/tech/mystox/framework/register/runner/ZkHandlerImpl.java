@@ -8,6 +8,10 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StreamUtils;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
@@ -20,7 +24,10 @@ import tech.mystox.framework.register.utils.DistributedLock;
 import tech.mystox.framework.service.RegHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,9 +77,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 注册web 功能权限
      */
-    public OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws KeeperException, InterruptedException {
+    public OperaResult registerWebPriv(WebPrivFuncConfig webPrivFuncConfig) throws KeeperException, InterruptedException, IOException {
         PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
         if (privFunc != null) {
+            appendPrivExtension(privFunc);
             //获取服务信息并注册至注册中心
             String privPath = TopicPrefix.PRIV_PREFIX + "/" +
                     preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
@@ -86,6 +94,38 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         return null;
     }
 
+
+    /**
+     * 添加web注册组件
+     */
+    private void appendPrivExtension(PrivFuncEntity privFunc) throws IOException {
+        String[] webExtension = iaConf.getWebExtension();
+        if (webExtension != null) {
+            for (String webComponent : webExtension) {
+                //从classpath路径下面查找文件
+                ResourceLoader resourceLoader = new DefaultResourceLoader();
+                //加载成PropertySource对象，并添加到Environment环境中
+                Resource resource = resourceLoader.getResource(webComponent);
+                if (resource.exists()) {
+                    Map<String, Object> extension = privFunc.getExtension();
+                    if (extension == null) {
+                        extension = new HashMap<>();
+                        privFunc.setExtension(extension);
+                    }
+                    try (InputStream inputStream = resource.getInputStream();) {
+                        extension.put(resource.getFilename(), StreamUtils.copyToString(inputStream, Charset.defaultCharset()));
+                    } catch (IOException e) {
+                        logger.debug("Get extension file context error", e);
+                    }
+                } else {
+                    logger.debug("Priv components file[{}] is is not exists", resource.getFilename());
+                }
+            }
+        } else {
+            logger.warn("Priv components file is empty!");
+
+        }
+    }
 
     /**
      * 往注册中心注册数据
@@ -256,6 +296,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
             System.exit(1);
             //            e.printStackTrace();
         }
+    }
+
+    private void registerWebComponent() {
+        //获取文件及其内容，组成web
     }
 
     /**
@@ -644,7 +688,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
     public void process(WatchedEvent watchedEvent) {
-        logger.debug("[{}]Zookeeper trigger event type: [{}] content: [{}] ", Thread.currentThread().getId(), watchedEvent.getType(), watchedEvent);
+        logger.debug("[{}]Zookeeper trigger event type: [{}] path: [{}] content: [{}] ", Thread.currentThread().getId(), watchedEvent.getType(), watchedEvent.getPath(), watchedEvent);
         Watcher.Event.KeeperState state = watchedEvent.getState();
         Watcher.Event.EventType eventType = watchedEvent.getType();
         String path = watchedEvent.getPath();
@@ -685,12 +729,18 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
         } else if (state == Watcher.Event.KeeperState.Expired
                 || state == Watcher.Event.KeeperState.Disconnected) {
-            logger.warn("Zookeeper Expired|Disconnected event [{}] ...", state);
+            logger.warn("Zookeeper Expired|Disconnected path [{}] event [{}] ...", path, state);
+            //todo 需要做个计数，一段时间内频繁掉线失联需要才需要做失联操作？
             disconnectedCall();
         }
     }
 
     private void disconnectedCall() {
+        //test 如果正在丢失连接重连的情况，则跳过本次重连回调
+        if (latch.getCount() == 1) {
+            logger.warn("Disconnect call get latch count is 1");
+            return;
+        }
         synchronized (ZkHandlerImpl.class) {
             try {
                 if (latch.getCount() == 0)

@@ -62,7 +62,7 @@ public class RegisterEnvironmentPostProcessor implements EnvironmentPostProcesso
                     if (logger.isWarnEnabled()) {
                         logger.warn("ignore file not exists..{}", profile);
                     } else {
-                        System.out.println("ignore file not exists..{}" + profile);
+//                        System.out.println("ignore file not exists..{}" + profile);
                     }
                     continue;
                 }
