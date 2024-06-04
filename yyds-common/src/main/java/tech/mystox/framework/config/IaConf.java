@@ -96,7 +96,7 @@ public class IaConf {
     @Value("${register.version:1.0.0}")
     private String registerServerVersion;
 
-    @Value("${register.webExtension:classpath:config/vueRouter.js}")
+    @Value("${register.webExtension:classpath:config/vueRouter.js,file:config/vueRouter.js}")
     private String[] webExtension;
 
     @Value("${register.balancer:base}")
