@@ -39,7 +39,7 @@ public class ApplicationCloseEventListener implements ApplicationListener<Contex
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        logger.debug("Server close to unregister msg ability....[{}]",event);
+        logger.info("Server close to unregister msg ability....[{}]", event);
         iaContext.getIaENV().setServerStatus(ServerStatus.UNREGISTER);
         //检测接收线程池
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,

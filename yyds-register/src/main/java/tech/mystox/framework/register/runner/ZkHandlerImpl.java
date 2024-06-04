@@ -81,6 +81,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         PrivFuncEntity privFunc = webPrivFuncConfig.getPrivFunc();
         if (privFunc != null) {
             appendPrivExtension(privFunc);
+            logger.debug("Register privilege function config context [{}]", JSON.toJSONString(privFunc));
             //获取服务信息并注册至注册中心
             String privPath = TopicPrefix.PRIV_PREFIX + "/" +
                     preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
@@ -644,10 +645,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
                 disconnectedCall();
             }
         } catch (InterruptedException | KeeperException e) {
-            logger.warn("Zookeeper[{}] get child node is null[{}]", path, e);
-            //            if (logger.isDebugEnabled())
-            //                e.printStackTrace();
-            //            e.printStackTrace();
+            logger.warn("Zookeeper[{}] get child node is null[{}]", path, e.toString());
+            //此处提醒即可，不打印堆栈
+            if (logger.isDebugEnabled())
+                e.printStackTrace();
         }
         return null;
     }

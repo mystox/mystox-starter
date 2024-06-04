@@ -26,8 +26,8 @@ public class OperaAnnotationBeanPostProcessor extends ConfigurationClassPostProc
             registry.registerBeanDefinition("operaApplication", beanDefinition);
         } catch (IOException e) {
             logger.error("opera application scanner init false...", e);
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
+//            if (logger.isDebugEnabled())
+//                e.printStackTrace();
         }
         processConfigBeanDefinitions(registry);
     }

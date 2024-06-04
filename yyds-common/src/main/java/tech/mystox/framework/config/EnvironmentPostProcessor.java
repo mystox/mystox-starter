@@ -47,9 +47,9 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
 //        environment.resolveRequiredPlaceholders("tech.mystox.framework");
 //        environment.setRequiredProperties("tech.mystox.framework");
         if (logger.isInfoEnabled())
-            logger.info("load register environment post processor success...");
+            logger.info("Load register environment post processor success...");
         else
-            System.out.println("load register environment post processor success...");
+            System.out.println("Load register environment post processor success...");
     }
 
     protected void loadResources(ConfigurableEnvironment environment, String[] profiles) {
@@ -62,13 +62,13 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             if (!resource.exists()) {
                 if (ignoreFileNotFound) {
                     if (logger.isWarnEnabled()) {
-                        logger.warn("ignore file not exists..{}", profile);
+                        logger.warn("Ignore file not exists..{}", profile);
                     } else {
-//                        System.out.println("ignore file not exists..{}" + profile);
+                        System.out.println("Ignore file not exists..{}" + profile);
                     }
                     continue;
                 }
-                throw new IllegalArgumentException("resource " + resource + " in not exists");
+                throw new IllegalArgumentException("Resource " + resource + " in not exists");
             }
             try {
                 String s = "";
@@ -79,7 +79,6 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
                         s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
                         if (StringUtils.isNotBlank(s)) {
                             environment.getPropertySources().addLast(loadProfiles(resource).get(0));
-                            continue;
                         }
 //                    }
                 } finally {

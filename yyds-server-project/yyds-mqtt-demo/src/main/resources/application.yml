@@ -31,6 +31,11 @@ logging:
     #    tech.mystox.framework.balancer.client.BaseLoadBalancerClient: debug
     tech.mystox.framework.register.service.ZkRegScheduler: info
     tech.mystox.framework.register.utils.DistributedLock: debug
+    tech:
+      mystox:
+        framework:
+          register:
+            runner: debug
     org.apache.zookeeper: OFF
     org.apache.hadoop.util.Shell: OFF
     org.mongodb.driver.*: OFF
