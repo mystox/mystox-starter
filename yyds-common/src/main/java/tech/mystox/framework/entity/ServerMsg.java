@@ -18,7 +18,7 @@ public class ServerMsg {
     private String serverVersion;
     private String routeMark;
     private String pageRoute;
-    private String serviceUri;
+    private String serverUri;
     private String title;
     private String groupCode; //对应云服务编码
     //    private String serverMark; //服务端标识 对应云管的serviceVersion 默认为*
@@ -26,7 +26,7 @@ public class ServerMsg {
     private Long sequence;
 
     public ServerMsg(String host, int port, String serverName, String serverVersion, String routeMark,
-                     String pageRoute, String serviceUri, String title, String groupCode, String myid) {
+                     String pageRoute, String serverUri, String title, String groupCode, String myid) {
         this.myid = myid;
         this.host = host;
         this.port = port;
@@ -34,7 +34,7 @@ public class ServerMsg {
         this.serverVersion = serverVersion;
         this.routeMark = routeMark;
         this.pageRoute = pageRoute;
-        this.serviceUri = serviceUri;
+        this.serverUri = serverUri;
         this.title = title;
         this.groupCode = groupCode;
         //        this.serverMark = serverMark;
@@ -42,7 +42,7 @@ public class ServerMsg {
 
 
     public ServerMsg(String host, int port, String serverName, String serverVersion, String routeMark,
-                     String pageRoute, String serviceUri, String title, String groupCode) {
+                     String pageRoute, String serverUri, String title, String groupCode) {
         this.myid = myid;
         this.host = host;
         this.port = port;
@@ -50,7 +50,7 @@ public class ServerMsg {
         this.serverVersion = serverVersion;
         this.routeMark = routeMark;
         this.pageRoute = pageRoute;
-        this.serviceUri = serviceUri;
+        this.serverUri = serverUri;
         this.title = title;
         this.groupCode = groupCode;
         //        this.serverMark = serverMark;
@@ -116,12 +116,21 @@ public class ServerMsg {
         this.pageRoute = pageRoute;
     }
 
+    @Deprecated
     public String getServiceUri() {
-        return serviceUri;
+        return serverUri;
+    }
+    @Deprecated
+    public void setServiceUri(String serviceUri) {
+        this.serverUri = serviceUri;
     }
 
-    public void setServiceUri(String serviceUri) {
-        this.serviceUri = serviceUri;
+    public String getServerUri() {
+        return serverUri;
+    }
+
+    public void setServerUri(String serverUri) {
+        this.serverUri = serverUri;
     }
 
     public String getHost() {
