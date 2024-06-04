@@ -196,7 +196,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         MsgResult result = null;
         if (StringUtils.isNotBlank(targetServerCode))
             result = (MsgResult) operaCall.operaTarget(operaCode, targetServerCode);
-        assert result != null;
+//        assert result != null;
         if (StringUtils.isBlank(targetServerCode) || result.getStateCode() != StateCode.SUCCESS) {
             if (StringUtils.isBlank(targetServerCode))
                 logger.warn("[{}]targetServerCode is null", operaCode);
