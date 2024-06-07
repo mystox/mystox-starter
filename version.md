@@ -50,5 +50,11 @@
 - fastjson upgrade to 2.0.40 
 - 消费者异常执行的异常抛出处理日志优化
 - 功能权限注册PrivFuncEntity添加extension字段
+##2.0.14
+- 注册逻辑的优化，及其zk.exists方法异常处理优化
+- 注册vueRouter.js文件目录位置
+- fastjson upgrade to 2.0.51
+- serverMsg类优化
+- zk分布式锁优化
 
 
