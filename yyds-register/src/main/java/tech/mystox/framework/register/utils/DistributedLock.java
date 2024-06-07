@@ -48,7 +48,7 @@ public class DistributedLock implements Lock, Watcher, AsyncCallback.StatCallbac
     public DistributedLock(String registerUrl, int regSessionTimeout, String serverName) throws IOException, InterruptedException, KeeperException {
         this.lockName = serverName;
         this.zk = new ZooKeeper(registerUrl, regSessionTimeout, this);
-        latch.await();
+        latch.await(); //等待zookeeper连接
         Stat stat = zk.exists(ROOT_LOCK, false);
         if (stat == null) {
             // 如果根节点不存在，则创建根节点
@@ -135,6 +135,11 @@ public class DistributedLock implements Lock, Watcher, AsyncCallback.StatCallbac
             if (lockName.contains(splitStr)) {
                 throw new LockException("lockName error" + lockName);
             }
+            Stat stat = zk.exists(ROOT_LOCK, false);
+            if (stat == null) {
+                // 如果根节点不存在，则创建根节点
+                zk.create(ROOT_LOCK, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            }
             if (StringUtils.isBlank(CURRENT_LOCK)) {
                 // 创建临时有序节点并监控
                 CURRENT_LOCK = zk.create(ROOT_LOCK + "/" + lockName + splitStr, new byte[0],
@@ -201,27 +206,31 @@ public class DistributedLock implements Lock, Watcher, AsyncCallback.StatCallbac
     // 等待锁
     private boolean waitForLock() throws KeeperException, InterruptedException {
         //监控等待锁状态
-        zk.exists(WAIT_LOCK, this::processEventDeal);
-        logger.debug("=============[{}] Wait lock [{}]", Thread.currentThread().getId(), WAIT_LOCK);
-        this.countDownLatch = new CountDownLatch(1);
-        // 计数等待，若等到前一个节点消失，则precess中进行countDown，停止等待，获取锁
-        this.countDownLatch.await();
-        logger.debug("[{}] Wait event await [{}]", Thread.currentThread().getId(), CURRENT_LOCK);
+        zk.exists(WAIT_LOCK, this::processEventDeal); //等待监听锁
+        Stat stat = zk.exists(WAIT_LOCK, this::processEventDeal);
+        //如果等待锁在，则等待该锁释放后重新取锁
+        if (stat != null) {
+            logger.debug("=============[{}] Wait lock [{}]", Thread.currentThread().getId(), WAIT_LOCK);
+            this.countDownLatch = new CountDownLatch(1);
+            // 计数等待，若等到前一个节点消失，则precess中进行countDown，停止等待，获取锁
+            this.countDownLatch.await();
+            logger.debug("[{}] Wait event await [{}]", Thread.currentThread().getId(), CURRENT_LOCK);
+        }
         return tryLock();
     }
 
     // 等待锁
-    private boolean waitForLock(long timeout, TimeUnit unit) throws KeeperException, InterruptedException {
-        Stat stat = zk.exists(WAIT_LOCK, this::processEventDeal);
-        if (stat != null) {
-            logger.debug("[{}] Wait lock [{}]", Thread.currentThread().getId(), WAIT_LOCK);
-            this.countDownLatch = new CountDownLatch(1);
-            // 计数等待，若等到前一个节点消失，则precess中进行countDown，停止等待，获取锁
-            boolean await = this.countDownLatch.await(timeout, unit);
-            logger.debug("[{}] Get lock [{}] result [{}]", Thread.currentThread().getName(), CURRENT_LOCK, await);
-        }
-        return true;
-    }
+//    private boolean waitForLock(long timeout, TimeUnit unit) throws KeeperException, InterruptedException {
+//        Stat stat = zk.exists(WAIT_LOCK, this::processEventDeal);
+//        if (stat != null) {
+//            logger.debug("[{}] Wait lock [{}]", Thread.currentThread().getId(), WAIT_LOCK);
+//            this.countDownLatch = new CountDownLatch(1);
+//            // 计数等待，若等到前一个节点消失，则precess中进行countDown，停止等待，获取锁
+//            boolean await = this.countDownLatch.await(timeout, unit);
+//            logger.debug("[{}] Get lock [{}] result [{}]", Thread.currentThread().getName(), CURRENT_LOCK, await);
+//        }
+//        return true;
+//    }
 
     public void unlock() {
         try {
