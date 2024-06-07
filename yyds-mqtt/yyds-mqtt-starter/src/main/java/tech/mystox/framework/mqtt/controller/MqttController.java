@@ -13,6 +13,7 @@ import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.MqttMsg;
 import tech.mystox.framework.entity.MsgRsp;
 import tech.mystox.framework.entity.OperaType;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
 import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 import tech.mystox.framework.mqtt.service.impl.MqttReceiver;
@@ -161,10 +162,10 @@ public class MqttController {
             mqttRestService.updateOperaRoute(operaCode, subGroupServerList);
             //修改完成需要广播
             operaRouteService.broadcastOperaRoute(operaCode, subGroupServerList);
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException | IOException | RegisterException e) {
             logger.error("update opera route error:", e);
-            if (logger.isDebugEnabled())
-                e.printStackTrace();
+//            if (logger.isDebugEnabled())
+//                e.printStackTrace();
             return new JsonResult<>("update opera route error: " + e, false);
         }
         return new JsonResult<>();

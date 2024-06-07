@@ -18,4 +18,5 @@ public class MsgResultFailException extends RuntimeException {
     public MsgResultFailException(StateCode.StateCodeEnum stateCodeEnum, String message) {
         super("["+stateCodeEnum+"("+stateCodeEnum.getCode()+")]"+message);
     }
+
 }

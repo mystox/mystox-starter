@@ -15,6 +15,7 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MqttLogUtil;
 import tech.mystox.framework.entity.*;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.mqtt.config.MqttConfig;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
@@ -230,7 +231,7 @@ public class ChannelSenderImpl {
     //    @Autowired
     //    ServiceRegistry serviceRegistry;
 
-    private boolean isExistsBySubList(String serverCode, String operaCode) /*throws KeeperException, InterruptedException */ {
+    private boolean isExistsBySubList(String serverCode, String operaCode) throws RegisterException /*throws KeeperException, InterruptedException */ {
         RegScheduler regScheduler = iaEnv.getRegScheduler();
         /*if (OperaCode.SLOGIN.equals(operaCode) && serverCode.contains(ServerName.AUTH_PLATFORM)) {
            logger.warn("server Slogin to {} jump subList judged...", serverCode);

@@ -72,7 +72,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
             List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     groupServerCode));
             if (CollectionUtils.isNotEmpty(children)) {
-                children.forEach(operaCode -> {
+                for (String operaCode : children) {
                     String routePath = preconditionRoutePath(groupServerCode, operaCode);
                     //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
                     List<String> operaRouteArr = new ArrayList<>();
@@ -98,7 +98,7 @@ public class BaseLoadBalancerClient extends CommonExecutorConfig implements Load
                     }
                     operaMap.put(operaCode, operaRouteArr);
                     logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
-                });
+                }
             }
             setOperaRouteMap(operaMap);
         } catch (Exception e) {

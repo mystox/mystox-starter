@@ -18,6 +18,7 @@ import tech.mystox.framework.core.ServiceScanner;
 import tech.mystox.framework.entity.AckEnum;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.MsgHandler;
 
@@ -157,7 +158,7 @@ public class MqttRestService {
     }
 
 
-    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws InterruptedException, IOException {
+    public void updateOperaRoute(String operaCode, List<String> subGroupServerList) throws InterruptedException, IOException, RegisterException {
         RegScheduler regScheduler = iaContext.getIaENV().getRegScheduler();
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute == null) {

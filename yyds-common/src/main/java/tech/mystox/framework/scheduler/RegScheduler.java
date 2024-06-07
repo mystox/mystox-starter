@@ -29,9 +29,9 @@ public interface RegScheduler extends Schedule {
      */
     public void reRegister();
 
-    public boolean exists(String nodeData);
+    public boolean exists(String nodeData) throws RegisterException;
 
-    List<String> buildOperaMap(String operaCode);
+    List<String> buildOperaMap(String operaCode) throws RegisterException;
 
     public List<RegisterSub> getSubList();
     public List<RegisterSub> getRegHttpList();

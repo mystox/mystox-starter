@@ -11,6 +11,7 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.MsgResultFailException;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.MsgHandler;
@@ -192,7 +193,13 @@ public class MqttHandler implements MsgHandler {
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
         String operaCode = context.getOperaCode();
         LoadBalanceScheduler loadBalanceScheduler = iaENV.getLoadBalanceScheduler();
-        ServerMsg chooseServer = loadBalanceScheduler.chooseServer(operaCode);
+        ServerMsg chooseServer = null;
+        try {
+            chooseServer = loadBalanceScheduler.chooseServer(operaCode);
+        } catch (RegisterException e) {
+//            logger.error("[{}]Choose server error!", operaCode);
+            throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Choose server error..." + e);
+        }
         // if (chooseServer == null) {
         //     logger.error("[{}] route server is null error...", operaCode);
         //     //       mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);

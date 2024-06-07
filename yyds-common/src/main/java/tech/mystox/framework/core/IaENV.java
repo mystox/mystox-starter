@@ -8,10 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.entity.RegisterMsg;
-import tech.mystox.framework.entity.RegisterSub;
-import tech.mystox.framework.entity.ServerMsg;
-import tech.mystox.framework.entity.ServerStatus;
+import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.DefaultMsgScheduler;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
@@ -19,6 +16,8 @@ import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.util.List;
+
+import static tech.mystox.framework.common.util.MqttUtils.*;
 
 @Component
 public class IaENV implements ApplicationContextAware, RegCall {
@@ -60,11 +59,12 @@ public class IaENV implements ApplicationContextAware, RegCall {
         switch (serverStatus) {
             case ONLINE: {//切换至在线状态
                 this.serverStatus = serverStatus;
+                String onlineStatus = preconditionGroupServerCode(serverMsg.getGroupCode(),
+                        preconditionServerCode(serverMsg.getServerName(), serverMsg.getServerVersion(), serverMsg.getSequence()));
+                logger.info("Server[{}] status is [{}]", onlineStatus, serverStatus);
                 break;
             }
-            case UNREGISTER: { //注销状态
-                this.serverStatus = serverStatus;
-            }
+            case UNREGISTER:
             case RESTARTING: { //重启命令 在注销状态和启动状态时 不修改状态
                 if (getServerStatus().equals(ServerStatus.UNREGISTER)
                         || getServerStatus().equals(ServerStatus.STARTING)) {
@@ -72,9 +72,10 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 }
             }
             default:
+                logger.info("Server status is [{}]", serverStatus);
                 this.serverStatus = serverStatus;
         }
-        logger.info("Server status is [{}]", serverStatus);
+
         return true;
     }
 

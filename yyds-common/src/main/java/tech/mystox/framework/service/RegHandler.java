@@ -13,7 +13,7 @@ public interface RegHandler {
 
 
     void unregister();
-    public boolean exists(String nodeData);
+    public boolean exists(String nodeData) throws RegisterException;
 
     void create(final String path, byte data[], int createMode);
 

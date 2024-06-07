@@ -2,6 +2,7 @@ package tech.mystox.framework.scheduler;
 
 import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.ServerMsg;
+import tech.mystox.framework.exception.RegisterException;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 public interface LoadBalanceScheduler extends Schedule/*,Callable<MsgResult> */{
     void addServers(List<String> serverCodeList);
 
-    ServerMsg chooseServer(Object key);
+    ServerMsg chooseServer(Object key) throws RegisterException;
 
     void markServerDown(String serverCode);
 

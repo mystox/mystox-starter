@@ -17,6 +17,7 @@ import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.MsgCall;
 import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.*;
+import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
@@ -29,7 +30,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 
 /**
  * Created by mystoxlol on 2020/6/8, 14:36.
- * company: ink
+ * company:
  * description:
  * update record:
  */
@@ -69,7 +70,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     }
 
     @Override
-    public ServerMsg chooseServer(Object ser) {
+    public ServerMsg chooseServer(Object ser) throws RegisterException {
         IaConf iaconf = iaENV.getConf();
         RegScheduler regScheduler = iaENV.getRegScheduler();
         String serverName = iaconf.getServerName();
@@ -143,7 +144,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     }
 
     void setRouteMap(String routePath, List<String> subTopicArr) {
-        logger.info("Route map set [{}] data {}", routePath, subTopicArr);
+        logger.debug("Route map set [{}] data {}", routePath, subTopicArr);
         RegScheduler regScheduler = iaENV.getRegScheduler();
         regScheduler.setData(routePath, JSON.toJSONBytes(subTopicArr));
     }
@@ -207,9 +208,9 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
             String serverName = iaconf.getServerName();
             String groupCode = iaconf.getGroupCode();
             String serverVersion = iaconf.getServerVersion();
-            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
-                    serverName, serverVersion));
-            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
+//            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
+//                    serverName, serverVersion));
+//            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
             //            if (CollectionUtils.isEmpty(topicArr)) {
             //            if (!regScheduler.exists(routePath))
             //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
@@ -256,7 +257,11 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                     topicArr = topicArr.subList(0, size - count);
                 } else if (count == size) { //遍历所有路由皆请求错误，重建路由
                     logger.warn("operaCode[{}] all route was failed...rebuild and try once again", operaCode);
-                    topicArr = regScheduler.buildOperaMap(operaCode);
+                    try {
+                        topicArr = regScheduler.buildOperaMap(operaCode);
+                    } catch (RegisterException e) {
+                        result = new MsgResult(StateCode.CONNECT_INTERRUPT, "["+operaCode+"] build opera map error!");
+                    }
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次
                         int i = r.nextInt(size2);

@@ -51,7 +51,7 @@ public class ZkRegScheduler implements  RegScheduler {
     }
 
     @Override
-    public boolean exists(String nodeData) {
+    public boolean exists(String nodeData) throws RegisterException {
         return regHandler.exists(nodeData);
     }
 
@@ -64,7 +64,7 @@ public class ZkRegScheduler implements  RegScheduler {
      * @Description 构建默认组装信息
      **/
     @Override
-    public List<String> buildOperaMap(String operaCode) {
+    public List<String> buildOperaMap(String operaCode) throws RegisterException {
         List<String> groupCodeList = new ArrayList<>();
         if (GroupCode.ROOT.equals(this.groupCode)){ //如果是root服务，则获取所有的服务节点
             List<String> children = this.getChildren(TopicPrefix.SUB_PREFIX);
@@ -74,7 +74,7 @@ public class ZkRegScheduler implements  RegScheduler {
             groupCodeList.add(GroupCode.ROOT);
         }
         List<String> result = new ArrayList<>();
-        groupCodeList.forEach(groupCode->{
+        for (String groupCode : groupCodeList) {
             String subPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupCode);
             List<String> serverArr = this.getChildren(subPath); //获取订阅表的服务列表
             //遍历订阅服务列表
@@ -92,8 +92,7 @@ public class ZkRegScheduler implements  RegScheduler {
                     result.add(groupServerCode);
                 }
             }
-        });
-
+        }
         return result;
     }
 
