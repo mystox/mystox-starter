@@ -205,9 +205,9 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                 logger.warn("[{}]targetServerCode request failed", targetServerCode);
             IaConf iaconf = iaENV.getConf();
             RegScheduler regScheduler = iaENV.getRegScheduler();
-            String serverName = iaconf.getServerName();
-            String groupCode = iaconf.getGroupCode();
-            String serverVersion = iaconf.getServerVersion();
+//            String serverName = iaconf.getServerName();
+//            String groupCode = iaconf.getGroupCode();
+//            String serverVersion = iaconf.getServerVersion();
 //            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
 //                    serverName, serverVersion));
 //            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
@@ -215,6 +215,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
             //            if (!regScheduler.exists(routePath))
             //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
             //            String data = regScheduler.getData(routePath);
+            //这里往下逻辑是发送错误后根据路由表再做一次尝试重建路由表
             List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             if (localTopicArr == null) localTopicArr = new ArrayList<>();
             /*boolean contains = topicArr.contains(targetServerCode);
@@ -278,11 +279,11 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                 }*/
 
             } else {
-                logger.warn("[{}]request route topic arr is null", operaCode);
+                logger.warn("[{}] Request route topic arr is null", operaCode);
                 result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
             }
             if (size != topicArr.size()) {
-                logger.warn("[{}] mqtt sender route code have changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
+                logger.warn("[{}] Mqtt sender route code had changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
                 loadBalancerClient.getOperaRouteMap().put(operaCode, topicArr);
             }
             //            regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));

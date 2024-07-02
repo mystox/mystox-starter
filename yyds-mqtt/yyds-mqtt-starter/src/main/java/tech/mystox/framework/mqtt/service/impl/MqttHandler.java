@@ -1,12 +1,12 @@
 package tech.mystox.framework.mqtt.service.impl;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.CollectionUtils;
+import org.springframework.scheduling.annotation.Async;
+import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
@@ -195,26 +195,32 @@ public class MqttHandler implements MsgHandler {
         LoadBalanceScheduler loadBalanceScheduler = iaENV.getLoadBalanceScheduler();
         ServerMsg chooseServer = null;
         try {
+            if (context.isAsync()) { //异步判断路由表是否为空，为空则不做选择，提高异步效率
+                List<String> operaRouteArr = loadBalanceScheduler.getOperaRouteArr(operaCode);
+                if (CollectionUtils.isEmpty(operaRouteArr)) {
+                    logger.warn("OperaCode[{}] route topic list size is null...", operaCode);
+                    return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] route topic list size is null...");
+                }
+            }
             chooseServer = loadBalanceScheduler.chooseServer(operaCode);
+
         } catch (RegisterException e) {
 //            logger.error("[{}]Choose server error!", operaCode);
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Choose server error..." + e);
         }
-        // if (chooseServer == null) {
-        //     logger.error("[{}] route server is null error...", operaCode);
-        //     //       mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
-        //     return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] route topic list size is null error...");
-        // }
+         if (chooseServer == null) {//选择服务为空则不做消息处理
+             logger.error("[{}] Choose server is null error...", operaCode);
+             return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] Choose server is null error...");
+         }
         String targetServerCode = "";
-        if (chooseServer != null)
+//        if (chooseServer != null)
             targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(),
                     preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion(), chooseServer.getSequence()));
 
-        MsgResult result = loadBalanceScheduler.operaCall((oCode, retryServerCode) -> operaTarget(oCode, context.getMsg(),
+        return loadBalanceScheduler.operaCall((oCode, retryServerCode) -> operaTarget(oCode, context.getMsg(),
                 context.getQos(), context.getTimeout(), context.getTimeUnit(),
                 context.isSetFlag(), context.isAsync(),
                 retryServerCode), targetServerCode, operaCode);
-        return result;
         // return loadBalanceScheduler.operaCall(operaTarget(operaCode, context.getMsg(),
         //         context.getQos(), context.getTimeout(), context.getTimeUnit(),
         //         context.isSetFlag(), context.isAsync(),
@@ -398,6 +404,7 @@ public class MqttHandler implements MsgHandler {
         return result;
     }*/
     @Override
+    @Async
     public void broadcast(String operaCode, String msg) {
         broadcast(operaCode, msg, 0, false);
     }
@@ -436,12 +443,14 @@ public class MqttHandler implements MsgHandler {
             //        String data = regScheduler.getData(routePath);
             //        List<String> topicArr = JSONArray.parseArray(data, String.class);
             List<String> topicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
-            if (CollectionUtils.isEmpty(topicArr)) {
+            if (CollectionUtils.isEmpty(topicArr)) {//异步或者广播不做路由表重整
+                logger.debug("Broadcast operaCode:[{}] route array is empty", operaCode);
+                return;
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>
-                List<String> subTopicArr = regScheduler.buildOperaMap(operaCode);
-                //                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
-                regScheduler.setData(routePath, JSON.toJSONBytes(subTopicArr));
-                topicArr = subTopicArr;
+//                List<String> subTopicArr = regScheduler.buildOperaMap(operaCode); //
+//                                List<String> subTopicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
+//                regScheduler.setData(routePath, JSON.toJSONBytes(subTopicArr));
+//                topicArr = subTopicArr;
             }
             //全部广播发送
             topicArr.forEach(groupServerCode -> {
@@ -467,6 +476,7 @@ public class MqttHandler implements MsgHandler {
     }
 
     @Override
+    @Async
     public void operaAsync(String operaCode, String msg) {
         opera(operaCode, msg, 1, 0, null, false, true);
     }
