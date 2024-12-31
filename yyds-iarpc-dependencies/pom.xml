@@ -23,7 +23,7 @@
             <dependency>
                 <groupId>tech.mystox.framework</groupId>
                 <artifactId>yyds-mqtt-starter</artifactId>
-                <version>${project.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>tech.mystox.framework</groupId>
