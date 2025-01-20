@@ -12,6 +12,10 @@
 
 
 ## maven安装依赖
+现已同步版本发布到中央仓库
+https://repo1.maven.org/maven2/tech/mystox/framework/
+
+离线环境参考以下脚本执行
 
 windows 环境下执行 baseJar/install.bat
 bash 环境下执行 baseJar/install.sh
