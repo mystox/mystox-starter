@@ -1,15 +1,12 @@
 package tech.mystox.framework.mqtt.service;
 
-import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,20 +24,40 @@ public class ExecutorRunner implements ApplicationRunner {
 
     private static LongAdder longAdder = new LongAdder();
 
-    @Value("${executor.runner.rhythm:3}")
+    //@Value("${executor.runner.rhythm:3}")
     private int rhythm;
 
-    @Autowired
-    ThreadPoolTaskExecutor mqttExecutor;
+    final ThreadPoolTaskExecutor mqttExecutor;
 
-    @Autowired
-    private ThreadPoolTaskExecutor mqttSenderAckExecutor;
+    private final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    @Autowired
-    ScheduledExecutorService mqttScheduled;
+    final ScheduledExecutorService mqttScheduled;
 
-    @Autowired
-    ChannelSenderImpl mqttSender;
+    final ChannelSenderImpl mqttSender;
+
+    public ExecutorRunner(ThreadPoolTaskExecutor mqttExecutor, ThreadPoolTaskExecutor mqttSenderAckExecutor, ScheduledExecutorService mqttScheduled, ChannelSenderImpl mqttSender) {
+        this.mqttExecutor = mqttExecutor;
+        this.mqttSenderAckExecutor = mqttSenderAckExecutor;
+        this.mqttScheduled = mqttScheduled;
+        this.mqttSender = mqttSender;
+        this.rhythm = 3;
+    }
+
+    public ThreadPoolTaskExecutor getMqttExecutor() {
+        return mqttExecutor;
+    }
+
+    public ThreadPoolTaskExecutor getMqttSenderAckExecutor() {
+        return mqttSenderAckExecutor;
+    }
+
+    public ScheduledExecutorService getMqttScheduled() {
+        return mqttScheduled;
+    }
+
+    public ChannelSenderImpl getMqttSender() {
+        return mqttSender;
+    }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

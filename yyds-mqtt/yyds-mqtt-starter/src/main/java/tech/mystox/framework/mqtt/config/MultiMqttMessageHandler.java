@@ -1,8 +1,6 @@
 package tech.mystox.framework.mqtt.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.Lifecycle;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.integration.handler.AbstractMessageHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -15,19 +13,28 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * \* @Author: mystox
  * \* Date: 2019/11/22 17:21
- * \* Description:
+ * \* Description: 批量消息处理器
  * \
  */
-public class MultiMqttMessageHandler extends AbstractMessageHandler implements Lifecycle {
+public class MultiMqttMessageHandler extends AbstractMessageHandler implements SmartLifecycle {
     private final AtomicBoolean running = new AtomicBoolean();
     private volatile Map<Integer, MessageHandler> mqttHandlerMap;
     private static LongAdder longAdder = new LongAdder();
 
-    @Autowired
-    MqttConfig mqttConfig;
+    //final MqttConfig mqttConfig;
+    CreateMqttOutBoundInterface createMqttOutBoundInterface;
 
-    @Value("${spring.mqtt.sender.count:10}")
-    private Integer handlerCount;
+    //@Value("${mqtt.sender.count:10}")
+    private final Integer handlerCount;
+
+    //public MultiMqttMessageHandler() {
+    //    this.mqttConfig = mqttConfig;
+    //}
+
+    public MultiMqttMessageHandler(CreateMqttOutBoundInterface createMqttOutbound, Integer mqttSenderCount) {
+        this.handlerCount = mqttSenderCount;
+        this.createMqttOutBoundInterface = createMqttOutbound;
+    }
 
     @Override
     public void start() {
@@ -46,7 +53,7 @@ public class MultiMqttMessageHandler extends AbstractMessageHandler implements L
     private void doStart() {
         mqttHandlerMap = new ConcurrentHashMap<>();
         for (int i = 0; i < handlerCount; i++) {
-            mqttHandlerMap.put(i, mqttConfig.createMqttOutbound());
+            mqttHandlerMap.put(i, createMqttOutBoundInterface.create());
         }
     }
 
@@ -63,7 +70,7 @@ public class MultiMqttMessageHandler extends AbstractMessageHandler implements L
     }
 
     @Override
-    protected void handleMessageInternal(Message<?> message) throws Exception {
+    public void handleMessageInternal(Message<?> message) throws Exception {
 //        Random random = new Random();
         longAdder.add(1);
         int key = longAdder.intValue();
@@ -73,5 +80,20 @@ public class MultiMqttMessageHandler extends AbstractMessageHandler implements L
         }
         MyMqttPahoMessageHandler messageHandler = (MyMqttPahoMessageHandler) mqttHandlerMap.get(key);
         messageHandler.handleMessageInternal(message);
+    }
+
+    @Override
+    public boolean isAutoStartup() {
+        return true;
+    }
+
+    @Override
+    public void stop(Runnable callback) {
+        this.stop();
+    }
+
+    @Override
+    public int getPhase() {
+        return 0;
     }
 }

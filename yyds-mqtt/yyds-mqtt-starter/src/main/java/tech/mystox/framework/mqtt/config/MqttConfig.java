@@ -148,7 +148,7 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = CHANNEL_NAME_OUT)
     public MessageHandler mqttOutbound() {
-        return new MultiMqttMessageHandler();
+        return new MultiMqttMessageHandler(this::createMqttOutbound,10);
     }
     public MessageHandler createMqttOutbound()
     {

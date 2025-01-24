@@ -6,3 +6,6 @@ mqtt:
   consumer:
     clientId: ${server.groupCode}_${server.name}_${server.version}_consumer_${random.uuid}
     defaultTopic: topic
+  executor:
+    corePoolSize: 10
+    maxPoolSize: 10000

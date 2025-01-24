@@ -3,11 +3,13 @@ package tech.mystox.framework.mqtt.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.EncodedResource;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
@@ -17,30 +19,36 @@ import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.service.MsgHandler;
 
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Properties;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
 
-@Component("mqttMsgScheduler")
-@Lazy
-public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
+//@Component("mqttMsgScheduler")
+//@Lazy
+public class DefaultMqttMsgScheduler implements MsgScheduler {
 
     private final IaContext iaContext;
     // @Autowired
     // @Qualifier("MqttHandler")
-    MsgHandler  iaHandler;
+    DefaultMqttHandler iaHandler;
     private ApplicationContext applicationContext;
     private IaConf iaconf;
     private IaENV iaENV;
     private String groupCode;
     private String serverName;
     private String serverVersion;
-    private Logger logger = LoggerFactory.getLogger(MqttMsgScheduler.class);
+    private Logger logger = LoggerFactory.getLogger(DefaultMqttMsgScheduler.class);
 
 
-    public MqttMsgScheduler(IaContext iaContext) {
-        super(iaContext);
+    public DefaultMqttMsgScheduler(IaContext iaContext) {
+        this.iaContext = iaContext;
+    }
+
+    public DefaultMqttMsgScheduler(IaContext iaContext, ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
         this.iaContext = iaContext;
     }
 
@@ -59,7 +67,51 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
         this.groupCode = iaconf.getGroupCode();
         this.serverName = iaconf.getServerName();
         this.serverVersion = iaconf.getServerVersion();
-        this.iaHandler = new MqttHandler(iaENV, applicationContext);
+        initMqttProperties();
+        this.iaHandler = new DefaultMqttHandler(iaContext);
+        try {
+            this.iaHandler.getExecutorRunner().run(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        //this.iaHandler = new MqttHandler(iaENV, applicationContext);
+    }
+
+    private void initMqttProperties() {
+        //mqMsgProperties = new Properties();
+        //从classpath路径下面查找文件
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        //加载成PropertySource对象，并添加到Environment环境中
+        Resource resource = resourceLoader.getResource("classpath:mqtt.yml");
+        EncodedResource encodedResource = new EncodedResource(resource);
+        try {
+            Properties properties = loadYamlIntoProperties(encodedResource);
+            if (applicationContext != null) {
+                Environment environment = applicationContext.getEnvironment();
+                properties.putIfAbsent("mqtt.url", environment.getProperty("mqtt.url"));
+                properties.putIfAbsent("mqtt.username", environment.getProperty("mqtt.username"));
+                properties.putIfAbsent("mqtt.password", environment.getProperty("mqtt.password"));
+                properties.putIfAbsent("mqtt.maxInflight", environment.getProperty("mqtt.maxInflight","100"));
+            }
+            iaconf.setMqMsgProperties(properties);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private Properties loadYamlIntoProperties(EncodedResource resource) throws FileNotFoundException {
+        try {
+            YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+            factory.setResources(resource.getResource());
+            factory.afterPropertiesSet();
+            return factory.getObject();
+        } catch (IllegalStateException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof FileNotFoundException)
+                throw (FileNotFoundException) e.getCause();
+            throw e;
+        }
     }
 
     @Override
@@ -126,8 +178,4 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
         return this.iaHandler;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

@@ -26,6 +26,10 @@ public class IaContext implements ApplicationRunner, Ordered {
         return iaEnv;
     }
 
+    public IaConf getConf() {
+        return conf;
+    }
+
     public IaRegister getIaRegister() {
         return iaRegister;
     }
@@ -33,7 +37,7 @@ public class IaContext implements ApplicationRunner, Ordered {
     @Override
     public void run(ApplicationArguments args) throws RegisterException {
         logger.info("Ia rpc framework run beginning...");
-        iaEnv.build(conf);
+        iaEnv.build(this);
         iaRegister = new IaRegister(iaEnv);
         iaRegister.connect();
         // iaRegister.subTopic();

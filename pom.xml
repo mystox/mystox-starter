@@ -38,7 +38,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>2.0.16</revision>
+        <revision>2.0.16.RELEASE</revision>
         <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
         <spring-cloud.version>Finchley.SR4</spring-cloud.version>
         <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
@@ -116,6 +116,7 @@
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -141,7 +142,7 @@
                         <configuration>
                             <target>
                                 <echo>delete ${base.jar.path}/${artifactId}-${version}.jar</echo>
-<!--                                <delete file="${base.jar.path}/${artifactId}-${version}.jar">-->
+                                <!--                                <delete file="${base.jar.path}/${artifactId}-${version}.jar">-->
                                 <delete file="${base.jar.path}/${artifactId}-${version}.*">
                                 </delete>
                                 <echo>copy ${project.build.outputDirectory} *.jar or *.xml to ${base.jar.path}</echo>
@@ -166,7 +167,7 @@
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>verify</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
@@ -190,6 +191,11 @@
                     <autoPublish>true</autoPublish>
                     <waitUntil>published</waitUntil>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -205,31 +211,31 @@
                 <disable.checks>true</disable.checks>
             </properties>
         </profile>
-<!--        <profile>-->
-<!--            <id>full</id>-->
-<!--            <activation>-->
-<!--                <property>-->
-<!--                    <name>full</name>-->
-<!--                </property>-->
-<!--            </activation>-->
-<!--            <build>-->
-<!--                <plugins>-->
+        <!--        <profile>-->
+        <!--            <id>full</id>-->
+        <!--            <activation>-->
+        <!--                <property>-->
+        <!--                    <name>full</name>-->
+        <!--                </property>-->
+        <!--            </activation>-->
+        <!--            <build>-->
+        <!--                <plugins>-->
 
-<!--                </plugins>-->
-<!--            </build>-->
-<!--        </profile>-->
+        <!--                </plugins>-->
+        <!--            </build>-->
+        <!--        </profile>-->
     </profiles>
 
-<!--    <distributionManagement>-->
-<!--        <repository>-->
-<!--            <id>central</id>-->
-<!--            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-<!--        </repository>-->
-<!--        <snapshotRepository>-->
-<!--            <id>central</id>-->
-<!--            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>-->
-<!--        </snapshotRepository>-->
-<!--    </distributionManagement>-->
+    <!--    <distributionManagement>-->
+    <!--        <repository>-->
+    <!--            <id>central</id>-->
+    <!--            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+    <!--        </repository>-->
+    <!--        <snapshotRepository>-->
+    <!--            <id>central</id>-->
+    <!--            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>-->
+    <!--        </snapshotRepository>-->
+    <!--    </distributionManagement>-->
     <!--<distributionManagement>
         <repository>
             <id>releases</id>

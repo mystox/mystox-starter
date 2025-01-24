@@ -8,16 +8,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.entity.*;
+import tech.mystox.framework.entity.RegisterMsg;
+import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.ServerMsg;
+import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.exception.RegisterException;
-import tech.mystox.framework.scheduler.DefaultMsgScheduler;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
+import static tech.mystox.framework.common.util.MqttUtils.preconditionServerCode;
 
 @Component
 public class IaENV implements ApplicationContextAware, RegCall {
@@ -25,14 +30,16 @@ public class IaENV implements ApplicationContextAware, RegCall {
     private RegScheduler regScheduler;
     private LoadBalanceScheduler loadBalanceScheduler;
     private IaConf conf;
+    private IaContext iaContext;
     private ServerStatus serverStatus = ServerStatus.OFFLINE;
     private ServerMsg serverMsg;
     private Logger logger = LoggerFactory.getLogger(IaENV.class);
 
 
-    public void build(IaConf conf) {
+    public void build(IaContext iaContext) {
         setServerStatus(ServerStatus.STARTING);
-        this.conf = conf;
+        this.iaContext = iaContext;
+        this.conf = iaContext.getConf();
         regScheduler = createRegScheduler(getRegType(conf));
         msgScheduler = createMsgScheduler(getMsgType(conf));
         loadBalanceScheduler = createLoadBalancerScheduler(getLoadBalancer(conf));
@@ -96,9 +103,18 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 return mqttMsgScheduler;
             }
             default: {
-                MsgScheduler mqttMsgScheduler = new DefaultMsgScheduler();
-                mqttMsgScheduler.build(this);
-                return mqttMsgScheduler;
+                try {
+                    Class<?> aClass = Class.forName("tech.mystox.framework.mqtt.service.impl.DefaultMqttMsgScheduler", false, Thread.currentThread()
+                            .getContextClassLoader());
+                    Constructor<?> declaredConstructor = aClass.getDeclaredConstructor(IaContext.class, ApplicationContext.class);
+                    MsgScheduler mqttMsgScheduler = (MsgScheduler) declaredConstructor.newInstance(iaContext, applicationContext);
+                    //MsgScheduler mqttMsgScheduler = new DefaultMsgScheduler();
+                    mqttMsgScheduler.build(this);
+                    return mqttMsgScheduler;
+                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                         InvocationTargetException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -166,6 +182,10 @@ public class IaENV implements ApplicationContextAware, RegCall {
     }
 
     ApplicationContext applicationContext;
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.StringUtils;
-import tech.mystox.framework.config.CommonExecutorConfig;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.OperaRouteConfig;
 import tech.mystox.framework.core.IaENV;
@@ -30,7 +29,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * description: 内存存放的路由表信息
  * update record:
  */
-public class BaseLoadBalancerClient extends CommonExecutorConfig implements LoadBalancerClient {
+public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements LoadBalancerClient {
 
     private Logger logger = LoggerFactory.getLogger(BaseLoadBalancerClient.class);
     private IaENV iaENV;

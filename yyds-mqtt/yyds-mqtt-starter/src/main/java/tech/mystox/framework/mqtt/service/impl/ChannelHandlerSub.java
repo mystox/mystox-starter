@@ -2,9 +2,7 @@ package tech.mystox.framework.mqtt.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
@@ -24,13 +22,14 @@ public class ChannelHandlerSub {
 
     Logger logger = LoggerFactory.getLogger(ChannelHandlerSub.class);
 
-    @Value("${server.name}_${server.version}")
-    private String serverCode;
+    //@Value("${server.name}_${server.version}")
+    //private String serverCode;
 
-    @Autowired
-    @Qualifier("inbound")
-    private MessageProducer messageProducer;
+    private final MessageProducer messageProducer;
 
+    public ChannelHandlerSub(@Qualifier("inbound") MessageProducer messageProducer) {
+        this.messageProducer = messageProducer;
+    }
 
 
     public void addSubTopic(String topic, int qos) {

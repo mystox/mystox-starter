@@ -6,6 +6,7 @@ package tech.mystox.framework.mqtt.entity;
  * description:
  * update record:
  */
+@Deprecated
 public class ResponseEntity {
     private int code;
     private String result;

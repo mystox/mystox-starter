@@ -22,16 +22,15 @@ public class ExecutorConfig extends CommonExecutorConfig {
     @Value("${executor.threadPool.maxPoolSize:100000}")
     private int MAX_POOL_SIZE;
 
-    @Bean(name = "logExecutor")
-    public ThreadPoolTaskExecutor logExecutor()
-    {
-        return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "log-");
-    }
+    //@Bean(name = "logExecutor")
+    //public ThreadPoolTaskExecutor logExecutor()
+    //{
+    //    return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "log-");
+    //}
 
 
     @Bean(name = "mqttExecutor")
-    public ThreadPoolTaskExecutor mqttExecutor()
-    {
+    public ThreadPoolTaskExecutor mqttExecutor() {
         return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "mqttExecutor-");
     }
 
@@ -47,8 +46,7 @@ public class ExecutorConfig extends CommonExecutorConfig {
     }
 
     @Bean(name = "mqttSenderAckExecutor")
-    public ThreadPoolTaskExecutor mqttAck()
-    {
+    public ThreadPoolTaskExecutor mqttAck() {
         return builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttAck-");
     }
 

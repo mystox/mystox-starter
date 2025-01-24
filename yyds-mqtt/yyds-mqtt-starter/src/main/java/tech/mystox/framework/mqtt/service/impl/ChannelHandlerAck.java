@@ -3,7 +3,6 @@ package tech.mystox.framework.mqtt.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.stereotype.Service;
@@ -23,13 +22,13 @@ public class ChannelHandlerAck {
 
     Logger logger = LoggerFactory.getLogger(ChannelHandlerAck.class);
 
-    @Value("${server.name}")
-    private String serverName;
+    //@Value("${server.name}")
+    //private String serverName;
+    //
+    //@Value("${server.version}")
+    //private String serverVersion;
 
-    @Value("${server.version}")
-    private String serverVersion;
-
-    @Qualifier(value = "replyProducer")
+    //@Qualifier(value = "replyProducer")
     private final MessageProducer messageProducer;
 
     public ChannelHandlerAck(@Qualifier(value = "replyProducer")MessageProducer replyProducer) {

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -13,7 +12,6 @@ import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.MqttLogUtil;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.mqtt.config.MqttConfig;
@@ -39,26 +37,36 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
 public class ChannelSenderImpl {
 
     Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);
-    @Value("${mqtt.payload.limit:#{47 * 1024}}")
+    //@Value("${mqtt.payload.limit:#{47 * 1024}}")
     private int mqttPayloadLimit;
     protected static final Map<String, CallSubpackageMsg<MsgRsp>> CALLBACKS = new ConcurrentHashMap<>();
 
-    @Value("${mqtt.callback.maxCount:10000}")
+    //@Value("${mqtt.callback.maxCount:10000}")
     private long callbackMaxCount;
     final IaENV iaEnv;
     final IaConf iaConf;
     private final IMqttSender mqttSender;
-    private final MqttLogUtil mqttLogUtil;
+    //private final MqttLogUtil mqttLogUtil;
     private final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    public ChannelSenderImpl(IaENV iaEnv, IaConf iaConf, IMqttSender mqttSender, MqttLogUtil mqttLogUtil, ThreadPoolTaskExecutor mqttSenderAckExecutor) {
+    public ChannelSenderImpl(IaENV iaEnv, IaConf iaConf, IMqttSender iMqttSender, /*MqttLogUtil mqttLogUtil, */
+                             ThreadPoolTaskExecutor mqttSenderAckExecutor) {
         this.iaEnv = iaEnv;
         this.iaConf = iaConf;
-        this.mqttSender = mqttSender;
-        this.mqttLogUtil = mqttLogUtil;
+        this.mqttSender = iMqttSender;
+        //this.mqttLogUtil = mqttLogUtil;
         this.mqttSenderAckExecutor = mqttSenderAckExecutor;
+        this.callbackMaxCount = 10000;
+        this.mqttPayloadLimit = 47 * 1024;
     }
 
+    public void setMqttPayloadLimit(int mqttPayloadLimit) {
+        this.mqttPayloadLimit = mqttPayloadLimit;
+    }
+
+    public void setCallbackMaxCount(long callbackMaxCount) {
+        this.callbackMaxCount = callbackMaxCount;
+    }
 
     public void sendToMqtt(String serverCode, String operaCode, String payload) throws Exception {
         //组建topicid
@@ -83,7 +91,7 @@ public class ChannelSenderImpl {
                 packageFlag = true;
             }
         } else {
-            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
         }
     }
@@ -112,7 +120,7 @@ public class ChannelSenderImpl {
                 packageFlag = true;
             }
         } else {
-            mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
             logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
         }
     }
@@ -134,12 +142,12 @@ public class ChannelSenderImpl {
                 }
                 return true;
             } else {
-                mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
+                //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
                 logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
                 return false;
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
             logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
@@ -165,7 +173,7 @@ public class ChannelSenderImpl {
         CallSubpackageMsg<MsgRsp> callBackTopic = new CallSubpackageMsg<>();
         int size = CALLBACKS.size();
         if (size > callbackMaxCount) {
-            mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
             logger.error("[{}]message, system callback map is full[{}]", msgId, size);
             return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
         }
@@ -180,12 +188,12 @@ public class ChannelSenderImpl {
                 return new MsgResult(resp.getStateCode(), resp.getPayload());
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
             logger.error("[{}]message{},{}, request timeout: [{}][{}]", msgId, serverCode, operaCode, timeout, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
             return new MsgResult(StateCode.TIMEOUT, timeout + "|" + e.toString());
         } catch (Exception e) {
-            mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
             logger.error("[{}]message, request exception: [{}]", msgId, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
             return new MsgResult(StateCode.FAILED, e.toString());

@@ -1,17 +1,16 @@
 package tech.mystox.framework.core;
 
 import com.alibaba.fastjson2.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.entity.MqttLog;
 import tech.mystox.framework.entity.OperaCode;
 import tech.mystox.framework.entity.ServerName;
 import tech.mystox.framework.service.IaOpera;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.UUID;
@@ -22,7 +21,8 @@ import java.util.UUID;
  * description: 消息日志处理类
  * update record:
  */
-@Component
+@Deprecated //不在此集成错误处理
+//@Component
 public class MqttLogUtil {
 
     private Logger logger = LoggerFactory.getLogger(MqttLogUtil.class);
@@ -34,14 +34,18 @@ public class MqttLogUtil {
     private String logServerVersion;
     @Value("${logging.mqtt.flag.error:true}")
     private Boolean mqttErrorFlag;
-    @Autowired
-    private ThreadPoolTaskExecutor logExecutor;
-    @Autowired
-    IaContext iaContext;
+    private final ThreadPoolTaskExecutor logExecutor;
+    final IaContext iaContext;
 
 
-    @Autowired
+    final
     IaOpera iaOpera;
+
+    public MqttLogUtil(@Qualifier("logExecutor") ThreadPoolTaskExecutor logExecutor, IaContext iaContext, IaOpera iaOpera) {
+        this.logExecutor = logExecutor;
+        this.iaContext = iaContext;
+        this.iaOpera = iaOpera;
+    }
 
 
     public void ERROR(String msgId, int stateCode, String operaCode, String targetServerCode) {
@@ -63,8 +67,8 @@ public class MqttLogUtil {
             return;
         }
         MqttLog mqttLog = operaRouteLogBuilder(UUID.randomUUID().toString(), stateCode, operaCode);
-            logExecutor.execute(() ->
-                    iaOpera.operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
+        logExecutor.execute(() ->
+                iaOpera.operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
     }
 
 

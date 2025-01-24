@@ -10,16 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.MessageEndpoint;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
 import tech.mystox.framework.core.IaContext;
-import tech.mystox.framework.core.MqttLogUtil;
 import tech.mystox.framework.entity.*;
-import tech.mystox.framework.mqtt.config.MqttConfig;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
@@ -35,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.*;
 
 
@@ -52,8 +50,8 @@ public class MqttReceiver {
     private int mqttPayloadLimit;
     @Value("${jarResources.path:./jarResources}")
     private String jarPath;
-    @Value("${server.name}_${server.version}")
-    private String serverCode;
+    //@Value("${server.name}_${server.version}")
+    //private String serverCode;
     @Value("${mqtt.callback.maxCount:10000}")
     private long callbackMaxCount;
     @Value("${mqtt.package.timeout:30}")
@@ -66,15 +64,22 @@ public class MqttReceiver {
      */
     private final IMqttSender iMqttSender;
     private final ThreadPoolTaskExecutor mqttExecutor;
-    private final MqttLogUtil mqttLogUtil;
+    //private final MqttLogUtil mqttLogUtil;
 
     protected static final Map<String, CallSubpackageMsg<MqttMsg>> CALLBACKS = new ConcurrentHashMap<>();
 
-    public MqttReceiver(IaContext iaContext, IMqttSender iMqttSender, ThreadPoolTaskExecutor mqttExecutor, MqttLogUtil mqttLogUtil) {
+    public MqttReceiver(IaContext iaContext, IMqttSender iMqttSender, ThreadPoolTaskExecutor mqttExecutor/*, MqttLogUtil mqttLogUtil*/) {
         this.iaContext = iaContext;
         this.iMqttSender = iMqttSender;
         this.mqttExecutor = mqttExecutor;
-        this.mqttLogUtil = mqttLogUtil;
+        //this.mqttLogUtil = mqttLogUtil;
+        Properties mqMsgProperties = iaContext.getConf().getMqMsgProperties();
+        if (mqMsgProperties != null) {
+            this.mqttPayloadLimit = (int) mqMsgProperties.getOrDefault("mqtt.payload.limit", 47 * 1024);
+            this.callbackMaxCount = (int) mqMsgProperties.getOrDefault("mqtt.callback.maxCount", 10000);
+            this.packageMsgTimeout = (int) mqMsgProperties.getOrDefault("mqtt.package.timeout", 30);
+            this.jarPath = mqMsgProperties.getProperty("jarResources.path", "./jarResources");
+        }
     }
 
 
@@ -93,7 +98,7 @@ public class MqttReceiver {
                 //todo 执行远程的http服务器
             }
         } catch (Exception e) {
-            mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
+            //mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
             logger.error(" [{}] Msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
             result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
@@ -136,7 +141,7 @@ public class MqttReceiver {
             resp = new MsgRsp(mqttMsg.getMsgId(), result);
             return resp;
         } catch (Exception e) {
-            mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), serverCode);
+            //mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), serverCode);
             logger.error("[{}]Local execute exception! Source: [{}] Method name: [{}]", mqttMsg.getMsgId(), mqttMsg.getSourceAddress(), methodName, e);
             resp = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             resp.setStateCode(StateCode.FAILED);
@@ -194,7 +199,7 @@ public class MqttReceiver {
             logger.info("jar result: {}", result);
             return resp;
         } catch (MalformedURLException | InstantiationException | IllegalAccessException
-                | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                 | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;
@@ -214,7 +219,7 @@ public class MqttReceiver {
 
     }
 
-    @ServiceActivator(inputChannel = MqttConfig.CHANNEL_NAME_IN)
+    //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_NAME_IN)
     public void messageReceiver(Message<String> message) {
         mqttExecutor.execute(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
@@ -239,7 +244,8 @@ public class MqttReceiver {
                 try {
                     packageMsg = stickPackageMsg(mqttMsg);
                     mqttMsg.setPayload(packageMsg);
-                } catch (ExecutionException | InterruptedException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+                } catch (ExecutionException | InterruptedException | InvocationTargetException | NoSuchMethodException |
+                         InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                     logger.error("[{}]Subpackage msg[{}] result excepted...[{}]", mqttMsg.getMsgId(), mqttMsg.getTopic(), e);
                     if (logger.isDebugEnabled()) e.printStackTrace();
@@ -277,8 +283,8 @@ public class MqttReceiver {
                 } else
                     iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
-                logger.error("[{}] Message ", e.toString());
-                if (logger.isDebugEnabled()) e.printStackTrace();
+                logger.error("[{}] Message ", result.getMsgId(), e);
+                //if (logger.isDebugEnabled()) e.printStackTrace();
             }
         });
 
@@ -305,7 +311,7 @@ public class MqttReceiver {
         int size = CALLBACKS.size();
         String operaCode = mqttMsg.getOperaCode();
         if (size > callbackMaxCount) {
-            mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
+            //mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
             logger.error("[{}]Message, system callback map is full[{}]", msgId, size);
             return null;
         }

@@ -6,7 +6,7 @@ import tech.mystox.framework.service.MsgHandler;
 
 import java.util.List;
 
-public interface MsgScheduler  extends Schedule {
+public interface MsgScheduler extends Schedule {
     public void subTopic(List<RegisterSub> subList);
     public void removerSubTopic(List<RegisterSub> subList);
     public void build(IaENV iaENV);
