@@ -24,6 +24,7 @@ import java.util.Arrays;
  */
 public abstract class OperaBaseInterceptor implements MethodInterceptor {
     private IaContext iaContext;
+
     public OperaBaseInterceptor(IaContext iaContext) {
         this.iaContext = iaContext;
     }
@@ -39,22 +40,22 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
             Object bean = null;
             try {
                 Class<?> declaringClass = invocation.getMethod().getDeclaringClass();
-                if (declaringClass.isInstance(Object.class)){
+                if (declaringClass.isInstance(Object.class)) {
                     Method[] methods = Object.class.getMethods();
-                    if(CollectionUtils.contains(Arrays.stream(methods).iterator(), method)){
+                    if (CollectionUtils.contains(Arrays.stream(methods).iterator(), method)) {
                         return method.invoke(this, arguments);
                     }
                 }
                 bean = applicationContext.getBean(declaringClass);
             } catch (BeansException e) {
-                throw new MsgResultFailException(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION,"opera is null or code is blank and no local service available...");//todo 是否应该本地执行
+                throw new MsgResultFailException(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION, "opera is null or code is blank and no local service available...");//todo 是否应该本地执行
             }
             return bean.getClass().getMethod(method.getName(), invocation.getMethod().getParameterTypes())
                     .invoke(bean, invocation.getArguments());
         }
         operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
 //        Type genericReturnType = method.getReturnType();
-        return opera(operaCodeName, arguments,method.getGenericReturnType());
+        return opera(operaCodeName, arguments, method.getGenericReturnType());
 
     }
 
