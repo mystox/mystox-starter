@@ -3,6 +3,7 @@ package tech.mystox.framework.proxy;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
+import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgResult;
 import tech.mystox.framework.entity.OperaContext;
@@ -36,9 +37,14 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
                         iaContext.getIaENV().getLoadBalanceScheduler(),
                         true, false));
-        if (opera.getStateCode() != StateCode.SUCCESS)
-            throw new MsgResultFailException(StateCode.StateCodeEnum.resolveByStateCode(opera.getStateCode()),"Opera result is failed ");
         String msg = opera.getMsg();
+        if (opera.getStateCode() != StateCode.SUCCESS) {
+            String operaResultIsFailed = "Opera result is failed ";
+            if (!StringUtils.isEmpty(msg)) {
+                operaResultIsFailed = msg;
+            }
+            throw new MsgResultFailException(StateCode.StateCodeEnum.resolveByStateCode(opera.getStateCode()), operaResultIsFailed);
+        }
         return deserialize(msg, genericReturnType);
     }
 
