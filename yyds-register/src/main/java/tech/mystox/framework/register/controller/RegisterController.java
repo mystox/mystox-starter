@@ -29,11 +29,14 @@ import java.util.Set;
 @RestController
 @RequestMapping("/register")
 public class RegisterController {
-    @Autowired
-    IaContext iaContext;
+    final IaContext iaContext;
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     ContextRefresher contextRefresher;
+
+    public RegisterController(IaContext iaContext) {
+        this.iaContext = iaContext;
+    }
 
     @Autowired
     @Lazy

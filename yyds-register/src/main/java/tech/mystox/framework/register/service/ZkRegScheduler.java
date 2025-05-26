@@ -23,15 +23,14 @@ import tech.mystox.framework.service.RegHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
-import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerPath;
+import static tech.mystox.framework.common.util.MqttUtils.*;
 
 @Component("zkRegScheduler")
 @Lazy
 public class ZkRegScheduler implements  RegScheduler {
     private final Logger logger = LoggerFactory.getLogger(ZkRegScheduler.class);
     RegHandler regHandler;
-    private IaConf iaconf;
+    private IaConf iaConf;
     private String groupCode;
 
 
@@ -47,6 +46,14 @@ public class ZkRegScheduler implements  RegScheduler {
 
     @Override
     public void unregister() {
+        String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
+                preconditionGroupServerCode(this.iaConf.getGroupCode(),
+                        preconditionServerCode(iaConf.getServerName(), iaConf.getServerVersion(), iaConf.getSequence())));
+        //if (regScheduler == null) {
+        //    logger.warn("Register scheduler is null...");
+        //    throw new RegisterException("Register scheduler is null...");
+        //}
+        deleteNode(onlineStatus);//关闭服务注册发现
         regHandler.unregister();
     }
 
@@ -123,12 +130,12 @@ public class ZkRegScheduler implements  RegScheduler {
 
     @Override
     public List<RegisterSub> getRegLocalList() {
-        return this.iaconf.getLocalServiceScanner().getSubList();
+        return this.iaConf.getLocalServiceScanner().getSubList();
     }
 
     @Override
     public List<RegisterSub> getRegJarList() {
-        return this.iaconf.getJarServiceScanner().getSubList();
+        return this.iaConf.getJarServiceScanner().getSubList();
     }
 
 
@@ -171,8 +178,8 @@ public class ZkRegScheduler implements  RegScheduler {
 
     @Override
     public void build(IaENV iaENV) {
-        this.iaconf = iaENV.getConf();
-        this.groupCode = iaconf.getGroupCode();
+        this.iaConf = iaENV.getConf();
+        this.groupCode = iaConf.getGroupCode();
         this.regHandler = new ZkHandlerImpl(iaENV);
         this.regHandler.build();
     }
