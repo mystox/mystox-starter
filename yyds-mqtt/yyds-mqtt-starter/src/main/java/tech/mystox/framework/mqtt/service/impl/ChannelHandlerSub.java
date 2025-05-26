@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +16,7 @@ import java.util.List;
  * description: 处理一些mqtt的接口操作
  * update record:
  */
-@Service(value = "mqttHandlerImpl")
+//@Service(value = "mqttHandlerImpl")
 public class ChannelHandlerSub {
 
     Logger logger = LoggerFactory.getLogger(ChannelHandlerSub.class);

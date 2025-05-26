@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
@@ -33,7 +32,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * description: 封装的mqtt生产者
  * update record:
  */
-@Service("mqttSenderImpl")
+//@Service("mqttSenderImpl")
 public class ChannelSenderImpl {
 
     Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);

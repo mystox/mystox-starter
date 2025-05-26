@@ -5,10 +5,6 @@ import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
@@ -18,7 +14,6 @@ import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannel
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import tech.mystox.framework.config.YamlPropertySourceFactory;
 
 /**
  * Created by mystoxlol on 2019/8/5, 14:35.
@@ -26,10 +21,10 @@ import tech.mystox.framework.config.YamlPropertySourceFactory;
  * description:
  * update record:
  */
-@Configuration
-@IntegrationComponentScan("tech.mystox.framework")
-@ComponentScan("tech.mystox.framework")
-@PropertySource(factory = YamlPropertySourceFactory.class, value = {"classpath:mqtt.yml"})
+//@Configuration
+//@IntegrationComponentScan("tech.mystox.framework")
+//@ComponentScan("tech.mystox.framework")
+//@PropertySource(factory = YamlPropertySourceFactory.class, value = {"classpath:mqtt.yml"})
 public class MqttConfig {
     private static final byte[] WILL_DATA;
 

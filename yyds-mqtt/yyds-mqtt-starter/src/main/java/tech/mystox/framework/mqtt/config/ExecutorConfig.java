@@ -2,7 +2,6 @@ package tech.mystox.framework.mqtt.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.config.CommonExecutorConfig;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * description:
  * update record:
  */
-@Configuration
+//@Configuration
 public class ExecutorConfig extends CommonExecutorConfig {
     @Value("${executor.threadPool.corePoolSize:10}")
     private int CORE_POOL_SIZE;

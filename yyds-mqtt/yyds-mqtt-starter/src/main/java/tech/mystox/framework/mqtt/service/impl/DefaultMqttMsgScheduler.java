@@ -10,18 +10,23 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.mqtt.service.ExecutorRunner;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.service.MsgHandler;
 
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -116,7 +121,27 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
 
     @Override
     public void unregister() {
+        ExecutorRunner executorRunner = this.iaHandler.getExecutorRunner();
+        ThreadPoolTaskExecutor mqttExecutor = executorRunner.getMqttExecutor();
+        ThreadPoolTaskExecutor mqttSenderAckExecutor = executorRunner.getMqttSenderAckExecutor();
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(() -> {
+            if (mqttExecutor.getActiveCount() == 0 && mqttSenderAckExecutor.getActiveCount() == 0)
+                executorService.shutdown();
+            else
+                logger.warn("MqttExecutor active count [{}], MqttSenderAckExecutor active count [{}]",
+                        mqttExecutor.getActiveCount(), mqttSenderAckExecutor.getActiveCount());
+        }, 10, 500, TimeUnit.MILLISECONDS);
+        try {
+            if (executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                logger.info("Server closed successfully!!");
+            }
+        } catch (InterruptedException e) {
+            logger.error("MqttExecutor active count [{}], MqttSenderAckExecutor active count [{}]",
+                    mqttExecutor.getActiveCount(), mqttSenderAckExecutor.getActiveCount());
+        }
         removerSubTopic(this.iaENV.getRegScheduler().getSubList());
+        this.iaHandler.stop();
     }
 
     private void ackTopic() {

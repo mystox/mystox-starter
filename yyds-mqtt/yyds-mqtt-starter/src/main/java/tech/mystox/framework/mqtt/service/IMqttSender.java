@@ -7,22 +7,14 @@ package tech.mystox.framework.mqtt.service;
  * update record:
  */
 
-import tech.mystox.framework.mqtt.config.MqttConfig;
-import org.springframework.integration.annotation.MessagingGateway;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.stereotype.Component;
 
 /**
  * MQTT生产者消息发送接口
  * <p>MessagingGateway要指定生产者的通道名称</p>
  * @author BBF
  */
-@Component
-@MessagingGateway(defaultRequestChannel = MqttConfig.CHANNEL_NAME_OUT,
-        defaultRequestTimeout = "10000"/*,
-        defaultReplyChannel = MqttConfig.CHANNEL_REPLY,
-        defaultReplyTimeout = "10000"*/)
 public interface IMqttSender {
 
     /**

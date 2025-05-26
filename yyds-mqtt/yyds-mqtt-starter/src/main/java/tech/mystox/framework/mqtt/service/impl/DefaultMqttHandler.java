@@ -111,6 +111,7 @@ public class DefaultMqttHandler extends MqttHandler {
         adapter.setOutputChannel(MqttConfigInstance.getInstance().mqttInboundChannel());
         adapter.setTaskScheduler(taskScheduler);
         adapter.start();
+        this.channelConsumerDrivenChannelAdapter = adapter;
         return adapter;
     }
 
@@ -142,6 +143,7 @@ public class DefaultMqttHandler extends MqttHandler {
         adapter.setOutputChannel(MqttConfigInstance.getInstance().mqttReplyChannel());
         adapter.setTaskScheduler(taskScheduler);
         adapter.start();
+        this.replyProducerDrivenChannelAdapter = adapter;
         return adapter;
     }
 

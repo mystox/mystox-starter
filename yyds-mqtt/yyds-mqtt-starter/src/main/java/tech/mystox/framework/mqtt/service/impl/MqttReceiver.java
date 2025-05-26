@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
@@ -42,7 +41,7 @@ import java.util.concurrent.*;
  * description:
  * update record:
  */
-@MessageEndpoint
+//@MessageEndpoint
 public class MqttReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MqttReceiver.class);
     //    private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小

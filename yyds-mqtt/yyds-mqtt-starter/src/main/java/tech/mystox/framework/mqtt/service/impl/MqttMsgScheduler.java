@@ -21,7 +21,7 @@ import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
-
+@Deprecated
 @Component("mqttMsgScheduler")
 @Lazy
 public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
@@ -62,10 +62,10 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
         this.iaHandler = new MqttHandler(iaENV, applicationContext);
     }
 
-    @Override
-    public void unregister() {
-        removerSubTopic(this.iaENV.getRegScheduler().getSubList());
-    }
+    //@Override
+    //public void unregister() {
+    //    removerSubTopic(this.iaENV.getRegScheduler().getSubList());
+    //}
 
     private void ackTopic() {
         String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion, iaconf.getSequence())));

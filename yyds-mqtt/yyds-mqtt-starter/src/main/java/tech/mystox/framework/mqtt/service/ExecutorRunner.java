@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
 import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,7 +17,7 @@ import java.util.concurrent.atomic.LongAdder;
  * \* Description:
  * \
  */
-@Component
+//@Component
 public class ExecutorRunner implements ApplicationRunner {
     Logger logger = LoggerFactory.getLogger(ExecutorRunner.class);
 
