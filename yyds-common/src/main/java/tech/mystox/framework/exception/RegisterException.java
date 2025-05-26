@@ -6,7 +6,7 @@ package tech.mystox.framework.exception;
  * description: 注册发生的异常
  * update record:
  */
-public class RegisterException extends Exception {
+public class RegisterException extends RuntimeException {
 
     public RegisterException(String message, Exception e) {
         super(message, e);
