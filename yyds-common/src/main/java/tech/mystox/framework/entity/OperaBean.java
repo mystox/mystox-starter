@@ -94,7 +94,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
         }
         initialized = true;
         if (interfaceName == null || interfaceName.length() == 0) {
-            throw new IllegalStateException("<dubbo:reference interface=\"\" /> interface not allow null!");
+            throw new IllegalStateException("<iarpc:reference interface=\"\" /> interface not allow null!");
         }
 
         try {
@@ -161,7 +161,7 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
         //     for (MethodConfig methodBean : methods) {
         //         String methodName = methodBean.getName();
         //         if (methodName == null || methodName.length() == 0) {
-        //             throw new IllegalStateException("<dubbo:method> name attribute is required! Please check: <dubbo:service interface=\"" + interfaceClass.getName() + "\" ... ><dubbo:method name=\"\" ... /></<dubbo:reference>");
+        //             throw new IllegalStateException("<iarpc:method> name attribute is required! Please check: <iarpc:service interface=\"" + interfaceClass.getName() + "\" ... ><dubbo:method name=\"\" ... /></<dubbo:reference>");
         //         }
         //         boolean hasMethod = false;
         //         for (java.lang.reflect.Method method : interfaceClass.getMethods()) {

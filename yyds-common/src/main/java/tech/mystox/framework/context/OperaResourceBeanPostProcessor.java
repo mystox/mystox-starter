@@ -125,7 +125,7 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
                 }
 
                 if (logger.isInfoEnabled()) {
-                    logger.info(beanDefinitionHolders.size() + " annotated Dubbo's @Service Components { " +
+                    logger.info(beanDefinitionHolders.size() + " annotated Iarpc's @Service Components { " +
                             beanDefinitionHolders +
                             " } were scanned under package[" + packageToScan + "]");
                 }
@@ -133,7 +133,7 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
             } else {
 
                 if (logger.isWarnEnabled()) {
-                    logger.warn("No Spring Bean annotating Dubbo's @Service was found under package["
+                    logger.warn("No Spring Bean annotating Iarpc's @Service was found under package["
                             + packageToScan + "]");
                 }
 
@@ -208,42 +208,27 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
         // Set interface
         builder.addPropertyValue("interface", interfaceClass.getName());
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.ProviderConfig} Bean reference
-         *//*
         String providerConfigBeanName = service.provider();
         if (StringUtils.hasText(providerConfigBeanName)) {
             addPropertyReference(builder, "provider", providerConfigBeanName);
         }
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.MonitorConfig} Bean reference
-         *//*
         String monitorConfigBeanName = service.monitor();
         if (StringUtils.hasText(monitorConfigBeanName)) {
             addPropertyReference(builder, "monitor", monitorConfigBeanName);
         }
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.ApplicationConfig} Bean reference
-         *//*
         String applicationConfigBeanName = service.application();
         if (StringUtils.hasText(applicationConfigBeanName)) {
             addPropertyReference(builder, "application", applicationConfigBeanName);
         }
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.ModuleConfig} Bean reference
-         *//*
         String moduleConfigBeanName = service.module();
         if (StringUtils.hasText(moduleConfigBeanName)) {
             addPropertyReference(builder, "module", moduleConfigBeanName);
         }
 
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.RegistryConfig} Bean reference
-         *//*
         String[] registryConfigBeanNames = service.registry();
 
         List<RuntimeBeanReference> registryRuntimeBeanReferences = toRuntimeBeanReferences(registryConfigBeanNames);
@@ -252,9 +237,6 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
             builder.addPropertyValue("registries", registryRuntimeBeanReferences);
         }
 
-        *//**
-         * Add {@link com.alibaba.dubbo.config.ProtocolConfig} Bean reference
-         *//*
         String[] protocolConfigBeanNames = service.protocol();
 
         List<RuntimeBeanReference> protocolRuntimeBeanReferences = toRuntimeBeanReferences(protocolConfigBeanNames);

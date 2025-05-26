@@ -13,7 +13,6 @@ import tech.mystox.framework.entity.ServerName;
 import tech.mystox.framework.service.IaOpera;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * Created by mystoxlol on 2019/10/12, 9:42.
@@ -61,15 +60,15 @@ public class MqttLogUtil {
         }
     }
 
-    public void OPERA_ERROR(int stateCode, String operaCode) {
-        if (OperaCode.MQLOG.equals(operaCode)) {
-            logger.error("mqtt log server is not running, skip save log...");
-            return;
-        }
-        MqttLog mqttLog = operaRouteLogBuilder(UUID.randomUUID().toString(), stateCode, operaCode);
-        logExecutor.execute(() ->
-                iaOpera.operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
-    }
+    //public void OPERA_ERROR(int stateCode, String operaCode) {
+    //    if (OperaCode.MQLOG.equals(operaCode)) {
+    //        logger.error("mqtt log server is not running, skip save log...");
+    //        return;
+    //    }
+    //    MqttLog mqttLog = operaRouteLogBuilder(UUID.randomUUID().toString(), stateCode, operaCode);
+    //    logExecutor.execute(() ->
+    //            iaOpera.operaAsync(OperaCode.MQLOG, JSONObject.toJSONString(mqttLog)));
+    //}
 
 
     /**
