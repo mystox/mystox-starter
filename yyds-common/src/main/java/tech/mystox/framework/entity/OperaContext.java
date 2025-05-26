@@ -1,7 +1,5 @@
 package tech.mystox.framework.entity;
 
-import tech.mystox.framework.scheduler.LoadBalanceScheduler;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,20 +15,20 @@ public class OperaContext {
     private int qos;
     private long timeout;
     private TimeUnit timeUnit;
-    private LoadBalanceScheduler loadBalanceScheduler;
+    //private LoadBalanceScheduler loadBalanceScheduler;
     private boolean setFlag;//context个性化标签
     private boolean async;
-    public OperaContext(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, LoadBalanceScheduler loadBalanceScheduler, boolean setFlag, boolean async) {
-        this(null, operaCode, msg, qos, timeout, timeUnit, loadBalanceScheduler, setFlag, async);
+    public OperaContext(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, /*LoadBalanceScheduler loadBalanceScheduler, */boolean setFlag, boolean async) {
+        this(null, operaCode, msg, qos, timeout, timeUnit, /*loadBalanceScheduler,*/ setFlag, async);
     }
-    public OperaContext(String groupCode, String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, LoadBalanceScheduler loadBalanceScheduler, boolean setFlag, boolean async) {
+    public OperaContext(String groupCode, String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, /*LoadBalanceScheduler loadBalanceScheduler,*/ boolean setFlag, boolean async) {
         this.groupCode = groupCode;
         this.operaCode = operaCode;
         this.msg = msg;
         this.qos = qos;
         this.timeout = timeout;
         this.timeUnit = timeUnit;
-        this.loadBalanceScheduler = loadBalanceScheduler;
+        //this.loadBalanceScheduler = loadBalanceScheduler;
         this.setFlag = setFlag;
         this.async = async;
     }
@@ -99,11 +97,11 @@ public class OperaContext {
         this.timeUnit = timeUnit;
     }
 
-    public LoadBalanceScheduler getLoadBalanceScheduler() {
-        return loadBalanceScheduler;
-    }
-
-    public void setLoadBalanceScheduler(LoadBalanceScheduler loadBalanceScheduler) {
-        this.loadBalanceScheduler = loadBalanceScheduler;
-    }
+    //public LoadBalanceScheduler getLoadBalanceScheduler() {
+    //    return loadBalanceScheduler;
+    //}
+    //
+    //public void setLoadBalanceScheduler(LoadBalanceScheduler loadBalanceScheduler) {
+    //    this.loadBalanceScheduler = loadBalanceScheduler;
+    //}
 }

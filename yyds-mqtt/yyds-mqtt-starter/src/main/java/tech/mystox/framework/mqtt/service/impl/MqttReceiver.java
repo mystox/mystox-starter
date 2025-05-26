@@ -145,7 +145,7 @@ public class MqttReceiver {
             logger.error("[{}]Local execute exception! Source: [{}] Method name: [{}]", mqttMsg.getMsgId(), mqttMsg.getSourceAddress(), methodName, e);
             resp = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             resp.setStateCode(StateCode.FAILED);
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return resp;
     }

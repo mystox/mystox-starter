@@ -179,7 +179,7 @@ public class MqttHandler implements MsgHandler {
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         return opera(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), qos, timeout, timeUnit,
-                iaENV.getLoadBalanceScheduler(),
+                //iaENV.getLoadBalanceScheduler(),
                 true, false));
     }
 
@@ -240,7 +240,7 @@ public class MqttHandler implements MsgHandler {
      * @Description
      **/
     private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async) {
-        return opera(new OperaContext(operaCode, msg, qos, timeout, timeUnit, iaENV.getLoadBalanceScheduler(), setFlag, async));
+        return opera(new OperaContext(operaCode, msg, qos, timeout, timeUnit, /*iaENV.getLoadBalanceScheduler(),*/ setFlag, async));
        /* MsgResult result;
 
         // IaENV iaENV= this.iaENV.getIaENV();

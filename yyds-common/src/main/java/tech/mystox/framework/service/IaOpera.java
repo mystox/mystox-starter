@@ -13,12 +13,18 @@ import java.util.concurrent.TimeUnit;
 
 public interface IaOpera {
 
-    MsgResult opera(String operaCode, String msg);
+    //MsgResult opera(String operaCode, Object msg);
+    MsgResult opera(String operaCode, Object... msg);
 
-    MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
+    //MsgResult opera(String groupServiceCode, String operaCode, Object msg);
+    MsgResult operaTarget(String groupServiceCode, String operaCode, Object... msg);
 
-    void operaAsync(String operaCode, String msg);
+    MsgResult opera(String operaCode, int qos, long timeout, TimeUnit timeUnit, Object... msg);
 
-    void broadcast(String operaCode, String msg);
+    void operaAsync(String operaCode, Object... msg);
+    void operaTargetAsync(String groupServiceCode, String operaCode, Object... msg) throws Exception;
+
+    void broadcast(String operaCode, Object... msg);
+
 
 }
