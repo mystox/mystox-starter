@@ -59,3 +59,12 @@
 ##2.0.15
 - 异步和广播做线程异步优化处理，广播不做路由表重建逻辑
 - opera()选择服务路由表做优化处理
+##2.0.20
+- 开源发布maven-central仓库相关配置集成
+- zookeeper-client upgrade to 3.9.2
+- fastjson upgrade to 2.0.53
+- 各模块非注入式实例化改造
+- 一些代码的修剪和优化
+- 添加注册服务健康状态查看接口
+- 一些日志和响应优化
+- iaOpera添加指定服务请求接口operaTarget&operaTargetAsync及其消息参数的优化为多参数
