@@ -87,7 +87,7 @@ public class IaConf {
     private int regSessionTimeout; //zookeeper session超时时间
 
 
-    @Value("${register.type:zookeeper}")
+    @Value("${register.type:}")
     private String registerType;
     @Value("${register.url:}")
     private String registerUrl;
@@ -99,10 +99,10 @@ public class IaConf {
     @Value("${register.webExtension:classpath:config/vueRouter.js,file:config/vueRouter.js}")
     private String[] webExtension;
 
-    @Value("${register.balancer:base}")
+    @Value("${register.balancer:BASE}")
     private String loadBalancerType;
 
-    @Value("${register.MsgType:mqtt}")
+    @Value("${register.MsgType:}")
     private String MsgType;
 
     @Value("${spring.profiles.active:dev}")
