@@ -98,9 +98,9 @@ public class IaENV implements ApplicationContextAware, RegCall {
         switch (regType) {
             //        case MqttMsgBus :return new MqttMsgScheduler();
             case IaConf.MqttMsgBus: {
-                MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
-                mqttMsgScheduler.build(this);
-                return mqttMsgScheduler;
+                //MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
+                //mqttMsgScheduler.build(this);
+                //return mqttMsgScheduler;
             }
             default: {
                 try {
@@ -126,29 +126,48 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public RegScheduler createRegScheduler(String regType) {
         switch (regType) {
             case IaConf.ZkRegType: {
-                RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
-                regScheduler.build(this);
-                return regScheduler;
+            //    RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
+            //    regScheduler.build(this);
+            //    return regScheduler;
             }
             default: {
-                RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
-                regScheduler.build(this);
-                return regScheduler;
+                try {
+                    Class<?> aClass = Class.forName("tech.mystox.framework.register.service.ZkRegScheduler", false, Thread.currentThread()
+                            .getContextClassLoader());
+                    RegScheduler regScheduler = (RegScheduler) aClass.newInstance();
+                    regScheduler.build(this);
+                    return regScheduler;
+                } catch (ClassNotFoundException | InstantiationException |
+                         IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            //default: {
+            //    RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
+            //    regScheduler.build(this);
+            //    return regScheduler;
+            //}
         }
     }
 
     public LoadBalanceScheduler createLoadBalancerScheduler(IaConf.LoadBalanceType balanceType) {
         switch (balanceType) {
             case BASE: {
-                LoadBalanceScheduler loadBalanceScheduler = applicationContext.getBean("baseLoadBalancer", LoadBalanceScheduler.class);
-                loadBalanceScheduler.build(this);
-                return loadBalanceScheduler;
+                //LoadBalanceScheduler loadBalanceScheduler = applicationContext.getBean("baseLoadBalancer", LoadBalanceScheduler.class);
+                //loadBalanceScheduler.build(this);
+                //return loadBalanceScheduler;
             }
             default: {
-                LoadBalanceScheduler loadBalanceScheduler = applicationContext.getBean("baseLoadBalancer", LoadBalanceScheduler.class);
+                //LoadBalanceScheduler loadBalanceScheduler = applicationContext.getBean("baseLoadBalancer", LoadBalanceScheduler.class);
+                try {
+                    Class<?> aClass = Class.forName("tech.mystox.framework.balancer.BaseLoadBalancer", false, Thread.currentThread()
+                            .getContextClassLoader());
+                    LoadBalanceScheduler loadBalanceScheduler = (LoadBalanceScheduler) aClass.newInstance();
                 loadBalanceScheduler.build(this);
                 return loadBalanceScheduler;
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

@@ -12,4 +12,5 @@ public interface MsgScheduler extends Schedule {
     public void build(IaENV iaENV);
     // public void initCaller(RegCall caller);//设置回调方法
     public MsgHandler getIaHandler();
+
 }

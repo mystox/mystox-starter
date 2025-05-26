@@ -51,4 +51,6 @@ public interface MsgHandler {
                              int qos, String payload, long timeout, TimeUnit timeUnit);
 
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload);
+
+
 }

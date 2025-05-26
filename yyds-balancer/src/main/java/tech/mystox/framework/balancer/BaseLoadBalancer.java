@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -36,7 +35,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  */
 @Lazy
 @Component("baseLoadBalancer")
-@DependsOn("zkRegScheduler")
+//@DependsOn("zkRegScheduler")
 public class BaseLoadBalancer implements LoadBalanceScheduler {
 
     Logger logger = LoggerFactory.getLogger(BaseLoadBalancer.class);
