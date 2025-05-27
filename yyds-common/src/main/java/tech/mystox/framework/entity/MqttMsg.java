@@ -8,7 +8,7 @@ package tech.mystox.framework.entity;
  */
 public class MqttMsg extends MsgPackage {
     private String operaCode;
-    private String sourceAddress; //消息源地址，一般为生产消息的服务code serverName+"_"+serverVersion
+    private String sourceAddress; //消息源地址，一般为生产消息的服务code groupCode/serverName_serverVersion
     private Boolean hasAck = false;
     private PayloadType payloadType;
 

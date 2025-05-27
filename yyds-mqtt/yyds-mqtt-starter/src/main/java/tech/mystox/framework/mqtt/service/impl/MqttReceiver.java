@@ -14,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.common.util.SpringContextUtil;
+import tech.mystox.framework.context.MsgHandlerThreadContext;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.mqtt.service.IMqttSender;
@@ -84,10 +85,10 @@ public class MqttReceiver {
 
     public MsgRsp receive(String topic, MqttMsg mqttMsg) {
         logger.debug("Receive... ..." + JSONObject.toJSONString(mqttMsg));
-
         String unit = getUnitBySubList(topic);
         MsgRsp result = null;
         try {
+            threadHandler(mqttMsg);
             if (unit.startsWith(UnitHead.LOCAL)) { //执行本地函数和方法
                 result = localExecute(unit, mqttMsg);
             } else if (unit.startsWith(UnitHead.JAR)) {//亦可执行本地和远程的jar，远程可执行jar以仓库的方式开放。
@@ -102,9 +103,19 @@ public class MqttReceiver {
             result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
             result.setStateCode(StateCode.FAILED);
             e.printStackTrace();
+        } finally {
+            MsgHandlerThreadContext.clear();
         }
         logger.debug("[{}] Message execute result: [{}]", mqttMsg.getMsgId(), JSONObject.toJSONString(result));
         return result;
+    }
+
+    private void threadHandler(MqttMsg mqttMsg) {
+        MsgHandlerThreadContext context = MsgHandlerThreadContext.getContext();
+        context.setOperaCode(mqttMsg.getOperaCode());
+        String sourceAddress = mqttMsg.getSourceAddress();
+        context.setSourceAddress(sourceAddress);
+        context.setGroupCode(sourceAddress.split("/")[0]);
     }
 
 
