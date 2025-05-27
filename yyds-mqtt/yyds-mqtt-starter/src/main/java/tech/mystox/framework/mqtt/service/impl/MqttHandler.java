@@ -97,6 +97,11 @@ public class MqttHandler implements MsgHandler {
         return opera(operaCode, msg, 1, 0, null, false, false);
     }
 
+    @Override
+    public MsgResult operaGroupCode(String groupCode, String operaCode, String msg) {
+        return opera(new OperaContext(groupCode,operaCode, msg, 1, 0, null, /*iaENV.getLoadBalanceScheduler(),*/ false, false));
+    }
+
 
     @Override
     public RegisterMsg whereIsCentre() {
@@ -192,17 +197,18 @@ public class MqttHandler implements MsgHandler {
         if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
         String operaCode = context.getOperaCode();
+        String targetGroupCode = context.getGroupCode();
         LoadBalanceScheduler loadBalanceScheduler = iaENV.getLoadBalanceScheduler();
         ServerMsg chooseServer = null;
         try {
-            if (context.isAsync()) { //异步判断路由表是否为空，为空则不做选择，提高异步效率
+            if (context.isAsync()) { //异步判断路由表是否为空，为空则不做选择，由LoadBalanceSchedule维护路由表，提高异步效率
                 List<String> operaRouteArr = loadBalanceScheduler.getOperaRouteArr(operaCode);
                 if (CollectionUtils.isEmpty(operaRouteArr)) {
                     logger.warn("OperaCode[{}] route topic list size is null...", operaCode);
                     return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] route topic list size is null...");
                 }
             }
-            chooseServer = loadBalanceScheduler.chooseServer(operaCode);
+            chooseServer = loadBalanceScheduler.chooseServer(targetGroupCode, operaCode);
 
         } catch (RegisterException e) {
 //            logger.error("[{}]Choose server error!", operaCode);
@@ -443,7 +449,7 @@ public class MqttHandler implements MsgHandler {
             //        String data = regScheduler.getData(routePath);
             //        List<String> topicArr = JSONArray.parseArray(data, String.class);
             List<String> topicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
-            if (CollectionUtils.isEmpty(topicArr)) {//异步或者广播不做路由表重整
+            if (CollectionUtils.isEmpty(topicArr)) {//异步或者广播不做路由表重整, 由LoadBalanceSchedule维护路由表，提高异步广播效率
                 logger.debug("Broadcast operaCode:[{}] route array is empty", operaCode);
                 return;
                 //根据订阅表获取整合的订阅信息 <operaCode,[subTopic1,subTopic2]>

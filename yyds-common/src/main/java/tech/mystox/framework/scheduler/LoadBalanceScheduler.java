@@ -15,7 +15,8 @@ import java.util.List;
 public interface LoadBalanceScheduler extends Schedule/*,Callable<MsgResult> */{
     void addServers(List<String> serverCodeList);
 
-    ServerMsg chooseServer(Object key) throws RegisterException;
+    ServerMsg chooseServer(String groupCode, Object key) throws RegisterException;
+
 
     void markServerDown(String serverCode);
 

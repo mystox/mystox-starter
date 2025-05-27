@@ -30,13 +30,13 @@ public class IaOperaImpl implements IaOpera {
     public MsgResult opera(String operaCode, Object... msg) {
         return iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(operaCode, JSONObject.toJSONString(msg));
     }
-    //@Override
-    //public MsgResult opera(String groupServiceCode, String operaCode, Object msg) {
-    //    return iaContext.getIaENV().getMsgScheduler().getIaHandler().sendToMqttSync(groupServiceCode, operaCode, JSONObject.toJSONString(Collections.singletonList(msg)));
-    //}
     @Override
-    public MsgResult operaTarget(String groupServiceCode, String operaCode, Object... msg) {
-        return iaContext.getIaENV().getMsgScheduler().getIaHandler().sendToMqttSync(groupServiceCode, operaCode, JSONObject.toJSONString(msg));
+    public MsgResult operaTarget(String groupServerCode, String operaCode, Object... msg) {
+        return iaContext.getIaENV().getMsgScheduler().getIaHandler().sendToMqttSync(groupServerCode, operaCode, JSONObject.toJSONString(msg));
+    }
+    @Override
+    public MsgResult operaGroup(String groupCode, String operaCode, Object... msg) {
+        return iaContext.getIaENV().getMsgScheduler().getIaHandler().operaGroupCode(groupCode, operaCode, JSONObject.toJSONString(msg));
     }
     @Override
     public MsgResult opera(String operaCode, int qos, long timeout, TimeUnit timeUnit,Object... msg) {
@@ -48,8 +48,8 @@ public class IaOperaImpl implements IaOpera {
         iaContext.getIaENV().getMsgScheduler().getIaHandler().operaAsync(operaCode, JSONObject.toJSONString(msg));
     }
     @Override
-    public void operaTargetAsync(String groupServiceCode, String operaCode, Object... msg) throws Exception {
-        iaContext.getIaENV().getMsgScheduler().getIaHandler().sendToMqtt(groupServiceCode, operaCode, JSONObject.toJSONString(msg));
+    public void operaTargetAsync(String groupServerCode, String operaCode, Object... msg) throws Exception {
+        iaContext.getIaENV().getMsgScheduler().getIaHandler().sendToMqtt(groupServerCode, operaCode, JSONObject.toJSONString(msg));
     }
 
     @Override

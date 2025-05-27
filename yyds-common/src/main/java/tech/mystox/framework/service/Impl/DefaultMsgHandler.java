@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
  * description:
  * update record:
  */
+@Deprecated
 public class DefaultMsgHandler implements MsgHandler {
 
 
@@ -53,6 +54,11 @@ public class DefaultMsgHandler implements MsgHandler {
 
     @Override
     public MsgResult opera(String operaCode, String msg) {
+        return null;
+    }
+
+    @Override
+    public MsgResult operaGroupCode(String groupCode, String operaCode, String msg) {
         return null;
     }
 
@@ -105,4 +111,5 @@ public class DefaultMsgHandler implements MsgHandler {
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload) {
         return false;
     }
+
 }

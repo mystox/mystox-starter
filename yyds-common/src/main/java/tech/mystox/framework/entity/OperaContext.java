@@ -16,7 +16,7 @@ public class OperaContext {
     private long timeout;
     private TimeUnit timeUnit;
     //private LoadBalanceScheduler loadBalanceScheduler;
-    private boolean setFlag;//context个性化标签
+    private boolean setFlag;//context个性化标签.如超时 qos等配置 默认为false
     private boolean async;
     public OperaContext(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, /*LoadBalanceScheduler loadBalanceScheduler, */boolean setFlag, boolean async) {
         this(null, operaCode, msg, qos, timeout, timeUnit, /*loadBalanceScheduler,*/ setFlag, async);

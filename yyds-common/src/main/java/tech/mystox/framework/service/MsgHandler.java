@@ -27,7 +27,13 @@ public interface MsgHandler {
 
     public MsgResult opera(String operaCode, String msg);
 
+    /**
+     * 指定组内通讯
+     */
+    public MsgResult operaGroupCode(String groupCode, String operaCode, String msg);
+
     public MsgResult opera(OperaContext operaContext);
+
     public MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit);
 
     public void operaAsync(String operaCode, String msg);
@@ -44,7 +50,10 @@ public interface MsgHandler {
                     int qos,
                     String payload) throws Exception;
 
-    MsgResult sendToMqttSync(String serverCode, String operaCode,
+    /**
+     * 指定注册服务通讯
+     */
+    MsgResult sendToMqttSync(String groupServerCode, String operaCode,
                              String payload);
 
     MsgResult sendToMqttSync(String serverCode, String operaCode,

@@ -16,13 +16,14 @@ public interface IaOpera {
     //MsgResult opera(String operaCode, Object msg);
     MsgResult opera(String operaCode, Object... msg);
 
-    //MsgResult opera(String groupServiceCode, String operaCode, Object msg);
-    MsgResult operaTarget(String groupServiceCode, String operaCode, Object... msg);
+    MsgResult operaTarget(String groupServerCode, String operaCode, Object... msg);
+
+    MsgResult operaGroup(String groupCode, String operaCode, Object... msg);
 
     MsgResult opera(String operaCode, int qos, long timeout, TimeUnit timeUnit, Object... msg);
 
     void operaAsync(String operaCode, Object... msg);
-    void operaTargetAsync(String groupServiceCode, String operaCode, Object... msg) throws Exception;
+    void operaTargetAsync(String groupServerCode, String operaCode, Object... msg) throws Exception;
 
     void broadcast(String operaCode, Object... msg);
 

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -69,7 +70,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     }
 
     @Override
-    public ServerMsg chooseServer(Object ser) throws RegisterException {
+    public ServerMsg chooseServer(String targetGroupCode, Object ser) throws RegisterException {
         IaConf iaconf = iaENV.getConf();
         RegScheduler regScheduler = iaENV.getRegScheduler();
         String serverName = iaconf.getServerName();
@@ -98,48 +99,29 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
             } else {
                 exists.sort(Comparator.comparing(String::hashCode));
                 subTopicArr.sort(Comparator.comparing(String::hashCode));
-                if (!exists.toString().equals(subTopicArr.toString())) {
+                if (!exists.toString().equals(subTopicArr.toString())) {//排序后文本比较，不相同的则设置当前最新的路由表更新到路由表注册中心
                     setRouteMap(routePath, subTopicArr);
                 }
             }
 
             topicArr = subTopicArr;
         }
-        //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
         if (CollectionUtils.isEmpty(topicArr)) {
             logger.error("[{}] route topic list size is null error...", operaCode);
-            //       mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
             return null;
+        }
+        //如果配置了targetServiceCode，则对topicArr做过滤处理
+        if (StringUtils.isNotBlank(targetGroupCode)) {
+            topicArr = topicArr.stream().filter(t -> t.startsWith(targetGroupCode)).collect(Collectors.toList());
         }
         int size = topicArr.size();
         String groupServerCode = "";
-        // if (size == 1) {
-        //     groupServerCode = topicArr.get(0);
-        //     // result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
-        //     String groupServerPath = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
-        //     return regScheduler.exists(groupServerPath) ? JSONObject.parseObject(regScheduler.getData(groupServerPath), ServerMsg.class) : null;
-        // }
-        if (size > 0) {
-            Random r = new Random();
-            int i = r.nextInt(size);
-            groupServerCode = topicArr.get(i);
-            String groupServerPath = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
-            logger.debug("[{}] choose server is [{}]", operaCode, groupServerCode);
-            return regScheduler.exists(groupServerPath) ? JSONObject.parseObject(regScheduler.getData(groupServerPath), ServerMsg.class) : null;
-            /*MsgResult result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
-            if (result.getStateCode() != StateCode.SUCCESS) {
-                //移除路由
-                topicArr.remove(i);
-                logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
-                regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
-                //重新请求
-                return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
-            }
-            return result;*/
-        }
-
-
-        return null;
+        Random r = new Random();
+        int i = r.nextInt(size);
+        groupServerCode = topicArr.get(i);
+        String groupServerPath = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
+        logger.debug("[{}] choose server is [{}]", operaCode, groupServerCode);
+        return regScheduler.exists(groupServerPath) ? JSONObject.parseObject(regScheduler.getData(groupServerPath), ServerMsg.class) : null;
     }
 
     void setRouteMap(String routePath, List<String> subTopicArr) {
