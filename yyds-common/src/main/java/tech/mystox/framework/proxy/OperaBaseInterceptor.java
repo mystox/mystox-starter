@@ -53,7 +53,11 @@ public abstract class OperaBaseInterceptor implements MethodInterceptor {
             return bean.getClass().getMethod(method.getName(), invocation.getMethod().getParameterTypes())
                     .invoke(bean, invocation.getArguments());
         }
-        operaCodeName = StringUtils.isBlank(operaCode.code()) ? method.getName() : operaCode.code();
+        String operaCodeStr = method.getName();
+        if (operaCode.withClass()) {//带类名的operaCode
+            operaCodeStr = method.getDeclaringClass().getName() + "." + method.getName();
+        }
+        operaCodeName = StringUtils.isBlank(operaCode.code()) ? operaCodeStr : operaCode.code();
 //        Type genericReturnType = method.getReturnType();
         return opera(operaCodeName, arguments, method.getGenericReturnType());
 

@@ -111,6 +111,9 @@ public class LocalServiceScanner implements EnvironmentCapable, ServiceScanner, 
                             String code = annotation.code();
                             if (StringUtils.isEmpty(code)) {
                                 code = method.getName();
+                                if (annotation.withClass()) {
+                                    code = method.getDeclaringClass().getName() + "." + method.getName();
+                                }
                             }
                             Type genericReturnType = method.getGenericReturnType();
                             sub.setAck("void".equals(genericReturnType.getTypeName()) ? AckEnum.NA : AckEnum.ACK);

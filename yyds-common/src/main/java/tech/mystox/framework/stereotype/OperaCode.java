@@ -16,4 +16,10 @@ public @interface OperaCode {
     String code() default "";
 
     String description() default "";
+
+    /**
+     *
+     * @return 为true注册operaCode带类的路径tech.mystox.framework.Class.function
+     */
+    boolean withClass() default false;
 }
