@@ -45,7 +45,7 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
     private String groupCode;
     private String serverName;
     private String serverVersion;
-    private Logger logger = LoggerFactory.getLogger(DefaultMqttMsgScheduler.class);
+    private final Logger logger = LoggerFactory.getLogger(DefaultMqttMsgScheduler.class);
 
 
     public DefaultMqttMsgScheduler(IaContext iaContext) {
@@ -58,7 +58,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
     }
 
     /**
-     * @return void
      * @Date 0:22 2020/1/6
      * @Param No such property: code for class: Script1
      * @Author mystox
@@ -93,9 +92,9 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
             Properties properties = loadYamlIntoProperties(encodedResource);
             if (applicationContext != null) {
                 Environment environment = applicationContext.getEnvironment();
-                properties.putIfAbsent("mqtt.url", environment.getProperty("mqtt.url"));
-                properties.putIfAbsent("mqtt.username", environment.getProperty("mqtt.username"));
-                properties.putIfAbsent("mqtt.password", environment.getProperty("mqtt.password"));
+                properties.putIfAbsent("mqtt.url", environment.getProperty("mqtt.url",""));
+                properties.putIfAbsent("mqtt.username", environment.getProperty("mqtt.username",""));
+                properties.putIfAbsent("mqtt.password", environment.getProperty("mqtt.password",""));
                 properties.putIfAbsent("mqtt.maxInflight", environment.getProperty("mqtt.maxInflight","100"));
             }
             iaconf.setMqMsgProperties(properties);
@@ -151,7 +150,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
     }
 
     /**
-     * @return void
      * @Date 0:22 2020/1/6
      * @Param No such property: code for class: Script1
      * @Author mystox
