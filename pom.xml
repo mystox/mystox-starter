@@ -7,8 +7,9 @@
     <groupId>tech.mystox.framework</groupId>
     <artifactId>YYDS</artifactId>
     <version>${revision}</version>
+    <name>mystox-starter</name>
     <prerequisites>
-        <maven>3.2.5</maven>
+    <maven>3.2.5</maven>
     </prerequisites>
     <description>mq rpc framework contains kafka/mqtt</description>
     <url>https://github.com/mystox/mystox-starter/blob/mystox-starter-SB2.0.4/README.md</url>

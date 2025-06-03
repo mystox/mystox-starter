@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>yyds-mqtt</artifactId>
+    <name>yyds-mqtt</name>
     <packaging>pom</packaging>
     <properties>
         <main.basedir>${basedir}/..</main.basedir>
