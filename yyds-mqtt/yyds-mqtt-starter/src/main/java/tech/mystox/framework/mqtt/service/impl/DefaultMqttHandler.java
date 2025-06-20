@@ -1,8 +1,10 @@
 package tech.mystox.framework.mqtt.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
@@ -59,15 +61,19 @@ public class DefaultMqttHandler extends MqttHandler {
         this.iaENV = iaContext.getIaENV();
         Properties mqMsgProperties = iaENV.getConf().getMqMsgProperties();
         //初始化mqtt客户端
-        this.mqttPahoClientFactory = mqttClientFactory();
+        try {
+            this.mqttPahoClientFactory = mqttClientFactory();
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
         int CORE_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.corePoolSize", 10);
         int MAX_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.maxPoolSize", 10000);
         ThreadPoolTaskExecutor mqttExecutor = builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "mqttExecutor-");
         ThreadPoolTaskExecutor ackExecutor = builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttAck-");
         int mqttSenderHandlerCount = (int) mqMsgProperties.getOrDefault("mqtt.sender.count", 10);
-        this.mqttHandlerAck = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE,"mqtt-reply")));
+        this.mqttHandlerAck = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-reply")));
         this.mqttSenderImpl = createSender(ackExecutor, mqttSenderHandlerCount);
-        this.mqttHandlerImpl = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE,"mqtt-consumer")));
+        this.mqttHandlerImpl = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-consumer")));
 
         receiverInit(iaContext, mqttExecutor);
         this.executorRunner = new ExecutorRunner(
@@ -115,7 +121,7 @@ public class DefaultMqttHandler extends MqttHandler {
         return adapter;
     }
 
-    private TaskScheduler builderTaskScheduler(int coreSize, int maxSize,  String prefix) {
+    private TaskScheduler builderTaskScheduler(int coreSize, int maxSize, String prefix) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(5); // 线程池大小
         scheduler.setThreadNamePrefix(prefix);
@@ -143,6 +149,10 @@ public class DefaultMqttHandler extends MqttHandler {
         adapter.setOutputChannel(MqttConfigInstance.getInstance().mqttReplyChannel());
         adapter.setTaskScheduler(taskScheduler);
         adapter.start();
+        boolean running = adapter.isRunning();
+        if (!running) {
+            throw new IllegalStateException("Adapter is not running");
+        }
         this.replyProducerDrivenChannelAdapter = adapter;
         return adapter;
     }
@@ -206,9 +216,24 @@ public class DefaultMqttHandler extends MqttHandler {
     }
 
 
-    public MqttPahoClientFactory mqttClientFactory() {
+    public MqttPahoClientFactory mqttClientFactory() throws MqttException {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-        factory.setConnectionOptions(getMqttConnectOptions());
+        MqttConnectOptions mqttConnectOptions = getMqttConnectOptions();
+        factory.setConnectionOptions(mqttConnectOptions);
+        for (String serverUri : mqttConnectOptions.getServerURIs()) {
+            IMqttAsyncClient asyncClientInstance = null;
+            try {
+                //校验一下连接
+                asyncClientInstance = factory.getAsyncClientInstance(serverUri, "validate-connect");
+                asyncClientInstance.connect(factory.getConnectionOptions()).waitForCompletion(5000);
+            } catch (MqttException e) {
+                throw new RuntimeException(e);
+            } finally {
+                if (asyncClientInstance != null) {
+                    asyncClientInstance.disconnect();
+                }
+            }
+        }
         return factory;
     }
 
@@ -231,6 +256,7 @@ public class DefaultMqttHandler extends MqttHandler {
         options.setKeepAliveInterval(20);
         // 设置“遗嘱”消息的话题，若客户端与服务器之间的连接意外中断，服务器将发布客户端的“遗嘱”消息。
 
+        options.setAutomaticReconnect(false);
         options.setWill("willTopic", WILL_DATA, 1, false);
         String maxInflightStr = mqMsgProperties.getProperty("mqtt.maxInflight");
         int maxInflight = StringUtils.isBlank(maxInflightStr) ? 1000 : Integer.parseInt(maxInflightStr);
