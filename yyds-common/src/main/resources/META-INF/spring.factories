@@ -1,1 +1,2 @@
 org.springframework.boot.env.EnvironmentPostProcessor=tech.mystox.framework.config.EnvironmentPostProcessor
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=tech.mystox.framework.OperaApplication
