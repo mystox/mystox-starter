@@ -7,6 +7,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
+import tech.mystox.framework.core.IaRegister;
 
 @Component
 public class ApplicationCloseEventListener implements ApplicationListener<ContextClosedEvent> {
@@ -58,7 +59,10 @@ public class ApplicationCloseEventListener implements ApplicationListener<Contex
         //    logger.error("MqttExecutor active count [{}], MqttSenderAckExecutor active count [{}]",
         //            mqttExecutor.getActiveCount(), mqttSenderAckExecutor.getActiveCount());
         //}
-        iaContext.getIaRegister().unregister();
+        IaRegister iaRegister = iaContext.getIaRegister();
+        if (iaRegister != null) {
+            iaRegister.unregister();
+        }
         //iaContext.getIaENV().setServerStatus(ServerStatus.OFFLINE);
     }
 }
