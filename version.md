@@ -68,3 +68,11 @@
 - 添加注册服务健康状态查看接口
 - 一些日志和响应优化
 - iaOpera添加指定服务请求接口operaTarget&operaTargetAsync及其消息参数的优化为多参数
+##2.0.21.RELEASE(Deprecated)
+- 该版本仓库废弃！
+##2.0.22.RELEASE
+- 新增operaGroup同步接口,OperaCode 添加withClass标记
+- 添加线程局部变量对象MsgHandlerThreadContext
+- mqtt配置容错，mqtt连接添加连接校验
+- 优化关闭服务优化
+- IaOpera注入提示配置优化
