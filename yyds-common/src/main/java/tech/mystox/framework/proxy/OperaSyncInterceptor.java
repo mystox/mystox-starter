@@ -65,7 +65,7 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
     }
 
     private Object deserialize(String msg, Type returnType) {
-        if (String.class == returnType) {
+        if(msg == null || String.class == returnType) {
             return msg;
         } else {
             boolean validate = JSONValidator.from(msg).validate();

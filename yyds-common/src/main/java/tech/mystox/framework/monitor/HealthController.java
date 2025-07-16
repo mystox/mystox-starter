@@ -25,7 +25,7 @@ public class HealthController {
     }
 
     @RequestMapping("/serverStatus")
-    public JsonResult<ServerStatus> testConfigRefresh() {
+    public JsonResult<ServerStatus> serverStatus() {
         ServerStatus serverStatus = iaContext.getIaENV().getServerStatus();
         return new JsonResult<>(serverStatus);
     }

@@ -147,7 +147,11 @@ public class MqttReceiver {
                 arguments[i] = jsonArray.getObject(i, genericParameterType);
             }
             Object invoke = method.invoke(bean, arguments);
-            result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
+            if (invoke != null) {
+                result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
+            } else {
+                result = null;
+            }
             resp = new MsgRsp(mqttMsg.getMsgId(), result);
             return resp;
         } catch (Exception e) {
@@ -279,7 +283,7 @@ public class MqttReceiver {
             if (!mqttMsg.getHasAck()) return; //如果不需返回
             result.setTopic(ackTopic);
             String ackPayload = result.getPayload();
-            byte[] bytes = ackPayload.getBytes(StandardCharsets.UTF_8);
+            byte[] bytes = ackPayload == null ? new byte[0] : ackPayload.getBytes(StandardCharsets.UTF_8);
             int length = bytes.length;
             try {
                 if (length > mqttPayloadLimit) {
