@@ -35,7 +35,6 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
         IaContext iaContext = super.getIaContext();
         MsgResult opera = iaContext.getIaENV().getMsgScheduler().getIaHandler().opera(
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
-                        //iaContext.getIaENV().getLoadBalanceScheduler(),
                         true, false));
         String msg = opera.getMsg();
         if (opera.getStateCode() != StateCode.SUCCESS) {
