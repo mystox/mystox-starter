@@ -179,12 +179,14 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         if (StringUtils.isNotBlank(targetServerCode))
             result = (MsgResult) operaCall.operaTarget(operaCode, targetServerCode);
 //        assert result != null;
-        if (StringUtils.isBlank(targetServerCode) || result.getStateCode() != StateCode.SUCCESS) {
+        if (StringUtils.isBlank(targetServerCode) || result.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode()) {
             if (StringUtils.isBlank(targetServerCode))
                 logger.warn("[{}]targetServerCode is null", operaCode);
-            else if (result.getStateCode() != StateCode.SUCCESS)
+            else if (result.getStateCode() == StateCode.StateCodeEnum.EXCEPTION.getCode())
+                return (T) result;
+             else if (result.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode())
                 logger.warn("[{}]targetServerCode request failed", targetServerCode);
-            IaConf iaconf = iaENV.getConf();
+            //IaConf iaconf = iaENV.getConf();
             RegScheduler regScheduler = iaENV.getRegScheduler();
 //            String serverName = iaconf.getServerName();
 //            String groupCode = iaconf.getGroupCode();
@@ -222,7 +224,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                     String retryServerCode = topicArr.get(i);
                     if (!StringUtils.equals(retryServerCode, targetServerCode)) {
                         result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
-                        if (result.getStateCode() == StateCode.SUCCESS) {
+                        if (result.getStateCode() == StateCode.StateCodeEnum.SUCCESS.getCode()) {
                             logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                             break;
                         } else {
@@ -242,14 +244,14 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                     try {
                         topicArr = regScheduler.buildOperaMap(operaCode);
                     } catch (RegisterException e) {
-                        result = new MsgResult(StateCode.CONNECT_INTERRUPT, "["+operaCode+"] build opera map error!");
+                        result = new MsgResult(StateCode.StateCodeEnum.CONNECT_INTERRUPT.getCode(), "[" + operaCode + "] build opera map error!");
                     }
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次
                         int i = r.nextInt(size2);
                         String retryServerCode = topicArr.get(i);
                         result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
-                        if (result.getStateCode() == StateCode.SUCCESS) {
+                        if (result.getStateCode() == StateCode.StateCodeEnum.SUCCESS.getCode()) {
                             logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                         } else {
                             logger.warn("opera[{}] target failed [{}]", operaCode, retryServerCode);
@@ -261,7 +263,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
 
             } else {
                 logger.warn("[{}] Request route topic arr is null", operaCode);
-                result = new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
+                result = new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
             }
             if (size != topicArr.size()) {
                 logger.warn("[{}] Mqtt sender route code had changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));

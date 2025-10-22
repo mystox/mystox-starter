@@ -101,7 +101,7 @@ public class MqttReceiver {
             //mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), mqttMsg.getSourceAddress());
             logger.error(" [{}] Msg execute error: [{}]", mqttMsg.getMsgId(), e.toString());
             result = new MsgRsp(mqttMsg.getMsgId(), e.toString());
-            result.setStateCode(StateCode.FAILED);
+            result.setStateCode(StateCode.StateCodeEnum.FAILED.getCode());
             e.printStackTrace();
         } finally {
             MsgHandlerThreadContext.clear();
@@ -158,7 +158,7 @@ public class MqttReceiver {
             //mqttLogUtil.ERROR(mqttMsg.getMsgId(), StateCode.EXCEPTION, mqttMsg.getOperaCode(), serverCode);
             logger.error("[{}]Local execute exception! Source: [{}] Method name: [{}]", mqttMsg.getMsgId(), mqttMsg.getSourceAddress(), methodName, e);
             resp = new MsgRsp(mqttMsg.getMsgId(), e.toString());
-            resp.setStateCode(StateCode.FAILED);
+            resp.setStateCode(StateCode.StateCodeEnum.EXCEPTION.getCode());
             e.printStackTrace();
         }
         return resp;

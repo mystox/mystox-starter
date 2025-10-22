@@ -91,7 +91,7 @@ public class ChannelSenderImpl {
             }
         } else {
             //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
+            logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.StateCodeEnum.UNREGISTERED, serverCode, operaCode);
         }
     }
 
@@ -120,7 +120,7 @@ public class ChannelSenderImpl {
             }
         } else {
             //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-            logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
+            logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.StateCodeEnum.UNREGISTERED, serverCode, operaCode);
         }
     }
 
@@ -142,12 +142,12 @@ public class ChannelSenderImpl {
                 return true;
             } else {
                 //mqttLogUtil.ERROR(msgId, StateCode.UNREGISTERED, operaCode, serverCode);
-                logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.UNREGISTERED, serverCode, operaCode);
+                logger.error("[{}]message send error[{}] sub operaCode[{}.{}] is not exists...", msgId, StateCode.StateCodeEnum.UNREGISTERED, serverCode, operaCode);
                 return false;
             }
         } catch (Exception e) {
             //mqttLogUtil.ERROR(msgId, StateCode.MESSAGE_EXCEPTION, operaCode, serverCode);
-            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.MESSAGE_EXCEPTION, e.toString());
+            logger.error("[{}]message send error[{}]...[{}]", msgId, StateCode.StateCodeEnum.MESSAGE_EXCEPTION, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
             return false;
         }
@@ -174,7 +174,7 @@ public class ChannelSenderImpl {
         if (size > callbackMaxCount) {
             //mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
             logger.error("[{}]message, system callback map is full[{}]", msgId, size);
-            return new MsgResult(StateCode.CALLBACK_FULL, StateCode.StateCodeEnum.toStateCodeName(StateCode.CALLBACK_FULL));
+            return new MsgResult(StateCode.StateCodeEnum.CALLBACK_FULL.getCode(), StateCode.StateCodeEnum.CALLBACK_FULL.getStateCodeName());
         }
         ExecutorService es = Executors.newSingleThreadExecutor();
         CALLBACKS.put(msgId, callBackTopic);
@@ -190,12 +190,12 @@ public class ChannelSenderImpl {
             //mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
             logger.error("[{}]message{},{}, request timeout: [{}][{}]", msgId, serverCode, operaCode, timeout, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
-            return new MsgResult(StateCode.TIMEOUT, timeout + "|" + e.toString());
+            return new MsgResult(StateCode.StateCodeEnum.TIMEOUT.getCode(), timeout + "|" + e.toString());
         } catch (Exception e) {
             //mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
             logger.error("[{}]message, request exception: [{}]", msgId, e.toString());
             if (logger.isDebugEnabled()) e.printStackTrace();
-            return new MsgResult(StateCode.FAILED, e.toString());
+            return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), e.toString());
         } finally {
             mqttMsgFutureTask.cancel(true);
             es.shutdown();
@@ -203,7 +203,7 @@ public class ChannelSenderImpl {
         }
         //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
 
-        return new MsgResult(StateCode.FAILED, "request failed");
+        return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), "request failed");
     }
 
 

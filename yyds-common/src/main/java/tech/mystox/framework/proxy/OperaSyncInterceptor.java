@@ -37,7 +37,7 @@ public class OperaSyncInterceptor extends OperaBaseInterceptor {
                 new OperaContext(operaCode, JSONObject.toJSONString(arguments), 2, timeout, timeUnit,
                         true, false));
         String msg = opera.getMsg();
-        if (opera.getStateCode() != StateCode.SUCCESS) {
+        if (opera.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode()) {
             String operaResultIsFailed = "Opera result is failed ";
             if (!StringUtils.isEmpty(msg)) {
                 operaResultIsFailed = msg;

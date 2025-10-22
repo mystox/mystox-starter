@@ -205,7 +205,7 @@ public class MqttHandler implements MsgHandler {
                 List<String> operaRouteArr = loadBalanceScheduler.getOperaRouteArr(operaCode);
                 if (CollectionUtils.isEmpty(operaRouteArr)) {
                     logger.warn("OperaCode[{}] route topic list size is null...", operaCode);
-                    return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] route topic list size is null...");
+                    return new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION.getCode(), "[" + operaCode + "] route topic list size is null...");
                 }
             }
             chooseServer = loadBalanceScheduler.chooseServer(targetGroupCode, operaCode);
@@ -216,7 +216,7 @@ public class MqttHandler implements MsgHandler {
         }
          if (chooseServer == null) {//选择服务为空则不做消息处理
              logger.error("[{}] Choose server is null error...", operaCode);
-             return new MsgResult(StateCode.OPERA_ROUTE_EXCEPTION, "[" + operaCode + "] Choose server is null error...");
+             return new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION.getCode(), "[" + operaCode + "] Choose server is null error...");
          }
         String targetServerCode = "";
 //        if (chooseServer != null)
@@ -358,9 +358,9 @@ public class MqttHandler implements MsgHandler {
         if (async) { //异步请求
             boolean resultBoolean = mqttSenderImpl.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
-                return new MsgResult(StateCode.SUCCESS, StateCode.StateCodeEnum.toStateCodeName(StateCode.SUCCESS));
+                return new MsgResult(StateCode.StateCodeEnum.SUCCESS.getCode(), StateCode.StateCodeEnum.SUCCESS.getStateCodeName());
             else
-                return new MsgResult(StateCode.FAILED, StateCode.StateCodeEnum.toStateCodeName(StateCode.FAILED));
+                return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), StateCode.StateCodeEnum.FAILED.getStateCodeName());
         } else {
             return setFlag ? mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
                     : mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, msg);

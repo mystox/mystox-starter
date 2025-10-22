@@ -9,7 +9,7 @@ import java.util.Arrays;
  * update record:
  */
 public class MsgRsp extends MsgPackage{
-    private Integer stateCode = StateCode.SUCCESS;
+    private Integer stateCode = StateCode.StateCodeEnum.SUCCESS.getCode();
 
     public MsgRsp(String msgId, byte[] bytePayload, boolean subpackage, Integer packageNum, Integer packageCount, Integer crc) {
         super(msgId,bytePayload,subpackage,packageNum,packageCount,crc);
