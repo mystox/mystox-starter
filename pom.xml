@@ -39,10 +39,10 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>2.0.23.SNAPSHOT</revision>
-        <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
-        <spring-cloud.version>Finchley.SR4</spring-cloud.version>
-        <build.plugins.plugin.version>3.1</build.plugins.plugin.version>
+        <revision>3.5.23.SNAPSHOT</revision>
+        <spring-boot.version>3.5.0</spring-boot.version>
+<!--        <spring-cloud.version>Finchley.SR4</spring-cloud.version>-->
+        <build.plugins.plugin.version>3.13.0</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <!--解决格式提示问题-->
@@ -50,6 +50,7 @@
         <base.jar.path>${main.basedir}/baseJar</base.jar.path>
         <main.basedir>${basedir}</main.basedir>
         <skipTest>true</skipTest>
+        <java.version>21</java.version>
     </properties>
     <build>
         <plugins>
@@ -93,8 +94,7 @@
                 <version>${build.plugins.plugin.version}</version>
                 <configuration>
                     <encoding>utf-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>21</release>
                 </configuration>
             </plugin>
             <plugin>

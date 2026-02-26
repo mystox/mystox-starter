@@ -14,8 +14,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.config.OperaRouteConfig;
-import tech.mystox.framework.config.WebPrivFuncConfig;
+import tech.mystox.framework.config.autoconfigure.OperaRouteProperties;
+import tech.mystox.framework.config.autoconfigure.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.*;
@@ -37,10 +37,11 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.constants.OperaConstants.*;
 
 // @Service(value = "zkHandlerImpl")
 public class ZkHandlerImpl implements RegHandler, Watcher {
-    private OperaRouteConfig operaRouteConfig;
+    private OperaRouteProperties operaRouteConfig;
     //    private IaContext iaContext;
     private final IaConf iaConf;
     private final IaENV iaENV;
@@ -355,7 +356,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
         //
         //            iaconf.setServerVersion(serverVersion);
         //        }
-        serverMsg.setExtension(iaConf.getExtensionConfig().getExtension());
+        serverMsg.setExtension(iaConf.getExtensionConfig());
         iaENV.setServerMsg(serverMsg);
         String onlineStatus = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS,
                 preconditionGroupServerCode(groupCode,
@@ -487,13 +488,13 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     }
 
 
-    public List<RegisterSub> getRegLocalList() {
-        return this.iaConf.getLocalServiceScanner().getSubList();
-    }
-
-    public List<RegisterSub> getRegJarList() {
-        return this.iaConf.getJarServiceScanner().getSubList();
-    }
+    //public List<RegisterSub> getRegLocalList() {
+    //    return this.iaConf.getLocalServiceScanner().getSubList();
+    //}
+    //
+    //public List<RegisterSub> getRegJarList() {
+    //    return this.iaConf.getJarServiceScanner().getSubList();
+    //}
 
     @Override
     public boolean exists(String nodePath) throws RegisterException {
@@ -523,16 +524,16 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     public synchronized void create(String path, byte[] data, int createMode) {
         CreateMode CM = null;
         switch (createMode) {
-            case IaConf.EPHEMERAL:
+            case EPHEMERAL:
                 CM = CreateMode.EPHEMERAL;
                 break;
-            case IaConf.EPHEMERAL_SEQUENTIAL:
+            case EPHEMERAL_SEQUENTIAL:
                 CM = CreateMode.EPHEMERAL_SEQUENTIAL;
                 break;
-            case IaConf.PERSISTENT:
+            case PERSISTENT:
                 CM = CreateMode.PERSISTENT;
                 break;
-            case IaConf.PERSISTENT_SEQUENTIAL:
+            case PERSISTENT_SEQUENTIAL:
                 CM = CreateMode.PERSISTENT_SEQUENTIAL;
                 break;
         }

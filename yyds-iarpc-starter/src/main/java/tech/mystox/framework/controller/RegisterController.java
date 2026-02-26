@@ -1,23 +1,21 @@
-package tech.mystox.framework.register.controller;
+package tech.mystox.framework.controller;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import tech.mystox.framework.config.WebPrivFuncConfig;
+import tech.mystox.framework.config.autoconfigure.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.JsonResult;
 import tech.mystox.framework.entity.OperaResult;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by mystoxlol on 2019/8/29, 9:46.
@@ -32,17 +30,17 @@ public class RegisterController {
     final IaContext iaContext;
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
-    ContextRefresher contextRefresher;
+    //ContextRefresher contextRefresher;
 
     public RegisterController(IaContext iaContext) {
         this.iaContext = iaContext;
     }
 
-    @Autowired
-    @Lazy
-    public void setContextRefresher(ContextRefresher contextRefresher) {
-        this.contextRefresher = contextRefresher;
-    }
+    //@Autowired
+    //@Lazy
+    //public void setContextRefresher(ContextRefresher contextRefresher) {
+    //    this.contextRefresher = contextRefresher;
+    //}
 
     WebPrivFuncConfig webPrivFuncConfig;
 
@@ -75,8 +73,8 @@ public class RegisterController {
     @RequestMapping("/refreshWebConfig")
     public JsonResult testConfigRefresh() {
         IaENV iaENV = iaContext.getIaENV();
-        Set<String> strings = contextRefresher.refresh();
-        logger.info(JSONObject.toJSONString(strings));
+        //Set<String> strings = contextRefresher.refresh();
+        //logger.info(JSONObject.toJSONString(strings));
         OperaResult operaResult = null;
         try {
             iaENV.getRegScheduler().registerWebPriv(iaENV.getConf().getWebPrivFuncConfig());

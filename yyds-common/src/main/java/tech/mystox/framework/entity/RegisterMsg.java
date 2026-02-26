@@ -15,7 +15,7 @@ public class RegisterMsg {
         return registerUrlHeader;
     }
 
-    public String getRegistURI()
+    public String getRegisterURI()
     {
         return registerUrlHeader+"://"+registerUrl;
     }

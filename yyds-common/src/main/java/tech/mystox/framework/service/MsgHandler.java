@@ -41,7 +41,7 @@ public interface MsgHandler {
     public void broadcast(String operaCode, String msg);
 
     // MsgResult slogin(String registerServerName, String registerServerVersion);
-    public RegisterMsg whereIsCentre();
+    public RegisterMsg getRegisterMsg();
 
     void sendToMqtt(String serverCode, String operaCode,
                     String payload) throws Exception;

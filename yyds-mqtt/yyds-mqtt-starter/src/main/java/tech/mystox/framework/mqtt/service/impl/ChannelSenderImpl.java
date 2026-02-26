@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
@@ -13,7 +12,6 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.RegisterException;
-import tech.mystox.framework.mqtt.config.MqttConfig;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
@@ -305,7 +303,7 @@ public class ChannelSenderImpl {
      *
      * @param message
      */
-    @ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
+    //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
         mqttSenderAckExecutor.execute(() -> {
             try {

@@ -1,4 +1,4 @@
-package tech.mystox.framework.entity;
+package tech.mystox.framework.proxy;
 
 /**
  * Created by mystoxlol on 2020/6/23, 17:16.
@@ -6,13 +6,13 @@ package tech.mystox.framework.entity;
  * description:
  * update record:
  */
-public interface Invoker<T> {
+public interface OperaInvoker {
     /**
      * get service interface.
      *
      * @return service interface.
      */
-    Class<T> getInterface();
+    //Class<T> getInterface();
 
     /**
      * invoke.
@@ -20,5 +20,5 @@ public interface Invoker<T> {
      * @param invocation
      * @return result
      */
-    MsgResult invoke(Invocation invocation);
+    Object invoke(Invocation invocation) throws Throwable;
 }

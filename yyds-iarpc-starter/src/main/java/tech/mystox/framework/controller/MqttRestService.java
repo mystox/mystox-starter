@@ -1,4 +1,4 @@
-package tech.mystox.framework.mqtt.service.impl;
+package tech.mystox.framework.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import tech.mystox.framework.common.util.MqttUtils;
-import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.config.OperaRouteConfig;
+import tech.mystox.framework.config.autoconfigure.OperaRouteProperties;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.ServiceScanner;
 import tech.mystox.framework.entity.AckEnum;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.constants.OperaConstants.EPHEMERAL;
 import static tech.mystox.framework.entity.UnitHead.*;
 
 /**
@@ -66,7 +66,7 @@ public class MqttRestService {
 
     final ServiceScanner jarServiceScanner;
 
-    private OperaRouteConfig operaRouteConfig;
+    private OperaRouteProperties operaRouteConfig;
 
     public MqttRestService(IaContext iaContext, ServiceScanner jarServiceScanner) {
         this.iaContext = iaContext;
@@ -74,7 +74,7 @@ public class MqttRestService {
     }
 
     @Autowired
-    public void setOperaRouteConfig(OperaRouteConfig operaRouteConfig) {
+    public void setOperaRouteConfig(OperaRouteProperties operaRouteConfig) {
         this.operaRouteConfig = operaRouteConfig;
     }
 
@@ -187,7 +187,7 @@ public class MqttRestService {
             String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion));
             String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
             if (!regScheduler.exists(routePath))
-                regScheduler.create(routePath, JSON.toJSONBytes(subGroupServerList), IaConf.EPHEMERAL);
+                regScheduler.create(routePath, JSON.toJSONBytes(subGroupServerList), EPHEMERAL);
             else
                 regScheduler.setData(routePath, JSON.toJSONBytes(subGroupServerList));
         } catch (Exception e) {

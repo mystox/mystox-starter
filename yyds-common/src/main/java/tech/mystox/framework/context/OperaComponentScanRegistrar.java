@@ -11,6 +11,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import java.util.Collections;
 import java.util.Set;
 
+@Deprecated
 public class OperaComponentScanRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {

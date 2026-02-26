@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.config.OperaRouteConfig;
+import tech.mystox.framework.config.autoconfigure.OperaRouteProperties;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.common.OperaRouteService;
@@ -32,7 +32,7 @@ public class OperaRouteUpdateImpl implements OperaRouteService {
     public List<String> broadcastOperaRoute(String operaCode,List<String> subGroupServerList) throws IOException {
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         IaConf conf = iaContext.getIaENV().getConf();
-        OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
+        OperaRouteProperties operaRouteConfig = conf.getOperaRouteConfig();
         Map<String, List<String>> operaRoute = operaRouteConfig.getOperaRoute();
         if (operaRoute == null) {
             operaRoute = new LinkedHashMap<>();

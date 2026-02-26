@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>yyds-iarpc-starter</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <properties>
         <!--解决格式提示问题-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,13 @@
     </properties>
     <description>yyds-iarpc远程消息框架</description>
     <artifactId>yyds-iarpc-starter</artifactId>
+
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>tech.mystox.framework</groupId>
             <artifactId>yyds-mqtt-starter</artifactId>
@@ -36,5 +42,22 @@
             <artifactId>yyds-register</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>tech.mystox.framework</groupId>
+            <artifactId>yyds-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
 </project>

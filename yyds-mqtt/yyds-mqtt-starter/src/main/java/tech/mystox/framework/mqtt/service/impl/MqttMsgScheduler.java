@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
@@ -21,9 +19,9 @@ import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
-@Deprecated
-@Component("mqttMsgScheduler")
-@Lazy
+//@Deprecated
+//@Component("mqttMsgScheduler")
+//@Lazy
 public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements ApplicationContextAware, MsgScheduler {
 
     private final IaContext iaContext;
@@ -59,7 +57,7 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
         this.groupCode = iaconf.getGroupCode();
         this.serverName = iaconf.getServerName();
         this.serverVersion = iaconf.getServerVersion();
-        this.iaHandler = new MqttHandler(iaENV, applicationContext);
+        this.iaHandler = new MqttHandler(iaENV);
     }
 
     //@Override

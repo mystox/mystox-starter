@@ -1,10 +1,11 @@
-package tech.mystox.framework.config;
+package tech.mystox.framework.autoconfigure;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,19 +18,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by mystoxlol on 2020/6/22, 11:29.
+ * Created by mystox on 2026/2/11, 9:14.
  * company:
  * description:
  * update record:
  */
-@Configuration
-public class OperaAutoConfig {
+@AutoConfiguration
+@Configuration(proxyBeanMethods = false)
+public class OperaAutoConfiguration {
     private static final Map<OperaClassIdBean, Object> OPERA_CONSUMER_MAP =
             new ConcurrentHashMap<OperaClassIdBean, Object>();
 
     private final ApplicationContext applicationContext;
 
-    public OperaAutoConfig(ApplicationContext applicationContext) {
+    public OperaAutoConfiguration(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
@@ -56,7 +58,7 @@ public class OperaAutoConfig {
                         Opera opera = field.getAnnotation(Opera.class);
                         if (opera != null) {
                             //获取消费bean实体
-                            OperaBean<Object> operaBean = OperaAutoConfig.this.getConsumerBean(beanName, field, opera);
+                            OperaBean<Object> operaBean = OperaAutoConfiguration.this.getConsumerBean(beanName, field, opera);
                             Class<?> interfaceClass = operaBean.getInterfaceClass();
                             String group = operaBean.getGroup();
                             String version = operaBean.getVersion();
@@ -68,7 +70,7 @@ public class OperaAutoConfig {
                                     if (yydsOpera == null) {
                                         operaBean.afterPropertiesSet();
                                         yydsOpera = operaBean.getObject();
-                                        OperaAutoConfig.OPERA_CONSUMER_MAP.put(classIdBean,
+                                        OperaAutoConfiguration.OPERA_CONSUMER_MAP.put(classIdBean,
                                                 yydsOpera);
                                     }
                                 }
@@ -127,7 +129,9 @@ public class OperaAutoConfig {
         // operaBean.setConsumer(this.parseConsumer(consumer, this.properties, environment, beanName,
         //         field.getName(), "consumer", consumer));
 
-        operaBean.setApplicationContext(OperaAutoConfig.this.applicationContext);
+        operaBean.setApplicationContext(OperaAutoConfiguration.this.applicationContext);
         return operaBean;
     }
+
+
 }

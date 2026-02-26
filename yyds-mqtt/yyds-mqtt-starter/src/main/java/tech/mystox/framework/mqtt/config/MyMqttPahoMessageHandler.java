@@ -30,7 +30,7 @@ public class MyMqttPahoMessageHandler extends MqttPahoMessageHandler {
     }
 
     @Override
-    public void handleMessageInternal(Message<?> message) throws Exception {
+    public void handleMessageInternal(Message<?> message) {
         super.handleMessageInternal(message);
     }
 

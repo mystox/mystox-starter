@@ -1,17 +1,16 @@
 package tech.mystox.framework.core;
 
 import com.alibaba.fastjson2.JSONObject;
-import tech.mystox.framework.entity.AckEnum;
-import tech.mystox.framework.entity.RegisterSub;
-import tech.mystox.framework.entity.UnitHead;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import tech.mystox.framework.entity.AckEnum;
+import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.UnitHead;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +26,7 @@ import java.util.Set;
  * description:
  * update record:
  */
-@Service
+//@Service
 public class WebResourceScanner {
     private Logger logger = LoggerFactory.getLogger(WebResourceScanner.class);
 

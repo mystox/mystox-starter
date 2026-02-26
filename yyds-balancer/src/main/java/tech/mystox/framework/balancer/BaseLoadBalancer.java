@@ -6,8 +6,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import tech.mystox.framework.balancer.client.BaseLoadBalancerClient;
 import tech.mystox.framework.balancer.client.LoadBalancerClient;
@@ -27,6 +25,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.constants.OperaConstants.EPHEMERAL;
 
 /**
  * Created by mystoxlol on 2020/6/8, 14:36.
@@ -34,8 +33,8 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * description:
  * update record:
  */
-@Lazy
-@Component("baseLoadBalancer")
+//@Lazy
+//@Component("baseLoadBalancer")
 //@DependsOn("zkRegScheduler")
 public class BaseLoadBalancer implements LoadBalanceScheduler {
 
@@ -83,7 +82,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
         //            if (CollectionUtils.isEmpty(topicArr)) {
         if (!regScheduler.exists(routePath))
-            regScheduler.create(routePath, null, IaConf.EPHEMERAL);
+            regScheduler.create(routePath, null, EPHEMERAL);
         //        String data = regScheduler.getData(routePath);
         //        List<String> topicArr = JSONArray.parseArray(data, String.class);
         List<String> topicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
@@ -244,7 +243,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                     try {
                         topicArr = regScheduler.buildOperaMap(operaCode);
                     } catch (RegisterException e) {
-                        result = new MsgResult(StateCode.StateCodeEnum.CONNECT_INTERRUPT.getCode(), "[" + operaCode + "] build opera map error!");
+                        result = new MsgResult(StateCode.StateCodeEnum.CONNECT_INTERRUPT, "[" + operaCode + "] build opera map error!");
                     }
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次

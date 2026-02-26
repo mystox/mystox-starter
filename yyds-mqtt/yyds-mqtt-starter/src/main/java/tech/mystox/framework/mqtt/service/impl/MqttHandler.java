@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.annotation.Async;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
@@ -21,45 +19,19 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
+import static tech.mystox.framework.constants.OperaConstants.EPHEMERAL;
 
-// @Component("MqttHandler")
-// @Lazy
 public class MqttHandler implements MsgHandler {
     private IaENV iaENV;
     Logger logger = LoggerFactory.getLogger(MqttHandler.class);
     protected ChannelHandlerAck mqttHandlerAck;
     protected ChannelHandlerSub mqttHandlerImpl;
     protected ChannelSenderImpl mqttSenderImpl;
-    private ApplicationContext applicationContext;
-
-    public MqttHandler(IaENV iaENV, ApplicationContext applicationContext) {
-        this.iaENV = iaENV;
-        this.applicationContext = applicationContext;
-        this.mqttHandlerAck = applicationContext.getBean(ChannelHandlerAck.class);
-        this.mqttHandlerImpl = applicationContext.getBean(ChannelHandlerSub.class);
-        this.mqttSenderImpl = applicationContext.getBean(ChannelSenderImpl.class);
-    }
 
     public MqttHandler(IaENV iaENV) {
         this.iaENV = iaENV;
     }
 
-    // @Autowired
-    // public MqttHandler(IaENV iaENV) {
-    //
-    //     this.iaENV = iaENV;
-    //     // this.mqttHandlerAck = mqttHandlerAck;
-    //     // this.mqttHandlerImpl = mqttHandlerImpl;
-    //     // this.mqttSenderImpl = mqttSenderImpl;
-    // }
-
-
-    // public ChannelHandlerAck getMqttHandlerAck() {
-    //     return mqttHandlerAck;
-    // }
-    // public ChannelHandlerSub getMqttHandler() {
-    //     return mqttHandlerImpl;
-    // }
     @Override
     public void addSubTopic(String topic, int qos) {
         mqttHandlerImpl.addSubTopic(topic, qos);
@@ -104,46 +76,12 @@ public class MqttHandler implements MsgHandler {
 
 
     @Override
-    public RegisterMsg whereIsCentre() {
-        // IaENV iaENV= this.iaENV.getIaENV();
+    @Deprecated
+    public RegisterMsg getRegisterMsg() {
         IaConf iaconf = iaENV.getConf();
         String serverName = iaconf.getServerName();
-        String groupCode = iaconf.getGroupCode();
-
-        String registerServerName = iaconf.getRegisterServerName();
-        String registerServerVersion = iaconf.getRegisterServerVersion();
         String registerUrl = iaconf.getRegisterUrl();
         RegisterMsg registerMsg = new RegisterMsg();
-        //TODO 第三方机构实现注册中心客户端负载均衡
-        //        if (!serverName.equals(registerServerName)) {  //非认证服务执行操作
-        //            ServerMsg serverMsg = new ServerMsg(iaconf.getHost(), iaconf.getPort(), iaconf.getServerName(), iaconf.getServerVersion(),
-        //                    iaconf.getRouteMark(),iaconf.getPageRoute() ,iaconf.getServerUri(),iaconf.getTitle(), groupCode,iaconf.getMyid());
-        //
-        //            String sLoginPayload = JSONObject.toJSONString(serverMsg);
-        //            MsgResult slogin=null;
-        //            do{
-        //                    DateUtil.Wait(1000);
-        //                    slogin=slogin(preconditionGroupServerCode(GroupCode.ROOT, preconditionServerCode(registerServerName,
-        //                        registerServerVersion)), sLoginPayload);
-        //                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), slogin.getMsg());
-        //                    if ("dev".equals(iaconf.getDevFlag())) {
-        //                        logger.warn("environment ${spring.profiles.active} is dev, set registerUrl is [{}]", registerUrl);
-        //                    }
-        //            }
-        //            while(slogin.getStateCode()!=StateCode.SUCCESS);
-        //
-        //            String msg = slogin.getMsg();
-        //            Object parse = JSON.parse(msg);
-        //            if (parse instanceof JSONObject) {
-        //                registerUrl=((JSONObject) parse).getString("registerUrl");
-        //                if (StringUtils.isBlank(registerUrl)) {
-        //                    String errorMsg = ((JSONObject) parse).getString("errorMsg");
-        //                    logger.error("slogin failed state[{}], msg: [{}]", slogin.getStateCode(), errorMsg);
-        //                    return null;
-        //                }
-        //                logger.info("get slogin result(registerUrl) is [{}]", registerUrl);
-        //                }
-        //            }
         logger.info("{} registerUrl is: [{}]", serverName, registerUrl);
         String[] split = registerUrl.split("://");
         String registerUrlHeader = split[0];
@@ -152,8 +90,6 @@ public class MqttHandler implements MsgHandler {
         registerMsg.setRegisterUrlHeader(registerUrlHeader);
         if (StringUtils.equals(RegisterType.ZOOKEEPER.toString(), registerUrlHeader.toUpperCase()))
             registerMsg.setRegisterType(RegisterType.ZOOKEEPER);
-        if (StringUtils.equals(RegisterType.REDIS.toString(), registerUrlHeader.toUpperCase()))
-            registerMsg.setRegisterType(RegisterType.REDIS);
         return registerMsg;
     }
 
@@ -410,8 +346,9 @@ public class MqttHandler implements MsgHandler {
         return result;
     }*/
     @Override
-    @Async
+    //@Async
     public void broadcast(String operaCode, String msg) {
+        //todo 异步处理要完善
         broadcast(operaCode, msg, 0, false);
     }
 
@@ -445,7 +382,7 @@ public class MqttHandler implements MsgHandler {
         String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
         try {
             if (!regScheduler.exists(routePath))
-                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
+                regScheduler.create(routePath, null, EPHEMERAL);
             //        String data = regScheduler.getData(routePath);
             //        List<String> topicArr = JSONArray.parseArray(data, String.class);
             List<String> topicArr = iaENV.getLoadBalanceScheduler().getOperaRouteArr(operaCode);
@@ -482,8 +419,9 @@ public class MqttHandler implements MsgHandler {
     }
 
     @Override
-    @Async
+    //@Async
     public void operaAsync(String operaCode, String msg) {
+        //todo 异步处理要完善
         opera(operaCode, msg, 1, 0, null, false, true);
     }
 }

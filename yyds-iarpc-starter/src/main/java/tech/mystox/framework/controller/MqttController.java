@@ -1,4 +1,4 @@
-package tech.mystox.framework.mqtt.controller;
+package tech.mystox.framework.controller;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -17,7 +17,6 @@ import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
 import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 import tech.mystox.framework.mqtt.service.impl.MqttReceiver;
-import tech.mystox.framework.mqtt.service.impl.MqttRestService;
 import tech.mystox.framework.service.common.OperaRouteService;
 import tech.mystox.framework.stereotype.Opera;
 

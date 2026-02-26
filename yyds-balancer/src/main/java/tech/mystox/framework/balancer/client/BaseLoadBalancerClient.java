@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.config.OperaRouteConfig;
+import tech.mystox.framework.config.autoconfigure.OperaRouteProperties;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.ServerStatus;
@@ -66,7 +66,7 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
                     preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
             //        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
             Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
-            OperaRouteConfig operaRouteConfig = conf.getOperaRouteConfig();
+            OperaRouteProperties operaRouteConfig = conf.getOperaRouteConfig();
             Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
             List<String> children = regScheduler.getChildren(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE,
                     groupServerCode));

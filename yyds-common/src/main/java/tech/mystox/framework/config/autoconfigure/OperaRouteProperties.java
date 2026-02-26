@@ -1,8 +1,6 @@
-package tech.mystox.framework.config;
+package tech.mystox.framework.config.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -13,10 +11,8 @@ import java.util.Map;
  * \* Description:
  * \
  */
-@Component
-@ConfigurationProperties
-@RefreshScope
-public class OperaRouteConfig {
+@ConfigurationProperties(prefix = "")
+public class OperaRouteProperties {
     Map<String, List<String>> operaRoute;
 
     public Map<String, List<String>> getOperaRoute() {

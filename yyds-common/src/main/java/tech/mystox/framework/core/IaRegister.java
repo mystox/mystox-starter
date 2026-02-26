@@ -58,8 +58,8 @@ public class IaRegister {
 
     }
     public void connect() throws RegisterException {
-        registerMsg=this.msgScheduler.getIaHandler().whereIsCentre();
-        this.iaConf.setRegisterUrl(registerMsg.getRegistURI());
+        registerMsg=this.msgScheduler.getIaHandler().getRegisterMsg();
+        //this.iaConf.setRegisterUrl(registerMsg.getRegisterURI());
         this.regScheduler.connect(registerMsg.getRegisterUrl());
     }
 

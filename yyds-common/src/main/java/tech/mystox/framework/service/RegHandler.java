@@ -1,6 +1,6 @@
 package tech.mystox.framework.service;
 
-import tech.mystox.framework.config.WebPrivFuncConfig;
+import tech.mystox.framework.config.autoconfigure.WebPrivFuncConfig;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.OperaResult;
 import tech.mystox.framework.entity.RegisterSub;

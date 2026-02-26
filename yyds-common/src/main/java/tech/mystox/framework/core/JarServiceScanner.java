@@ -1,17 +1,16 @@
 package tech.mystox.framework.core;
 
 import com.alibaba.fastjson2.JSONObject;
-import tech.mystox.framework.entity.AckEnum;
-import tech.mystox.framework.entity.RegisterSub;
-import tech.mystox.framework.entity.UnitHead;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import tech.mystox.framework.config.IaConf;
+import tech.mystox.framework.entity.AckEnum;
+import tech.mystox.framework.entity.RegisterSub;
+import tech.mystox.framework.entity.UnitHead;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -25,7 +24,8 @@ import java.util.Set;
  * description:
  * update record:
  */
-@Service
+//@Service
+@Deprecated
 public class JarServiceScanner implements ServiceScanner {
     private Logger logger = LoggerFactory.getLogger(JarServiceScanner.class);
 
@@ -34,22 +34,26 @@ public class JarServiceScanner implements ServiceScanner {
 //
 //    @Value("${server.version}")
 //    private String serverVersion;
-    @Value("${jarResources.path:./jarResources}")
-    private String jarResPath;
+//    @Value("${jarResources.path:./jarResources}")
+//    private String jarResPath;
 
 
-    @Value("${server.name}_${server.version}")
-    private String serverCode;
+    //@Value("${server.name}_${server.version}")
+    //private String serverCode;
+    final  IaConf conf;
+    public JarServiceScanner(IaConf conf) {
+     this.conf = conf;
+    }
 
     @Override
     public List<RegisterSub> getSubList() {
         Yaml yaml = new Yaml(dumperOptions());
-        File file = FileUtils.getFile(jarResPath + "/jarRes.yml");
+        File file = FileUtils.getFile("./jarResources/jarRes.yml");
         List<RegisterSub> subList = new ArrayList<>();
         if (file.exists()) {
             try {
-                Map load = (Map) yaml.load(new FileInputStream(file));
-                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                Map load = yaml.load(new FileInputStream(file));
+                Map<String, String> operaMap = (Map<String, String>) load.get(conf.getServerName() + "_" + conf.getServerVersion());
                 if (!CollectionUtils.isEmpty(operaMap)) {
                     Set<Map.Entry<String, String>> entries = operaMap.entrySet();
                     for (Map.Entry<String, String> e : entries) {
@@ -84,13 +88,13 @@ public class JarServiceScanner implements ServiceScanner {
     @Override
     public boolean addSub(RegisterSub registerSub) {
         Yaml yaml = new Yaml(dumperOptions());
-        File file = FileUtils.getFile(jarResPath + "/jarRes.yml");
+        File file = FileUtils.getFile("./jarResources/jarRes.yml");
         if (file.exists()) {
             FileOutputStream out = null;
             OutputStreamWriter output = null;
             try {
                 Map load = (Map) yaml.load(new FileInputStream(file));
-                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                Map<String, String> operaMap = (Map<String, String>) load.get(conf.getServerName() + "_" + conf.getServerVersion());
                 String operaCode = registerSub.getOperaCode();
                 AckEnum ack = registerSub.getAck();
                 String executeUnit = registerSub.getExecuteUnit();
@@ -122,13 +126,13 @@ public class JarServiceScanner implements ServiceScanner {
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         dumperOptions.setPrettyFlow(false);
         Yaml yaml = new Yaml(dumperOptions);
-        File file = FileUtils.getFile(jarResPath + "/jarRes.yml");
+        File file = FileUtils.getFile("./jarResources/jarRes.yml");
         if (file.exists()) {
             FileOutputStream out = null;
             OutputStreamWriter output = null;
             try {
-                Map load = (Map) yaml.load(new FileInputStream(file));
-                Map<String, String> operaMap = (Map<String, String>) load.get(serverCode);
+                Map load = yaml.load(new FileInputStream(file));
+                Map<String, String> operaMap = (Map<String, String>) load.get(conf.getServerName() + "_" + conf.getServerVersion());
                 operaMap.remove(operaCode);
                 out = FileUtils.openOutputStream(file);
                 output = new OutputStreamWriter(out);

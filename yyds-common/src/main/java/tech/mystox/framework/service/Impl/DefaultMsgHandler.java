@@ -83,7 +83,7 @@ public class DefaultMsgHandler implements MsgHandler {
     }
 
     @Override
-    public RegisterMsg whereIsCentre() {
+    public RegisterMsg getRegisterMsg() {
         return null;
     }
 

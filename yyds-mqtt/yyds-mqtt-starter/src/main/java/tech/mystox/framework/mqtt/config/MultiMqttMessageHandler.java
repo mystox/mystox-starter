@@ -70,7 +70,7 @@ public class MultiMqttMessageHandler extends AbstractMessageHandler implements S
     }
 
     @Override
-    public void handleMessageInternal(Message<?> message) throws Exception {
+    public void handleMessageInternal(Message<?> message) {
 //        Random random = new Random();
         longAdder.add(1);
         int key = longAdder.intValue();

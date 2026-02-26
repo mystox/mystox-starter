@@ -1,13 +1,13 @@
 package tech.mystox.framework.stereotype;
 
 import org.springframework.context.annotation.Import;
-import tech.mystox.framework.context.OperaAnnotationBeanPostProcessor;
+import tech.mystox.framework.autoconfigure.OperaImportSelector;
 
 import java.lang.annotation.*;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(OperaAnnotationBeanPostProcessor.class)
+@Import(OperaImportSelector.class)
 public @interface EnableOpera {
 }

@@ -16,6 +16,7 @@ import java.util.Map;
  * update record:
  */
 @Component
+@Deprecated
 public class SpringContextUtil implements ApplicationContextAware{
 
     private static Map<String, String> serviceMap;

@@ -4,23 +4,21 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
-import tech.mystox.framework.common.util.SpringContextUtil;
 import tech.mystox.framework.context.MsgHandlerThreadContext;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.mqtt.service.IMqttSender;
 import tech.mystox.framework.scheduler.RegScheduler;
 
-import javax.annotation.PreDestroy;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,23 +40,14 @@ import java.util.concurrent.*;
  * description:
  * update record:
  */
-//@MessageEndpoint
 public class MqttReceiver {
     private static final Logger logger = LoggerFactory.getLogger(MqttReceiver.class);
-    //    private final static int MQTT_PAYLOAD_LIMIT = 47 * 1024; //消息体（byte payload）最长大小
-    @Value("${mqtt.payload.limit:#{47 * 1024}}")
     private int mqttPayloadLimit;
-    @Value("${jarResources.path:./jarResources}")
     private String jarPath;
-    //@Value("${server.name}_${server.version}")
-    //private String serverCode;
-    @Value("${mqtt.callback.maxCount:10000}")
     private long callbackMaxCount;
-    @Value("${mqtt.package.timeout:30}")
     private long packageMsgTimeout;
 
-    final
-    IaContext iaContext;
+    final IaContext iaContext;
     /**
      * 注入发送MQTT的Bean
      */
@@ -134,7 +123,7 @@ public class MqttReceiver {
         MsgRsp resp;
         try {
             Class<?> clazz = Class.forName(className);
-            Object bean = SpringContextUtil.getBean(clazz);//这里会是性能瓶颈
+            Object bean = iaContext.getIaENV().getBeanProvider().getBean(clazz);//这里会是性能瓶颈
             List<Class> classes = JSON.parseArray(paramsTypeStr, Class.class, JSONReader.Feature.SupportClassForName);
             Method method = clazz.getDeclaredMethod(methodName, classes.toArray(new Class[0]));
             Type[] genericParameterTypes = method.getGenericParameterTypes();

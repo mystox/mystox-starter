@@ -3,13 +3,7 @@ package tech.mystox.framework.mqtt.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.EncodedResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
@@ -21,9 +15,7 @@ import tech.mystox.framework.mqtt.service.ExecutorRunner;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.service.MsgHandler;
 
-import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +63,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
         this.groupCode = iaconf.getGroupCode();
         this.serverName = iaconf.getServerName();
         this.serverVersion = iaconf.getServerVersion();
-        initMqttProperties();
         this.iaHandler = new DefaultMqttHandler(iaContext);
         try {
             this.iaHandler.getExecutorRunner().run(null);
@@ -81,42 +72,8 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
         //this.iaHandler = new MqttHandler(iaENV, applicationContext);
     }
 
-    private void initMqttProperties() {
-        //mqMsgProperties = new Properties();
-        //从classpath路径下面查找文件
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
-        //加载成PropertySource对象，并添加到Environment环境中
-        Resource resource = resourceLoader.getResource("classpath:mqtt.yml");
-        EncodedResource encodedResource = new EncodedResource(resource);
-        try {
-            Properties properties = loadYamlIntoProperties(encodedResource);
-            if (applicationContext != null) {
-                Environment environment = applicationContext.getEnvironment();
-                properties.putIfAbsent("mqtt.url", environment.getProperty("mqtt.url",""));
-                properties.putIfAbsent("mqtt.username", environment.getProperty("mqtt.username",""));
-                properties.putIfAbsent("mqtt.password", environment.getProperty("mqtt.password",""));
-                properties.putIfAbsent("mqtt.maxInflight", environment.getProperty("mqtt.maxInflight","100"));
-            }
-            iaconf.setMqMsgProperties(properties);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
 
-    }
 
-    private Properties loadYamlIntoProperties(EncodedResource resource) throws FileNotFoundException {
-        try {
-            YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
-            factory.setResources(resource.getResource());
-            factory.afterPropertiesSet();
-            return factory.getObject();
-        } catch (IllegalStateException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof FileNotFoundException)
-                throw (FileNotFoundException) e.getCause();
-            throw e;
-        }
-    }
 
     @Override
     public void unregister() {

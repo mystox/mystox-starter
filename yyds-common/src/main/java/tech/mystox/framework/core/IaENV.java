@@ -3,10 +3,6 @@ package tech.mystox.framework.core;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.entity.RegisterMsg;
 import tech.mystox.framework.entity.RegisterSub;
@@ -23,9 +19,11 @@ import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
 import static tech.mystox.framework.common.util.MqttUtils.preconditionServerCode;
+import static tech.mystox.framework.constants.OperaConstants.MqttMsgBus;
+import static tech.mystox.framework.constants.OperaConstants.ZkRegType;
 
-@Component
-public class IaENV implements ApplicationContextAware, RegCall {
+//@Component
+public class IaENV implements RegCall {
     private MsgScheduler msgScheduler;
     private RegScheduler regScheduler;
     private LoadBalanceScheduler loadBalanceScheduler;
@@ -33,16 +31,38 @@ public class IaENV implements ApplicationContextAware, RegCall {
     private IaContext iaContext;
     private ServerStatus serverStatus = ServerStatus.OFFLINE;
     private ServerMsg serverMsg;
+    private ServiceScanner localServiceScanner;
+    private ServiceScanner jarServiceScanner;
     private Logger logger = LoggerFactory.getLogger(IaENV.class);
+
+    private final BeanProvider beanProvider;
+    private List<String> scanBasePackage;
+
+    public IaENV(List<String> scanBasePackage, BeanProvider beanProvider) {
+        this.beanProvider = beanProvider;
+        this.scanBasePackage = scanBasePackage;
+    }
 
 
     public void build(IaContext iaContext) {
         setServerStatus(ServerStatus.STARTING);
         this.iaContext = iaContext;
         this.conf = iaContext.getConf();
+        //扫描注册信息
+        String scannedBasePackage = this.conf.scanBasePackage();
+        if (StringUtils.isEmpty(scannedBasePackage)) {
+            scanBasePackage = List.of(scannedBasePackage);
+        }
+        localServiceScanner = new LocalServiceScannerCore(
+                scanBasePackage, beanProvider);
+        jarServiceScanner = new JarServiceScanner(conf);
         regScheduler = createRegScheduler(getRegType(conf));
         msgScheduler = createMsgScheduler(getMsgType(conf));
         loadBalanceScheduler = createLoadBalancerScheduler(getLoadBalancer(conf));
+    }
+
+    public BeanProvider getBeanProvider() {
+        return beanProvider;
     }
 
     private IaConf.LoadBalanceType getLoadBalancer(IaConf conf) {
@@ -97,7 +117,7 @@ public class IaENV implements ApplicationContextAware, RegCall {
     public MsgScheduler createMsgScheduler(String regType) {
         switch (regType) {
             //        case MqttMsgBus :return new MqttMsgScheduler();
-            case IaConf.MqttMsgBus: {
+            case MqttMsgBus: {
                 //MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
                 //mqttMsgScheduler.build(this);
                 //return mqttMsgScheduler;
@@ -106,8 +126,8 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 try {
                     Class<?> aClass = Class.forName("tech.mystox.framework.mqtt.service.impl.DefaultMqttMsgScheduler", false, Thread.currentThread()
                             .getContextClassLoader());
-                    Constructor<?> declaredConstructor = aClass.getDeclaredConstructor(IaContext.class, ApplicationContext.class);
-                    MsgScheduler mqttMsgScheduler = (MsgScheduler) declaredConstructor.newInstance(iaContext, applicationContext);
+                    Constructor<?> declaredConstructor = aClass.getDeclaredConstructor(IaContext.class);
+                    MsgScheduler mqttMsgScheduler = (MsgScheduler) declaredConstructor.newInstance(iaContext);
                     //MsgScheduler mqttMsgScheduler = new DefaultMsgScheduler();
                     mqttMsgScheduler.build(this);
                     return mqttMsgScheduler;
@@ -125,20 +145,20 @@ public class IaENV implements ApplicationContextAware, RegCall {
 
     public RegScheduler createRegScheduler(String regType) {
         switch (regType) {
-            case IaConf.ZkRegType: {
-            //    RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
-            //    regScheduler.build(this);
-            //    return regScheduler;
+            case ZkRegType: {
+                //    RegScheduler regScheduler = applicationContext.getBean("zkRegScheduler", RegScheduler.class);
+                //    regScheduler.build(this);
+                //    return regScheduler;
             }
             default: {
                 try {
                     Class<?> aClass = Class.forName("tech.mystox.framework.register.service.ZkRegScheduler", false, Thread.currentThread()
                             .getContextClassLoader());
-                    RegScheduler regScheduler = (RegScheduler) aClass.newInstance();
+                    RegScheduler regScheduler = (RegScheduler) aClass.getDeclaredConstructor().newInstance();
                     regScheduler.build(this);
                     return regScheduler;
-                } catch (ClassNotFoundException | InstantiationException |
-                         IllegalAccessException e) {
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                         InvocationTargetException | NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -162,10 +182,11 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 try {
                     Class<?> aClass = Class.forName("tech.mystox.framework.balancer.BaseLoadBalancer", false, Thread.currentThread()
                             .getContextClassLoader());
-                    LoadBalanceScheduler loadBalanceScheduler = (LoadBalanceScheduler) aClass.newInstance();
-                loadBalanceScheduler.build(this);
-                return loadBalanceScheduler;
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                    LoadBalanceScheduler loadBalanceScheduler = (LoadBalanceScheduler) aClass.getDeclaredConstructor().newInstance();
+                    loadBalanceScheduler.build(this);
+                    return loadBalanceScheduler;
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                         InvocationTargetException | NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -200,16 +221,16 @@ public class IaENV implements ApplicationContextAware, RegCall {
         return conf;
     }
 
-    ApplicationContext applicationContext;
+    //ApplicationContext applicationContext;
 
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
+    //public ApplicationContext getApplicationContext() {
+    //    return applicationContext;
+    //}
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+    //@Override
+    //public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    //    this.applicationContext = applicationContext;
+    //}
 
 
     @Override
@@ -221,8 +242,8 @@ public class IaENV implements ApplicationContextAware, RegCall {
                 List<RegisterSub> subList = this.regScheduler.getSubList();
                 logger.warn("[operaCall] Cancel msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                RegisterMsg registerMsg = this.msgScheduler.getIaHandler().whereIsCentre();
-                getConf().setRegisterUrl(registerMsg.getRegistURI());
+                RegisterMsg registerMsg = this.msgScheduler.getIaHandler().getRegisterMsg();
+                //getConf().setRegisterUrl(registerMsg.getRegistURI());
                 logger.warn("[operaCall] Register reconnected [{}]", registerMsg.getRegisterUrl());
                 this.regScheduler.connect(registerMsg.getRegisterUrl());
                 logger.warn("[operaCall] Register waiting for rebuilding");
@@ -254,4 +275,11 @@ public class IaENV implements ApplicationContextAware, RegCall {
     }
 
 
+    public ServiceScanner getLocalServiceScanner() {
+        return localServiceScanner;
+    }
+
+    public ServiceScanner getJarServiceScanner() {
+        return jarServiceScanner;
+    }
 }

@@ -7,15 +7,11 @@ package tech.mystox.framework.entity;
  * update record:
  */
 public class MsgResult {
-    private int stateCode;
+    private final int stateCode;
     private String msg;
 
     public int getStateCode() {
         return stateCode;
-    }
-
-    public void setStateCode(int stateCode) {
-        this.stateCode = stateCode;
     }
 
     public String getMsg() {
@@ -29,6 +25,10 @@ public class MsgResult {
     public MsgResult(int stateCode, String msg) {
         this.msg = msg;
         this.stateCode = stateCode;
+    }
+    public MsgResult(StateCode.StateCodeEnum stateCode, String msg) {
+        this.msg = msg;
+        this.stateCode = stateCode.getCode();
     }
 
     @Override

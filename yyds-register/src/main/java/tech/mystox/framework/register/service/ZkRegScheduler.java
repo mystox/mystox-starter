@@ -3,11 +3,9 @@ package tech.mystox.framework.register.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
-import tech.mystox.framework.config.WebPrivFuncConfig;
+import tech.mystox.framework.config.autoconfigure.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.core.RegCall;
@@ -25,13 +23,15 @@ import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
-@Component("zkRegScheduler")
-@Lazy
+//@Component("zkRegScheduler")
+//@Lazy
 public class ZkRegScheduler implements  RegScheduler {
     private final Logger logger = LoggerFactory.getLogger(ZkRegScheduler.class);
     RegHandler regHandler;
     private IaConf iaConf;
+    private IaENV iaENV;
     private String groupCode;
+
 
 
     @Override
@@ -130,12 +130,12 @@ public class ZkRegScheduler implements  RegScheduler {
 
     @Override
     public List<RegisterSub> getRegLocalList() {
-        return this.iaConf.getLocalServiceScanner().getSubList();
+        return this.iaENV.getLocalServiceScanner().getSubList();
     }
 
     @Override
     public List<RegisterSub> getRegJarList() {
-        return this.iaConf.getJarServiceScanner().getSubList();
+        return this.iaENV.getJarServiceScanner().getSubList();
     }
 
 
@@ -178,6 +178,7 @@ public class ZkRegScheduler implements  RegScheduler {
 
     @Override
     public void build(IaENV iaENV) {
+        this.iaENV = iaENV;
         this.iaConf = iaENV.getConf();
         this.groupCode = iaConf.getGroupCode();
         this.regHandler = new ZkHandlerImpl(iaENV);

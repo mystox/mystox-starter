@@ -1,8 +1,7 @@
 package tech.mystox.framework.proxy;
 
-import tech.mystox.framework.entity.Invocation;
-import tech.mystox.framework.entity.Invoker;
-
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,38 +11,34 @@ import java.util.Map;
  * update record:
  */
 public class OperaInvocation implements Invocation {
-    @Override
-    public String getMethodName() {
-        return null;
+    private final String operaCode;
+    private final Object[] arguments;
+    private final Type returnType;
+    private final Map<String, Object> attachments = new HashMap<>();
+
+    public OperaInvocation(String operaCode, Object[] arguments, Type returnType) {
+        this.operaCode = operaCode;
+        this.arguments = arguments;
+        this.returnType = returnType;
     }
 
     @Override
-    public Class<?>[] getParameterTypes() {
-        return new Class<?>[0];
+    public String getOperaCode() {
+        return operaCode;
     }
 
     @Override
     public Object[] getArguments() {
-        return new Object[0];
+        return arguments;
     }
 
     @Override
-    public Map<String, String> getAttachments() {
-        return null;
+    public Type getReturnType() {
+        return returnType;
     }
 
     @Override
-    public String getAttachment(String key) {
-        return null;
-    }
-
-    @Override
-    public String getAttachment(String key, String defaultValue) {
-        return null;
-    }
-
-    @Override
-    public Invoker<?> getInvoker() {
-        return null;
+    public Map<String, Object> getAttachments() {
+        return attachments;
     }
 }
