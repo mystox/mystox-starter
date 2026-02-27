@@ -5,7 +5,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
@@ -20,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -44,15 +46,12 @@ public class ChannelSenderImpl {
     final IaConf iaConf;
     private final IMqttSender mqttSender;
     //private final MqttLogUtil mqttLogUtil;
-    private final ThreadPoolTaskExecutor mqttSenderAckExecutor;
 
-    public ChannelSenderImpl(IaENV iaEnv, IaConf iaConf, IMqttSender iMqttSender, /*MqttLogUtil mqttLogUtil, */
-                             ThreadPoolTaskExecutor mqttSenderAckExecutor) {
+    public ChannelSenderImpl(IaENV iaEnv, IaConf iaConf, IMqttSender iMqttSender) {
         this.iaEnv = iaEnv;
         this.iaConf = iaConf;
         this.mqttSender = iMqttSender;
         //this.mqttLogUtil = mqttLogUtil;
-        this.mqttSenderAckExecutor = mqttSenderAckExecutor;
         this.callbackMaxCount = 10000;
         this.mqttPayloadLimit = 47 * 1024;
     }
@@ -171,19 +170,31 @@ public class ChannelSenderImpl {
         int size = CALLBACKS.size();
         if (size > callbackMaxCount) {
             //mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
-            logger.error("[{}]message, system callback map is full[{}]", msgId, size);
+            logger.error("[{}]message, Callback map full[{}]", msgId, size);
             return new MsgResult(StateCode.StateCodeEnum.CALLBACK_FULL.getCode(), StateCode.StateCodeEnum.CALLBACK_FULL.getStateCodeName());
         }
-        ExecutorService es = Executors.newSingleThreadExecutor();
+
+        //ExecutorService es = Executors.newSingleThreadExecutor();
         CALLBACKS.put(msgId, callBackTopic);
-        FutureTask<MsgRsp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
+        //CompletableFuture<MsgRsp> future = callBackTopic.getFuture();
+        //FutureTask<MsgRsp> mqttMsgFutureTask = new FutureTask<>(callBackTopic);
         try {
             boolean sendResult = sendToMqttBoolean(msgId, serverCode, operaCode, qos, mqttMsgArr);
-            if (sendResult) {
-                es.submit(mqttMsgFutureTask);
-                MsgRsp resp = mqttMsgFutureTask.get(timeout, timeUnit);
-                return new MsgResult(resp.getStateCode(), resp.getPayload());
+            if (!sendResult) {
+                return new MsgResult(
+                        StateCode.StateCodeEnum.FAILED.getCode(),
+                        "send failed"
+                );
             }
+
+            MsgRsp resp = callBackTopic.get(timeout, timeUnit);
+            return new MsgResult(resp.getStateCode(), resp.getPayload());
+
+            //if (sendResult) {
+            //    es.submit(mqttMsgFutureTask);
+            //    MsgRsp resp = mqttMsgFutureTask.get(timeout, timeUnit);
+            //    return new MsgResult(resp.getStateCode(), resp.getPayload());
+            //}
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             //mqttLogUtil.ERROR(msgId, StateCode.TIMEOUT, operaCode, serverCode);
             logger.error("[{}]message{},{}, request timeout: [{}][{}]", msgId, serverCode, operaCode, timeout, e.toString());
@@ -195,13 +206,15 @@ public class ChannelSenderImpl {
             if (logger.isDebugEnabled()) e.printStackTrace();
             return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), e.toString());
         } finally {
-            mqttMsgFutureTask.cancel(true);
-            es.shutdown();
+            //mqttMsgFutureTask.cancel(true);
+            //es.shutdown();
+            //if (!future.isDone()) {
+            //    future.cancel(true);
+            //}
             CALLBACKS.remove(msgId);
         }
         //        mqttLogUtil.ERROR(msgId, StateCode.FAILED, operaCode, serverCode);
 
-        return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), "request failed");
     }
 
 
@@ -305,7 +318,7 @@ public class ChannelSenderImpl {
      */
     //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {
-        mqttSenderAckExecutor.execute(() -> {
+        Thread.startVirtualThread(() -> {
             try {
                 String payload = message.getPayload();
                 MsgRsp resp = JSONObject.parseObject(payload, MsgRsp.class);

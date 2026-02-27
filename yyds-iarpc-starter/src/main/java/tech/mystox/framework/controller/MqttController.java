@@ -113,6 +113,7 @@ public class MqttController {
         return new JsonResult<>();
     }
 
+    @Deprecated
     @PostMapping("/getReceiverPackageCallBack")
     public JsonResult<?> getReceiverPackageCallBack(@RequestParam(required = false) String msgId) {
         MqttReceiver bean = SpringContextUtil.getApplicationContext().getBean(MqttReceiver.class);
@@ -122,7 +123,7 @@ public class MqttController {
             MqttMsg call = null;
             try {
                 if (callBackTopic != null) {
-                    call = callBackTopic.call();
+                    //call = callBackTopic.call();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -132,6 +133,7 @@ public class MqttController {
         return new JsonResult<>(callbacks);
     }
 
+    @Deprecated
     @PostMapping("/getSenderSyncCallBack")
     public JsonResult<?> getSenderSyncCallBack(@RequestParam(required = false) String msgId) {
         ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
@@ -141,7 +143,7 @@ public class MqttController {
             MsgRsp call = null;
             try {
                 if (callBackTopic != null) {
-                    call = callBackTopic.call();
+                    //call = callBackTopic.call();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

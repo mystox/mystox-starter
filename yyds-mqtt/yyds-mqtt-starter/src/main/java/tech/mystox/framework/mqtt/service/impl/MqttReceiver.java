@@ -1,16 +1,11 @@
 package tech.mystox.framework.mqtt.service.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
-import jakarta.annotation.PreDestroy;
+import com.alibaba.fastjson2.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tech.mystox.framework.common.util.ByteUtil;
 import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.context.MsgHandlerThreadContext;
@@ -31,7 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -52,15 +50,13 @@ public class MqttReceiver {
      * 注入发送MQTT的Bean
      */
     private final IMqttSender iMqttSender;
-    private final ThreadPoolTaskExecutor mqttExecutor;
     //private final MqttLogUtil mqttLogUtil;
 
     protected static final Map<String, CallSubpackageMsg<MqttMsg>> CALLBACKS = new ConcurrentHashMap<>();
 
-    public MqttReceiver(IaContext iaContext, IMqttSender iMqttSender, ThreadPoolTaskExecutor mqttExecutor/*, MqttLogUtil mqttLogUtil*/) {
+    public MqttReceiver(IaContext iaContext, IMqttSender iMqttSender) {
         this.iaContext = iaContext;
         this.iMqttSender = iMqttSender;
-        this.mqttExecutor = mqttExecutor;
         //this.mqttLogUtil = mqttLogUtil;
         Properties mqMsgProperties = iaContext.getConf().getMqMsgProperties();
         if (mqMsgProperties != null) {
@@ -137,7 +133,7 @@ public class MqttReceiver {
             }
             Object invoke = method.invoke(bean, arguments);
             if (invoke != null) {
-                result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke);
+                result = invoke instanceof String ? (String) invoke : JSON.toJSONString(invoke, JSONWriter.Feature.ReferenceDetection);
             } else {
                 result = null;
             }
@@ -224,7 +220,7 @@ public class MqttReceiver {
 
     //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_NAME_IN)
     public void messageReceiver(Message<String> message) {
-        mqttExecutor.execute(() -> {
+        Thread.startVirtualThread(() -> {
             //至少送达一次存在重复发送的几率，所以订阅服务需要判断消息订阅的幂等性,幂等性可以通过消息属性判断是否重复发送
             Boolean mqtt_duplicate = (Boolean) message.getHeaders().get("mqtt_duplicate");
             if (mqtt_duplicate != null && mqtt_duplicate) {
@@ -287,7 +283,6 @@ public class MqttReceiver {
                     iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
                 logger.error("[{}] Message ", result.getMsgId(), e);
-                //if (logger.isDebugEnabled()) e.printStackTrace();
             }
         });
 
@@ -312,32 +307,25 @@ public class MqttReceiver {
     private String stickPackageMsg(MqttMsg mqttMsg) throws ExecutionException, InterruptedException, TimeoutException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String msgId = mqttMsg.getMsgId();
         int size = CALLBACKS.size();
-        String operaCode = mqttMsg.getOperaCode();
         if (size > callbackMaxCount) {
-            //mqttLogUtil.ERROR(msgId, StateCode.CALLBACK_FULL, operaCode, serverCode);
             logger.error("[{}]Message, system callback map is full[{}]", msgId, size);
             return null;
         }
-        CallSubpackageMsg<MqttMsg> callSubpackageMsg = new CallSubpackageMsg<>();
-        CallSubpackageMsg<MqttMsg> put = CALLBACKS.putIfAbsent(msgId, callSubpackageMsg);
-        if (put == null) {
-            logger.debug("[{}]Message[{}] receive size package start...", msgId, mqttMsg.getTopic());
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            FutureTask<MqttMsg> mqttMsgFutureTask = new FutureTask<>(callSubpackageMsg);
-            try {
-                CALLBACKS.get(msgId).callbackSubPackage(mqttMsg);
-                es.submit(mqttMsgFutureTask);
-                MqttMsg resultMsg = mqttMsgFutureTask.get(packageMsgTimeout * 3, TimeUnit.SECONDS);//组装结果,三倍请求超时间
-                return resultMsg.getPayload();
-            } finally {
-                mqttMsgFutureTask.cancel(true);
-                es.shutdown();
-                CALLBACKS.remove(msgId);
-            }
-        } else {
-            put.callbackSubPackage(mqttMsg);
+        CallSubpackageMsg<MqttMsg> future = CALLBACKS.computeIfAbsent(msgId, k -> new CallSubpackageMsg<>());
+        future.callbackSubPackage(mqttMsg);
+        if (!future.isComplete()) {
+            return null;
         }
-        return null;
+        try {
+            logger.debug("[{}]Message[{}] receive size package start...", msgId, mqttMsg.getTopic());
+            MqttMsg result =
+                    future.get(packageMsgTimeout * 3, TimeUnit.SECONDS);
+            return result.getPayload();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            CALLBACKS.remove(msgId);
+        }
     }
 
 
@@ -362,31 +350,6 @@ public class MqttReceiver {
     }
 
 
-    @PreDestroy
-    public void destroy() {
-        logger.debug("Mqtt receiver destroy...");
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(() -> {
-            int activeCount = mqttExecutor.getActiveCount();
-            if (activeCount == 0) {
-                executorService.shutdown();
-            }
-            if (activeCount >= 50) {
-                logger.warn("Mqtt task executor status: pool size:[{}], active count:[{}], max pool size:[{}] ",
-                        mqttExecutor.getPoolSize(), activeCount, mqttExecutor.getMaxPoolSize());
-            }
-        }, 10, 200, TimeUnit.MILLISECONDS);
-        try {
-            if (executorService.awaitTermination(10, TimeUnit.SECONDS)) {
-                logger.info("Mqtt receiver destroy successfully!!");
-
-            }
-        } catch (InterruptedException e) {
-            logger.error("Destroy mqtt receiver time out 10 seconds, Mqtt task executor status:pool size:[{}], active count:[{}], max pool size:[{}] ",
-                    mqttExecutor.getPoolSize(), mqttExecutor.getActiveCount(), mqttExecutor.getMaxPoolSize());
-        }
-
-    }
 
     public Map<String, CallSubpackageMsg<MqttMsg>> getCALLBACKS() {
         return CALLBACKS;

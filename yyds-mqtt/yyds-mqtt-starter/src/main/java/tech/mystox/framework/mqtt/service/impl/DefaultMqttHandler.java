@@ -16,7 +16,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 
 /**
  * Created by mystox on 2022/4/29, 11:16.
@@ -68,18 +66,13 @@ public class DefaultMqttHandler extends MqttHandler {
         }
         int CORE_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.corePoolSize", 10);
         int MAX_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.maxPoolSize", 10000);
-        ThreadPoolTaskExecutor mqttExecutor = builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 5000, 30000, "mqttExecutor-");
-        ThreadPoolTaskExecutor ackExecutor = builder(CORE_POOL_SIZE, MAX_POOL_SIZE, 2000, 10000, "mqttAck-");
         int mqttSenderHandlerCount = (int) mqMsgProperties.getOrDefault("mqtt.sender.count", 10);
         this.mqttHandlerAck = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-reply")));
-        this.mqttSenderImpl = createSender(ackExecutor, mqttSenderHandlerCount);
+        this.mqttSenderImpl = createSender(mqttSenderHandlerCount);
         this.mqttHandlerImpl = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-consumer")));
 
-        receiverInit(iaContext, mqttExecutor);
+        receiverInit(iaContext);
         this.executorRunner = new ExecutorRunner(
-                mqttExecutor,
-                ackExecutor,
-                Executors.newScheduledThreadPool(10),
                 this.mqttSenderImpl
         );
     }
@@ -88,8 +81,8 @@ public class DefaultMqttHandler extends MqttHandler {
         return executorRunner;
     }
 
-    void receiverInit(IaContext iaContext, ThreadPoolTaskExecutor mqttExecutor) {
-        mqttReceiver = new MqttReceiver(iaContext, iMqttSender, mqttExecutor);
+    void receiverInit(IaContext iaContext) {
+        mqttReceiver = new MqttReceiver(iaContext, iMqttSender);
         DirectChannel inBoundChannel = (DirectChannel) MqttConfigInstance.getInstance().mqttInboundChannel();
         inBoundChannel.subscribe(message -> mqttReceiver.messageReceiver((Message<String>) message));
         DirectChannel replyChannel = (DirectChannel) MqttConfigInstance.getInstance().mqttReplyChannel();
@@ -157,7 +150,7 @@ public class DefaultMqttHandler extends MqttHandler {
         return adapter;
     }
 
-    ChannelSenderImpl createSender(ThreadPoolTaskExecutor ackExecutor, Integer mqttSenderHandlerCount) {
+    ChannelSenderImpl createSender(Integer mqttSenderHandlerCount) {
         this.multiMqttMessageHandler = new MultiMqttMessageHandler(this::createMqttOutbound, mqttSenderHandlerCount);
         DirectChannel messageChannel = (DirectChannel) MqttConfigInstance.getInstance().mqttOutboundChannel();
         messageChannel.subscribe(multiMqttMessageHandler);
@@ -185,7 +178,7 @@ public class DefaultMqttHandler extends MqttHandler {
                 //messageHandler.handleMessageInternal(buildMessage(topic, payload, headers));
             }
         };
-        return new ChannelSenderImpl(iaENV, iaENV.getConf(), iMqttSender, ackExecutor);
+        return new ChannelSenderImpl(iaENV, iaENV.getConf(), iMqttSender);
     }
 
     private Message<String> buildMessage(String topic, String payload, Map<String, Object> headers) throws Exception {
@@ -265,23 +258,8 @@ public class DefaultMqttHandler extends MqttHandler {
     }
 
 
-    protected ThreadPoolTaskExecutor builder(int corePoolSize, int maxPoolSize, int queueCapacity, int aliveSeconds, String threadName) {
-        ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
-        //线程池维护线程的最少数量
-        poolTaskExecutor.setCorePoolSize(corePoolSize);
-        //线程池维护线程的最大数量
-        poolTaskExecutor.setMaxPoolSize(maxPoolSize);
-        //线程池所使用的缓冲队列
-        poolTaskExecutor.setQueueCapacity(queueCapacity);
-        //线程池维护线程所允许的空闲时间
-        poolTaskExecutor.setKeepAliveSeconds(aliveSeconds);
-        poolTaskExecutor.setThreadNamePrefix(threadName);
-        poolTaskExecutor.initialize();
-        return poolTaskExecutor;
-    }
-
     public void stop() {
-        //todo 记得对message相关实例做stop管理
+        // 记得对message相关实例做stop管理
         multiMqttMessageHandler.stop();
         replyProducerDrivenChannelAdapter.stop();
         channelConsumerDrivenChannelAdapter.stop();
