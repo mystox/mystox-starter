@@ -7,9 +7,10 @@ import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 /**
  * Created by mystoxlol on 2020/6/8, 15:20.
  * company:
- * description:
+ * description: 暂时无用
  * update record:
  */
+@Deprecated
 public class BaseLoadBalanceRule implements IaBalanceRule {
     @Override
     public ServerMsg choose(Object var1) {

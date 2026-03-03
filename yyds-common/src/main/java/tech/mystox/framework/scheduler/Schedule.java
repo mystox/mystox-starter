@@ -1,6 +1,5 @@
 package tech.mystox.framework.scheduler;
 
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.core.IaENV;
 
 /**
@@ -10,7 +9,7 @@ import tech.mystox.framework.core.IaENV;
  * update record:
  */
 public interface Schedule {
-    public void initCaller(OperaCall caller);//设置回调方法
+    //public void initCaller(OperaCall caller);//设置回调方法
     public void build(IaENV iaENV);
 
     void unregister();

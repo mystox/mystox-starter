@@ -22,7 +22,7 @@ import java.util.Arrays;
  * update record:
  */
 public abstract class OperaBaseInterceptor implements MethodInterceptor {
-    private IaContext iaContext;
+    private final IaContext iaContext;
 
     public OperaBaseInterceptor(IaContext iaContext) {
         this.iaContext = iaContext;

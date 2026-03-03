@@ -53,6 +53,7 @@ public class IaENV implements RegCall {
         if (StringUtils.isEmpty(scannedBasePackage)) {
             scanBasePackage = List.of(scannedBasePackage);
         }
+        scanBasePackage.add("tech.mystox.framework");
         localServiceScanner = new LocalServiceScannerCore(
                 scanBasePackage, beanProvider);
         jarServiceScanner = new JarServiceScanner(conf);

@@ -7,7 +7,6 @@ import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.autoconfigure.WebPrivFuncConfig;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.GroupCode;
 import tech.mystox.framework.entity.OperaResult;
@@ -114,13 +113,13 @@ public class ZkRegScheduler implements  RegScheduler {
         if (CollectionUtils.isNotEmpty(regHttpList)) registerSubList.addAll(regHttpList);
         return registerSubList;
     }
-
-    private OperaCall caller;
-
-    @Override
-    public void initCaller(OperaCall caller) {
-        this.caller = caller;
-    }
+    //
+    //private OperaCall caller;
+    //
+    //@Override
+    //public void initCaller(OperaCall caller) {
+    //    this.caller = caller;
+    //}
 
 
     @Override

@@ -3,7 +3,6 @@ package tech.mystox.framework.scheduler;
 import org.springframework.context.ApplicationContext;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.service.Impl.DefaultMsgHandler;
 import tech.mystox.framework.service.MsgHandler;
@@ -26,11 +25,6 @@ public class DefaultMsgScheduler implements MsgScheduler {
 
     @Override
     public void removerSubTopic(List<RegisterSub> subList) {
-
-    }
-
-    @Override
-    public void initCaller(OperaCall caller) {
 
     }
 

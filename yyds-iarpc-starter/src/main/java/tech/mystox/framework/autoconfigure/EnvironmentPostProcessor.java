@@ -1,4 +1,4 @@
-package tech.mystox.framework.config;
+package tech.mystox.framework.autoconfigure;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,8 +44,6 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         loadResources(environment, this.profiles);
-//        environment.resolveRequiredPlaceholders("tech.mystox.framework");
-//        environment.setRequiredProperties("tech.mystox.framework");
         if (logger.isInfoEnabled())
             logger.info("Load register environment post processor success...");
         else
@@ -72,21 +70,13 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
             }
             try {
                 String s = "";
-                InputStream inputStream = null;
-                try {
-                    inputStream = resource.getInputStream();
-//                    if (inputStream != null) {
-                        s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-                        if (StringUtils.isNotBlank(s)) {
-                            environment.getPropertySources().addLast(loadProfiles(resource).get(0));
-                        }
-//                    }
-                } finally {
-                    if (inputStream != null)
-                        inputStream.close();
+                try (InputStream inputStream = resource.getInputStream()) {
+                    //                    if (inputStream != null) {
+                    s = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+                    if (StringUtils.isNotBlank(s)) {
+                        environment.getPropertySources().addLast(loadProfiles(resource).getFirst());
+                    }
                 }
-//                if (logger.isWarnEnabled()) logger.warn("file is blank {}", resource.getFilename());
-//                else System.out.println("file is blank " + resource.getFilename());
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(0);

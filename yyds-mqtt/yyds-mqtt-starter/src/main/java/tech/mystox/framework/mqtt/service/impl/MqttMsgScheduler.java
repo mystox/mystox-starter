@@ -10,7 +10,6 @@ import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.service.MsgHandler;
@@ -114,10 +113,6 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
         }
     }
 
-    @Override
-    public void initCaller(OperaCall caller) {
-
-    }
 
     @Override
     public MsgHandler getIaHandler() {

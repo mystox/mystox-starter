@@ -24,6 +24,31 @@ public class MqttProperties {
 
     private int callbackMaxCount = 10000;
     private int packageMsgTimeout = 30;
+
+    public int getPayloadLimit() {
+        return payloadLimit;
+    }
+
+    public void setPayloadLimit(int payloadLimit) {
+        this.payloadLimit = payloadLimit;
+    }
+
+    public int getCallbackMaxCount() {
+        return callbackMaxCount;
+    }
+
+    public void setCallbackMaxCount(int callbackMaxCount) {
+        this.callbackMaxCount = callbackMaxCount;
+    }
+
+    public int getPackageMsgTimeout() {
+        return packageMsgTimeout;
+    }
+
+    public void setPackageMsgTimeout(int packageMsgTimeout) {
+        this.packageMsgTimeout = packageMsgTimeout;
+    }
+
     public String getProducerDefaultTopic() {
         return producerDefaultTopic;
     }

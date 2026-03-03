@@ -3,10 +3,14 @@ package tech.mystox.framework.balancer.client;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 负载均衡接口定义
+ * @Author mystox
+ */
 public interface LoadBalancerClient {
-    public void execute();
+    void execute();
 
-    public Map<String, List<String>>  getOperaRouteMap();
+    Map<String, List<String>>  getOperaRouteMap();
 
-    public void setOperaRouteMap(Map<String, List<String>> operaRouteMap);
+    void setOperaRouteMap(Map<String, List<String>> operaRouteMap);
 }

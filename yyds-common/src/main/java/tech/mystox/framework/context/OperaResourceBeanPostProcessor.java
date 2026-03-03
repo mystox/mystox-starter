@@ -144,9 +144,6 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
     }
     /**
      *
-     * @param beanDefinitionHolder
-     * @param registry
-     * @param scanner
      * @see BeanDefinition
      */
     private void registerServiceBean(BeanDefinitionHolder beanDefinitionHolder, BeanDefinitionRegistry registry,
@@ -307,8 +304,7 @@ public class OperaResourceBeanPostProcessor implements BeanDefinitionRegistryPos
 
         BeanNameGenerator beanNameGenerator = null;
 
-        if (registry instanceof SingletonBeanRegistry) {
-            SingletonBeanRegistry singletonBeanRegistry = SingletonBeanRegistry.class.cast(registry);
+        if (registry instanceof SingletonBeanRegistry singletonBeanRegistry) {
             beanNameGenerator = (BeanNameGenerator) singletonBeanRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
         }
 

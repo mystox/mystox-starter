@@ -1,4 +1,4 @@
-package tech.mystox.framework.service.common;
+package tech.mystox.framework.service;
 
 import tech.mystox.framework.stereotype.OperaCode;
 import tech.mystox.framework.stereotype.Register;

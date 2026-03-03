@@ -11,8 +11,6 @@ import tech.mystox.framework.balancer.client.BaseLoadBalancerClient;
 import tech.mystox.framework.balancer.client.LoadBalancerClient;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.MsgCall;
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
@@ -22,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
@@ -30,12 +29,9 @@ import static tech.mystox.framework.constants.OperaConstants.EPHEMERAL;
 /**
  * Created by mystoxlol on 2020/6/8, 14:36.
  * company:
- * description:
+ * description: 负载均衡处理器
  * update record:
  */
-//@Lazy
-//@Component("baseLoadBalancer")
-//@DependsOn("zkRegScheduler")
 public class BaseLoadBalancer implements LoadBalanceScheduler {
 
     Logger logger = LoggerFactory.getLogger(BaseLoadBalancer.class);
@@ -45,11 +41,12 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     private LoadBalancerClient loadBalancerClient;
 
 
-    private MsgCall msgCall;
-
-
-    public void initCaller(OperaCall caller) {
-    }
+    //private OperaCall msgCall;
+    //
+    //
+    //public void initCaller(OperaCall caller) {
+    //    this.msgCall = caller;
+    //}
 
     @Override
     public void build(IaENV iaENV) {
@@ -171,44 +168,26 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     }
 
     @Override
-    public <T> T operaCall(OperaCall<T> operaCall, String targetServerCode, Object ser) {
-        // OperaCall msgCall = (MsgCall) operaCall;
-        String operaCode = String.valueOf(ser);
-        MsgResult result = null;
+    public <T extends MsgResult> T operaCall(BiFunction<String, String, T> executor,
+                                             BiFunction<StateCode.StateCodeEnum, String, T> errorSupplier,
+                                             String targetServerCode,
+                                             String operaCode) {
+        //String operaCode = String.valueOf(targetServerCode);
+        T result = null;
         if (StringUtils.isNotBlank(targetServerCode))
-            result = (MsgResult) operaCall.operaTarget(operaCode, targetServerCode);
-//        assert result != null;
+            result = executor.apply(operaCode, targetServerCode);
+        if (result == null) return null;
         if (StringUtils.isBlank(targetServerCode) || result.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode()) {
             if (StringUtils.isBlank(targetServerCode))
                 logger.warn("[{}]targetServerCode is null", operaCode);
             else if (result.getStateCode() == StateCode.StateCodeEnum.EXCEPTION.getCode())
                 return (T) result;
-             else if (result.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode())
+            else if (result.getStateCode() != StateCode.StateCodeEnum.SUCCESS.getCode())
                 logger.warn("[{}]targetServerCode request failed", targetServerCode);
-            //IaConf iaconf = iaENV.getConf();
             RegScheduler regScheduler = iaENV.getRegScheduler();
-//            String serverName = iaconf.getServerName();
-//            String groupCode = iaconf.getGroupCode();
-//            String serverVersion = iaconf.getServerVersion();
-//            String groupCodeServerCode = preconditionGroupServerCode(groupCode, preconditionServerCode(
-//                    serverName, serverVersion));
-//            String routePath = preconditionRoutePath(groupCodeServerCode, operaCode);
-            //            if (CollectionUtils.isEmpty(topicArr)) {
-            //            if (!regScheduler.exists(routePath))
-            //                regScheduler.create(routePath, null, IaConf.EPHEMERAL);
-            //            String data = regScheduler.getData(routePath);
             //这里往下逻辑是发送错误后根据路由表再做一次尝试重建路由表
             List<String> localTopicArr = loadBalancerClient.getOperaRouteMap().get(operaCode);
             if (localTopicArr == null) localTopicArr = new ArrayList<>();
-            /*boolean contains = topicArr.contains(targetServerCode);
-            if (contains) {
-                topicArr.remove(targetServerCode);
-            }
-            if (CollectionUtils.isEmpty(topicArr)) {//如果移除后可选路由为空则重建路由，并尝试发送
-                logger.warn("opera map rebuild");
-
-                logger.debug("opera map rebuild result is {}", JSON.toJSON(topicArr));
-            }*/
             //如果路由配置只有一个元素，则默认直接选择单一元素进行发送
             int size = localTopicArr.size();
             List<String> topicArr = new ArrayList<>(localTopicArr);
@@ -222,7 +201,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                         i = r.nextInt(bound);
                     String retryServerCode = topicArr.get(i);
                     if (!StringUtils.equals(retryServerCode, targetServerCode)) {
-                        result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
+                        result = executor.apply(operaCode, retryServerCode);
                         if (result.getStateCode() == StateCode.StateCodeEnum.SUCCESS.getCode()) {
                             logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                             break;
@@ -243,13 +222,13 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
                     try {
                         topicArr = regScheduler.buildOperaMap(operaCode);
                     } catch (RegisterException e) {
-                        result = new MsgResult(StateCode.StateCodeEnum.CONNECT_INTERRUPT, "[" + operaCode + "] build opera map error!");
+                        return errorSupplier.apply(StateCode.StateCodeEnum.CONNECT_INTERRUPT, "[" + operaCode + "] build opera map error!");
                     }
                     int size2 = topicArr.size();
                     if (!CollectionUtils.isEmpty(topicArr)) { //重试一次
                         int i = r.nextInt(size2);
                         String retryServerCode = topicArr.get(i);
-                        result = (MsgResult) operaCall.operaTarget(operaCode, retryServerCode);
+                        result = (T) executor.apply(operaCode, retryServerCode);
                         if (result.getStateCode() == StateCode.StateCodeEnum.SUCCESS.getCode()) {
                             logger.debug("opera[{}] target success server, serverCode is [{}]", operaCode, retryServerCode);
                         } else {
@@ -262,7 +241,7 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
 
             } else {
                 logger.warn("[{}] Request route topic arr is null", operaCode);
-                result = new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
+                return errorSupplier.apply(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION, "request route topic arr is null");
             }
             if (size != topicArr.size()) {
                 logger.warn("[{}] Mqtt sender route code had changed...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
@@ -287,25 +266,6 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
     @Override
     public List<String> getOperaRouteArr(String operaCode) {
         return getLoadBalancerClient().getOperaRouteMap().get(operaCode);
-    }
-
-    public static void main(String[] args) {
-        args = new String[]{"5"};
-        int size = 5;
-        int count = 0;
-        do {
-            if (count == Integer.parseInt(args[0])) {
-                break;
-            }
-            count += 1;
-        } while (count < size);
-        if (count > 0 && count < size) {
-            System.out.println(count);
-        } else if (count == size) {
-
-        }
-        System.out.println(count);
-
     }
 
 }

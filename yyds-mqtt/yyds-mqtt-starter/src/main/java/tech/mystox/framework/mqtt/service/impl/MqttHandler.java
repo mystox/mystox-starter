@@ -63,7 +63,7 @@ public class MqttHandler implements MsgHandler {
         mqttHandlerAck.addSubTopic(topic, qos);
     }
 
-    /////////////IaOperate/////////////
+    /// //////////IaOperate/////////////
     @Override
     public MsgResult opera(String operaCode, String msg) {
         return opera(operaCode, msg, 1, 0, null, false, false);
@@ -71,7 +71,7 @@ public class MqttHandler implements MsgHandler {
 
     @Override
     public MsgResult operaGroupCode(String groupCode, String operaCode, String msg) {
-        return opera(new OperaContext(groupCode,operaCode, msg, 1, 0, null, /*iaENV.getLoadBalanceScheduler(),*/ false, false));
+        return opera(new OperaContext(groupCode, operaCode, msg, 1, 0, null, /*iaENV.getLoadBalanceScheduler(),*/ false, false));
     }
 
 
@@ -150,27 +150,24 @@ public class MqttHandler implements MsgHandler {
 //            logger.error("[{}]Choose server error!", operaCode);
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Choose server error..." + e);
         }
-         if (chooseServer == null) {//选择服务为空则不做消息处理
-             logger.error("[{}] Choose server is null error...", operaCode);
-             return new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION.getCode(), "[" + operaCode + "] Choose server is null error...");
-         }
+        if (chooseServer == null) {//选择服务为空则不做消息处理
+            logger.error("[{}] Choose server is null error...", operaCode);
+            return new MsgResult(StateCode.StateCodeEnum.OPERA_ROUTE_EXCEPTION.getCode(), "[" + operaCode + "] Choose server is null error...");
+        }
         String targetServerCode = "";
 //        if (chooseServer != null)
-            targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(),
-                    preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion(), chooseServer.getSequence()));
+        targetServerCode = preconditionGroupServerCode(chooseServer.getGroupCode(),
+                preconditionServerCode(chooseServer.getServerName(), chooseServer.getServerVersion(), chooseServer.getSequence()));
 
-        return loadBalanceScheduler.operaCall((oCode, retryServerCode) -> operaTarget(oCode, context.getMsg(),
-                context.getQos(), context.getTimeout(), context.getTimeUnit(),
-                context.isSetFlag(), context.isAsync(),
-                retryServerCode), targetServerCode, operaCode);
-        // return loadBalanceScheduler.operaCall(operaTarget(operaCode, context.getMsg(),
-        //         context.getQos(), context.getTimeout(), context.getTimeUnit(),
-        //         context.isSetFlag(), context.isAsync(),
-        //         targetServerCode),this);
-        // return operaTarget(operaCode, context.getMsg(),
-        //         context.getQos(), context.getTimeout(), context.getTimeUnit(),
-        //         context.isSetFlag(), context.isAsync(),
-        //         targetServerCode);
+        return loadBalanceScheduler.operaCall(
+                (oCode, retryServerCode) ->
+                        operaTarget(oCode, context.getMsg(),
+                                context.getQos(), context.getTimeout(), context.getTimeUnit(),
+                                context.isSetFlag(), context.isAsync(),
+                                retryServerCode),
+                (stateCodeEnum, msg) ->
+                        new MsgResult(stateCodeEnum.getCode(), msg),
+                targetServerCode, operaCode);
     }
 
     /**

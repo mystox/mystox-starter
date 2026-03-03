@@ -11,7 +11,7 @@ import java.util.Map;
  * \* Description:
  * \
  */
-@ConfigurationProperties(prefix = "")
+@ConfigurationProperties(prefix = "balance")
 public class OperaRouteProperties {
     Map<String, List<String>> operaRoute;
 

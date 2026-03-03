@@ -10,8 +10,6 @@ public class ByteUtil {
     /**
      * 计算CRC16校验码
      *
-     * @param bytes
-     * @return
      */
     public static int getCRC(byte[] bytes) {
         int CRC = 0x0000ffff;

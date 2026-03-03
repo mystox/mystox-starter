@@ -8,7 +8,6 @@ import tech.mystox.framework.common.util.MqttUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.OperaCall;
 import tech.mystox.framework.entity.RegisterSub;
 import tech.mystox.framework.mqtt.service.ExecutorRunner;
 import tech.mystox.framework.scheduler.MsgScheduler;
@@ -27,7 +26,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
     // @Autowired
     // @Qualifier("MqttHandler")
     DefaultMqttHandler iaHandler;
-    private ApplicationContext applicationContext;
     private IaConf iaconf;
     private IaENV iaENV;
     private String groupCode;
@@ -41,7 +39,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
     }
 
     public DefaultMqttMsgScheduler(IaContext iaContext, ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
         this.iaContext = iaContext;
     }
 
@@ -144,11 +141,6 @@ public class DefaultMqttMsgScheduler implements MsgScheduler {
             logger.error("remove sub topic list error...", e);
             if (logger.isDebugEnabled()) e.printStackTrace();
         }
-    }
-
-    @Override
-    public void initCaller(OperaCall caller) {
-
     }
 
     @Override

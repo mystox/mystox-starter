@@ -7,8 +7,6 @@ import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.scheduler.MsgScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.List;
  * 注册类
  */
 public class IaRegister {
-    private Logger logger = LoggerFactory.getLogger(IaRegister.class);
     IaConf iaConf;
     IaENV iaEnv;
     RegisterMsg registerMsg;

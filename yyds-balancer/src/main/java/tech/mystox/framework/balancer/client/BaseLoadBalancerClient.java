@@ -8,18 +8,13 @@ import tech.mystox.framework.common.util.StringUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.config.autoconfigure.OperaRouteProperties;
 import tech.mystox.framework.core.IaENV;
-import tech.mystox.framework.core.RegCall;
 import tech.mystox.framework.entity.ServerStatus;
 import tech.mystox.framework.entity.TopicPrefix;
 import tech.mystox.framework.scheduler.RegScheduler;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static tech.mystox.framework.common.util.MqttUtils.*;
 
@@ -31,13 +26,14 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  */
 public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements LoadBalancerClient {
 
-    private Logger logger = LoggerFactory.getLogger(BaseLoadBalancerClient.class);
-    private IaENV iaENV;
+    private final Logger logger = LoggerFactory.getLogger(BaseLoadBalancerClient.class);
+    private final IaENV iaENV;
 
     private Map<String, List<String>> operaRouteMap = new ConcurrentHashMap<>();
 
-
-    private ScheduledExecutorService scheduledExecutorService;
+    private final ExecutorService executor =
+            Executors.newVirtualThreadPerTaskExecutor();
+    private final ScheduledExecutorService scheduledExecutorService;
 
     public BaseLoadBalancerClient(IaENV iaENV) {
         this.scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -45,17 +41,12 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
     }
 
     public void execute() {
-        scheduledExecutorService.scheduleWithFixedDelay(this::runner, 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay( () -> executor.submit(this::runner), 1, 1, TimeUnit.SECONDS);
     }
 
     void runner() {
         try {
             RegScheduler regScheduler = iaENV.getRegScheduler();
-            RegCall.RegState state = regScheduler.getState();
-            //            if (RegCall.RegState.SyncConnected != state) {
-            //                logger.debug("register state is not connected ...");
-            //                return;
-            //            }
             ServerStatus serverStatus = iaENV.getServerStatus();
             if (!ServerStatus.ONLINE.equals(serverStatus)) {
                 logger.debug("server state is[{}] not connected ...", serverStatus);
@@ -64,7 +55,6 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
             IaConf conf = iaENV.getConf();
             String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
                     preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
-            //        String nodeData = preconditionGroupServerPath(TopicPrefix.SERVER_STATUS, groupServerCode);
             Map<String, List<String>> operaMap = new ConcurrentHashMap<>();
             OperaRouteProperties operaRouteConfig = conf.getOperaRouteConfig();
             Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
@@ -74,13 +64,13 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
                 for (String operaCode : children) {
                     String routePath = preconditionRoutePath(groupServerCode, operaCode);
                     //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
-                    List<String> operaRouteArr = new ArrayList<>();
+                    List<String> operaRouteArr;
                     if (localOperaRouteMap != null && localOperaRouteMap.containsKey(operaCode)) {
                         operaRouteArr = localOperaRouteMap.get(operaCode);
                         String data = regScheduler.getData(routePath);
                         List<String> exists = JSON.parseArray(data, String.class);
                         if (!CollectionUtils.listEqual(exists, operaRouteArr)) {
-                            logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
+                            logger.info("operaCode [{}] local route changed result: {}", operaCode, operaRouteArr);
                             regScheduler.setData(routePath, JSON.toJSONBytes(operaRouteArr));
                         }
                     } else {
@@ -101,8 +91,8 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
             }
             setOperaRouteMap(operaMap);
         } catch (Exception e) {
-            if (logger.isDebugEnabled()) e.printStackTrace();
-            logger.error("base load balancer error [{}]", e.toString());
+            //if (logger.isDebugEnabled()) e.printStackTrace();
+            logger.error("base load balancer error", e);
         }
     }
 

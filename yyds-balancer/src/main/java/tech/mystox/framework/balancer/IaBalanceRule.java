@@ -6,7 +6,7 @@ import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 /**
  * Created by mystoxlol on 2020/6/8, 10:37.
  * company:
- * description:
+ * description: 复杂均衡规则定义接口
  * update record:
  */
 public interface IaBalanceRule {

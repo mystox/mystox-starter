@@ -1,0 +1,9 @@
+  _____      _____
+ |_   _|    |  __ \
+   | |  __ _| |__) |_ __   ___
+   | | / _` |  _  /| '_ \ / __|
+  _| || (_| | | \ \| |_) | (__
+ |_____\__,_|_|  \_\ .__/ \___|
+                   | |  ${iarpc.starter.version}
+                   |_|
+===::groupCode:: ${server.groupCode} ::serverCode:: ${server.name}_${server.version} ::serverUrl:: ${server.host}:${server.port}
