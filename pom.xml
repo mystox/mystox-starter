@@ -39,8 +39,8 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>3.5.23.SNAPSHOT</revision>
-        <spring-boot.version>3.5.0</spring-boot.version>
+        <revision>3.5.23.RELEASE</revision>
+        <spring-boot.version>3.5.11</spring-boot.version>
 <!--        <spring-cloud.version>Finchley.SR4</spring-cloud.version>-->
         <build.plugins.plugin.version>3.13.0</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
