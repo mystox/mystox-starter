@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * \* @Author: mystox
+ * \* @author: mystox
  * \* Date: 2019/11/22 17:21
  * \* Description: 批量消息处理器
  * \

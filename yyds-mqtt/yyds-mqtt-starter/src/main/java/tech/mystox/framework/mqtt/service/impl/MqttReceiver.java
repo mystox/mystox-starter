@@ -332,7 +332,7 @@ public class MqttReceiver {
     /**
      * 分包
      *
-     * @param bytes 分包流
+     *  bytes 分包流
      * @Parem msgId 消息id
      */
     private List<MsgRsp> subpackage(byte[] bytes, String msgId) {

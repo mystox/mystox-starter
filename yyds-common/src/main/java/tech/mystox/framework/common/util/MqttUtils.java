@@ -31,10 +31,10 @@ public class MqttUtils {
 
     /**
      * @return java.lang.String
-     * @Date 10:02 2020/1/3
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description // GROUP_CODE/SERVER_NAME_VERSION
+     *  10:02 2020/1/3
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  // GROUP_CODE/SERVER_NAME_VERSION
      **/
     public static String preconditionGroupServerCode(String groupCode, String serverCode) {
         return groupCode + "/" + serverCode;
@@ -42,10 +42,10 @@ public class MqttUtils {
 
     /**
      * @return java.lang.String
-     * @Date 9:50 2020/1/3
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description //完整路径 /mqtt/operaRoute/groupCode/serverCode/operaCode
+     *  9:50 2020/1/3
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  //完整路径 /mqtt/operaRoute/groupCode/serverCode/operaCode
      **/
     public static String preconditionRoutePath(String groupCodeServerCode, String operaCode) {
         return preconditionOperaCodePath(preconditionGroupServerPath(TopicPrefix.OPERA_ROUTE, groupCodeServerCode), operaCode);
@@ -53,10 +53,10 @@ public class MqttUtils {
 
     /**
      * @return java.lang.String
-     * @Date 14:34 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 根据不同的目录构建服务路径
+     *  14:34 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  根据不同的目录构建服务路径
      **/
     public static String preconditionGroupServerPath(String topicPrefix, String groupServerCode) {
         return topicPrefix + "/" + groupServerCode;
@@ -65,10 +65,10 @@ public class MqttUtils {
 
     /**
      * @return java.lang.String
-     * @Date 14:35 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 构建操作码路径
+     *  14:35 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  构建操作码路径
      **/
     public static String preconditionOperaCodePath(String groupServerPath, String operaCode) {
         return groupServerPath + "/" + operaCode;
@@ -76,10 +76,10 @@ public class MqttUtils {
 
     /**
      * @return java.lang.String
-     * @Date 15:24 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 构建服务的统一ack topic 格式样例 /mqtt/sub/GROUP_CODE/SERVER_CODE/+/ack
+     *  15:24 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  构建服务的统一ack topic 格式样例 /mqtt/sub/GROUP_CODE/SERVER_CODE/+/ack
      **/
     public static String preconditionSubACKTopicId(String groupServerCode) {
         return preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupServerCode) + "/+" + "/ack";

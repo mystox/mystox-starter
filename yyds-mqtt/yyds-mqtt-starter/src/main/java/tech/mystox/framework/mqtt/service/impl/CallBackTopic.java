@@ -38,7 +38,7 @@ public class CallBackTopic implements Callable<MsgRsp> {
      * 组包
      * 如果出现并发问题，则方法添加synchronized 关键字 性能妥协
      *
-     * @param result
+     *  result
      */
     public void callbackSubPackage(MsgRsp result) {
         int packageNum = result.getPackageNum();

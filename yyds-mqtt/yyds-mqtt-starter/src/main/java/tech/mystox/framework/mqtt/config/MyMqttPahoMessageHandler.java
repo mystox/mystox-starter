@@ -5,7 +5,7 @@ import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.messaging.Message;
 
 /**
- * \* @Author: mystox
+ * \* @author: mystox
  * \* Date: 2019/11/22 17:19
  * \* Description:
  * \

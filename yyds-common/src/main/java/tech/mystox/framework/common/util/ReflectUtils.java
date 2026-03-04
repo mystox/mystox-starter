@@ -145,8 +145,8 @@ public final class ReflectUtils {
     /**
      * is compatible.
      *
-     * @param c class.
-     * @param o instance.
+     *  c class.
+     *  o instance.
      * @return compatible or not.
      */
     public static boolean isCompatible(Class<?> c, Object o) {
@@ -180,8 +180,8 @@ public final class ReflectUtils {
     /**
      * is compatible.
      *
-     * @param cs class array.
-     * @param os object array.
+     *  cs class array.
+     *  os object array.
      * @return compatible or not.
      */
     public static boolean isCompatible(Class<?>[] cs, Object[] os) {
@@ -212,7 +212,7 @@ public final class ReflectUtils {
      * get name.
      * java.lang.Object[][].class => "java.lang.Object[][]"
      *
-     * @param c class.
+     *  c class.
      * @return name.
      */
     public static String getName(Class<?> c) {
@@ -257,7 +257,7 @@ public final class ReflectUtils {
      * get method name.
      * "void do(int)", "void do()", "int do(java.lang.String,boolean)"
      *
-     * @param m method.
+     *  m method.
      * @return name.
      */
     public static String getName(final Method m) {
@@ -296,7 +296,7 @@ public final class ReflectUtils {
      * get constructor name.
      * "()", "(java.lang.String,int)"
      *
-     * @param c constructor.
+     *  c constructor.
      * @return name.
      */
     public static String getName(final Constructor<?> c) {
@@ -315,7 +315,7 @@ public final class ReflectUtils {
      * name to desc.
      * java.util.Map[][] => "[[Ljava/util/Map;"
      *
-     * @param name name.
+     *  name name.
      * @return desc.
      */
     public static String name2desc(String name) {
@@ -343,7 +343,7 @@ public final class ReflectUtils {
      * desc to name.
      * "[[I" => "int[][]"
      *
-     * @param desc desc.
+     *  desc desc.
      * @return name.
      */
     public static String desc2name(String desc) {
@@ -410,7 +410,7 @@ public final class ReflectUtils {
      * "boolean" => boolean.class
      * "java.util.Map[][]" => java.util.Map[][].class
      *
-     * @param name name.
+     *  name name.
      * @return Class instance.
      */
     public static Class<?> name2class(String name) throws ClassNotFoundException {
@@ -422,8 +422,8 @@ public final class ReflectUtils {
      * "boolean" => boolean.class
      * "java.util.Map[][]" => java.util.Map[][].class
      *
-     * @param cl   ClassLoader instance.
-     * @param name name.
+     *  cl   ClassLoader instance.
+     *  name name.
      * @return Class instance.
      */
     private static Class<?> name2class(ClassLoader cl, String name) throws ClassNotFoundException {
@@ -475,7 +475,7 @@ public final class ReflectUtils {
      * "[Z" => boolean[].class
      * "[[Ljava/util/Map;" => java.util.Map[][].class
      *
-     * @param desc desc.
+     *  desc desc.
      * @return Class instance.
      * @throws ClassNotFoundException
      */
@@ -488,8 +488,8 @@ public final class ReflectUtils {
      * "[Z" => boolean[].class
      * "[[Ljava/util/Map;" => java.util.Map[][].class
      *
-     * @param cl   ClassLoader instance.
-     * @param desc desc.
+     *  cl   ClassLoader instance.
+     *  desc desc.
      * @return Class instance.
      * @throws ClassNotFoundException
      */
@@ -536,7 +536,7 @@ public final class ReflectUtils {
     /**
      * get class array instance.
      *
-     * @param desc desc.
+     *  desc desc.
      * @return Class class array.
      * @throws ClassNotFoundException
      */
@@ -548,8 +548,8 @@ public final class ReflectUtils {
     /**
      * get class array instance.
      *
-     * @param cl   ClassLoader instance.
-     * @param desc desc.
+     *  cl   ClassLoader instance.
+     *  desc desc.
      * @return Class[] class array.
      * @throws ClassNotFoundException
      */
@@ -567,8 +567,8 @@ public final class ReflectUtils {
     /**
      * Find method from method signature
      *
-     * @param clazz      Target class to find method
-     * @param methodName Method signature, e.g.: method1(int, String). It is allowed to provide method name only, e.g.: method2
+     *  clazz      Target class to find method
+     *  methodName Method signature, e.g.: method1(int, String). It is allowed to provide method name only, e.g.: method2
      * @return target method
      * @throws NoSuchMethodException
      * @throws ClassNotFoundException
@@ -645,8 +645,8 @@ public final class ReflectUtils {
      * This method will not trigger classloading for the given interface, therefore it will not lead to error when
      * the given interface is not visible by the classloader
      *
-     * @param obj                Object to examine
-     * @param interfaceClazzName The given interface
+     *  obj                Object to examine
+     *  interfaceClazzName The given interface
      * @return true if the object implements the given interface, otherwise return false
      */
     public static boolean isInstance(Object obj, String interfaceClazzName) {

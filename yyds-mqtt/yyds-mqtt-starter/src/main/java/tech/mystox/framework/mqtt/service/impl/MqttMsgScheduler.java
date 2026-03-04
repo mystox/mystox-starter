@@ -43,10 +43,10 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
 
     /**
      * @return void
-     * @Date 0:22 2020/1/6
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 订阅统一AckTopic
+     *  0:22 2020/1/6
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  订阅统一AckTopic
      **/
 
     @Override
@@ -72,10 +72,10 @@ public class MqttMsgScheduler extends DefaultMqttMsgScheduler implements Applica
 
     /**
      * @return void
-     * @Date 0:22 2020/1/6
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 订阅订阅表信息
+     *  0:22 2020/1/6
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  订阅订阅表信息
      **/
     public void subTopic(List<RegisterSub> subList) {
         subList.forEach(sub -> {

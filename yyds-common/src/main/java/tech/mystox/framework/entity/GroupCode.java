@@ -1,7 +1,7 @@
 package tech.mystox.framework.entity;
 
 /**
- * \* @Author: mystox
+ * \* @author: mystox
  * \* Date: 2020/1/4 19:34
  * \* Description:
  * \

@@ -207,7 +207,7 @@ public class CollectionUtils {
 
     /**
      * Java8 数组转为List
-     * @param arrays
+     *  arrays
      * @return
      */
     public static <T> List<T> arrayToList(T[] arrays) {

@@ -9,7 +9,7 @@
     <version>${revision}</version>
     <name>mystox-starter</name>
     <prerequisites>
-    <maven>3.2.5</maven>
+        <maven>3.2.5</maven>
     </prerequisites>
     <description>mq rpc framework contains kafka/mqtt</description>
     <url>https://github.com/mystox/mystox-starter/blob/mystox-starter-SB2.0.4/README.md</url>
@@ -41,7 +41,7 @@
     <properties>
         <revision>3.5.23.RELEASE</revision>
         <spring-boot.version>3.5.11</spring-boot.version>
-<!--        <spring-cloud.version>Finchley.SR4</spring-cloud.version>-->
+        <!--        <spring-cloud.version>Finchley.SR4</spring-cloud.version>-->
         <build.plugins.plugin.version>3.13.0</build.plugins.plugin.version>
         <build.plugins.antrun.version>3.0.0</build.plugins.antrun.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
@@ -131,6 +131,10 @@
                         <version>3.7</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+<!--                    <failOnError>false</failOnError>-->
+<!--                    <doclint>none</doclint>-->
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

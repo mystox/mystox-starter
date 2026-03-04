@@ -64,10 +64,10 @@ public class ZkRegScheduler implements  RegScheduler {
 
     /**
      * @return java.util.List<java.lang.String>
-     * @Date 14:05 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 构建默认组装信息
+     *  14:05 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  构建默认组装信息
      **/
     @Override
     public List<String> buildOperaMap(String operaCode) throws RegisterException {

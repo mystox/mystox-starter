@@ -42,12 +42,12 @@ public class CharSequenceUtils {
     /**
      * Green implementation of regionMatches.
      *
-     * @param cs the {@code CharSequence} to be processed
-     * @param ignoreCase whether or not to be case insensitive
-     * @param thisStart the index to start on the {@code cs} CharSequence
-     * @param substring the {@code CharSequence} to be looked for
-     * @param start the index to start on the {@code substring} CharSequence
-     * @param length character length of the region
+     *  cs the {@code CharSequence} to be processed
+     *  ignoreCase whether or not to be case insensitive
+     *  thisStart the index to start on the {@code cs} CharSequence
+     *  substring the {@code CharSequence} to be looked for
+     *  start the index to start on the {@code substring} CharSequence
+     *  length character length of the region
      * @return whether the region matched
      */
     static boolean regionMatches(final CharSequence cs, final boolean ignoreCase, final int thisStart,

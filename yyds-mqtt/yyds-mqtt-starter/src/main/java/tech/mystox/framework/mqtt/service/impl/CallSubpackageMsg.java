@@ -51,7 +51,7 @@ public class CallSubpackageMsg<T extends MsgPackage> {
      * 组包
      * 如果出现并发问题，则方法添加synchronized 关键字 性能妥协
      *
-     * @param msg 分包消息
+     *  msg 分包消息
      */
     public void callbackSubPackage(T msg) {
         if (completed.get()) {

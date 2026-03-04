@@ -286,8 +286,8 @@ public class ChannelSenderImpl {
     /**
      * 发送消息过大分包处理
      *
-     * @param
-     * @param hashAck
+     * 
+     *  hashAck
      * @return
      */
     private List<MqttMsg> subpackage(byte[] bytes, String topicId, String operaCode, String msgId, Boolean hashAck) {
@@ -314,7 +314,7 @@ public class ChannelSenderImpl {
     /**
      * 回复通道
      *
-     * @param message
+     *  message
      */
     //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
     public void messageReceiver(Message<String> message) {

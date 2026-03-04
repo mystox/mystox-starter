@@ -171,12 +171,12 @@ public class MqttHandler implements MsgHandler {
     }
 
     /**
-     * @param setFlag 设置超时
+     *  setFlag 设置超时
      * @return tech.mystox.framework.entity.MsgResult
-     * @Date 16:12 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description
+     *  16:12 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     * 
      **/
     private MsgResult opera(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async) {
         return opera(new OperaContext(operaCode, msg, qos, timeout, timeUnit, /*iaENV.getLoadBalanceScheduler(),*/ setFlag, async));
@@ -302,10 +302,10 @@ public class MqttHandler implements MsgHandler {
     }
 
     /**
-     * @Date 14:05 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 构建默认组装信息
+     *  14:05 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  构建默认组装信息
      **//*
     private List<String> buildOperaMap(String operaCode)  {
 
@@ -360,10 +360,10 @@ public class MqttHandler implements MsgHandler {
 
     /**
      * @return tech.mystox.framework.entity.MsgResult
-     * @Date 16:12 2020/1/4
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description
+     *  16:12 2020/1/4
+     *  No such property: code for class: Script1
+     * @author mystox
+     * 
      **/
     private void broadcast(String operaCode, String msg, int qos, boolean setFlag) {
 

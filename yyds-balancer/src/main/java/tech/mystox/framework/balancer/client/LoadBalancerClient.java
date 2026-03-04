@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * 负载均衡接口定义
- * @Author mystox
+ * @author mystox
  */
 public interface LoadBalancerClient {
     void execute();

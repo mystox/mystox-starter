@@ -78,7 +78,7 @@ public class ClassHelper {
     /**
      * get class loader
      *
-     * @param cls
+     *  cls
      * @return class loader
      */
     public static ClassLoader getClassLoader(Class<?> cls) {
@@ -126,8 +126,8 @@ public class ClassHelper {
      * instances for primitives (like "int") and array class names (like
      * "String[]").
      *
-     * @param name        the name of the Class
-     * @param classLoader the class loader to use (may be <code>null</code>,
+     *  name        the name of the Class
+     *  classLoader the class loader to use (may be <code>null</code>,
      *                    which indicates the default class loader)
      * @return Class instance for the supplied name
      * @throws ClassNotFoundException if the class was not found
@@ -178,7 +178,7 @@ public class ClassHelper {
      * <i>not</i> support the "[]" suffix notation for primitive arrays; this is
      * only supported by {@link #forName}.
      *
-     * @param name the name of the potentially primitive class
+     *  name the name of the potentially primitive class
      * @return the primitive class, or <code>null</code> if the name does not
      * denote a primitive class or primitive array class
      */

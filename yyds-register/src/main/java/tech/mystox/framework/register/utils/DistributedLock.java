@@ -63,9 +63,9 @@ public class DistributedLock implements Lock, Watcher, AsyncCallback.StatCallbac
     /**
      * 配置分布式锁
      * <p>
-     * //     * @param config   连接的url
+     * //     *  config   连接的url
      *
-     * @param lockName 竞争资源
+     *  lockName 竞争资源
      */
     @Deprecated //外部zk源监听会失效
     public DistributedLock(ZooKeeper zk, String lockName) {

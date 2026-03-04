@@ -249,8 +249,8 @@ public class OperaBean<T> implements FactoryBean, InitializingBean, Serializable
     /**
      * 校验作用
      *
-     * @param annotationClass
-     * @param annotation
+     *  annotationClass
+     *  annotation
      */
     protected void appendAnnotation(Class<?> annotationClass, Object annotation) {
         Method[] methods = annotationClass.getMethods();

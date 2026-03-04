@@ -39,7 +39,7 @@ public final class StringUtils {
     /**
      * is empty string.
      *
-     * @param str source string.
+     *  str source string.
      * @return is empty.
      */
     public static boolean isEmpty(String str) {
@@ -51,7 +51,7 @@ public final class StringUtils {
     /**
      * is not empty string.
      *
-     * @param str source string.
+     *  str source string.
      * @return is not empty.
      */
     public static boolean isNotEmpty(String str) {
@@ -70,7 +70,7 @@ public final class StringUtils {
     /**
      * join string.
      *
-     * @param array String array.
+     *  array String array.
      * @return String.
      */
     public static String join(String[] array) {

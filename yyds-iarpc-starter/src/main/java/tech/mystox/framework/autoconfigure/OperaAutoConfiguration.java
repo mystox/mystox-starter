@@ -100,7 +100,7 @@ public class OperaAutoConfiguration {
     /**
      * init consumer bean
      *
-     * @param opera          opera
+     *  opera          opera
      * @return ReferenceBean<T>
      * @throws BeansException BeansException
      */

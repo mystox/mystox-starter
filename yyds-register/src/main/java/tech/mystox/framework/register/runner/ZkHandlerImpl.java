@@ -135,7 +135,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 往注册中心注册数据
      *
-     * @param sub 注册数据
+     *  sub 注册数据
      */
     @Override
     public void setDataToRegistry(RegisterSub sub) {
@@ -182,9 +182,9 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
 
 //    /**
-//     * @param topicPrefix 前缀
-//     * @param groupCode   服务组code
-//     * @param serverCode  服务code
+//     *  topicPrefix 前缀
+//     *  groupCode   服务组code
+//     *  serverCode  服务code
 //     * @throws KeeperException      zk异常
 //     * @throws InterruptedException zk中断异常
 //     */
@@ -204,8 +204,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 //    }
 
     /**
-     * @param topicPrefix topic前缀
-     * @param groupCode   组编码前缀
+     *  topicPrefix topic前缀
+     *  groupCode   组编码前缀
      * @throws KeeperException      zookeeper异常
      * @throws InterruptedException 中断异常
      */
@@ -223,7 +223,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 往注册中心注册数据
      *
-     * @param sub 注册订阅数据
+     *  sub 注册订阅数据
      * @throws KeeperException      zookeeper异常
      * @throws InterruptedException 中断异常
      */
@@ -241,7 +241,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * 注销注册中心能力
      *
-     * @param sub 注册订阅数据
+     *  sub 注册订阅数据
      */
     public void unregisteringSub(RegisterSub sub) throws InterruptedException, KeeperException {
         if (!zk.getState().isAlive()) return;
@@ -266,10 +266,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     /*
      * @return void
-     * @Date 0:22 2020/1/6
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 订阅统一AckTopic
+     *  0:22 2020/1/6
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  订阅统一AckTopic
      **/
     /*private void ackTopic(MsgHandler mqttHandlerAck) {
         String ackTopicId = preconditionSubACKTopicId(preconditionGroupServerCode(groupCode, preconditionServerCode(serverName, serverVersion)));
@@ -322,7 +322,7 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * //往服务节点注册订阅服务信息
      *
-     * @param subList 注册订阅数据
+     *  subList 注册订阅数据
      * @throws KeeperException      zookeeper异常
      * @throws InterruptedException 中断异常
      */
@@ -340,10 +340,10 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
 
     /**
      * @return void
-     * @Date 0:21 2020/1/6
-     * @Param No such property: code for class: Script1
-     * @Author mystox
-     * @Description 注册服务信息
+     *  0:21 2020/1/6
+     *  No such property: code for class: Script1
+     * @author mystox
+     *  注册服务信息
      **/
     private boolean locks() throws KeeperException, InterruptedException, InterruptedIOException {
         //获取服务信息并注册
@@ -782,8 +782,8 @@ public class ZkHandlerImpl implements RegHandler, Watcher {
     /**
      * zookeeper连接异常采集计数
      *
-     * @param e    异常
-     * @param path node_path
+     *  e    异常
+     *  path node_path
      */
     private void zooKeeperConnectExceptionDeal(KeeperException e, String path) {
         // 十次异常连接 尝试重新注册连接

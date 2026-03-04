@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * \* @Author: mystox
+ * \* @author: mystox
  * \* Date: 2019/11/27 11:01
  * \* Description:
  * \
