@@ -15,6 +15,7 @@ import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
@@ -51,7 +52,7 @@ public class IaENV implements RegCall {
         //扫描注册信息
         String scannedBasePackage = this.conf.scanBasePackage();
         if (StringUtils.isNotBlank(scannedBasePackage)) {
-            scanBasePackage = List.of(scannedBasePackage);
+            scanBasePackage = new ArrayList<>(List.of(scannedBasePackage));
         }
         scanBasePackage.add("tech.mystox.framework");
         localServiceScanner = new LocalServiceScannerCore(
