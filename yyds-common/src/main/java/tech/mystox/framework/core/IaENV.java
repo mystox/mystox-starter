@@ -50,7 +50,7 @@ public class IaENV implements RegCall {
         this.conf = iaContext.getConf();
         //扫描注册信息
         String scannedBasePackage = this.conf.scanBasePackage();
-        if (StringUtils.isEmpty(scannedBasePackage)) {
+        if (StringUtils.isNotBlank(scannedBasePackage)) {
             scanBasePackage = List.of(scannedBasePackage);
         }
         scanBasePackage.add("tech.mystox.framework");
