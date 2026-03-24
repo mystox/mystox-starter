@@ -24,7 +24,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * description: 内存存放的路由表信息
  * update record:
  */
-public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements LoadBalancerClient {
+public class BaseLoadBalancerClient /*extends CommonExecutorConfig */ implements LoadBalancerClient {
 
     private final Logger logger = LoggerFactory.getLogger(BaseLoadBalancerClient.class);
     private final IaENV iaENV;
@@ -41,7 +41,7 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
     }
 
     public void execute() {
-        scheduledExecutorService.scheduleWithFixedDelay( () -> executor.submit(this::runner), 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(() -> executor.submit(this::runner), 1, 1, TimeUnit.SECONDS);
     }
 
     void runner() {
@@ -90,6 +90,54 @@ public class BaseLoadBalancerClient /*extends CommonExecutorConfig */implements 
                 }
             }
             setOperaRouteMap(operaMap);
+        } catch (Exception e) {
+            //if (logger.isDebugEnabled()) e.printStackTrace();
+            logger.error("base load balancer error", e);
+        }
+    }
+
+    public void retryOpera(String operaCode) {
+        try {
+            RegScheduler regScheduler = iaENV.getRegScheduler();
+            ServerStatus serverStatus = iaENV.getServerStatus();
+            if (!ServerStatus.ONLINE.equals(serverStatus)) {
+                logger.debug("server state is[{}] not connected ...", serverStatus);
+                return;
+            }
+            IaConf conf = iaENV.getConf();
+            String groupServerCode = preconditionGroupServerCode(conf.getGroupCode(),
+                    preconditionServerCode(conf.getServerName(), conf.getServerVersion()));
+            Map<String, List<String>> operaRouteMap = getOperaRouteMap();
+            if (operaRouteMap == null || operaRouteMap.isEmpty()) {
+                return;
+            }
+            OperaRouteProperties operaRouteConfig = conf.getOperaRouteConfig();
+            List<String> operaRouteArr;
+            Map<String, List<String>> localOperaRouteMap = operaRouteConfig.getOperaRoute();
+            String routePath = preconditionRoutePath(groupServerCode, operaCode);
+            //判断本地是否存在自定义配置，如有，使用本地配置文件的配置 本地配置不进行重新注册，只有在接受广播后会改变路由
+            if (localOperaRouteMap != null && localOperaRouteMap.containsKey(operaCode)) {
+                operaRouteArr = localOperaRouteMap.get(operaCode);
+                String data = regScheduler.getData(routePath);
+                List<String> exists = JSON.parseArray(data, String.class);
+                if (!CollectionUtils.listEqual(exists, operaRouteArr)) {
+                    logger.info("operaCode [{}] local route changed result: {}", operaCode, operaRouteArr);
+                    regScheduler.setData(routePath, JSON.toJSONBytes(operaRouteArr));
+                }
+            } else {
+                operaRouteArr = regScheduler.buildOperaMap(operaCode);
+                String data = regScheduler.getData(routePath);
+                if (StringUtils.isNotEmpty(data)) {
+                    List<String> registerRoute = JSON.parseArray(data, String.class);
+                    if (CollectionUtils.isNotEmpty(registerRoute) && !CollectionUtils.listEqual(operaRouteArr, registerRoute)) {//判断路由是否发生变化，变化则更新
+                        logger.info("operaCode [{}] route changed result: {}", operaCode, operaRouteArr);
+                        regScheduler.setData(routePath, JSON.toJSONBytes(operaRouteArr));
+                    }
+                }
+
+            }
+            operaRouteMap.put(operaCode, operaRouteArr);
+            logger.debug("operaCode [{}] route update result: {}", operaCode, operaRouteArr);
         } catch (Exception e) {
             //if (logger.isDebugEnabled()) e.printStackTrace();
             logger.error("base load balancer error", e);

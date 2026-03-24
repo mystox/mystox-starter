@@ -268,4 +268,9 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         return getLoadBalancerClient().getOperaRouteMap().get(operaCode);
     }
 
+    @Override
+    public void retryOpera(String operaCode) {
+        getLoadBalancerClient().retryOpera(operaCode);
+    }
+
 }

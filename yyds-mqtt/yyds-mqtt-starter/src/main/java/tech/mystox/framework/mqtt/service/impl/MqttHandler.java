@@ -145,7 +145,12 @@ public class MqttHandler implements MsgHandler {
                 }
             }
             chooseServer = loadBalanceScheduler.chooseServer(targetGroupCode, operaCode);
-
+            //选择空重试一次
+            if (chooseServer == null) {
+                logger.warn("[{}] Choose server is null error...", targetGroupCode);
+                loadBalanceScheduler.retryOpera(operaCode);
+                chooseServer = loadBalanceScheduler.chooseServer(targetGroupCode, operaCode);
+            }
         } catch (RegisterException e) {
 //            logger.error("[{}]Choose server error!", operaCode);
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Choose server error..." + e);

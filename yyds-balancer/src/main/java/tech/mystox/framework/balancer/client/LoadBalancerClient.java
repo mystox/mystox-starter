@@ -13,4 +13,6 @@ public interface LoadBalancerClient {
     Map<String, List<String>>  getOperaRouteMap();
 
     void setOperaRouteMap(Map<String, List<String>> operaRouteMap);
+
+    void retryOpera(String operaCode);
 }
