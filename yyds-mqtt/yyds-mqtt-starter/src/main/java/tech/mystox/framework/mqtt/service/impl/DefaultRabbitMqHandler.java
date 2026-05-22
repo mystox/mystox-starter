@@ -23,7 +23,7 @@ public class DefaultRabbitMqHandler extends MqttHandler {
     private static final String MQTT_RECEIVED_TOPIC = "mqtt_receivedTopic";
 
     private final MessageBusTransport transport;
-    private final MqttReceiver mqttReceiver;
+    private final MessageBusReceiverSupport mqttReceiver;
     private final ExecutorRunner executorRunner;
     private final MessageBusListener requestListener;
     private final MessageBusListener ackListener;

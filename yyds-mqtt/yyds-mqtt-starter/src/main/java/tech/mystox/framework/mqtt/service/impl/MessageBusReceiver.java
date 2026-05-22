@@ -6,12 +6,12 @@ import tech.mystox.framework.mqtt.service.MessageBusTransport;
 /**
  * Receiver implementation for non-MQTT message bus transports.
  */
-public class MessageBusReceiver extends MqttReceiver {
+public class MessageBusReceiver extends MessageBusReceiverSupport {
 
     private final MessageBusTransport transport;
 
     public MessageBusReceiver(IaContext iaContext, MessageBusTransport transport) {
-        super(iaContext, null);
+        super(iaContext);
         this.transport = transport;
     }
 
