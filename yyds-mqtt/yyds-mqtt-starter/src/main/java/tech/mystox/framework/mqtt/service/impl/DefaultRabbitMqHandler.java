@@ -1,24 +1,9 @@
 package tech.mystox.framework.mqtt.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.ExchangeBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
-import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.mqtt.service.ExecutorRunner;
@@ -26,72 +11,41 @@ import tech.mystox.framework.mqtt.service.MessageBusChannel;
 import tech.mystox.framework.mqtt.service.MessageBusListener;
 import tech.mystox.framework.mqtt.service.MessageBusTransport;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * RabbitMQ transport adapter that keeps the existing MQTT-shaped topic and payload protocol.
+ * RabbitMQ handler that wires the generic message bus protocol to the RabbitMQ transport.
  */
-public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTransport {
-    private static final Logger logger = LoggerFactory.getLogger(DefaultRabbitMqHandler.class);
+public class DefaultRabbitMqHandler extends MqttHandler {
     private static final String MQTT_RECEIVED_TOPIC = "mqtt_receivedTopic";
 
-    private final IaENV iaENV;
-    private final String exchangeName;
-    private final String queuePrefix;
-    private final int queueExpires;
-    private final CachingConnectionFactory connectionFactory;
-    private final RabbitAdmin rabbitAdmin;
-    private final RabbitTemplate rabbitTemplate;
-    private final SimpleMessageListenerContainer consumerContainer;
-    private final SimpleMessageListenerContainer ackContainer;
-    private final String instanceId;
-    private Queue serviceSubQueue;
-    private Queue serviceAckQueue;
-    private final Map<String, Queue> subQueues = new ConcurrentHashMap<>();
-    private final Map<String, Queue> ackQueues = new ConcurrentHashMap<>();
-    private final Map<MessageBusChannel, MessageBusListener> listeners = new ConcurrentHashMap<>();
+    private final MessageBusTransport transport;
     private final MqttReceiver mqttReceiver;
     private final ExecutorRunner executorRunner;
+    private final MessageBusListener requestListener;
+    private final MessageBusListener ackListener;
 
     public DefaultRabbitMqHandler(IaContext iaContext) {
         super(iaContext.getIaENV());
-        this.iaENV = iaContext.getIaENV();
+        IaENV iaENV = iaContext.getIaENV();
         Properties properties = iaENV.getConf().getMqMsgProperties();
-        this.exchangeName = getProperty(properties, "rabbitmq.exchange", "yyds.rpc");
-        this.queuePrefix = getProperty(properties, "rabbitmq.queuePrefix", "yyds");
-        this.queueExpires = getInt(properties, "rabbitmq.queueExpires", 600000);
-        this.connectionFactory = createConnectionFactory(properties);
-        this.rabbitAdmin = new RabbitAdmin(connectionFactory);
-        this.rabbitAdmin.declareExchange(ExchangeBuilder.topicExchange(exchangeName).durable(true).build());
-        this.rabbitTemplate = new RabbitTemplate(connectionFactory);
-        this.instanceId = sanitizeQueuePart(iaENV.getConf().getMyId());
-        this.consumerContainer = createContainer(properties);
-        this.ackContainer = createContainer(properties);
+        this.transport = new RabbitMqTransport(iaENV, properties);
 
         int payloadLimit = getInt(properties, 1024 * 1024, "rabbitmq.payload.limit", "messageBus.payload.limit");
-        MessageBusSender sender = new MessageBusSender(iaENV, iaENV.getConf(), this);
+        MessageBusSender sender = new MessageBusSender(iaENV, iaENV.getConf(), transport);
         sender.setMqttPayloadLimit(payloadLimit);
-        MessageBusReceiver receiver = new MessageBusReceiver(iaContext, this);
+        MessageBusReceiver receiver = new MessageBusReceiver(iaContext, transport);
         receiver.setMqttPayloadLimit(payloadLimit);
         this.mqttSenderImpl = sender;
         this.mqttReceiver = receiver;
         this.executorRunner = new ExecutorRunner(this.mqttSenderImpl);
-        this.listeners.put(MessageBusChannel.REQUEST, (topic, payload, headers) ->
-                this.mqttReceiver.messageReceiver(buildSpringMessage(topic, payload, headers)));
-        this.listeners.put(MessageBusChannel.ACK, (topic, payload, headers) ->
-                this.mqttSenderImpl.messageReceiver(buildSpringMessage(topic, payload, headers)));
-
-        this.consumerContainer.setMessageListener(message ->
-                dispatch(MessageBusChannel.REQUEST, message));
-        this.ackContainer.setMessageListener(message ->
-                dispatch(MessageBusChannel.ACK, message));
-        this.consumerContainer.afterPropertiesSet();
-        this.ackContainer.afterPropertiesSet();
+        this.requestListener = (topic, payload, headers) ->
+                this.mqttReceiver.messageReceiver(buildSpringMessage(topic, payload, headers));
+        this.ackListener = (topic, payload, headers) ->
+                this.mqttSenderImpl.messageReceiver(buildSpringMessage(topic, payload, headers));
     }
 
     public ExecutorRunner getExecutorRunner() {
@@ -100,172 +54,40 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
 
     @Override
     public void addSubTopic(String topic, int qos) {
-        subscribe(MessageBusChannel.REQUEST, topic, qos, listeners.get(MessageBusChannel.REQUEST));
+        transport.subscribe(MessageBusChannel.REQUEST, topic, qos, requestListener);
     }
 
     @Override
     public void removeSubTopic(String... topics) {
-        unsubscribe(MessageBusChannel.REQUEST, topics);
+        transport.unsubscribe(MessageBusChannel.REQUEST, topics);
     }
 
     @Override
     public void removeAckSubTopic(String... topics) {
-        unsubscribe(MessageBusChannel.ACK, topics);
+        transport.unsubscribe(MessageBusChannel.ACK, topics);
     }
 
     @Override
     public boolean isAckExists(String topic) {
-        return isSubscribed(MessageBusChannel.ACK, topic);
+        return transport.isSubscribed(MessageBusChannel.ACK, topic);
     }
 
     @Override
     public boolean isExists(String topic) {
-        return isSubscribed(MessageBusChannel.REQUEST, topic);
+        return transport.isSubscribed(MessageBusChannel.REQUEST, topic);
     }
 
     @Override
     public void addAckTopic(String topic, int qos) {
-        subscribe(MessageBusChannel.ACK, topic, qos, listeners.get(MessageBusChannel.ACK));
+        transport.subscribe(MessageBusChannel.ACK, topic, qos, ackListener);
     }
 
     public void stop() {
-        consumerContainer.stop();
-        ackContainer.stop();
-        connectionFactory.destroy();
-    }
-
-    @Override
-    public void publish(String topic, int qos, String payload) {
-        String routingKey = toRoutingKey(topic);
-        rabbitTemplate.convertAndSend(exchangeName, routingKey, payload, message -> {
-            message.getMessageProperties().setHeader(MQTT_RECEIVED_TOPIC, topic);
-            message.getMessageProperties().setHeader("mqtt_qos", qos);
-            return message;
-        });
-        logger.debug("RabbitMQ message sent to [{}] via [{}]", topic, routingKey);
-    }
-
-    @Override
-    public void subscribe(MessageBusChannel channel, String topic, int qos) {
-        subscribe(channel, topic, qos, listeners.get(channel));
-    }
-
-    @Override
-    public void subscribe(MessageBusChannel channel, String topic, int qos, MessageBusListener listener) {
-        if (listener != null) {
-            listeners.put(channel, listener);
-        }
-        boolean ackQueue = MessageBusChannel.ACK.equals(channel);
-        addQueue(topic, ackQueue ? ackQueues : subQueues, ackQueue ? ackContainer : consumerContainer, ackQueue);
-    }
-
-    @Override
-    public void unsubscribe(MessageBusChannel channel, String... topics) {
-        boolean ackQueue = MessageBusChannel.ACK.equals(channel);
-        removeQueue(ackQueue ? ackQueues : subQueues, ackQueue ? ackContainer : consumerContainer, topics);
-    }
-
-    @Override
-    public boolean isSubscribed(MessageBusChannel channel, String topic) {
-        if (MessageBusChannel.ACK.equals(channel)) {
-            return ackQueues.containsKey(topic);
-        }
-        return subQueues.containsKey(topic);
-    }
-
-    @Override
-    public void start() {
-        startConsumers();
+        transport.stop();
     }
 
     public void startConsumers() {
-        if (serviceSubQueue != null && !consumerContainer.isRunning()) {
-            consumerContainer.start();
-        }
-        if (serviceAckQueue != null && !ackContainer.isRunning()) {
-            ackContainer.start();
-        }
-    }
-
-    private void dispatch(MessageBusChannel channel, org.springframework.amqp.core.Message message) {
-        MessageBusListener listener = listeners.get(channel);
-        if (listener == null) {
-            logger.warn("RabbitMQ message listener is null for channel [{}]", channel);
-            return;
-        }
-        String topic = getReceivedTopic(message);
-        listener.onMessage(topic, new String(message.getBody(), StandardCharsets.UTF_8),
-                new HashMap<>(message.getMessageProperties().getHeaders()));
-    }
-
-    private void addQueue(String topic, Map<String, Queue> queues, SimpleMessageListenerContainer container, boolean ackQueue) {
-        queues.computeIfAbsent(topic, item -> {
-            String routingKey = toRoutingKey(item);
-            Queue queue = serviceQueue(ackQueue);
-            TopicExchange exchange = new TopicExchange(exchangeName, true, false);
-            Binding binding = BindingBuilder.bind(queue).to(exchange).with(routingKey);
-            declareQueueIfNecessary(container, queue, ackQueue);
-            rabbitAdmin.declareBinding(binding);
-            logger.debug("RabbitMQ queue [{}] bound to [{}]", queue.getName(), routingKey);
-            return queue;
-        });
-    }
-
-    private Queue serviceQueue(boolean ackQueue) {
-        if (ackQueue) {
-            if (serviceAckQueue == null) {
-                serviceAckQueue = QueueBuilder.nonDurable(queueName("ack")).expires(queueExpires).build();
-            }
-            return serviceAckQueue;
-        }
-        if (serviceSubQueue == null) {
-            serviceSubQueue = QueueBuilder.nonDurable(queueName("sub")).expires(queueExpires).build();
-        }
-        return serviceSubQueue;
-    }
-
-    private void declareQueueIfNecessary(SimpleMessageListenerContainer container, Queue queue, boolean ackQueue) {
-        boolean alreadyDeclared = ackQueue
-                ? ackQueues.containsValue(queue)
-                : subQueues.containsValue(queue);
-        if (alreadyDeclared) {
-            return;
-        }
-        rabbitAdmin.declareQueue(queue);
-        container.addQueues(queue);
-        logger.info("RabbitMQ queue [{}] declared", queue.getName());
-    }
-
-    private void removeQueue(Map<String, Queue> queues, SimpleMessageListenerContainer container, String... topics) {
-        for (String topic : topics) {
-            Queue queue = queues.remove(topic);
-            if (queue == null || StringUtils.isBlank(queue.getName())) {
-                continue;
-            }
-            container.removeQueues(queue);
-            rabbitAdmin.deleteQueue(queue.getName());
-            logger.info("RabbitMQ queue [{}] removed for topic [{}]", queue.getName(), topic);
-        }
-    }
-
-    private SimpleMessageListenerContainer createContainer(Properties properties) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory);
-        container.setAmqpAdmin((AmqpAdmin) rabbitAdmin);
-        container.setAutoDeclare(true);
-        container.setMissingQueuesFatal(false);
-        container.setAcknowledgeMode(AcknowledgeMode.AUTO);
-        container.setPrefetchCount(getInt(properties, "rabbitmq.prefetch", 50));
-        return container;
-    }
-
-    private CachingConnectionFactory createConnectionFactory(Properties properties) {
-        CachingConnectionFactory factory = new CachingConnectionFactory();
-        factory.setHost(getProperty(properties, "spring.rabbitmq.host", "rabbitmq.host", "127.0.0.1"));
-        factory.setPort(getInt(properties, "spring.rabbitmq.port", "rabbitmq.port", 5672));
-        factory.setUsername(getProperty(properties, "spring.rabbitmq.username", "rabbitmq.username", "guest"));
-        factory.setPassword(getProperty(properties, "spring.rabbitmq.password", "rabbitmq.password", "guest"));
-        factory.setVirtualHost(getProperty(properties, "spring.rabbitmq.virtual-host", "rabbitmq.virtualHost", "/"));
-        return factory;
+        transport.start();
     }
 
     private Message<String> buildSpringMessage(String topic, String payload, Map<String, Object> sourceHeaders) {
@@ -278,77 +100,6 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
         headers.put(MQTT_RECEIVED_TOPIC, topic);
         headers.put("mqtt_duplicate", false);
         return new GenericMessage<>(payload, new MessageHeaders(headers));
-    }
-
-    private String queueName(String topic) {
-        IaConf conf = iaENV.getConf();
-        String serverCode = String.join(".",
-                conf.getGroupCode(),
-                conf.getServerName(),
-                conf.getServerVersion(),
-                conf.getSequence() == null ? "default" : String.valueOf(conf.getSequence()));
-        return queuePrefix + "." + serverCode + "." + instanceId + "." + Integer.toHexString(topic.hashCode());
-    }
-
-    private String sanitizeQueuePart(String value) {
-        if (StringUtils.isBlank(value)) {
-            return UUID.randomUUID().toString().replace("-", "");
-        }
-        return value.replaceAll("[^A-Za-z0-9_-]", "");
-    }
-
-    private String toRoutingKey(String topic) {
-        String value = StringUtils.removeStart(topic, "/").replace("/", ".");
-        return value.replace("+", "#");
-    }
-
-    private String toTopic(String routingKey) {
-        if (StringUtils.isBlank(routingKey)) {
-            return "";
-        }
-        return "/" + routingKey.replace(".", "/");
-    }
-
-    private String getReceivedTopic(org.springframework.amqp.core.Message message) {
-        Object topic = message.getMessageProperties().getHeaders().get(MQTT_RECEIVED_TOPIC);
-        if (topic != null && StringUtils.isNotBlank(topic.toString())) {
-            return topic.toString();
-        }
-        return toTopic(message.getMessageProperties().getReceivedRoutingKey());
-    }
-
-    private String getProperty(Properties properties, String key, String defaultValue) {
-        if (properties == null) {
-            return defaultValue;
-        }
-        return properties.getProperty(key, defaultValue);
-    }
-
-    private String getProperty(Properties properties, String primaryKey, String fallbackKey, String defaultValue) {
-        if (properties == null) {
-            return defaultValue;
-        }
-        String primaryValue = properties.getProperty(primaryKey);
-        if (StringUtils.isNotBlank(primaryValue)) {
-            return primaryValue;
-        }
-        return properties.getProperty(fallbackKey, defaultValue);
-    }
-
-    private int getInt(Properties properties, String key, int defaultValue) {
-        String value = getProperty(properties, key, String.valueOf(defaultValue));
-        if (StringUtils.isBlank(value)) {
-            return defaultValue;
-        }
-        return Integer.parseInt(value);
-    }
-
-    private int getInt(Properties properties, String primaryKey, String fallbackKey, int defaultValue) {
-        String value = getProperty(properties, primaryKey, fallbackKey, String.valueOf(defaultValue));
-        if (StringUtils.isBlank(value)) {
-            return defaultValue;
-        }
-        return Integer.parseInt(value);
     }
 
     private int getInt(Properties properties, int defaultValue, String... keys) {
