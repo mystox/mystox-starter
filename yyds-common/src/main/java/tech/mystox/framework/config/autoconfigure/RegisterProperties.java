@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static tech.mystox.framework.constants.OperaConstants.MqttMsgBus;
-
 @ConfigurationProperties(prefix = "register")
 public class RegisterProperties {
 
@@ -21,7 +19,7 @@ public class RegisterProperties {
     //private String serverName;
     //private String version = "1.0.0";
     private String balancer = "BASE";
-    private String msgType = MqttMsgBus;
+    private String msgType = "";
     private List<String> webExtension = List.of("classpath:config/vueRouter.js", "file:config/vueRouter.js");
     private Map<String, Object> extension = new HashMap<>();
 

@@ -27,6 +27,7 @@ public class OperaConstants {
     public static final int EPHEMERAL_SEQUENTIAL = 3;
 
     public static final String MqttMsgBus = "mqtt";
+    public static final String RabbitMqMsgBus = "rabbitmq";
 
     public static final String ZkRegType = "zookeeper";
 

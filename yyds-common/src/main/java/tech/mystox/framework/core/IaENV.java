@@ -21,6 +21,7 @@ import java.util.List;
 import static tech.mystox.framework.common.util.MqttUtils.preconditionGroupServerCode;
 import static tech.mystox.framework.common.util.MqttUtils.preconditionServerCode;
 import static tech.mystox.framework.constants.OperaConstants.MqttMsgBus;
+import static tech.mystox.framework.constants.OperaConstants.RabbitMqMsgBus;
 import static tech.mystox.framework.constants.OperaConstants.ZkRegType;
 
 //@Component
@@ -118,6 +119,19 @@ public class IaENV implements RegCall {
 
     public MsgScheduler createMsgScheduler(String regType) {
         switch (regType) {
+            case RabbitMqMsgBus: {
+                try {
+                    Class<?> aClass = Class.forName("tech.mystox.framework.mqtt.service.impl.DefaultRabbitMqMsgScheduler", false, Thread.currentThread()
+                            .getContextClassLoader());
+                    Constructor<?> declaredConstructor = aClass.getDeclaredConstructor(IaContext.class);
+                    MsgScheduler rabbitMqMsgScheduler = (MsgScheduler) declaredConstructor.newInstance(iaContext);
+                    rabbitMqMsgScheduler.build(this);
+                    return rabbitMqMsgScheduler;
+                } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                         InvocationTargetException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             //        case MqttMsgBus :return new MqttMsgScheduler();
             case MqttMsgBus: {
                 //MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -15,7 +16,9 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by mystoxlol on 2019/11/11, 13:57.
@@ -44,10 +47,34 @@ public class EnvironmentPostProcessor implements org.springframework.boot.env.En
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         loadResources(environment, this.profiles);
+        addRabbitMqDefaults(environment);
         if (logger.isInfoEnabled())
             logger.info("Load register environment post processor success...");
         else
             System.out.println("Load register environment post processor success...");
+    }
+
+    private void addRabbitMqDefaults(ConfigurableEnvironment environment) {
+        Map<String, Object> defaults = new HashMap<>();
+        putDefault(defaults, environment, "spring.rabbitmq.host", "rabbitmq.host");
+        putDefault(defaults, environment, "spring.rabbitmq.port", "rabbitmq.port");
+        putDefault(defaults, environment, "spring.rabbitmq.username", "rabbitmq.username");
+        putDefault(defaults, environment, "spring.rabbitmq.password", "rabbitmq.password");
+        putDefault(defaults, environment, "spring.rabbitmq.virtual-host", "rabbitmq.virtualHost");
+        if (!defaults.isEmpty()) {
+            environment.getPropertySources().addLast(new MapPropertySource("yyds-rabbitmq-defaults", defaults));
+        }
+    }
+
+    private void putDefault(Map<String, Object> defaults, ConfigurableEnvironment environment,
+                            String springKey, String frameworkKey) {
+        if (StringUtils.isNotBlank(environment.getProperty(springKey))) {
+            return;
+        }
+        String frameworkValue = environment.getProperty(frameworkKey);
+        if (StringUtils.isNotBlank(frameworkValue)) {
+            defaults.put(springKey, frameworkValue);
+        }
     }
 
     protected void loadResources(ConfigurableEnvironment environment, String[] profiles) {

@@ -119,7 +119,10 @@ public class IaConf {
 
 
     public String getMsgType() {
-        return registerProperties.getMsgType();
+        if (registerProperties.getMsgType() != null && !registerProperties.getMsgType().isBlank()) {
+            return registerProperties.getMsgType();
+        }
+        return serverProperties.getMsgBus();
     }
 
 

@@ -52,6 +52,20 @@ public class OperaCoreConfiguration {
                 properties.putIfAbsent("mqtt.username", environment.getProperty("mqtt.username",""));
                 properties.putIfAbsent("mqtt.password", environment.getProperty("mqtt.password",""));
                 properties.putIfAbsent("mqtt.maxInflight", environment.getProperty("mqtt.maxInflight","100"));
+                properties.putIfAbsent("rabbitmq.host", getRabbitProperty(environment, "spring.rabbitmq.host", "rabbitmq.host", "127.0.0.1"));
+                properties.putIfAbsent("rabbitmq.port", getRabbitProperty(environment, "spring.rabbitmq.port", "rabbitmq.port", "5672"));
+                properties.putIfAbsent("rabbitmq.username", getRabbitProperty(environment, "spring.rabbitmq.username", "rabbitmq.username", "guest"));
+                properties.putIfAbsent("rabbitmq.password", getRabbitProperty(environment, "spring.rabbitmq.password", "rabbitmq.password", "guest"));
+                properties.putIfAbsent("rabbitmq.virtualHost", getRabbitProperty(environment, "spring.rabbitmq.virtual-host", "rabbitmq.virtualHost", "/"));
+                properties.putIfAbsent("rabbitmq.exchange", environment.getProperty("rabbitmq.exchange", "yyds.rpc"));
+                properties.putIfAbsent("rabbitmq.queuePrefix", environment.getProperty("rabbitmq.queuePrefix", "yyds"));
+                properties.putIfAbsent("rabbitmq.prefetch", environment.getProperty("rabbitmq.prefetch", "50"));
+                properties.putIfAbsent("rabbitmq.queueExpires", environment.getProperty("rabbitmq.queueExpires", "600000"));
+                properties.putIfAbsent("spring.rabbitmq.host", getRabbitProperty(environment, "spring.rabbitmq.host", "rabbitmq.host", "127.0.0.1"));
+                properties.putIfAbsent("spring.rabbitmq.port", getRabbitProperty(environment, "spring.rabbitmq.port", "rabbitmq.port", "5672"));
+                properties.putIfAbsent("spring.rabbitmq.username", getRabbitProperty(environment, "spring.rabbitmq.username", "rabbitmq.username", "guest"));
+                properties.putIfAbsent("spring.rabbitmq.password", getRabbitProperty(environment, "spring.rabbitmq.password", "rabbitmq.password", "guest"));
+                properties.putIfAbsent("spring.rabbitmq.virtual-host", getRabbitProperty(environment, "spring.rabbitmq.virtual-host", "rabbitmq.virtualHost", "/"));
             }
             iaConf.setMqMsgProperties(properties);
         } catch (FileNotFoundException e) {
@@ -64,6 +78,10 @@ public class OperaCoreConfiguration {
         //从classpath路径下面查找文件
 
 
+    }
+
+    private String getRabbitProperty(Environment environment, String springKey, String frameworkKey, String defaultValue) {
+        return environment.getProperty(springKey, environment.getProperty(frameworkKey, defaultValue));
     }
 
     private Properties loadYamlIntoProperties(EncodedResource resource) throws FileNotFoundException {
