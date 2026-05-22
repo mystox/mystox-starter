@@ -4,6 +4,8 @@ public interface MessageBusTransport {
 
     void publish(String topic, int qos, String payload) throws Exception;
 
+    void subscribe(MessageBusChannel channel, String topic, int qos, MessageBusListener listener);
+
     void subscribe(MessageBusChannel channel, String topic, int qos);
 
     void unsubscribe(MessageBusChannel channel, String... topics);

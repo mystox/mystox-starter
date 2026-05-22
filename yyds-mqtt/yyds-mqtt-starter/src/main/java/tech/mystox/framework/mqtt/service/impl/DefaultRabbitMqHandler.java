@@ -23,6 +23,7 @@ import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.mqtt.service.ExecutorRunner;
 import tech.mystox.framework.mqtt.service.MessageBusChannel;
+import tech.mystox.framework.mqtt.service.MessageBusListener;
 import tech.mystox.framework.mqtt.service.MessageBusTransport;
 
 import java.nio.charset.StandardCharsets;
@@ -53,6 +54,7 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
     private Queue serviceAckQueue;
     private final Map<String, Queue> subQueues = new ConcurrentHashMap<>();
     private final Map<String, Queue> ackQueues = new ConcurrentHashMap<>();
+    private final Map<MessageBusChannel, MessageBusListener> listeners = new ConcurrentHashMap<>();
     private final MqttReceiver mqttReceiver;
     private final ExecutorRunner executorRunner;
 
@@ -79,14 +81,15 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
         this.mqttSenderImpl = sender;
         this.mqttReceiver = receiver;
         this.executorRunner = new ExecutorRunner(this.mqttSenderImpl);
+        this.listeners.put(MessageBusChannel.REQUEST, (topic, payload, headers) ->
+                this.mqttReceiver.messageReceiver(buildSpringMessage(topic, payload, headers)));
+        this.listeners.put(MessageBusChannel.ACK, (topic, payload, headers) ->
+                this.mqttSenderImpl.messageReceiver(buildSpringMessage(topic, payload, headers)));
 
-        this.consumerContainer.setMessageListener(message -> {
-            String topic = getReceivedTopic(message);
-            this.mqttReceiver.messageReceiver(buildSpringMessage(topic, message.getBody()));
-        });
+        this.consumerContainer.setMessageListener(message ->
+                dispatch(MessageBusChannel.REQUEST, message));
         this.ackContainer.setMessageListener(message ->
-                this.mqttSenderImpl.messageReceiver(buildSpringMessage(
-                        getReceivedTopic(message), message.getBody())));
+                dispatch(MessageBusChannel.ACK, message));
         this.consumerContainer.afterPropertiesSet();
         this.ackContainer.afterPropertiesSet();
     }
@@ -97,7 +100,7 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
 
     @Override
     public void addSubTopic(String topic, int qos) {
-        subscribe(MessageBusChannel.REQUEST, topic, qos);
+        subscribe(MessageBusChannel.REQUEST, topic, qos, listeners.get(MessageBusChannel.REQUEST));
     }
 
     @Override
@@ -122,7 +125,7 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
 
     @Override
     public void addAckTopic(String topic, int qos) {
-        subscribe(MessageBusChannel.ACK, topic, qos);
+        subscribe(MessageBusChannel.ACK, topic, qos, listeners.get(MessageBusChannel.ACK));
     }
 
     public void stop() {
@@ -144,6 +147,14 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
 
     @Override
     public void subscribe(MessageBusChannel channel, String topic, int qos) {
+        subscribe(channel, topic, qos, listeners.get(channel));
+    }
+
+    @Override
+    public void subscribe(MessageBusChannel channel, String topic, int qos, MessageBusListener listener) {
+        if (listener != null) {
+            listeners.put(channel, listener);
+        }
         boolean ackQueue = MessageBusChannel.ACK.equals(channel);
         addQueue(topic, ackQueue ? ackQueues : subQueues, ackQueue ? ackContainer : consumerContainer, ackQueue);
     }
@@ -174,6 +185,17 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
         if (serviceAckQueue != null && !ackContainer.isRunning()) {
             ackContainer.start();
         }
+    }
+
+    private void dispatch(MessageBusChannel channel, org.springframework.amqp.core.Message message) {
+        MessageBusListener listener = listeners.get(channel);
+        if (listener == null) {
+            logger.warn("RabbitMQ message listener is null for channel [{}]", channel);
+            return;
+        }
+        String topic = getReceivedTopic(message);
+        listener.onMessage(topic, new String(message.getBody(), StandardCharsets.UTF_8),
+                new HashMap<>(message.getMessageProperties().getHeaders()));
     }
 
     private void addQueue(String topic, Map<String, Queue> queues, SimpleMessageListenerContainer container, boolean ackQueue) {
@@ -246,13 +268,16 @@ public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTra
         return factory;
     }
 
-    private Message<String> buildSpringMessage(String topic, byte[] body) {
+    private Message<String> buildSpringMessage(String topic, String payload, Map<String, Object> sourceHeaders) {
         Map<String, Object> headers = new HashMap<>();
+        if (sourceHeaders != null) {
+            headers.putAll(sourceHeaders);
+        }
         headers.put("id", UUID.randomUUID());
         headers.put("timestamp", System.currentTimeMillis());
         headers.put(MQTT_RECEIVED_TOPIC, topic);
         headers.put("mqtt_duplicate", false);
-        return new GenericMessage<>(new String(body, StandardCharsets.UTF_8), new MessageHeaders(headers));
+        return new GenericMessage<>(payload, new MessageHeaders(headers));
     }
 
     private String queueName(String topic) {
