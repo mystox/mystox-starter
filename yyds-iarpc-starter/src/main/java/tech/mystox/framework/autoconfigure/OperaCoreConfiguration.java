@@ -61,6 +61,8 @@ public class OperaCoreConfiguration {
                 properties.putIfAbsent("rabbitmq.queuePrefix", environment.getProperty("rabbitmq.queuePrefix", "yyds"));
                 properties.putIfAbsent("rabbitmq.prefetch", environment.getProperty("rabbitmq.prefetch", "50"));
                 properties.putIfAbsent("rabbitmq.queueExpires", environment.getProperty("rabbitmq.queueExpires", "600000"));
+                properties.putIfAbsent("rabbitmq.payload.limit", environment.getProperty("rabbitmq.payload.limit", "1048576"));
+                properties.putIfAbsent("messageBus.payload.limit", environment.getProperty("messageBus.payload.limit", "1048576"));
                 properties.putIfAbsent("spring.rabbitmq.host", getRabbitProperty(environment, "spring.rabbitmq.host", "rabbitmq.host", "127.0.0.1"));
                 properties.putIfAbsent("spring.rabbitmq.port", getRabbitProperty(environment, "spring.rabbitmq.port", "rabbitmq.port", "5672"));
                 properties.putIfAbsent("spring.rabbitmq.username", getRabbitProperty(environment, "spring.rabbitmq.username", "rabbitmq.username", "guest"));

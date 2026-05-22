@@ -5,8 +5,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.entity.MsgRsp;
+import tech.mystox.framework.mqtt.service.MessageBusOperator;
 import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
-import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
+import tech.mystox.framework.mqtt.service.impl.MqttHandler;
 
 import java.util.Map;
 
@@ -23,8 +24,9 @@ public class MystoxMetrics {
     }
 
     public void register() {
-        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
-        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = mqttSender.getCALLBACKS();
+        MqttHandler handler = (MqttHandler) this.iaContext.getIaENV().getMsgScheduler().getIaHandler();
+        MessageBusOperator messageBusOperator = handler.getMessageBusOperator();
+        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = messageBusOperator.getCALLBACKS();
         Gauge.builder("mystox.rpc.inflight",
                         callbacks,
                         Map::size)

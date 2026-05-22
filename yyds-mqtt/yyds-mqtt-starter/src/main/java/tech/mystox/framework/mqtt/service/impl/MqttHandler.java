@@ -10,6 +10,7 @@ import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.exception.RegisterException;
+import tech.mystox.framework.mqtt.service.MessageBusOperator;
 import tech.mystox.framework.scheduler.LoadBalanceScheduler;
 import tech.mystox.framework.scheduler.RegScheduler;
 import tech.mystox.framework.service.MsgHandler;
@@ -26,10 +27,14 @@ public class MqttHandler implements MsgHandler {
     Logger logger = LoggerFactory.getLogger(MqttHandler.class);
     protected ChannelHandlerAck mqttHandlerAck;
     protected ChannelHandlerSub mqttHandlerImpl;
-    protected ChannelSenderImpl mqttSenderImpl;
+    protected MessageBusOperator mqttSenderImpl;
 
     public MqttHandler(IaENV iaENV) {
         this.iaENV = iaENV;
+    }
+
+    public MessageBusOperator getMessageBusOperator() {
+        return mqttSenderImpl;
     }
 
     @Override

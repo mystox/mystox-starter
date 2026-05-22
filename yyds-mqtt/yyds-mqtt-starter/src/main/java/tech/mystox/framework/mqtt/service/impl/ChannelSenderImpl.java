@@ -12,6 +12,7 @@ import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.RegisterException;
 import tech.mystox.framework.mqtt.service.IMqttSender;
+import tech.mystox.framework.mqtt.service.MessageBusOperator;
 import tech.mystox.framework.scheduler.RegScheduler;
 
 import java.nio.charset.StandardCharsets;
@@ -33,7 +34,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * update record:
  */
 //@Service("mqttSenderImpl")
-public class ChannelSenderImpl {
+public class ChannelSenderImpl implements MessageBusOperator {
 
     Logger logger = LoggerFactory.getLogger(ChannelSenderImpl.class);
     //@Value("${mqtt.payload.limit:#{47 * 1024}}")
@@ -64,6 +65,7 @@ public class ChannelSenderImpl {
         this.callbackMaxCount = callbackMaxCount;
     }
 
+    @Override
     public void sendToMqtt(String serverCode, String operaCode, String payload) throws Exception {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
@@ -83,7 +85,7 @@ public class ChannelSenderImpl {
                 }
                 String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
                 logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
-                mqttSender.sendToMqtt(topic, mqttMsgJson);
+                publishToBus(topic, mqttMsgJson);
                 packageFlag = true;
             }
         } else {
@@ -93,6 +95,7 @@ public class ChannelSenderImpl {
     }
 
 
+    @Override
     public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) throws Exception {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
@@ -112,7 +115,7 @@ public class ChannelSenderImpl {
                 }
                 String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
                 logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
-                mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                publishToBus(topic, qos, mqttMsgJson);
                 packageFlag = true;
             }
         } else {
@@ -133,7 +136,7 @@ public class ChannelSenderImpl {
                     if (packageFlag) Thread.sleep(10L);
                     String mqttMsgJson = JSONObject.toJSONString(mqttMsg);
                     logger.debug("[{}]message [{}] send...", msgId, mqttMsgJson);
-                    mqttSender.sendToMqtt(topic, qos, mqttMsgJson);
+                    publishToBus(topic, qos, mqttMsgJson);
                     packageFlag = true;
                 }
                 return true;
@@ -151,6 +154,7 @@ public class ChannelSenderImpl {
     }
 
 
+    @Override
     public boolean sendToMqttBoolean(String serverCode, String operaCode, int qos, String payload) {
         //组建topicid
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
@@ -161,6 +165,7 @@ public class ChannelSenderImpl {
     }
 
 
+    @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, int qos, String payload, long timeout, TimeUnit timeUnit) {
         String topic = MqttUtils.preconditionSubTopicId(serverCode, operaCode);
         //组建消息体
@@ -218,8 +223,17 @@ public class ChannelSenderImpl {
     }
 
 
+    @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
         return sendToMqttSync(serverCode, operaCode, 2, payload, 30000L, TimeUnit.MILLISECONDS);
+    }
+
+    protected void publishToBus(String topic, String payload) throws Exception {
+        mqttSender.sendToMqtt(topic, payload);
+    }
+
+    protected void publishToBus(String topic, int qos, String payload) throws Exception {
+        mqttSender.sendToMqtt(topic, qos, payload);
     }
 
     /*private boolean addPubList(String serverCode, String operaCode) throws KeeperException, InterruptedException {
@@ -317,6 +331,7 @@ public class ChannelSenderImpl {
      *  message
      */
     //@ServiceActivator(inputChannel = MqttConfig.CHANNEL_REPLY)
+    @Override
     public void messageReceiver(Message<String> message) {
         Thread.startVirtualThread(() -> {
             try {
@@ -345,6 +360,7 @@ public class ChannelSenderImpl {
 
     }
 
+    @Override
     public Map<String, CallSubpackageMsg<MsgRsp>> getCALLBACKS() {
         return CALLBACKS;
     }

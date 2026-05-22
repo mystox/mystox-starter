@@ -14,8 +14,9 @@ import tech.mystox.framework.entity.MqttMsg;
 import tech.mystox.framework.entity.MsgRsp;
 import tech.mystox.framework.entity.OperaType;
 import tech.mystox.framework.exception.RegisterException;
+import tech.mystox.framework.mqtt.service.MessageBusOperator;
 import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
-import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
+import tech.mystox.framework.mqtt.service.impl.MqttHandler;
 import tech.mystox.framework.mqtt.service.impl.MqttReceiver;
 import tech.mystox.framework.service.OperaRouteService;
 import tech.mystox.framework.stereotype.Opera;
@@ -136,8 +137,9 @@ public class MqttController {
     @Deprecated
     @PostMapping("/getSenderSyncCallBack")
     public JsonResult<?> getSenderSyncCallBack(@RequestParam(required = false) String msgId) {
-        ChannelSenderImpl mqttSender = (ChannelSenderImpl) this.iaContext.getIaENV().getMsgScheduler();
-        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = mqttSender.getCALLBACKS();
+        MqttHandler handler = (MqttHandler) this.iaContext.getIaENV().getMsgScheduler().getIaHandler();
+        MessageBusOperator messageBusOperator = handler.getMessageBusOperator();
+        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = messageBusOperator.getCALLBACKS();
         if (StringUtils.isNotBlank(msgId)) {
             CallSubpackageMsg<MsgRsp> callBackTopic = callbacks.get(msgId);
             MsgRsp call = null;

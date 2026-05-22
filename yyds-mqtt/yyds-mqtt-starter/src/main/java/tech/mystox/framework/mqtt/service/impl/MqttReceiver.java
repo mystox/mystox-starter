@@ -67,6 +67,10 @@ public class MqttReceiver {
         }
     }
 
+    public void setMqttPayloadLimit(int mqttPayloadLimit) {
+        this.mqttPayloadLimit = mqttPayloadLimit;
+    }
+
 
     public MsgRsp receive(String topic, MqttMsg mqttMsg) {
         logger.debug("Receive... ..." + JSONObject.toJSONString(mqttMsg));
@@ -277,10 +281,10 @@ public class MqttReceiver {
                     for (MsgRsp resp : resultArr) {
                         Thread.sleep(10L);
                         resp.setTopic(topic);
-                        iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(resp));
+                        publishAck(ackTopic, 1, JSONObject.toJSONString(resp));
                     }
                 } else
-                    iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+                    publishAck(ackTopic, 1, JSONObject.toJSONString(result));
             } catch (Exception e) {
                 logger.error("[{}] Message ", result.getMsgId(), e);
             }
@@ -291,12 +295,16 @@ public class MqttReceiver {
     private void errorAck(String ackTopic, MsgRsp result) {
         result.setStateCode(StateCode.StateCodeEnum.PACKAGE_ERROR.getCode());
         try {
-            iMqttSender.sendToMqtt(ackTopic, 1, JSONObject.toJSONString(result));
+            publishAck(ackTopic, 1, JSONObject.toJSONString(result));
         } catch (Exception ex) {
             logger.error("[{}]Return errorAck[{}] message result exception[{}]", result.getMsgId(), ackTopic, ex.toString());
             if (logger.isDebugEnabled()) ex.printStackTrace();
             ex.printStackTrace();
         }
+    }
+
+    protected void publishAck(String ackTopic, int qos, String payload) throws Exception {
+        iMqttSender.sendToMqtt(ackTopic, qos, payload);
     }
 
     /**
@@ -355,4 +363,3 @@ public class MqttReceiver {
         return CALLBACKS;
     }
 }
-

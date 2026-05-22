@@ -22,7 +22,8 @@ import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaContext;
 import tech.mystox.framework.core.IaENV;
 import tech.mystox.framework.mqtt.service.ExecutorRunner;
-import tech.mystox.framework.mqtt.service.IMqttSender;
+import tech.mystox.framework.mqtt.service.MessageBusChannel;
+import tech.mystox.framework.mqtt.service.MessageBusTransport;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * RabbitMQ transport adapter that keeps the existing MQTT-shaped topic and payload protocol.
  */
-public class DefaultRabbitMqHandler extends MqttHandler {
+public class DefaultRabbitMqHandler extends MqttHandler implements MessageBusTransport {
     private static final Logger logger = LoggerFactory.getLogger(DefaultRabbitMqHandler.class);
     private static final String MQTT_RECEIVED_TOPIC = "mqtt_receivedTopic";
 
@@ -70,9 +71,13 @@ public class DefaultRabbitMqHandler extends MqttHandler {
         this.consumerContainer = createContainer(properties);
         this.ackContainer = createContainer(properties);
 
-        IMqttSender sender = createSender();
-        this.mqttSenderImpl = new ChannelSenderImpl(iaENV, iaENV.getConf(), sender);
-        this.mqttReceiver = new MqttReceiver(iaContext, sender);
+        int payloadLimit = getInt(properties, 1024 * 1024, "rabbitmq.payload.limit", "messageBus.payload.limit");
+        MessageBusSender sender = new MessageBusSender(iaENV, iaENV.getConf(), this);
+        sender.setMqttPayloadLimit(payloadLimit);
+        MessageBusReceiver receiver = new MessageBusReceiver(iaContext, this);
+        receiver.setMqttPayloadLimit(payloadLimit);
+        this.mqttSenderImpl = sender;
+        this.mqttReceiver = receiver;
         this.executorRunner = new ExecutorRunner(this.mqttSenderImpl);
 
         this.consumerContainer.setMessageListener(message -> {
@@ -92,32 +97,32 @@ public class DefaultRabbitMqHandler extends MqttHandler {
 
     @Override
     public void addSubTopic(String topic, int qos) {
-        addQueue(topic, subQueues, consumerContainer, false);
+        subscribe(MessageBusChannel.REQUEST, topic, qos);
     }
 
     @Override
     public void removeSubTopic(String... topics) {
-        removeQueue(subQueues, consumerContainer, topics);
+        unsubscribe(MessageBusChannel.REQUEST, topics);
     }
 
     @Override
     public void removeAckSubTopic(String... topics) {
-        removeQueue(ackQueues, ackContainer, topics);
+        unsubscribe(MessageBusChannel.ACK, topics);
     }
 
     @Override
     public boolean isAckExists(String topic) {
-        return ackQueues.containsKey(topic);
+        return isSubscribed(MessageBusChannel.ACK, topic);
     }
 
     @Override
     public boolean isExists(String topic) {
-        return subQueues.containsKey(topic);
+        return isSubscribed(MessageBusChannel.REQUEST, topic);
     }
 
     @Override
     public void addAckTopic(String topic, int qos) {
-        addQueue(topic, ackQueues, ackContainer, true);
+        subscribe(MessageBusChannel.ACK, topic, qos);
     }
 
     public void stop() {
@@ -126,31 +131,40 @@ public class DefaultRabbitMqHandler extends MqttHandler {
         connectionFactory.destroy();
     }
 
-    private IMqttSender createSender() {
-        return new IMqttSender() {
-            @Override
-            public void sendToMqtt(String data) {
-            }
-
-            @Override
-            public void sendToMqtt(String topic, String payload) {
-                publish(topic, payload);
-            }
-
-            @Override
-            public void sendToMqtt(String topic, int qos, String payload) {
-                publish(topic, payload);
-            }
-        };
-    }
-
-    private void publish(String topic, String payload) {
+    @Override
+    public void publish(String topic, int qos, String payload) {
         String routingKey = toRoutingKey(topic);
         rabbitTemplate.convertAndSend(exchangeName, routingKey, payload, message -> {
             message.getMessageProperties().setHeader(MQTT_RECEIVED_TOPIC, topic);
+            message.getMessageProperties().setHeader("mqtt_qos", qos);
             return message;
         });
         logger.debug("RabbitMQ message sent to [{}] via [{}]", topic, routingKey);
+    }
+
+    @Override
+    public void subscribe(MessageBusChannel channel, String topic, int qos) {
+        boolean ackQueue = MessageBusChannel.ACK.equals(channel);
+        addQueue(topic, ackQueue ? ackQueues : subQueues, ackQueue ? ackContainer : consumerContainer, ackQueue);
+    }
+
+    @Override
+    public void unsubscribe(MessageBusChannel channel, String... topics) {
+        boolean ackQueue = MessageBusChannel.ACK.equals(channel);
+        removeQueue(ackQueue ? ackQueues : subQueues, ackQueue ? ackContainer : consumerContainer, topics);
+    }
+
+    @Override
+    public boolean isSubscribed(MessageBusChannel channel, String topic) {
+        if (MessageBusChannel.ACK.equals(channel)) {
+            return ackQueues.containsKey(topic);
+        }
+        return subQueues.containsKey(topic);
+    }
+
+    @Override
+    public void start() {
+        startConsumers();
     }
 
     public void startConsumers() {
@@ -310,5 +324,18 @@ public class DefaultRabbitMqHandler extends MqttHandler {
             return defaultValue;
         }
         return Integer.parseInt(value);
+    }
+
+    private int getInt(Properties properties, int defaultValue, String... keys) {
+        if (properties == null || keys == null) {
+            return defaultValue;
+        }
+        for (String key : keys) {
+            String value = properties.getProperty(key);
+            if (StringUtils.isNotBlank(value)) {
+                return Integer.parseInt(value);
+            }
+        }
+        return defaultValue;
     }
 }

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import tech.mystox.framework.mqtt.service.impl.ChannelSenderImpl;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,9 +28,9 @@ public class ExecutorRunner implements ApplicationRunner {
 
     final ScheduledExecutorService mqttScheduled  ;
 
-    final ChannelSenderImpl mqttSender;
+    final MessageBusOperator mqttSender;
 
-    public ExecutorRunner(ChannelSenderImpl mqttSender) {
+    public ExecutorRunner(MessageBusOperator mqttSender) {
         this.mqttScheduled = new ScheduledThreadPoolExecutor(1);
         this.mqttSender = mqttSender;
         this.rhythm = 3;
@@ -39,7 +38,7 @@ public class ExecutorRunner implements ApplicationRunner {
 
 
 
-    public ChannelSenderImpl getMqttSender() {
+    public MessageBusOperator getMqttSender() {
         return mqttSender;
     }
 
