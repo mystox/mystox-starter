@@ -25,6 +25,8 @@ import tech.mystox.framework.mqtt.config.MultiMqttMessageHandler;
 import tech.mystox.framework.mqtt.config.MyMqttPahoMessageHandler;
 import tech.mystox.framework.mqtt.service.ExecutorRunner;
 import tech.mystox.framework.mqtt.service.IMqttSender;
+import tech.mystox.framework.mqtt.service.MessageBusChannel;
+import tech.mystox.framework.mqtt.service.MessageBusTransport;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +51,7 @@ public class DefaultMqttHandler extends MqttHandler {
     private IMqttSender iMqttSender;
     private final ExecutorRunner executorRunner;
     private final MqttPahoClientFactory mqttPahoClientFactory;
+    private final MessageBusTransport transport;
 
     private MultiMqttMessageHandler multiMqttMessageHandler;
     private MqttPahoMessageDrivenChannelAdapter channelConsumerDrivenChannelAdapter;
@@ -70,6 +73,7 @@ public class DefaultMqttHandler extends MqttHandler {
         this.mqttHandlerAck = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-reply")));
         this.mqttSenderImpl = createSender(mqttSenderHandlerCount);
         this.mqttHandlerImpl = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-consumer")));
+        this.transport = new MqttMessageBusTransport(iMqttSender, mqttHandlerImpl, mqttHandlerAck);
 
         receiverInit(iaContext);
         this.executorRunner = new ExecutorRunner(
@@ -79,6 +83,36 @@ public class DefaultMqttHandler extends MqttHandler {
 
     public ExecutorRunner getExecutorRunner() {
         return executorRunner;
+    }
+
+    @Override
+    public void addSubTopic(String topic, int qos) {
+        transport.subscribe(MessageBusChannel.REQUEST, topic, qos);
+    }
+
+    @Override
+    public void removeSubTopic(String... topic) {
+        transport.unsubscribe(MessageBusChannel.REQUEST, topic);
+    }
+
+    @Override
+    public void removeAckSubTopic(String... topic) {
+        transport.unsubscribe(MessageBusChannel.ACK, topic);
+    }
+
+    @Override
+    public boolean isAckExists(String topic) {
+        return transport.isSubscribed(MessageBusChannel.ACK, topic);
+    }
+
+    @Override
+    public boolean isExists(String topic) {
+        return transport.isSubscribed(MessageBusChannel.REQUEST, topic);
+    }
+
+    @Override
+    public void addAckTopic(String topic, int qos) {
+        transport.subscribe(MessageBusChannel.ACK, topic, qos);
     }
 
     void receiverInit(IaContext iaContext) {

@@ -7,12 +7,12 @@ import tech.mystox.framework.mqtt.service.MessageBusTransport;
 /**
  * Sender implementation for non-MQTT message bus transports.
  */
-public class MessageBusSender extends ChannelSenderImpl {
+public class MessageBusSender extends MessageBusSenderSupport {
 
     private final MessageBusTransport transport;
 
     public MessageBusSender(IaENV iaEnv, IaConf iaConf, MessageBusTransport transport) {
-        super(iaEnv, iaConf, null);
+        super(iaEnv, iaConf);
         this.transport = transport;
     }
 
