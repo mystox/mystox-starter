@@ -26,47 +26,47 @@ import static tech.mystox.framework.constants.OperaConstants.EPHEMERAL;
 public class MqttHandler implements MsgHandler {
     private IaENV iaENV;
     Logger logger = LoggerFactory.getLogger(MqttHandler.class);
-    protected ChannelHandlerAck mqttHandlerAck;
-    protected ChannelHandlerSub mqttHandlerImpl;
-    protected MessageBusOperator mqttSenderImpl;
+    protected ChannelHandlerAck ackTopicHandler;
+    protected ChannelHandlerSub requestTopicHandler;
+    protected MessageBusOperator messageBusOperator;
 
     public MqttHandler(IaENV iaENV) {
         this.iaENV = iaENV;
     }
 
     public MessageBusOperator getMessageBusOperator() {
-        return mqttSenderImpl;
+        return messageBusOperator;
     }
 
     @Override
     public void addSubTopic(String topic, int qos) {
-        mqttHandlerImpl.addSubTopic(topic, qos);
+        requestTopicHandler.addSubTopic(topic, qos);
     }
 
     @Override
     public void removeSubTopic(String... topic) {
-        mqttHandlerImpl.removeSubTopic(topic);
+        requestTopicHandler.removeSubTopic(topic);
     }
 
     @Override
     public void removeAckSubTopic(String... topic) {
-        mqttHandlerAck.removeSubTopic(topic);
+        ackTopicHandler.removeSubTopic(topic);
     }
 
     @Override
     public boolean isAckExists(String topic) {
-        return mqttHandlerAck.isExists(topic);
+        return ackTopicHandler.isExists(topic);
     }
 
     @Override
     public boolean isExists(String topic) {
-        return mqttHandlerImpl.isExists(topic);
+        return requestTopicHandler.isExists(topic);
 
     }
 
     @Override
     public void addAckTopic(String topic, int qos) {
-        mqttHandlerAck.addSubTopic(topic, qos);
+        ackTopicHandler.addSubTopic(topic, qos);
     }
 
     /// //////////IaOperate/////////////
@@ -91,21 +91,21 @@ public class MqttHandler implements MsgHandler {
     public void sendToMqtt(String serverCode, String operaCode, String payload) throws Exception {
         if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
-        mqttSenderImpl.sendToMqtt(serverCode, operaCode, payload);
+        messageBusOperator.sendToMqtt(serverCode, operaCode, payload);
     }
 
     @Override
     public void sendToMqtt(String serverCode, String operaCode, int qos, String payload) throws Exception {
         if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
-        mqttSenderImpl.sendToMqtt(serverCode, operaCode, qos, payload);
+        messageBusOperator.sendToMqtt(serverCode, operaCode, qos, payload);
     }
 
     @Override
     public MsgResult sendToMqttSync(String serverCode, String operaCode, String payload) {
         if (!ServerStatus.ONLINE.equals(iaENV.getServerStatus()))
             throw new MsgResultFailException(StateCode.StateCodeEnum.UNREGISTERED, "Server status is not online!");
-        return mqttSenderImpl.sendToMqttSync(serverCode, operaCode, payload);
+        return messageBusOperator.sendToMqttSync(serverCode, operaCode, payload);
         //        return operaTarget(new OperaContext(operaCode, JSONObject.toJSONString(Collections.singletonList(payload)), 2, 30000, TimeUnit.MILLISECONDS,
         //                iaENV.getLoadBalanceScheduler(),
         //                true, false));
@@ -266,7 +266,7 @@ public class MqttHandler implements MsgHandler {
             if (result.getStateCode() != StateCode.SUCCESS) {
                 //移除路由
                 topicArr.remove(i);
-                logger.warn("[{}] mqtt sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
+                logger.warn("[{}] message bus sender state code is failed, retry another server opera...topicArr: {}", operaCode, JSONArray.toJSONString(topicArr));
                 regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
                 //重新请求
                 return operaBalance(operaCode, msg, qos, timeout, timeUnit, setFlag, async, topicArr, routePath); //
@@ -277,7 +277,7 @@ public class MqttHandler implements MsgHandler {
             MsgResult result = operaTarget(operaCode, msg, qos, timeout, timeUnit, setFlag, async, groupServerCode);
             if (result.getStateCode() != StateCode.SUCCESS) {
                 topicArr.remove(0);
-                logger.error("[{}] mqtt sender topicArr is empty...", operaCode);
+                logger.error("[{}] message bus sender topicArr is empty...", operaCode);
           //      mqttLogUtil.OPERA_ERROR(StateCode.OPERA_ROUTE_EXCEPTION, operaCode);
                 regScheduler.setData(routePath, JSONArray.toJSONBytes(topicArr));
             }
@@ -288,14 +288,14 @@ public class MqttHandler implements MsgHandler {
     protected MsgResult operaTarget(String operaCode, String msg, int qos, long timeout, TimeUnit timeUnit, boolean setFlag, boolean async, String groupServerCode) {
         // MsgScheduler msgScheduler =iaENV.getIaENV().getMsgScheduler();
         if (async) { //异步请求
-            boolean resultBoolean = mqttSenderImpl.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
+            boolean resultBoolean = messageBusOperator.sendToMqttBoolean(groupServerCode, operaCode, qos, msg);
             if (resultBoolean)
                 return new MsgResult(StateCode.StateCodeEnum.SUCCESS.getCode(), StateCode.StateCodeEnum.SUCCESS.getStateCodeName());
             else
                 return new MsgResult(StateCode.StateCodeEnum.FAILED.getCode(), StateCode.StateCodeEnum.FAILED.getStateCodeName());
         } else {
-            return setFlag ? mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
-                    : mqttSenderImpl.sendToMqttSync(groupServerCode, operaCode, msg);
+            return setFlag ? messageBusOperator.sendToMqttSync(groupServerCode, operaCode, qos, msg, timeout, timeUnit)
+                    : messageBusOperator.sendToMqttSync(groupServerCode, operaCode, msg);
         }
 
     }
@@ -394,8 +394,8 @@ public class MqttHandler implements MsgHandler {
             //全部广播发送
             topicArr.forEach(groupServerCode -> {
                 try {
-                    if (setFlag) mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, qos, msg);
-                    else mqttSenderImpl.sendToMqtt(groupServerCode, operaCode, msg);
+                    if (setFlag) messageBusOperator.sendToMqtt(groupServerCode, operaCode, qos, msg);
+                    else messageBusOperator.sendToMqtt(groupServerCode, operaCode, msg);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

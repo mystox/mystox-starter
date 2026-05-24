@@ -23,7 +23,7 @@ public class DefaultRabbitMqHandler extends MqttHandler {
     private static final String MQTT_RECEIVED_TOPIC = "mqtt_receivedTopic";
 
     private final MessageBusTransport transport;
-    private final MessageBusReceiverSupport mqttReceiver;
+    private final MessageBusReceiverSupport messageBusReceiver;
     private final ExecutorRunner executorRunner;
     private final MessageBusListener requestListener;
     private final MessageBusListener ackListener;
@@ -39,13 +39,13 @@ public class DefaultRabbitMqHandler extends MqttHandler {
         sender.setMqttPayloadLimit(payloadLimit);
         MessageBusReceiver receiver = new MessageBusReceiver(iaContext, transport);
         receiver.setMqttPayloadLimit(payloadLimit);
-        this.mqttSenderImpl = sender;
-        this.mqttReceiver = receiver;
-        this.executorRunner = new ExecutorRunner(this.mqttSenderImpl);
+        this.messageBusOperator = sender;
+        this.messageBusReceiver = receiver;
+        this.executorRunner = new ExecutorRunner(this.messageBusOperator);
         this.requestListener = (topic, payload, headers) ->
-                this.mqttReceiver.messageReceiver(buildSpringMessage(topic, payload, headers));
+                this.messageBusReceiver.messageReceiver(buildSpringMessage(topic, payload, headers));
         this.ackListener = (topic, payload, headers) ->
-                this.mqttSenderImpl.messageReceiver(buildSpringMessage(topic, payload, headers));
+                this.messageBusOperator.messageReceiver(buildSpringMessage(topic, payload, headers));
     }
 
     public ExecutorRunner getExecutorRunner() {

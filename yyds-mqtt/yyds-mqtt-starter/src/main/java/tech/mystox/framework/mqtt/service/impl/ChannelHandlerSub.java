@@ -16,7 +16,7 @@ import java.util.List;
  * description: 处理一些mqtt的接口操作
  * update record:
  */
-//@Service(value = "mqttHandlerImpl")
+//@Service(value = "requestTopicHandler")
 public class ChannelHandlerSub {
 
     Logger logger = LoggerFactory.getLogger(ChannelHandlerSub.class);

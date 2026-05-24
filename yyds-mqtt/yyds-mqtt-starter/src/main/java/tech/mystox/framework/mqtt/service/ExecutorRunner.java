@@ -54,9 +54,9 @@ public class ExecutorRunner implements ApplicationRunner {
         int callbackSize = mqttSender.getCALLBACKS().size();
         if (l > 0 && l % rhythm == 0) {
             if (callbackSize >= 50 /*&& callbackSize % 10 == 0*/)
-                logger.warn("mqtt sender callback map size: [{}]", callbackSize);
+                logger.warn("message bus callback map size: [{}]", callbackSize);
             longAdder.reset();
-            logger.debug("mqtt sender callback map size: [{}]", callbackSize);
+            logger.debug("message bus callback map size: [{}]", callbackSize);
         }
     }
 }

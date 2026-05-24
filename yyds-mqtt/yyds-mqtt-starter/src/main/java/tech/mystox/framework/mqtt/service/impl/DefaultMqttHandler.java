@@ -47,7 +47,7 @@ public class DefaultMqttHandler extends MqttHandler {
     }
 
     private final IaENV iaENV;
-    private MqttReceiver mqttReceiver;
+    private MqttReceiver messageBusReceiver;
     private IMqttSender iMqttSender;
     private final ExecutorRunner executorRunner;
     private final MqttPahoClientFactory mqttPahoClientFactory;
@@ -70,14 +70,14 @@ public class DefaultMqttHandler extends MqttHandler {
         int CORE_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.corePoolSize", 10);
         int MAX_POOL_SIZE = (int) mqMsgProperties.getOrDefault("mqtt.executor.maxPoolSize", 10000);
         int mqttSenderHandlerCount = (int) mqMsgProperties.getOrDefault("mqtt.sender.count", 10);
-        this.mqttHandlerAck = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-reply")));
-        this.mqttSenderImpl = createSender(mqttSenderHandlerCount);
-        this.mqttHandlerImpl = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-consumer")));
-        this.transport = new MqttMessageBusTransport(iMqttSender, mqttHandlerImpl, mqttHandlerAck);
+        this.ackTopicHandler = new ChannelHandlerAck(replyProducer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-reply")));
+        this.messageBusOperator = createSender(mqttSenderHandlerCount);
+        this.requestTopicHandler = new ChannelHandlerSub(channelConsumer(builderTaskScheduler(CORE_POOL_SIZE, MAX_POOL_SIZE, "mqtt-consumer")));
+        this.transport = new MqttMessageBusTransport(iMqttSender, requestTopicHandler, ackTopicHandler);
 
         receiverInit(iaContext);
         this.executorRunner = new ExecutorRunner(
-                this.mqttSenderImpl
+                this.messageBusOperator
         );
     }
 
@@ -116,11 +116,11 @@ public class DefaultMqttHandler extends MqttHandler {
     }
 
     void receiverInit(IaContext iaContext) {
-        mqttReceiver = new MqttReceiver(iaContext, iMqttSender);
+        messageBusReceiver = new MqttReceiver(iaContext, iMqttSender);
         DirectChannel inBoundChannel = (DirectChannel) MqttConfigInstance.getInstance().mqttInboundChannel();
-        inBoundChannel.subscribe(message -> mqttReceiver.messageReceiver((Message<String>) message));
+        inBoundChannel.subscribe(message -> messageBusReceiver.messageReceiver((Message<String>) message));
         DirectChannel replyChannel = (DirectChannel) MqttConfigInstance.getInstance().mqttReplyChannel();
-        replyChannel.subscribe(message -> mqttSenderImpl.messageReceiver((Message<String>) message));
+        replyChannel.subscribe(message -> messageBusOperator.messageReceiver((Message<String>) message));
     }
 
 

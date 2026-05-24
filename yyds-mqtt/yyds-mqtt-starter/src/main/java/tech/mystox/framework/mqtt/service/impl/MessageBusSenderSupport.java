@@ -32,7 +32,7 @@ import static tech.mystox.framework.common.util.MqttUtils.*;
  * description: 封装的mqtt生产者
  * update record:
  */
-//@Service("mqttSenderImpl")
+//@Service("messageBusOperator")
 public class MessageBusSenderSupport implements MessageBusOperator {
 
     Logger logger = LoggerFactory.getLogger(MessageBusSenderSupport.class);

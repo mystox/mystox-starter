@@ -16,7 +16,7 @@ import java.util.List;
  * description: 处理一些mqtt的接口操作
  * update record:
  */
-//@Service("mqttHandlerAck")
+//@Service("ackTopicHandler")
 public class ChannelHandlerAck {
 
     Logger logger = LoggerFactory.getLogger(ChannelHandlerAck.class);
