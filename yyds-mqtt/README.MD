@@ -1,10 +1,10 @@
-# mqtt消息框架开发者指北
+# mqtt/rabbitmq消息框架开发者指北
 
 
 
 ## 前提说明：
-- 此消息框架基于mqtt消息中间件实现的伪远程调用。
-- 此消息框架需要消息中间件mqtt、注册中心中间件zookeeper(1.0.0版本redis暂不支持)环境支持。
+- 此消息框架基于mqtt或rabbitmq消息中间件实现伪远程调用。
+- 此消息框架需要消息中间件mqtt/rabbitmq、注册中心中间件zookeeper(1.0.0版本redis暂不支持)环境支持。
 jdk版本为1.8+。
 
 
@@ -34,6 +34,7 @@ server:
   groupCode: GROUP #组编码
   name: FOO_SERVER_DEMO #服务编码
   version: 1.0.0 #服务版本,可以扩展为 * app
+  msgBus: mqtt #可选配置，mqtt或rabbitmq，默认mqtt
   port: 52002 #服务占用web端口 占用拦截{/mqtt/*,/register*}
 jarResources:
   path: ./jarResources #可选配置 jar包和jarRes.yml资源配置文件存放路径 默认为./jarResources
@@ -47,6 +48,80 @@ mqtt:
 ```
 
 作为云管的配置文件，需要必须额外配置${register.url},作为非云管模块配置文件，${register.url}作为可配属性，作为开发态免云管注册功能的便捷开发
+
+### 消息总线选择
+
+`server.msgBus`用于选择通讯中间件：
+
+- `mqtt`：默认值，继续使用Spring Integration MQTT/Paho链路。
+- `rabbitmq`：使用RabbitMQ topic exchange链路，消息协议、topic、ACK、分包逻辑保持和MQTT一致。
+
+#### MQTT配置示例
+
+```
+server:
+  msgBus: mqtt
+
+mqtt:
+  url: tcp://127.0.0.1:1883
+  username: root
+  password: 123456
+  maxInflight: 1000
+  payload:
+    limit: 48128
+  callback:
+    maxCount: 10000
+  package:
+    timeout: 30
+  sender:
+    count: 10
+  completionTimeout: 3000
+  executor:
+    corePoolSize: 10
+    maxPoolSize: 10000
+```
+
+#### RabbitMQ配置示例
+
+```
+server:
+  msgBus: rabbitmq
+
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+  virtualHost: /
+  exchange: yyds.rpc
+  queuePrefix: yyds
+  prefetch: 50
+  queueExpires: 600000
+  payload:
+    limit: 1048576
+
+# 可选：如果项目启用了Spring Boot Actuator，并且不希望RabbitMQ健康检查影响健康端点，可以关闭。
+management:
+  health:
+    rabbit:
+      enabled: false
+```
+
+#### RabbitMQ与Spring Boot配置覆盖关系
+
+框架同时识别`rabbitmq.*`和`spring.rabbitmq.*`连接配置。优先级如下：
+
+1. 用户显式配置的`spring.rabbitmq.host/port/username/password/virtual-host`优先。
+2. 如果没有配置`spring.rabbitmq.*`，框架会使用`rabbitmq.host/port/username/password/virtualHost`补齐。
+3. 两组都没有配置时，默认使用`127.0.0.1:5672`、`guest/guest`、vhost `/`。
+
+RabbitMQ专用配置说明：
+
+- `rabbitmq.exchange`：topic exchange名称，默认`yyds.rpc`。
+- `rabbitmq.queuePrefix`：服务端临时队列前缀，默认`yyds`。
+- `rabbitmq.prefetch`：消费端预取数量，默认`50`。
+- `rabbitmq.queueExpires`：临时队列过期时间，单位毫秒，默认`600000`。
+- `rabbitmq.payload.limit`：RabbitMQ发送和ACK分包阈值，默认`1048576`。也可用`messageBus.payload.limit`作为通用默认值。
 
 ## 代码相关
 
@@ -146,7 +221,6 @@ YYTD_MQTT_DEMO_1.0.0: #服务编码
 消息发送者载入MqttOpera即可实现消息的同步和异步发送，参数分别为：operaCode(操作码)，message（发送的消息实体，默认为String）
 
 ---
-
 
 
 

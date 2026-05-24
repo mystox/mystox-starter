@@ -118,8 +118,10 @@ public class IaENV implements RegCall {
     }
 
     public MsgScheduler createMsgScheduler(String regType) {
-        switch (regType) {
+        String msgBusType = StringUtils.defaultIfBlank(regType, MqttMsgBus);
+        switch (msgBusType) {
             case RabbitMqMsgBus: {
+                logger.info("Message bus selected: [{}]", RabbitMqMsgBus);
                 try {
                     Class<?> aClass = Class.forName("tech.mystox.framework.mqtt.service.impl.DefaultRabbitMqMsgScheduler", false, Thread.currentThread()
                             .getContextClassLoader());
@@ -134,11 +136,15 @@ public class IaENV implements RegCall {
             }
             //        case MqttMsgBus :return new MqttMsgScheduler();
             case MqttMsgBus: {
+                logger.info("Message bus selected: [{}]", MqttMsgBus);
                 //MsgScheduler mqttMsgScheduler = applicationContext.getBean("mqttMsgScheduler", MsgScheduler.class);
                 //mqttMsgScheduler.build(this);
                 //return mqttMsgScheduler;
             }
             default: {
+                if (!StringUtils.equals(msgBusType, MqttMsgBus)) {
+                    logger.warn("Message bus [{}] is unsupported, fallback to [{}]", msgBusType, MqttMsgBus);
+                }
                 try {
                     Class<?> aClass = Class.forName("tech.mystox.framework.mqtt.service.impl.DefaultMqttMsgScheduler", false, Thread.currentThread()
                             .getContextClassLoader());
@@ -258,9 +264,9 @@ public class IaENV implements RegCall {
                 List<RegisterSub> subList = this.regScheduler.getSubList();
                 logger.warn("[operaCall] Cancel msg-schedule sub session");
                 this.msgScheduler.removerSubTopic(subList);
-                RegisterMsg registerMsg = this.msgScheduler.getIaHandler().getRegisterMsg();
+                RegisterMsg registerMsg = IaRegister.buildRegisterMsg(conf);
                 //getConf().setRegisterUrl(registerMsg.getRegistURI());
-                logger.warn("[operaCall] Register reconnected [{}]", registerMsg.getRegisterUrl());
+                logger.warn("[operaCall] Register reconnected [{}]", registerMsg.getRegisterURI());
                 this.regScheduler.connect(registerMsg.getRegisterUrl());
                 logger.warn("[operaCall] Register waiting for rebuilding");
                 this.regScheduler.reRegister();

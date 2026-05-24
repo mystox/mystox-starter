@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import tech.mystox.framework.common.util.CollectionUtils;
 import tech.mystox.framework.config.IaConf;
 import tech.mystox.framework.core.IaENV;
+import tech.mystox.framework.core.IaRegister;
 import tech.mystox.framework.entity.*;
 import tech.mystox.framework.exception.MsgResultFailException;
 import tech.mystox.framework.exception.RegisterException;
@@ -83,19 +84,7 @@ public class MqttHandler implements MsgHandler {
     @Override
     @Deprecated
     public RegisterMsg getRegisterMsg() {
-        IaConf iaconf = iaENV.getConf();
-        String serverName = iaconf.getServerName();
-        String registerUrl = iaconf.getRegisterUrl();
-        RegisterMsg registerMsg = new RegisterMsg();
-        logger.info("{} registerUrl is: [{}]", serverName, registerUrl);
-        String[] split = registerUrl.split("://");
-        String registerUrlHeader = split[0];
-        String registerHosts = split[1];
-        registerMsg.setRegisterUrl(registerHosts);
-        registerMsg.setRegisterUrlHeader(registerUrlHeader);
-        if (StringUtils.equals(RegisterType.ZOOKEEPER.toString(), registerUrlHeader.toUpperCase()))
-            registerMsg.setRegisterType(RegisterType.ZOOKEEPER);
-        return registerMsg;
+        return IaRegister.buildRegisterMsg(iaENV.getConf());
     }
 
     @Override
