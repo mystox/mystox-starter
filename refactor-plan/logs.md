@@ -2,6 +2,20 @@
 
 ## 2026-05-24
 
+### 补充 demo 回归清单
+
+- 范围：
+  - MQTT 模式启动、普通请求、同步 ACK。
+  - RabbitMQ 模式启动、普通请求、同步 ACK。
+  - dotted operaCode、大 payload 分包/组包、RabbitMQ 重启/重复启动。
+- 结果：
+  - 最终回归清单已收口到 `refactor-plan/areas/rabbitmq-message-bus.md`。
+  - 当前阶段待处理任务已清空。
+- 验证：
+  - 文档检查。
+- 下一步：
+  - 提交当前收口结果。
+
 ### 完成内部命名清理
 
 - 范围：

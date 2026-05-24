@@ -109,6 +109,10 @@ public class BaseLoadBalancer implements LoadBalanceScheduler {
         //如果配置了targetServiceCode，则对topicArr做过滤处理
         if (StringUtils.isNotBlank(targetGroupCode)) {
             topicArr = topicArr.stream().filter(t -> t.startsWith(targetGroupCode)).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(topicArr)) {
+                logger.error("[{}] route topic list has no server for target group [{}]...", operaCode, targetGroupCode);
+                return null;
+            }
         }
         int size = topicArr.size();
         String groupServerCode = "";

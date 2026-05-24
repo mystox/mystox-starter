@@ -6,11 +6,12 @@
 
 ## 待处理
 
-- [ ] 补充或精简 demo 回归清单
-  - 覆盖 MQTT 启动、RabbitMQ 启动、ACK、dotted operaCode、大 payload、RabbitMQ 重启。
+- 暂无。
 
 ## 已完成
 
+- [x] 补充或精简 demo 回归清单
+  - 覆盖 MQTT 启动、RabbitMQ 启动、ACK、dotted operaCode、大 payload、RabbitMQ 重启。
 - [x] 添加 RabbitMQ 消息总线基础支持
 - [x] 抽象 RabbitMQ 发送侧
 - [x] RabbitMQ 消息接入 listener 分发

@@ -6,7 +6,8 @@
 
 ## P1
 
-- [ ] 增加一份独立的 RabbitMQ/MQTT 回归清单。
+- [x] 增加一份独立的 RabbitMQ/MQTT 回归清单。
+  - 已收口到 `refactor-plan/areas/rabbitmq-message-bus.md` 的“最终回归清单”。
 - [ ] 如仍需要，补充更具体的 broker 启动日志：
   - MQTT URL
   - RabbitMQ host/port/exchange

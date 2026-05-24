@@ -12,11 +12,11 @@
 | 6. Sender support 与 MQTT transport facade | 已完成 | `a07ed34` |
 | 7. 配置文档与启动日志 | 已完成 | `8beba62` |
 | 8. 内部命名清理 | 已完成 | 已验证，待提交 |
-| 9. 最终回归清单 | 可选 | demo 回归已完成 |
+| 9. 最终回归清单 | 已完成 | 已收口到 `areas/rabbitmq-message-bus.md` |
 
 ## 当前任务
 
-提交已完成的内部命名清理：
+当前阶段任务已完成，等待提交。内部命名清理包括：
 
 - `mqttSenderImpl` -> `messageBusOperator`
 - `mqttHandlerAck` -> `ackTopicHandler`
@@ -42,5 +42,4 @@ mvn -pl yyds-mqtt/yyds-mqtt-starter,yyds-iarpc-starter -am -DskipTests clean ins
 ## 剩余事项
 
 - 提交当前命名清理和计划文件。
-- 可选：补一份简短回归清单。
 - 未来大版本任务：考虑 `sendToMqtt*` 公共 API 命名清理。

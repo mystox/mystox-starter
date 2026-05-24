@@ -47,21 +47,29 @@
 
 ## 当前任务
 
-提交已完成并验证通过的内部命名清理。
+当前阶段任务已完成，等待提交。
 
-## 建议最终检查
+## 最终回归清单
 
 - MQTT 模式启动：
+  - 配置 `server.msgBus=mqtt`
   - 日志包含 `Message bus selected: [mqtt]`
   - 普通请求成功
   - 同步 ACK 成功
 - RabbitMQ 模式启动：
+  - 配置 `server.msgBus=rabbitmq`
   - 日志包含 `Message bus selected: [rabbitmq]`
   - 普通请求成功
   - 同步 ACK 成功
-  - dotted operaCode 成功
-  - 大 payload 分包/组包成功
-  - broker 重启/重复启动不再出现队列声明冲突
+- dotted operaCode：
+  - 带点号的 `operaCode` 可以正常路由
+  - 服务端可以正常执行并返回结果
+- 大 payload：
+  - 请求分包/组包成功
+  - ACK 分包/组包成功
+- RabbitMQ 重启/重复启动：
+  - 不再出现队列声明冲突
+  - broker 恢复后服务可以恢复通讯
 
 ## 后续建议提交
 

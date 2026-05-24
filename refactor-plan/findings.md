@@ -12,10 +12,11 @@
   - 当前保留兼容。
   - 注册地址解析已收口到 `IaRegister.buildRegisterMsg(...)`。
 - `sendToMqtt*` 等公共方法名仍刻意保留，避免破坏兼容性。
+- RabbitMQ/MQTT demo 回归清单已文档化到 `refactor-plan/areas/rabbitmq-message-bus.md`。
 
 ## 剩余风险
 
 - 部分公共类名仍包含 MQTT 语义，这是兼容性取舍。
 - 目前没有自动化集成测试覆盖 MQTT/RabbitMQ 切换。
+- 自动化集成测试仍作为 P2 后续任务处理。
 - RabbitMQ 运行时仍建议通过真实 broker 重启、重复启动、队列自动过期等场景持续验证。
-

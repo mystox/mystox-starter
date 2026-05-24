@@ -74,7 +74,9 @@ public class ZkRegScheduler implements  RegScheduler {
         List<String> groupCodeList = new ArrayList<>();
         if (GroupCode.ROOT.equals(this.groupCode)){ //如果是root服务，则获取所有的服务节点
             List<String> children = this.getChildren(TopicPrefix.SUB_PREFIX);
-            groupCodeList.addAll(children);
+            if (CollectionUtils.isNotEmpty(children)) {
+                groupCodeList.addAll(children);
+            }
         } else {
             groupCodeList.add(this.groupCode);
             groupCodeList.add(GroupCode.ROOT);
@@ -83,6 +85,10 @@ public class ZkRegScheduler implements  RegScheduler {
         for (String groupCode : groupCodeList) {
             String subPath = preconditionGroupServerPath(TopicPrefix.SUB_PREFIX, groupCode);
             List<String> serverArr = this.getChildren(subPath); //获取订阅表的服务列表
+            if (CollectionUtils.isEmpty(serverArr)) {
+                logger.debug("Sub path [{}] has no server subscription nodes.", subPath);
+                continue;
+            }
             //遍历订阅服务列表
             for (String serverCode : serverArr) {
                 String groupServerCode = preconditionGroupServerCode(groupCode, serverCode);
@@ -94,6 +100,10 @@ public class ZkRegScheduler implements  RegScheduler {
                     continue;
                 }
                 List<String> serverOperaCodeArr = this.getChildren(serverPath);
+                if (CollectionUtils.isEmpty(serverOperaCodeArr)) {
+                    logger.debug("Server [{}] has no opera subscription nodes.", serverPath);
+                    continue;
+                }
                 if (serverOperaCodeArr.contains(operaCode)) {
                     result.add(groupServerCode);
                 }
