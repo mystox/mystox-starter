@@ -39,7 +39,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>3.5.26-SNAPSHOT</revision>
+        <revision>3.5.26.RELEASE</revision>
         <spring-boot.version>3.5.11</spring-boot.version>
         <!--        <spring-cloud.version>Finchley.SR4</spring-cloud.version>-->
         <build.plugins.plugin.version>3.13.0</build.plugins.plugin.version>
