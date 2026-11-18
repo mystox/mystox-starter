@@ -32,7 +32,7 @@ import java.util.Map;
  * update record:
  */
 @RestController
-@ConditionalOnExpression("${mqtt.controller.enable:false}")
+@ConditionalOnExpression("${mqtt.controller.enable:false} && !'none'.equalsIgnoreCase('${register.type:}')")
 @RequestMapping("/register")
 public class MqttController {
 

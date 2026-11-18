@@ -1,0 +1,20 @@
+server:
+  name: rpc-demo
+  version: 1.0.0
+  groupCode: G1
+  host: 127.0.0.1
+  port: 8080
+  msg-bus: rabbitmq
+register:
+  type: none
+  scan-base-package: com.example.rpc
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+rabbitmq:
+  rpc:
+    contract-version: v1

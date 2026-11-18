@@ -8,6 +8,7 @@ import tech.mystox.framework.entity.MsgRsp;
 import tech.mystox.framework.mqtt.service.MessageBusOperator;
 import tech.mystox.framework.mqtt.service.impl.CallSubpackageMsg;
 import tech.mystox.framework.mqtt.service.impl.MqttHandler;
+import tech.mystox.framework.mqtt.rpc.RabbitRpcHandler;
 
 import java.util.Map;
 
@@ -24,13 +25,15 @@ public class MystoxMetrics {
     }
 
     public void register() {
-        MqttHandler handler = (MqttHandler) this.iaContext.getIaENV().getMsgScheduler().getIaHandler();
-        MessageBusOperator messageBusOperator = handler.getMessageBusOperator();
-        Map<String, CallSubpackageMsg<MsgRsp>> callbacks = messageBusOperator.getCALLBACKS();
-        Gauge.builder("mystox.rpc.inflight",
-                        callbacks,
-                        Map::size)
-                .register(registry);
+        var msgHandler = this.iaContext.getIaENV().getMsgScheduler().getIaHandler();
+        if (msgHandler instanceof RabbitRpcHandler rpc) {
+            Gauge.builder("mystox.rpc.inflight", rpc, RabbitRpcHandler::getPendingCount).register(registry);
+        } else {
+            MqttHandler handler = (MqttHandler) msgHandler;
+            MessageBusOperator messageBusOperator = handler.getMessageBusOperator();
+            Map<String, CallSubpackageMsg<MsgRsp>> callbacks = messageBusOperator.getCALLBACKS();
+            Gauge.builder("mystox.rpc.inflight", callbacks, Map::size).register(registry);
+        }
 
         //Gauge.builder("mystox.rpc.limiter.available",
         //        limiter,

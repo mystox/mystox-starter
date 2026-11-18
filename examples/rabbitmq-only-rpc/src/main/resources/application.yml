@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    default: provider
+  main:
+    web-application-type: none
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+server:
+  name: rabbit-rpc-demo
+  version: 1.0.0
+  groupCode: demo
+  host: 127.0.0.1
+  port: 0
+  msg-bus: rabbitmq
+register:
+  type: none
+  scan-base-package: demo.rabbitmq
+rabbitmq:
+  rpc:
+    contract-version: v1
+    exchange: demo.rpc.requests
+    queue-prefix: demo.rpc
+    request-timeout: 3000
+    confirm-timeout: 3000
+    concurrency: 1
+    prefetch: 1

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import tech.mystox.framework.common.util.MqttUtils;
@@ -39,6 +40,7 @@ import static tech.mystox.framework.entity.UnitHead.*;
  * update record:
  */
 @Service
+@ConditionalOnExpression("!'none'.equalsIgnoreCase('${register.type:}')")
 public class MqttRestService {
     Logger logger = LoggerFactory.getLogger(MqttRestService.class);
 

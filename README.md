@@ -49,7 +49,7 @@
 
 ## 前提说明：
 - 此消息框架基于mqtt消息中间件实现的分布式远程调用。
-- 此消息框架需要消息中间件mqtt、注册中心中间件zookeeper(redis暂不支持)环境支持。
+- 默认模式需要 MQTT/RabbitMQ 和 ZooKeeper（Redis 暂不支持）。无注册中心模式配置见 [RabbitMQ-only](docs/rabbitmq-only-rpc.md)，包含 [IaOpera 与 @Opera 函数调用 Demo](examples/rabbitmq-only-rpc/README.md)。
 - 此框架bean管理依赖于springboot 3.5.x。
 - 此框架消息队列中间件、注册中心、负载均衡策略可自定义开发，友好性配置开发正在进行...
 - 支持jdk版本为21。

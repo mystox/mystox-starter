@@ -1,6 +1,6 @@
 package tech.mystox.framework.config.autoconfigure;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.AssertTrue;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.HashMap;
@@ -14,7 +14,6 @@ public class RegisterProperties {
     private boolean duplicate = true;
     private int sessionTimeout = 100;
     private String type = "";
-    @NotBlank(message = "register.url must be configured")
     private String url;
     //private String serverName;
     //private String version = "1.0.0";
@@ -22,6 +21,11 @@ public class RegisterProperties {
     private String msgType = "";
     private List<String> webExtension = List.of("classpath:config/vueRouter.js", "file:config/vueRouter.js");
     private Map<String, Object> extension = new HashMap<>();
+
+    @AssertTrue(message = "register.url must be configured unless register.type=none")
+    public boolean isUrlConfigured() {
+        return "none".equalsIgnoreCase(type) || (url != null && !url.isBlank());
+    }
 
 
     public String getScanBasePackage() {

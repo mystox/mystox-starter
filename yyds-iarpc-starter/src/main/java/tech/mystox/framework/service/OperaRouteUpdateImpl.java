@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import tech.mystox.framework.config.IaConf;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnExpression("!'none'.equalsIgnoreCase('${register.type:}')")
 public class OperaRouteUpdateImpl implements OperaRouteService {
 
 
@@ -29,6 +31,7 @@ public class OperaRouteUpdateImpl implements OperaRouteService {
 
     @Override
     public List<String> broadcastOperaRoute(String operaCode,List<String> subGroupServerList) throws IOException {
+        if (iaContext.getConf().isRegistryless()) throw new UnsupportedOperationException("No registry route updates in none mode");
         RegScheduler regScheduler=iaContext.getIaENV().getRegScheduler();
         IaConf conf = iaContext.getIaENV().getConf();
         OperaRouteProperties operaRouteConfig = conf.getOperaRouteConfig();

@@ -30,7 +30,7 @@ public class IaRegister {
         this.iaEnv = iaEnv;
         iaConf= iaEnv.getConf();
         this.msgScheduler = iaEnv.getMsgScheduler();
-        this.regScheduler= iaEnv.getRegScheduler();
+        this.regScheduler= iaConf.isRegistryless() ? null : iaEnv.getRegScheduler();
 //        msgScheduler.build(this.iaEnv);
     }
 
@@ -45,22 +45,29 @@ public class IaRegister {
      * @throws InterruptedException
      */
     public void register()  {
-        this.regScheduler.register();
+        if (iaConf.isRegistryless()) {
+            this.msgScheduler.subTopic(iaEnv.getLocalServiceScanner().getSubList());
+        } else {
+            this.regScheduler.register();
+        }
         iaEnv.setServerStatus(ServerStatus.ONLINE);
     }
 
     public void unregister()  {
+        if (iaEnv.getServerStatus() == ServerStatus.OFFLINE) return;
         iaEnv.setServerStatus(ServerStatus.UNREGISTER);
-        this.regScheduler.unregister();
+        if (!iaConf.isRegistryless()) this.regScheduler.unregister();
         this.msgScheduler.unregister();
         iaEnv.setServerStatus(ServerStatus.OFFLINE);
     }
     public void subTopic(){
+        if (iaConf.isRegistryless()) throw new UnsupportedOperationException("Registryless subscriptions are fixed at startup");
         List<RegisterSub> subList=this.regScheduler.getSubList();
         this.msgScheduler.subTopic(subList);
 
     }
     public void connect() throws RegisterException {
+        if (iaConf.isRegistryless()) return;
         registerMsg = buildRegisterMsg(iaConf);
         //this.iaConf.setRegisterUrl(registerMsg.getRegisterURI());
         logger.info("{} registerUrl is: [{}]", iaConf.getServerName(), registerMsg.getRegisterURI());

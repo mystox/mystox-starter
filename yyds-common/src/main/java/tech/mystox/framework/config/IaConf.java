@@ -15,6 +15,11 @@ public class IaConf {
     final RegisterProperties registerProperties;
     final WebPrivFuncConfig webPrivFuncConfig;
     Properties properties;
+    private RabbitRpcProperties rabbitRpcProperties = new RabbitRpcProperties();
+
+    public boolean isRegistryless() { return "none".equalsIgnoreCase(getRegisterType()); }
+    public RabbitRpcProperties getRabbitRpcProperties() { return rabbitRpcProperties; }
+    public void setRabbitRpcProperties(RabbitRpcProperties value) { rabbitRpcProperties = value; }
 
     public IaConf(RegisterProperties registerProperties, ServerProperties serverProperties,
                   OperaRouteProperties operaRouteProperties,

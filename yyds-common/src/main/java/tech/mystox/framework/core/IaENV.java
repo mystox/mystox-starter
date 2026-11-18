@@ -42,7 +42,7 @@ public class IaENV implements RegCall {
 
     public IaENV(List<String> scanBasePackage, BeanProvider beanProvider) {
         this.beanProvider = beanProvider;
-        this.scanBasePackage = scanBasePackage;
+        this.scanBasePackage = new ArrayList<>(scanBasePackage);
     }
 
 
@@ -59,6 +59,25 @@ public class IaENV implements RegCall {
         localServiceScanner = new LocalServiceScannerCore(
                 scanBasePackage, beanProvider);
         jarServiceScanner = new JarServiceScanner(conf);
+        if (conf.isRegistryless()) {
+            if (!RabbitMqMsgBus.equals(getMsgType(conf))) {
+                throw new IllegalArgumentException("register.type=none requires server.msg-bus=rabbitmq (or register.msg-type=rabbitmq)");
+            }
+            conf.getRabbitRpcProperties().validate();
+            serverMsg = new ServerMsg(conf.getHost(), conf.getPort(), conf.getServerName(),
+                    conf.getServerVersion(), conf.getRouteMark(), conf.getPageRoute(), conf.getServerUri(),
+                    conf.getTitle(), conf.getGroupCode(), conf.getMyId());
+            serverMsg.setSequence(conf.getSequence());
+            serverMsg.setExtension(conf.getExtensionConfig());
+            try {
+                Class<?> type = Class.forName("tech.mystox.framework.mqtt.rpc.RabbitRpcMsgScheduler");
+                msgScheduler = (MsgScheduler) type.getDeclaredConstructor(IaContext.class).newInstance(iaContext);
+                msgScheduler.build(this);
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("Cannot initialize RabbitMQ RPC without registry", e);
+            }
+            return;
+        }
         regScheduler = createRegScheduler(getRegType(conf));
         msgScheduler = createMsgScheduler(getMsgType(conf));
         loadBalanceScheduler = createLoadBalancerScheduler(getLoadBalancer(conf));
@@ -228,6 +247,9 @@ public class IaENV implements RegCall {
     //    }
 
     public RegScheduler getRegScheduler() {
+        if (conf != null && conf.isRegistryless()) {
+            throw new UnsupportedOperationException("No registry is available with register.type=none");
+        }
         return regScheduler;
     }
 
@@ -236,6 +258,9 @@ public class IaENV implements RegCall {
     }
 
     public LoadBalanceScheduler getLoadBalanceScheduler() {
+        if (conf != null && conf.isRegistryless()) {
+            throw new UnsupportedOperationException("RabbitMQ distributes registryless RPC requests; no instance load balancer is available");
+        }
         return loadBalanceScheduler;
     }
 
@@ -257,6 +282,7 @@ public class IaENV implements RegCall {
 
     @Override
     public void call(RegState state) throws RegisterException {
+        if (conf.isRegistryless()) throw new UnsupportedOperationException("No registry state callbacks in none mode");
         switch (state) {
             case Disconnected: {
                 setServerStatus(ServerStatus.OFFLINE);
@@ -291,6 +317,7 @@ public class IaENV implements RegCall {
     }
 
     public void subTopic() {
+        if (conf.isRegistryless()) throw new UnsupportedOperationException("Registryless subscriptions are fixed at startup");
         List<RegisterSub> subList = this.regScheduler.getSubList();
         this.msgScheduler.subTopic(subList);
 

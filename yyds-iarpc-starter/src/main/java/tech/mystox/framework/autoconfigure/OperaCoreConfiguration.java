@@ -30,6 +30,7 @@ import java.util.Properties;
         OperaRouteProperties.class,
         WebPrivFuncConfig.class,
         MqttProperties.class,
+        RabbitRpcProperties.class,
 })
 public class OperaCoreConfiguration {
     @Bean
@@ -38,8 +39,10 @@ public class OperaCoreConfiguration {
             RegisterProperties register,
             WebPrivFuncConfig webPrivFuncConfig,
             OperaRouteProperties operaRouteProperties,
+            RabbitRpcProperties rabbitRpcProperties,
             ApplicationContext applicationContext) {
         IaConf iaConf = new IaConf(register, server, operaRouteProperties, webPrivFuncConfig);
+        iaConf.setRabbitRpcProperties(rabbitRpcProperties);
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         //加载成PropertySource对象，并添加到Environment环境中
         Resource resource = resourceLoader.getResource("classpath:mqtt.yml");
@@ -105,7 +108,7 @@ public class OperaCoreConfiguration {
         return new IaENV(basePackages, beanProvider);
     }
 
-    @Bean
+    @Bean(destroyMethod = "stop")
     public IaContext iaContext(IaConf iaConf, IaENV iaENV) {
 
         return new IaContext(iaConf, iaENV);

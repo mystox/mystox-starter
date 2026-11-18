@@ -33,9 +33,13 @@ public class IaContext {
         logger.info("Ia rpc framework run beginning...");
         iaEnv.build(this);
         iaRegister = new IaRegister(iaEnv);
-        iaRegister.connect();
-        // iaRegister.subTopic();
-        iaRegister.register();
+        try {
+            iaRegister.connect();
+            iaRegister.register();
+        } catch (RuntimeException e) {
+            if (conf.isRegistryless()) iaRegister.unregister();
+            throw e;
+        }
 
     }
 
